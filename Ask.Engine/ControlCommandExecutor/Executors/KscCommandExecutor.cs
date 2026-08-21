@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.App;
+using Ask.Core.Services.App;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.EventCore.Events;
@@ -6,7 +6,6 @@ using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
-using Ask.Core.Shared.Metadata.Static.Messages;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandExecutor.Execution;
 
@@ -30,14 +29,8 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       SetActiveLine(context, command);
 
       var nameCommand = $"{command.CommandNumber} {command.Mnemonic}";
-      var message = BuildSourceLinesMessage(command);
-      await context.Console.ShowMessageAsync(ExecutorMessageBuilder.BuildCommandExecutionMessage(nameCommand, message));
-
-      var devices = EquipmentService.GetAllDevices();
-      foreach (var device in devices)
-      {
-        await device.ConnectableManager.ResetAsync(context.Console);
-      }
+      var message = CommandMessages.FormatSourceLines(command.SourceLines);
+      await CommandMessages.PublishCommandExecutionAsync(context.Console, nameCommand, message, isBlockStart: false);
 
       GetProtocol(context, command, protocolModel);
       EventAggregator.Unsubscribe<FileInteractionEvents.ProtocolInfoClose>(OnProtocolClose);
@@ -61,15 +54,18 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       {
         uniqueNameWithoutExtention = uniqueNameWithoutExtention[..index];
       }
-        
-      var protocolProgramName = 
+
+      var protocolProgramName =
       protocolModel.ProgramName = string.IsNullOrWhiteSpace(opkPath)
           ? "Название программы контроля"
           : $"{uniqueNameWithoutExtention}{Path.GetExtension(opkPath)}";
 
       if (ProtocolConfig.GetGenerateProtocol())
       {
-        FileInteractionEventAdapter.RaiseGetProtocolInfo(protocolModel);
+        if (ProtocolConfig.ShouldShowProtocolInfoDialog())
+        {
+          FileInteractionEventAdapter.RaiseGetProtocolInfo(protocolModel);
+        }
       }
     }
 

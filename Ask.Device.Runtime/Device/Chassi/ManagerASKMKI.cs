@@ -1,4 +1,4 @@
-using Ask.Core.Shared.DTO.Devices.ChassisManager;
+﻿using Ask.Core.Shared.DTO.Devices.ChassisManager;
 using Ask.Core.Services.Config.LegacyMki;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Capabilities;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
@@ -184,3 +184,4 @@ public sealed class ManagerASKMKI : DeviceWithCOM, IChassisManager, IAskMkiContr
     return new LegacyAskControllerProtocol(options);
   }
 }
+

@@ -1,6 +1,8 @@
+using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Services.UI;
+using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
@@ -26,13 +28,10 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       var command = GetRequiredCommand<KsCommandModel>(context);
       var nameCommand = $"{command.CommandNumber} {command.Mnemonic}";
-      var message = BuildSourceLinesMessage(command);
+      var message = CommandMessages.FormatSourceLines(command.SourceLines);
       SetActiveLine(context, command);
 
-      await context.Console.ShowMessageAsync(ExecutorMessageBuilder.BuildCommandExecutionMessage(nameCommand, message), IsBlockStart: true);
-
-      List<ShowMessageModel> errorMessage = new();
-      List<ShowMessageModel> infoMessage = new();
+      await CommandMessages.PublishCommandExecutionAsync(context.Console, nameCommand, message);
 
       await DeviceManager.ShowDevicesPreparationMessageIfNeededAsync(context);
 
@@ -45,7 +44,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       var dbc = EquipmentService.GetSwitchingDevice();
       await DeviceManager.SwitchModuleManager.DeviceConnectionManager.ConnectMultimeter(dbc, context.Console);
 
-      var meter = EquipmentService.GetFastMeterOrThrow(context.Console);
+      var meter = await EquipmentService.GetFastMeterOrThrow(context.Console);
       await SettingFastMeter(meter, context.Console, command.AlgorithmKey.Contains("Б"));
 
       if (command.LowerLimitResistance.HasValue)
@@ -95,17 +94,8 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       }
 
       var messageResult = await ConnectedPointChecker.CheckSequenceAsync(pointContext);
-      errorMessage.AddRange(messageResult.errorMessage);
-      infoMessage.AddRange(messageResult.infoMessage);
 
-      if (errorMessage.Count > 0)
-      {
-        protocolModel.AddErrors(nameCommand, errorMessage);
-      }
-      if (infoMessage.Count > 0)
-      {
-        protocolModel.AddInfo(nameCommand, infoMessage);
-      }
+      protocolModel.AddResult(nameCommand, messageResult);
     }
 
     /// <summary>
@@ -115,12 +105,13 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
     /// <returns>Задача, представляющая измерение.</returns>
     private async Task<(bool, double)> ResistanceMeasure(double value, IUserInteractionService messageService, CancellationToken cancellationToken, double errorResistance = 0)
     {
-      var meter = EquipmentService.GetFastMeterOrThrow(messageService);
+      var meter = await EquipmentService.GetFastMeterOrThrow(messageService);
       double answer = 0;
 
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
-        answer = await meter.ResistanceManager.MeasureResistanceAsync(value, firstValue, secondValue);
+        MeasurementRange measurementRange = new MeasurementRange(value, firstValue, secondValue);
+        answer = await meter.ResistanceManager.MeasureResistanceAsync(measurementRange, messageService);
 
         if (!ExecutionConfig.GetIsIdleModeEnabled())
         {
@@ -132,7 +123,14 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
           answer = 0;
         }
 
-        return await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.KC, firstValue, secondValue, answer);
+        measurementRange.TargetValue = answer;
+        var result = MeasurementResultEvaluator.Evaluate(measurementRange);
+        await MeasurementMessages.PublishResultAsync(CheckType.ControlProgram,
+          MeasurementTypeCommand.KC,
+          new MeasurementRange(result.Value, measurementRange.LowerBound, measurementRange.UpperBound),
+          result.IsSuccessful,
+          outputService: messageService);
+        return result;
       }, messageService);
 
       return result;
@@ -145,13 +143,13 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
     /// <returns>Задача, представляющая измерение.</returns>
     private async Task<(bool, double)> FastResistanceMeasure(double value, IUserInteractionService messageService, CancellationToken cancellationToken, double errorResistance = 0)
     {
-      var meter = EquipmentService.GetFastMeterOrThrow(messageService);
+      var meter = await EquipmentService.GetFastMeterOrThrow(messageService);
       double answer = 0;
 
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
-        answer = await meter.ContinuityManager.CheckContinuityAsync(value, firstValue, secondValue);
-
+        MeasurementRange measurementRange = new MeasurementRange(value, firstValue, secondValue);
+        answer = await meter.ContinuityManager.CheckContinuityAsync(measurementRange, messageService);
         if (!ExecutionConfig.GetIsIdleModeEnabled())
         {
           answer -= errorResistance;
@@ -162,7 +160,14 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
           answer = 0;
         }
 
-        return await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.KC, firstValue, secondValue, answer);
+        measurementRange.TargetValue = answer;
+        var result = MeasurementResultEvaluator.Evaluate(measurementRange);
+        await MeasurementMessages.PublishResultAsync(CheckType.ControlProgram,
+          MeasurementTypeCommand.KC,
+          new MeasurementRange(result.Value, measurementRange.LowerBound, measurementRange.UpperBound),
+          result.IsSuccessful,
+          outputService: messageService);
+        return result;
 
       }, messageService);
 

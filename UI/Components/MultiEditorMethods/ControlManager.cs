@@ -491,7 +491,7 @@ namespace UI.Components.MultiEditorMethods
     {
       foreach (OpenFileButton child in multiEditorControl.TopPanel.Children)
       {
-        child.IsActive = control.Text == child.Text;
+        child.IsActive = ReferenceEquals(child, control);
 
         if (child.IsActive)
         {

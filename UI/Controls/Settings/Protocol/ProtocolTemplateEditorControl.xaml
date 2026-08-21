@@ -13,6 +13,7 @@
             x:Name="ProtocolEditor"
             FontSize="14"
             IsReadOnly="False"
+            PreviewMouseWheel="ProtocolEditor_PreviewMouseWheel"
             />
     </Grid>
 </UserControl>

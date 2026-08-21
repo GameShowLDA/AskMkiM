@@ -1,25 +1,27 @@
-﻿using Ask.Core.Services.App;
+using Ask.Core.Services.App;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Errors.Models;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
+using Ask.UI.Features.ProtocolNew.Controls;
 using Ask.UI.Features.ProtocolNew.Execution;
-using Ask.UI.Features.ProtocolNew.Errors;
 using Ask.UI.Features.ProtocolNew.Protocol;
 using Message;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using static Ask.Core.Shared.DTO.Protocol.ShowMessageModel;
+using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.UI.Controls.ProtocolNew
 {
   /// <inheritdoc />
-  public partial class ProtocolUI : IUserInteractionService, IMessageOutputService, IExecutionController, IInputFieldProvider, IDeviceSelectorProvider, IProtocolEntrySink, IProtocolPostOutputContext, IInspectionProtocolAreaView, IProtocolErrorListView
+  public partial class ProtocolUI : IUserInteractionService, IMessageOutputService, IExecutionController, IExecutionPauseGate, IInputFieldProvider, IDeviceSelectorProvider, IProtocolEntrySink, IProtocolPostOutputContext, IInspectionProtocolAreaView, IProtocolErrorListView
   {
     #region РџРѕР»СЏ.
 
@@ -56,6 +58,7 @@ namespace Ask.UI.Controls.ProtocolNew
     private readonly ActionExecutor ActionExecutor;
 
     private TaskCompletionSource<UserAction> _userActionTcs;
+    private bool _isRetryOrContinueInteraction;
 
     public ErrorManager Errors;
 
@@ -124,7 +127,6 @@ namespace Ask.UI.Controls.ProtocolNew
       NextButtonPreviewMouseDown += (sender, e) => Resume();
       ExitButtonPreviewMouseDown += async (sender, e) => await StopAsync();
 
-      LoopMeasureResistanceButtonPreviewMouseDown += (sender, e) => LoopMeasureEvent();
       ReturnMeasureResistanceButtonPreviewMouseDown += (sender, e) => ReturnMeasureEvent();
     }
     #endregion
@@ -143,7 +145,18 @@ namespace Ask.UI.Controls.ProtocolNew
     /// РќР°С‡РёРЅР°РµС‚ Р·Р°РїСѓСЃРє РёР·РјРµСЂРµРЅРёСЏ.
     /// </summary>
     /// <returns>Задача, представляющая асинхронную операцию измерения.</returns>
-    public async Task StartAsync() => await ActionExecutor.StartAsync(_modeSettings.Current);
+    public async Task StartAsync()
+    {
+      var actionSettings = _modeSettings.Current;
+      var executionName = actionSettings.NameProvider?.Invoke();
+      if (!string.IsNullOrWhiteSpace(executionName))
+      {
+        Header = executionName;
+        actionSettings.Name = executionName;
+      }
+
+      await ActionExecutor.StartAsync(actionSettings);
+    }
 
 
     /// <summary>
@@ -174,14 +187,17 @@ namespace Ask.UI.Controls.ProtocolNew
     /// </summary>
     public void Resume() => ActionExecutor.Resume(ActionExecutor.StepMode, this, _userActionTcs);
 
+    /// <inheritdoc />
+    Task IExecutionPauseGate.WaitIfPausedAsync(CancellationToken cancellationToken) =>
+      ActionExecutor.WaitAtExecutionCheckpointAsync(cancellationToken, this, "ExecutionPauseGate");
+
+    /// <inheritdoc />
+    Task IExecutionPauseGate.DelayAsync(TimeSpan delay, CancellationToken cancellationToken) =>
+      ActionExecutor.DelayAsync(delay, cancellationToken);
+
     #endregion
 
-    #region РџРѕРІС‚РѕСЂ Рё Р·Р°С†РёРєР»РёРІР°РЅРёРµ.
-
-    /// <summary>
-    /// Р—Р°РїСѓСЃРєР°РµС‚ С†РёРєР» РІС‹РїРѕР»РЅРµРЅРёСЏ РґРµР»РµРіР°С‚Р° РёР·РјРµСЂРµРЅРёСЏ, РѕС‚РѕР±СЂР°Р¶Р°СЏ РєРЅРѕРїРєРё "РћСЃС‚Р°РЅРѕРІРёС‚СЊ" Рё "Р—Р°РІРµСЂС€РёС‚СЊ".
-    /// </summary>
-    private async void LoopMeasureEvent() => await ActionExecutor.LoopMeasureEvent(_modeSettings.Current);
+    #region Повтор.
 
     /// <summary>
     /// Р’С‹РїРѕР»РЅСЏРµС‚ РґРµР»РµРіР°С‚ РёР·РјРµСЂРµРЅРёСЏ РѕРґРёРЅ СЂР°Р·. Р•СЃР»Рё РґРµР»РµРіР°С‚ null, РІС‹РїРѕР»РЅСЏРµС‚СЃСЏ Р·Р°РІРµСЂС€РµРЅРёРµ.
@@ -218,12 +234,16 @@ namespace Ask.UI.Controls.ProtocolNew
       [CallerFilePath] string callerFile = "",
       [CallerLineNumber] int callerLine = 0)
     {
+      var outputStarted = Stopwatch.GetTimestamp();
+      var messageId = RuntimeHelpers.GetHashCode(showMessageModel);
+
       await CheckBlockStart(IsBlockStart);
       var wasDisplayed = await _entryOutputService.WriteAsync(
         showMessageModel,
         LastMessage,
         ignoreOutputValidation,
         _modeSettings.AccumulateErrorMessages,
+        _modeSettings.CheckType,
         AddError,
         callerName,
         callerFile,
@@ -234,12 +254,21 @@ namespace Ask.UI.Controls.ProtocolNew
         return;
       }
 
+      var displayedAt = Stopwatch.GetTimestamp();
       LastMessage = false;
       await _postOutputController.ProcessAsync(
         showMessageModel,
         IsBlockStart,
         SkipStepModeCheck,
         skipPause);
+
+      var completedAt = Stopwatch.GetTimestamp();
+      LogDebug(
+        $"[ProtocolOutputTiming] Output completed: message={messageId}, " +
+        $"dispatcherAndWriteMs={Stopwatch.GetElapsedTime(outputStarted, displayedAt).TotalMilliseconds:F1}, " +
+        $"postOutputMs={Stopwatch.GetElapsedTime(displayedAt, completedAt).TotalMilliseconds:F1}, " +
+        $"totalMs={Stopwatch.GetElapsedTime(outputStarted, completedAt).TotalMilliseconds:F1}, " +
+        $"thread={Environment.CurrentManagedThreadId}");
     }
 
     /// <summary>
@@ -320,7 +349,7 @@ namespace Ask.UI.Controls.ProtocolNew
 
     /// <inheritdoc />
     Task IProtocolPostOutputContext.WaitWhilePausedAsync(CancellationToken cancellationToken) =>
-      ActionExecutor.WaitWhilePausedAsync(cancellationToken, this);
+      ActionExecutor.WaitAtExecutionCheckpointAsync(cancellationToken, this, "ProtocolPostOutput");
 
     /// <inheritdoc />
     void IProtocolPostOutputContext.ShowPauseButtons() => ShowButtonsOnPause(repeatVisible: false);
@@ -357,6 +386,7 @@ namespace Ask.UI.Controls.ProtocolNew
     /// </summary>
     public void ShowInspectionProtocol(string protocolText)
     {
+      UpdateInspectionProtocolTitle();
       _inspectionProtocolAreaController.Show(protocolText, InspectionProtocolHost);
     }
 
@@ -376,14 +406,17 @@ namespace Ask.UI.Controls.ProtocolNew
         : new GridLength(0);
       InspectionProtocolSplitter.Visibility = visibility;
       InspectionProtocolPanel.Visibility = visibility;
+      InspectionProtocolManager.Visibility = visibility;
     }
 
     /// <summary>
-    /// Сохраняет итоговый протокол в History в формате RTLST.
+    /// Сохраняет итоговый протокол в каталоге истории.
     /// </summary>
-    public async Task SaveInspectionProtocolAsync(string name)
+    /// <param name="name">Имя сохраняемого протокола.</param>
+    /// <param name="checkType">Тип завершённой проверки.</param>
+    public async Task SaveInspectionProtocolAsync(string name, CheckType checkType)
     {
-      await _protocolStorage.SaveInspectionProtocolAsync(name);
+      await _protocolStorage.SaveInspectionProtocolAsync(name, checkType);
     }
 
     #endregion
@@ -414,31 +447,69 @@ namespace Ask.UI.Controls.ProtocolNew
     /// РђСЃРёРЅС…СЂРѕРЅРЅРѕ РѕР¶РёРґР°РµС‚ РґРµР№СЃС‚РІРёРµ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ РїРѕСЃР»Рµ РІРѕР·РЅРёРєРЅРѕРІРµРЅРёСЏ РѕС€РёР±РєРё РёР»Рё РѕСЃС‚Р°РЅРѕРІРєРё.
     /// </summary>
     /// <remarks>
-    /// РњРµС‚РѕРґ СЃРѕР·РґР°С‘С‚ РЅРѕРІС‹Р№ <see cref="TaskCompletionSource{TResult}"/> РґР»СЏ РѕР¶РёРґР°РЅРёСЏ РІС‹Р±РѕСЂР° РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ 
-    /// (РЅР°РїСЂРёРјРµСЂ, РїСЂРѕРґРѕР»Р¶РёС‚СЊ, РїСЂРѕРїСѓСЃС‚РёС‚СЊ РёР»Рё РѕСЃС‚Р°РЅРѕРІРёС‚СЊ РІС‹РїРѕР»РЅРµРЅРёРµ).  
-    /// Р•СЃР»Рё РІ РєРѕРЅС„РёРіСѓСЂР°С†РёРё СѓСЃС‚Р°РЅРѕРІР»РµРЅРѕ СЃРІРѕР№СЃС‚РІРѕ <c>IsStopOnErrorEnabled</c>,  
-    /// РёРЅС‚РµСЂС„РµР№СЃ РїРµСЂРµС…РѕРґРёС‚ РІ СЂРµР¶РёРј РїР°СѓР·С‹ вЂ” СЃРєСЂС‹РІР°СЋС‚СЃСЏ РІСЃРµ РєРЅРѕРїРєРё Рё РѕС‚РѕР±СЂР°Р¶Р°СЋС‚СЃСЏ РєРЅРѕРїРєРё СѓРїСЂР°РІР»РµРЅРёСЏ РїР°СѓР·РѕР№.  
-    /// РџРѕСЃР»Рµ РІС‹Р±РѕСЂР° РґРµР№СЃС‚РІРёСЏ РїРѕР»СЊР·РѕРІР°С‚РµР»РµРј СЂРµР·СѓР»СЊС‚Р°С‚ РІРѕР·РІСЂР°С‰Р°РµС‚СЃСЏ РєР°Рє Р·РЅР°С‡РµРЅРёРµ РїРµСЂРµС‡РёСЃР»РµРЅРёСЏ 
-    /// <see cref="IUserInteractionService.UserAction"/>.
+    /// Аппаратная операция ожидает решения независимо от настройки остановки при ошибке.
+    /// Для отрицательного результата измерения ожидание определяется этой настройкой.
     /// </remarks>
+    /// <param name="loop">Признак обязательного интерактивного режима.</param>
+    /// <param name="deviceTask">Признак аппаратной операции.</param>
+    /// <param name="canContinue">Признак доступности продолжения после последней попытки.</param>
     /// <returns>
-    /// Р—Р°РґР°С‡Р°, РїСЂРµРґСЃС‚Р°РІР»СЏСЋС‰Р°СЏ РѕР¶РёРґР°РµРјРѕРµ РґРµР№СЃС‚РІРёРµ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ.  
-    /// Р•СЃР»Рё СЂРµР¶РёРј РѕСЃС‚Р°РЅРѕРІРєРё РЅР° РѕС€РёР±РєРµ РѕС‚РєР»СЋС‡С‘РЅ, РІРѕР·РІСЂР°С‰Р°РµС‚СЃСЏ <see cref="IUserInteractionService.UserAction.None"/>.
+    /// Выбранное действие или <see cref="UserAction.None"/>, если ожидание не требуется.
     /// </returns>
-    public async Task<UserAction> WaitUserActionAsync(bool loop = false, bool deviceTask = false)
+    public async Task<UserAction> WaitUserActionAsync(
+      bool loop = false,
+      bool deviceTask = false,
+      bool canContinue = true)
     {
-      _userActionTcs = new TaskCompletionSource<UserAction>();
-
-      if (await ExecutionConfig.GetIsStopOnErrorEnabled() || loop || deviceTask)
+      bool stopOnError = await ExecutionConfig.GetIsStopOnErrorEnabled();
+      if (ShouldWaitForUserAction(stopOnError, loop, deviceTask))
       {
-
+        _userActionTcs = new TaskCompletionSource<UserAction>(
+          TaskCreationOptions.RunContinuationsAsynchronously);
         SetNonVisibleAllButton();
-        ShowButtonsOnPause(true);
+        ShowInteractiveActionButtons(canContinue);
 
         return await _userActionTcs.Task;
       }
 
       return UserAction.None;
+    }
+
+    /// <inheritdoc />
+    public async Task<UserAction> WaitRetryOrContinueAsync()
+    {
+      _userActionTcs = new TaskCompletionSource<UserAction>(
+        TaskCreationOptions.RunContinuationsAsynchronously);
+      _isRetryOrContinueInteraction = true;
+      SetNonVisibleAllButton();
+      _buttonController.Apply(ProtocolButtonState.RetryOrContinue);
+
+      try
+      {
+        return await _userActionTcs.Task;
+      }
+      finally
+      {
+        _isRetryOrContinueInteraction = false;
+      }
+    }
+
+    /// <summary>
+    /// Определяет необходимость ожидания решения оператора.
+    /// </summary>
+    /// <param name="stopOnError">Настройка остановки при отрицательном результате измерения.</param>
+    /// <param name="loop">Признак обязательного интерактивного режима.</param>
+    /// <param name="deviceTask">Признак аппаратной операции.</param>
+    /// <returns>
+    /// <see langword="true"/>, если требуется ожидать решение оператора.
+    /// В противном случае — <see langword="false"/>.
+    /// </returns>
+    internal static bool ShouldWaitForUserAction(
+      bool stopOnError,
+      bool loop,
+      bool deviceTask)
+    {
+      return stopOnError || loop || deviceTask;
     }
 
     public void AddError(ErrorItem errorItem)
@@ -474,6 +545,30 @@ namespace Ask.UI.Controls.ProtocolNew
       }
 
       return result;
+    }
+
+    /// <inheritdoc />
+    public string GetExecutionTitle()
+    {
+      if (Dispatcher.CheckAccess())
+        return Header;
+
+      return Dispatcher.Invoke(() => Header);
+    }
+
+    /// <inheritdoc />
+    public void SetExecutionInputParameters(IReadOnlyList<string> parameters)
+    {
+      void SetParameters()
+      {
+        _modeSettings.Current.InputParameters.Clear();
+        _modeSettings.Current.InputParameters.AddRange(parameters);
+      }
+
+      if (Dispatcher.CheckAccess())
+        SetParameters();
+      else
+        Dispatcher.Invoke(SetParameters);
     }
 
     public IInputHighlightService? GetInputHighlightService()

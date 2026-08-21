@@ -25,14 +25,17 @@ namespace Ask.Diagnostics.Services
       _logSink = logSink;
     }
 
-    public async Task<string> CreateAsync(Exception exception, CancellationToken cancellationToken = default)
+    public async Task<string> CreateAsync(
+      Exception exception,
+      IReadOnlyList<CrashReportArtifact>? artifacts = null,
+      CancellationToken cancellationToken = default)
     {
       ArgumentNullException.ThrowIfNull(exception);
 
       await _gate.WaitAsync(cancellationToken).ConfigureAwait(false);
       try
       {
-        return await CreateCoreAsync(exception, cancellationToken).ConfigureAwait(false);
+        return await CreateCoreAsync(exception, artifacts, cancellationToken).ConfigureAwait(false);
       }
       finally
       {
@@ -40,7 +43,10 @@ namespace Ask.Diagnostics.Services
       }
     }
 
-    private async Task<string> CreateCoreAsync(Exception exception, CancellationToken cancellationToken)
+    private async Task<string> CreateCoreAsync(
+      Exception exception,
+      IReadOnlyList<CrashReportArtifact>? artifacts,
+      CancellationToken cancellationToken)
     {
       var options = _options.Value;
       var timestamp = DateTimeOffset.Now;
@@ -50,7 +56,13 @@ namespace Ask.Diagnostics.Services
       var exceptionName = SanitizeFileName(exception.GetType().Name);
       var packageName = $"{timestamp:yyyyMMdd_HHmmss}_{exceptionName}";
       var packageDirectory = CreateUniqueDirectory(rootDirectory, packageName);
-      var context = new CrashContext(exception, timestamp, rootDirectory, packageDirectory, System.IO.Path.GetFileName(packageDirectory));
+      var context = new CrashContext(
+        exception,
+        timestamp,
+        rootDirectory,
+        packageDirectory,
+        System.IO.Path.GetFileName(packageDirectory),
+        artifacts);
 
       foreach (var collector in _collectors)
       {

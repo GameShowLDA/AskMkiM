@@ -7,6 +7,7 @@ using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Ask.UI.Services.Notifications;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows;
@@ -31,8 +32,6 @@ namespace Ask.UI.Components.ProtocolListBox
     private const double ZoomStep = 1.0;
     private const double DefaultFontSize = 20.0;
     private const double MouseWheelScrollStep = 48.0;
-    private const int MaxVisibleProtocolRows = 3000;
-
     private readonly List<ShowMessageModel> _historyMessages = new();
     private ScrollViewer? _protocolScrollViewer;
     private ProtocolCommandGroup? _currentGroup;
@@ -40,7 +39,25 @@ namespace Ask.UI.Components.ProtocolListBox
     private bool _scrollToEndRequested;
     private bool _settingsSubscribed;
     private bool _themeSubscribed;
-    private int _visibleRowCount;
+    /// <summary>
+    /// Признак запланированного замера задержки отрисовки.
+    /// </summary>
+    private bool _renderProbePending;
+
+    /// <summary>
+    /// Количество записей, ожидающих ближайшего цикла отрисовки.
+    /// </summary>
+    private int _pendingRenderEntries;
+
+    /// <summary>
+    /// Метка времени добавления последней записи протокола.
+    /// </summary>
+    private long _lastAppendTimestamp;
+
+    /// <summary>
+    /// Идентификатор последней записи протокола, ожидающей отрисовки.
+    /// </summary>
+    private int _lastRenderedMessageId;
 
     public static readonly DependencyProperty ProtocolFontSizeProperty =
       DependencyProperty.Register(
@@ -342,7 +359,6 @@ namespace Ask.UI.Components.ProtocolListBox
       }
 
       DisplayItems.RemoveAt(DisplayItems.Count - 1);
-      _visibleRowCount--;
       return true;
     }
 
@@ -354,8 +370,6 @@ namespace Ask.UI.Components.ProtocolListBox
         DisplayItems.Clear();
         _currentGroup = null;
         _pendingGroup = null;
-        _visibleRowCount = 0;
-
         LogInformation("Протокол полностью очищен.");
       });
     }
@@ -391,8 +405,17 @@ namespace Ask.UI.Components.ProtocolListBox
 
     public async Task AppendLineAsync(ShowMessageModel showMessageModel, bool lastMessage = false)
     {
+      var queuedAt = Stopwatch.GetTimestamp();
+      var messageId = RuntimeHelpers.GetHashCode(showMessageModel);
+      var dispatcherQueueMs = 0d;
+      var uiWorkMs = 0d;
+
       await Application.Current.Dispatcher.InvokeAsync(() =>
       {
+        var uiWorkStarted = Stopwatch.GetTimestamp();
+        dispatcherQueueMs = Stopwatch.GetElapsedTime(queuedAt, uiWorkStarted).TotalMilliseconds;
+        var shouldScrollToEnd = IsScrolledToEnd();
+
         _historyMessages.Add(showMessageModel);
         AppendVisibleMessage(showMessageModel);
 
@@ -401,9 +424,52 @@ namespace Ask.UI.Components.ProtocolListBox
           FinalizeLatestCommandGroup();
         }
 
-        TrimVisibleItemsIfNeeded();
-        RequestScrollToEnd();
-      });
+        if (shouldScrollToEnd)
+        {
+          RequestScrollToEnd();
+        }
+        RequestRenderTimingProbe(messageId);
+
+        uiWorkMs = Stopwatch.GetElapsedTime(uiWorkStarted).TotalMilliseconds;
+      }, DispatcherPriority.Background);
+
+      LogDebug(
+        $"[ProtocolOutputTiming] UI append completed: message={messageId}, " +
+        $"dispatcherQueueMs={dispatcherQueueMs:F1}, uiWorkMs={uiWorkMs:F1}, " +
+        $"totalMs={Stopwatch.GetElapsedTime(queuedAt).TotalMilliseconds:F1}, " +
+        $"thread={Environment.CurrentManagedThreadId}");
+    }
+
+    /// <summary>
+    /// Регистрирует задержку до ближайшего цикла отрисовки протокола.
+    /// </summary>
+    /// <param name="messageId">Идентификатор записи протокола.</param>
+    private void RequestRenderTimingProbe(int messageId)
+    {
+      _pendingRenderEntries++;
+      _lastAppendTimestamp = Stopwatch.GetTimestamp();
+      _lastRenderedMessageId = messageId;
+
+      if (_renderProbePending)
+      {
+        return;
+      }
+
+      _renderProbePending = true;
+      Dispatcher.BeginInvoke(() =>
+      {
+        var entries = _pendingRenderEntries;
+        var lastMessageId = _lastRenderedMessageId;
+        var renderLatencyMs = Stopwatch.GetElapsedTime(_lastAppendTimestamp).TotalMilliseconds;
+
+        _pendingRenderEntries = 0;
+        _renderProbePending = false;
+
+        LogDebug(
+          $"[ProtocolOutputTiming] UI render turn reached: message={lastMessageId}, " +
+          $"batchedEntries={entries}, renderLatencyMs={renderLatencyMs:F1}, " +
+          $"thread={Environment.CurrentManagedThreadId}");
+      }, DispatcherPriority.Render);
     }
 
     private void AppendVisibleMessage(ShowMessageModel model)
@@ -431,14 +497,12 @@ namespace Ask.UI.Components.ProtocolListBox
         {
           DisplayItems.Add(lineItem);
           _currentGroup.VisibleBodyCount++;
-          _visibleRowCount++;
         }
 
         return;
       }
 
       DisplayItems.Add(lineItem);
-      _visibleRowCount++;
     }
 
     private void StartCommandGroup(ShowMessageModel model)
@@ -456,7 +520,6 @@ namespace Ask.UI.Components.ProtocolListBox
       _pendingGroup = group;
 
       DisplayItems.Add(group.HeaderItem);
-      _visibleRowCount++;
     }
 
     private void EnsureCurrentGroupStarted()
@@ -513,7 +576,6 @@ namespace Ask.UI.Components.ProtocolListBox
           DisplayItems.RemoveAt(startIndex);
         }
 
-        _visibleRowCount -= group.VisibleBodyCount;
         group.VisibleBodyCount = 0;
       }
 
@@ -546,8 +608,6 @@ namespace Ask.UI.Components.ProtocolListBox
       }
 
       group.VisibleBodyCount = group.BodyItems.Count;
-      _visibleRowCount += group.VisibleBodyCount;
-      TrimVisibleItemsIfNeeded();
     }
 
     private void ProtocolCommandHeaderToggleButton_Click(object sender, RoutedEventArgs e)
@@ -574,11 +634,7 @@ namespace Ask.UI.Components.ProtocolListBox
       DisplayItems.Clear();
       _currentGroup = null;
       _pendingGroup = null;
-      _visibleRowCount = 0;
-
-      int historyStart = Math.Max(0, _historyMessages.Count - MaxVisibleProtocolRows);
-
-      for (int i = historyStart; i < _historyMessages.Count; i++)
+      for (int i = 0; i < _historyMessages.Count; i++)
       {
         AppendVisibleMessage(_historyMessages[i]);
       }
@@ -721,50 +777,24 @@ namespace Ask.UI.Components.ProtocolListBox
       }, DispatcherPriority.Loaded);
     }
 
-    private void TrimVisibleItemsIfNeeded()
+    /// <summary>
+    /// Проверяет, находится ли область просмотра у последней строки протокола.
+    /// </summary>
+    /// <returns>
+    /// <see langword="true"/>, если включена автоматическая прокрутка к новым строкам.
+    /// В противном случае — <see langword="false"/>.
+    /// </returns>
+    private bool IsScrolledToEnd()
     {
-      while (_visibleRowCount > MaxVisibleProtocolRows && DisplayItems.Count > 0)
+      _protocolScrollViewer ??= FindVisualChild<ScrollViewer>(ProtocolListBox);
+      if (_protocolScrollViewer == null)
       {
-        RemoveFirstVisibleChunk();
-      }
-    }
-
-    private void RemoveFirstVisibleChunk()
-    {
-      if (DisplayItems.Count == 0)
-      {
-        return;
+        return true;
       }
 
-      var firstItem = DisplayItems[0];
-
-      if (firstItem.IsCommandHeader && firstItem.Group != null)
-      {
-        var group = firstItem.Group;
-        int rowsToRemove = 1 + group.VisibleBodyCount;
-
-        for (int i = 0; i < rowsToRemove; i++)
-        {
-          DisplayItems.RemoveAt(0);
-        }
-
-        if (ReferenceEquals(_currentGroup, group))
-        {
-          _currentGroup = null;
-        }
-
-        if (ReferenceEquals(_pendingGroup, group))
-        {
-          _pendingGroup = null;
-        }
-
-        _visibleRowCount -= rowsToRemove;
-        group.VisibleBodyCount = 0;
-        return;
-      }
-
-      DisplayItems.RemoveAt(0);
-      _visibleRowCount--;
+      const double tolerance = 2.0;
+      return _protocolScrollViewer.VerticalOffset >=
+        _protocolScrollViewer.ScrollableHeight - tolerance;
     }
 
     public Task AppendEmptyLineAsync(int indentLevel = 0)
@@ -808,13 +838,7 @@ namespace Ask.UI.Components.ProtocolListBox
     {
       return string.Join(Environment.NewLine, _historyMessages
         .Where(message => ProtocolConfig.GetCommandHeadersInProtocol() || message.Status != ShowMessageModel.MessageType.Command)
-        .Select(m =>
-      {
-        string indent = new string(' ', m.IndentLevel * 2);
-        string header = string.IsNullOrWhiteSpace(m.Header) ? string.Empty : $"{m.Header}: ";
-        string timePart = string.IsNullOrWhiteSpace(m.Time) ? string.Empty : $" | {m.Time}";
-        return $"{indent}{header}{m.Message}{timePart}";
-      }));
+        .Select(Ask.Core.Services.Protocols.ExecutionProtocolLineFormatter.Format));
     }
 
     public int GetLastLineNumber()

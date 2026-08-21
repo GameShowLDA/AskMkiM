@@ -1,4 +1,4 @@
-using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+﻿using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Runtime.Base.Connected;
 using Ask.Device.Runtime.Base.DeviceProtocol;
 
@@ -18,3 +18,4 @@ public abstract class AskMkiDeviceBase : DeviceWithCOM, IAskMkiAttachableDevice
 
   public int NumberChassis { get; set; }
 }
+

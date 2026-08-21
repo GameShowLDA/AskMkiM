@@ -1,11 +1,5 @@
-﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
-using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
+﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities
 {

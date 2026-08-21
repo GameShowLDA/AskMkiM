@@ -38,7 +38,8 @@ namespace UI.Services
       LogDebug($"Отображение контейнера для типа \"{editorType}\"");
 
       var controlManager = CreateControlManager();
-      var tabButton = CreateTabButton(editorType);
+      var tabButton = _context.OpenPages.FirstOrDefault(page => page.Text == editorType.ToString())
+        ?? CreateTabButton(editorType);
 
       controlManager.ShowControl(container, tabButton);
     }
@@ -58,10 +59,9 @@ namespace UI.Services
     /// </summary>
     private OpenFileButton CreateTabButton(EditorType editorType)
     {
-      return new OpenFileButton
-      {
-        Header = { Text = editorType.ToString() }
-      };
+      var tabButton = new OpenFileButton();
+      tabButton.Text = editorType.ToString();
+      return tabButton;
     }
 
     #endregion

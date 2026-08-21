@@ -3,6 +3,7 @@ using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Config.Base;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using System.Globalization;
 using System.IO;
 using System.Windows;
@@ -39,6 +40,7 @@ namespace Ask.UI.Features.ProtocolNew.Protocol
     /// <param name="isLastMessage">Признак последней записи текущего блока.</param>
     /// <param name="ignoreOutputValidation">Разрешает вывод служебной записи без текста сообщения.</param>
     /// <param name="accumulateErrors">Определяет, требуется ли накопление сообщений об ошибках.</param>
+    /// <param name="checkType">Тип текущей проверки.</param>
     /// <param name="addError">Операция регистрации накопленной ошибки.</param>
     /// <param name="callerName">Имя метода, сформировавшего запись.</param>
     /// <param name="callerFile">Путь к файлу, сформировавшему запись.</param>
@@ -49,6 +51,7 @@ namespace Ask.UI.Features.ProtocolNew.Protocol
       bool isLastMessage,
       bool ignoreOutputValidation,
       bool accumulateErrors,
+      CheckType checkType,
       Action<string> addError,
       string callerName,
       string callerFile,
@@ -57,7 +60,7 @@ namespace Ask.UI.Features.ProtocolNew.Protocol
       AddExecutionTime(message);
       AddDebugSource(message, callerName, callerFile, callerLine);
       await ApplyDetailedProtocolModeAsync(message);
-      AccumulateError(message, accumulateErrors, addError);
+      AccumulateError(message, accumulateErrors, checkType, addError);
       ApplyStatusAndHighlighting(message);
 
       if (!CanDisplay(message, ignoreOutputValidation))
@@ -91,7 +94,7 @@ namespace Ask.UI.Features.ProtocolNew.Protocol
       string callerFile,
       int callerLine)
     {
-      if (!AdminConfig.GetDebugRights())
+      if (!DebugAccessConfig.IsDebugEnabled)
       {
         return;
       }
@@ -122,9 +125,12 @@ namespace Ask.UI.Features.ProtocolNew.Protocol
     private static void AccumulateError(
       ShowMessageModel message,
       bool accumulateErrors,
+      CheckType checkType,
       Action<string> addError)
     {
-      if (!accumulateErrors || message.Status != MessageType.Error)
+      if (!accumulateErrors
+        || message.Status != MessageType.Error
+        || ShouldSkipAccumulatedError(message, checkType))
       {
         return;
       }
@@ -134,6 +140,20 @@ namespace Ask.UI.Features.ProtocolNew.Protocol
       {
         addError(error);
       }
+    }
+
+    /// <summary>
+    /// Исключает из итогового заключения самоконтроля дублирующие внутренние результаты мультиметра.
+    /// </summary>
+    internal static bool ShouldSkipAccumulatedError(ShowMessageModel message, CheckType checkType)
+    {
+      if (checkType != CheckType.SelfTest)
+      {
+        return false;
+      }
+
+      return message.Header.StartsWith("Результат \"Измерение ", StringComparison.Ordinal)
+        || message.Header.Contains(" - Измерение ", StringComparison.Ordinal);
     }
 
     /// <summary>Добавляет обозначение качества и применяет цвета записи.</summary>

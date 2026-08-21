@@ -1,7 +1,10 @@
+using Ask.Protocol.Messages.EntryPoints;
 using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Errors.Device;
 using Ask.Core.Services.Errors.Device.Breakdown;
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Devices.Breakdown;
+using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Mode;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
@@ -172,7 +175,7 @@ namespace Ask.Device.Application.FunctionAdapters.GPT
 
           if (!succes.Success || DeviceDisplayConfig.GetConnectionInfoVisibility())
           {
-            await DeviceMessageBuilder.ShowConnectionMessageAsync(
+            await DeviceMessages.PublishOperationResultAsync(
             _device,
             "Установка режима IR",
             succes.Success ? "IR" : succes.Message,
@@ -262,7 +265,7 @@ namespace Ask.Device.Application.FunctionAdapters.GPT
 
           if (!succes.Success || DeviceDisplayConfig.GetConnectionInfoVisibility())
           {
-            await DeviceMessageBuilder.ShowConnectionMessageAsync(
+            await DeviceMessages.PublishOperationResultAsync(
             _device,
             "Установка напряжения IR",
             succes.Success ? $"{value} В" : succes.Message,
@@ -291,7 +294,7 @@ namespace Ask.Device.Application.FunctionAdapters.GPT
       {
         var value = await _irMode.Voltage.GetVoltageAsync();
 
-        await DeviceMessageBuilder.ShowConnectionMessageAsync(
+        await DeviceMessages.PublishOperationResultAsync(
           _device,
           "Чтение напряжения IR",
           $"{value} В",
@@ -360,7 +363,7 @@ namespace Ask.Device.Application.FunctionAdapters.GPT
 
           if (!succes.Success || DeviceDisplayConfig.GetConnectionInfoVisibility())
           {
-            await DeviceMessageBuilder.ShowConnectionMessageAsync(
+            await DeviceMessages.PublishOperationResultAsync(
             _device,
             "Установка верхнего предела сопротивления IR",
             succes.Success ? $"{value} ГОм" : succes.Message,
@@ -409,7 +412,7 @@ namespace Ask.Device.Application.FunctionAdapters.GPT
           var succes = await _irMode.ResistanceLimits.SetLowResistanceLimitAsync((int)value);
           if (!succes.Success || DeviceDisplayConfig.GetConnectionInfoVisibility())
           {
-            await DeviceMessageBuilder.ShowConnectionMessageAsync(
+            await DeviceMessages.PublishOperationResultAsync(
             _device,
             "Установка нижнего предела сопротивления IR",
             succes.Success ? $"{value} МОм" : succes.Message,
@@ -493,7 +496,7 @@ namespace Ask.Device.Application.FunctionAdapters.GPT
 
           if (!succes.Success || DeviceDisplayConfig.GetConnectionInfoVisibility())
           {
-            await DeviceMessageBuilder.ShowConnectionMessageAsync(
+            await DeviceMessages.PublishOperationResultAsync(
             _device,
             "Установка времени измерения IR",
             succes.Success ? $"{value} сек" : succes.Message,
@@ -543,7 +546,7 @@ namespace Ask.Device.Application.FunctionAdapters.GPT
 
           if (!succes.Success || DeviceDisplayConfig.GetConnectionInfoVisibility())
           {
-            await DeviceMessageBuilder.ShowConnectionMessageAsync(
+            await DeviceMessages.PublishOperationResultAsync(
             _device,
             "Установка времени нарастания IR",
             succes.Success ? $"{value} сек" : succes.Message,
@@ -626,7 +629,7 @@ namespace Ask.Device.Application.FunctionAdapters.GPT
 
           if (!succes.Success || DeviceDisplayConfig.GetConnectionInfoVisibility())
           {
-            await DeviceMessageBuilder.ShowConnectionMessageAsync(
+            await DeviceMessages.PublishOperationResultAsync(
             _device,
             "Установка смещения IR",
             succes.Success ? $"{value} ГОм" : succes.Message,
@@ -696,22 +699,29 @@ namespace Ask.Device.Application.FunctionAdapters.GPT
       /// Результат измерения сопротивления изоляции в МОм.  
       /// В случае ошибки возвращает значение <c>-1</c>.
       /// </returns>
-      public async Task<(double value, string unit)> MeasureAsync(double param = 0, double rangeFrom = -1, double rangeTo = 600000, bool waitFullTime = false, IUserInteractionService? userMessageService = null)
+      public async Task<(double value, string unit)> MeasureAsync(ElectricalTestFunction electricalTestFunction, MeasurementRange measurementRange, bool waitFullTime = false, IUserInteractionService? userMessageService = null)
       {
         var execution = await AdapterMeasurementExecutor.ExecuteAsync(
           _device,
           "Измерение сопротивления изоляции",
-          () => _irMode.Measure.MeasureAsync(param, rangeFrom, rangeTo));
+          () => _irMode.Measure.MeasureAsync(ElectricalTestFunction.InsulationResistance, measurementRange),
+          maxAttempts: userMessageService == null ? 2 : 1);
 
         if (!execution.Success)
         {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(
+          await DeviceMessages.PublishOperationResultAsync(
             _device,
             "Ошибка измерения сопротивления изоляции",
             execution.ErrorMessage,
             false,
             2,
             userMessageService);
+
+          if (userMessageService != null)
+          {
+            throw new DeviceException(
+              $"Ошибка при измерении сопротивления изоляции: {execution.ErrorMessage}");
+          }
 
           return (-1, string.Empty);
         }
@@ -721,13 +731,16 @@ namespace Ask.Device.Application.FunctionAdapters.GPT
         var unitEnum = ResistanceConverter.ParseUnit(unit, "мом");
         result = ResistanceConverter.ToMegaOhms(result, unitEnum);
 
-        await DeviceMessageBuilder.ShowConnectionMessageAsync(
+        await DeviceMessages.PublishOperationResultAsync(
           _device,
           "Измерение сопротивления изоляции",
           $"{result} МОм",
-          result >= rangeFrom && result <= rangeTo,
+          result >= measurementRange.LowerBound && result <= measurementRange.UpperBound,
           2,
           userMessageService);
+
+        if (result > _device.IrMaxResistanceMOhm)
+          result = _device.IrMaxResistanceMOhm;
 
         return (result, unit);
       }
@@ -801,7 +814,7 @@ namespace Ask.Device.Application.FunctionAdapters.GPT
       {
         var config = await _irMode.Config.ReadConfigurationAsync();
 
-        await DeviceMessageBuilder.ShowConnectionMessageAsync(
+        await DeviceMessages.PublishOperationResultAsync(
           _device,
           "Чтение конфигурации IR",
           "Конфигурация считана",

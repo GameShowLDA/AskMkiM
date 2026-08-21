@@ -17,12 +17,6 @@ namespace Ask.Device.Runtime.AskMkiM.Function.GPT.Helper
 
       try
       {
-        if (ExecutionConfig.GetIsIdleModeEnabled())
-        {
-          LogInformation($"{nameof(SetHighCurrentLimitAsync)}: Устройство в Idle Mode. Пропускаем установку.", isDeviceLog: true);
-          return (true, string.Empty);
-        }
-
         ManualCommand manualCommand = typeCommand switch
         {
           BreakdownTypeMode.ACW => ManualCommand.MANU_ACW_CHISET,
@@ -79,12 +73,6 @@ namespace Ask.Device.Runtime.AskMkiM.Function.GPT.Helper
 
       try
       {
-        if (ExecutionConfig.GetIsIdleModeEnabled())
-        {
-          LogInformation($"{nameof(GetHighCurrentLimitAsync)}: Устройство в Idle Mode. Возвращаем 0.", isDeviceLog: true);
-          return 0;
-        }
-
         await Task.Delay(delay);
         var query = $"{GetCommandSyntax(manualCommand)} ?";
         var response = await breakDown.DeviceProtocol.QueryAsync(query, timeout: 1000);
@@ -113,12 +101,6 @@ namespace Ask.Device.Runtime.AskMkiM.Function.GPT.Helper
 
       try
       {
-        if (ExecutionConfig.GetIsIdleModeEnabled())
-        {
-          LogInformation($"{nameof(SetLowCurrentLimitAsync)}: Устройство в Idle Mode. Пропускаем установку.", isDeviceLog: true);
-          return (true, string.Empty);
-        }
-
         ManualCommand manualCommand = typeCommand switch
         {
           BreakdownTypeMode.ACW => ManualCommand.MANU_ACW_CLOSET,
@@ -168,12 +150,6 @@ namespace Ask.Device.Runtime.AskMkiM.Function.GPT.Helper
 
       try
       {
-        if (ExecutionConfig.GetIsIdleModeEnabled())
-        {
-          LogInformation($"{nameof(GetLowCurrentLimitAsync)}: Устройство в Idle Mode. Возвращаем 0.", isDeviceLog: true);
-          return 0;
-        }
-
         ManualCommand manualCommand = typeCommand switch
         {
           BreakdownTypeMode.ACW => ManualCommand.MANU_ACW_CLOSET,

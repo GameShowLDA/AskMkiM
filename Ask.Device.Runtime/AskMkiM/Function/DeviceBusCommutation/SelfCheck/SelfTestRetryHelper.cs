@@ -1,8 +1,7 @@
-using Ask.Core.Shared.DTO.Protocol;
+﻿using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
-using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
-using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.Device.ResponseProcessor.DeviceBusCommutation.ResponseProcessing;
 
 namespace Ask.Device.Runtime.AskMkiM.Function.DeviceBusCommutation.SelfCheck
 {
@@ -12,32 +11,6 @@ namespace Ask.Device.Runtime.AskMkiM.Function.DeviceBusCommutation.SelfCheck
   /// </summary>
   static internal class SelfTestRetryHelper
   {
-    /// <summary>
-    /// Выполняет попытку замкнуть указанную цепь с возможностью повтора при ошибке.
-    /// Если замыкание не удалось, отображается сообщение об ошибке и сохраняется действие для кнопки "Повторить".
-    /// </summary>
-    /// <param name="messageService">Сервис отображения сообщений и управления действиями повтора.</param>
-    /// <param name="selfTestChecker">Объект, выполняющий замыкание цепи.</param>
-    /// <param name="testType">Тип соединения (например, BlockingRelay, Multimeter и т. д.).</param>
-    /// <param name="busContact">Номер контакта шины, подлежащий замыканию.</param>
-    /// <param name="circuitName">Название цепи для отображения в сообщениях.</param>
-    /// <returns>True, если замыкание выполнено успешно; иначе false.</returns>
-    internal static async Task<bool> TryCloseCircuitWithRetryAsync(CancellationToken cancellation, IUserInteractionService messageService, ISelfTestCheckerDeviceBusCommutation selfTestChecker, SwitchingDeviceTypeConnector testType, int busContact, string circuitName)
-    {
-      cancellation.ThrowIfCancellationRequested();
-
-      if (!await selfTestChecker.ExecuteSelfTestAsync(cancellation, testType, busContact, 1))
-      {
-        await messageService.ShowMessageAsync(new ShowMessageModel($"Ошибка при подключении: {circuitName}.", type: ShowMessageModel.MessageType.Error) { IndentLevel = 1 });
-        return false;
-      }
-      else
-      {
-        await messageService.ShowMessageAsync(new ShowMessageModel($"\"{circuitName}\" подключен", type: ShowMessageModel.MessageType.Success) { IndentLevel = 1 });
-        return true;
-      }
-    }
-
     /// <summary>
     /// Выполняет проверку состояния реле через <see cref="ContinuityManager"/> и отображает результат.
     /// </summary>
@@ -53,17 +26,47 @@ namespace Ask.Device.Runtime.AskMkiM.Function.DeviceBusCommutation.SelfCheck
     {
       cancellation.ThrowIfCancellationRequested();
 
-      var result = await meter.ContinuityManager.CheckContinuityAsync(false, messageService);
-      if (result)
+      var result = await meter.ContinuityManager.CheckContinuityAsync(false);
+      await DeviceBusCommutationMessages.PublishResultAsync(
+        $"Реле {relay}",
+        result,
+        messageService,
+        indentLevel: 3,
+        executionError: false,
+        skipPause: false);
+      return result;
+    }
+
+    /// <summary>
+    /// Выполняет аппаратную операцию и отображает её результат до ожидания решения оператора.
+    /// </summary>
+    /// <param name="operation">Аппаратная операция.</param>
+    /// <param name="messageService">Сервис взаимодействия с пользователем.</param>
+    /// <param name="operationMessage">Название аппаратной операции.</param>
+    /// <param name="indentLevel">Уровень отступа сообщения.</param>
+    /// <returns>
+    /// <see langword="true"/>, если операция завершилась успешно.
+    /// В противном случае — <see langword="false"/>.
+    /// </returns>
+    internal static async Task<bool> ExecuteHardwareOperationAsync(
+      Func<Task<bool>> operation,
+      IUserInteractionService messageService,
+      string operationMessage,
+      int indentLevel = 1)
+    {
+      bool result = await operation();
+      if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        await messageService.ShowMessageAsync(new ShowMessageModel($"Реле {relay}", type: ShowMessageModel.MessageType.Success) { IndentLevel = 3 });
-        return true;
+        await DeviceBusCommutationMessages.PublishResultAsync(
+          operationMessage,
+          result,
+          messageService,
+          indentLevel: indentLevel,
+          executionError: false);
       }
-      else
-      {
-        await messageService.ShowMessageAsync(new ShowMessageModel($"Реле {relay}", type: ShowMessageModel.MessageType.Error) { IndentLevel = 3 });
-        return false;
-      }
+
+      return result;
     }
   }
 }
+

@@ -1,8 +1,9 @@
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Devices;
 using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
@@ -10,7 +11,6 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.UninterruptiblePowerSupply;
 using Ask.DataBase.Engine.Static.Devices;
-using Ask.Device.Runtime.AskMkiM.Ethernet.Udp.Broadcast;
 using Ask.Device.Runtime.Base.DeviceProtocol;
 using Ask.UI.Features.Notifications.Models;
 using Ask.UI.Infrastructure.UI.Overlay.Notifications.Runtime;
@@ -324,7 +324,7 @@ namespace UI.Components
     /// </summary>
     private async Task StopPowerSequenceAsync()
     {
-      await UdpBroadcastCommandSender.ResetAllDevicesAsync();
+      await DeviceResetService.ResetDevicesAsync(await GetStartupResetDevicesAsync());
       await Task.Delay(500);
 
       bool power = true;
@@ -571,3 +571,4 @@ namespace UI.Components
     }
   }
 }
+

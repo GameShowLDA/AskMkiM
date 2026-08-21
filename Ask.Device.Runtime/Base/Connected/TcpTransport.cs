@@ -1,6 +1,8 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Device.Emulator;
 using Ask.Device.Runtime.Base.DeviceProtocol;
 using System.Net;
 using System.Net.Sockets;
@@ -31,9 +33,30 @@ namespace Ask.Device.Runtime.Base.Connected
     /// <inheritdoc />
     public async Task<(bool Connect, string Answer)> InitializeAsync(IUserInteractionService userMessageService = null)
     {
+      if (_device is IMultimeter multimeter)
+      {
+        if (!ExecutionConfig.GetIsIdleModeEnabled() && !(await ConnectAsync()).Connect)
+        {
+          return (false, $"Нет связи с {_device.Name}");
+        }
+
+        string idleResponse = $"ASK,{_device.Name},0,IDLE";
+        string answer = await DeviceProtocolEmulator.QueryMultimeterAsync(
+          multimeter,
+          _device.ConnectedProfile.Initialize,
+          idleResponse,
+          timeout: _device.ConnectedProfile.Timeout,
+          port: _device.ConnectedProfile.Port);
+        return string.IsNullOrWhiteSpace(answer)
+          ? (false, $"Нет ответа на команду {_device.ConnectedProfile.Initialize} от {_device.Name}")
+          : (true, answer.Trim());
+      }
+
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        return (true, "Холостой режим");
+        return IdleHardwareErrorSimulator.ShouldSimulateHardwareError()
+          ? (false, IdleHardwareErrorSimulator.ErrorMessage)
+          : (true, "Холостой режим");
       }
 
       if ((await ConnectAsync()).Connect)
@@ -53,7 +76,9 @@ namespace Ask.Device.Runtime.Base.Connected
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        return (true, string.Empty);
+        return IdleHardwareErrorSimulator.ShouldSimulateHardwareError()
+          ? (false, IdleHardwareErrorSimulator.ErrorMessage)
+          : (true, string.Empty);
       }
 
       if (_device.IPAddress == null)
@@ -95,7 +120,7 @@ namespace Ask.Device.Runtime.Base.Connected
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        return true;
+        return !IdleHardwareErrorSimulator.ShouldSimulateHardwareError();
       }
 
       await _device.DeviceProtocol.OperationLock.WaitAsync();
@@ -126,3 +151,4 @@ namespace Ask.Device.Runtime.Base.Connected
     }
   }
 }
+

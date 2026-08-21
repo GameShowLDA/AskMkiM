@@ -1,10 +1,10 @@
-using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Devices;
 using Ask.Core.Services.Errors;
 using Ask.Core.Services.Errors.Device.Adapters;
 using Ask.Core.Services.Errors.Metrology;
 using Ask.Core.Services.Extensions;
+using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
-using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
@@ -12,11 +12,11 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Enums.UnitEnums;
 using Ask.Core.Shared.Metadata.Static.Messages;
 using Ask.DataBase.Engine.Static.Devices;
-using Ask.Engine.Tests.Base;
 using static Ask.Engine.Tests.Base.UIValidationHelper;
 using static Ask.LogLib.LoggerUtility;
 
@@ -128,18 +128,15 @@ namespace Ask.Engine.Tests.Metrology.MeasurementSystem
     {
       try
       {
-        CollectDevices(point1, point2, mode);
+        await CollectDevices(point1, point2, mode);
       }
       catch (Exception ex)
       {
-        await messageService.ShowMessageAsync(new ShowMessageModel("Ошибка", message: ex.Message, type: ShowMessageModel.MessageType.Error));
+        await ExecutionMessages.PublishErrorAsync(ex.Message, messageService);
         throw MetrologyValidationErrors.DeviceCollectFailed(ex);
       }
 
-      if (DeviceDisplayConfig.GetExecutionParametersVisibility())
-      {
-        await messageService.ShowMessageAsync(new ShowMessageModel("Инициализация устройств", type: ShowMessageModel.MessageType.Info), IsBlockStart: true);
-      }
+      await ExecutionMessages.PublishDevicesInitializationAsync(messageService);
 
       try
       {
@@ -161,7 +158,8 @@ namespace Ask.Engine.Tests.Metrology.MeasurementSystem
               var (connected, message) = await connectableDevice.ConnectableManager.ConnectAsync(messageService);
               if (!connected)
               {
-                await messageService.ShowMessageAsync(new ShowMessageModel("Ошибка", message: $"Не удалось подключить устройство {connectableDevice.Name}({connectableDevice.Number}) - {message} ", type: ShowMessageModel.MessageType.Error));
+                await ExecutionMessages.PublishErrorAsync($"Не удалось подключить устройство {connectableDevice.Name}({connectableDevice.Number}) - {message} ",
+                  messageService);
                 throw ConnectionExceptionAdapter.ConnectByRoleFailed(role.ToString());
               }
 
@@ -173,10 +171,14 @@ namespace Ask.Engine.Tests.Metrology.MeasurementSystem
             }
           }
         }
+
+        await DeviceResetService.ResetDevicesAsync(
+          connectedDevices.OfType<IDevice>(),
+          messageService);
       }
       catch (Exception ex)
       {
-        await messageService.ShowMessageAsync(new ShowMessageModel("Ошибка", message: ex.Message, type: ShowMessageModel.MessageType.Error));
+        await ExecutionMessages.PublishErrorAsync(ex.Message, messageService);
         throw SystemUnexpectedErrors.Unexpected(ex);
       }
     }
@@ -208,10 +210,7 @@ namespace Ask.Engine.Tests.Metrology.MeasurementSystem
     /// <param name="dataModel">Модель данных, содержащая дополнительные значения для устройств.</param>
     public virtual async Task ConfigureMeter(IUserInteractionService messageService, MeasurementTypeCommand metrologicalModeRole, DataModel dataModel = null)
     {
-      if (DeviceDisplayConfig.GetExecutionParametersVisibility())
-      {
-        await messageService.ShowMessageAsync(new ShowMessageModel("Настройка измерителя", type: ShowMessageModel.MessageType.Info), IsBlockStart: true);
-      }
+      await ExecutionMessages.PublishMeasurementDeviceSetupAsync(messageService);
     }
 
     /// <summary>
@@ -238,6 +237,23 @@ namespace Ask.Engine.Tests.Metrology.MeasurementSystem
         upperBound,
         unit);
     }
+
+    protected Task PublishMetrologyMeasurementErrorAsync(
+      Enum measurementUnit,
+      MeasurementRange measurementRange,
+      bool isSuccessful,
+      IMessageOutputService messageService)
+    {
+      return MeasurementMessages.PublishErrorAsync(
+        CheckType.Metrology,
+        measurementUnit,
+        measurementRange,
+        isSuccessful,
+        messageService);
+    }
+
+    protected string MeasurementPointsDisplay =>
+      $"{FormatPoint(Points.points1)}, {FormatPoint(Points.pointModel2)}";
 
     protected void AddMetrologyError(
       IUserInteractionService messageService,
@@ -314,13 +330,15 @@ namespace Ask.Engine.Tests.Metrology.MeasurementSystem
     }
 
     /// <summary>
-    /// Завершает измерение, размыкает реле и отключает прибор.
+    /// Завершает выполнение измерения.
     /// </summary>
-    public virtual async Task FinalizeMeasurement(MeasurementTypeCommand metrologicalModeRole, IUserInteractionService messageService)
-    {
-      var devices = GetDevices(metrologicalModeRole);
-      await RelayModuleHelper.ResetDevices(devices, messageService);
-    }
+    /// <param name="metrologicalModeRole">Роль метрологического режима.</param>
+    /// <param name="messageService">Сервис взаимодействия с пользователем.</param>
+    /// <returns>Задача, представляющая асинхронную операцию завершения.</returns>
+    public virtual Task FinalizeMeasurement(
+      MeasurementTypeCommand metrologicalModeRole,
+      IUserInteractionService messageService) =>
+      Task.CompletedTask;
 
     /// <summary>
     /// Добавляет устройство в коллекцию по роли, если оно ещё не добавлено.
@@ -408,13 +426,7 @@ namespace Ask.Engine.Tests.Metrology.MeasurementSystem
         max = 0;
       }
 
-      var info = command.GetCommandDisplayInfo();
-      string displayName = info?.DisplayName ?? command.ToString();
-      string unit = info?.Unit ?? "";
-
-      await messageService.ShowMessageAsync(new ShowMessageModel($"Результаты режима {displayName}"), skipPause: true);
-      await messageService.ShowMessageAsync(new ShowMessageModel("Максимальная отрицательная погрешность", message: MeasurementValueFormatter.FormatWithUnit(min, unit), type: ShowMessageModel.MessageType.Info) { IndentLevel = 1 }, skipPause: true);
-      await messageService.ShowMessageAsync(new ShowMessageModel("Максимальная положительная погрешность", message: MeasurementValueFormatter.FormatWithUnit(max, unit), type: ShowMessageModel.MessageType.Info) { IndentLevel = 1 }, skipPause: true);
+      await MetrologyMessages.PublishResultSummaryAsync(command, min, max, messageService);
 
       Measurements = new();
     }
@@ -526,10 +538,7 @@ namespace Ask.Engine.Tests.Metrology.MeasurementSystem
     /// <param name="modeDevice">Тип метрологического устройства.</param>
     private async Task ConnectBusesAsync(ISwitchingDevice busSwitcher, IPowerSourceModule mint, List<IRelaySwitchModule> relayModules, MetrologicalDeviceType modeDevice, IUserInteractionService protocolUI)
     {
-      if (DeviceDisplayConfig.GetConnectionInfoVisibility())
-      {
-        await protocolUI.ShowMessageAsync(new ShowMessageModel("Подключение шин"), IsBlockStart: true);
-      }
+      await ExecutionMessages.PublishBusConnectionAsync(protocolUI);
 
       foreach (var relayModule in relayModules)
       {
@@ -561,10 +570,7 @@ namespace Ask.Engine.Tests.Metrology.MeasurementSystem
     /// <param name="point2">Вторая точка коммутации.</param>
     public virtual async Task ConnectRelayPointsAsync(List<IRelaySwitchModule> relayModules, PointModel point1, PointModel point2, IUserInteractionService protocolUI)
     {
-      if (DeviceDisplayConfig.GetConnectionInfoVisibility())
-      {
-        await protocolUI.ShowMessageAsync(new ShowMessageModel("Подключение точек"), IsBlockStart: true);
-      }
+      await ExecutionMessages.PublishPointConnectionAsync(protocolUI);
 
       await relayModules[0].PointManager.ConnectRelayAsync(BusPoint.A, point1.PointNumber, protocolUI);
       await relayModules.Last().PointManager.ConnectRelayAsync(BusPoint.B, point2.PointNumber, protocolUI);

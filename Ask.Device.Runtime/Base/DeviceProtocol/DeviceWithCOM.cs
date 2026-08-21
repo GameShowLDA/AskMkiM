@@ -1,9 +1,11 @@
-using System.IO.Ports;
+﻿using System.IO.Ports;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Metadata.Commands.MultimeterCommands.Connected;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Communication.Com.Configuration;
 using Ask.Device.Communication.Com.Protocols;
+using Ask.Device.Emulator;
 using Ask.Device.Runtime.Base.Status;
 using System.IO.Ports;
 using static Ask.LogLib.LoggerUtility;
@@ -66,7 +68,10 @@ namespace Ask.Device.Runtime.Base.DeviceProtocol
         if (port != null)
         {
           COMPort = port;
-          DeviceProtocol = new ComProtocol(this, port);
+          var realProtocol = new ComProtocol(this, port);
+          DeviceProtocol = this is IBreakdownTester breakdownTester
+            ? DeviceProtocolEmulator.CreateBreakdownTester(breakdownTester, realProtocol)
+            : realProtocol;
           LogInformation($"[{Name}] COM-порт сконфигурирован из ConnectionDetails и протокол установлен.", isDeviceLog: true);
         }
         else
@@ -139,3 +144,4 @@ namespace Ask.Device.Runtime.Base.DeviceProtocol
     public ComConnectedProfile ConnectedProfile { get; set; } = new ComConnectedProfile();
   }
 }
+

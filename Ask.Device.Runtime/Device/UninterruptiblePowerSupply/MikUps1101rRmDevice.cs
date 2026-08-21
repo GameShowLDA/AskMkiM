@@ -1,4 +1,4 @@
-using Ask.Core.Shared.DTO.Devices.UninterruptiblePowerSupply;
+﻿using Ask.Core.Shared.DTO.Devices.UninterruptiblePowerSupply;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Capabilities;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.UninterruptiblePowerSupply;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
@@ -75,3 +75,4 @@ namespace Ask.Device.Runtime.Device.UninterruptiblePowerSupply
     }
   }
 }
+

@@ -29,11 +29,6 @@ namespace Ask.Core.Shared.DTO.Executor
     public PreActionDelegate? PreActionDelegate { get; init; }
 
     /// <summary>
-    /// Разрешить повторное выполнение.
-    /// </summary>
-    public bool IsRepeatEnabled { get; set; }
-
-    /// <summary>
     /// Выполнять проверку питания.
     /// </summary>
     public bool CheckPower { get; init; } = true;
@@ -54,6 +49,11 @@ namespace Ask.Core.Shared.DTO.Executor
     public string Name { get; set; }
 
     /// <summary>
+    /// Операция получения имени запускаемого процесса перед началом выполнения.
+    /// </summary>
+    public Func<string?>? NameProvider { get; init; }
+
+    /// <summary>
     /// Время начала выполнения.
     /// </summary>
     public TimeOnly StartTime { get; set; }
@@ -67,5 +67,10 @@ namespace Ask.Core.Shared.DTO.Executor
     /// Ошибки, сформированные во время выполнения действия.
     /// </summary>
     public List<string> ExecutionErrors { get; } = new();
+
+    /// <summary>
+    /// Подтверждённые входные параметры текущего выполнения.
+    /// </summary>
+    public List<string> InputParameters { get; } = new();
   }
 }

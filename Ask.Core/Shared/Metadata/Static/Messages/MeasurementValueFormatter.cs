@@ -9,6 +9,7 @@ namespace Ask.Core.Shared.Metadata.Static.Messages
   {
     private const int DisplayPrecision = 3;
     private const string DisplayFormat = "0.###";
+    private static readonly CultureInfo RussianDisplayCulture = CultureInfo.GetCultureInfo("ru-RU");
 
     /// <summary>
     /// Округляет измеренное значение для отображения с точностью до трёх знаков после запятой.
@@ -28,7 +29,7 @@ namespace Ask.Core.Shared.Metadata.Static.Messages
     /// </summary>
     public static string Format(double value)
     {
-      return Round(value).ToString(DisplayFormat, CultureInfo.CurrentCulture);
+      return Round(value).ToString(DisplayFormat, RussianDisplayCulture);
     }
 
     /// <summary>

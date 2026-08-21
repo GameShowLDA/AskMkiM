@@ -1,4 +1,4 @@
-using Ask.Core.Shared.Interfaces.DeviceInterfaces;
+﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Device.Runtime.Base.DeviceProtocol;
 using Ask.Device.Runtime.Device.Multimeters;
 using System;
@@ -61,3 +61,4 @@ public partial class AskMkiConfigControl
     return device;
   }
 }
+

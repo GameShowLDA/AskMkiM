@@ -7,6 +7,7 @@ using Ask.Core.Services.FileFormats.Opk;
 using Ask.Core.Services.FilesUtility;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
+using Ask.Core.Shared.Metadata.Static;
 using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
 using Ask.UI.Controls.ProtocolNew;
 using Ask.UI.Features.Archive.Application;
@@ -136,7 +137,7 @@ namespace MainWindowProgram.Services
       {
         OpenFileDialog openFileDialog = new OpenFileDialog
         {
-          Filter = "Supported files (*.pk;*.pkw;*.opk;*.opkw;*.lst;*.lstw;*.rtlst;*.acs;*.txt)|*.pk;*.pkw;*.opk;*.opkw;*.lst;*.lstw;*.rtlst;*.acs;*.txt|PK/PKW files (*.pk;*.pkw)|*.pk;*.pkw|OPK/OPKW files (*.opk;*.opkw)|*.opk;*.opkw|Protocol files (*.lst;*.lstw;*.rtlst)|*.lst;*.lstw;*.rtlst|ACS files (*.acs)|*.acs|Text files (*.txt)|*.txt|All files (*.*)|*.*",
+          Filter = "Supported files (*.pk;*.pkw;*.opk;*.opkw;*.asktrace;*.askresult;*.askreport;*.lst;*.lstw;*.rtlst;*.acs;*.txt)|*.pk;*.pkw;*.opk;*.opkw;*.asktrace;*.askresult;*.askreport;*.lst;*.lstw;*.rtlst;*.acs;*.txt|PK/PKW files (*.pk;*.pkw)|*.pk;*.pkw|OPK/OPKW files (*.opk;*.opkw)|*.opk;*.opkw|Protocol files (*.asktrace;*.askresult;*.askreport)|*.asktrace;*.askresult;*.askreport|Legacy protocol files (*.lst;*.lstw;*.rtlst)|*.lst;*.lstw;*.rtlst|ACS files (*.acs)|*.acs|Text files (*.txt)|*.txt|All files (*.*)|*.*",
           Title = "Выберите файл",
           Multiselect = true,
           InitialDirectory = LastDirectoryService.GetLastDirectory()
@@ -197,7 +198,8 @@ namespace MainWindowProgram.Services
 
     private void OpenFileWithLegacyConversion(string filePath)
     {
-      if (string.Equals(Path.GetExtension(filePath), ".rtlst", StringComparison.OrdinalIgnoreCase))
+      string extension = Path.GetExtension(filePath);
+      if (ProtocolFileExtensions.IsSummary(extension))
       {
         OpenLinkedResultProtocol(filePath);
         return;
@@ -223,7 +225,14 @@ namespace MainWindowProgram.Services
       try
       {
         string fullResultPath = Path.GetFullPath(resultProtocolPath);
-        string executionProtocolPath = Path.ChangeExtension(fullResultPath, ".lst");
+        string resultExtension = Path.GetExtension(fullResultPath);
+        string traceExtension = string.Equals(
+          resultExtension,
+          ProtocolFileExtensions.LegacyResult,
+          StringComparison.OrdinalIgnoreCase)
+          ? ProtocolFileExtensions.LegacyTrace
+          : ProtocolFileExtensions.Trace;
+        string executionProtocolPath = Path.ChangeExtension(fullResultPath, traceExtension);
 
         string resultProtocolText = ReadSavedProtocolText(fullResultPath);
         string executionProtocolText = File.Exists(executionProtocolPath)

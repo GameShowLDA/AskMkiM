@@ -1,9 +1,6 @@
-using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
-using Ask.Device.Communication.Ethernet.Udp;
-using Ask.Device.Runtime.AskMkiM.Ethernet.Udp.Broadcast;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandExecutor.Execution;
 
@@ -18,7 +15,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
     public async Task ExecuteAsync(CommandExecutionContext context, ProtocolModel protocolModel)
     {
-      await UdpBroadcastCommandSender.ResetAllDevicesAsync();
+      EquipmentService.ClearUsedDevices();
       context.CommandExecutionManager.ClearErrorsMethod();
 
       var command = GetRequiredCommand<OkCommandModel>(context);
@@ -27,10 +24,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       command.ProtocolModel = new ProtocolModel();
       command.ProtocolModel.ProgramPath = command.ObjectName;
 
-      await context.Console.ShowMessageAsync(new ShowMessageModel($"Выполнение программы контроля для \"{command.ObjectName}({command.ObjectCode})\"", type: ShowMessageModel.MessageType.Command)
-      {
-        IsControlProgramCommandHeader = true
-      }, IsBlockStart: true);
+      await CommandMessages.PublishControlProgramStartAsync(context.Console, command.ObjectName, command.ObjectCode);
     }
   }
 }

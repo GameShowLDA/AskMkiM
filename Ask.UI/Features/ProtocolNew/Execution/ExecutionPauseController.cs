@@ -18,6 +18,11 @@ internal sealed class ExecutionPauseController : IExecutionPauseController
   private TaskCompletionSource<bool>? _resumeSource;
 
   /// <summary>
+  /// Источник сигнала запроса паузы.
+  /// </summary>
+  private TaskCompletionSource<bool> _pauseSource = CreateSignalSource();
+
+  /// <summary>
   /// Текущее состояние паузы.
   /// </summary>
   private bool _isPaused;
@@ -46,8 +51,26 @@ internal sealed class ExecutionPauseController : IExecutionPauseController
 
       _isPaused = true;
       _resumeSource = CreateResumeSource();
+      _pauseSource.TrySetResult(true);
       return true;
     }
+  }
+
+  /// <inheritdoc />
+  public async Task WaitForPauseRequestAsync(CancellationToken cancellationToken)
+  {
+    Task waitTask;
+    lock (_syncRoot)
+    {
+      if (_isPaused)
+      {
+        return;
+      }
+
+      waitTask = _pauseSource.Task;
+    }
+
+    await waitTask.WaitAsync(cancellationToken).ConfigureAwait(false);
   }
 
   /// <inheritdoc />
@@ -75,10 +98,37 @@ internal sealed class ExecutionPauseController : IExecutionPauseController
     lock (_syncRoot)
     {
       resumeSource = _resumeSource;
+      _resumeSource = null;
       _isPaused = false;
+      _pauseSource = CreateSignalSource();
     }
 
     resumeSource?.TrySetResult(true);
+  }
+
+  /// <summary>
+  /// Прерывает текущее ожидание, сохраняя состояние паузы.
+  /// </summary>
+  /// <returns>
+  /// <see langword="true"/>, если ожидание было прервано.
+  /// В противном случае — <see langword="false"/>.
+  /// </returns>
+  public bool InterruptWait()
+  {
+    TaskCompletionSource<bool>? resumeSource;
+    lock (_syncRoot)
+    {
+      if (!_isPaused)
+      {
+        return false;
+      }
+
+      resumeSource = _resumeSource;
+      _resumeSource = CreateResumeSource();
+    }
+
+    resumeSource?.TrySetResult(true);
+    return true;
   }
 
   /// <inheritdoc />
@@ -88,7 +138,9 @@ internal sealed class ExecutionPauseController : IExecutionPauseController
     lock (_syncRoot)
     {
       resumeSource = _resumeSource;
+      _resumeSource = null;
       _isPaused = false;
+      _pauseSource = CreateSignalSource();
     }
 
     resumeSource?.TrySetCanceled();
@@ -97,11 +149,16 @@ internal sealed class ExecutionPauseController : IExecutionPauseController
   /// <inheritdoc />
   public void Reset()
   {
+    TaskCompletionSource<bool>? resumeSource;
     lock (_syncRoot)
     {
+      resumeSource = _resumeSource;
       _isPaused = false;
       _resumeSource = null;
+      _pauseSource = CreateSignalSource();
     }
+
+    resumeSource?.TrySetResult(true);
   }
 
   /// <summary>
@@ -109,5 +166,12 @@ internal sealed class ExecutionPauseController : IExecutionPauseController
   /// </summary>
   /// <returns>Новый источник завершения ожидания.</returns>
   private static TaskCompletionSource<bool> CreateResumeSource() =>
+    new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+  /// <summary>
+  /// Создаёт источник сигнала запроса паузы.
+  /// </summary>
+  /// <returns>Новый источник сигнала запроса паузы.</returns>
+  private static TaskCompletionSource<bool> CreateSignalSource() =>
     new(TaskCreationOptions.RunContinuationsAsynchronously);
 }

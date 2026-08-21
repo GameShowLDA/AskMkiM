@@ -1,12 +1,10 @@
-using Ask.Core.Services.Config.AppSettings;
-using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
+﻿using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.Device.ResponseProcessor.ModuleRelayControl.ResponseProcessing;
 using Ask.Device.Runtime.AskMkiM.Base.Commands;
-using Ask.Device.Runtime.AskMkiM.Base.DeviceResponses;
-using Ask.Device.Runtime.AskMkiM.Ethernet.Udp.Broadcast;
 using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.Device.Runtime.AskMkiM.Function.ModuleRelayControl
@@ -22,6 +20,7 @@ namespace Ask.Device.Runtime.AskMkiM.Function.ModuleRelayControl
     /// Экземпляр интерфейса модуля реле.
     /// </summary>
     private readonly IRelaySwitchModule _moduleRelayControl;
+    private readonly ModuleRelayControlQueryExecutor _queryExecutor;
 
     /// <summary>
     /// Создаёт новый экземпляр класса <see cref="PointManager"/>.
@@ -30,9 +29,9 @@ namespace Ask.Device.Runtime.AskMkiM.Function.ModuleRelayControl
     public PointManager(IRelaySwitchModule moduleRelayControl)
     {
       _moduleRelayControl = moduleRelayControl;
+      _queryExecutor = new ModuleRelayControlQueryExecutor(moduleRelayControl);
       connectionState = new PointConnectionStateStore(moduleRelayControl.PointCount);
       _moduleRelayControl.ConnectableManager.IsReset += ConnectableManager_IsReset;
-      UdpBroadcastCommandSender.ResetAllDevicesSent += ConnectableManager_IsReset;
       ConnectableManager_IsReset();
     }
 
@@ -50,21 +49,18 @@ namespace Ask.Device.Runtime.AskMkiM.Function.ModuleRelayControl
     /// <inheritdoc />
     public async Task<bool> ConnectRelayAsync(BusPoint bus, int number, IUserInteractionService? userMessageService = null)
     {
-      if (ExecutionConfig.GetIsIdleModeEnabled())
-      {
-        SetPointConnection(number, bus, true);
-        return true;
-      }
-
       var cmd = new DeviceCommand(8, number, (int)bus, 1);
       string commandText = cmd.ToString();
 
       for (int attempt = 1; attempt <= 2; attempt++)
       {
-        string response = await _moduleRelayControl.DeviceProtocol.QueryAsync(commandText, timeout: 1000);
-        var parsed = BaseResponse.FromJson(response);
-
-        if (parsed?.Answer == $"8.{number}.{(int)bus}.1")
+        string response = await _queryExecutor.QueryAsync(commandText, timeout: 1000);
+        if (await ModuleRelayControlResponseProcessor.CheckPointConnectionAsync(
+          response,
+          _moduleRelayControl,
+          number,
+          (int)bus,
+          userMessageService))
         {
           SetPointConnection(number, bus, true);
           return true;
@@ -82,21 +78,18 @@ namespace Ask.Device.Runtime.AskMkiM.Function.ModuleRelayControl
     /// <inheritdoc />
     public async Task<bool> DisconnectRelayAsync(BusPoint bus, int number, IUserInteractionService? userMessageService = null)
     {
-      if (ExecutionConfig.GetIsIdleModeEnabled())
-      {
-        SetPointConnection(number, bus, false);
-        return true;
-      }
-
       var cmd = new DeviceCommand(8, number, (int)bus, 2);
       string commandText = cmd.ToString();
 
       for (int attempt = 1; attempt <= 2; attempt++)
       {
-        string response = await _moduleRelayControl.DeviceProtocol.QueryAsync(commandText, timeout: 1000);
-        var parsed = BaseResponse.FromJson(response);
-
-        if (parsed?.Answer == $"8.{number}.{(int)bus}.2")
+        string response = await _queryExecutor.QueryAsync(commandText, timeout: 1000);
+        if (await ModuleRelayControlResponseProcessor.CheckPointDisconnectionAsync(
+          response,
+          _moduleRelayControl,
+          number,
+          (int)bus,
+          userMessageService))
         {
           SetPointConnection(number, bus, false);
           return true;
@@ -114,21 +107,18 @@ namespace Ask.Device.Runtime.AskMkiM.Function.ModuleRelayControl
     /// <inheritdoc />
     public async Task<bool> ConnectRelayVerifiedAsync(BusPoint bus, int number, IUserInteractionService? userMessageService = null)
     {
-      if (ExecutionConfig.GetIsIdleModeEnabled())
-      {
-        SetPointConnection(number, bus, true);
-        return true;
-      }
-
       var cmd = new DeviceCommand(82, number, (int)bus, 1);
       string commandText = cmd.ToString();
 
       for (int attempt = 1; attempt <= 2; attempt++)
       {
-        string response = await _moduleRelayControl.DeviceProtocol.QueryAsync(commandText, timeout: 1000);
-        var parsed = RelayVerifiedAnswer.FromJson(response);
-
-        if (parsed != null && parsed.Checked)
+        string response = await _queryExecutor.QueryAsync(commandText, timeout: 1000);
+        if (await ModuleRelayControlResponseProcessor.CheckVerifiedPointConnectionAsync(
+          response,
+          _moduleRelayControl,
+          number,
+          (int)bus,
+          userMessageService))
         {
           SetPointConnection(number, bus, true);
           return true;
@@ -146,21 +136,18 @@ namespace Ask.Device.Runtime.AskMkiM.Function.ModuleRelayControl
     /// <inheritdoc />
     public async Task<bool> DisconnectRelayVerifiedAsync(BusPoint bus, int number, IUserInteractionService? userMessageService = null)
     {
-      if (ExecutionConfig.GetIsIdleModeEnabled())
-      {
-        SetPointConnection(number, bus, false);
-        return true;
-      }
-
       var cmd = new DeviceCommand(82, number, (int)bus, 2);
       string commandText = cmd.ToString();
 
       for (int attempt = 1; attempt <= 2; attempt++)
       {
-        string response = await _moduleRelayControl.DeviceProtocol.QueryAsync(commandText, timeout: 1000);
-        var parsed = RelayVerifiedAnswer.FromJson(response);
-
-        if (parsed != null && parsed.Checked)
+        string response = await _queryExecutor.QueryAsync(commandText, timeout: 1000);
+        if (await ModuleRelayControlResponseProcessor.CheckVerifiedPointDisconnectionAsync(
+          response,
+          _moduleRelayControl,
+          number,
+          (int)bus,
+          userMessageService))
         {
           SetPointConnection(number, bus, false);
           return true;
@@ -178,12 +165,6 @@ namespace Ask.Device.Runtime.AskMkiM.Function.ModuleRelayControl
     /// <inheritdoc />
     public async Task<bool> ConnectRelayGroupAsync(BusPoint bus, int firstPoint, int lastPoint, IUserInteractionService? userMessageService = null)
     {
-      if (ExecutionConfig.GetIsIdleModeEnabled())
-      {
-        connectionState.SetRange(firstPoint, lastPoint, bus, true);
-        return true;
-      }
-
       DeviceCommand cmd = new DeviceCommand
       {
         Number = 11,
@@ -196,10 +177,15 @@ namespace Ask.Device.Runtime.AskMkiM.Function.ModuleRelayControl
 
       for (int attempt = 1; attempt <= 2; attempt++)
       {
-        string response = await _moduleRelayControl.DeviceProtocol.QueryAsync(commandText, timeout: 3000);
-        var parsed = BaseResponse.FromJson(response);
-
-        if (parsed?.Answer == $"11.{firstPoint}.{lastPoint}.{(int)bus * 10 + 1}")
+        string response = await _queryExecutor.QueryAsync(commandText, timeout: 3000);
+        if (await ModuleRelayControlResponseProcessor.CheckPointRangeOperationAsync(
+          response,
+          _moduleRelayControl,
+          firstPoint,
+          lastPoint,
+          bus,
+          connect: true,
+          userMessageService))
         {
           connectionState.SetRange(firstPoint, lastPoint, bus, true);
           return true;
@@ -217,12 +203,6 @@ namespace Ask.Device.Runtime.AskMkiM.Function.ModuleRelayControl
     /// <inheritdoc />
     public async Task<bool> DisconnectRelayGroupAsync(BusPoint bus, int firstPoint, int lastPoint, IUserInteractionService? userMessageService = null)
     {
-      if (ExecutionConfig.GetIsIdleModeEnabled())
-      {
-        connectionState.SetRange(firstPoint, lastPoint, bus, false);
-        return true;
-      }
-
       DeviceCommand cmd = new DeviceCommand
       {
         Number = 11,
@@ -235,10 +215,15 @@ namespace Ask.Device.Runtime.AskMkiM.Function.ModuleRelayControl
 
       for (int attempt = 1; attempt <= 2; attempt++)
       {
-        string response = await _moduleRelayControl.DeviceProtocol.QueryAsync(commandText, timeout: 3000);
-        var parsed = BaseResponse.FromJson(response);
-
-        if (parsed?.Answer == $"11.{firstPoint}.{lastPoint}.{(int)bus * 10 + 2}")
+        string response = await _queryExecutor.QueryAsync(commandText, timeout: 3000);
+        if (await ModuleRelayControlResponseProcessor.CheckPointRangeOperationAsync(
+          response,
+          _moduleRelayControl,
+          firstPoint,
+          lastPoint,
+          bus,
+          connect: false,
+          userMessageService))
         {
           connectionState.SetRange(firstPoint, lastPoint, bus, false);
           return true;
@@ -256,37 +241,22 @@ namespace Ask.Device.Runtime.AskMkiM.Function.ModuleRelayControl
     /// <inheritdoc />
     public async Task<string> CheckPoint(int numberPoint, IUserInteractionService? userMessageService = null)
     {
-      if (ExecutionConfig.GetIsIdleModeEnabled())
-      {
-        return "Включен холостой режим.";
-      }
-
       var cmd = new DeviceCommand(6, numberPoint);
-      string response = await _moduleRelayControl.DeviceProtocol.QueryAsync(cmd.ToString(), timeout: 1000);
+      string response = await _queryExecutor.QueryAsync(cmd.ToString(), timeout: 1000);
       return response;
     }
 
     /// <inheritdoc />
     public async Task<bool> ConnectingPointToNewBus(BusPoint bus, int nubmerPoint, IUserInteractionService? userMessageService = null)
     {
-      if (ExecutionConfig.GetIsIdleModeEnabled())
-      {
-        if (bus == BusPoint.A)
-        {
-          SetPointConnection(nubmerPoint, BusPoint.B, false);
-          SetPointConnection(nubmerPoint, BusPoint.A, true);
-        }
-        else
-        {
-          SetPointConnection(nubmerPoint, BusPoint.A, false);
-          SetPointConnection(nubmerPoint, BusPoint.B, true);
-        }
-        return true;
-      }
-
       var cmd = new DeviceCommand(81, nubmerPoint, (int)bus);
-      string response = await _moduleRelayControl.DeviceProtocol.QueryAsync(cmd.ToString(), timeout: 1000);
-      var result = response.Contains(cmd.ToString()[..^1]);
+      string response = await _queryExecutor.QueryAsync(cmd.ToString(), timeout: 1000);
+      var result = await ModuleRelayControlResponseProcessor.CheckPointReconnectionAsync(
+        response,
+        _moduleRelayControl,
+        nubmerPoint,
+        bus,
+        userMessageService);
       if (result)
       {
         if (bus == BusPoint.A)
@@ -372,3 +342,5 @@ namespace Ask.Device.Runtime.AskMkiM.Function.ModuleRelayControl
     }
   }
 }
+
+

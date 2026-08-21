@@ -1,12 +1,13 @@
-using System.IO.Ports;
+﻿using System.IO.Ports;
 using Ask.Core.Shared.DTO.Devices.Base;
 using Ask.Core.Shared.DTO.Devices.Breakdown;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Mode;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
-using Ask.Device.Runtime.Base.Connected;
 using Ask.Device.Runtime.Base.DeviceProtocol;
+using Ask.Device.Runtime.Base.Connected;
+using System.IO.Ports;
 using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.Device.Runtime.Device.Breakdowntester
@@ -28,6 +29,8 @@ namespace Ask.Device.Runtime.Device.Breakdowntester
       DcwMaxVoltage = 1000;
       IrMaxVoltage = 1000;
       IrMinVoltage = 50;
+      IrMaxResistanceMOhm = 60000;
+      SystemInsulationResistanceGOhm = 60;
       ConnectedProfile.CheckMode = "GPT";
 
       ApplyDefaultComPortSettings();
@@ -47,7 +50,7 @@ namespace Ask.Device.Runtime.Device.Breakdowntester
     public new string Name { get => "GPT79904"; }
 
     /// <inheritdoc />
-    public new string Description { get => "Реализовать описание в Ask.Device.Runtime.Device.GPT79904"; }
+    public new string Description { get => "Реализовать описание в Ask.Device.Runtime.Device.Breakdowntester.GPT79904"; }
 
     /// <inheritdoc />
     public override ComPortSettings DefaultComPortSettings { get; } = new()
@@ -86,6 +89,12 @@ namespace Ask.Device.Runtime.Device.Breakdowntester
 
     /// <inheritdoc />
     public int IrMinVoltage { get; set; }
+
+    /// <inheritdoc />
+    public int IrMaxResistanceMOhm { get; set; }
+
+    /// <inheritdoc />
+    public int SystemInsulationResistanceGOhm { get; set; }
 
     /// <inheritdoc />
     public ISelfTestCheckerBreakdownTester SelfTestManager { get; set; }
@@ -132,8 +141,10 @@ namespace Ask.Device.Runtime.Device.Breakdowntester
         AcwMaxVoltage = AcwMaxVoltage,
         DcwMaxVoltage = DcwMaxVoltage,
         SiMaxVoltage = IrMaxVoltage,
-        IRMinVoltage = IrMinVoltage
+        IRMinVoltage = IrMinVoltage,
+        SystemInsulationResistanceGOhm = SystemInsulationResistanceGOhm
       };
     }
   }
 }
+

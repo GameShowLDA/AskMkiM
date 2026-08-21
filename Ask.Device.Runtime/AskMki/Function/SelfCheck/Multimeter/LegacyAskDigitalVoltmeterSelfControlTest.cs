@@ -1,5 +1,6 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Config.LegacyMki;
+using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Runtime.Device.ASKMKI;
 using Ask.Engine.Tests.SelfControl.LegacyAskProtocol;
@@ -249,10 +250,8 @@ public sealed partial class LegacyAskDigitalVoltmeterSelfControlTest : LegacyAsk
     if (ExecutionConfig.GetIsIdleModeEnabled())
     {
       return await context.Multimeter.DcVoltageManager.MeasureDCVoltageAsync(
-        param: expected,
-        rangeFrom: expected,
-        rangeTo: expected,
-        userMessageService: context.MessageService);
+        new MeasurementRange(expected, expected, expected),
+        context.MessageService);
     }
 
     LogInformation($"[Тест цифрового вольтметра] {operation}: DC READ?, диапазон={range}, ожидается={expected}.", isDeviceLog: true);
@@ -331,10 +330,8 @@ public sealed partial class LegacyAskDigitalVoltmeterSelfControlTest : LegacyAsk
     if (ExecutionConfig.GetIsIdleModeEnabled())
     {
       return await context.Multimeter.ResistanceManager.MeasureResistanceAsync(
-        param: expected,
-        rangeFrom: expected,
-        rangeTo: expected,
-        userMessageService: context.MessageService);
+        new MeasurementRange(expected, expected, expected),
+        context.MessageService);
     }
 
     LogInformation($"[Тест цифрового вольтметра] {operation}: R READ?, диапазон={range}, ожидается={expected}.", isDeviceLog: true);
@@ -374,3 +371,4 @@ public sealed partial class LegacyAskDigitalVoltmeterSelfControlTest : LegacyAsk
   /// Проверяет ожидаемую перегрузку по сопротивлению без срыва всего теста на штатном ответе прибора.
   /// </summary>
 }
+

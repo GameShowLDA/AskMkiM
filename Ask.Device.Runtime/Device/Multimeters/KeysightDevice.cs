@@ -1,14 +1,15 @@
-using System.Net;
+﻿using System.Net;
 using Ask.Core.Shared.DTO.Devices.FastMeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities;
 using Ask.Core.Shared.Metadata.Commands.MultimeterCommands;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Communication.Ethernet.Tcp.Protocols;
-using Ask.Device.Runtime.Base.Connected;
 using Ask.Device.Runtime.Base.DeviceProtocol;
+using Ask.Device.Runtime.Base.Connected;
 using Ask.Device.Runtime.Base.Multimeter.Measurements;
 using Ask.Device.Runtime.Base.Multimeter.SelfCheck;
+using System.Net;
 
 namespace Ask.Device.Runtime.Device.Multimeters
 {
@@ -170,3 +171,4 @@ namespace Ask.Device.Runtime.Device.Multimeters
     }
   }
 }
+

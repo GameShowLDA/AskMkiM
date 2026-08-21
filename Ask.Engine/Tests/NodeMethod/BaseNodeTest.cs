@@ -1,6 +1,5 @@
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
-using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
@@ -89,7 +88,7 @@ namespace Ask.Engine.Tests.NodeMethod
 
       foreach (var module in relayModules)
       {
-        await protocolUI.ShowMessageAsync(new ShowMessageModel($"{module.Name}({module.Number})", message: $"Подключение к шинам A1B1", type: ShowMessageModel.MessageType.Info));
+        await ExecutionMessages.PublishModuleBusConnectionAsync(module.Name, module.Number, protocolUI);
         await module.BusManager.ConnectBusAsync(SwitchingBus.A1, userMessageService: protocolUI);
         await module.BusManager.ConnectBusAsync(SwitchingBus.B1, userMessageService: protocolUI);
 
@@ -119,7 +118,12 @@ namespace Ask.Engine.Tests.NodeMethod
 
         await module.PointManager.ConnectRelayGroupAsync(oppositeBus, startPoint, endPoint, protocolUI);
 
-        await protocolUI.ShowMessageAsync(new ShowMessageModel($"{module.NumberChassis}.{module.Number}.{startPoint} - {endPoint}", message: $"Подключение точек к шинам", type: ShowMessageModel.MessageType.Info));
+        await ExecutionMessages.PublishPointRangeConnectionAsync(
+          module.NumberChassis,
+          module.Number,
+          startPoint,
+          endPoint,
+          protocolUI);
         for (int i = startPoint; i <= endPoint; i++)
         {
           _pointsToProcess.Add(new PointModel { DeviceNumber = module.NumberChassis, ModuleNumber = module.Number, PointNumber = i });
@@ -185,12 +189,12 @@ namespace Ask.Engine.Tests.NodeMethod
     public abstract Task PerformMeasurement(IUserInteractionService protocolUI, DataModel dataModel);
 
     /// <summary>
-    /// Завершает тест, выполняя очистку и отключение оборудования.
+    /// Завершает выполнение проверки методом узла.
     /// </summary>
-    public virtual async Task FinalizeAsync(IUserInteractionService messageService)
-    {
-      await RelayModuleHelper.ResetDevices(Devices, messageService);
-    }
+    /// <param name="messageService">Сервис взаимодействия с пользователем.</param>
+    /// <returns>Задача, представляющая асинхронную операцию завершения.</returns>
+    public virtual Task FinalizeAsync(IUserInteractionService messageService) =>
+      Task.CompletedTask;
 
     /// <summary>
     /// Проверяет и подключает все необходимые устройства перед выполнением теста.
@@ -198,7 +202,7 @@ namespace Ask.Engine.Tests.NodeMethod
     /// <returns>Задача, представляющая операцию подключения.</returns>
     public virtual async Task<(bool Connect, string Message)> ConnectDevicesAsync(IUserInteractionService messageService)
     {
-      await messageService.ShowMessageAsync(new ShowMessageModel("Инициализация оборудования", type: ShowMessageModel.MessageType.Info));
+      await ExecutionMessages.PublishEquipmentInitializationStatusAsync(messageService);
 
       foreach (var device in Devices)
       {
@@ -210,10 +214,10 @@ namespace Ask.Engine.Tests.NodeMethod
             return (false, $"Не удалось подключить устройство {connectableDevice.Name}({connectableDevice.Number}) - {message} ");
           }
 
-          await connectableDevice.ConnectableManager.ResetAsync(messageService);
         }
       }
 
+      await RelayModuleHelper.ResetDevices(Devices, messageService);
       return (true, string.Empty);
     }
 
@@ -240,7 +244,7 @@ namespace Ask.Engine.Tests.NodeMethod
     {
       try
       {
-        CollectDevicesAsync(point1, point2);
+        await CollectDevicesAsync(point1, point2);
       }
       catch (Exception ex)
       {

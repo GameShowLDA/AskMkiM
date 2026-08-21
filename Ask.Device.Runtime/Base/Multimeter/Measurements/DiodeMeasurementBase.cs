@@ -1,4 +1,5 @@
-﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
+﻿using Ask.Core.Shared.DTO.Devices.Measurements;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Device.Runtime.Base.Multimeter.Measurements.Common;
@@ -24,7 +25,15 @@ namespace Ask.Device.Runtime.Base.Multimeter.Measurements
 
 
     /// <inheritdoc />
-    public async Task<double> CheckDiodeAsync(double param = 0, double rangeFrom = -1, double rangeTo = -1, IUserInteractionService? userMessageService = null)
-        => await MeasurementBase.MeasureAsync(_device, _device.DiodeCommands, param, rangeFrom, rangeTo, userMessageService);
+    public async Task<double> CheckDiodeAsync(
+      MeasurementRange measurementRange,
+      IUserInteractionService? userMessageService = null,
+      double responseDelay = 0)
+        => await MeasurementBase.MeasureAsync(
+          _device,
+          _device.DiodeCommands,
+          measurementRange,
+          userMessageService,
+          responseDelay: responseDelay);
   }
 }

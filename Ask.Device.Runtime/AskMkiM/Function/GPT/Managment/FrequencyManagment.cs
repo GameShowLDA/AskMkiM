@@ -60,14 +60,6 @@ namespace Ask.Device.Runtime.AskMkiM.Function.GPT.Managment
         return (true, string.Empty);
       }
 
-      if (ExecutionConfig.GetIsIdleModeEnabled())
-      {
-        _setFrequency(frequency);
-        LogInformation($"{nameof(SetFrequencyAsync)}: Устройство в Idle Mode. Пропускаем установку.", isDeviceLog: true);
-        _frequency = frequency;
-        return (true, string.Empty);
-      }
-
       try
       {
         await Task.Delay(_delay);
@@ -112,11 +104,6 @@ namespace Ask.Device.Runtime.AskMkiM.Function.GPT.Managment
     /// </summary>
     public async Task<int> GetFrequencyAsync()
     {
-      if (ExecutionConfig.GetIsIdleModeEnabled())
-      {
-        return _frequency;
-      }
-
       try
       {
         var query = $"{GetCommandSyntax(ManualCommand.MANU_ACW_FREQUENCY)} ?";

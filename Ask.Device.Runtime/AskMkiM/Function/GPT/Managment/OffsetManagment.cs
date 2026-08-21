@@ -70,7 +70,7 @@ namespace Ask.Device.Runtime.AskMkiM.Function.GPT.Managment
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        return _offset;
+        return IdleHardwareErrorSimulator.ShouldSimulateHardwareError() ? 0 : _offset;
       }
       return await OffsetHelper.GetOffsetAsync(_gptModel, _mode, _delay);
     }

@@ -1,10 +1,14 @@
-﻿using Ask.Core.Services.Config.AppSettings;
-using Ask.Core.Services.UI;
+﻿using Ask.Core.Services.UI;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Runtime.Base.DeviceProtocol;
 using Ask.Device.Runtime.Base.Helpers;
+using Ask.Protocol.Messages.EntryPoints;
+using Ask.Device.ResponseProcessor.ModuleRelayControl.ResponseProcessing;
+using Ask.Device.ResponseProcessor.DeviceBusCommutation.ResponseProcessing;
 
 namespace Ask.Device.Runtime.Base.Connected
 {
@@ -46,14 +50,23 @@ namespace Ask.Device.Runtime.Base.Connected
       var (connect, answer) = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
         var result = await _connectionTransport.ConnectAsync(userMessageService);
-
-        if (!result.Connect || DeviceDisplayConfig.GetExecutionParametersVisibility())
+        string? error = string.IsNullOrWhiteSpace(result.Answer) ? null : result.Answer;
+        if (_device is IRelaySwitchModule module)
         {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync((IAttachableDevice)_device, $"Подключение {_device.Name}", string.IsNullOrWhiteSpace(result.Answer) ? string.Empty : result.Answer, result.Connect, 1, userMessageService);
+          await ModuleRelayControlResponseProcessor.PublishConnectionResultAsync(
+            module, result.Connect, error, userMessageService);
         }
-
+        else if (_device is ISwitchingDevice switchingDevice)
+        {
+          await DeviceBusCommutationResponseProcessor.PublishConnectionResultAsync(
+            switchingDevice, result.Connect, error, userMessageService);
+        }
+        else
+        {
+          await EquipmentMessages.PublishConnectionResultAsync(_device, result.Connect, error, userMessageService);
+        }
         return result;
-      }, userMessageService);
+      }, userMessageService, deviceTask: true);
 
       return (connect, answer);
     }
@@ -64,14 +77,23 @@ namespace Ask.Device.Runtime.Base.Connected
       var connect = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
         var result = await _connectionTransport.DisconnectAsync(userMessageService);
-
-        if (!result || DeviceDisplayConfig.GetExecutionParametersVisibility())
+        if (_device is IRelaySwitchModule module)
         {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync((IAttachableDevice)_device, $"Отключение {_device.Name}", result ? "Соединение разорвано" : "Ошибка отключения", result, 1, userMessageService);
+          await ModuleRelayControlResponseProcessor.PublishDisconnectionResultAsync(
+            module, result, userMessageService);
         }
-
+        else if (_device is ISwitchingDevice switchingDevice)
+        {
+          await DeviceBusCommutationResponseProcessor.PublishDisconnectionResultAsync(
+            switchingDevice, result, userMessageService);
+        }
+        else
+        {
+          await EquipmentMessages.PublishDisconnectionResultAsync(
+            _device, result, outputService: userMessageService);
+        }
         return result;
-      }, userMessageService);
+      }, userMessageService, deviceTask: true);
 
       return connect;
     }
@@ -82,14 +104,25 @@ namespace Ask.Device.Runtime.Base.Connected
       var (connect, answer) = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
         var result = await _connectionTransport.InitializeAsync(userMessageService);
-
-        if (!result.Connect || DeviceDisplayConfig.GetExecutionParametersVisibility())
+        string? error = string.IsNullOrWhiteSpace(result.Answer) ? null : result.Answer;
+        if (_device is IRelaySwitchModule module)
         {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync((IAttachableDevice)_device, $"Инициализация {_device.Name}", string.IsNullOrWhiteSpace(result.Answer) ? string.Empty : result.Answer, result.Connect, 1, userMessageService);
+          await ModuleRelayControlResponseProcessor.PublishInitializationResultAsync(
+            module, result.Connect, error, userMessageService);
         }
-
+        else if (_device is ISwitchingDevice switchingDevice)
+        {
+          await DeviceBusCommutationResponseProcessor.PublishInitializationResultAsync(
+            switchingDevice, result.Connect, error, userMessageService);
+        }
+        else
+        {
+          await EquipmentMessages.PublishInitializationResultAsync(
+            _device, result.Connect, error, userMessageService);
+        }
         return result;
-      }, userMessageService);
+      }, userMessageService,
+      deviceTask: true);
 
       return (connect, answer);
     }
@@ -99,8 +132,26 @@ namespace Ask.Device.Runtime.Base.Connected
     {
       var connect = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
-        return await _connectionTransport.ResetAsync(userMessageService);
-      }, userMessageService);
+        var result = await _connectionTransport.ResetAsync(userMessageService);
+        if (_device is IRelaySwitchModule module)
+        {
+          await ModuleRelayControlResponseProcessor.PublishResetResultAsync(
+            module, result, userMessageService);
+        }
+        else if (_device is ISwitchingDevice switchingDevice)
+        {
+          await DeviceBusCommutationResponseProcessor.PublishResetResultAsync(
+            switchingDevice, result, userMessageService);
+        }
+        else
+        {
+          await EquipmentMessages.PublishResetResultAsync(
+            _device, result, outputService: userMessageService);
+        }
+
+        return result;
+      }, userMessageService, deviceTask: true);
+
       return connect;
     }
 
@@ -114,3 +165,5 @@ namespace Ask.Device.Runtime.Base.Connected
     };
   }
 }
+
+

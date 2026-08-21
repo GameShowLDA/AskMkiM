@@ -1,4 +1,5 @@
-﻿using Ask.Core.Shared.Interfaces.UiInterfaces;
+﻿using Ask.Core.Shared.DTO.Devices.Measurements;
+using Ask.Core.Shared.Interfaces.UiInterfaces;
 
 namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities
 {
@@ -24,7 +25,18 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities
     /// <summary>
     /// Выполняет измерение ёмкости.
     /// </summary>
-    /// <param name="param">Ожиданемео знчение.</param>
-    Task<double> MeasureCapacitanceAsync(double param = 0, double rangeFrom = -1, double rangeTo = -1, IUserInteractionService? userMessageService = null);
+    /// <param name="measurementRange">Заданное значение и допустимый диапазон измерения.</param>
+    /// <param name="userMessageService">Сервис взаимодействия с пользователем.</param>
+    /// <param name="measurementCount">Количество положительных результатов для усреднения.</param>
+    /// <param name="responseDelay">Задержка перед чтением ответа прибора, мс.</param>
+    /// <returns>Среднее значение положительных результатов измерений.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// Выбрасывается, если <paramref name="measurementCount"/> меньше единицы.
+    /// </exception>
+    Task<double> MeasureCapacitanceAsync(
+      MeasurementRange measurementRange,
+      IUserInteractionService? userMessageService = null,
+      int measurementCount = 5,
+      double responseDelay = 0);
   }
 }

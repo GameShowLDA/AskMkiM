@@ -92,73 +92,137 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <Border Grid.Row="0"
-                Height="40"
-                MaxHeight="40"
-                Margin="5"
-                Padding="6,4"
-                Name="ProtocolManager"
-                Visibility="Collapsed"
-                Background="{DynamicResource SettingsNestedGroupBackgroundSolidColorBrush}"
-                Style="{DynamicResource SettingCardStyle}">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
+        <Grid Grid.Row="0"
+              Height="40"
+              MaxHeight="40"
+              Margin="5"
+              Name="ProtocolManager"
+              Visibility="Collapsed">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition x:Name="ExecutionProtocolManagerColumn" Width="*"/>
+                <ColumnDefinition x:Name="ProtocolManagerSplitterColumn" Width="0"/>
+                <ColumnDefinition x:Name="InspectionProtocolManagerColumn" Width="0"/>
+            </Grid.ColumnDefinitions>
 
-                <Button x:Name="OpenFileButton"
-                Grid.Column="0"
-                VerticalAlignment="Center"
-                Click="OpenFileButton_Click"
-                ToolTip="Открыть файл в редакторе"
-                Style="{StaticResource ActionButtonStyle}">
-                    <Icons:EyeOpenedIcon Size="16"
+            <Border Grid.Column="0"
+                    Padding="6,4"
+                    Background="{DynamicResource SettingsNestedGroupBackgroundSolidColorBrush}"
+                    Style="{DynamicResource SettingCardStyle}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Button x:Name="OpenFileButton"
+                            Grid.Column="0"
+                            VerticalAlignment="Center"
+                            Click="OpenFileButton_Click"
+                            ToolTip="Открыть файл в редакторе"
+                            Style="{StaticResource ActionButtonStyle}">
+                        <Icons:EyeOpenedIcon Size="16"
+                                             Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" />
+                    </Button>
+
+                    <Button x:Name="OpenFolderButton"
+                            Grid.Column="1"
+                            Margin="8,0,0,0"
+                            VerticalAlignment="Center"
+                            Click="OpenFolderButton_Click"
+                            ToolTip="Показать файл в папке"
+                            Style="{StaticResource ActionButtonStyle}">
+                        <Icons:FolderOpenIcon Size="16"
+                                              Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" />
+                    </Button>
+
+                    <Button x:Name="PrintButton"
+                            Grid.Column="2"
+                            Margin="8,0,0,0"
+                            VerticalAlignment="Center"
+                            Click="PrintButton_Click"
+                            ToolTip="Печать файла"
+                            Style="{StaticResource ActionButtonStyle}">
+                        <Icons:PrintIcon Size="16"
+                                         IsPrinting="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=IsMouseOver}"
                                          Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" />
-                </Button>
+                    </Button>
 
-                <Button x:Name="OpenFolderButton"
-                Grid.Column="1"
-                Margin="8,0,0,0"
-                VerticalAlignment="Center"
-                Click="OpenFolderButton_Click"
-                ToolTip="Показать файл в папке"
-                Style="{StaticResource ActionButtonStyle}">
-                    <Icons:FolderOpenIcon Size="16"
-                                       Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" />
-                </Button>
+                    <TextBlock x:Name="FileName"
+                               Grid.Column="3"
+                               FontSize="16"
+                               Margin="12,0"
+                               FontFamily="{DynamicResource WinstonBold}"
+                               HorizontalAlignment="Left"
+                               VerticalAlignment="Center"
+                               TextWrapping="NoWrap"
+                               TextTrimming="CharacterEllipsis"
+                               Foreground="{DynamicResource ForegrounfBrushes}" />
+                </Grid>
+            </Border>
 
-                <Button x:Name="PrintButton"
-                Grid.Column="2"
-                Margin="8,0,0,0"
-                VerticalAlignment="Center"
-                Click="PrintButton_Click"
-                ToolTip="Печать файла"
-                Style="{StaticResource ActionButtonStyle}">
-                    <Icons:PrintIcon Size="16"
-                                  IsPrinting="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=IsMouseOver}"
-                                  Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" />
-                </Button>
+            <Border x:Name="InspectionProtocolManager"
+                    Grid.Column="2"
+                    Padding="6,4"
+                    Visibility="Collapsed"
+                    Background="{DynamicResource SettingsNestedGroupBackgroundSolidColorBrush}"
+                    Style="{DynamicResource SettingCardStyle}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
 
-                <TextBlock x:Name="FileName" 
-               Grid.Column = "3" 
-               Text="Some text"
-               FontSize="16"
-               Margin="12,0"
-               FontFamily="{DynamicResource WinstonBold}"
-               HorizontalAlignment="Left"
-               VerticalAlignment="Center"
-               TextWrapping="NoWrap"
-               TextTrimming="CharacterEllipsis"
-                           Foreground="{DynamicResource ForegrounfBrushes}"
-               />
-            </Grid>
-        </Border>
+                    <Button Grid.Column="0"
+                            VerticalAlignment="Center"
+                            Click="OpenInspectionFileButton_Click"
+                            ToolTip="Открыть протокол проверки в редакторе"
+                            Style="{StaticResource ActionButtonStyle}">
+                        <Icons:EyeOpenedIcon Size="16"
+                                             Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" />
+                    </Button>
+
+                    <Button Grid.Column="1"
+                            Margin="8,0,0,0"
+                            VerticalAlignment="Center"
+                            Click="OpenInspectionFolderButton_Click"
+                            ToolTip="Показать протокол проверки в папке"
+                            Style="{StaticResource ActionButtonStyle}">
+                        <Icons:FolderOpenIcon Size="16"
+                                              Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" />
+                    </Button>
+
+                    <Button Grid.Column="2"
+                            Margin="8,0,0,0"
+                            VerticalAlignment="Center"
+                            Click="PrintInspectionButton_Click"
+                            ToolTip="Печать протокола проверки"
+                            Style="{StaticResource ActionButtonStyle}">
+                        <Icons:PrintIcon Size="16"
+                                         IsPrinting="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=IsMouseOver}"
+                                         Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" />
+                    </Button>
+
+                    <TextBlock x:Name="InspectionFileName"
+                               Grid.Column="3"
+                               FontSize="16"
+                               Margin="12,0"
+                               FontFamily="{DynamicResource WinstonBold}"
+                               HorizontalAlignment="Left"
+                               VerticalAlignment="Center"
+                               TextWrapping="NoWrap"
+                               TextTrimming="CharacterEllipsis"
+                               Foreground="{DynamicResource ForegrounfBrushes}" />
+                </Grid>
+            </Border>
+        </Grid>
 
         <Grid Grid.Row="1" Background="{DynamicResource IsCheckedColorSolidColorBrush}" Name="TopMenuButton" MinHeight="40" Visibility="{Binding IsTopMenuVisible, Converter={StaticResource BoolToVis}}">
             <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
@@ -206,12 +270,21 @@
                 <Icons:StepIntoIcon Size="17" IsHitTestVisible="False"/>
             </Button>
 
+            <Button x:Name="CommandJumpButtonTop"
+                    Grid.Column="7"
+                    Style="{StaticResource TopMenuButtonStyle}"
+                    ToolTip="{Binding Source={StaticResource LS_Protocol_Tooltip_CommandJump}, Path=Value}"
+                    Click="CommandJumpButtonTop_Click"
+                    Visibility="{Binding ElementName=ContinueButtonTop, Path=Visibility}">
+                <Icons:FastForwardIcon Size="17" IsHitTestVisible="False"/>
+            </Button>
+
         </Grid>
 
         <Border  Name="ButtonPanels" CornerRadius="0,0,0,0" Grid.Row="2" Background="{DynamicResource TestsProtocolBackgroundBrush}">
             <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" MaxWidth="400"/>
+                    <ColumnDefinition x:Name="MenuButtonColumn" Width="Auto" MaxWidth="400"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
@@ -282,12 +355,6 @@
                                     Style="{DynamicResource ShadowButtonStyle}" 
                                     />
 
-                                    <Button x:Name="loopButton" 
-                                    Content="{Binding Source={StaticResource LS_Protocol_Btn_Loop}, Path=Value}" 
-                                    Margin="0,10,0,0" 
-                                    Style="{DynamicResource ShadowButtonStyle}" 
-                                    />
-
                                     <Button x:Name="PauseButton" 
                                     Content="{Binding Source={StaticResource LS_Protocol_Btn_Stop}, Path=Value}" 
                                     Margin="0,10,0,0"
@@ -344,7 +411,7 @@
                 <Grid Grid.Column="1" Margin="5">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition x:Name="ExecutionProtocolColumn" Width="*" MinWidth="100"/>
-                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition x:Name="InspectionProtocolSplitterColumn" Width="Auto"/>
                         <ColumnDefinition x:Name="InspectionProtocolColumn" Width="0" MinWidth="0"/>
                     </Grid.ColumnDefinitions>
 

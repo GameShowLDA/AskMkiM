@@ -1,5 +1,5 @@
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
-using Ask.Core.Shared.DTO.Protocol;
+using Ask.Core.Services.Devices;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
@@ -34,6 +34,11 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
     private static IMultimeter? ValidFastMeter { get; set; }
 
     /// <summary>
+    /// Устройства, использованные текущей программой контроля.
+    /// </summary>
+    private static readonly List<IDevice> UsedDevices = new();
+
+    /// <summary>
     /// Сохранённый список точек подключения, переданных при вызове <see cref="AnalyzePoints"/>.
     /// Используется для повторной проверки и валидации.
     /// </summary>
@@ -52,6 +57,8 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
       PointsMap = keyValuePairs;
       AnalyzedPoints = null;
       ValidRelayModules = new List<IRelaySwitchModule>();
+      ValidBreakdownTester = null;
+      ValidFastMeter = null;
 
       var validChassisNumbers = await CheckChassisManagersAsync(points, userMessageService);
       if (validChassisNumbers == null)
@@ -77,6 +84,8 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
       }
 
       ValidRelayModules = modules;
+      RegisterUsedDevices(modules);
+      RegisterUsedDevices([ValidSwitchingDevice]);
 
       await InitializeModulesAsync(modules, ValidSwitchingDevice, userMessageService);
       AnalyzedPoints = points;
@@ -98,9 +107,10 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
       {
         if (await ChassisManagers.GetByNumberAsync(chassisNumber) == null)
         {
-          await messageService.ShowMessageAsync(new ShowMessageModel($"Менеджер шасси {chassisNumber}",
-            message: "Устройство не найдено в конфигурации.", type: ShowMessageModel.MessageType.Error)
-          { IndentLevel = 1 }, skipPause: true);
+          await ValidationMessages.PublishEquipmentConfigurationErrorAsync(
+            $"Менеджер шасси {chassisNumber}",
+            "Устройство не найдено в конфигурации.",
+            messageService);
           error = true;
         }
         else
@@ -136,9 +146,10 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
 
         if (allModules == null || allModules.Count == 0)
         {
-          await messageService.ShowMessageAsync(new ShowMessageModel($"Модуль коммутации реле[{item.DeviceNumber}.{item.ModuleNumber}]",
-            message: "Устройство не найдено в конфигурации.", type: ShowMessageModel.MessageType.Error)
-          { IndentLevel = 1 }, skipPause: true);
+          await ValidationMessages.PublishEquipmentConfigurationErrorAsync(
+            $"Модуль коммутации реле[{item.DeviceNumber}.{item.ModuleNumber}]",
+            "Устройство не найдено в конфигурации.",
+            messageService);
           error = true;
           continue;
         }
@@ -146,9 +157,10 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
         var module = allModules.FirstOrDefault(m => m.Number == item.ModuleNumber);
         if (module == null)
         {
-          await messageService.ShowMessageAsync(new ShowMessageModel($"Модуль коммутации реле[{item.DeviceNumber}.{item.ModuleNumber}]",
-            message: "Модуль не найден в конфигурации.", type: ShowMessageModel.MessageType.Error)
-          { IndentLevel = 1 }, skipPause: true);
+          await ValidationMessages.PublishEquipmentConfigurationErrorAsync(
+            $"Модуль коммутации реле[{item.DeviceNumber}.{item.ModuleNumber}]",
+            "Модуль не найден в конфигурации.",
+            messageService);
           error = true;
           continue;
         }
@@ -158,9 +170,10 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
 
         if (invalidPoint != null)
         {
-          await messageService.ShowMessageAsync(new ShowMessageModel($"{module.Name}[{item.DeviceNumber}.{item.ModuleNumber}]",
-            message: $"Указана несуществующая точка: {invalidPoint.PointNumber} (максимум {module.PointCount}).", type: ShowMessageModel.MessageType.Error)
-          { IndentLevel = 1 }, skipPause: true);
+          await ValidationMessages.PublishEquipmentConfigurationErrorAsync(
+            $"{module.Name}[{item.DeviceNumber}.{item.ModuleNumber}]",
+            $"Указана несуществующая точка: {invalidPoint.PointNumber} (максимум {module.PointCount}).",
+            messageService);
           error = true;
           continue;
         }
@@ -194,9 +207,10 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
         }
       }
 
-      await messageService.ShowMessageAsync(new ShowMessageModel("Устройство коммутации",
-        message: "Не найдено ни одно устройство коммутации для переданных шасси.", type: ShowMessageModel.MessageType.Error)
-      { IndentLevel = 1 }, skipPause: true);
+      await ValidationMessages.PublishEquipmentConfigurationErrorAsync(
+        "Устройство коммутации",
+        "Не найдено ни одно устройство коммутации для переданных шасси.",
+        messageService);
 
       return false;
     }
@@ -212,11 +226,12 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
       foreach (var module in modules)
       {
         await module.ConnectableManager.InitializeAsync(messageService);
-        await module.ConnectableManager.ResetAsync(messageService);
       }
 
       await switchingDevice.ConnectableManager.InitializeAsync(messageService);
-      await switchingDevice.ConnectableManager.ResetAsync(messageService);
+      await DeviceResetService.ResetDevicesAsync(
+        modules.Cast<IDevice>().Append(switchingDevice),
+        messageService);
     }
 
     /// <summary>
@@ -248,29 +263,21 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
 
     public static List<IDevice> GetAllDevices()
     {
-      var devices = new List<IDevice>();
-      
-      if (ValidRelayModules != null)
-      { 
-        devices.AddRange(ValidRelayModules);
-      }
+      return UsedDevices.ToList();
+    }
 
-      if (ValidSwitchingDevice != null)
-      { 
-        devices.Add(ValidSwitchingDevice);
-      }
-
-      if (ValidBreakdownTester != null)
-      {
-        devices.Add(ValidBreakdownTester);
-      }
-
-      if (ValidFastMeter != null)
-      {
-        devices.Add(ValidFastMeter);
-      }
-
-      return devices;
+    /// <summary>
+    /// Очищает оборудование, зарегистрированное для предыдущей программы контроля.
+    /// </summary>
+    public static void ClearUsedDevices()
+    {
+      UsedDevices.Clear();
+      ValidRelayModules = null;
+      ValidSwitchingDevice = null;
+      ValidBreakdownTester = null;
+      ValidFastMeter = null;
+      AnalyzedPoints = null;
+      PointsMap = new Dictionary<string, string>();
     }
 
     /// <summary>
@@ -307,12 +314,15 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
     }
 
     /// <summary>
-    /// Возвращает устройство пробойной установки (<see cref="IBreakdownTester"/>), связанное с одним из задействованных МКР.
-    /// Если устройство ещё не найдено — выполняется попытка поиска по номеру шасси.
+    /// Возвращает пробойную установку для используемого шасси.
     /// </summary>
     /// <param name="messageService">Сервис отображения сообщений пользователю.</param>
-    /// <returns>Экземпляр <see cref="IBreakdownTester"/>.</returns>
-    /// <exception cref="Exception">Если устройство не найдено или <see cref="ValidRelayModules"/> ещё не проинициализировано.</exception>
+    /// <returns>
+    /// Задача, результат которой содержит экземпляр <see cref="IBreakdownTester"/>.
+    /// </returns>
+    /// <exception cref="Exception">
+    /// Выбрасывается, если модули релейной коммутации не инициализированы или пробойная установка не найдена.
+    /// </exception>
     public static async Task<IBreakdownTester> GetBreakdownTesterOrThrow(IUserInteractionService messageService = null)
     {
       if (ValidBreakdownTester != null)
@@ -328,32 +338,36 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
 
       foreach (var number in chassisNumbers)
       {
-        var tester = BreakdownTesters.GetDevicesByNumberChassisAsync(number).GetAwaiter().GetResult().FirstOrDefault();
+        var tester = (await BreakdownTesters.GetDevicesByNumberChassisAsync(number)).FirstOrDefault();
         if (tester != null)
         {
           ValidBreakdownTester = tester;
+          RegisterUsedDevices([tester]);
           return tester;
         }
       }
       if (messageService != null)
       {
-        messageService.ShowMessageAsync(new ShowMessageModel("Пробойная установка",
-          message: "Не найдено устройство пробойной установки (BreakdownTester) для используемых шасси.",
-          type: ShowMessageModel.MessageType.Error)
-        { IndentLevel = 1 }, skipPause: true).Wait();
+        await ValidationMessages.PublishEquipmentConfigurationErrorAsync(
+          "Пробойная установка",
+          "Не найдено устройство пробойной установки (BreakdownTester) для используемых шасси.",
+          messageService);
       }
 
       throw new Exception("Ошибка конфигурации: не найдено устройство пробойной установки.");
     }
 
     /// <summary>
-    /// Возвращает устройство быстрого измерителя (<see cref="IMultimeter"/>), связанное с одним из задействованных МКР.
-    /// Если устройство ещё не найдено — выполняется попытка поиска по номеру шасси.
+    /// Возвращает быстрый измеритель для используемого шасси.
     /// </summary>
     /// <param name="messageService">Сервис отображения сообщений пользователю.</param>
-    /// <returns>Экземпляр <see cref="IMultimeter"/>.</returns>
-    /// <exception cref="Exception">Если устройство не найдено или <see cref="ValidRelayModules"/> ещё не проинициализировано.</exception>
-    public static IMultimeter GetFastMeterOrThrow(IUserInteractionService messageService)
+    /// <returns>
+    /// Задача, результат которой содержит экземпляр <see cref="IMultimeter"/>.
+    /// </returns>
+    /// <exception cref="Exception">
+    /// Выбрасывается, если модули релейной коммутации не инициализированы или быстрый измеритель не найден.
+    /// </exception>
+    public static async Task<IMultimeter> GetFastMeterOrThrow(IUserInteractionService messageService)
     {
       if (ValidFastMeter != null)
         return ValidFastMeter;
@@ -368,20 +382,40 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
 
       foreach (var number in chassisNumbers)
       {
-        var meter = FastMeters.GetDevicesByNumberChassisAsync(number).GetAwaiter().GetResult().FirstOrDefault();
+        var meter = (await FastMeters.GetDevicesByNumberChassisAsync(number)).FirstOrDefault();
         if (meter != null)
         {
           ValidFastMeter = meter;
+          RegisterUsedDevices([meter]);
           return meter;
         }
       }
 
-      messageService.ShowMessageAsync(new ShowMessageModel("Быстрый измеритель",
-        message: "Не найдено устройство быстрого измерителя (FastMeter) для используемых шасси.",
-        type: ShowMessageModel.MessageType.Error)
-      { IndentLevel = 1 }, skipPause: true).Wait();
+      await ValidationMessages.PublishEquipmentConfigurationErrorAsync(
+        "Быстрый измеритель",
+        "Не найдено устройство быстрого измерителя (FastMeter) для используемых шасси.",
+        messageService);
 
       throw new Exception("Ошибка конфигурации: не найдено устройство быстрого измерителя.");
+    }
+
+    private static void RegisterUsedDevices(IEnumerable<IDevice?> devices)
+    {
+      foreach (var device in devices.Where(static device => device != null).Cast<IDevice>())
+      {
+        bool alreadyRegistered = UsedDevices.Any(used =>
+          used.DeviceType == device.DeviceType
+          && used.Number == device.Number
+          && used.ConnectionDetails == device.ConnectionDetails
+          && (used is not IAttachableDevice usedAttachable
+              || device is not IAttachableDevice deviceAttachable
+              || usedAttachable.NumberChassis == deviceAttachable.NumberChassis));
+
+        if (!alreadyRegistered)
+        {
+          UsedDevices.Add(device);
+        }
+      }
     }
 
     /// <summary>
@@ -407,11 +441,10 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
 
         if (!pointExists)
         {
-          await messageService.ShowMessageAsync(new ShowMessageModel(
+          await ValidationMessages.PublishEquipmentConfigurationErrorAsync(
             $"Системная ошибка при трансляции: [{point.DeviceNumber}.{point.ModuleNumber}.{point.PointNumber}]",
-            message: "Точка такая-то не существует.",
-            type: ShowMessageModel.MessageType.Error)
-          { IndentLevel = 1 }, skipPause: true);
+            "Точка такая-то не существует.",
+            messageService);
 
           throw new Exception($"Системная ошибка при трансляции: [{point.DeviceNumber}.{point.ModuleNumber}.{point.PointNumber}]");
         }

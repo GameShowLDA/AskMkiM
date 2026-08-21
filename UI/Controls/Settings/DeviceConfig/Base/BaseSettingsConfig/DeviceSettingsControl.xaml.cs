@@ -1,10 +1,11 @@
-using System.Management;
+﻿using System.Management;
 using System.Net;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using Ask.Core.Shared.DTO.Devices.Base;
+using Ask.Core.Shared.DTO.Devices.Breakdown;
 using Ask.Core.Shared.DTO.Devices.FastMeter;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
@@ -33,6 +34,7 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
     {
       InitializeComponent();
       VisibilityElements();
+      InitializeValidationTracking();
     }
 
     /// <summary>
@@ -230,6 +232,12 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
         SetPpuDividerCoefficientPercent(
           fastMeterDevice.AcwPpuDividerCoefficientPercent,
           fastMeterDevice.DcwPpuDividerCoefficientPercent);
+      }
+
+
+      if (device is BreakdownTesterDto breakdownTesterDevice)
+      {
+        SetSystemInsulationResistanceGOhm(breakdownTesterDevice.SystemInsulationResistanceGOhm);
       }
 
       ApplyConnectionDetails(device.ConnectionDetails);
@@ -506,3 +514,4 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
     private sealed record UsbDeviceMatch(string PortDisplay, string DeviceId, string PnpDeviceId, string Vid, string Pid);
   }
 }
+

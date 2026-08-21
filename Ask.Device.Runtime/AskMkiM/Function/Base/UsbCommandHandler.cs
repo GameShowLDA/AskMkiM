@@ -1,4 +1,4 @@
-using System.Text;
+﻿using System.Text;
 using System.Text.Json;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.UninterruptiblePowerSupply;
@@ -786,3 +786,4 @@ namespace Ask.Device.Runtime.AskMkiM.Function.Base
     }
   }
 }
+

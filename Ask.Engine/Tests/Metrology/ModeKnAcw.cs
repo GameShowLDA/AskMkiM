@@ -1,10 +1,12 @@
-﻿using Ask.Core.Services.UI;
+using Ask.Core.Services.UI;
+using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
+using Ask.Core.Shared.Metadata.Enums.UnitEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Static;
 using Ask.Core.Shared.Metadata.Static.Messages;
@@ -46,7 +48,6 @@ namespace Ask.Engine.Tests.Metrology
       ActionSettings settings = new ActionSettings()
       {
         StartDelegate = ExecuteMeasurementProcess,
-        IsRepeatEnabled = true,
         CheckType = CheckType.Metrology,
         StopDelegate = async (CancellationToken token) =>
         {
@@ -64,7 +65,7 @@ namespace Ask.Engine.Tests.Metrology
     /// <returns></returns>
     private async Task ExecuteMeasurementProcess(IUserInteractionService _messageService, IInputFieldProvider inputFieldProvider, IInputHighlightService inputHighlightService, CancellationToken cancellationToken)
     {
-      var data = await EnsureValidMetrologyInputAsync(inputFieldProvider, _userInteractionService);
+      var data = await EnsureValidMetrologyInputAsync(inputFieldProvider, _userInteractionService, metrologyMode: metrologicalModeRole);
 
       await testMeasurement.ConnectToEquipment(data.FirstPoint, data.SecondPoint, metrologicalModeRole, _userInteractionService);
       await testMeasurement.SetupCommutation(_userInteractionService, data.FirstPoint, data.SecondPoint, metrologicalModeRole);
@@ -102,9 +103,9 @@ namespace Ask.Engine.Tests.Metrology
 
         var resultReferenceMeterMeasured = await MeasuredReferenceMeter(protocolUI, param);
         (LowerBound, UpperBound, var delta) = MeasurementErrorDefaults.CalculateToleranceRange(MeasurementTypeCommand.KN_ACW, resultReferenceMeterMeasured);
-        var resultFastMeterMeasured = await MeasuredFastMeter(fastMeter, protocolUI, param, LowerBound, UpperBound);
 
-        await protocolUI.ShowMessageAsync(new ShowMessageModel(header: "Результат проверки"));
+        MeasurementRange measurementRangeAc = new MeasurementRange(param, LowerBound, UpperBound);
+        var resultFastMeterMeasured = await MeasuredFastMeter(fastMeter, protocolUI, measurementRangeAc);
 
         var result = resultFastMeterMeasured >= LowerBound && resultFastMeterMeasured <= UpperBound;
 
@@ -116,10 +117,16 @@ namespace Ask.Engine.Tests.Metrology
           AddMetrologyError(protocolUI, metrologicalModeRole, resultFastMeterMeasured, LowerBound, UpperBound, "В");
         }
 
-        await protocolUI.ShowMessageAsync(new ShowMessageModel($"Значение эталоного напряжения ", null, MeasurementValueFormatter.FormatWithUnit(resultReferenceMeterMeasured, "В")) { IndentLevel = 1 });
-        await protocolUI.ShowMessageAsync(new ShowMessageModel("Результат измерения напряжение", message: MeasurementValueFormatter.FormatWithUnit(resultFastMeterMeasured, "В"), type: result ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error) { IndentLevel = 1 }, skipPause: true);
-        await protocolUI.ShowMessageAsync(new ShowMessageModel("Диапазон допускаемых значений", message: $"от {MeasurementValueFormatter.Format(LowerBound)} до {MeasurementValueFormatter.Format(UpperBound)} В") { IndentLevel = 2 }, skipPause: true);
-        await protocolUI.ShowMessageAsync(new ShowMessageModel("Погрешность измерения", message: MeasurementValueFormatter.FormatWithUnit(err, "В"), type: result ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error) { IndentLevel = 2 }, skipPause: true);
+        await MeasurementMessages.PublishReferenceValueAsync(CheckType.Metrology,
+          VoltageUnit.Volt,
+          resultReferenceMeterMeasured,
+          protocolUI);
+        await MeasurementMessages.PublishResultAsync(CheckType.Metrology, MeasurementTypeCommand.KN_ACW, new MeasurementRange(resultFastMeterMeasured, LowerBound, UpperBound), result, chains: MeasurementPointsDisplay, outputService: protocolUI);
+        await PublishMetrologyMeasurementErrorAsync(
+          VoltageUnit.Volt,
+          new MeasurementRange(err, LowerBound, UpperBound),
+          result,
+          protocolUI);
 
         return true;
       }
@@ -131,9 +138,9 @@ namespace Ask.Engine.Tests.Metrology
         Measurements.Clear();
       }
 
-      private async Task<double> MeasuredFastMeter(IMultimeter fastMeter, IUserInteractionService userMessageService, double param, double rangeFrom, double rangeTo)
+      private async Task<double> MeasuredFastMeter(IMultimeter fastMeter, IUserInteractionService userMessageService, MeasurementRange measurementRange)
       {
-        var result = await fastMeter.AcVoltageManager.MeasureACVoltageAsync(param, rangeFrom, rangeTo);
+        var result = await fastMeter.AcVoltageManager.MeasureACVoltageAsync(measurementRange, userMessageService);
         return result;
       }
 

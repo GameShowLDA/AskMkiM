@@ -22,11 +22,7 @@ namespace MainWindowProgram.Engine
           continue;
         }
 
-        if (IsSwitch(raw, "debug"))
-        {
-          AdminConfig.SetDebugRights(true).ConfigureAwait(false);
-        }
-        else if (SupportedFileExtensions.TryResolveSupportedExistingFile(raw, out var filePath))
+        if (SupportedFileExtensions.TryResolveSupportedExistingFile(raw, out var filePath))
         {
           if (seenPaths.Add(filePath))
           {

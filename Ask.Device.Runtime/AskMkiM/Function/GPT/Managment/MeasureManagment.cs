@@ -1,11 +1,13 @@
+﻿using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
-using static Ask.LogLib.LoggerUtility;
-using static Ask.Device.Runtime.AskMkiM.Function.GPT.Command.FunctionCommandManager;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.Device.Runtime.Device.Breakdowntester;
 using Ask.Device.Runtime.AskMkiM.Function.GPT.Command;
 using Ask.Device.Runtime.AskMkiM.Function.GPT.Helper;
 using Ask.Device.Runtime.Base.Helpers;
-using Ask.Device.Runtime.Device.Breakdowntester;
+using static Ask.Device.Runtime.AskMkiM.Function.GPT.Command.FunctionCommandManager;
+using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.Device.Runtime.AskMkiM.Function.GPT.Managment
 {
@@ -44,12 +46,12 @@ namespace Ask.Device.Runtime.AskMkiM.Function.GPT.Managment
     }
 
     /// <inheritdoc />
-    public async Task<(double value, string unit)> MeasureAsync(double param = 0, double rangeFrom = -1, double rangeTo = -1, bool waitFullTime = false, IUserInteractionService? userMessageService = null)
+    public async Task<(double value, string unit)> MeasureAsync(ElectricalTestFunction electricalTestFunction, MeasurementRange measurementRange, bool waitFullTime = false, IUserInteractionService? userMessageService = null)
     {
       var time = await _getTestTime();
       var timeRamp = await _getRampTime();
 
-      if (_gptModel.Mode != Core.Shared.Metadata.Enums.DeviceEnums.BreakdownTypeMode.IR)
+      if (_gptModel.Mode != BreakdownTypeMode.IR)
       {
         waitFullTime = true;
       }
@@ -59,13 +61,21 @@ namespace Ask.Device.Runtime.AskMkiM.Function.GPT.Managment
         time,
         timeRamp,
         _delayBeforeCall,
-        param,
-        rangeFrom,
-        rangeTo,
+        electricalTestFunction,
+        measurementRange,
         waitFullTime,
         userMessageService);
 
-      return (MeasurementAdapterHelper.Round(measurement.value), measurement.unit);
+      var result = measurement;
+
+      if (_gptModel.Mode == BreakdownTypeMode.IR)
+      {
+        var resistanceMOm = _gptModel.SystemInsulationResistanceGOhm * 1000;
+        result.Item1 = measurement.value * resistanceMOm / (resistanceMOm - measurement.value);
+      }
+
+      result = (MeasurementAdapterHelper.Round(result.value), result.unit);
+      return result;
     }
 
     /// <inheritdoc />
@@ -98,3 +108,4 @@ namespace Ask.Device.Runtime.AskMkiM.Function.GPT.Managment
     }
   }
 }
+

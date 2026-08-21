@@ -1,4 +1,5 @@
 using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Errors.Device;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Capabilities;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.UninterruptiblePowerSupply;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
@@ -27,6 +28,7 @@ namespace Ask.Device.Runtime.AskMkiM.Function.MikUps1101rRm
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
+        ThrowIfHardwareErrorSimulated();
         return;
       }
 
@@ -39,6 +41,7 @@ namespace Ask.Device.Runtime.AskMkiM.Function.MikUps1101rRm
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
+        ThrowIfHardwareErrorSimulated();
         return;
       }
 
@@ -51,11 +54,25 @@ namespace Ask.Device.Runtime.AskMkiM.Function.MikUps1101rRm
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        return true;
+        return !IdleHardwareErrorSimulator.ShouldSimulateHardwareError();
       }
 
       string result = await _device.DeviceProtocol.QueryAsync(VerifyPowerCommand, timeout: 1_000);
       return ReadVerifyState(result);
+    }
+
+    /// <summary>
+    /// Выбрасывает ошибку оборудования для имитированной неудачной попытки.
+    /// </summary>
+    /// <exception cref="DeviceException">
+    /// Выбрасывается, если для текущего вызова выбрана аппаратная ошибка.
+    /// </exception>
+    private static void ThrowIfHardwareErrorSimulated()
+    {
+      if (IdleHardwareErrorSimulator.ShouldSimulateHardwareError())
+      {
+        throw new DeviceException(IdleHardwareErrorSimulator.ErrorMessage);
+      }
     }
 
     private static void EnsureCommandSucceeded(string payload, string operationName)

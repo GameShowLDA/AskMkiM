@@ -1,9 +1,6 @@
-﻿using Ask.Core.Contracts.Debugging;
 using Ask.Core.Services.App;
-using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.DTO.Executor;
-using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.HotkeysEnums;
@@ -28,11 +25,15 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
     {
       if (!command.HasBreakpoint)
         return command;
-	
+
       if (!command.IsBreakpointEnabled)
         return command;
 
-      await ShowBreakpointCommandHeaderAsync(command, userInteractionService).ConfigureAwait(false);
+      await CommandMessages.PublishBreakpointHitAsync(
+        userInteractionService,
+        command.CommandNumber,
+        command.Mnemonic,
+        command.CommandBody).ConfigureAwait(false);
       StepControlManager.EnableStepModeByBreakpoint(command, true);
       var cancellationToken = userInteractionService.GetCancellationToken();
       var shouldOpenDrawer = await WaitForBreakpointActionAsync(command, cancellationToken).ConfigureAwait(false);
@@ -41,31 +42,15 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
         return command;
       }
 
-      var selected = await OpenDrawerAndWaitSelectionAsync(command, commands, cancellationToken).ConfigureAwait(false);
+      var selected = await CommandJumpService.SelectAsync(command, commands, cancellationToken).ConfigureAwait(false);
+      if (selected == null)
+      {
+        return command;
+      }
 
-      // Drawer closed via F4 without selection: stay on current command and continue in normal flow.
-      return selected ?? command;
-    }
-
-    private static Task ShowBreakpointCommandHeaderAsync(BaseCommandModel command, IUserInteractionService userInteractionService)
-    {
-      var commandName = $"{command.CommandNumber} {command.Mnemonic}".Trim();
-      var commandBody = string.IsNullOrWhiteSpace(command.CommandBody) ? "<пусто>" : command.CommandBody;
-
-      var header = new ShowMessageModel(
-        header: $"\r\nСработала точка останова на команде {commandName}",
-        headerColor: ShowMessageModel.SuccessMessage.TitleColor,
-        message: $"{commandBody}",
-        type: ShowMessageModel.MessageType.Command)
-        {
-          IndentLevel = 1
-        };
-
-      return userInteractionService.ShowMessageAsync(
-        header,
-        IsBlockStart: true,
-        SkipStepModeCheck: true,
-        skipPause: true);
+      await CommandJumpService.PrepareAsync(selected, userInteractionService).ConfigureAwait(false);
+      StepControlManager.EnableStepMode(true);
+      return selected;
     }
 
     private static async Task<bool> WaitForBreakpointActionAsync(BaseCommandModel command, CancellationToken cancellationToken)
@@ -122,45 +107,6 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
       {
         EventAggregator.Unsubscribe(onF4Pressed);
         EventAggregator.Unsubscribe(onControlPressed);
-      }
-    }
-
-    private static async Task<BaseCommandModel?> OpenDrawerAndWaitSelectionAsync(
-      BaseCommandModel breakpointCommand,
-      IReadOnlyList<BaseCommandModel> commands,
-      CancellationToken cancellationToken)
-    {
-      var requestId = Guid.NewGuid();
-      var tcs = new TaskCompletionSource<BaseCommandModel?>(TaskCreationOptions.RunContinuationsAsynchronously);
-
-      Action<CommandDrawerResult>? onResult = null;
-      onResult = e =>
-      {
-        if (e.RequestId != requestId)
-        {
-          return;
-        }
-
-        tcs.TrySetResult(e.SelectedCommand);
-      };
-
-      EventAggregator.Subscribe(onResult);
-
-      try
-      {
-        CommandDrawerEventAdapter.RaiseOpenRequest(requestId, commands, breakpointCommand);
-        using (cancellationToken.Register(() => tcs.TrySetCanceled(cancellationToken)))
-        {
-          return await tcs.Task.ConfigureAwait(false);
-        }
-      }
-      catch (TaskCanceledException)
-      {
-        return null;
-      }
-      finally
-      {
-        EventAggregator.Unsubscribe(onResult);
       }
     }
 

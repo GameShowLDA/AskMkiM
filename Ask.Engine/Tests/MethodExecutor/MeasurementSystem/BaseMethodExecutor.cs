@@ -43,7 +43,7 @@ namespace Ask.Engine.Tests.MethodExecutor.MeasurementSystem
     /// Настраивает измерительное устройство (мультиметр или ППУ).
     /// </summary>
     /// <param name="dataModel">Модель данных, содержащая параметры измерений.</param>
-    public abstract Task ConfigureMeter(IUserInteractionService messageService, DataModel dataModel = null);
+    public abstract Task ConfigureMeter(IUserInteractionService messageService, DataModel? dataModel = null);
 
     /// <summary>
     /// Выполняет измерение.
@@ -63,7 +63,7 @@ namespace Ask.Engine.Tests.MethodExecutor.MeasurementSystem
     {
       try
       {
-        _deviceCollector.CollectAsync(point1, point2);
+        await _deviceCollector.CollectAsync(point1, point2);
         _commutationManager = new CommutationManager(_deviceCollector.Devices);
         _binaryPointMapper = new BinaryPointMapper(_deviceCollector.Devices.OfType<IRelaySwitchModule>());
         _pointGroupingService = new PointGroupingService(_deviceCollector.Devices.OfType<IRelaySwitchModule>());
@@ -120,18 +120,18 @@ namespace Ask.Engine.Tests.MethodExecutor.MeasurementSystem
           OppositeBus,
           HighestBitCount,
           protocolUI,
-          async (ui, model) => await PerformMeasurement(ui, model));
+          PerformMeasurement);
 
       await _runner.RunAsync(dataModel, grouped, _pointGroupingService, protocolUI.GetCancellationToken());
     }
 
     /// <summary>
-    /// Выполняет общий сброс оборудования.
+    /// Завершает выполнение группового метода.
     /// </summary>
-    public virtual async Task FinalizeAsync(IUserInteractionService messageService)
-    {
-      await RelayModuleHelper.ResetDevices(Devices, messageService);
-    }
+    /// <param name="messageService">Сервис взаимодействия с пользователем.</param>
+    /// <returns>Задача, представляющая асинхронную операцию завершения.</returns>
+    public virtual Task FinalizeAsync(IUserInteractionService messageService) =>
+      Task.CompletedTask;
 
     /// <summary>
     /// Возвращает строку, где заданный разряд равен 1, остальные — 0.

@@ -41,6 +41,12 @@ namespace Ask.Device.Runtime.AskMkiM.Function.MikUps1101rRm
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
+        if (IdleHardwareErrorSimulator.ShouldSimulateHardwareError())
+        {
+          _connected = false;
+          return (false, IdleHardwareErrorSimulator.ErrorMessage);
+        }
+
         _connected = true;
         return (true, "Idle mode enabled");
       }
@@ -69,6 +75,11 @@ namespace Ask.Device.Runtime.AskMkiM.Function.MikUps1101rRm
     /// <inheritdoc />
     public Task<bool> DisconnectAsync(IUserInteractionService messageService = null)
     {
+      if (IdleHardwareErrorSimulator.ShouldSimulateHardwareError())
+      {
+        return Task.FromResult(false);
+      }
+
       _connected = false;
       _viewPowerPortName = string.Empty;
       _workMode = string.Empty;
@@ -78,6 +89,11 @@ namespace Ask.Device.Runtime.AskMkiM.Function.MikUps1101rRm
     /// <inheritdoc />
     public Task<bool> ResetAsync(IUserInteractionService messageService = null)
     {
+      if (IdleHardwareErrorSimulator.ShouldSimulateHardwareError())
+      {
+        return Task.FromResult(false);
+      }
+
       _connected = false;
       _viewPowerPortName = string.Empty;
       _workMode = string.Empty;

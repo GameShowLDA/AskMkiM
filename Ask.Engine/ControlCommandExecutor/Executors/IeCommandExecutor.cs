@@ -1,16 +1,12 @@
-using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Services.UI;
-using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
+using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
-using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
-using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Static.Messages;
-using Ask.Engine.ControlCommandAnalyser.Model;
-using Ask.Engine.ControlCommandAnalyser.Model.Chains;
 using Ask.Engine.ControlCommandAnalyser.Model.Ie;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies.Data;
@@ -28,13 +24,11 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
     {
       var command = GetRequiredCommand<IeCommandModel>(context);
       var nameCommand = $"{command.CommandNumber} {command.Mnemonic}";
-      var message = BuildSourceLinesMessage(command);
-      List<ShowMessageModel> errorMessage = new();
-      List<ShowMessageModel> infoMessage = new();
+      var message = CommandMessages.FormatSourceLines(command.SourceLines);
 
       SetActiveLine(context, command);
 
-      await context.Console.ShowMessageAsync(ExecutorMessageBuilder.BuildCommandExecutionMessage(nameCommand, message), IsBlockStart: true);
+      await CommandMessages.PublishCommandExecutionAsync(context.Console, nameCommand, message);
       await DeviceManager.ShowDevicesPreparationMessageIfNeededAsync(context);
 
       var points = DeviceManager.RelayModule.PointManager.CollectPoints(command);
@@ -46,7 +40,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       var dbc = EquipmentService.GetSwitchingDevice();
       await DeviceManager.SwitchModuleManager.DeviceConnectionManager.ConnectMultimeter(dbc, context.Console);
 
-      var meter = EquipmentService.GetFastMeterOrThrow(context.Console);
+      var meter = await EquipmentService.GetFastMeterOrThrow(context.Console);
       await SettingFastMeter(meter, context.Console);
 
       if (command.LowerLimitCapacity.HasValue)
@@ -80,17 +74,8 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       }
 
       var messageResult = await ConnectedPointChecker.CheckSequenceAsync(pointContext);
-      errorMessage.AddRange(messageResult.errorMessage);
-      infoMessage.AddRange(messageResult.infoMessage);
 
-      if (errorMessage.Count > 0)
-      {
-        protocolModel.AddErrors(nameCommand, errorMessage);
-      }
-      if (infoMessage.Count > 0)
-      {
-        protocolModel.AddInfo(nameCommand, infoMessage);
-      }
+      protocolModel.AddResult(nameCommand, messageResult);
     }
 
     /// <summary>
@@ -100,25 +85,22 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
     /// <returns>Задача, представляющая измерение.</returns>
     private async Task<(bool, double)> ResistanceMeasure(double value, IUserInteractionService messageService, CancellationToken cancellationToken, double errorResistance = 0)
     {
-      var meter = EquipmentService.GetFastMeterOrThrow(messageService);
+      var meter = await EquipmentService.GetFastMeterOrThrow(messageService);
       double answer = 0;
 
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
+        MeasurementRange measurementRange = new MeasurementRange(value, firstValue, secondValue);
+        answer = await meter.CapacitanceManager.MeasureCapacitanceAsync(measurementRange, userMessageService: messageService) - fixtureCapacitance;
 
-        List<double> measuremend = new List<double>();
-
-        for (int i = 0; i < 5; i++)
-        {
-          answer = await meter.CapacitanceManager.MeasureCapacitanceAsync(value, firstValue, secondValue, userMessageService: messageService) - fixtureCapacitance;
-          if (answer > 0)
-          {
-            measuremend.Add(answer);
-          }
-        }
-        answer = measuremend.Average();
-
-        return await MessageManager.ShowMeasurementResultAsync(messageService, MeasurementTypeCommand.IE, firstValue, secondValue, answer);
+        measurementRange.TargetValue = answer;
+        var result = MeasurementResultEvaluator.Evaluate(measurementRange);
+        await MeasurementMessages.PublishResultAsync(CheckType.ControlProgram,
+          MeasurementTypeCommand.IE,
+          new MeasurementRange(result.Value, measurementRange.LowerBound, measurementRange.UpperBound),
+          result.IsSuccessful,
+          outputService: messageService);
+        return result;
       }, messageService);
 
       return result;

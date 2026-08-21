@@ -1,5 +1,8 @@
-﻿using Ask.Core.Services.Errors.Device;
+using Ask.Core.Shared.Metadata.Enums.FileEnums;
+using Ask.Core.Services.Devices;
+using Ask.Core.Services.Errors.Device;
 using Ask.Core.Services.Errors.Device.Adapters;
+using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
@@ -137,7 +140,7 @@ namespace Ask.Engine.Tests.Base
 
     /// <summary>
     /// Возвращает мультиметр (FastMeter), привязанный к указанному шасси.
-    /// Используется для точного измерения электрического сопротивления.
+    /// Используется для проверки контактного сопротивления RKOMM в режиме прозвонки.
     /// </summary>
     /// <param name="numberChassis">Номер шасси, в котором требуется найти мультиметр.</param>
     /// <returns>Экземпляр <see cref="IMultimeter"/>.</returns>
@@ -200,14 +203,14 @@ namespace Ask.Engine.Tests.Base
     }
 
     /// <summary>
-    /// Переводит мультиметр в режим измерения электрического сопротивления.
-    /// Должен быть вызван перед выполнением любых измерений.
+    /// Переводит мультиметр в режим прозвонки.
+    /// Должен быть вызван перед проверкой контактного сопротивления RKOMM.
     /// </summary>
     /// <param name="meter">Экземпляр мультиметра.</param>
     /// <param name="ui">Сервис взаимодействия с пользователем (протокол).</param>
     /// <param name="token">Токен отмены операции.</param>
     /// <exception cref="DeviceException">
-    /// Генерируется, если не удалось установить режим измерения сопротивления.
+    /// Генерируется, если не удалось установить режим прозвонки.
     /// </exception>
     public static async Task EnsureResistanceModeAsync(
       IMultimeter meter,
@@ -220,34 +223,40 @@ namespace Ask.Engine.Tests.Base
     }
 
     /// <summary>
-    /// Выполняет измерение электрического сопротивления с использованием мультиметра.
+    /// Выполняет проверку контактного сопротивления в режиме прозвонки.
     /// Возвращает измеренное значение в Омах.
     /// </summary>
     /// <param name="meter">Экземпляр мультиметра.</param>
     /// <param name="ui">Сервис взаимодействия с пользователем (протокол).</param>
     /// <param name="token">Токен отмены операции.</param>
-    /// <param name="param">
-    /// Ожидаемое значение сопротивления (может быть 0, если эталон отсутствует).
-    /// </param>
-    /// <param name="lower">Нижняя граница допустимого диапазона.</param>
-    /// <param name="upper">Верхняя граница допустимого диапазона.</param>
-    /// <returns>Измеренное значение сопротивления (Ом).</returns>
+    /// <param name="measurementRange">Заданное значение и допустимые границы сопротивления.</param>
+    /// <returns>
+    /// Признак соответствия сопротивления допустимому диапазону и измеренное значение в омах.
+    /// </returns>
     /// <exception cref="DeviceException">
     /// Генерируется при ошибке выполнения измерения.
     /// </exception>
-    public static async Task<double> MeasureResistanceAsync(
+    public static async Task<(bool Success, double Result)> MeasureResistanceAsync(
       IMultimeter meter,
       IUserInteractionService ui,
       CancellationToken token,
       int pointNumber,
       IRelaySwitchModule _module,
-      double param = 0,
-      double lower = 0)
+      MeasurementRange measurementRange)
     {
-      var answer = await meter.ContinuityManager.CheckContinuityAsync(param);
+      var answer = await meter.ContinuityManager.CheckContinuityAsync(measurementRange, userMessageService: ui);
+
       token.ThrowIfCancellationRequested();
       string point = $"{_module.NumberChassis}.{_module.Number}.{pointNumber}";
-      var (_, result) = await MessageManager.ShowMeasurementResultAsync(ui, MeasurementTypeCommand.KC, lower, param, answer, point);
+      measurementRange.TargetValue = answer;
+
+      var result = MeasurementResultEvaluator.Evaluate(measurementRange);
+      await MeasurementMessages.PublishResultAsync(CheckType.Test,
+        MeasurementTypeCommand.KC,
+        new MeasurementRange(result.Value, measurementRange.LowerBound, measurementRange.UpperBound),
+        result.IsSuccessful,
+        point,
+        outputService: ui);
       return result;
     }
 
@@ -256,10 +265,10 @@ namespace Ask.Engine.Tests.Base
     ///  • поиск устройств по номеру шасси;
     ///  • подключение к устройствам;
     ///  • коммутация мультиметра к заданной паре шин;
-    ///  • установка режима измерения сопротивления.
+    ///  • установка режима прозвонки.
     /// </summary>
     /// <param name="numberChassis">Номер шасси.</param>
-    /// <param name="pairBus">Пара шин для измерения.</param>
+    /// <param name="pairBus">Пара шин для прозвонки.</param>
     /// <param name="ui">Сервис взаимодействия с пользователем (протокол).</param>
     /// <param name="token">Токен отмены операции.</param>
     /// <returns>
@@ -336,12 +345,15 @@ namespace Ask.Engine.Tests.Base
       await uksh.ConnectorManager.DisconnectAllBuses(ui);
     }
 
-    public static async Task ResetDevices(List<IDevice> devices, IUserInteractionService? messageService = null)
+    public static async Task ResetDevices(
+      List<IDevice> devices,
+      IUserInteractionService? messageService = null,
+      bool showTestCompletionHeader = false)
     {
-      foreach (var device in devices)
-      {
-        await device.ConnectableManager.ResetAsync();
-      }
+      await DeviceResetService.ResetDevicesAsync(
+        devices,
+        messageService,
+        showTestCompletionHeader: showTestCompletionHeader);
     }
 
     #endregion

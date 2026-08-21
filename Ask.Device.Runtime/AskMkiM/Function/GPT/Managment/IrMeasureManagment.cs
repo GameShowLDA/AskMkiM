@@ -1,13 +1,15 @@
+﻿using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
-using System.Globalization;
-using System.Text.RegularExpressions;
-using static Ask.LogLib.LoggerUtility;
-using static Ask.Device.Runtime.AskMkiM.Function.GPT.Command.FunctionCommandManager;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.Device.Runtime.Device.Breakdowntester;
 using Ask.Device.Runtime.AskMkiM.Function.GPT.Command;
 using Ask.Device.Runtime.AskMkiM.Function.GPT.Helper;
 using Ask.Device.Runtime.Base.Helpers;
-using Ask.Device.Runtime.Device.Breakdowntester;
+using System.Globalization;
+using System.Text.RegularExpressions;
+using static Ask.Device.Runtime.AskMkiM.Function.GPT.Command.FunctionCommandManager;
+using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.Device.Runtime.AskMkiM.Function.GPT.Managment
 {
@@ -50,14 +52,13 @@ namespace Ask.Device.Runtime.AskMkiM.Function.GPT.Managment
     /// Выполняет измерение сопротивления изоляции.
     /// </summary>
     public async Task<(double value, string unit)> MeasureAsync(
-      double param = 0,
-      double rangeFrom = -1,
-      double rangeTo = -1,
+      ElectricalTestFunction electricalTestFunction,
+      MeasurementRange measurementRange,
       bool waitFullTime = false,
       IUserInteractionService? userMessageService = null)
     {
       if (await _getIsIdleMode())
-        return (MeasurementAdapterHelper.Round(param), string.Empty);
+        return (MeasurementAdapterHelper.Round(measurementRange.TargetValue), string.Empty);
 
       await StopMeasure();
       await Task.Delay(_delayBeforeCall);
@@ -94,7 +95,7 @@ namespace Ask.Device.Runtime.AskMkiM.Function.GPT.Managment
           {
             await _gptModel.DeviceProtocol.QueryAsync(testCommand);
           }
-          else if (model.Status.ToLower().Contains("test") && model.Resistance > 0 && model.Resistance > param)
+          else if (model.Status.ToLower().Contains("test") && model.Resistance > 0 && model.Resistance > measurementRange.TargetValue)
           {
             await StopMeasure();
             tickCount = totalTicks + 1;
@@ -287,3 +288,4 @@ namespace Ask.Device.Runtime.AskMkiM.Function.GPT.Managment
     }
   }
 }
+

@@ -18,8 +18,10 @@
         <LocalizeStrings:LocalizedString x:Key="Settings_Execution_StepByStepMode_Description" Key="settings.execution.stepByStepMode.description" />
         <LocalizeStrings:LocalizedString x:Key="Settings_Execution_IdleMode_Title" Key="settings.execution.idleMode.title" />
         <LocalizeStrings:LocalizedString x:Key="Settings_Execution_IdleMode_Description" Key="settings.execution.idleMode.description" />
-        <LocalizeStrings:LocalizedString x:Key="Settings_Execution_ErrorSimulation_Title" Key="settings.execution.errorSimulation.title" />
-        <LocalizeStrings:LocalizedString x:Key="Settings_Execution_ErrorSimulation_Description" Key="settings.execution.errorSimulation.description" />
+        <LocalizeStrings:LocalizedString x:Key="Settings_Execution_MeasurementErrorSimulation_Title" Key="settings.execution.measurementErrorSimulation.title" />
+        <LocalizeStrings:LocalizedString x:Key="Settings_Execution_MeasurementErrorSimulation_Description" Key="settings.execution.measurementErrorSimulation.description" />
+        <LocalizeStrings:LocalizedString x:Key="Settings_Execution_HardwareErrorSimulation_Title" Key="settings.execution.hardwareErrorSimulation.title" />
+        <LocalizeStrings:LocalizedString x:Key="Settings_Execution_HardwareErrorSimulation_Description" Key="settings.execution.hardwareErrorSimulation.description" />
     </UserControl.Resources>
 
     <Border 
@@ -86,9 +88,9 @@
                 </Grid>
             </Grid>
 
-            <WrapPanel Orientation="Horizontal" Grid.Row="1">
-                <WrapPanel.Style>
-                    <Style TargetType="WrapPanel">
+            <StackPanel Grid.Row="1">
+                <StackPanel.Style>
+                    <Style TargetType="StackPanel">
                         <Setter Property="Visibility" Value="Visible"/>
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding ElementName=ToggleSettingsButton, Path=IsArrowUp}" Value="True">
@@ -96,7 +98,9 @@
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>
-                </WrapPanel.Style>
+                </StackPanel.Style>
+
+                <WrapPanel Orientation="Horizontal">
 
                 <SharedComponents:SettingsCard
                     Title="{Binding Source={StaticResource Settings_Execution_StopOnError_Title}, Path=Value}"
@@ -126,15 +130,6 @@
                     />
 
                 <SharedComponents:SettingsCard
-                    Title="{Binding Source={StaticResource Settings_Execution_ErrorSimulation_Title}, Path=Value}"
-                    Description="{Binding Source={StaticResource Settings_Execution_ErrorSimulation_Description}, Path=Value}"
-                    IsChecked="{Binding IdleMode, Mode=TwoWay}" 
-                    Margin="10,10"
-                    VerticalAlignment="Top"
-                    x:Name="ErrorSimulation"
-                 />
-
-                <SharedComponents:SettingsCard
                     Title="{Binding Source={StaticResource Settings_Execution_CompatibilityMode}, Path=Value}"
                     Description="{Binding Source={StaticResource Settings_Execution_CompatibilityMode_LegacySystemExecution}, Path=Value}"
                     IsChecked="{Binding IdleMode, Mode=TwoWay}" 
@@ -142,7 +137,38 @@
                     VerticalAlignment="Top"
                     x:Name="CompatibilityModeCheckBox"
                  />
-            </WrapPanel>
+                </WrapPanel>
+
+                <WrapPanel x:Name="ErrorSimulationGroup"
+                           Orientation="Horizontal"
+                           Margin="10,0,10,10">
+                    <WrapPanel.Style>
+                        <Style TargetType="WrapPanel">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ElementName=IdleMode, Path=IsChecked}"
+                                             Value="True">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </WrapPanel.Style>
+
+                                <SharedComponents:SettingsCard
+                                    Title="{Binding Source={StaticResource Settings_Execution_MeasurementErrorSimulation_Title}, Path=Value}"
+                                    Description="{Binding Source={StaticResource Settings_Execution_MeasurementErrorSimulation_Description}, Path=Value}"
+                                    Margin="0,10,10,0"
+                                    VerticalAlignment="Top"
+                                    x:Name="MeasurementErrorSimulation"/>
+
+                                <SharedComponents:SettingsCard
+                                    Title="{Binding Source={StaticResource Settings_Execution_HardwareErrorSimulation_Title}, Path=Value}"
+                                    Description="{Binding Source={StaticResource Settings_Execution_HardwareErrorSimulation_Description}, Path=Value}"
+                                    Margin="0,10,0,0"
+                                    VerticalAlignment="Top"
+                                    x:Name="HardwareErrorSimulation"/>
+                </WrapPanel>
+            </StackPanel>
 
         </Grid>
     </Border>

@@ -1,5 +1,7 @@
-﻿using Ask.Core.Shared.DTO.Executor;
-using Ask.Core.Shared.DTO.Protocol;
+using Ask.Core.Services.UI;
+using Ask.Core.Shared.DTO.Devices.Measurements;
+using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
+using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
@@ -7,7 +9,11 @@ using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
+using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
+using Ask.Core.Shared.Metadata.Enums.UnitEnums;
 using Ask.Engine.Tests.Base;
+using Ask.Engine.Tests.NodeMethod;
+using Ask.Protocol.Messages.EntryPoints;
 using static Ask.Engine.Tests.Base.UIValidationHelper;
 
 namespace Ask.Engine.Tests.RelaySwitchingModule
@@ -66,8 +72,8 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
       ActionSettings settings = new ActionSettings()
       {
         StartDelegate = ExecuteTestProcess,
-        IsRepeatEnabled = true,
         CheckType = CheckType.Test,
+        AccumulateErrorMessages = true,
         StopDelegate = Stop
       };
 
@@ -87,6 +93,7 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
       DataModel data = await EnsureValidMetrologyInputAsync(
           inputFieldProvider,
           _messageOutputService,
+          metrologyMode: MeasurementTypeCommand.KC,
           pairBusCheck: true);
 
       _pairBus = data.ActivePairBus;
@@ -107,18 +114,14 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
 
       needReset = true;
 
-      await _userInteractionService.ShowMessageAsync(
-          new ShowMessageModel("Инициализация оборудования"),
-          IsBlockStart: true);
+      await ExecutionMessages.PublishEquipmentInitializationAsync(_userInteractionService);
 
       // Подключение к устройствам (МКР + УКШ + мультиметр)
       await RelayModuleHelper.ConnectIfNeededAsync(_module, _userInteractionService, cancellationToken);
       await RelayModuleHelper.ConnectIfNeededAsync(_busSwitcher, _userInteractionService, cancellationToken);
       await RelayModuleHelper.ConnectIfNeededAsync(_fastMeter, _userInteractionService, cancellationToken);
 
-      await _userInteractionService.ShowMessageAsync(
-          new ShowMessageModel("Настройка оборудования"),
-          IsBlockStart: true);
+      await ExecutionMessages.PublishEquipmentSetupAsync(_userInteractionService);
 
       var busses = ConvertingInSwitchingBusNewToSwitchingBus(data.ActivePairBus);
 
@@ -141,32 +144,90 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
           _userInteractionService,
           cancellationToken);
 
-      // Переводим мультиметр в режим измерения сопротивления
+      // Переводим мультиметр в режим прозвонки
       await RelayModuleHelper.EnsureResistanceModeAsync(
           _fastMeter,
           _userInteractionService,
           cancellationToken);
 
-      await _userInteractionService.ShowMessageAsync(
-          new ShowMessageModel("Инициализация завершена, тест начат!"),
-          IsBlockStart: true);
-
-      double result = 0;
+      await ExecutionMessages.PublishTestStartedAsync(_userInteractionService);
 
       for (int i = data.FirstPoint.PointNumber; i <= data.SecondPoint.PointNumber; i++)
       {
         cancellationToken.ThrowIfCancellationRequested();
-        await _module.PointManager.ConnectRelayAsync(BusPoint.AB, i, _userInteractionService);
 
-        result = await RelayModuleHelper.MeasureResistanceAsync(
+        await MeasurePointResistanceWithUserActionAsync(i, data.Param, cancellationToken);
+
+        cancellationToken.ThrowIfCancellationRequested();
+      }
+    }
+
+    /// <summary>
+    /// Выполняет измерение точки.
+    /// </summary>
+    private async Task MeasurePointResistanceWithUserActionAsync(
+      int pointNumber,
+      double expectedResistance,
+      CancellationToken cancellationToken)
+    {
+      await UserActionHelper.RunWithUserRepeatAsync(
+        () => MeasurePointResistanceAsync(pointNumber, expectedResistance, cancellationToken),
+        _userInteractionService);
+    }
+
+    /// <summary>
+    /// Подключает точку, измеряет сопротивление и возвращает признак успешного попадания в допуск.
+    /// </summary>
+    private async Task<bool> MeasurePointResistanceAsync(
+      int pointNumber,
+      double expectedResistance,
+      CancellationToken cancellationToken)
+    {
+      cancellationToken.ThrowIfCancellationRequested();
+
+      await _module.PointManager.ConnectRelayAsync(BusPoint.AB, pointNumber, _userInteractionService);
+
+      try
+      {
+        MeasurementRange measurementRange = new MeasurementRange(
+          expectedResistance,
+          0d,
+          expectedResistance);
+        var (success, result) = await RelayModuleHelper.MeasureResistanceAsync(
             _fastMeter,
-            _userInteractionService,
+            null!,
             cancellationToken,
-            i,
+            pointNumber,
             _module,
-            data.Param);
+            measurementRange);
 
-        await _module.PointManager.DisconnectRelayAsync(BusPoint.AB, i, _userInteractionService);
+        var point = new PointModel
+        {
+          DeviceNumber = _module.NumberChassis,
+          ModuleNumber = _module.Number,
+          PointNumber = pointNumber,
+        };
+        string? executionErrorMessage = success
+          ? null
+          : MeasurementMessages.BuildNodeRangeFailure(
+            point,
+            0d,
+            expectedResistance,
+            result,
+            ResistanceUnit.Ohm);
+        await MeasurementMessages.PublishResultAsync(CheckType.Test,
+          ResistanceUnit.Ohm,
+          new MeasurementRange(result, 0d, expectedResistance),
+          success,
+          point.ToString(),
+          executionErrorMessage,
+          _userInteractionService);
+
+        return success;
+      }
+      finally
+      {
+        await _module.PointManager.DisconnectRelayAsync(BusPoint.AB, pointNumber, _userInteractionService);
       }
     }
 
@@ -184,11 +245,16 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
         return;
       }
 
-      await _module.ConnectableManager.ResetAsync();
-      await RelayModuleHelper.DisconnectMultimeterFromBusAsync(_busSwitcher, _pairBus, _userInteractionService, cancellationToken);
-      await RelayModuleHelper.ShutdownMeterAsync(_fastMeter, _userInteractionService, cancellationToken);
-      await RelayModuleHelper.ShutdownUkshAsync(_busSwitcher, _userInteractionService, cancellationToken);
-      needReset = false;
+      try
+      {
+        await RelayModuleHelper.DisconnectMultimeterFromBusAsync(_busSwitcher, _pairBus, _userInteractionService, cancellationToken);
+        await RelayModuleHelper.ShutdownMeterAsync(_fastMeter, _userInteractionService, cancellationToken);
+        await RelayModuleHelper.ShutdownUkshAsync(_busSwitcher, _userInteractionService, cancellationToken);
+      }
+      finally
+      {
+        needReset = false;
+      }
     }
 
     #region Вспомогательные методы

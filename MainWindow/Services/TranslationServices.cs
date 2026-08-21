@@ -5,6 +5,8 @@ using Ask.Core.Shared.Metadata.Static;
 using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
 using Ask.Engine.ControlCommandAnalyser;
 using Ask.Engine.ControlCommandAnalyser.Model;
+using Ask.Diagnostics.Abstractions;
+using Ask.Diagnostics.Models;
 using Ask.UI.Shared.Formatting;
 using Message;
 using System.IO;
@@ -14,6 +16,7 @@ using System.Windows;
 using System.Windows.Media.Effects;
 using System.Windows.Threading;
 using UI.Components;
+using UI.Components.MultiEditorMethods;
 using UI.Components.SearchControls;
 using UI.Controls;
 using UI.Controls.Runner;
@@ -43,6 +46,7 @@ namespace MainWindowProgram.Services
     /// Сервис для работы с файлами.
     /// </summary>
     private readonly FileService _fileService;
+    private readonly IExceptionDiagnosticReporter _exceptionDiagnosticReporter;
 
     private static readonly HashSet<string> SupportedExecutionSourceExtensions = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -194,10 +198,15 @@ namespace MainWindowProgram.Services
     /// </summary>
     /// <param name="multiWindow">Сервис управления многооконным интерфейсом.</param>
     /// <param name="fileService">Сервис  для работы с файлами.</param>
-    public TranslationServices(MultiWindowService multiWindow, FileService fileService)
+    /// <param name="exceptionDiagnosticReporter">Сервис формирования диагностических отчётов.</param>
+    public TranslationServices(
+      MultiWindowService multiWindow,
+      FileService fileService,
+      IExceptionDiagnosticReporter exceptionDiagnosticReporter)
     {
       _multiWindow = multiWindow;
       _fileService = fileService;
+      _exceptionDiagnosticReporter = exceptionDiagnosticReporter;
     }
 
     private async Task RunWithTranslationProgressAsync(Func<ProgressWindow, Task> action)
@@ -475,23 +484,13 @@ namespace MainWindowProgram.Services
     /// <returns>Задача, представляющая асинхронную операцию трансляции.</returns>
     public async Task RunAsync()
     {
-      var editor = _multiWindow.GetActiveTextEditor(EditorType.TextEditor);
+      var editor = _multiWindow.GetActiveTextEditor(EditorType.TextEditor); 
       var container = _multiWindow.GetActiveTextEditorContainer(EditorType.Translator);
       var runContainer = _multiWindow.GetActiveTextEditorContainer(EditorType.Run);
 
       if (editor != null && !EnsureSupportedExecutionSource(editor))
       {
         return;
-      }
-
-      if (runContainer != null)
-      {
-        var runControl = runContainer.GetDockControl().DockItems[0].Content as RunControl;
-        if (runControl != null)
-        {
-          await runControl.Start(runControl.TranslationModels);
-          return;
-        }
       }
 
       if (container == null && runContainer == null && editor == null)
@@ -505,6 +504,8 @@ namespace MainWindowProgram.Services
 
       await BuildAsync();
 
+      var actualContainer = _multiWindow.GetActiveTextEditorContainer(EditorType.Translator);
+
       if (container == null && editor != null)
       {
         container = _multiWindow.GetActiveTextEditorContainer(EditorType.Translator);
@@ -513,6 +514,11 @@ namespace MainWindowProgram.Services
       if (container == null && runContainer != null)
       {
         container = runContainer;
+      }
+
+      if (!container.Equals(actualContainer))
+      {
+        container = actualContainer;
       }
 
       var dockManager = container.GetDockControl();
@@ -597,7 +603,11 @@ namespace MainWindowProgram.Services
     private async Task PrepareRun(TextEditorContainer runContainer, TextEditorUI editor, RunControl runControl)
     {
       runControl.OpkFilePath = editor.TextEditorModel.FilePath;
-      runControl.FileName = BuildDerivedFileName(editor.TextEditorModel.FilePath, editor.TextEditorModel.OriginalFileName, ".lst", "protocol.lst");
+      runControl.FileName = BuildDerivedFileName(
+        editor.TextEditorModel.FilePath,
+        editor.TextEditorModel.OriginalFileName,
+        ProtocolFileExtensions.Trace,
+        $"protocol{ProtocolFileExtensions.Trace}");
       runControl.SetLeftEditor(editor);
 
       if (runContainer == null)
@@ -739,14 +749,57 @@ namespace MainWindowProgram.Services
       MessageBoxCustom.Show("Редактор не найден", "Ошибка", MessageBoxButton.OK, image: MessageBoxImage.Error);
     }
 
-    private void ShowTranslationError(Exception ex)
+    private async Task ShowTranslationErrorAsync(
+      Exception ex,
+      TextEditorUI editor,
+      string sourceText,
+      string operation)
     {
+      var sourcePath = editor.TextEditorModel?.FilePath;
+      var sourceName = editor.TextEditorModel?.FileName;
+      var originalSourceText = editor.Text ?? sourceText;
+      var artifacts = new List<CrashReportArtifact>
+      {
+        CrashReportArtifact.Json("translation-parameters.json", new
+        {
+          operation,
+          sourcePath,
+          sourceName,
+          sourceExtension = Path.GetExtension(sourcePath ?? sourceName),
+          sourceLength = sourceText.Length,
+          sourceLineCount = CountLines(sourceText),
+          normalizedMnemonics = true,
+          legacyControlCharactersRemoved = true,
+        }),
+        CrashReportArtifact.Text("source-program.txt", originalSourceText),
+      };
+
+      if (!string.Equals(originalSourceText, sourceText, StringComparison.Ordinal))
+      {
+        artifacts.Add(CrashReportArtifact.Text("translation-input.txt", sourceText));
+      }
+
+      await _exceptionDiagnosticReporter.ReportAsync(
+        ex,
+        $"TranslationServices.{operation}",
+        artifacts);
+
+      LogError($"Не удалось выполнить трансляцию программы контроля: {ex}.");
+
       MessageBoxCustom.Show(
           "Не удалось выполнить трансляцию программы контроля.",
           "Ошибка запуска программы контроля",
           image: MessageBoxImage.Error);
+    }
 
-      LogError($"Не удалось выполнить трансляцию программы контроля: {ex}.");
+    private static int CountLines(string text)
+    {
+      if (text.Length == 0)
+      {
+        return 0;
+      }
+
+      return text.Count(static character => character == '\n') + 1;
     }
 
     /// <summary>
@@ -865,7 +918,7 @@ namespace MainWindowProgram.Services
       }
       catch (Exception ex)
       {
-        ShowTranslationError(ex);
+        await ShowTranslationErrorAsync(ex, editor, text, nameof(EditExistingTranslator));
       }
       finally
       {
@@ -1017,7 +1070,7 @@ namespace MainWindowProgram.Services
       }
       catch (Exception ex)
       {
-        ShowTranslationError(ex);
+        await ShowTranslationErrorAsync(ex, editor, text, nameof(CreateNewTranslator));
 
         EditorEventAdapter.RaiseTextEditorActivated(editor);
         _multiWindow.EditorDocumentService.OpenFile(editor.TextEditorModel.FilePath);

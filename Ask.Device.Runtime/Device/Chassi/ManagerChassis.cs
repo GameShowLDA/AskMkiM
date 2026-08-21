@@ -1,12 +1,12 @@
-using Ask.Core.Shared.DTO.Devices.ChassisManager;
+﻿using Ask.Core.Shared.DTO.Devices.ChassisManager;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Capabilities;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
-using Ask.Device.Runtime.AskMkiM.Base.Commands;
-using Ask.Device.Runtime.AskMkiM.Function.ManagerChassis;
-using Ask.Device.Runtime.Base.Connected;
 using Ask.Device.Runtime.Base.DeviceProtocol;
+using Ask.Device.Runtime.AskMkiM.Base.Commands;
+using Ask.Device.Runtime.Base.Connected;
+using Ask.Device.Runtime.AskMkiM.Function.ManagerChassis;
 
 namespace Ask.Device.Runtime.Device.Chassi
 {
@@ -52,3 +52,4 @@ namespace Ask.Device.Runtime.Device.Chassi
     }
   }
 }
+

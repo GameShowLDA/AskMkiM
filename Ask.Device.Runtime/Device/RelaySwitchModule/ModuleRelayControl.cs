@@ -1,13 +1,13 @@
-using Ask.Core.Services.Validation.Devices;
+﻿using Ask.Core.Services.Validation.Devices;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule.Capabilities;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.Device.Runtime.Base.DeviceProtocol;
 using Ask.Device.Runtime.AskMkiM.Base.Commands;
+using Ask.Device.Runtime.Base.Connected;
 using Ask.Device.Runtime.AskMkiM.Function.ModuleRelayControl;
 using Ask.Device.Runtime.AskMkiM.Function.ModuleRelayControl.SelfCheck;
-using Ask.Device.Runtime.Base.Connected;
-using Ask.Device.Runtime.Base.DeviceProtocol;
 
 namespace Ask.Device.Runtime.Device.RelaySwitchModule
 {
@@ -104,3 +104,4 @@ namespace Ask.Device.Runtime.Device.RelaySwitchModule
     }
   }
 }
+

@@ -64,6 +64,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
         string? nextLine = GetNextLine(lines, i);
 
         RemoveCommentsFromLine(lines, model, current, ref nextLine, i);
+        lines[i] = current.ToString();
 
         AddProcessedLine(result, current);
 
@@ -179,20 +180,30 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
         return true;
       }
 
-      if (nextLine != null)
+      for (int lineIndex = index + 1; lineIndex < lines.Count; lineIndex++)
       {
-        int nextClose = nextLine.IndexOf('}');
+        var candidateLine = lines[lineIndex];
+        int nextClose = candidateLine.IndexOf('}');
         if (nextClose >= 0)
         {
-          string thisTail = lines[index].Substring(openBrace);
-          string nextHead = nextLine.Substring(0, nextClose + 1);
-          string block = thisTail + "\n" + nextHead;
+          var blockBuilder = new StringBuilder();
+          blockBuilder.Append(lines[index].Substring(openBrace));
 
-          AddComment(model, block, "{…}(2 строки)");
+          for (int middleLineIndex = index + 1; middleLineIndex < lineIndex; middleLineIndex++)
+          {
+            blockBuilder.Append('\n');
+            blockBuilder.Append(lines[middleLineIndex]);
+            lines[middleLineIndex] = string.Empty;
+          }
+
+          blockBuilder.Append('\n');
+          blockBuilder.Append(candidateLine.Substring(0, nextClose + 1));
+
+          AddComment(model, blockBuilder.ToString(), "{…}");
 
           current.Remove(openBrace, current.Length - openBrace);
-          lines[index + 1] = nextLine.Substring(nextClose + 1);
-          nextLine = lines[index + 1];
+          lines[lineIndex] = candidateLine.Substring(nextClose + 1);
+          nextLine = GetNextLine(lines, index);
 
           return true;
         }
@@ -220,23 +231,32 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
       }
 
       // Двухстрочный
-      if (nextLine != null)
+      for (int lineIndex = index + 1; lineIndex < lines.Count; lineIndex++)
       {
-        int nextClose = nextLine.IndexOf('"');
+        var candidateLine = lines[lineIndex];
+        int nextClose = candidateLine.IndexOf('"');
 
         if (nextClose >= 0)
         {
-          string thisTail = lines[index].Substring(open).Replace('"','{');
-          string nextHead = nextLine.Substring(0, nextClose + 1).Replace('"', '}');
+          var blockBuilder = new StringBuilder();
+          blockBuilder.Append(lines[index].Substring(open).Replace('"', '{'));
 
-          string block = thisTail + "\n" + nextHead;
+          for (int middleLineIndex = index + 1; middleLineIndex < lineIndex; middleLineIndex++)
+          {
+            blockBuilder.Append('\n');
+            blockBuilder.Append(lines[middleLineIndex]);
+            lines[middleLineIndex] = string.Empty;
+          }
 
-          AddComment(model, block, "\"...\" (2 строки)");
+          blockBuilder.Append('\n');
+          blockBuilder.Append(candidateLine.Substring(0, nextClose + 1).Replace('"', '}'));
+
+          AddComment(model, blockBuilder.ToString(), "\"...\"");
 
           current.Remove(open, current.Length - open);
 
-          lines[index + 1] = nextLine.Substring(nextClose + 1);
-          nextLine = lines[index + 1];
+          lines[lineIndex] = candidateLine.Substring(nextClose + 1);
+          nextLine = GetNextLine(lines, index);
 
           return true;
         }
@@ -276,20 +296,30 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
         return true;
       }
 
-      if (nextLine != null)
+      for (int lineIndex = index + 1; lineIndex < lines.Count; lineIndex++)
       {
-        int nextClose = nextLine.IndexOf("*/");
+        var candidateLine = lines[lineIndex];
+        int nextClose = candidateLine.IndexOf("*/");
         if (nextClose >= 0)
         {
-          string thisTail = lines[index].Substring(openBlock);
-          string nextHead = nextLine.Substring(0, nextClose + 2);
-          string block = thisTail + "\n" + nextHead;
+          var blockBuilder = new StringBuilder();
+          blockBuilder.Append(lines[index].Substring(openBlock));
 
-          AddComment(model, block, "/*…*/(2 строки)");
+          for (int middleLineIndex = index + 1; middleLineIndex < lineIndex; middleLineIndex++)
+          {
+            blockBuilder.Append('\n');
+            blockBuilder.Append(lines[middleLineIndex]);
+            lines[middleLineIndex] = string.Empty;
+          }
+
+          blockBuilder.Append('\n');
+          blockBuilder.Append(candidateLine.Substring(0, nextClose + 2));
+
+          AddComment(model, blockBuilder.ToString(), "/*…*/");
 
           current.Remove(openBlock, current.Length - openBlock);
-          lines[index + 1] = nextLine.Substring(nextClose + 2);
-          nextLine = lines[index + 1];
+          lines[lineIndex] = candidateLine.Substring(nextClose + 2);
+          nextLine = GetNextLine(lines, index);
 
           return true;
         }
@@ -333,7 +363,10 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
     /// </remarks>
     private static void AddComment(BaseCommandModel model, string block, string type)
     {
-      model.Comment.Add(block);
+      foreach (var line in block.Replace("\r\n", "\n").Split('\n'))
+      {
+        model.Comment.Add(line);
+      }
       LogInformation($"Комментарий {type} найден: {TrimForLog(block)}");
     }
 

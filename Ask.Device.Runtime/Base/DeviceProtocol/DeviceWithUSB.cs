@@ -1,4 +1,4 @@
-using Ask.Core.Shared.Interfaces.DeviceInterfaces;
+﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Metadata.Commands.MultimeterCommands.Connected;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Runtime.Base.Status;
@@ -71,3 +71,4 @@ namespace Ask.Device.Runtime.Base.DeviceProtocol
     public UsbConnectedProfile ConnectedProfile { get; set; } = new UsbConnectedProfile();
   }
 }
+

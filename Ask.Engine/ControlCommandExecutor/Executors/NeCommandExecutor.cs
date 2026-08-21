@@ -1,11 +1,12 @@
-﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Shared.Metadata.Enums.FileEnums;
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Services.UI;
+using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
-using Ask.Core.Shared.Metadata.Static.Messages;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies.Data;
@@ -26,13 +27,10 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       var command = GetRequiredCommand<NeCommandModel>(context);
       var nameCommand = $"{command.CommandNumber} {command.Mnemonic}";
-      var message = BuildSourceLinesMessage(command);
+      var message = CommandMessages.FormatSourceLines(command.SourceLines);
       SetActiveLine(context, command);
 
-      await context.Console.ShowMessageAsync(ExecutorMessageBuilder.BuildCommandExecutionMessage(nameCommand, message), IsBlockStart: true);
-
-      List<ShowMessageModel> errorMessage = new();
-      List<ShowMessageModel> infoMessage = new();
+      await CommandMessages.PublishCommandExecutionAsync(context.Console, nameCommand, message);
 
       await DeviceManager.ShowDevicesPreparationMessageIfNeededAsync(context);
 
@@ -45,7 +43,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       var dbc = EquipmentService.GetSwitchingDevice();
       await DeviceManager.SwitchModuleManager.DeviceConnectionManager.ConnectMultimeter(dbc, context.Console);
 
-      var meter = EquipmentService.GetFastMeterOrThrow(context.Console);
+      var meter = await EquipmentService.GetFastMeterOrThrow(context.Console);
       await SettingMeter(meter, context.Console);
 
       if (command.LowerLimitVoltage.HasValue)
@@ -84,17 +82,8 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       }
 
       var messageResult = await ConnectedPointChecker.CheckSequenceAsync(pointContext);
-      errorMessage.AddRange(messageResult.errorMessage);
-      infoMessage.AddRange(messageResult.infoMessage);
 
-      if (errorMessage.Count > 0)
-      {
-        protocolModel.AddErrors(nameCommand, errorMessage);
-      }
-      if (infoMessage.Count > 0)
-      {
-        protocolModel.AddInfo(nameCommand, infoMessage);
-      }
+      protocolModel.AddResult(nameCommand, messageResult);
     }
 
     /// <summary>
@@ -109,25 +98,31 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       ConnectedPointContext pointContext,
       double errorResistance = 0)
     {
-      var meter = EquipmentService.GetFastMeterOrThrow(messageService);
+      var meter = await EquipmentService.GetFastMeterOrThrow(messageService);
       double answer = 0;
 
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
-        answer = await GetDiodeMeasurementValueAsync(meter, value, pointContext);
+        answer = await GetDiodeMeasurementValueAsync(meter, value, pointContext, messageService);
 
         if (answer < 0)
         {
           answer = 0;
         }
 
-        return await MessageManager.ShowMeasurementResultAsync(
-          messageService,
+        MeasurementRange measurementRange = new MeasurementRange(answer, firstValue, secondValue);
+        var measurementResult = MeasurementResultEvaluator.Evaluate(
+          measurementRange,
+          pointContext.IsOverloadExpected);
+        await MeasurementMessages.PublishResultAsync(CheckType.ControlProgram,
           MeasurementTypeCommand.NE,
-          firstValue,
-          secondValue,
-          answer,
-          isOverloadExpected: pointContext.IsOverloadExpected);
+          new MeasurementRange(
+            measurementResult.Value,
+            measurementRange.LowerBound,
+            measurementRange.UpperBound),
+          measurementResult.IsSuccessful,
+          outputService: messageService);
+        return measurementResult;
       }, messageService);
 
       return result;
@@ -139,22 +134,29 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
     private async Task<double> GetDiodeMeasurementValueAsync(
       IMultimeter meter,
       double value,
-      ConnectedPointContext pointContext)
+      ConnectedPointContext pointContext,
+      IUserInteractionService messageService)
     {
-      if (ShouldReturnOverloadInIdleReverseMode(pointContext))
+      if (await ShouldReturnOverloadInIdleReverseModeAsync(pointContext))
       {
         return 9.9E+37;
       }
 
-      return await meter.DiodeManager.CheckDiodeAsync(value, firstValue, secondValue);
+      MeasurementRange measurementRange = new MeasurementRange(value, firstValue, secondValue);
+      return await meter.DiodeManager.CheckDiodeAsync(measurementRange, messageService);
     }
 
     /// <summary>
     /// Определяет, нужно ли в холостом режиме вернуть перегрузку для обратного направления NE.
     /// </summary>
-    private static bool ShouldReturnOverloadInIdleReverseMode(ConnectedPointContext pointContext) =>
+    /// <param name="pointContext">Контекст проверки соединённых точек.</param>
+    /// <returns>
+    /// Задача, результат которой равен <see langword="true"/>, если требуется вернуть признак перегрузки.
+    /// В противном случае — <see langword="false"/>.
+    /// </returns>
+    private static async Task<bool> ShouldReturnOverloadInIdleReverseModeAsync(ConnectedPointContext pointContext) =>
       ExecutionConfig.GetIsIdleModeEnabled()
-      && !ExecutionConfig.GetIsErrorSimulationEnabled().Result
+      && !ExecutionConfig.GetIsErrorSimulationEnabled()
       && pointContext.IsOverloadExpected;
 
     private async Task SettingMeter(IMultimeter meter, IUserInteractionService userMessageService)

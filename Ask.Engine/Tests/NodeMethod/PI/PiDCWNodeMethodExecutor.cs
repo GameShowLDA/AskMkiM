@@ -1,11 +1,13 @@
 using Ask.Core.Services.UI;
+using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.DTO.Executor;
-using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
-using Ask.Device.Runtime.AskMkiM.Ethernet.Udp.Broadcast;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
+using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
+using Ask.Core.Shared.Metadata.Enums.UnitEnums;
 using static Ask.Engine.Tests.Base.UIValidationHelper;
 
 namespace Ask.Engine.Tests.NodeMethod.PI
@@ -23,8 +25,8 @@ namespace Ask.Engine.Tests.NodeMethod.PI
       ActionSettings settings = new ActionSettings()
       {
         StartDelegate = ExecuteMeasurementProcess,
-        IsRepeatEnabled = true,
         CheckType = CheckType.Test,
+        AccumulateErrorMessages = true,
         StopDelegate = async (CancellationToken token) =>
         {
           await testMeasurement.FinalizeAsync(userInteractionService);
@@ -41,13 +43,11 @@ namespace Ask.Engine.Tests.NodeMethod.PI
     /// <returns></returns>
     private async Task ExecuteMeasurementProcess(IUserInteractionService _messageService, IInputFieldProvider inputFieldProvider, IInputHighlightService inputHighlightService, CancellationToken cancellationToken)
     {
-      var data = await EnsureValidMetrologyInputAsync(inputFieldProvider, _messageService, timeCheck: true, timeRampCheck: true, voltageCheck: true, busCheck: true);
-      await UdpBroadcastCommandSender.ResetAllDevicesAsync();
-
+      var data = await EnsureValidMetrologyInputAsync(inputFieldProvider, _messageService, metrologyMode: MeasurementTypeCommand.PI_DCW, timeCheck: true, timeRampCheck: true, voltageCheck: true, busCheck: true);
       var connect = await testMeasurement.ConnectToEquipment(data.FirstPoint, data.SecondPoint, _messageService);
       if (!connect.Connect)
       {
-        await _messageService.ShowMessageAsync(new ShowMessageModel("Ошибка", message: connect.Message, type: ShowMessageModel.MessageType.Error));
+        await ExecutionMessages.PublishErrorAsync(connect.Message, _messageService);
         return;
       }
 
@@ -91,21 +91,36 @@ namespace Ask.Engine.Tests.NodeMethod.PI
           var connectResult = await GetNextPoint(protocolUI);
           if (connectResult.Step)
           {
-            await protocolUI.ShowMessageAsync(new ShowMessageModel("\tИспытания прочности изоляции(DCW)"));
+            await MeasurementMessages.PublishLeakageCurrentStartAsync(CheckType.Test,
+              MeasurementTypeCommand.PI_DCW,
+              protocolUI);
 
             await UserActionHelper.RunWithUserRepeatAsync(async () =>
             {
               token.ThrowIfCancellationRequested();
 
-              var answer = await breakDown.DcwManger.Measure.MeasureAsync();
-              var type = ShowMessageModel.MessageType.Success;
+              MeasurementRange measurementRange = new MeasurementRange(dataModel.Param / 2, 0, dataModel.Param);
+              var answer = await breakDown.DcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandDC, measurementRange);
 
-              if (answer.value >= dataModel.Param)
-              {
-                type = ShowMessageModel.MessageType.Error;
-              }
+              bool isSuccessful = answer.value < dataModel.Param;
 
-              return type == ShowMessageModel.MessageType.Success;
+              string? executionErrorMessage = !isSuccessful
+                ? MeasurementMessages.BuildNodeFailure(
+                  connectResult.PointModel,
+                  dataModel.Param,
+                  answer.value,
+                  CurrentUnit.MilliAmpere,
+                  MeasurementLimitKind.Maximum)
+                : null;
+              await MeasurementMessages.PublishResultAsync(CheckType.Test,
+                CurrentUnit.MilliAmpere,
+                new MeasurementRange(answer.value, 0, dataModel.Param),
+                isSuccessful,
+                connectResult.PointModel.ToString(),
+                executionErrorMessage,
+                protocolUI);
+
+              return isSuccessful;
             }, protocolUI);
           }
           else

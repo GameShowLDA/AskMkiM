@@ -1,4 +1,6 @@
-﻿using Ask.Core.Shared.Interfaces.UiInterfaces;
+﻿using Ask.Core.Shared.DTO.Devices.Measurements;
+using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 
 namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities
 {
@@ -26,7 +28,7 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabiliti
     /// <returns>
     /// Числовое значение результата измерения (единицы зависят от конкретного режима устройства).
     /// </returns>
-    Task<(double value, string unit)> MeasureAsync(double param = 0, double rangeFrom = -1, double rangeTo = -1, bool waitFullTime = false, IUserInteractionService? userMessageService = null);
+    Task<(double value, string unit)> MeasureAsync(ElectricalTestFunction electricalTestFunction, MeasurementRange measurementRange, bool waitFullTime = false, IUserInteractionService? userMessageService = null);
 
     /// <summary>
     /// Останавливает запущенный тест.

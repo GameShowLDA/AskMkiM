@@ -1,12 +1,14 @@
 using Ask.Core.Services.UI;
+using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.DTO.Executor;
-using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Runtime.AskMkiM.Ethernet.Udp.Broadcast;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
+using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
+using Ask.Core.Shared.Metadata.Enums.UnitEnums;
 using static Ask.Engine.Tests.Base.UIValidationHelper;
 
 namespace Ask.Engine.Tests.NodeMethod.CI
@@ -23,6 +25,7 @@ namespace Ask.Engine.Tests.NodeMethod.CI
       {
         StartDelegate = ExecuteMeasurementProcess,
         CheckType = CheckType.Test,
+        AccumulateErrorMessages = true,
       };
 
       executionController.SetSettings(settings);
@@ -35,21 +38,25 @@ namespace Ask.Engine.Tests.NodeMethod.CI
     /// <returns></returns>
     private async Task ExecuteMeasurementProcess(IUserInteractionService _messageService, IInputFieldProvider inputFieldProvider, IInputHighlightService inputHighlightService, CancellationToken cancellationToken)
     {
-      var data = await EnsureValidMetrologyInputAsync(inputFieldProvider, _messageService, timeCheck: true, voltageCheck: true);
-      await UdpBroadcastCommandSender.ResetAllDevicesAsync();
-
+      var data = await EnsureValidMetrologyInputAsync(inputFieldProvider, _messageService, metrologyMode: MeasurementTypeCommand.SI, timeCheck: true, voltageCheck: true);
       CiNodeMethod testMeasurement = new CiNodeMethod();
-      var connect = await testMeasurement.ConnectToEquipment(data.FirstPoint, data.SecondPoint, _messageService);
-      if (!connect.Connect)
+      try
       {
-        await _messageService.ShowMessageAsync(new ShowMessageModel("Ошибка", message: connect.Message, type: ShowMessageModel.MessageType.Error));
-        return;
-      }
+        var connect = await testMeasurement.ConnectToEquipment(data.FirstPoint, data.SecondPoint, _messageService);
+        if (!connect.Connect)
+        {
+          await ExecutionMessages.PublishErrorAsync(connect.Message, _messageService);
+          return;
+        }
 
-      await testMeasurement.SetupCommutation(_messageService, data.FirstPoint, data.SecondPoint, BusPoint.A);
-      await testMeasurement.ConfigureMeter(_messageService, data);
-      await testMeasurement.PerformMeasurement(_messageService, data);
-      await testMeasurement.FinalizeAsync(_messageService);
+        await testMeasurement.SetupCommutation(_messageService, data.FirstPoint, data.SecondPoint, BusPoint.A);
+        await testMeasurement.ConfigureMeter(_messageService, data);
+        await testMeasurement.PerformMeasurement(_messageService, data);
+      }
+      finally
+      {
+        await testMeasurement.FinalizeAsync(_messageService);
+      }
     }
 
     private class CiNodeMethod : BaseNodeTest
@@ -83,20 +90,35 @@ namespace Ask.Engine.Tests.NodeMethod.CI
           var connectResult = await GetNextPoint(protocolUI);
           if (connectResult.Step)
           {
-            await protocolUI.ShowMessageAsync(new ShowMessageModel("Измерение сопротивления изоляции"));
+            await MeasurementMessages.PublishStartAsync(CheckType.Test,
+              MeasurementTypeCommand.SI,
+              protocolUI);
 
             await UserActionHelper.RunWithUserRepeatAsync(async () =>
             {
               token.ThrowIfCancellationRequested();
-              var answer = await breakDown.IrManger.Measure.MeasureAsync(dataModel.Param, 1000, 60000, userMessageService: protocolUI);
-              var type = ShowMessageModel.MessageType.Success;
 
-              if (answer.value < dataModel.Param)
-              {
-                type = ShowMessageModel.MessageType.Error;
-              }
+              MeasurementRange measurementRange = new MeasurementRange(dataModel.Param, 1000, 60000);
+              var answer = await breakDown.IrManger.Measure.MeasureAsync(ElectricalTestFunction.InsulationResistance, measurementRange);
 
-              return type == ShowMessageModel.MessageType.Success;
+              bool isSuccessful = answer.value >= dataModel.Param;
+
+              string? executionErrorMessage = !isSuccessful
+                ? MeasurementMessages.BuildNodeFailure(
+                  connectResult.PointModel,
+                  dataModel.Param,
+                  answer.value,
+                  ResistanceUnit.MegaOhm,
+                  MeasurementLimitKind.Minimum)
+                : null;
+              await MeasurementMessages.PublishResultAsync(CheckType.Test,
+                ResistanceUnit.MegaOhm,
+                new MeasurementRange(answer.value, dataModel.Param, -1),
+                isSuccessful,
+                connectResult.PointModel.ToString(),
+                executionErrorMessage,
+                protocolUI);
+              return isSuccessful;
 
             }, protocolUI);
           }
@@ -110,6 +132,7 @@ namespace Ask.Engine.Tests.NodeMethod.CI
       public override async Task FinalizeAsync(IUserInteractionService messageService)
       {
         await base.FinalizeAsync(messageService);
+        ResetPoints();
       }
     }
   }

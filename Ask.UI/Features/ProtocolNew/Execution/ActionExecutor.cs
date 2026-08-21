@@ -2,14 +2,15 @@ using System.Windows;
 using System.Windows.Input;
 using Ask.Core.Services.App;
 using Ask.Core.Services.Config.AppSettings;
-using Ask.Core.Services.EventCore.Adapters;
+using Ask.Core.Services.Devices;
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
-using Ask.Core.Services.FilesUtility;
+using Ask.Core.Services.Errors.Models;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.DTO.Protocol;
-using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Exceptions;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
+using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Ask.Device.Runtime.AskMkiM.Ethernet.Udp.Broadcast;
@@ -17,7 +18,9 @@ using Ask.UI.Controls.ProtocolNew;
 using Ask.UI.Features.ProtocolNew.Hotkeys;
 using Ask.UI.Features.ProtocolNew.Protocol;
 using Ask.UI.Features.ProtocolNew.Services;
-using Message;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+using System.Windows.Input;
 using WindowsInput;
 using static Ask.Core.Shared.DTO.Protocol.ShowMessageModel;
 using static Ask.Core.Shared.Metadata.Static.DelegateManager;
@@ -71,7 +74,32 @@ namespace Ask.UI.Features.ProtocolNew.Execution
     /// Глобальный объект синхронизации, предотвращающий одновременный запуск
     /// нескольких экземпляров исполнителя.
     /// </summary>
-    private readonly IExecutionPauseController _pauseController;
+    private readonly ExecutionPauseController _pauseController;
+
+    /// <summary>
+    /// Признак запроса перехода к другой команде.
+    /// </summary>
+    private int _commandJumpRequested;
+
+    /// <summary>
+    /// Идентификатор последнего запроса паузы.
+    /// </summary>
+    private long _pauseRequestId;
+
+    /// <summary>
+    /// Метка времени последнего запроса паузы.
+    /// </summary>
+    private long _pauseRequestedTimestamp;
+
+    /// <summary>
+    /// Признак регистрации фактического достижения паузы.
+    /// </summary>
+    private int _pauseReachedLogged;
+
+    /// <summary>
+    /// Признак регистрации выхода исполнителя из паузы.
+    /// </summary>
+    private int _pauseReleasedLogged;
 
     /// <summary>
     /// Ссылка на текущий активный экземпляр исполнителя.
@@ -160,7 +188,13 @@ namespace Ask.UI.Features.ProtocolNew.Execution
     {
       isExit = false;
       processName = actionSettings.Name;
+      Interlocked.Exchange(ref _commandJumpRequested, 0);
       _pauseController.Reset();
+
+      if (IsProcessRunning(actionSettings.Name))
+      {
+        return;
+      }
 
       if (!_runGuard.TryAcquire(actionSettings.Name, this, out var activeProcessName))
       {
@@ -168,6 +202,9 @@ namespace Ask.UI.Features.ProtocolNew.Execution
         await ProtocolSelfCheck.ShowMessageAsync(new ShowMessageModel($"Уже выполняется \"{activeProcessName}\". Дождитесь завершения текущей задачи.", type: MessageType.Error), skipPause: true);
         return;
       }
+
+      _session?.Dispose();
+      _session = new ExecutionSession(actionSettings);
 
       try
       {
@@ -213,11 +250,6 @@ namespace Ask.UI.Features.ProtocolNew.Execution
         {
           StepControlManager.EnableStepMode(true);
           StepMode = true;
-        }
-
-        if (IsProcessRunning(actionSettings.Name))
-        {
-          return;
         }
 
         PrepareForStartAsync(actionSettings.Name);
@@ -272,13 +304,45 @@ namespace Ask.UI.Features.ProtocolNew.Execution
 
       isExit = true;
       LogInformation($"Завершение \"{actionSettings.Name}\"");
+      var equipmentUsage = _session?.EquipmentUsage;
 
       await _finalizer.FinalizeAsync(
         actionSettings,
         ProtocolSelfCheck,
         () => CancelProcessTaskAsync(actionSettings.StopDelegate, actionSettings.Name),
+        () => ResetUsedEquipmentAsync(
+          equipmentUsage,
+          ShouldShowTestCompletionHeader(actionSettings.CheckType)),
         ResetState,
         value => StartProcessing?.Invoke(value));
+    }
+
+    /// <summary>
+    /// Определяет необходимость отдельного заголовка завершения теста.
+    /// </summary>
+    /// <param name="checkType">Тип выполняемой проверки.</param>
+    /// <returns>
+    /// <see langword="true"/>, если требуется отдельный заголовок завершения.
+    /// В противном случае — <see langword="false"/>.
+    /// </returns>
+    internal static bool ShouldShowTestCompletionHeader(CheckType checkType) =>
+      checkType != CheckType.ControlProgram;
+
+    /// <summary>
+    /// Сбрасывает оборудование, использованное текущим запуском.
+    /// </summary>
+    /// <param name="equipmentUsage">Сеанс учёта использованного оборудования.</param>
+    /// <param name="showTestCompletionHeader">Признак вывода заголовка завершения теста.</param>
+    private async Task ResetUsedEquipmentAsync(
+      EquipmentUsageSession? equipmentUsage,
+      bool showTestCompletionHeader)
+    {
+      var devices = equipmentUsage?.GetUsedDevices() ?? [];
+      await DeviceResetService.ResetDevicesAsync(
+        devices,
+        ProtocolSelfCheck,
+        CancellationToken.None,
+        showTestCompletionHeader);
     }
 
     /// <summary>
@@ -301,7 +365,38 @@ namespace Ask.UI.Features.ProtocolNew.Execution
     /// </summary>
     internal bool RequestPause()
     {
-      return _pauseController.RequestPause();
+      var requested = _pauseController.RequestPause();
+      if (!requested)
+      {
+        LogInformation(
+          $"[PauseTiming] Pause request ignored (already paused): executor={RuntimeHelpers.GetHashCode(this)}, " +
+          $"requestId={Volatile.Read(ref _pauseRequestId)}, thread={Environment.CurrentManagedThreadId}");
+        return false;
+      }
+
+      var requestId = Interlocked.Increment(ref _pauseRequestId);
+      Volatile.Write(ref _pauseRequestedTimestamp, Stopwatch.GetTimestamp());
+      Volatile.Write(ref _pauseReachedLogged, 0);
+      Volatile.Write(ref _pauseReleasedLogged, 0);
+
+      LogInformation(
+        $"[PauseTiming] Pause requested: executor={RuntimeHelpers.GetHashCode(this)}, " +
+        $"requestId={requestId}, thread={Environment.CurrentManagedThreadId}, utc={DateTime.UtcNow:O}");
+      return true;
+    }
+
+    /// <summary>
+    /// Прерывает ожидание паузы для перехода к другой команде.
+    /// </summary>
+    internal void InterruptPauseForCommandJump()
+    {
+      if (!IsPaused)
+      {
+        return;
+      }
+
+      Interlocked.Exchange(ref _commandJumpRequested, 1);
+      _pauseController.InterruptWait();
     }
 
     /// <summary>
@@ -311,6 +406,16 @@ namespace Ask.UI.Features.ProtocolNew.Execution
     internal void Resume(bool stepMode, IUserInteractionService userMessageService, TaskCompletionSource<UserAction> _userActionTcs)
     {
       LogInformation("Срабатывание возобновления при самоконтроле");
+
+      var requestId = Volatile.Read(ref _pauseRequestId);
+      var requestedTimestamp = Volatile.Read(ref _pauseRequestedTimestamp);
+      var elapsed = requestedTimestamp == 0
+        ? TimeSpan.Zero
+        : Stopwatch.GetElapsedTime(requestedTimestamp);
+      LogInformation(
+        $"[PauseTiming] Resume requested: executor={RuntimeHelpers.GetHashCode(this)}, " +
+        $"requestId={requestId}, elapsedSincePauseRequestMs={elapsed.TotalMilliseconds:F1}, " +
+        $"thread={Environment.CurrentManagedThreadId}");
 
       _pauseController.Resume();
 
@@ -337,63 +442,6 @@ namespace Ask.UI.Features.ProtocolNew.Execution
     {
       var inputSimulator = new InputSimulator();
       inputSimulator.Keyboard.KeyDown(WindowsInput.Native.VirtualKeyCode.F10);
-    }
-
-    /// <summary>
-    /// Запускает цикл выполнения делегата измерения, отображая кнопки "Остановить" и "Завершить".
-    /// </summary>
-    /// <param name="returnDelegate">Делегат, выполняющий операцию измерения. Если null, выполняется завершение.</param>
-    /// <param name="stop">Делегат для остановки операции.</param>
-    /// <returns>Задача, представляющая асинхронную операцию цикла измерения.</returns>
-    internal async Task LoopMeasureEvent(ActionSettings actionSettings)
-    {
-      ProtocolSelfCheck.ShowOnlyStopAndFinishButtons();
-      while (!CancellationTokenSource?.IsCancellationRequested ?? true)
-      {
-        try
-        {
-          await ReturnMeasureEvent(actionSettings);
-        }
-        catch (Exception)
-        {
-          break;
-        }
-      }
-    }
-
-    /// <summary>
-    /// Выполняет операцию измерения один раз.
-    /// </summary>
-    /// <param name="returnDelegate">Делегат измерения.</param>
-    /// <param name="stop">Делегат остановки.</param>
-    /// <returns>Задача, представляющая измерение.</returns>
-    private async Task ReturnMeasureEvent(ActionSettings actionSettings)
-    {
-      try
-      {
-        var token = CancellationTokenSource?.Token ?? new CancellationToken();
-
-        if (actionSettings.ReturnDelegate != null)
-        {
-          await actionSettings.ReturnDelegate(token);
-        }
-        else
-        {
-          await FinalizeAsync(actionSettings);
-        }
-      }
-      catch (ObjectDisposedException ex)
-      {
-        LogException("Token уже утилизирован", ex);
-        MessageBoxCustom.Show($"Ошибка токена отмены: {ex.Message}", $"Ошибка CancellationTokenSource", MessageBoxButton.OK, MessageBoxImage.Error);
-        await FinalizeAsync(actionSettings);
-      }
-      catch (Exception ex)
-      {
-        LogException("Системная ошибка", ex);
-        MessageBoxCustom.Show($"Системная ошибка : {ex}! \r\rПожалуйста, обратитесь к администратору", $"Ошибка CancellationTokenSource", MessageBoxButton.OK, MessageBoxImage.Error);
-        await FinalizeAsync(actionSettings);
-      }
     }
 
     /// <summary>
@@ -455,6 +503,11 @@ namespace Ask.UI.Features.ProtocolNew.Execution
         {
           ShouldShowPauseMessage = true;
         }
+
+        if (IsPaused)
+        {
+          return;
+        }
       }
 
       if (protocolSelfCheck != null && ShouldShowResumeMessage)
@@ -472,6 +525,122 @@ namespace Ask.UI.Features.ProtocolNew.Execution
     }
 
     /// <summary>
+    /// Ожидает продолжения выполнения в указанной контрольной точке.
+    /// </summary>
+    /// <param name="cancellationToken">Токен отмены ожидания.</param>
+    /// <param name="protocolSelfCheck">Сервис вывода сообщений протокола.</param>
+    /// <param name="checkpoint">Имя контрольной точки выполнения.</param>
+    /// <returns>Задача, представляющая ожидание продолжения выполнения.</returns>
+    /// <exception cref="OperationCanceledException">
+    /// Выбрасывается, если запрошена отмена через <paramref name="cancellationToken"/>.
+    /// </exception>
+    internal async Task WaitAtExecutionCheckpointAsync(
+      CancellationToken cancellationToken,
+      IMessageOutputService protocolSelfCheck,
+      string checkpoint)
+    {
+      ThrowIfCommandJumpRequested();
+
+      if (IsPaused)
+      {
+        var requestId = Volatile.Read(ref _pauseRequestId);
+        var requestedTimestamp = Volatile.Read(ref _pauseRequestedTimestamp);
+        if (Interlocked.CompareExchange(ref _pauseReachedLogged, 1, 0) == 0)
+        {
+          var elapsed = requestedTimestamp == 0
+            ? TimeSpan.Zero
+            : Stopwatch.GetElapsedTime(requestedTimestamp);
+          LogInformation(
+            $"[PauseTiming] Execution pause reached: executor={RuntimeHelpers.GetHashCode(this)}, " +
+            $"requestId={requestId}, checkpoint={checkpoint}, latencyMs={elapsed.TotalMilliseconds:F1}, " +
+            $"thread={Environment.CurrentManagedThreadId}, utc={DateTime.UtcNow:O}");
+        }
+
+        await WaitWhilePausedAsync(cancellationToken, protocolSelfCheck).ConfigureAwait(false);
+
+        ThrowIfCommandJumpRequested();
+
+        if (Interlocked.CompareExchange(ref _pauseReleasedLogged, 1, 0) == 0)
+        {
+          var releaseReason = cancellationToken.IsCancellationRequested
+            ? "Cancellation"
+            : "Resume";
+          LogInformation(
+            $"[PauseTiming] Execution pause released: executor={RuntimeHelpers.GetHashCode(this)}, " +
+            $"requestId={requestId}, checkpoint={checkpoint}, reason={releaseReason}, " +
+            $"thread={Environment.CurrentManagedThreadId}, " +
+            $"utc={DateTime.UtcNow:O}");
+        }
+
+        return;
+      }
+
+      await WaitWhilePausedAsync(cancellationToken, protocolSelfCheck).ConfigureAwait(false);
+      ThrowIfCommandJumpRequested();
+    }
+
+    /// <summary>
+    /// Прерывает текущую команду, если запрошен переход к другой команде.
+    /// </summary>
+    private void ThrowIfCommandJumpRequested()
+    {
+      if (Interlocked.Exchange(ref _commandJumpRequested, 0) == 1)
+      {
+        ShouldShowPauseMessage = false;
+        ShouldShowResumeMessage = true;
+        throw new CommandJumpRequestedException();
+      }
+    }
+
+    /// <summary>
+    /// Ожидает заданное время активного выполнения без учёта времени на паузе.
+    /// </summary>
+    /// <param name="delay">Продолжительность активного ожидания.</param>
+    /// <param name="cancellationToken">Токен отмены ожидания.</param>
+    /// <returns>Задача, представляющая ожидание указанного интервала.</returns>
+    /// <exception cref="OperationCanceledException">
+    /// Выбрасывается, если запрошена отмена через <paramref name="cancellationToken"/>.
+    /// </exception>
+    public async Task DelayAsync(TimeSpan delay, CancellationToken cancellationToken)
+    {
+      if (delay <= TimeSpan.Zero)
+      {
+        await WaitAtExecutionCheckpointAsync(
+          cancellationToken,
+          ProtocolSelfCheck,
+          "PauseAwareDelay").ConfigureAwait(false);
+        return;
+      }
+
+      var remaining = delay;
+      while (remaining > TimeSpan.Zero)
+      {
+        await WaitAtExecutionCheckpointAsync(
+          cancellationToken,
+          ProtocolSelfCheck,
+          "PauseAwareDelay").ConfigureAwait(false);
+        cancellationToken.ThrowIfCancellationRequested();
+
+        var stopwatch = Stopwatch.StartNew();
+        using var raceCancellation = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        var delayTask = Task.Delay(remaining, raceCancellation.Token);
+        var pauseTask = _pauseController.WaitForPauseRequestAsync(raceCancellation.Token);
+        var completedTask = await Task.WhenAny(delayTask, pauseTask).ConfigureAwait(false);
+        stopwatch.Stop();
+        await raceCancellation.CancelAsync().ConfigureAwait(false);
+
+        if (completedTask == delayTask)
+        {
+          await delayTask.ConfigureAwait(false);
+          return;
+        }
+
+        await pauseTask.ConfigureAwait(false);
+        remaining -= stopwatch.Elapsed;
+      }
+    }
+
+    /// <summary>
     /// Проверка на паузу или завершение программы.
     /// </summary>
     /// <param name="token">Токен отмены.</param>
@@ -485,7 +654,10 @@ namespace Ask.UI.Features.ProtocolNew.Execution
 
       if (IsPaused)
       {
-        await WaitWhilePausedAsync(token).ConfigureAwait(true);
+        await WaitAtExecutionCheckpointAsync(
+          token,
+          ProtocolSelfCheck,
+          "CheckStatusProgram").ConfigureAwait(true);
       }
 
       return true;
@@ -561,18 +733,14 @@ namespace Ask.UI.Features.ProtocolNew.Execution
     /// <returns>Задача, представляющая асинхронную операцию выполнения.</returns>
     private async Task ExecuteTaskAsync(ActionSettings actionSettings)
     {
-      // Освобождаем ресурсы предыдущего запуска, если они ещё существуют.
-      _session?.Dispose();
       isExit = false;
 
-      // Создаём изолированное состояние нового запуска.
-      _session = new ExecutionSession(actionSettings);
+      var session = _session
+        ?? throw new InvalidOperationException("Сеанс выполнения не инициализирован.");
       _pauseController.Reset();
 
       if (actionSettings.StartDelegate != null)
       {
-        bool shouldFinalize = !actionSettings.IsRepeatEnabled;
-
         try
         {
           SystemStateManager._stopwatch.Restart();
@@ -582,27 +750,23 @@ namespace Ask.UI.Features.ProtocolNew.Execution
             ProtocolSelfCheck,
             ProtocolSelfCheck,
             ProtocolSelfCheck.GetInputHighlightService(),
-            _session.Cancellation.Token));
+            session.Cancellation.Token));
           SystemStateManager.SetIsLocked(true);
           await ProcessTask;
-
-          if (actionSettings.IsRepeatEnabled)
-          {
-            ProtocolSelfCheck.ShowAdditionalFunctionButtons();
-            shouldFinalize = false;
-          }
         }
         catch (OperationCanceledException)
         {
           // Отмена ожидаема при остановке выполнения.
-          shouldFinalize = true;
+        }
+        catch (InputValidationException)
+        {
+          // Ошибка ввода уже отображена пользователю и не является сбоем приложения.
         }
         catch (Exception ex)
         {
           LogException($"Ошибка при запуске \"{actionSettings.Name}\"", ex);
           await ProtocolSelfCheck.AppendEmptyLineAsync();
           await ProtocolSelfCheck.ShowMessageAsync(new ShowMessageModel("Системная ошибка программы АСК-МКИ-М", headerColor: ShowMessageModel.ErrorMessage.TitleColor, message: ex.Message) { IndentLevel = 1 });
-          shouldFinalize = true;
         }
         finally
         {
@@ -610,11 +774,7 @@ namespace Ask.UI.Features.ProtocolNew.Execution
 
           actionSettings.ExecutionDuration = SystemStateManager._stopwatch.Elapsed;
           SystemStateManager._stopwatch.Stop();
-
-          if (shouldFinalize)
-          {
-            await ProtocolSelfCheck.FinalizeAsync();
-          }
+          await ProtocolSelfCheck.FinalizeAsync();
         }
       }
     }
@@ -664,15 +824,20 @@ namespace Ask.UI.Features.ProtocolNew.Execution
 
       if (stopDelegate != null)
       {
-        var token = CancellationTokenSource?.Token ?? CancellationToken.None;
-        await stopDelegate(token);
+        try
+        {
+          var token = CancellationTokenSource?.Token ?? CancellationToken.None;
+          await stopDelegate(token);
+        }
+        catch (Exception ex)
+        {
+          LogException($"Ошибка обязательного завершающего делегата \"{name}\".", ex);
+        }
       }
 
       if (_session != null)
       {
         _session.ProcessTask = null;
-        _session.Dispose();
-        _session = null;
       }
     }
 
@@ -682,6 +847,8 @@ namespace Ask.UI.Features.ProtocolNew.Execution
     private void ResetState()
     {
       ProcessTask = null;
+      _session?.Dispose();
+      _session = null;
       _pauseController.Reset();
       StepMode = false;
       ShouldShowPauseMessage = true;
@@ -693,10 +860,6 @@ namespace Ask.UI.Features.ProtocolNew.Execution
 
     #endregion
 
-    #region Повтор действий.
-
-    #endregion
-
     #region Настройки подключения к классу.
 
     /// <summary>
@@ -705,7 +868,7 @@ namespace Ask.UI.Features.ProtocolNew.Execution
     /// <typeparam name="T">Тип родительского класса.</typeparam>
     /// <param name="parentClass">Экземпляр родительского класса.</param>
     /// <returns>Настроенный экземпляр <see cref="ActionExecutor"/>.</returns>
-    public static async Task<ActionExecutor> CreateInstanceAsync<T>(T parentClass)
+    public static ActionExecutor CreateInstance<T>(T parentClass)
     {
       try
       {
@@ -713,7 +876,7 @@ namespace Ask.UI.Features.ProtocolNew.Execution
         {
           if (parentClass.GetType() == typeof(ProtocolUI))
           {
-            return await DefaultSettings(parentClass as ProtocolUI);
+            return DefaultSettings(parentClass as ProtocolUI);
           }
         }
       }
@@ -731,7 +894,7 @@ namespace Ask.UI.Features.ProtocolNew.Execution
     /// </summary>
     /// <param name="parentClass">Экземпляр <see cref="ProtocolUI"/>.</param>
     /// <returns>Настроенный экземпляр <see cref="ActionExecutor"/>.</returns>
-    static private async Task<ActionExecutor> DefaultSettings(ProtocolUI parentClass)
+    static private ActionExecutor DefaultSettings(ProtocolUI parentClass)
     {
       var actionExecutor = new ActionExecutor();
       actionExecutor.ProtocolSelfCheck = parentClass;

@@ -36,6 +36,16 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester
     int IrMinVoltage { get; set; }
 
     /// <summary>
+    /// Максимально измеряемое сопротивление изоляции, МОм.
+    /// </summary>
+    int IrMaxResistanceMOhm { get; set; }
+
+    /// <summary>
+    /// Сопротивление изоляции системы, ГОм.
+    /// </summary>
+    int SystemInsulationResistanceGOhm { get; set; }
+
+    /// <summary>
     /// Управление режимом переменного тока (ACW) в пробойной установке.
     /// </summary>
     IAcwModeBreakdown AcwManger { get; set; }

@@ -1,14 +1,14 @@
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 using Ask.Core.Shared.DTO.Devices.PowerSourceModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule.Capabilities;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
-using Ask.Device.Runtime.AskMkiM.Base.Commands;
+using Ask.Device.Runtime.Base.DeviceProtocol;
 using Ask.Device.Runtime.AskMkiM.Base.DeviceResponses;
+using Ask.Device.Runtime.AskMkiM.Base.Commands;
+using Ask.Device.Runtime.Base.Connected;
 using Ask.Device.Runtime.AskMkiM.Function.ModuleVoltageCurrentSource;
 using Ask.Device.Runtime.AskMkiM.Function.ModuleVoltageCurrentSource.SelfCheck;
-using Ask.Device.Runtime.Base.Connected;
-using Ask.Device.Runtime.Base.DeviceProtocol;
 
 
 namespace Ask.Device.Runtime.Device.PowerSourceModule
@@ -28,6 +28,7 @@ namespace Ask.Device.Runtime.Device.PowerSourceModule
 
       DeviceType = DeviceType.PowerSourceModule;
 
+      ConnectedProfile.Initialize = new DeviceCommand(1, 0, 0, 0).ToString();
       ConnectedProfile.Reset = new DeviceCommand(2, 1, 0, 0).ToString();
       BusManager = new BusManager(this);
       CurrentManager = new CurrentManager(this);
@@ -83,3 +84,4 @@ namespace Ask.Device.Runtime.Device.PowerSourceModule
     }
   }
 }
+

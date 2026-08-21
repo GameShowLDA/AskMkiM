@@ -1,5 +1,4 @@
-using Ask.Core.Services.Config.AppSettings;
-using Ask.Core.Services.Errors.Device.DeviceBusCommutation;
+﻿using Ask.Core.Services.Errors.Device.DeviceBusCommutation;
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
@@ -31,12 +30,7 @@ namespace Ask.Device.Application.FunctionAdapters.DeviceBusCommutation
     {
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
-        var succes = await _relayManager.ConnectRelay(numberRelay);
-
-        if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
-        {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, "Подключение реле", $"№{numberRelay}", succes, 1, userMessageService);
-        }
+        var succes = await _relayManager.ConnectRelay(numberRelay, userMessageService);
 
         return succes;
       }, userMessageService, deviceTask: true);
@@ -52,12 +46,7 @@ namespace Ask.Device.Application.FunctionAdapters.DeviceBusCommutation
     {
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
-        var succes = await _relayManager.DisconnectRelay(numberRelay);
-
-        if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
-        {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, "Отключение реле", $"№{numberRelay}", succes, 1, userMessageService);
-        }
+        var succes = await _relayManager.DisconnectRelay(numberRelay, userMessageService);
 
         return succes;
       }, userMessageService, deviceTask: true);
@@ -73,12 +62,7 @@ namespace Ask.Device.Application.FunctionAdapters.DeviceBusCommutation
     {
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
-        var succes = await _relayManager.EnableRelay();
-
-        if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
-        {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, "Включение реле", $"Общий", succes, 1, userMessageService);
-        }
+        var succes = await _relayManager.EnableRelay(userMessageService);
 
         return succes;
       }, userMessageService, deviceTask: true);
@@ -94,12 +78,7 @@ namespace Ask.Device.Application.FunctionAdapters.DeviceBusCommutation
     {
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
-        var succes = await _relayManager.DisableRelay();
-
-        if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
-        {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(_deviceBusCommutation, "Выключение реле", $"Общий", succes, 1, userMessageService);
-        }
+        var succes = await _relayManager.DisableRelay(userMessageService);
 
         return succes;
       }, userMessageService, deviceTask: true);
@@ -109,5 +88,120 @@ namespace Ask.Device.Application.FunctionAdapters.DeviceBusCommutation
 
       return result;
     }
+
+    /// <inheritdoc />
+    public async Task<bool> ConnectRCRelay(IUserInteractionService? userMessageService = null)
+    {
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(
+        async () =>
+        {
+          var succes = await _relayManager.ConnectRCRelay(userMessageService);
+
+          return succes;
+        },
+        userMessageService!,
+        deviceTask: true);
+
+      if (!result)
+        throw RelayControlExceptionFactory.ConnectRCFailed();
+
+      return result;
+    }
+
+    /// <inheritdoc />
+    public async Task<bool> DisconnectRCRelay(IUserInteractionService? userMessageService = null)
+    {
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(
+        async () =>
+        {
+          var succes = await _relayManager.DisconnectRCRelay(userMessageService);
+
+          return succes;
+        },
+        userMessageService!,
+        deviceTask: true);
+
+      if (!result)
+        throw RelayControlExceptionFactory.DisconnectRCFailed();
+
+      return result;
+    }
+
+    /// <inheritdoc />
+    public async Task<bool> ConnectResistor(int numberResistor, IUserInteractionService? userMessageService = null)
+    {
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(
+        async () =>
+        {
+          var succes = await _relayManager.ConnectResistor(numberResistor, userMessageService);
+
+          return succes;
+        },
+        userMessageService!,
+        deviceTask: true);
+
+      if (!result)
+        throw ResistorExceptionFactory.ConnectFailed($"R{numberResistor}");
+
+      return result;
+    }
+
+    /// <inheritdoc />
+    public async Task<bool> DisconnectResistor(int numberResistor, IUserInteractionService? userMessageService = null)
+    {
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(
+        async () =>
+        {
+          var succes = await _relayManager.DisconnectResistor(numberResistor, userMessageService);
+
+          return succes;
+        },
+        userMessageService!,
+        deviceTask: true);
+
+      if (!result)
+        throw ResistorExceptionFactory.DisconnectFailed($"R{numberResistor}");
+
+      return result;
+    }
+
+    /// <inheritdoc />
+    public async Task<bool> ConnectCapacitor(int numberCapacitor, IUserInteractionService? userMessageService = null)
+    {
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(
+        async () =>
+        {
+          var succes = await _relayManager.ConnectCapacitor(numberCapacitor, userMessageService);
+
+          return succes;
+        },
+        userMessageService!,
+        deviceTask: true);
+
+      if (!result)
+        throw CapacitorExceptionFactory.ConnectFailed($"C{numberCapacitor}");
+
+      return result;
+    }
+
+    /// <inheritdoc />
+    public async Task<bool> DisconnectCapacitor(int numberCapacitor, IUserInteractionService? userMessageService = null)
+    {
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(
+        async () =>
+        {
+          var succes = await _relayManager.DisconnectCapacitor(numberCapacitor, userMessageService);
+
+          return succes;
+        },
+        userMessageService!,
+        deviceTask: true);
+
+      if (!result)
+        throw CapacitorExceptionFactory.DisconnectFailed($"C{numberCapacitor}");
+
+      return result;
+    }
   }
 }
+

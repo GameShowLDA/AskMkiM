@@ -2,10 +2,12 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Runtime.Base.Multimeter.Measurements.Common;
+using Ask.Device.Runtime.AskMkiM.Function.GPT.Command;
 using static Ask.Device.Runtime.AskMkiM.Function.GPT.Command.FunctionCommandManager;
 using static Ask.LogLib.LoggerUtility;
 
@@ -24,9 +26,8 @@ namespace Ask.Device.Runtime.AskMkiM.Function.GPT.Helper
       double time,
       double timeRamp,
       int delayBeforeCall,
-      double param = 0,
-      double rangeFrom = -1,
-      double rangeTo = -1,
+      ElectricalTestFunction electricalTestFunction,
+      MeasurementRange measurementRange,
       bool waitFullTime = false,
       IUserInteractionService? userMessageService = null)
     {
@@ -40,9 +41,21 @@ namespace Ask.Device.Runtime.AskMkiM.Function.GPT.Helper
 
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        var random = Simulated.GetSimulatedValue(rangeFrom, rangeTo, ElectricalTestFunction.InsulationResistance);
+        var random = Simulated.GetSimulatedValue(measurementRange.LowerBound, measurementRange.UpperBound, electricalTestFunction);
+        await breakDown.DeviceProtocol.QueryAsync(
+          $"{GetCommandSyntax(FunctionCommand.FUNCTION_TEST)} ON",
+          delayBeforeCall: delayBeforeCall);
+        await breakDown.DeviceProtocol.QueryAsync(
+          $"{FunctionCommandManager.GetCommandSyntax(FunctionCommand.MEASURE)} ?",
+          timeout: 500,
+          delayBeforeCall: delayBeforeCall);
+        await breakDown.DeviceProtocol.QueryAsync($"{GetCommandSyntax(FunctionCommand.FUNCTION_TEST)} OFF");
+        await breakDown.DeviceProtocol.QueryAsync(
+          $"{GetCommandSyntax(FunctionCommand.FUNCTION_TEST)} ?",
+          responseDelay: StopPollIntervalMs,
+          timeout: 1000);
         LogInformation($"{nameof(MeasureAsync)}: Устройство в Idle Mode. Возвращаем {random}.", isDeviceLog: true);
-        return (random, "");
+        return (random, string.Empty);
       }
 
       try

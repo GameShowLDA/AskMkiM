@@ -1,4 +1,4 @@
-using Ask.Core.Services.Config.AppSettings;
+﻿using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Config.Base;
 using Ask.Core.Shared.DTO.Devices.Breakdown;
 using Ask.Core.Shared.DTO.Devices.ChassisManager;
@@ -75,11 +75,11 @@ internal sealed class ApplicationAutoConfigurationService
         {
           Id = 1,
           Name = "Устройство УКШ",
-          Description = "Реализовать описание в Ask.Device.Runtime.Device.DeviceBusCommutation",
+          Description = "Реализовать описание в Ask.Device.Runtime.Device.SwitchingDevice.DeviceBusCommutation",
           Number = 20,
           ConnectionDetails = "192.168.1.20",
           DeviceType = DeviceType.SwitchingDevice,
-          DeviceClass = "Ask.Device.Runtime.Device.DeviceBusCommutation",
+          DeviceClass = "Ask.Device.Runtime.Device.SwitchingDevice.DeviceBusCommutation",
           NumberChassis = 1
         }
       ],
@@ -147,7 +147,7 @@ internal sealed class ApplicationAutoConfigurationService
       Number = number,
       ConnectionDetails = connectionDetails,
       DeviceType = DeviceType.RelaySwitchModule,
-      DeviceClass = "Ask.Device.Runtime.Device.ModuleRelayControl",
+      DeviceClass = "Ask.Device.Runtime.Device.RelaySwitchModule.ModuleRelayControl",
       NumberChassis = 1
     };
   }
@@ -166,6 +166,7 @@ internal sealed class ApplicationAutoConfigurationService
     {
       IdleModeExecution = false,
       IsErrorSimulationMode = false,
+      IsHardwareErrorSimulationMode = false,
       StepByStepMode = false,
       StopOnError = false,
       LegacyCompatibilityMode = false
@@ -235,3 +236,4 @@ internal sealed class ApplicationAutoConfigurationService
     await ProtocolConfig.SaveProtocolModel(defaultProtocolSettings);
   }
 }
+

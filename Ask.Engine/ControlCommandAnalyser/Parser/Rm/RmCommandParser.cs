@@ -1,4 +1,5 @@
 using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Config.Base;
 using Ask.Core.Services.Errors.Translation;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Services.Translator;
@@ -130,6 +131,9 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Rm
     {
       var modules = relaySwitchModuleInfoProvider().ToArray();
 
+      if (ExecutionConfig.GetIsLegacyCompatibilityModeEnabled())
+        InitializeCompatibilityPointsMap(modules);
+
       if (modules.Length == 0)
         return RmTranslationOptions.Default;
 
@@ -138,6 +142,48 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Rm
         : new RelaySwitchModuleAddressValidator(modules);
 
       return new RmTranslationOptions(SynonymBindingMode.ObjectThenSynonym, addressMapper);
+    }
+
+    /// <summary>
+    /// Заполняет таблицу соответствия реальных и устаревших адресов точек.
+    /// </summary>
+    /// <param name="modules">Параметры модулей коммутации.</param>
+    private static void InitializeCompatibilityPointsMap(
+      IReadOnlyCollection<LegacyRelaySwitchModuleInfo> modules)
+    {
+      var compatibilityPointsMap = new Dictionary<PointModel, PointModel>();
+      var legacyModuleNumber = 1;
+      var legacyPointNumber = 1;
+
+      foreach (var module in modules.OrderBy(module => module.Number))
+      {
+        for (var realPointNumber = 1; realPointNumber <= module.PointCount; realPointNumber++)
+        {
+          var realPoint = new PointModel
+          {
+            DeviceNumber = module.NumberChassis,
+            ModuleNumber = module.Number,
+            PointNumber = realPointNumber
+          };
+          var legacyPoint = new PointModel
+          {
+            DeviceNumber = module.NumberChassis,
+            ModuleNumber = legacyModuleNumber,
+            PointNumber = legacyPointNumber
+          };
+
+          compatibilityPointsMap[realPoint] = legacyPoint;
+
+          legacyPointNumber++;
+          if (legacyPointNumber > 100)
+          {
+            legacyPointNumber = 1;
+            legacyModuleNumber++;
+          }
+        }
+      }
+
+      LegacyCompatibilityMapper.SetCompatibilityPointsMap(compatibilityPointsMap);
     }
 
     private static IReadOnlyCollection<LegacyRelaySwitchModuleInfo> LoadRelaySwitchModuleInfoFromDatabase()

@@ -1,3 +1,4 @@
+using Ask.Core.Services.Devices;
 using Ask.Core.Shared.DTO.Executor;
 
 namespace Ask.UI.Features.ProtocolNew.Execution;
@@ -15,6 +16,7 @@ internal sealed class ExecutionSession : IDisposable
   {
     Settings = settings;
     Cancellation = new CancellationTokenSource();
+    EquipmentUsage = EquipmentUsageTracker.BeginSession();
   }
 
   /// <summary>
@@ -28,12 +30,21 @@ internal sealed class ExecutionSession : IDisposable
   public CancellationTokenSource Cancellation { get; }
 
   /// <summary>
+  /// Оборудование, использованное текущим запуском.
+  /// </summary>
+  public EquipmentUsageSession EquipmentUsage { get; }
+
+  /// <summary>
   /// Фоновая задача, выполняющая делегат режима.
   /// </summary>
   public Task? ProcessTask { get; set; }
 
   /// <summary>
-  /// Освобождает источник отмены текущего запуска.
+  /// Освобождает ресурсы текущего запуска.
   /// </summary>
-  public void Dispose() => Cancellation.Dispose();
+  public void Dispose()
+  {
+    EquipmentUsage.Dispose();
+    Cancellation.Dispose();
+  }
 }

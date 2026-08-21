@@ -6,6 +6,7 @@ using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Communication.Common.Threading;
 using Ask.Device.Communication.Usb.Discovery;
+using Ask.Device.Emulator;
 using Ask.Device.Runtime.Base.DeviceProtocol;
 
 namespace Ask.Device.Runtime.Base.Connected
@@ -26,7 +27,9 @@ namespace Ask.Device.Runtime.Base.Connected
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        return (true, string.Empty);
+        return IdleHardwareErrorSimulator.ShouldSimulateHardwareError()
+          ? (false, IdleHardwareErrorSimulator.ErrorMessage)
+          : (true, string.Empty);
       }
 
       string pattern = GetUsbSearchPattern();
@@ -47,7 +50,7 @@ namespace Ask.Device.Runtime.Base.Connected
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        return true;
+        return !IdleHardwareErrorSimulator.ShouldSimulateHardwareError();
       }
 
       using (await _device.DeviceProtocol.OperationLock.LockAsync())
@@ -67,9 +70,33 @@ namespace Ask.Device.Runtime.Base.Connected
     /// <inheritdoc />
     public async Task<(bool Connect, string Answer)> InitializeAsync(IUserInteractionService userMessageService = null)
     {
+      if (_device is IMultimeter multimeter)
+      {
+        if (!ExecutionConfig.GetIsIdleModeEnabled())
+        {
+          var multimeterConnection = await ConnectAsync(userMessageService);
+          if (!multimeterConnection.Connect)
+          {
+            return multimeterConnection;
+          }
+        }
+
+        string idleResponse = $"ASK,{_device.Name},0,IDLE";
+        string answer = await DeviceProtocolEmulator.QueryMultimeterAsync(
+          multimeter,
+          _device.ConnectedProfile.Initialize,
+          idleResponse,
+          timeout: _device.ConnectedProfile.Timeout);
+        return string.IsNullOrWhiteSpace(answer)
+          ? (false, $"Нет ответа на команду {_device.ConnectedProfile.Initialize} от {_device.Name}")
+          : (true, answer.Trim());
+      }
+
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        return (true, "Холостой режим");
+        return IdleHardwareErrorSimulator.ShouldSimulateHardwareError()
+          ? (false, IdleHardwareErrorSimulator.ErrorMessage)
+          : (true, "Холостой режим");
       }
 
       var connection = await ConnectAsync(userMessageService);
@@ -87,6 +114,11 @@ namespace Ask.Device.Runtime.Base.Connected
     /// <inheritdoc />
     public async Task<bool> ResetAsync(IUserInteractionService userMessageService = null)
     {
+      if (IdleHardwareErrorSimulator.ShouldSimulateHardwareError())
+      {
+        return false;
+      }
+
       if (_device is IMultimeter multimeter)
       {
         multimeter.TypeMode = MultimeterTypeMode.None;
@@ -104,3 +136,4 @@ namespace Ask.Device.Runtime.Base.Connected
     }
   }
 }
+

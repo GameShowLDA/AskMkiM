@@ -1,4 +1,4 @@
-using System.IO.Ports;
+﻿using System.IO.Ports;
 using System.Net;
 using System.Windows;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
@@ -118,3 +118,4 @@ namespace UI.Controls.Settings.DeviceConfig.Base
     }
   }
 }
+

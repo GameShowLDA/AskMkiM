@@ -50,7 +50,14 @@ namespace Ask.Device.Runtime.Base.Connected
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        return (true, string.Empty);
+        if (_device is IBreakdownTester)
+        {
+          return await InitializeCoreAsync();
+        }
+
+        return IdleHardwareErrorSimulator.ShouldSimulateHardwareError()
+          ? (false, IdleHardwareErrorSimulator.ErrorMessage)
+          : (true, string.Empty);
       }
 
       using (await OperationLock.LockAsync())
@@ -89,7 +96,12 @@ namespace Ask.Device.Runtime.Base.Connected
 
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        return true;
+        if (_device is IBreakdownTester)
+        {
+          return await SendResetCommandsAsync("отключении устройства");
+        }
+
+        return !IdleHardwareErrorSimulator.ShouldSimulateHardwareError();
       }
 
       using (await OperationLock.LockAsync())
@@ -120,7 +132,18 @@ namespace Ask.Device.Runtime.Base.Connected
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        return true;
+        if (_device is IBreakdownTester)
+        {
+          bool isReset = await SendResetCommandsAsync("сбросе устройства");
+          if (isReset)
+          {
+            IsReset?.Invoke();
+          }
+
+          return isReset;
+        }
+
+        return !IdleHardwareErrorSimulator.ShouldSimulateHardwareError();
       }
 
       using (await OperationLock.LockAsync())
@@ -402,3 +425,4 @@ namespace Ask.Device.Runtime.Base.Connected
     private static extern bool CancelIoEx(SafeFileHandle hFile, nint lpOverlapped);
   }
 }
+

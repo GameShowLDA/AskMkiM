@@ -1,4 +1,4 @@
-using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
+﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
@@ -68,3 +68,4 @@ namespace Ask.Device.Runtime.AskMkiM.Function.DeviceBusCommutation.SelfCheck
 
   }
 }
+

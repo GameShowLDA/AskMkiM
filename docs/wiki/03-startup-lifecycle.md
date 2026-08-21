@@ -125,7 +125,6 @@ sequenceDiagram
 `CommandLineParser` поддерживает:
 
 - `admin`;
-- `debug`;
 - путь к файлу поддерживаемого типа.
 
 Поддерживаемые расширения перечислены в `SupportedFileExtensions`.

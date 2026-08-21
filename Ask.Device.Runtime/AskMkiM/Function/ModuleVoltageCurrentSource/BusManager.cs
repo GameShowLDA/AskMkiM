@@ -42,7 +42,7 @@ namespace Ask.Device.Runtime.AskMkiM.Function.ModuleVoltageCurrentSource
 
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        return true;
+        return !IdleHardwareErrorSimulator.ShouldSimulateHardwareError();
       }
 
       await _moduleVoltageCurrentSource.DeviceProtocol.QueryAsync(new DeviceCommand(5, partialCommand.Item1, partialCommand.Item2, 1).ToString());
@@ -66,7 +66,7 @@ namespace Ask.Device.Runtime.AskMkiM.Function.ModuleVoltageCurrentSource
 
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        return true;
+        return !IdleHardwareErrorSimulator.ShouldSimulateHardwareError();
       }
 
       await _moduleVoltageCurrentSource.DeviceProtocol.QueryAsync(new DeviceCommand(6, partialCommand.Item1, partialCommand.Item2, 1).ToString());
@@ -90,7 +90,7 @@ namespace Ask.Device.Runtime.AskMkiM.Function.ModuleVoltageCurrentSource
 
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        return true;
+        return !IdleHardwareErrorSimulator.ShouldSimulateHardwareError();
       }
 
       await _moduleVoltageCurrentSource.DeviceProtocol.QueryAsync(new DeviceCommand(5, partialCommand.Item1, partialCommand.Item2, 2).ToString());
@@ -114,7 +114,7 @@ namespace Ask.Device.Runtime.AskMkiM.Function.ModuleVoltageCurrentSource
 
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        return true;
+        return !IdleHardwareErrorSimulator.ShouldSimulateHardwareError();
       }
 
       await _moduleVoltageCurrentSource.DeviceProtocol.QueryAsync(new DeviceCommand(6, partialCommand.Item1, partialCommand.Item2, 2).ToString());

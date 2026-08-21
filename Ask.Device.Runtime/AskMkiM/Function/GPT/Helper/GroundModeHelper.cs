@@ -13,12 +13,6 @@ namespace Ask.Device.Runtime.AskMkiM.Function.GPT.Helper
 
       try
       {
-        if (ExecutionConfig.GetIsIdleModeEnabled())
-        {
-          LogInformation($"{nameof(SetGroundModeAsync)}: Устройство в Idle Mode. Пропускаем установку.", isDeviceLog: true);
-          return (true, string.Empty);
-        }
-
         var expectedState = state ? "ON" : "OFF";
         var command = $"{GetCommandSyntax(ManualCommand.MANU_UTILITY_GROUNDMODE)} {expectedState}";
 
@@ -63,12 +57,6 @@ namespace Ask.Device.Runtime.AskMkiM.Function.GPT.Helper
 
       try
       {
-        if (ExecutionConfig.GetIsIdleModeEnabled())
-        {
-          LogInformation($"{nameof(GetGroundModeAsync)}: Устройство в Idle Mode. Возвращаем false.", isDeviceLog: true);
-          return false;
-        }
-
         await Task.Delay(delay);
         var query = $"{GetCommandSyntax(ManualCommand.MANU_UTILITY_GROUNDMODE)} ?";
         var response = await breakDown.DeviceProtocol.QueryAsync(query, timeout: 1000);

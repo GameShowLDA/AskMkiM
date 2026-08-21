@@ -46,7 +46,7 @@ namespace UI.Controls.TextEditorControl
 
     public TextEditorUI GetTextEditor()
     {
-      var foundDockItem = DockManager.DockItems.FirstOrDefault(item => item.IsActiveItem == true);
+      var foundDockItem = DockManager.DockItems.FirstOrDefault(item => item.IsSelected == true);
       if (foundDockItem != null)
       {
         if (foundDockItem.Content is TextEditorUI textEditor)

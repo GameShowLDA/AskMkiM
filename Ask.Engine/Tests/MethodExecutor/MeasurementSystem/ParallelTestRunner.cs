@@ -1,9 +1,9 @@
-﻿using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
-using Ask.Core.Shared.DTO.Protocol;
+using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Engine.Base.GroupMethod;
+using Ask.Engine.ControlCommandExecutor.Execution;
 using static Ask.Engine.Tests.Base.UIValidationHelper;
 
 namespace Ask.Engine.Tests.MethodExecutor.MeasurementSystem
@@ -92,7 +92,7 @@ namespace Ask.Engine.Tests.MethodExecutor.MeasurementSystem
         await Task.WhenAll(tasks);
 
         await _measurementAction(_protocolUI, dataModel);
-        await _protocolUI.ShowMessageAsync(new ShowMessageModel($"\tОбщий сброс точек"));
+        await ExecutionMessages.PublishGeneralPointsResetAsync(_protocolUI);
 
         await ResetAllPointsAsync(groupedPoints, cancellationToken);
       }
@@ -106,7 +106,10 @@ namespace Ask.Engine.Tests.MethodExecutor.MeasurementSystem
     {
       string bitString = GetBitString();
       await _protocolUI.AppendEmptyLineAsync();
-      await _protocolUI.ShowMessageAsync(new ShowMessageModel($"Проверка разряда {step + 1} ({bitString})"));
+      await CommandMessages.PublishDischargeCheckBlockAsync(
+        _protocolUI,
+        step + 1,
+        bitString);
     }
 
     /// <summary>
@@ -154,7 +157,7 @@ namespace Ask.Engine.Tests.MethodExecutor.MeasurementSystem
         await RelayPointBatchCommutator.ConnectPointsAsync(module, currentPoints, currentBus.Value, _protocolUI);
       }
 
-      await Task.Delay(500);
+      await _protocolUI.DelayWithPauseAsync(TimeSpan.FromMilliseconds(500));
     }
 
     /// <summary>

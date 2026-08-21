@@ -8,7 +8,7 @@ using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Shared.Metadata.Enums.HotkeysEnums;
-using Ask.UI.Infrastructure.UI.Overlay.Drawer.Runtime;
+using Ask.Engine.ControlCommandExecutor.Execution;
 using Ask.UI.Features.ProtocolNew.Execution;
 using Ask.UI.Features.ProtocolNew.Hotkeys;
 using Ask.UI.Features.ProtocolNew.Protocol;
@@ -26,7 +26,7 @@ namespace Ask.UI.Controls.ProtocolNew
   /// Класс управления пользовательским интерфейсом протокола выполнения.
   /// Обеспечивает взаимодействие с пользователем, управление процессами и обработку сообщений.
   /// </summary>
-  public partial class ProtocolUI : UserControl, ITextAdapter, IProtocolHotkeyContext
+  public partial class ProtocolUI : UserControl, ITextAdapter, IProtocolHotkeyContext, IExecutionCommandJumpGate
   {
     static public event Action<object, KeyEventArgs> AnotherKeyPressed;
     private bool loaded = false;
@@ -64,6 +64,7 @@ namespace Ask.UI.Controls.ProtocolNew
         control.header.Text = e.NewValue as string;
         control.headerFile.Text = e.NewValue as string;
         control.FileName.Text = e.NewValue as string;
+        control.UpdateInspectionProtocolTitle();
       }
     }
 
@@ -143,7 +144,7 @@ namespace Ask.UI.Controls.ProtocolNew
     {
       IsTopMenuVisible = isTopMenuVisible;
       Items = new ObservableCollection<object>();
-      ActionExecutor = Task.Run(() => ActionExecutor.CreateInstanceAsync(this)).Result;
+      ActionExecutor = ActionExecutor.CreateInstance(this);
       _controlButtonHandler = OnControlButtonPressed;
       _stepByStepModeChangedHandler = e => EventAggregator_StepByStepModeChanged(e.IsEnabled);
       InitializeInternal();
@@ -163,6 +164,7 @@ namespace Ask.UI.Controls.ProtocolNew
 
       loaded = true;
       InitializeComponent();
+      LayoutUpdated += ProtocolUI_LayoutUpdated;
       _protocolStorage = new ProtocolStorageService();
       _inspectionProtocolAreaController = new InspectionProtocolAreaController(_protocolStorage, this);
       inspectionProtocolTextBox.SetFileType(FileType.InspectionProtocol);
@@ -170,7 +172,6 @@ namespace Ask.UI.Controls.ProtocolNew
       ClearInspectionProtocol();
       this.DataContext = this;
 
-      loopButton.Visibility = Visibility.Collapsed;
       RepeatButtonElement.Visibility = Visibility.Collapsed;
 
       SetupButtons();
@@ -210,6 +211,56 @@ namespace Ask.UI.Controls.ProtocolNew
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
       AttachEventSubscriptions();
+      UpdateProtocolManagerLayout();
+    }
+
+    private void ProtocolUI_LayoutUpdated(object? sender, EventArgs e)
+    {
+      UpdateProtocolManagerLayout();
+    }
+
+    private void UpdateProtocolManagerLayout()
+    {
+      if (ProtocolManager.Visibility != Visibility.Visible
+          || InspectionProtocolManager.Visibility != Visibility.Visible
+          || InspectionProtocolSplitter.Visibility != Visibility.Visible)
+      {
+        SetProtocolManagerColumnWidth(ExecutionProtocolManagerColumn, new GridLength(1, GridUnitType.Star));
+        SetProtocolManagerColumnWidth(ProtocolManagerSplitterColumn, new GridLength(0));
+        SetProtocolManagerColumnWidth(InspectionProtocolManagerColumn, new GridLength(0));
+        return;
+      }
+
+      double splitterLeft = InspectionProtocolSplitter
+        .TranslatePoint(new Point(0, 0), ProtocolManager)
+        .X;
+      double inspectionLeft = InspectionProtocolPanel
+        .TranslatePoint(new Point(0, 0), ProtocolManager)
+        .X;
+
+      if (!double.IsFinite(splitterLeft)
+          || !double.IsFinite(inspectionLeft)
+          || splitterLeft <= 0
+          || inspectionLeft <= splitterLeft)
+      {
+        return;
+      }
+
+      SetProtocolManagerColumnWidth(ExecutionProtocolManagerColumn, new GridLength(splitterLeft));
+      SetProtocolManagerColumnWidth(
+        ProtocolManagerSplitterColumn,
+        new GridLength(inspectionLeft - splitterLeft));
+      SetProtocolManagerColumnWidth(InspectionProtocolManagerColumn, new GridLength(1, GridUnitType.Star));
+    }
+
+    private static void SetProtocolManagerColumnWidth(ColumnDefinition column, GridLength width)
+    {
+      bool isSameValue = column.Width.GridUnitType == width.GridUnitType
+                         && Math.Abs(column.Width.Value - width.Value) < 0.1;
+      if (!isSameValue)
+      {
+        column.Width = width;
+      }
     }
 
     private void AttachEventSubscriptions()
@@ -240,33 +291,49 @@ namespace Ask.UI.Controls.ProtocolNew
 
     /// <inheritdoc />
     bool IProtocolHotkeyContext.CanExit =>
-      StopButtonElement.Visibility == Visibility.Visible
-      || ContinueButtonElement.Visibility == Visibility.Visible
-      || PauseButtonElement.Visibility == Visibility.Visible;
+      !_isRetryOrContinueInteraction
+      && (StopButtonElement.Visibility == Visibility.Visible
+          || ContinueButtonElement.Visibility == Visibility.Visible
+          || PauseButtonElement.Visibility == Visibility.Visible);
 
     /// <inheritdoc />
     bool IProtocolHotkeyContext.CanRepeat => RepeatButtonElement.Visibility == Visibility.Visible;
 
     /// <inheritdoc />
-    void IProtocolHotkeyContext.Start() => KeyboardManager.OnStartPressed?.Invoke();
+    bool IProtocolHotkeyContext.CanJumpToCommand =>
+      !_isRetryOrContinueInteraction
+      && ContinueButtonElement.Visibility == Visibility.Visible;
 
     /// <inheritdoc />
-    void IProtocolHotkeyContext.RunOrPause() => KeyboardManager.OnRunOrPausePressed?.Invoke();
+    void IProtocolHotkeyContext.Start() => StartFromHotkey();
+
+    /// <inheritdoc />
+    void IProtocolHotkeyContext.RunOrPause() => HandleRunOrPause();
 
     /// <inheritdoc />
     void IProtocolHotkeyContext.Step(bool isStepInto) => HandleStepModeStart(isStepInto);
 
     /// <inheritdoc />
-    void IProtocolHotkeyContext.Pause() => KeyboardManager.OnPausePressed?.Invoke();
+    void IProtocolHotkeyContext.Pause() => PauseFromHotkey();
 
     /// <inheritdoc />
-    void IProtocolHotkeyContext.Continue() => KeyboardManager.OnContinuePressed?.Invoke();
+    void IProtocolHotkeyContext.Continue() => ContinueFromHotkey();
 
     /// <inheritdoc />
-    void IProtocolHotkeyContext.Exit() => KeyboardManager.OnExitPressed?.Invoke();
+    void IProtocolHotkeyContext.Exit() => ExitFromHotkey();
 
     /// <inheritdoc />
-    void IProtocolHotkeyContext.Repeat() => KeyboardManager.OnRepeatPressed?.Invoke();
+    void IProtocolHotkeyContext.Repeat() => RepeatFromHotkey();
+
+    /// <inheritdoc />
+    void IProtocolHotkeyContext.JumpToCommand() => RequestCommandJump();
+
+    /// <inheritdoc />
+    bool IExecutionCommandJumpGate.IsExecutionPaused => ActionExecutor.IsPaused;
+
+    /// <inheritdoc />
+    void IExecutionCommandJumpGate.InterruptPauseForCommandJump() =>
+      ActionExecutor.InterruptPauseForCommandJump();
 
     /// <inheritdoc />
     void IProtocolHotkeyContext.NotifyOtherKey(object sender, KeyEventArgs e) =>
@@ -306,6 +373,26 @@ namespace Ask.UI.Controls.ProtocolNew
       header.Visibility = vis;
       ContentPanel.Visibility = vis;
       BigButtonsPanel.Visibility = vis;
+    }
+
+    private void CommandJumpButtonTop_Click(object sender, RoutedEventArgs e) => RequestCommandJump();
+
+    private async void RequestCommandJump()
+    {
+      if (StepControlManager.IsBreakpointStepModeActive && StepControlManager.BreakpointCommandInfo != null)
+      {
+        ExecutionEventAdapter.RaiseBreakpointF4Pressed(StepControlManager.BreakpointCommandInfo);
+        return;
+      }
+
+      try
+      {
+        await CommandExecutionManager.RequestPausedCommandJumpAsync();
+      }
+      catch (Exception exception)
+      {
+        LogException("Ошибка перехода к выбранной команде", exception);
+      }
     }
 
     private void OnControlButtonPressed(ExecutionEvents.ControlButtonPressed e)
@@ -350,7 +437,7 @@ namespace Ask.UI.Controls.ProtocolNew
     {
       if (StartButtonElement.Visibility == Visibility.Visible)
       {
-        KeyboardManager.OnStartPressed?.Invoke();
+        StartFromHotkey();
         return;
       }
 
@@ -359,11 +446,11 @@ namespace Ask.UI.Controls.ProtocolNew
       // если видна "Пауза" — ставим на паузу (в т.ч. во время F10-run).
       if (ContinueButtonElement.Visibility == Visibility.Visible)
       {
-        KeyboardManager.OnContinuePressed?.Invoke();
+        ContinueFromHotkey();
       }
       else if (PauseButtonElement.Visibility == Visibility.Visible)
       {
-        KeyboardManager.OnPausePressed?.Invoke();
+        PauseFromHotkey();
       }
     }
 
@@ -414,6 +501,54 @@ namespace Ask.UI.Controls.ProtocolNew
       OpenLatestProtocolFolder();
     }
 
+    private void OpenInspectionFileButton_Click(object sender, RoutedEventArgs e)
+      => OpenInspectionProtocolInEditor();
+
+    /// <summary>
+    /// Открывает последний итоговый протокол в редакторе.
+    /// </summary>
+    public void OpenInspectionProtocolInEditor()
+    {
+      try
+      {
+        OpenProtocolInEditor(_protocolStorage.ResolveLatestInspectionProtocolPath());
+      }
+      catch (Exception ex)
+      {
+        LogException("Ошибка при открытии протокола проверки в редакторе", ex);
+      }
+    }
+
+    private void OpenInspectionFolderButton_Click(object sender, RoutedEventArgs e)
+      => OpenInspectionProtocolFolder();
+
+    /// <summary>
+    /// Открывает папку последнего итогового протокола.
+    /// </summary>
+    public void OpenInspectionProtocolFolder()
+    {
+      try
+      {
+        OpenProtocolFolder(_protocolStorage.ResolveLatestInspectionProtocolPath());
+      }
+      catch (Exception ex)
+      {
+        LogException("Ошибка при открытии папки протокола проверки", ex);
+      }
+    }
+
+    private void PrintInspectionButton_Click(object sender, RoutedEventArgs e)
+    {
+      try
+      {
+        PrintUtility.PrintProtocol(_protocolStorage.InspectionProtocolText);
+      }
+      catch (Exception ex)
+      {
+        LogException("Ошибка печати протокола проверки", ex);
+      }
+    }
+
     private void PrintButton_Click(object sender, RoutedEventArgs e)
     {
       if (PrintRequested != null)
@@ -436,13 +571,7 @@ namespace Ask.UI.Controls.ProtocolNew
     {
       try
       {
-        var latestProtocolPath = ResolveLatestProtocolPath();
-        if (string.IsNullOrWhiteSpace(latestProtocolPath))
-        {
-          return;
-        }
-
-        FileInteractionEventAdapter.RaiseOpenFileInEditorAgain(latestProtocolPath);
+        OpenProtocolInEditor(ResolveLatestProtocolPath());
       }
       catch (Exception ex)
       {
@@ -454,23 +583,7 @@ namespace Ask.UI.Controls.ProtocolNew
     {
       try
       {
-        var latestProtocolPath = ResolveLatestProtocolPath();
-        if (!string.IsNullOrWhiteSpace(latestProtocolPath) && File.Exists(latestProtocolPath))
-        {
-          Process.Start(new ProcessStartInfo("explorer.exe", $"/select,\"{Path.GetFullPath(latestProtocolPath)}\"")
-          {
-            UseShellExecute = true
-          });
-          return;
-        }
-
-        var historyDirectory = _protocolStorage.GetHistoryDirectory();
-        Directory.CreateDirectory(historyDirectory);
-
-        Process.Start(new ProcessStartInfo("explorer.exe", $"\"{historyDirectory}\"")
-        {
-          UseShellExecute = true
-        });
+        OpenProtocolFolder(ResolveLatestProtocolPath());
       }
       catch (Exception ex)
       {
@@ -481,6 +594,44 @@ namespace Ask.UI.Controls.ProtocolNew
     private string? ResolveLatestProtocolPath()
     {
       return _protocolStorage.ResolveLatestExecutionProtocolPath();
+    }
+
+    private static void OpenProtocolInEditor(string? protocolPath)
+    {
+      if (!string.IsNullOrWhiteSpace(protocolPath))
+      {
+        FileInteractionEventAdapter.RaiseOpenFileInEditorAgain(protocolPath);
+      }
+    }
+
+    private void OpenProtocolFolder(string? protocolPath)
+    {
+      if (!string.IsNullOrWhiteSpace(protocolPath) && File.Exists(protocolPath))
+      {
+        Process.Start(new ProcessStartInfo("explorer.exe", $"/select,\"{Path.GetFullPath(protocolPath)}\"")
+        {
+          UseShellExecute = true
+        });
+        return;
+      }
+
+      var historyDirectory = _protocolStorage.GetHistoryDirectory();
+      Directory.CreateDirectory(historyDirectory);
+
+      Process.Start(new ProcessStartInfo("explorer.exe", $"\"{historyDirectory}\"")
+      {
+        UseShellExecute = true
+      });
+    }
+
+    private void UpdateInspectionProtocolTitle()
+    {
+      if (InspectionFileName == null)
+      {
+        return;
+      }
+
+      InspectionFileName.Text = $"Протокол проверки {Header} от {DateTime.Now:dd.MM.yyyy}";
     }
   }
 }

@@ -7,7 +7,7 @@ namespace MainWindowProgram.ViewModels
 {
   /// <summary>
   /// ViewModel для управления окном приложения.
-  /// Содержит команды для изменения состояния окна, его закрытия, перетаскивания и адаптации интерфейса.
+  /// Содержит команды для изменения состояния окна, его закрытия и перетаскивания.
   /// </summary>
   public partial class WindowViewModel : ObservableObject
   {
@@ -44,12 +44,6 @@ namespace MainWindowProgram.ViewModels
     /// </summary>
     [RelayCommand]
     private async Task CloseAsync() => await _service.CloseApplicationAsync();
-
-    /// <summary>
-    /// Команда для адаптации размера шрифта главного меню в зависимости от размеров окна.
-    /// </summary>
-    [RelayCommand]
-    private async Task AdjustAsync() => await _service.AdjustMainMenuFontAsync();
 
     /// <summary>
     /// Команда, вызываемая при закрытии окна (с CancelEventArgs).

@@ -92,7 +92,7 @@
             <Setter Property="Margin" Value="0,0,10,0"/>
             <Setter Property="MinWidth" Value="0"/>
             <Setter Property="MaxWidth" Value="260"/>
-            <Setter Property="Height" Value="{Binding ActualHeight, ElementName=mainMenu}"/>
+            <Setter Property="Height" Value="{Binding ActualHeight, ElementName=File}"/>
             <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
             <Setter Property="Background" Value="#12000000"/>
             <Setter Property="BorderBrush" Value="#16000000"/>
@@ -175,10 +175,6 @@
     </Window.Resources>
 
     <i:Interaction.Triggers>
-        <i:EventTrigger EventName="SizeChanged">
-            <i:InvokeCommandAction Command="{Binding Window.AdjustCommand}" />
-        </i:EventTrigger>
-
         <i:EventTrigger EventName="Closing">
             <i:InvokeCommandAction 
                 Command="{Binding Window.ClosingCommand}" 
@@ -227,22 +223,23 @@
             </Grid.RowDefinitions>
 
             <Grid 
-            x:Name="TopPanel" Background="{DynamicResource BackgroundBrushes}" Cursor="SizeAll">
-
-                <i:Interaction.Triggers>
-                    <i:EventTrigger EventName="MouseLeftButtonDown">
-                        <i:InvokeCommandAction Command="{Binding Window.DragMoveCommand}" />
-                    </i:EventTrigger>
-                </i:Interaction.Triggers>
+            x:Name="TopPanel" Background="{DynamicResource BackgroundBrushes}" Cursor="SizeAll"
+            PreviewMouseLeftButtonDown="TopPanel_PreviewMouseLeftButtonDown">
 
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="*" MinWidth="50"/>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="0"/>
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
                 <Menu Name="mainMenu" VerticalAlignment="Center" VerticalContentAlignment="Center" FontSize="16" Background="Transparent" 
                 Foreground="{DynamicResource MainTitleSolidColorBrush}" Grid.Column="0" BorderThickness="0">
+                    <Menu.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel Orientation="Horizontal"
+                                       KeyboardNavigation.DirectionalNavigation="Cycle"/>
+                        </ItemsPanelTemplate>
+                    </Menu.ItemsPanel>
 
                     <MenuItem Header="{Binding Source={StaticResource LS_Menu_File}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Name="File" Uid="1" Tag="menuHeader_1">
 
@@ -351,7 +348,17 @@
                         <MenuItem Header="{Binding Source={StaticResource LS_Menu_Help_FastMenuCommand}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Name="FastMenuCommand" Command="{Binding Settings.HelpOpenFastMenuCommand}"/>
                     </MenuItem>
 
-                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Admin}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Name="Admin" Command="{Binding Admin.AdminPanelCommand}">
+                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Admin}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Name="Admin">
+                        <MenuItem Header="Сервисные утилиты"
+                                  Style="{DynamicResource StyleMenuItem}"
+                                  Command="{Binding Admin.ServiceUtilitiesCommand}"/>
+                        <MenuItem Header="База данных"
+                                  Style="{DynamicResource StyleMenuItem}"
+                                  Command="{Binding Admin.DatabaseCommand}"/>
+                        <MenuItem Header="Сопротивление МКР"
+                                  Style="{DynamicResource StyleMenuItem}"
+                                  Command="{Binding Admin.ResistanceCommand}"/>
+                        <Separator Style="{DynamicResource SeparatorMenuStyle}"/>
                         <!--<MenuItem Header="{Binding Source={StaticResource LS_Menu_Admin_Management}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Name="DeviceManagment">
                         <MenuItem Header="GPT" Style="{DynamicResource StyleMenuItem}" Name="GptManagment" Command="{Binding Admin.GptCommand}"/>
                         <MenuItem Header="МеШ" Style="{DynamicResource StyleMenuItem}" Name="ModuleMeshMenuItem" Command="{Binding Service.ServicesTestMeshCommand}" />
@@ -374,17 +381,12 @@
                 <StackPanel  
                 Background="Transparent" 
                 Grid.Column="2">
-                    <i:Interaction.Triggers>
-                        <i:EventTrigger EventName="MouseLeftButtonDown">
-                            <i:InvokeCommandAction Command="{Binding Window.DragMoveCommand}" />
-                        </i:EventTrigger>
-                    </i:Interaction.Triggers>
                 </StackPanel>
 
                 <StackPanel Name="ButtonsPanel"
                     Orientation="Horizontal" 
                     HorizontalAlignment="Right" 
-                    VerticalAlignment="Center" 
+                    VerticalAlignment="Top"
                     Grid.Column="2" 
                     Background="Transparent"
                     >
@@ -428,8 +430,8 @@
 
                     <Button x:Name="DarkThemeButton"
                         Style="{StaticResource DarkThemeToggleButtonStyle}"
-                        Width="{Binding ActualHeight, ElementName=mainMenu}"
-                        Height="{Binding ActualHeight, ElementName=mainMenu}"
+                        Width="{Binding ActualHeight, ElementName=File}"
+                        Height="{Binding ActualHeight, ElementName=File}"
                         Visibility="Collapsed"
                         ToolTip="Тёмная тема"
                         PreviewMouseDown="ThemeToggleButton_PreviewMouseDown">
@@ -440,8 +442,8 @@
 
                     <Button x:Name="LightThemeButton"
                         Style="{StaticResource LightThemeToggleButtonStyle}"
-                        Width="{Binding ActualHeight, ElementName=mainMenu}"
-                        Height="{Binding ActualHeight, ElementName=mainMenu}"
+                        Width="{Binding ActualHeight, ElementName=File}"
+                        Height="{Binding ActualHeight, ElementName=File}"
                         Visibility="Collapsed"
                         ToolTip="Светлая тема"
                         PreviewMouseDown="ThemeToggleButton_PreviewMouseDown">
@@ -452,8 +454,8 @@
 
                     <Button x:Name="minimizeButton"
                         Style="{DynamicResource StyleWindowsButtons}"
-                        Width="{Binding ActualHeight, ElementName=mainMenu}" 
-                        Height="{Binding ActualHeight, ElementName=mainMenu}" 
+                        Width="{Binding ActualHeight, ElementName=File}"
+                        Height="{Binding ActualHeight, ElementName=File}"
                         Command="{Binding Window.MinimizeCommand}">
                         <askUiIcons:WindowMinimizeIcon Size="14"
                             IsHovering="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=IsMouseOver}"
@@ -462,8 +464,8 @@
 
                     <Button x:Name="maximizeButton"
                         Style="{DynamicResource StyleWindowsButtons}"
-                        Width="{Binding ActualHeight, ElementName=mainMenu}" 
-                        Height="{Binding ActualHeight, ElementName=mainMenu}"
+                        Width="{Binding ActualHeight, ElementName=File}"
+                        Height="{Binding ActualHeight, ElementName=File}"
                         Command="{Binding Window.MaximizeCommand}">
                         <Grid Width="18" Height="18">
                             <askUiIcons:WindowMaximizeIcon Size="14"
@@ -499,8 +501,8 @@
 
                     <Button x:Name="exitButton"
                         Style="{DynamicResource StyleWindowsButtons}"
-                        Width="{Binding ActualHeight, ElementName=mainMenu}" 
-                        Height="{Binding ActualHeight, ElementName=mainMenu}"
+                        Width="{Binding ActualHeight, ElementName=File}"
+                        Height="{Binding ActualHeight, ElementName=File}"
                         Command="{Binding Window.CloseCommand}">
                         <askUiIcons:WindowCloseIcon Size="14"
                             IsHovering="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=IsMouseOver}"
@@ -621,7 +623,7 @@
             </Grid>
         </Grid>
 
-        <askUiNotifications:WindowNotificationManagerControl Panel.ZIndex="9998" />
+        <askUiNotifications:WindowNotificationManagerControl Panel.ZIndex="10000" />
         <askUi:DrawerControl Panel.ZIndex="9999" />
     </Grid>
 </Window>

@@ -1,7 +1,15 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Device.Runtime.Base.DeviceProtocol;
+using Ask.Device.Runtime.AskMkiM.Function.ManagerChassis;
+using Ask.Device.Runtime.AskMkiM.Function.ModuleRelayControl;
+using Ask.Device.ResponseProcessor.ModuleRelayControl.ResponseProcessing;
+using Ask.Device.ResponseProcessor.DeviceBusCommutation.ResponseProcessing;
+using Ask.Device.Runtime.AskMkiM.Function.DeviceBusCommutation;
 
 namespace Ask.Device.Runtime.Base.Connected
 {
@@ -32,19 +40,72 @@ namespace Ask.Device.Runtime.Base.Connected
     /// <inheritdoc />
     public async Task<(bool Connect, string Answer)> InitializeAsync(IUserInteractionService userMessageService = null)
     {
+      if (_device is IRelaySwitchModule module)
+      {
+        string response = await new ModuleRelayControlQueryExecutor(module).QueryAsync(
+          _device.ConnectedProfile.Initialize,
+          _device.ConnectedProfile.Timeout);
+        return ValidateInitialization(response);
+      }
+
+      if (_device is IChassisManager chassis)
+      {
+        string response = await new ChassisQueryExecutor(chassis).QueryAsync(
+          _device.ConnectedProfile.Initialize,
+          _device.ConnectedProfile.Timeout);
+        return ValidateInitialization(response);
+      }
+
+      if (_device is ISwitchingDevice switchingDevice)
+      {
+        string response = await new DeviceBusCommutationQueryExecutor(switchingDevice).QueryAsync(
+          _device.ConnectedProfile.Initialize,
+          _device.ConnectedProfile.Timeout);
+        return ValidateInitialization(response);
+      }
+
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        return (true, string.Empty);
+        return IdleHardwareErrorSimulator.ShouldSimulateHardwareError()
+          ? (false, IdleHardwareErrorSimulator.ErrorMessage)
+          : (true, string.Empty);
       }
 
       string result = await _device.DeviceProtocol.QueryAsync(_device.ConnectedProfile.Initialize, timeout: _device.ConnectedProfile.Timeout);
-      if (string.IsNullOrEmpty(result))
+      return ValidateInitialization(result);
+    }
+
+    private (bool Connect, string Answer) ValidateInitialization(string response)
+    {
+      if (string.IsNullOrEmpty(response))
       {
         IsReset?.Invoke();
         return (false, $"Нет ответа от устройства {_device.Name}({_device.Number})");
       }
 
-      var initializationResult = _device.InitializationValidationDelegate(result, _device);
+      if (_device is IRelaySwitchModule module)
+      {
+        bool success = ModuleRelayControlResponseProcessor.CheckInitialization(response, module);
+        if (!success)
+        {
+          IsReset?.Invoke();
+        }
+
+        return (success, success ? string.Empty : response);
+      }
+
+      if (_device is ISwitchingDevice switchingDevice)
+      {
+        bool success = DeviceBusCommutationResponseProcessor.CheckInitialization(response, switchingDevice);
+        if (!success)
+        {
+          IsReset?.Invoke();
+        }
+
+        return (success, success ? string.Empty : response);
+      }
+
+      var initializationResult = _device.InitializationValidationDelegate(response, _device);
       if (initializationResult.Success)
       {
         return (true, string.Empty);
@@ -69,23 +130,59 @@ namespace Ask.Device.Runtime.Base.Connected
     /// <inheritdoc />
     public async Task<bool> ResetAsync(IUserInteractionService userMessageService = null)
     {
+      if (_device is IRelaySwitchModule module)
+      {
+        string response = await new ModuleRelayControlQueryExecutor(module).QueryAsync(
+          _device.ConnectedProfile.Reset,
+          _device.ConnectedProfile.Timeout);
+        return ValidateReset(response);
+      }
+
+      if (_device is IChassisManager chassis)
+      {
+        string response = await new ChassisQueryExecutor(chassis).QueryAsync(
+          _device.ConnectedProfile.Reset,
+          _device.ConnectedProfile.Timeout);
+        return ValidateReset(response);
+      }
+
+      if (_device is ISwitchingDevice switchingDevice)
+      {
+        string response = await new DeviceBusCommutationQueryExecutor(switchingDevice).QueryAsync(
+          _device.ConnectedProfile.Reset,
+          _device.ConnectedProfile.Timeout);
+        return ValidateReset(response);
+      }
+
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
+        if (IdleHardwareErrorSimulator.ShouldSimulateHardwareError())
+        {
+          return false;
+        }
+
         IsReset?.Invoke();
         return true;
       }
 
       string result = await _device.DeviceProtocol.QueryAsync(_device.ConnectedProfile.Reset, timeout: _device.ConnectedProfile.Timeout);
-      var resetResult = _device.ResetValidationDelegate(result, _device);
+      return ValidateReset(result);
+    }
+
+    private bool ValidateReset(string response)
+    {
+      bool resetResult = _device switch
+      {
+        IRelaySwitchModule module => ModuleRelayControlResponseProcessor.CheckReset(response, module),
+        ISwitchingDevice switchingDevice => DeviceBusCommutationResponseProcessor.CheckReset(response, switchingDevice),
+        _ => _device.ResetValidationDelegate(response, _device)
+      };
       IsReset?.Invoke();
 
-      if (resetResult)
-      {
-        return true;
-      }
-
-      return false;
+      return resetResult;
     }
 
   }
 }
+
+

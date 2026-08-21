@@ -63,6 +63,9 @@ namespace Ask.DataBase.Provider.Migrations
                     b.Property<int>("SiMaxVoltage")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("SystemInsulationResistanceGOhm")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("Id");
 
                     b.ToTable("BreakdownTesters");
@@ -787,6 +790,9 @@ namespace Ask.DataBase.Provider.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<bool>("IsErrorSimulationMode")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsHardwareErrorSimulationMode")
                         .HasColumnType("INTEGER");
 
                     b.Property<bool>("LegacyCompatibilityMode")

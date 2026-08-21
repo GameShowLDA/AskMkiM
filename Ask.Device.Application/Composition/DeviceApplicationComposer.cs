@@ -74,6 +74,13 @@ namespace Ask.Device.Application.Composition
           break;
       }
 
+      if (device.ConnectableManager is not EquipmentTrackingConnectable)
+      {
+        device.ConnectableManager = new EquipmentTrackingConnectable(
+          device,
+          device.ConnectableManager);
+      }
+
       return device;
     }
   }

@@ -47,8 +47,8 @@ namespace UI.Services
         TextEditorContainer runContainer = _fileManager.ContainerService.GetEditorContainer(editorType)
           ?? _fileManager.ContainerService.CreateEditorContainer(editorType, TypeWindow.DeviceControl);
 
-        _fileManager.DockItemService.ShowEditorDockItem(runControl.FileName, runContainer, runControl.View, editorType);
-        _fileManager.ControlManagerService.ShowEditorContainer(runContainer, EditorType.Translator);
+        await _fileManager.DockItemService.ShowEditorDockItem(runControl.FileName, runContainer, runControl.View, editorType); 
+        _fileManager.ControlManagerService.ShowEditorContainer(runContainer, editorType);
       }
       catch (Exception ex)
       {

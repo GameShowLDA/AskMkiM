@@ -20,6 +20,15 @@ internal sealed class InspectionProtocolBuilder : IInspectionProtocolBuilder
     message.AppendLine($"\tВремя выполнения: {settings.ExecutionDuration:hh\\:mm\\:ss\\:fff}");
     message.AppendLine();
 
+    if (settings.InputParameters.Count > 0)
+    {
+      message.AppendLine("Введённые данные:");
+      foreach (var parameter in settings.InputParameters)
+        message.AppendLine($"\t{parameter}");
+
+      message.AppendLine();
+    }
+
     if (settings.ExecutionErrors.Count == 0)
     {
       message.AppendLine("\tЗаключение: ошибок не обнаружено");
@@ -29,7 +38,7 @@ internal sealed class InspectionProtocolBuilder : IInspectionProtocolBuilder
     message.AppendLine("Заключение:");
     for (var index = 0; index < settings.ExecutionErrors.Count; index++)
     {
-      message.AppendLine($"\t{index + 1}. {settings.ExecutionErrors[index]}[БРАК]");
+      message.AppendLine($"\t{index + 1}. {settings.ExecutionErrors[index]} [БРАК]");
     }
 
     return message.ToString();

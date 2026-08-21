@@ -1,10 +1,10 @@
-using Ask.Core.Services.Config.AppSettings;
+﻿using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Runtime.AskMkiM.Base.Commands;
-using Ask.Device.Runtime.AskMkiM.Ethernet.Udp.Broadcast;
+using Ask.Device.ResponseProcessor.DeviceBusCommutation.ResponseProcessing;
 using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.Device.Runtime.AskMkiM.Function.DeviceBusCommutation
@@ -14,27 +14,37 @@ namespace Ask.Device.Runtime.AskMkiM.Function.DeviceBusCommutation
   /// </summary>
   public class ConnectorManager : IConnectorDeviceBusCommutation
   {
+    /// <summary>
+    /// Состояние подключений устройств к шинам.
+    /// </summary>
     private readonly DeviceBusConnectionStateStore connectionState = new DeviceBusConnectionStateStore();
+
+    /// <summary>
+    /// Шина, используемая для регистрации подключения пробойной установки.
+    /// </summary>
     private const SwitchingBusNew BreakdownBus = SwitchingBusNew.AB1;
 
     /// <summary>
     /// Устройство коммутации шин.
     /// </summary>
     private readonly Device.SwitchingDevice.DeviceBusCommutation _deviceBusCommutation;
+    private readonly DeviceBusCommutationQueryExecutor queryExecutor;
 
     /// <summary>
-    /// Инициализирует новый экземпляр класса <see cref="BusManager"/>.
+    /// Инициализирует новый экземпляр класса <see cref="ConnectorManager"/>.
     /// </summary>
-    /// <param name="deviceBusCommutation">Экземпляр устройства коммутации шин.</param>
+    /// <param name="deviceBusCommutation">Устройство коммутации шин.</param>
     public ConnectorManager(Device.SwitchingDevice.DeviceBusCommutation deviceBusCommutation)
     {
       _deviceBusCommutation = deviceBusCommutation;
+      queryExecutor = new DeviceBusCommutationQueryExecutor(deviceBusCommutation);
       _deviceBusCommutation.ConnectableManager.IsReset += ConnectableManager_IsReset;
-      UdpBroadcastCommandSender.ResetAllDevicesSent += ConnectableManager_IsReset;
       ConnectableManager_IsReset();
     }
 
-    /// <inheritdoc />
+    /// <summary>
+    /// Сбрасывает сохранённые состояния подключений после сброса устройства.
+    /// </summary>
     private void ConnectableManager_IsReset()
     {
       connectionState.Reset();
@@ -47,11 +57,11 @@ namespace Ask.Device.Runtime.AskMkiM.Function.DeviceBusCommutation
     {
       foreach (var connected in connectionState.GetConnected(DeviceBusConnectionType.Multimeter))
       {
-        var disconnectResult = await DisconnectMultimeter(connected.Bus);
+        var disconnectResult = await DisconnectMultimeter(connected.Bus, userMessageService);
         connectionState.Set(DeviceBusConnectionType.Multimeter, connected.Bus, false);
       }
 
-      var result = await SetMultimeterState(true, bus);
+      var result = await SetMultimeterState(true, bus, userMessageService);
 
       if (result)
       {
@@ -68,32 +78,38 @@ namespace Ask.Device.Runtime.AskMkiM.Function.DeviceBusCommutation
     /// <inheritdoc />
     public async Task<bool> DisconnectMultimeter(SwitchingBusNew bus, IUserInteractionService? userMessageService = null)
     {
-      var result = await SetMultimeterState(false, bus);
+      var result = await SetMultimeterState(false, bus, userMessageService);
       connectionState.Set(DeviceBusConnectionType.Multimeter, bus, false);
       return result;
     }
 
     /// <summary>
-    /// Устанавливает состояние мультиметра (подключение или отключение).
+    /// Подключает мультиметр к указанной шине или отключает его от неё.
     /// </summary>
-    /// <param name="connect">Флаг состояния: <c>true</c> – подключить, <c>false</c> – отключить.</param>
-    /// <param name="bus">Шина, к которой подключается мультиметр.</param>
-    /// <returns>Возвращает <c>true</c>, если операция выполнена успешно, иначе <c>false</c>.</returns>
+    /// <param name="connect">
+    /// <see langword="true"/>, чтобы подключить мультиметр; <see langword="false"/>, чтобы отключить.
+    /// </param>
+    /// <param name="bus">Коммутируемая шина.</param>
+    /// <param name="userMessageService">Сервис взаимодействия с пользователем.</param>
+    /// <returns>
+    /// <see langword="true"/>, если состояние мультиметра изменено успешно; иначе — <see langword="false"/>.
+    /// </returns>
     private async Task<bool> SetMultimeterState(bool connect, SwitchingBusNew bus, IUserInteractionService? userMessageService = null)
     {
       int numberConnector = (int)SwitchingDeviceTypeConnector.Multimeter;
       if (TryGetBusNumber(bus, out int busNumber) && busNumber >= 1 && busNumber <= 4)
       {
-        if (ExecutionConfig.GetIsIdleModeEnabled())
-        {
-          return true;
-        }
-
         var command = new DeviceCommand(5, numberConnector, busNumber, connect ? 1 : 2);
-        var answer = await _deviceBusCommutation.DeviceProtocol.QueryAsync(command.ToString(), timeout: 1000);
+        var answer = await queryExecutor.QueryAsync(command.ToString());
         await Task.Delay(10);
-        var expectingResult = command.ToString().Substring(0, command.ToString().Length - 1);
-        return !string.IsNullOrWhiteSpace(answer) && answer.Contains(expectingResult);
+        return await DeviceBusCommutationResponseProcessor.CheckEquipmentOperationAsync(
+          answer,
+          _deviceBusCommutation,
+          numberConnector,
+          busNumber,
+          connect,
+          $"мультиметра {(connect ? "к" : "с")} шине [{bus}]",
+          userMessageService);
       }
 
       LogError("Ошибка номера шины УКШ!", isDeviceLog: true);
@@ -104,42 +120,71 @@ namespace Ask.Device.Runtime.AskMkiM.Function.DeviceBusCommutation
 
     #region АЦП
 
-    /// <inheritdoc />
+    /// <summary>
+    /// Подключает АЦП к указанной шине.
+    /// </summary>
+    /// <param name="bus">Шина, к которой подключается АЦП.</param>
+    /// <param name="reversePolarity">
+    /// <see langword="true"/>, чтобы подключить АЦП с обратной полярностью; иначе — <see langword="false"/>.
+    /// </param>
+    /// <param name="userMessageService">Сервис взаимодействия с пользователем.</param>
+    /// <returns>
+    /// <see langword="true"/>, если АЦП подключён успешно; иначе — <see langword="false"/>.
+    /// </returns>
     public async Task<bool> ConnectADC(SwitchingBusNew bus, bool reversePolarity = false, IUserInteractionService? userMessageService = null) => await SetADCState(true, bus, reversePolarity);
 
-    /// <inheritdoc />
+    /// <summary>
+    /// Отключает АЦП от указанной шины.
+    /// </summary>
+    /// <param name="bus">Шина, от которой отключается АЦП.</param>
+    /// <param name="reversePolarity">
+    /// <see langword="true"/>, если АЦП подключён с обратной полярностью; иначе — <see langword="false"/>.
+    /// </param>
+    /// <param name="userMessageService">Сервис взаимодействия с пользователем.</param>
+    /// <returns>
+    /// <see langword="true"/>, если АЦП отключён успешно; иначе — <see langword="false"/>.
+    /// </returns>
     public async Task<bool> DisconnectADC(SwitchingBusNew bus, bool reversePolarity = false, IUserInteractionService? userMessageService = null) => await SetADCState(false, bus, reversePolarity);
 
     /// <summary>
-    /// Устанавливает состояние АЦП (подключение или отключение).
+    /// Подключает АЦП к указанной шине или отключает его от неё.
     /// </summary>
-    /// <param name="connect">Флаг состояния: <c>true</c> – подключить, <c>false</c> – отключить.</param>
-    /// <param name="bus">Шина, к которой подключается мультиметр.</param>
-    /// <param name="reversePolarity">Флаг полюса: <c>true</c> – с переполюсовкой, <c>false</c> – без переполюсовки. </param>
-    /// <returns>Возвращает <c>true</c>, если операция выполнена успешно, иначе <c>false</c>.</returns>
+    /// <param name="connect">
+    /// <see langword="true"/>, чтобы подключить АЦП; <see langword="false"/>, чтобы отключить.
+    /// </param>
+    /// <param name="bus">Коммутируемая шина.</param>
+    /// <param name="reversePolarity">
+    /// <see langword="true"/>, чтобы использовать обратную полярность; иначе — <see langword="false"/>.
+    /// </param>
+    /// <param name="userMessageService">Сервис взаимодействия с пользователем.</param>
+    /// <returns>
+    /// <see langword="true"/>, если состояние АЦП изменено успешно; иначе — <see langword="false"/>.
+    /// </returns>
+    /// <exception cref="Exception">Операция временно отключена.</exception>
     private async Task<bool> SetADCState(bool connect, SwitchingBusNew bus, bool reversePolarity, IUserInteractionService? userMessageService = null)
     {
-      int numberConnector = (int)SwitchingDeviceTypeConnector.ADC;
-      if (reversePolarity)
-      {
-        numberConnector++;
-      }
+      throw new Exception("Временно откличли в Ask.Device.Runtime.Function.DeviceBusCommutation.ConnectorManager.SetADCState");
+      //int numberConnector = (int)SwitchingDeviceTypeConnector.ADC;
+      //if (reversePolarity)
+      //{
+      //  numberConnector++;
+      //}
 
-      if (TryGetBusNumber(bus, out int busNumber) && busNumber >= 1 && busNumber <= 4)
-      {
-        if (ExecutionConfig.GetIsIdleModeEnabled())
-        {
-          return true;
-        }
+      //if (TryGetBusNumber(bus, out int busNumber) && busNumber >= 1 && busNumber <= 4)
+      //{
+      //  if (ExecutionConfig.GetIsIdleModeEnabled())
+      //  {
+      //    return !IdleHardwareErrorSimulator.ShouldSimulateHardwareError();
+      //  }
 
-        var command = new DeviceCommand(5, numberConnector, busNumber, connect ? 1 : 2);
-        var answer = await _deviceBusCommutation.DeviceProtocol.QueryAsync(command.ToString(), timeout: 1000);
-        await Task.Delay(10);
-        return !string.IsNullOrWhiteSpace(answer) && answer.Contains(command.ToString());
-      }
+      //  var command = new DeviceCommand(5, numberConnector, busNumber, connect ? 1 : 2);
+      //  var answer = await _deviceBusCommutation.DeviceProtocol.QueryAsync(command.ToString(), timeout: 1000);
+      //  await Task.Delay(10);
+      //  return !string.IsNullOrWhiteSpace(answer) && answer.Contains(command.ToString());
+      //}
 
-      LogError("Ошибка номера шины УКШ!", isDeviceLog: true);
-      return false;
+      //LogError("Ошибка номера шины УКШ!", isDeviceLog: true);
+      //return false;
     }
 
     #endregion
@@ -177,29 +222,36 @@ namespace Ask.Device.Runtime.AskMkiM.Function.DeviceBusCommutation
     }
 
     /// <summary>
-    /// Устанавливает состояние ПИНТ (подключение или отключение).
+    /// Подключает ПИНТ к указанной шине или отключает его от неё.
     /// </summary>
-    /// <param name="connect">Флаг состояния: <c>true</c> – подключить, <c>false</c> – отключить.</param>
-    /// <param name="bus">Шина, к которой подключается мультиметр.</param>
-    /// <returns>Возвращает <c>true</c>, если операция выполнена успешно, иначе <c>false</c>.</returns>
+    /// <param name="connect">
+    /// <see langword="true"/>, чтобы подключить ПИНТ; <see langword="false"/>, чтобы отключить.
+    /// </param>
+    /// <param name="bus">Коммутируемая шина.</param>
+    /// <param name="userMessageService">Сервис взаимодействия с пользователем.</param>
+    /// <returns>
+    /// <see langword="true"/>, если состояние ПИНТ изменено успешно; иначе — <see langword="false"/>.
+    /// </returns>
+    /// <exception cref="Exception">Операция временно отключена.</exception>
     private async Task<bool> SetPINTState(bool connect, SwitchingBusNew bus, IUserInteractionService? userMessageService = null)
     {
-      int numberConnector = (int)SwitchingDeviceTypeConnector.PINT;
-      if (TryGetBusNumber(bus, out int busNumber) && busNumber >= 2 && busNumber <= 3)
-      {
-        if (ExecutionConfig.GetIsIdleModeEnabled())
-        {
-          return true;
-        }
+      throw new Exception("Временно откличли в Ask.Device.Runtime.Function.DeviceBusCommutation.ConnectorManager.SetPINTState");
+      //int numberConnector = (int)SwitchingDeviceTypeConnector.PINT;
+      //if (TryGetBusNumber(bus, out int busNumber) && busNumber >= 2 && busNumber <= 3)
+      //{
+      //  if (ExecutionConfig.GetIsIdleModeEnabled())
+      //  {
+      //    return !IdleHardwareErrorSimulator.ShouldSimulateHardwareError();
+      //  }
 
-        var command = new DeviceCommand(5, numberConnector, busNumber, connect ? 1 : 2);
-        var answer = await _deviceBusCommutation.DeviceProtocol.QueryAsync(command.ToString(), timeout: 1000);
-        await Task.Delay(10);
-        return !string.IsNullOrWhiteSpace(answer) && answer.Contains(command.ToString());
-      }
+      //  var command = new DeviceCommand(5, numberConnector, busNumber, connect ? 1 : 2);
+      //  var answer = await _deviceBusCommutation.DeviceProtocol.QueryAsync(command.ToString(), timeout: 1000);
+      //  await Task.Delay(10);
+      //  return !string.IsNullOrWhiteSpace(answer) && answer.Contains(command.ToString());
+      //}
 
-      LogError("Ошибка номера шины УКШ!", isDeviceLog: true);
-      return false;
+      //LogError("Ошибка номера шины УКШ!", isDeviceLog: true);
+      //return false;
     }
 
     #endregion
@@ -209,7 +261,7 @@ namespace Ask.Device.Runtime.AskMkiM.Function.DeviceBusCommutation
     /// <inheritdoc />
     public async Task<bool> ConnectBreakdownTester(IUserInteractionService? userMessageService = null)
     {
-      var result = await SetBreakdownTesterState(true);
+      var result = await SetBreakdownTesterState(true, userMessageService);
 
       if (result)
       {
@@ -226,66 +278,63 @@ namespace Ask.Device.Runtime.AskMkiM.Function.DeviceBusCommutation
     /// <inheritdoc />
     public async Task<bool> DisconnectBreakdownTester(IUserInteractionService? userMessageService = null)
     {
-      var result = await SetBreakdownTesterState(false);
+      var result = await SetBreakdownTesterState(false, userMessageService);
 
       connectionState.Set(DeviceBusConnectionType.BreakdownTester, BreakdownBus, false);
       return result;
     }
 
     /// <summary>
-    /// Устанавливает состояние мультиметра (подключение или отключение).
+    /// Подключает пробойную установку или отключает её.
     /// </summary>
-    /// <param name="connect">Флаг состояния: <c>true</c> – подключить, <c>false</c> – отключить.</param>
-    /// <returns>Возвращает <c>true</c>, если операция выполнена успешно, иначе <c>false</c>.</returns>
+    /// <param name="connect">
+    /// <see langword="true"/>, чтобы подключить пробойную установку; <see langword="false"/>, чтобы отключить.
+    /// </param>
+    /// <param name="userMessageService">Сервис взаимодействия с пользователем.</param>
+    /// <returns>
+    /// <see langword="true"/>, если состояние пробойной установки изменено успешно;
+    /// иначе — <see langword="false"/>.
+    /// </returns>
     private async Task<bool> SetBreakdownTesterState(bool connect, IUserInteractionService? userMessageService = null)
     {
       int numberConnector = (int)SwitchingDeviceTypeConnector.BreakdownTester;
 
-      if (ExecutionConfig.GetIsIdleModeEnabled())
-      {
-        return true;
-      }
-
       var command = new DeviceCommand(5, numberConnector, 1, connect ? 1 : 2);
-      var answer = await _deviceBusCommutation.DeviceProtocol.QueryAsync(command.ToString(), timeout: 1000);
-      var expectingResult = command.ToString().Substring(0, command.ToString().Length - 1);
-
-      return !string.IsNullOrWhiteSpace(answer) && answer.Contains(expectingResult);
+      var answer = await queryExecutor.QueryAsync(command.ToString());
+      return await DeviceBusCommutationResponseProcessor.CheckEquipmentOperationAsync(
+        answer,
+        _deviceBusCommutation,
+        numberConnector,
+        1,
+        connect,
+        "пробойной установки",
+        userMessageService);
     }
 
     #endregion
 
     #region Делитель.
 
-
+    /// <inheritdoc />
     public async Task<bool> EnableDivider(IUserInteractionService? userMessageService = null)
     {
 
-      if (ExecutionConfig.GetIsIdleModeEnabled())
-      {
-        return true;
-      }
-
       var command = new DeviceCommand(9, 2, 0, 1);
-      var answer = await _deviceBusCommutation.DeviceProtocol.QueryAsync(command.ToString(), timeout: 1000);
-      var expectingResult = command.ToString().Substring(0, command.ToString().Length - 1);
-
-      return !string.IsNullOrWhiteSpace(answer) && answer.Contains(expectingResult);
+      var answer = await queryExecutor.QueryAsync(command.ToString());
+      return await DeviceBusCommutationResponseProcessor.CheckAccessoryOperationAsync(
+        answer, _deviceBusCommutation, 2, 0, true, "Включение делителя ППУ",
+        executionParameter: true, outputService: userMessageService);
     }
 
+    /// <inheritdoc />
     public async Task<bool> DisableDivider(IUserInteractionService? userMessageService = null)
     {
 
-      if (ExecutionConfig.GetIsIdleModeEnabled())
-      {
-        return true;
-      }
-
       var command = new DeviceCommand(9, 2, 0, 2);
-      var answer = await _deviceBusCommutation.DeviceProtocol.QueryAsync(command.ToString(), timeout: 1000);
-      var expectingResult = command.ToString().Substring(0, command.ToString().Length - 1);
-
-      return !string.IsNullOrWhiteSpace(answer) && answer.Contains(expectingResult);
+      var answer = await queryExecutor.QueryAsync(command.ToString());
+      return await DeviceBusCommutationResponseProcessor.CheckAccessoryOperationAsync(
+        answer, _deviceBusCommutation, 2, 0, false, "Отключение делителя ППУ",
+        executionParameter: true, outputService: userMessageService);
     }
 
     #endregion
@@ -295,30 +344,31 @@ namespace Ask.Device.Runtime.AskMkiM.Function.DeviceBusCommutation
     /// <inheritdoc />
     public async Task<bool> ConnectAllBuses(IUserInteractionService? userMessageService = null)
     {
-      return await SetAllBusesStatus(true);
+      return await SetAllBusesStatus(true, userMessageService);
     }
 
     /// <inheritdoc />
     public async Task<bool> DisconnectAllBuses(IUserInteractionService? userMessageService = null)
     {
-      return await SetAllBusesStatus(false);
+      return await SetAllBusesStatus(false, userMessageService);
     }
 
     /// <summary>
-    /// Устанавливает состояние всех шин на устройстве.
+    /// Подключает или отключает все шины устройства.
     /// </summary>
-    /// <param name="connect"></param>
-    /// <returns></returns>
+    /// <param name="connect">
+    /// <see langword="true"/>, чтобы подключить все шины; <see langword="false"/>, чтобы отключить.
+    /// </param>
+    /// <param name="userMessageService">Сервис взаимодействия с пользователем.</param>
+    /// <returns>
+    /// <see langword="true"/>, если состояние всех шин изменено успешно; иначе — <see langword="false"/>.
+    /// </returns>
     private async Task<bool> SetAllBusesStatus(bool connect, IUserInteractionService? userMessageService = null)
     {
-      if (ExecutionConfig.GetIsIdleModeEnabled())
-      {
-        return true;
-      }
-
       var command = new DeviceCommand(7, connect ? 1 : 2);
-      var answer = await _deviceBusCommutation.DeviceProtocol.QueryAsync(command.ToString(), timeout: 1000);
-      return !string.IsNullOrWhiteSpace(answer) && (connect ? answer.Contains("7.1") : answer.Contains("7.2"));
+      var answer = await queryExecutor.QueryAsync(command.ToString());
+      return await DeviceBusCommutationResponseProcessor.CheckAllBusesOperationAsync(
+        answer, _deviceBusCommutation, connect, userMessageService);
     }
 
     #endregion
@@ -327,8 +377,11 @@ namespace Ask.Device.Runtime.AskMkiM.Function.DeviceBusCommutation
     /// Извлекает номер шины из её имени.
     /// </summary>
     /// <param name="bus">Тип шины.</param>
-    /// <param name="busNumber">Выходной параметр, содержащий номер шины.</param>
-    /// <returns><c>true</c>, если номер успешно получен; иначе <c>false</c>.</returns>
+    /// <param name="busNumber">Полученный номер шины.</param>
+    /// <param name="userMessageService">Сервис взаимодействия с пользователем.</param>
+    /// <returns>
+    /// <see langword="true"/>, если номер шины получен успешно; иначе — <see langword="false"/>.
+    /// </returns>
     private bool TryGetBusNumber(SwitchingBusNew bus, out int busNumber, IUserInteractionService? userMessageService = null)
     {
       string busName = bus.ToString();
@@ -347,16 +400,16 @@ namespace Ask.Device.Runtime.AskMkiM.Function.DeviceBusCommutation
     /// <inheritdoc />
     public async Task<bool> ConnectBreakdownTesterAndMultimeter(IUserInteractionService? userMessageService = null)
     {
-      if (ExecutionConfig.GetIsIdleModeEnabled())
-      {
-        connectionState.Set(DeviceBusConnectionType.BreakdownTesterAndMultimeter, BreakdownBus, true);
-        return true;
-      }
-
       var command = new DeviceCommand(5, 7, 0, 1);
-      var answer = await _deviceBusCommutation.DeviceProtocol.QueryAsync(command.ToString(), timeout: 1000);
-      var expectingResult = command.ToString();
-      var result = !string.IsNullOrWhiteSpace(answer) && answer.Contains(expectingResult);
+      var answer = await queryExecutor.QueryAsync(command.ToString());
+      var result = await DeviceBusCommutationResponseProcessor.CheckEquipmentOperationAsync(
+        answer,
+        _deviceBusCommutation,
+        7,
+        0,
+        true,
+        "пробойной установки и мультиметра",
+        userMessageService);
 
       if (result)
       {
@@ -373,21 +426,25 @@ namespace Ask.Device.Runtime.AskMkiM.Function.DeviceBusCommutation
     /// <inheritdoc />
     public async Task<bool> DisconnectBreakdownTesterAndMultimeter(IUserInteractionService? userMessageService = null)
     {
-      if (ExecutionConfig.GetIsIdleModeEnabled())
-      {
-        connectionState.Set(DeviceBusConnectionType.BreakdownTesterAndMultimeter, BreakdownBus, false);
-        return true;
-      }
-
       var command = new DeviceCommand(5, 7, 0, 2);
-      var answer = await _deviceBusCommutation.DeviceProtocol.QueryAsync(command.ToString(), timeout: 1000);
-      var expectingResult = command.ToString();
-      var result = !string.IsNullOrWhiteSpace(answer) && answer.Contains(expectingResult);
+      var answer = await queryExecutor.QueryAsync(command.ToString());
+      var result = await DeviceBusCommutationResponseProcessor.CheckEquipmentOperationAsync(
+        answer,
+        _deviceBusCommutation,
+        7,
+        0,
+        false,
+        "пробойной установки и мультиметра",
+        userMessageService);
 
       connectionState.Set(DeviceBusConnectionType.BreakdownTesterAndMultimeter, BreakdownBus, false);
       return result;
     }
 
+    /// <summary>
+    /// Возвращает сведения о подключённых устройствах.
+    /// </summary>
+    /// <returns>Список текущих подключений устройств к шинам.</returns>
     public IReadOnlyList<DeviceConnectionInfo> GetConnectedDevices()
     {
       return connectionState.GetConnectedDevices();
@@ -395,3 +452,5 @@ namespace Ask.Device.Runtime.AskMkiM.Function.DeviceBusCommutation
 
   }
 }
+
+

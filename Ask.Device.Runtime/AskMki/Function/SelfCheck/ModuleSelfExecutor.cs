@@ -1,5 +1,5 @@
 using Ask.Core.Shared.DTO.Executor;
-using Ask.Core.Shared.DTO.Protocol;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule;
@@ -35,13 +35,25 @@ namespace Ask.Engine.Tests.SelfControl
       ActionSettings settings = new ActionSettings()
       {
         StartDelegate = ExecuteMeasurementProcess,
-        IsRepeatEnabled = false,
         CheckType = CheckType.SelfTest,
         CheckPower = false,
         AccumulateErrorMessages = true,
+        NameProvider = GetExecutionName,
       };
 
       executionController.SetSettings(settings);
+    }
+
+    /// <summary>
+    /// Формирует имя самоконтроля для выбранного устройства.
+    /// </summary>
+    /// <returns>Имя самоконтроля или <see langword="null"/>, если устройство не выбрано.</returns>
+    private string? GetExecutionName()
+    {
+      var device = _deviceSelectorProvider.GetDeviceSelector().GetSelectedRelayDeviceByTypeSafe();
+      return device is IAttachableDevice attachableDevice
+        ? $"Самоконтроль модуля {attachableDevice.Name} {attachableDevice.NumberChassis}.{attachableDevice.Number}"
+        : null;
     }
 
     /// <summary>
@@ -68,7 +80,7 @@ namespace Ask.Engine.Tests.SelfControl
       {
         if (meter == null)
         {
-          await _messageService.ShowMessageAsync(new ShowMessageModel("Ошибка", message: "Не удалось преобразовать объект в измеритель!", type: ShowMessageModel.MessageType.Error));
+          await ValidationMessages.PublishMeterUnavailableAsync(_messageService);
           return;
         }
 
@@ -77,39 +89,61 @@ namespace Ask.Engine.Tests.SelfControl
           case DeviceType.RelaySwitchModule when device is IRelaySwitchModule relay:
             var dbcChassinumbers = relay.NumberChassis;
             var dbc = (await SelfCheckDeviceRuntime.GetSwitchingDevicesByNumberChassisAsync(dbcChassinumbers, cancellationToken)).FirstOrDefault();
-            await relay.SelfTestManager.StartSelfCheck(_messageService.GetCancellationToken(), part, _messageService, dbc);
-            if (dbc != null)
-            {
-              await dbc.ConnectableManager.ResetAsync();
-            }
+            await relay.SelfTestManager.StartSelfCheck(
+              _messageService.GetCancellationToken(),
+              part,
+              _messageService,
+              dbc);
             break;
 
           case DeviceType.SwitchingDevice when device is ISwitchingDevice switcher:
-            await switcher.SelfTestManager.StartSelfCheck(_messageService.GetCancellationToken(), part, _messageService, switcher, meter);
+            await switcher.SelfTestManager.StartSelfCheck(
+              _messageService.GetCancellationToken(),
+              part,
+              _messageService,
+              switcher,
+              meter);
             break;
 
           case DeviceType.PowerSourceModule when device is IPowerSourceModule mint:
             var numberChassis = mint.NumberChassis;
             var switcher1 = (await SelfCheckDeviceRuntime.GetSwitchingDevicesByNumberChassisAsync(numberChassis, cancellationToken)).FirstOrDefault();
-            await mint.SelfTestManager.StartSelfCheck(_messageService.GetCancellationToken(), _messageService, part, switcher1, mint, meter);
+            await mint.SelfTestManager.StartSelfCheck(
+              _messageService.GetCancellationToken(),
+              _messageService,
+              part,
+              switcher1,
+              mint,
+              meter);
             break;
 
           case DeviceType.BreakdownTester when device is IBreakdownTester breakdown:
             var numberBreakdown = breakdown.NumberChassis;
             var switcher2 = (await SelfCheckDeviceRuntime.GetSwitchingDevicesByNumberChassisAsync(numberBreakdown, cancellationToken)).FirstOrDefault();
-            await breakdown.SelfTestManager.StartSelfCheck(_messageService.GetCancellationToken(), part, _messageService, breakdown, switcher2, meter);
+            await breakdown.SelfTestManager.StartSelfCheck(
+              _messageService.GetCancellationToken(),
+              part,
+              _messageService,
+              breakdown,
+              switcher2,
+              meter);
             break;
 
           case DeviceType.FastMeter when device is IMultimeter multimeter:
             var numberMultimeter = multimeter.NumberChassis;
             var switcher3 = (await SelfCheckDeviceRuntime.GetSwitchingDevicesByNumberChassisAsync(numberMultimeter, cancellationToken)).FirstOrDefault();
-            await multimeter.SelfTestManager.StartSelfCheck(_messageService.GetCancellationToken(), part, _messageService, switcher3, multimeter);
+            await multimeter.SelfTestManager.StartSelfCheck(
+              _messageService.GetCancellationToken(),
+              part,
+              _messageService,
+              switcher3,
+              multimeter);
             break;
         }
       }
       else
       {
-        await _messageService.ShowMessageAsync(new ShowMessageModel("Ошибка", message: "Не удалось получить устройство.", type: ShowMessageModel.MessageType.Error));
+        await ValidationMessages.PublishDeviceUnavailableAsync(_messageService);
         return;
       }
     }

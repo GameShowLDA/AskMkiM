@@ -1,10 +1,9 @@
-﻿using Ask.Core.Services.Extensions;
+using Ask.Core.Services.Extensions;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
-using Ask.Core.Shared.Metadata.Static.Messages;
 using Ask.Engine.Base.GroupMethod;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandExecutor.Execution;
@@ -21,9 +20,9 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       SetActiveLine(context, command);
 
       var nameCommand = $"{command.CommandNumber} {command.Mnemonic}";
-      var message = BuildSourceLinesMessage(command);
+      var message = CommandMessages.FormatSourceLines(command.SourceLines);
 
-      await context.Console.ShowMessageAsync(ExecutorMessageBuilder.BuildCommandExecutionMessage(nameCommand, message), IsBlockStart: true);
+      await CommandMessages.PublishCommandExecutionAsync(context.Console, nameCommand, message);
 
       foreach (var item in command.BusPointsDictionary.Keys)
       {
@@ -89,9 +88,9 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
     private async Task DelayAsync(double? time, IUserInteractionService interactionService)
     {
-      await interactionService.ShowMessageAsync(new ShowMessageModel("Задержка перед включением", message: $"{time}сек.") { IndentLevel = 2 });
+      await ExecutionMessages.PublishDelayBeforeEnablingAsync(time, interactionService);
       var delay = Convert.ToInt32(time * 1000);
-      await Task.Delay(delay);
+      await interactionService.DelayWithPauseAsync(TimeSpan.FromMilliseconds(delay));
     }
   }
 }

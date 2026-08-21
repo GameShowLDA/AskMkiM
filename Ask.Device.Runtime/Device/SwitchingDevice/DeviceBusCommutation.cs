@@ -1,12 +1,12 @@
-using Ask.Core.Shared.DTO.Devices.SwitchingDevice;
+﻿using Ask.Core.Shared.DTO.Devices.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice.Capabilities;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.Device.Runtime.Base.DeviceProtocol;
 using Ask.Device.Runtime.AskMkiM.Base.Commands;
+using Ask.Device.Runtime.Base.Connected;
 using Ask.Device.Runtime.AskMkiM.Function.DeviceBusCommutation;
 using Ask.Device.Runtime.AskMkiM.Function.DeviceBusCommutation.SelfCheck;
-using Ask.Device.Runtime.Base.Connected;
-using Ask.Device.Runtime.Base.DeviceProtocol;
 
 namespace Ask.Device.Runtime.Device.SwitchingDevice
 {
@@ -21,7 +21,7 @@ namespace Ask.Device.Runtime.Device.SwitchingDevice
     public DeviceBusCommutation()
     {
       Name = "Устройство УКШ";
-      Description = "Реализовать описание в Ask.Device.Runtime.Device.DeviceBusCommutation";
+      Description = "Реализовать описание в Ask.Device.Runtime.Device.SwitchingDevice.DeviceBusCommutation";
       DeviceClass = GetType().FullName;
       DeviceType = DeviceType.SwitchingDevice;
       ConnectedProfile.Initialize = new DeviceCommand(1, 0, 0, 0).ToString();
@@ -71,3 +71,4 @@ namespace Ask.Device.Runtime.Device.SwitchingDevice
     }
   }
 }
+

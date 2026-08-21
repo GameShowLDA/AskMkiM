@@ -1,10 +1,13 @@
-﻿using Ask.Core.Services.UI;
+using Ask.Core.Services.UI;
+using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.DTO.Executor;
-using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
+using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
+using Ask.Core.Shared.Metadata.Enums.UnitEnums;
 using Ask.Engine.Tests.MethodExecutor.MeasurementSystem;
 using static Ask.Engine.Tests.Base.UIValidationHelper;
 
@@ -21,8 +24,8 @@ namespace Ask.Engine.Tests.MethodExecutor.CI
       ActionSettings settings = new ActionSettings()
       {
         StartDelegate = ExecuteMeasurementProcess,
-        IsRepeatEnabled = true,
-        CheckType = CheckType.Test
+        CheckType = CheckType.Test,
+        AccumulateErrorMessages = true,
       };
 
       executionController.SetSettings(settings);
@@ -35,14 +38,17 @@ namespace Ask.Engine.Tests.MethodExecutor.CI
     /// <returns></returns>
     private async Task ExecuteMeasurementProcess(IUserInteractionService _messageService, IInputFieldProvider inputFieldProvider, IInputHighlightService inputHighlightService, CancellationToken cancellationToken)
     {
-      var data = await EnsureValidMetrologyInputAsync(inputFieldProvider, _messageService, timeCheck: true, voltageCheck: true, busCheck: true);
+      var data = await EnsureValidMetrologyInputAsync(inputFieldProvider, _messageService, metrologyMode: MeasurementTypeCommand.SI, timeCheck: true, voltageCheck: true, busCheck: true);
       TestMeasurement testMeasurement = new TestMeasurement();
       try
       {
         var connect = await testMeasurement.ConnectToEquipment(data.FirstPoint, data.SecondPoint, _messageService);
         if (!connect.Connect)
         {
-          await _messageService.ShowMessageAsync(new ShowMessageModel("Ошибка", message: connect.Message, type: ShowMessageModel.MessageType.Error), SkipStepModeCheck: true);
+          await ExecutionMessages.PublishErrorAsync(
+            connect.Message,
+            _messageService,
+            skipStepModeCheck: true);
           return;
         }
 
@@ -82,17 +88,35 @@ namespace Ask.Engine.Tests.MethodExecutor.CI
           messageService.GetCancellationToken().ThrowIfCancellationRequested();
 
           var breakDown = Devices.OfType<IBreakdownTester>().FirstOrDefault();
-          await messageService.ShowMessageAsync(new ShowMessageModel("\tИзмерение сопротивления изоляции"));
+          await MeasurementMessages.PublishStartAsync(CheckType.Test,
+            MeasurementTypeCommand.SI,
+            messageService,
+            indentLevel: 1);
 
-          var answer = await breakDown.IrManger.Measure.MeasureAsync(dataModel.Param, dataModel.Param, 60000, userMessageService: messageService);
-          var type = ShowMessageModel.MessageType.Success;
-          if (answer.value < dataModel.Param)
-          {
-            type = ShowMessageModel.MessageType.Error;
-          }
+          MeasurementRange measurementRange = new MeasurementRange(dataModel.Param, dataModel.Param, 60000);
+          var answer = await breakDown.IrManger.Measure.MeasureAsync(ElectricalTestFunction.InsulationResistance, measurementRange, userMessageService: messageService);
 
-          await messageService.ShowMessageAsync(new ShowMessageModel($"\t\tРезультат измерения разряда {CurrentDischargeNumber}({GetBitString()})", message: $"{answer.ToString()} МОм", type: type), skipPause: true);
-          return type == ShowMessageModel.MessageType.Success;
+          bool isSuccessful = answer.value >= dataModel.Param;
+
+          var dischargeIndex = CurrentDischargeNumber - 1;
+          var bitString = GetBitString();
+          string? executionErrorMessage = !isSuccessful
+            ? MeasurementMessages.BuildGroupFailure(
+              dischargeIndex,
+              bitString,
+              dataModel.Param,
+              answer.value,
+              ResistanceUnit.MegaOhm,
+              MeasurementLimitKind.Minimum)
+            : null;
+          await MeasurementMessages.PublishResultAsync(CheckType.Test,
+            ResistanceUnit.MegaOhm,
+            new MeasurementRange(answer.value, dataModel.Param, -1),
+            isSuccessful,
+            $"Разряд {dischargeIndex} ({bitString})",
+            executionErrorMessage,
+            messageService);
+          return isSuccessful;
         }, messageService);
       }
 
@@ -101,6 +125,7 @@ namespace Ask.Engine.Tests.MethodExecutor.CI
         await base.FinalizeAsync(messageService);
       }
     }
+
   }
 }
 

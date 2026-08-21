@@ -22,13 +22,10 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
     {
       var command = GetRequiredCommand<EhtCommandModel>(context);
       var nameCommand = $"{command.CommandNumber} {command.Mnemonic}";
-      var message = BuildSourceLinesMessage(command);
-      List<ShowMessageModel> errorMessage = new();
-      List<ShowMessageModel> infoMessage = new();
-
+      var message = CommandMessages.FormatSourceLines(command.SourceLines);
       SetActiveLine(context, command);
 
-      await context.Console.ShowMessageAsync(ExecutorMessageBuilder.BuildCommandExecutionMessage(nameCommand, message), IsBlockStart: true);
+      await CommandMessages.PublishCommandExecutionAsync(context.Console, nameCommand, message);
       await DeviceManager.ShowDevicesPreparationMessageIfNeededAsync(context);
 
       var points = DeviceManager.RelayModule.PointManager.CollectPoints(command);
@@ -40,7 +37,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       var dbc = EquipmentService.GetSwitchingDevice();
       await DeviceManager.SwitchModuleManager.DeviceConnectionManager.ConnectMultimeter(dbc, context.Console);
 
-      var meter = EquipmentService.GetFastMeterOrThrow(context.Console);
+      var meter = await EquipmentService.GetFastMeterOrThrow(context.Console);
       await SettingFastMeter(meter, context.Console);
 
       if (command.LowerLimitResistance.HasValue)
@@ -63,6 +60,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         firstValue,
         secondValue);
       pairwiseFirstPointCheckerAlt.CabelResistance = cabelResistance;
+      pairwiseFirstPointCheckerAlt.ValidatePointConnections = ShouldValidatePointConnections();
 
       if (command.AlgorithmKey.Contains("Д"))
       {
@@ -70,18 +68,19 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       }
 
       var messageResult = await PairwiseFirstPointCheckerAlt.CheckSequenceAsync(pairwiseFirstPointCheckerAlt);
-      errorMessage.AddRange(messageResult.errorMessage);
-      infoMessage.AddRange(messageResult.infoMessage);
 
-      if (errorMessage.Count > 0)
-      {
-        protocolModel.AddErrors(nameCommand, errorMessage);
-      }
-      if (infoMessage.Count > 0)
-      {
-        protocolModel.AddInfo(nameCommand, infoMessage);
-      }
+      protocolModel.AddResult(nameCommand, messageResult);
     }
+
+    /// <summary>
+    /// Проверяет, требуется ли контролировать подключение точек команды ЭТ.
+    /// </summary>
+    /// <returns>
+    /// <see langword="true"/>, если холостой режим выключен.
+    /// В противном случае — <see langword="false"/>.
+    /// </returns>
+    internal static bool ShouldValidatePointConnections()
+      => !ExecutionConfig.GetIsIdleModeEnabled();
 
     private async Task SettingFastMeter(IMultimeter meter, IUserInteractionService userMessageService)
     {

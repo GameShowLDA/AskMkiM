@@ -1,4 +1,4 @@
-using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
+﻿using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule.Capabilities;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
@@ -81,3 +81,4 @@ namespace Ask.Device.Runtime.Device.RelaySwitchModule
     }
   }
 }
+

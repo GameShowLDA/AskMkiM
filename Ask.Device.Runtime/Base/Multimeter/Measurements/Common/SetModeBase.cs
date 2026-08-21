@@ -1,9 +1,12 @@
-﻿using Ask.Core.Services.Config.AppSettings;
+﻿using Ask.Protocol.Messages.EntryPoints;
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Errors.Device.Multimeter;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.Device.Emulator;
 using Ask.Device.Runtime.Base.Helpers;
 
 namespace Ask.Device.Runtime.Base.Multimeter.Measurements.Common
@@ -13,7 +16,7 @@ namespace Ask.Device.Runtime.Base.Multimeter.Measurements.Common
     /// <inheritdoc />
     static public async Task<bool> SetModeAsync(IMultimeter device, IMeasurementProfile profile, IUserInteractionService? userMessageService = null)
     {
-      var header = profile.TypeMode.GetDescription();
+      var header = GetModeHeader(profile.TypeMode);
 
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
@@ -21,7 +24,7 @@ namespace Ask.Device.Runtime.Base.Multimeter.Measurements.Common
 
         if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
         {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(device, $"Установка режима \"{header}\"", succes, 1, userMessageService);
+          await DeviceMessages.PublishOperationResultAsync(device, header, succes, 1, userMessageService);
         }
 
         return succes;
@@ -39,24 +42,23 @@ namespace Ask.Device.Runtime.Base.Multimeter.Measurements.Common
     /// <inheritdoc />
     static private async Task<bool> SetModeCoreAsync(IMultimeter device, IMeasurementProfile profile, IUserInteractionService? userMessageService = null)
     {
-      if (ExecutionConfig.GetIsIdleModeEnabled())
-      {
-        return true;
-      }
-
       if (device.TypeMode == profile.TypeMode)
       {
         return true;
       }
 
-      if (!device.ConnectionInfo.IsConnected)
+      if (!ExecutionConfig.GetIsIdleModeEnabled() && !device.ConnectionInfo.IsConnected)
       {
         throw new InvalidOperationException("Прибор не подключен.");
       }
 
-      await device.DeviceProtocol.QueryAsync(profile.SetMode);
-      var answer = await device.DeviceProtocol.QueryAsync(profile.GetMode, timeout: profile.Timeout);
-      if (IsModeAnswerMatched(answer, profile.CheckMode))
+      await DeviceProtocolEmulator.QueryMultimeterAsync(device, profile.SetMode, string.Empty);
+      var answer = await DeviceProtocolEmulator.QueryMultimeterAsync(
+        device,
+        profile.GetMode,
+        profile.CheckMode,
+        timeout: profile.Timeout);
+      if (answer.Contains(profile.CheckMode))
       {
         device.TypeMode = profile.TypeMode;
         return true;
@@ -65,32 +67,18 @@ namespace Ask.Device.Runtime.Base.Multimeter.Measurements.Common
       return false;
     }
 
-    /// <summary>
-    /// Проверяет ответ прибора о текущем режиме с учетом особенностей Agilent-совместимых USB-мультиметров.
-    /// </summary>
-    static private bool IsModeAnswerMatched(string answer, string expectedMode)
+    static private string GetModeHeader(MultimeterTypeMode typeMode)
     {
-      var normalizedAnswer = NormalizeModeAnswer(answer);
-      var normalizedExpected = NormalizeModeAnswer(expectedMode);
-
-      if (normalizedAnswer.Contains(normalizedExpected, StringComparison.OrdinalIgnoreCase))
+      return typeMode switch
       {
-        return true;
-      }
-
-      return normalizedAnswer.Length > 1
-        && normalizedAnswer[1..].Contains(normalizedExpected, StringComparison.OrdinalIgnoreCase);
-    }
-
-    /// <summary>
-    /// Убирает служебные символы из ответа FUNC?, как это делалось в старой MKI для Rigol/Agilent USB.
-    /// </summary>
-    static private string NormalizeModeAnswer(string value)
-    {
-      return new string((value ?? string.Empty)
-        .Where(ch => !char.IsWhiteSpace(ch) && ch != '"' && ch != '\'' && ch != '\r' && ch != '\n')
-        .ToArray());
+        MultimeterTypeMode.DcVoltage => "Режим измерения постоянного напряжения",
+        MultimeterTypeMode.AcVoltage => "Режим измерения переменного напряжения",
+        MultimeterTypeMode.Resistance => "Режим измерения сопротивления",
+        MultimeterTypeMode.Capacitance => "Режим измерения ёмкости",
+        _ => $"Режим \"{EnumExtensions.GetDescription(typeMode)}\"",
+      };
     }
 
   }
 }
+

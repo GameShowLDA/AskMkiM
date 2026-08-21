@@ -1,11 +1,9 @@
-using Ask.Core.Services.Config.AppSettings;
-using Ask.Core.Services.Errors.Device.ModuleRelayControl;
+﻿using Ask.Core.Services.Errors.Device.ModuleRelayControl;
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Device.Runtime.AskMkiM.Function.ModuleRelayControl;
-using Ask.Device.Runtime.Base.Helpers;
 
 namespace Ask.Device.Application.FunctionAdapters.ModuleRelayControl
 {
@@ -36,21 +34,14 @@ namespace Ask.Device.Application.FunctionAdapters.ModuleRelayControl
       if (IsConnectMeter)
         return true;
 
-      const string description = "модуля МКР";
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
-        var succes = await _meterManager.ConnectMeterAsync();
-
-        if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
-        {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(_moduleRelayControl, $"Подключение измерителя {description}", succes, 1, userMessageService);
-        }
-
-        return succes;
+        return await _meterManager.ConnectMeterAsync(userMessageService);
       }, userMessageService, deviceTask: true);
 
       if (!result)
       {
+        const string description = "модуля МКР";
         throw MeterExceptionFactory.ConnectFailed(description);
       }
       else
@@ -64,21 +55,14 @@ namespace Ask.Device.Application.FunctionAdapters.ModuleRelayControl
     /// <inheritdoc />
     public async Task<bool> DisconnectMeterAsync(IUserInteractionService? userMessageService = null)
     {
-      if (IsConnectMeter)
-        return false;
+      if (!IsConnectMeter)
+        return true;
 
       const string description = "модуля МКР";
 
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
-        var succes = await _meterManager.DisconnectMeterAsync();
-
-        if (!succes || DeviceDisplayConfig.GetConnectionInfoVisibility())
-        {
-          await DeviceMessageBuilder.ShowConnectionMessageAsync(_moduleRelayControl, $"Отключение измерителя {description}", succes, 1, userMessageService);
-        }
-
-        return succes;
+        return await _meterManager.DisconnectMeterAsync(userMessageService);
       }, userMessageService, deviceTask: true);
 
       if (!result)
@@ -98,13 +82,7 @@ namespace Ask.Device.Application.FunctionAdapters.ModuleRelayControl
     {
       return await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
        {
-         var succes = await _meterManager.GetMeterResponseAsync();
-         await DeviceMessageBuilder.ShowConnectionMessageAsync(
-           _moduleRelayControl,
-           succes ? "Обнаружено подлючение шин/точек (МКР)" : "Подлючение шин/точек не обнаружено (МКР)",
-           succes,
-           1,
-           userMessageService);
+         var succes = await _meterManager.GetMeterResponseAsync(userMessageService);
 
          if (!succes)
          {
@@ -117,3 +95,10 @@ namespace Ask.Device.Application.FunctionAdapters.ModuleRelayControl
     }
   }
 }
+
+
+
+
+
+
+

@@ -1,12 +1,14 @@
-using Ask.Core.Services.Errors.Device.Chassis;
+﻿using Ask.Core.Services.Errors.Device.Chassis;
 using Ask.Core.Services.Errors.Device.ModuleRelayControl;
 using Ask.Core.Services.Errors.Metrology;
 using Ask.Core.Services.Errors.Models;
+using Ask.Core.Services.Extensions;
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
-using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
+using Ask.Core.Shared.Metadata.Static.Messages;
 using Ask.DataBase.Engine.Static.Devices;
 using System.Globalization;
 
@@ -24,6 +26,7 @@ namespace Ask.Engine.Tests.Base
     /// При обнаружении ошибки отображает сообщение пользователю и выбрасывает исключение для остановки алгоритма.
     /// </summary>
     /// <param name="protocolUI">Экземпляр интерфейса <see cref="ProtocolUI"/>, содержащий ввод пользователя.</param>
+    /// <param name="metrologyMode">Метрологическая команда для вывода введённых данных в протокол.</param>
     /// <param name="timeCheck">Флаг проверки времени измерения.</param>
     /// <param name="voltageCheck">Флаг проверки напряжения измерения.</param>
     /// <param name="timeRampCheck">Флаг проверки времени нарастания.</param>
@@ -37,12 +40,39 @@ namespace Ask.Engine.Tests.Base
     public static async Task<DataModel> EnsureValidMetrologyInputAsync(
         IInputFieldProvider protocolUI,
         IMessageOutputService messageOutputService,
+        MeasurementTypeCommand? metrologyMode = null,
         bool timeCheck = false,
         bool voltageCheck = false,
         bool timeRampCheck = false,
         bool busCheck = false,
         bool pairBusCheck = false)
     {
+      var inputAccessor = protocolUI.GetInputFieldAccessor();
+      if (inputAccessor != null)
+      {
+        var validationErrors = inputAccessor.ValidatePoints().Errors
+          .Concat(inputAccessor.ValidateElectricalParameters().Errors)
+          .Concat(inputAccessor.ValidateTimeParameters().Errors)
+          .ToArray();
+        if (validationErrors.Length > 0)
+        {
+          foreach (var error in validationErrors)
+          {
+            await ValidationMessages.PublishDataErrorAsync(
+              error.Description,
+              messageOutputService);
+          }
+
+          throw new InputValidationException(new ErrorItem
+          {
+            Code = validationErrors[0].Code,
+            Description = string.Join(
+              Environment.NewLine,
+              validationErrors.Select(error => error.Description))
+          });
+        }
+      }
+
       try
       {
         var result = UIValidationHelper.TryValidateAndParseInputWithEquipment(
@@ -53,13 +83,126 @@ namespace Ask.Engine.Tests.Base
             busCheck: busCheck,
             pairBusCheck: pairBusCheck);
 
+        if (metrologyMode.HasValue)
+        {
+          await ShowMetrologyInputAsync(
+            messageOutputService,
+            protocolUI,
+            metrologyMode.Value,
+            result,
+            timeCheck,
+            voltageCheck,
+            timeRampCheck,
+            busCheck,
+            pairBusCheck);
+        }
+
         return result;
       }
       catch (SystemExceptionBase ex)
       {
-        await messageOutputService.ShowMessageAsync(new ShowMessageModel("Ошибка данных", message: ex.Description, type: ShowMessageModel.MessageType.Error), SkipStepModeCheck: true);
+        await ValidationMessages.PublishDataErrorAsync(ex.Description, messageOutputService);
         throw;
       }
+    }
+
+    private static async Task ShowMetrologyInputAsync(
+      IMessageOutputService messageOutputService,
+      IInputFieldProvider inputFieldProvider,
+      MeasurementTypeCommand metrologyMode,
+      DataModel data,
+      bool timeCheck,
+      bool voltageCheck,
+      bool timeRampCheck,
+      bool busCheck,
+      bool pairBusCheck)
+    {
+      var parameters = BuildMetrologyInputParameters(
+        metrologyMode,
+        data,
+        timeCheck,
+        voltageCheck,
+        timeRampCheck,
+        busCheck,
+        pairBusCheck);
+
+      inputFieldProvider.SetExecutionInputParameters(
+        parameters
+          .Select(parameter => $"{parameter.Header}: {parameter.Value}")
+          .ToArray());
+
+      await ValidationMessages.PublishInputParametersAsync(
+        inputFieldProvider.GetExecutionTitle(),
+        parameters,
+        messageOutputService,
+        isCommandHeader: false,
+        isBlockStart: false);
+    }
+
+    internal static async Task ShowTestInputAsync(
+      IMessageOutputService messageOutputService,
+      IInputFieldProvider inputFieldProvider,
+      IReadOnlyList<(string Header, string Value)> parameters)
+    {
+      inputFieldProvider.SetExecutionInputParameters(
+        parameters
+          .Select(parameter => $"{parameter.Header}: {parameter.Value}")
+          .ToArray());
+
+      await ValidationMessages.PublishInputParametersAsync(
+        inputFieldProvider.GetExecutionTitle(),
+        parameters,
+        messageOutputService,
+        isCommandHeader: true);
+    }
+
+    internal static IReadOnlyList<(string Header, string Value)> BuildMetrologyInputParameters(
+      MeasurementTypeCommand metrologyMode,
+      DataModel data,
+      bool timeCheck,
+      bool voltageCheck,
+      bool timeRampCheck,
+      bool busCheck,
+      bool pairBusCheck)
+    {
+      var displayInfo = metrologyMode.GetCommandDisplayInfo();
+      var parameters = new List<(string Header, string Value)>
+      {
+        ("Первая точка", data.FirstPoint.ToString()),
+        ("Вторая точка", data.SecondPoint.ToString()),
+        (
+          $"Заданное значение {displayInfo.MeasurementDescription.ToLowerInvariant()}",
+          MeasurementValueFormatter.FormatWithUnit(data.Param, displayInfo.Unit)),
+      };
+
+      if (timeCheck)
+      {
+        parameters.Add((
+          "Время выполнения",
+          MeasurementValueFormatter.FormatWithUnit(data.Time, "с")));
+      }
+
+      if (timeRampCheck)
+      {
+        parameters.Add((
+          "Время нарастания",
+          MeasurementValueFormatter.FormatWithUnit(data.RampTime, "с")));
+      }
+
+      if (voltageCheck)
+      {
+        parameters.Add((
+          "Напряжение",
+          MeasurementValueFormatter.FormatWithUnit(data.Voltage, "В")));
+      }
+
+      if (busCheck)
+        parameters.Add(("Шина", data.ActiveBus.GetDescription()));
+
+      if (pairBusCheck)
+        parameters.Add(("Группа шин", data.ActivePairBus.GetDescription()));
+
+      return parameters;
     }
 
     /// <summary>
@@ -430,7 +573,8 @@ namespace Ask.Engine.Tests.Base
 
       var timeString = inputField.GetTime();
 
-      if (double.TryParse(timeString, out double result))
+      if (int.TryParse(timeString, out int result) &&
+          result is >= 1 and <= 60)
       {
         return result;
       }
@@ -474,7 +618,12 @@ namespace Ask.Engine.Tests.Base
 
       var timeString = inputField.GetTimeRamp();
 
-      if (double.TryParse(timeString, out double result))
+      if (double.TryParse(
+            timeString.Replace(',', '.'),
+            NumberStyles.Float,
+            CultureInfo.InvariantCulture,
+            out double result) &&
+          result is >= 0.1 and <= 10)
       {
         return result;
       }
@@ -604,7 +753,7 @@ namespace Ask.Engine.Tests.Base
 
       var voltageString = inputField.GetVoltage();
 
-      if (double.TryParse(voltageString, out double result))
+      if (int.TryParse(voltageString, out int result))
       {
         return result;
       }
@@ -682,3 +831,5 @@ namespace Ask.Engine.Tests.Base
     }
   }
 }
+
+

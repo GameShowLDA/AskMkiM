@@ -41,11 +41,6 @@ namespace Ask.UI.Controls.ProtocolNew
     public event PreviewMouseDownEventHandler ReturnMeasureResistanceButtonPreviewMouseDown;
 
     /// <summary>
-    /// Событие возникает при нажатии на кнопку "Зациклить".
-    /// </summary>
-    public event PreviewMouseDownEventHandler LoopMeasureResistanceButtonPreviewMouseDown;
-
-    /// <summary>
     /// Событие возникает при нажатии на кнопку "Остановить".
     /// </summary>
     public event PreviewMouseDownEventHandler PauseButtonPreviewMouseDown;
@@ -90,15 +85,6 @@ namespace Ask.UI.Controls.ProtocolNew
     {
       get { return Application.Current.Dispatcher.Invoke(() => RepeatButtonElement.Visibility); }
       set { Application.Current.Dispatcher.Invoke(() => RepeatButtonElement.Visibility = value); }
-    }
-
-    /// <summary>
-    /// Получает или устанавливает видимость кнопки "Зациклить".
-    /// </summary>
-    public Visibility LoopMeasureResistanceButtonVisibility
-    {
-      get { return Application.Current.Dispatcher.Invoke(() => loopButton.Visibility); }
-      set { Application.Current.Dispatcher.Invoke(() => loopButton.Visibility = value); }
     }
 
     /// <summary>
@@ -209,13 +195,6 @@ namespace Ask.UI.Controls.ProtocolNew
     }
 
     /// <inheritdoc />
-    Visibility IProtocolButtonView.LoopVisibility
-    {
-      get => loopButton.Visibility;
-      set => loopButton.Visibility = value;
-    }
-
-    /// <inheritdoc />
     Visibility IProtocolButtonView.StepOverVisibility
     {
       get => StepOverButtonElement.Visibility;
@@ -242,9 +221,8 @@ namespace Ask.UI.Controls.ProtocolNew
     {
       LogInformation($"Сработан обработчик события для кнопки \"Запустить\"");
 
-      // Режим шага выбирается только в момент запуска:
-      // F10/F11 выставляют флаг заранее, обычный старт сбрасывает его.
-      var startInStepMode = _startRequestedInStepMode;
+      var startInStepMode = _startRequestedInStepMode ||
+        ExecutionConfig.GetIsStepByStepModeEnabled();
       _startRequestedInStepMode = false;
       ExecutionConfig.SetStepByStepMode(startInStepMode);
 
@@ -260,11 +238,6 @@ namespace Ask.UI.Controls.ProtocolNew
     {
       LogInformation($"Сработан обработчик события для кнопки \"Остановить\"");
 
-      // Фиксируем запрос паузы сразу в executor, чтобы избежать гонки
-      // между быстрым "Пауза -> Продолжить" и запуском async-обработчика.
-      ActionExecutor.RequestPause();
-      ShowButtonsOnPause();
-
       PauseButtonPreviewMouseDown?.Invoke(this, e);
     }
 
@@ -275,7 +248,6 @@ namespace Ask.UI.Controls.ProtocolNew
     {
       LogInformation($"Сработан обработчик события для кнопки \"Продолжить\"");
 
-      // Для брейкпоинта "Продолжить" должно отправлять управляющее событие выполнения.
       if (StepControlManager.IsBreakpointStepModeActive)
       {
         StepControlManager.DisableStepMode();
@@ -284,7 +256,6 @@ namespace Ask.UI.Controls.ProtocolNew
         return;
       }
 
-      // "Продолжить" в UI всегда продолжает без пошагового режима.
       if (ActionExecutor.StepMode || StepControlManager.StepMode)
       {
         ExecutionConfig.SetStepByStepMode(false);
@@ -311,13 +282,7 @@ namespace Ask.UI.Controls.ProtocolNew
     {
       KeyboardManager.OnRunOrPausePressed = HandleRunOrPause;
 
-      KeyboardManager.OnStartPressed = () =>
-        Application.Current.Dispatcher.Invoke(() =>
-        {
-          _startRequestedInStepMode = false;
-          ExecutionConfig.SetStepByStepMode(false);
-          StartMeasureResistanceButton_PreviewMouseDown(StartButtonElement, CreateMouseArgs());
-        });
+      KeyboardManager.OnStartPressed = StartFromHotkey;
 
       KeyboardManager.OnStartPressedByStepMode = () =>
         Application.Current.Dispatcher.Invoke(() =>
@@ -327,36 +292,65 @@ namespace Ask.UI.Controls.ProtocolNew
           StartMeasureResistanceButton_PreviewMouseDown(StartButtonElement, CreateMouseArgs());
         });
 
-      KeyboardManager.OnExitPressed = () =>
-        Application.Current.Dispatcher.Invoke(() =>
-        {
-          if (Ask.UI.Infrastructure.UI.Overlay.Drawer.Runtime.DrawerHostService.Instance.ShouldBlockGlobalInput)
-          {
-            return;
-          }
-
-          ExitButton_PreviewMouseDown(StopButtonElement, CreateMouseArgs());
-        });
-
-      KeyboardManager.OnPausePressed = () =>
-      {
-        Application.Current.Dispatcher.Invoke(() =>
-          StopButton_PreviewMouseDown(PauseButtonElement, CreateMouseArgs()));
-      };
-
-      KeyboardManager.OnContinuePressed = () =>
-      {
-        Application.Current.Dispatcher.Invoke(() =>
-          NextButton_PreviewMouseDown(ContinueButtonElement, CreateMouseArgs()));
-      };
-
-      KeyboardManager.OnRepeatPressed = () =>
-      {
-        Application.Current.Dispatcher.Invoke(() =>
-          ReturnMeasureResistanceButton_PreviewMouseDown(RepeatButtonElement, CreateMouseArgs()));
-      };
+      KeyboardManager.OnExitPressed = ExitFromHotkey;
+      KeyboardManager.OnPausePressed = PauseFromHotkey;
+      KeyboardManager.OnContinuePressed = ContinueFromHotkey;
+      KeyboardManager.OnRepeatPressed = RepeatFromHotkey;
     }
 
+    /// <summary>
+    /// Запускает выполнение по команде горячей клавиши.
+    /// </summary>
+    private void StartFromHotkey()
+    {
+      Application.Current.Dispatcher.Invoke(() =>
+      {
+        _startRequestedInStepMode = false;
+        StartMeasureResistanceButton_PreviewMouseDown(StartButtonElement, CreateMouseArgs());
+      });
+    }
+
+    /// <summary>
+    /// Приостанавливает выполнение по команде горячей клавиши.
+    /// </summary>
+    private void PauseFromHotkey() =>
+      Application.Current.Dispatcher.Invoke(() =>
+        StopButton_PreviewMouseDown(PauseButtonElement, CreateMouseArgs()));
+
+    /// <summary>
+    /// Продолжает выполнение по команде горячей клавиши.
+    /// </summary>
+    private void ContinueFromHotkey() =>
+      Application.Current.Dispatcher.Invoke(() =>
+        NextButton_PreviewMouseDown(ContinueButtonElement, CreateMouseArgs()));
+
+    /// <summary>
+    /// Завершает выполнение по команде горячей клавиши.
+    /// </summary>
+    private void ExitFromHotkey()
+    {
+      Application.Current.Dispatcher.Invoke(() =>
+      {
+        if (Ask.UI.Infrastructure.UI.Overlay.Drawer.Runtime.DrawerHostService.Instance.ShouldBlockGlobalInput)
+        {
+          return;
+        }
+
+        ExitButton_PreviewMouseDown(StopButtonElement, CreateMouseArgs());
+      });
+    }
+
+    /// <summary>
+    /// Повторяет выполнение по команде горячей клавиши.
+    /// </summary>
+    private void RepeatFromHotkey() =>
+      Application.Current.Dispatcher.Invoke(() =>
+        ReturnMeasureResistanceButton_PreviewMouseDown(RepeatButtonElement, CreateMouseArgs()));
+
+    /// <summary>
+    /// Создаёт аргументы события нажатия левой кнопки мыши.
+    /// </summary>
+    /// <returns>Аргументы события нажатия левой кнопки мыши.</returns>
     private MouseButtonEventArgs CreateMouseArgs()
     {
       return new MouseButtonEventArgs(Mouse.PrimaryDevice, 0, MouseButton.Left)
@@ -375,15 +369,6 @@ namespace Ask.UI.Controls.ProtocolNew
     {
       LogInformation($"Сработан обработчик события для кнопки \"Повторить\"");
       ReturnMeasureResistanceButtonPreviewMouseDown?.Invoke(this, e);
-    }
-
-    /// <summary>
-    /// Обработчик события PreviewMouseDown для кнопки LoopMeasureResistanceButton.
-    /// </summary>
-    private void LoopMeasureResistanceButton_PreviewMouseDown(object sender, MouseButtonEventArgs e)
-    {
-      LogInformation($"Сработан обработчик события для кнопки \"Зациклить\"");
-      LoopMeasureResistanceButtonPreviewMouseDown?.Invoke(this, e);
     }
 
     /// <summary>
@@ -450,7 +435,6 @@ namespace Ask.UI.Controls.ProtocolNew
       StepIntoButtonElement.PreviewMouseDown += BottomLayer_PreviewMouseDown;
 
       RepeatButtonElement.PreviewMouseDown += ReturnMeasureResistanceButton_PreviewMouseDown;
-      loopButton.PreviewMouseDown += LoopMeasureResistanceButton_PreviewMouseDown;
     }
 
     /// <summary>
@@ -511,6 +495,21 @@ namespace Ask.UI.Controls.ProtocolNew
       _buttonController.Apply(ProtocolButtonState.AdditionalActions);
     }
 
+    /// <summary>
+    /// Отображает действия интерактивной операции с учётом результата последней попытки.
+    /// </summary>
+    /// <param name="canContinue">
+    /// <see langword="true"/>, если последняя попытка завершилась корректно.
+    /// В противном случае — <see langword="false"/>.
+    /// </param>
+    public void ShowInteractiveActionButtons(bool canContinue)
+    {
+      _buttonController.Apply(
+        canContinue
+          ? ProtocolButtonState.InteractiveActions
+          : ProtocolButtonState.AdditionalActions);
+    }
+
     public void ShowOnlyExitButton()
     {
       _buttonController.Apply(ProtocolButtonState.ExitOnly, ActionExecutor.StepMode);
@@ -555,7 +554,11 @@ namespace Ask.UI.Controls.ProtocolNew
 
     public void ShowProtocolManager()
     {
-      Application.Current.Dispatcher.Invoke(() => ProtocolManager.Visibility = Visibility.Visible);
+      Application.Current.Dispatcher.Invoke(() =>
+      {
+        ProtocolManager.Visibility = Visibility.Visible;
+        UpdateProtocolManagerLayout();
+      });
     }
 
     public void HideProtocolManager()

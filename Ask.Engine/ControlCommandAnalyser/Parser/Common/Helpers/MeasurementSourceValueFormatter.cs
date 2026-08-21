@@ -4,7 +4,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
 {
   internal static class MeasurementSourceValueFormatter
   {
-    private static readonly CultureInfo DisplayCulture = CultureInfo.GetCultureInfo("ru-RU");
+    private static readonly CultureInfo DisplayCulture = CultureInfo.InvariantCulture;
 
     public static string FormatValue(double value)
     {

@@ -1,7 +1,10 @@
+using Ask.Core.Shared.Metadata.Enums.FileEnums;
+using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Enums.UnitEnums;
 using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.Device.Runtime.AskMkiM.Function.ModuleVoltageCurrentSource.SelfCheck
@@ -14,7 +17,9 @@ namespace Ask.Device.Runtime.AskMkiM.Function.ModuleVoltageCurrentSource.SelfChe
     /// <param name="token">Токен для отмены операции.</param>
     static internal async Task GenerateDiscreteVoltageCheck(CancellationToken cancellationToken, IUserInteractionService messageService, IMultimeter fastMeter, IPowerSourceModule powerSource)
     {
-      await messageService.ShowMessageAsync(new ShowMessageModel("Начало проверки формирования дискрет напряжения"));
+      await SelfTestMessages.PublishInformationAsync(
+        "Начало проверки формирования дискрет напряжения",
+        messageService);
 
       await CheckVoltageLevelsAsync(cancellationToken, messageService, 0.1, 0.9, 0.1, 20, fastMeter, powerSource);
       await CheckVoltageLevelsAsync(cancellationToken, messageService, 1, 9, 1, 20, fastMeter, powerSource);
@@ -31,10 +36,14 @@ namespace Ask.Device.Runtime.AskMkiM.Function.ModuleVoltageCurrentSource.SelfChe
     /// <param name="token">Токен для отмены операции.</param>
     static private async Task CheckVoltageLevelsAsync(CancellationToken cancellationToken, IUserInteractionService messageService, double startVoltage, double endVoltage, double step, int delay, IMultimeter fastMeter, IPowerSourceModule powerSource)
     {
-      await messageService.ShowMessageAsync(new ShowMessageModel($"Проверка уровней напряжения от {startVoltage} до {endVoltage} с шагом {step}"));
+      await SelfTestMessages.PublishInformationAsync(
+        $"Проверка уровней напряжения от {startVoltage} до {endVoltage} с шагом {step}",
+        messageService);
       for (double voltage = startVoltage; voltage <= endVoltage; voltage += step)
       {
-        await messageService.ShowMessageAsync(new ShowMessageModel($"Проверка напряжения {Math.Round(voltage, 1)}В"));
+        await SelfTestMessages.PublishInformationAsync(
+          $"Проверка напряжения {Math.Round(voltage, 1)}В",
+          messageService);
         cancellationToken.ThrowIfCancellationRequested();
         double roundedVoltage = Math.Round(voltage, 1);
         await SetVoltageAndShowMessage(messageService, roundedVoltage, powerSource);
@@ -66,13 +75,27 @@ namespace Ask.Device.Runtime.AskMkiM.Function.ModuleVoltageCurrentSource.SelfChe
 
       await Task.Delay(10);
 
-      double result = await GetMeasurementResult(messageService, voltage, firstNorm, lastNorm, delay, fastMeter);
+      MeasurementRange measurementRange = new MeasurementRange(voltage, firstNorm, lastNorm);
+      double result = await GetMeasurementResult(messageService, measurementRange, delay, fastMeter);
       bool error = !(result >= firstNorm && result <= lastNorm);
 
-      var status = error ? ShowMessageModel.MessageType.Error : ShowMessageModel.MessageType.Success;
-      await messageService.ShowMessageAsync(new ShowMessageModel($"Результат измерения", message: $"{result}В", type: status) { IndentLevel = 2 });
-      await messageService.ShowMessageAsync(new ShowMessageModel($"Диапазон значений", message: $"от {firstNorm} до {lastNorm}В") { IndentLevel = 3 });
-      await messageService.ShowMessageAsync(new ShowMessageModel($"Погрешность измерения", message: $"{Math.Abs(result - voltage)}В", type: status) { IndentLevel = 3 });
+      await MeasurementMessages.PublishResultAsync(CheckType.SelfTest,
+        VoltageUnit.Volt,
+        new MeasurementRange(result, firstNorm, lastNorm),
+        !error,
+        outputService: messageService);
+      await RangeMessages.PublishAllowedRangeAsync(
+        VoltageUnit.Volt,
+        new MeasurementRange(voltage, firstNorm, lastNorm),
+        messageService,
+        indentLevel: 3,
+        header: "Диапазон значений");
+      await MeasurementMessages.PublishErrorAsync(CheckType.SelfTest,
+        VoltageUnit.Volt,
+        new MeasurementRange(Math.Abs(result - voltage), firstNorm, lastNorm),
+        !error,
+        messageService,
+        indentLevel: 3);
 
       await Task.Delay(1);
     }
@@ -84,10 +107,10 @@ namespace Ask.Device.Runtime.AskMkiM.Function.ModuleVoltageCurrentSource.SelfChe
     /// <param name="delay">Задержка перед измерением.</param>
     /// <param name="token">Токен отмены.</param>
     /// <returns>Результат измерения.</returns>
-    static private async Task<double> GetMeasurementResult(IUserInteractionService messageService, double voltage, double rangeFrom, double rangeTo, int delay, IMultimeter meter)
+    static private async Task<double> GetMeasurementResult(IUserInteractionService messageService, MeasurementRange measurementRange, int delay, IMultimeter meter)
     {
       await Task.Delay(delay);
-      double result = await meter.DcVoltageManager.MeasureDCVoltageAsync(voltage, rangeFrom, rangeTo, messageService);
+      double result = await meter.DcVoltageManager.MeasureDCVoltageAsync(measurementRange, messageService);
       LogInformation($"Измеренное напряжение: {result} В", isDeviceLog: true);
       return result;
     }

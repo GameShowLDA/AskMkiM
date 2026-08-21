@@ -14,8 +14,21 @@ namespace Ask.Core.Shared.Interfaces.UiInterfaces
     /// <summary>
     /// Асинхронно ожидает выбора пользователя (повторить, продолжить, завершить) после сообщения.
     /// </summary>
+    /// <param name="loop">Признак обязательного интерактивного режима.</param>
+    /// <param name="deviceTask">Признак аппаратной операции.</param>
+    /// <param name="canContinue">Признак доступности продолжения после последней попытки.</param>
     /// <returns>Выбранное пользователем действие.</returns>
-    Task<UserAction> WaitUserActionAsync(bool loop = false, bool deviceTask = false);
+    Task<UserAction> WaitUserActionAsync(
+      bool loop = false,
+      bool deviceTask = false,
+      bool canContinue = true);
+
+    /// <summary>
+    /// Ожидает выбора между повтором операции и переходом к следующей операции.
+    /// </summary>
+    /// <returns>Выбранное пользователем действие.</returns>
+    Task<UserAction> WaitRetryOrContinueAsync() =>
+      WaitUserActionAsync(loop: true, deviceTask: true, canContinue: true);
 
     CancellationToken GetCancellationToken();
 

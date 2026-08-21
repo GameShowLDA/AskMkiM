@@ -384,6 +384,9 @@
   <data name="protocol.tooltip.stepinto" xml:space="preserve">
     <value>Шаг с заходом (F11)</value>
   </data>
+  <data name="protocol.tooltip.commandjump" xml:space="preserve">
+    <value>Перейти к другой команде (F4)</value>
+  </data>
   <data name="translator.editor.tooltip.back" xml:space="preserve">
     <value>Вернуться к исходному файлу</value>
   </data>
@@ -484,7 +487,19 @@
     <value>Выполнение с ошибками</value>
   </data>
   <data name="settings.execution.errorSimulation.description" xml:space="preserve">
-    <value>Добавляет случайные ошибки при холостом режиме для проверки обработки ошибок.</value>
+    <value>Настройки искусственных ошибок при выполнении в холостом режиме.</value>
+  </data>
+  <data name="settings.execution.measurementErrorSimulation.title" xml:space="preserve">
+    <value>Симуляция ошибок измерений</value>
+  </data>
+  <data name="settings.execution.measurementErrorSimulation.description" xml:space="preserve">
+    <value>Добавляет существующие случайные отклонения результатов измерений от заданных норм.</value>
+  </data>
+  <data name="settings.execution.hardwareErrorSimulation.title" xml:space="preserve">
+    <value>Симуляция ошибок оборудования</value>
+  </data>
+  <data name="settings.execution.hardwareErrorSimulation.description" xml:space="preserve">
+    <value>Имитирует ошибку выполнения не измерительной команды оборудования с вероятностью 50%.</value>
   </data>
   <data name="settings.protocol.operationTime.title" xml:space="preserve">
     <value>Вывод времени операции</value>
@@ -511,10 +526,10 @@
     <value>По завершении выполнения отображает диалог выбора принтера для печати итогового протокола.</value>
   </data>
   <data name="settings.protocol.showInSoftware.title" xml:space="preserve">
-    <value>Вывод протокола в ПО</value>
+    <value>Формирование протокола программы контроля</value>
   </data>
   <data name="settings.protocol.showInSoftware.description" xml:space="preserve">
-    <value>По завершении выполнения протокол отображается в программном обеспечении, по умолчанию открывается как PDF-файл.</value>
+    <value>По завершении программы контроля формируется итоговый протокол. Протоколы метрологии, тестов и самоконтроля формируются независимо от этой настройки.</value>
   </data>
   <data name="settings.protocol.generate.title" xml:space="preserve">
     <value>Формирование протокола</value>
@@ -641,5 +656,8 @@
   </data>
   <data name="settings.device.multimeter.additionalDividerCoefficient.dcw" xml:space="preserve">
     <value>Доп. коэф. делителя DCW, %</value>
+  </data>
+  <data name="settings.device.breakdownTester.systemInsulationResistance" xml:space="preserve">
+    <value>Сопротивление изоляции системы, ГОм</value>
   </data>
 </root>

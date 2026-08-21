@@ -1,6 +1,6 @@
-using Ask.Core.Services.Config.AppSettings;
-using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice.Capabilities;
+﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Device.ResponseProcessor.DeviceBusCommutation.ResponseProcessing;
 using Ask.Device.Runtime.AskMkiM.Base.Commands;
 using Ask.Device.Runtime.Base.Helpers;
 
@@ -16,12 +16,17 @@ namespace Ask.Device.Runtime.AskMkiM.Function.DeviceBusCommutation
     /// Устройство коммутации шин.
     /// </summary>
     private readonly Device.SwitchingDevice.DeviceBusCommutation _deviceBusCommutation;
+    private readonly DeviceBusCommutationQueryExecutor queryExecutor;
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="BusManager"/>.
     /// </summary>
     /// <param name="deviceBusCommutation">Экземпляр устройства коммутации шин.</param>
-    public CapacitorManager(Device.SwitchingDevice.DeviceBusCommutation deviceBusCommutation) => _deviceBusCommutation = deviceBusCommutation;
+    public CapacitorManager(Device.SwitchingDevice.DeviceBusCommutation deviceBusCommutation)
+    {
+      _deviceBusCommutation = deviceBusCommutation;
+      queryExecutor = new DeviceBusCommutationQueryExecutor(deviceBusCommutation);
+    }
 
     /// <summary>
     /// Замыкание конденсатора.
@@ -30,14 +35,10 @@ namespace Ask.Device.Runtime.AskMkiM.Function.DeviceBusCommutation
     /// <returns>Задача (Task), представляющая асинхронную операцию.</returns>
     public async Task<bool> ConnectCapacitor(int number, IUserInteractionService? userMessageService = null)
     {
-      if (ExecutionConfig.GetIsIdleModeEnabled())
-      {
-        return true;
-      }
-
       DeviceCommand command = new DeviceCommand(6, 2, number, 1);
-      await _deviceBusCommutation.DeviceProtocol.QueryAsync(command.ToString());
-      return true;
+      string answer = await queryExecutor.QueryAsync(command.ToString());
+      return await DeviceBusCommutationResponseProcessor.CheckChainOperationAsync(
+        answer, _deviceBusCommutation, true, "конденсатора", number.ToString(), userMessageService);
     }
 
     /// <summary>
@@ -47,16 +48,12 @@ namespace Ask.Device.Runtime.AskMkiM.Function.DeviceBusCommutation
     /// <returns>Задача (Task), представляющая асинхронную операцию.</returns>
     public async Task<bool> DisconnectCapacitor(int number, IUserInteractionService? userMessageService = null)
     {
-      var showMessageModel = DeviceMessageBuilder.GetDefaultSettings(_deviceBusCommutation);
-
-      if (ExecutionConfig.GetIsIdleModeEnabled())
-      {
-        return true;
-      }
-
       DeviceCommand command = new DeviceCommand(6, 2, number, 2);
-      await _deviceBusCommutation.DeviceProtocol.QueryAsync(command.ToString());
-      return true;
+      string answer = await queryExecutor.QueryAsync(command.ToString());
+      return await DeviceBusCommutationResponseProcessor.CheckChainOperationAsync(
+        answer, _deviceBusCommutation, false, "конденсатора", number.ToString(), userMessageService);
     }
   }
 }
+
+

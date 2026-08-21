@@ -18,7 +18,6 @@ namespace Ask.Engine.Tests.SelfControl
       ActionSettings actionSettings = new ActionSettings()
       {
         StartDelegate = ExecuteMeasurementProcess,
-        IsRepeatEnabled = true,
         CheckPower = false,
       };
       executionController.SetSettings(actionSettings);
