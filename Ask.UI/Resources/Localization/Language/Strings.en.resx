@@ -511,10 +511,10 @@
     <value>Above range</value>
   </data>
   <data name="settings.execution.hardwareErrorSimulation.title" xml:space="preserve">
-    <value>Hardware error simulation</value>
+    <value>Hardware failure simulation</value>
   </data>
   <data name="settings.execution.hardwareErrorSimulation.description" xml:space="preserve">
-    <value>Select equipment whose every non-measurement command must fail (100% probability).</value>
+    <value>Specifies the equipment for which every non‑measurement command ends in an error.</value>
   </data>
   <data name="settings.protocol.operationTime.title" xml:space="preserve">
     <value>Operation time output</value>

@@ -2,6 +2,15 @@
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.DTO.Devices.Base;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.Rack;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.UninterruptiblePowerSupply;
 using Ask.Core.Shared.DTO.Settings;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.RoleEnums;
@@ -317,7 +326,7 @@ namespace UI.Controls.Settings.Execution
         var card = new SettingsCard
         {
           Title = GetDeviceCardTitle(device),
-          Description = GetDeviceCardDescription(device),
+          Description = string.Empty,
           IsChecked = currentValue,
           Margin = new Thickness(0, 6, 10, 0),
           VerticalAlignment = VerticalAlignment.Top,
@@ -356,13 +365,41 @@ namespace UI.Controls.Settings.Execution
       }
 
       await context.SaveChangesAsync();
-      DeviceRuntime.ClearCache();
+      foreach (var item in changedItems)
+      {
+        await ApplyHardwareErrorSimulationToRuntimeAsync(item.Device);
+      }
 
       foreach (var item in changedItems)
       {
         item.SavedValue = item.Card.IsChecked;
       }
     }
+
+    private static async Task ApplyHardwareErrorSimulationToRuntimeAsync(DeviceDto device)
+    {
+      IDevice? runtimeDevice = device.DeviceType switch
+      {
+        DeviceType.ChassisManager => await GetRuntimeDeviceAsync<IChassisManager>(device.Id),
+        DeviceType.Rack => await GetRuntimeDeviceAsync<IRack>(device.Id),
+        DeviceType.RelaySwitchModule => await GetRuntimeDeviceAsync<IRelaySwitchModule>(device.Id),
+        DeviceType.PowerSourceModule => await GetRuntimeDeviceAsync<IPowerSourceModule>(device.Id),
+        DeviceType.SwitchingDevice => await GetRuntimeDeviceAsync<ISwitchingDevice>(device.Id),
+        DeviceType.PrecisionMeter or DeviceType.FastMeter => await GetRuntimeDeviceAsync<IMultimeter>(device.Id),
+        DeviceType.BreakdownTester => await GetRuntimeDeviceAsync<IBreakdownTester>(device.Id),
+        DeviceType.UninterruptiblePowerSupply => await GetRuntimeDeviceAsync<IUninterruptiblePowerSupply>(device.Id),
+        _ => null,
+      };
+
+      if (runtimeDevice != null)
+      {
+        runtimeDevice.IsHardwareFailureSimulationEnabled = device.IsHardwareFailureSimulationEnabled;
+      }
+    }
+
+    private static async Task<IDevice?> GetRuntimeDeviceAsync<TDevice>(int id)
+      where TDevice : class, IDevice =>
+      await DeviceRuntime.GetByIdAsync<TDevice>(id);
 
     private bool HasHardwareErrorSimulationChanges() =>
       _hardwareErrorSimulationItems.Any(item => item.Card.IsChecked != item.SavedValue);
@@ -374,21 +411,6 @@ namespace UI.Controls.Settings.Execution
       device is AttachableDeviceDto attachable
         ? $"{device.Name} ({attachable.NumberChassis}.{device.Number})"
         : $"{device.Name} ({device.Number})";
-
-    private static string GetDeviceCardDescription(DeviceDto device)
-    {
-      if (!string.IsNullOrWhiteSpace(device.Description))
-      {
-        return device.Description;
-      }
-
-      if (!string.IsNullOrWhiteSpace(device.ConnectionDetails))
-      {
-        return device.ConnectionDetails;
-      }
-
-      return $"ID: {device.Id}";
-    }
 
     /// <summary>
     /// Проверяет, обладает ли текущая сессия ролью Root.

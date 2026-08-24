@@ -1455,8 +1455,10 @@ enabled. The measurement selector defaults to `None`; persisted legacy boolean
 values remain compatible because `false/0 → None` and `true/1 → Rnd`.
 Hardware simulation is disabled for every device by default. `ExecutionControl`
 loads all eight device tables and renders one nested `SettingsCard` per concrete
-equipment row; save updates only `IsHardwareFailureSimulationEnabled` and clears
-the runtime device cache. Successful device Create/Update/Delete operations in
+equipment row; save updates only `IsHardwareFailureSimulationEnabled` in SQLite
+and synchronizes the same flag on the current cached runtime `IDevice` instance,
+so subsequent commands observe the change without restarting the application;
+the full runtime device cache is not cleared. Successful device Create/Update/Delete operations in
 `DeviceEngine` and a committed bulk import publish
 `SystemStateEvents.DeviceConfigurationChanged`; the loaded `ExecutionControl`
 coalesces these notifications and rereads all device tables. Added devices therefore

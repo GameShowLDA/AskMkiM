@@ -514,10 +514,10 @@
     <value>Выше нормы</value>
   </data>
   <data name="settings.execution.hardwareErrorSimulation.title" xml:space="preserve">
-    <value>Симуляция ошибок оборудования</value>
+    <value>Симуляция сбоев оборудования</value>
   </data>
   <data name="settings.execution.hardwareErrorSimulation.description" xml:space="preserve">
-    <value>Выберите оборудование, для которого каждая не измерительная команда должна завершаться ошибкой (вероятность 100%).</value>
+    <value>Задаёт оборудование, для которого каждая неизмерительная команда завершается ошибкой.</value>
   </data>
   <data name="settings.protocol.operationTime.title" xml:space="preserve">
     <value>Вывод времени операции</value>
