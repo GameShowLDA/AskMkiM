@@ -5,6 +5,7 @@ using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Shared.Interfaces.ProtocolInterfaces;
 using Ask.UI.Controls.ProtocolNew;
+using Ask.Core.Shared.Metadata.Enums.ExecutionEnums;
 
 namespace Ask.UI.Features.ProtocolNew.Protocol;
 
@@ -45,7 +46,8 @@ internal sealed class ProtocolCompletionService
   /// </summary>
   /// <param name="settings">Настройки и результаты завершённого действия.</param>
   /// <param name="protocol">Компонент отображения протокола.</param>
-  public async Task DisplayCompletionAsync(ActionSettings settings, ProtocolUI protocol)
+  /// <param name="completionStatus">Статус завершения выполнения.</param>
+  public async Task DisplayCompletionAsync(ActionSettings settings, ProtocolUI protocol, ExecutionCompletionStatus completionStatus)
   {
     var completionMessage = new ShowMessageModel
     {
@@ -66,7 +68,7 @@ internal sealed class ProtocolCompletionService
     }
 
     await protocol.AppendEmptyLineAsync();
-    protocol.ShowInspectionProtocol(_inspectionProtocolBuilder.Build(settings));
+    protocol.ShowInspectionProtocol(_inspectionProtocolBuilder.Build(settings, completionStatus));
   }
 
   /// <summary>
@@ -74,7 +76,8 @@ internal sealed class ProtocolCompletionService
   /// </summary>
   /// <param name="settings">Параметры завершённого выполнения.</param>
   /// <param name="protocol">Компонент отображения протокола.</param>
-  public async Task AppendControlProgramCompletionAsync(ActionSettings settings, ProtocolUI protocol)
+  /// <param name="completionStatus">Статус завершения выполнения.</param>
+  public async Task AppendControlProgramCompletionAsync(ActionSettings settings, ProtocolUI protocol, ExecutionCompletionStatus completionStatus)
   {
     if (settings.CheckType != CheckType.ControlProgram)
     {
@@ -82,11 +85,13 @@ internal sealed class ProtocolCompletionService
     }
 
     await protocol.FinalizeCurrentCommandGroupAsync();
-    var completionMessage = ControlProgramCompletionMessageBuilder.Build(settings);
-    var successColor = ShowMessageModel.SuccessMessage.TitleColor;
-    completionMessage.HeaderColor = successColor;
-    completionMessage.MessageColor = successColor;
-    completionMessage.TimeColor = successColor;
+    var completionMessage = ControlProgramCompletionMessageBuilder.Build(settings, completionStatus);
+    var color = completionStatus == ExecutionCompletionStatus.Interrupted
+    ? ShowMessageModel.ErrorMessage.TitleColor
+    : ShowMessageModel.SuccessMessage.TitleColor;
+    completionMessage.HeaderColor = color;
+    completionMessage.MessageColor = color;
+    completionMessage.TimeColor = color;
     await protocol.ShowMessageAsync(
       completionMessage,
       skipPause: true,

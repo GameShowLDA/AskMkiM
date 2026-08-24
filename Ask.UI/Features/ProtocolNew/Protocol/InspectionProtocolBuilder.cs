@@ -1,5 +1,6 @@
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.Interfaces.ProtocolInterfaces;
+using Ask.Core.Shared.Metadata.Enums.ExecutionEnums;
 using System.Text;
 
 namespace Ask.UI.Features.ProtocolNew.Protocol;
@@ -10,7 +11,7 @@ namespace Ask.UI.Features.ProtocolNew.Protocol;
 internal sealed class InspectionProtocolBuilder : IInspectionProtocolBuilder
 {
   /// <inheritdoc />
-  public string Build(ActionSettings settings)
+  public string Build(ActionSettings settings, ExecutionCompletionStatus completionStatus)
   {
     ArgumentNullException.ThrowIfNull(settings);
 
@@ -67,7 +68,11 @@ internal sealed class InspectionProtocolBuilder : IInspectionProtocolBuilder
       }
     }
 
-
+    if (completionStatus == ExecutionCompletionStatus.Interrupted)
+    {
+      message.AppendLine("\nЗаключение: выполнение проверки прервано");
+      return message.ToString();
+    }
     if (settings.ExecutionErrors.Count == 0)
     {
       message.AppendLine("\nЗаключение: ошибок не обнаружено");

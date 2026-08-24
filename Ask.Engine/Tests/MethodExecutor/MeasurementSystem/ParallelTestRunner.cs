@@ -93,7 +93,8 @@ namespace Ask.Engine.Tests.MethodExecutor.MeasurementSystem
 
         await _measurementAction(_protocolUI, dataModel);
         await ExecutionMessages.PublishGeneralPointsResetAsync(_protocolUI);
-
+        // задержка для теста ПИ групповым методом
+        await _protocolUI.DelayWithPauseAsync(TimeSpan.FromSeconds(1));
         await ResetAllPointsAsync(groupedPoints, cancellationToken);
       }
     }

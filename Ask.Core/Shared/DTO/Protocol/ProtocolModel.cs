@@ -1,3 +1,4 @@
+using Ask.Core.Shared.Metadata.Enums.ExecutionEnums;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -112,6 +113,12 @@ namespace Ask.Core.Shared.DTO.Protocol
       }
     }
 
+    /// <summary>
+    /// Статус завершения программы контроля.
+    /// </summary>
+    public ExecutionCompletionStatus CompletionStatus { get; set; } =
+        ExecutionCompletionStatus.Success;
+
     private static string Template { get; set; } = string.Empty;
     private static string ErrorsTemplate { get; set; } = string.Empty;
 
@@ -142,6 +149,7 @@ namespace Ask.Core.Shared.DTO.Protocol
     {
       string timeText = protocolModel.ExecutionTime.ToString(@"hh\:mm\:ss\:ff");
       string messagesText = BuildMessagesBlock(protocolModel);
+      var conclusionText = GetConclusionText(protocolModel);
 
       string formattedText = Template
           .Replace("$ДАТА", protocolModel.Date.ToString("dd.MM.yyyy"))
@@ -154,8 +162,17 @@ namespace Ask.Core.Shared.DTO.Protocol
           .Replace("$ВРЕМЯ", timeText + messagesText)
           .Replace("$ИСПОЛНИТЕЛЬ", protocolModel.Executor)
           .Replace("$ПРЕДСТАВИТЕЛЬ", protocolModel.Agent)
-          .Replace("$ЗАКАЗЧИК", protocolModel.Customer);
+          .Replace("$ЗАКАЗЧИК", protocolModel.Customer)
+          .Replace("$ЗАКЛЮЧЕНИЕ", conclusionText); 
       return formattedText;
+    }
+
+    private static string GetConclusionText(ProtocolModel protocolModel)
+    {
+      return protocolModel.CompletionStatus == ExecutionCompletionStatus.Interrupted
+          ? "Выполнение протокола прервано"
+          : $"Изделие {protocolModel.Designation} Зав.N {protocolModel.Number}\r\n" +
+            "            соответствует требованиям КД";
     }
 
     public static string GetProtocolWithErrorsText(ProtocolModel protocolModel)
@@ -169,6 +186,8 @@ namespace Ask.Core.Shared.DTO.Protocol
 
       string before = ErrorsTemplate.Substring(0, markerIndex + marker.Length);
       string after = ErrorsTemplate.Substring(markerIndex + marker.Length);
+
+      var conclusionText = GetConclusionText(protocolModel);
 
       before = before
           .Replace("$ДАТА", protocolModel.Date.ToString("dd.MM.yyyy"))
@@ -184,7 +203,9 @@ namespace Ask.Core.Shared.DTO.Protocol
           .Replace("$БРАК(не )", "не ")
           .Replace("$ИСПОЛНИТЕЛЬ", protocolModel.Executor)
           .Replace("$ПРЕДСТАВИТЕЛЬ", protocolModel.Agent)
-          .Replace("$ЗАКАЗЧИК", protocolModel.Customer);
+          .Replace("$ЗАКАЗЧИК", protocolModel.Customer)
+          .Replace("$ЗАКЛЮЧЕНИЕ", conclusionText);
+      
 
       if (string.IsNullOrEmpty(messagesText))
       {

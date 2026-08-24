@@ -77,15 +77,17 @@ namespace Ask.Core.Services.EventCore.Events
       public string Executor { get; }
       public string Agent { get; }
       public string Customer { get; }
+      public bool IsInterrupted { get; }
       public ProtocolModel Protocol { get; }
 
-      public ProtocolInfoClose(string number, string executor, string agent, string customer, ProtocolModel protocol)
+      public ProtocolInfoClose(string number, string executor, string agent, string customer, bool isInterrupted, ProtocolModel protocol)
       {
         Number = number;
         Executor = executor;
         Agent = agent;
         Customer = customer;
         Protocol = protocol;
+        IsInterrupted = isInterrupted;
       }
     }
   }

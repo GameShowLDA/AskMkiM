@@ -74,7 +74,7 @@ namespace Ask.Core.Services.EventCore.Adapters
     /// FileInteractionEventAdapter.RaiseProtocolInfoClose("№123", "Иванов", "НИИ Электрон", "АО Аксион", protocolModel);
     /// </code>
     /// </example>
-    public static void RaiseProtocolInfoClose(string number, string executor, string agent, string customer, ProtocolModel protocol)
-      => EventAggregator.Publish(new FileInteractionEvents.ProtocolInfoClose(number, executor, agent, customer, protocol));
+    public static void RaiseProtocolInfoClose(string number, string executor, string agent, string customer, bool isInterrupted, ProtocolModel protocol)
+      => EventAggregator.Publish(new FileInteractionEvents.ProtocolInfoClose(number, executor, agent, customer, isInterrupted, protocol));
   }
 }

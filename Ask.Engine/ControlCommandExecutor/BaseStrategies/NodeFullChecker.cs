@@ -40,6 +40,8 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         ControlCheckAlgorithm.FullNode,
         context.IsPolarityReversed);
 
+      try
+      {
       foreach (var chainModels in groupChains.ChainModels)
       {
         context.MessageService.GetCancellationToken().ThrowIfCancellationRequested();
@@ -108,6 +110,11 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       if (context.IsInvokedByAnotherCommand)
       {
         context.SchemeModel.SetErrorChainDisconnectedPoints(errorChains);
+      }
+      }
+      finally
+      {
+        await DisconnectAllFromBusBAsync(groupChains.ChainModels, context.MessageService, context.IsPolarityReversed);
       }
 
       return executionResult;

@@ -1,6 +1,7 @@
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using System.Windows.Media;
@@ -71,7 +72,11 @@ public static class DeviceResetService
         string? error = null;
         try
         {
-          reset = await device.ConnectableManager.ResetAsync();
+          reset = await ResetDeviceAsync(device, messageService);
+          if (!reset)
+          {
+            error = $"Сброс не завершён для {GetDeviceLabel(device)}.";
+          }
         }
         catch (Exception ex)
         {
@@ -120,6 +125,25 @@ public static class DeviceResetService
         device is IAttachableDevice attachable ? attachable.NumberChassis : 0,
         device.Number,
         device.ConnectionDetails));
+  }
+
+  private static async Task<bool> ResetDeviceAsync(
+    IDevice device,
+    IUserInteractionService? messageService)
+  {
+    if (device is IRelaySwitchModule relayModule)
+    {
+      bool disconnected = await relayModule.PointManager.DisconnectingAllPoint(messageService);
+      if (!disconnected)
+      {
+        LogError(
+          $"{GetDeviceLabel(device)}: не удалось физически отключить все точки МКР перед адресным сбросом.",
+          isDeviceLog: true);
+        return false;
+      }
+    }
+
+    return await device.ConnectableManager.ResetAsync();
   }
 
   private static async Task ShowResultAsync(

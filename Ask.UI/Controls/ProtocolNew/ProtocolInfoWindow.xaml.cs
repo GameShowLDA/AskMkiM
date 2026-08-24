@@ -2,8 +2,10 @@ using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.DTO.Protocol;
+using Ask.Core.Shared.Metadata.Enums.ExecutionEnums;
 using System.Windows;
 using System.Windows.Input;
+using static Ask.Core.Services.EventCore.Events.ExecutionEvents;
 
 namespace Ask.UI.Controls.ProtocolNew
 {
@@ -34,16 +36,20 @@ namespace Ask.UI.Controls.ProtocolNew
     public string CustomerAgentResult { get; private set; }
 
     private ProtocolModel _protocolModel = null;
-    public ProtocolInfoWindow(ProtocolModel protocolModel) : this()
+    private bool _executionInterrupted = false;
+    public ProtocolInfoWindow(ProtocolModel protocolModel, bool executionInterrupted) : this()
     {
       _protocolModel = protocolModel;
+      _executionInterrupted = executionInterrupted;
     }
 
     public ProtocolInfoWindow()
     {
       InitializeComponent();
+
       this.Loaded += Window_Loaded;
     }
+
 
     private void Window_Loaded(object sender, RoutedEventArgs e)
     {
@@ -72,6 +78,10 @@ namespace Ask.UI.Controls.ProtocolNew
       ExecutorResult = ExecutorInput.Text;
       AgentResult = AgentInput.Text;
       CustomerAgentResult = CustomerAgentInput.Text;
+      if(_executionInterrupted == true)
+      {
+        _protocolModel.CompletionStatus = ExecutionCompletionStatus.Interrupted;
+      }
       if (string.IsNullOrEmpty(NumberResult)
         || string.IsNullOrEmpty(ExecutorResult)
         || string.IsNullOrEmpty(AgentResult)
@@ -83,7 +93,8 @@ namespace Ask.UI.Controls.ProtocolNew
       else
       {
         this.DialogResult = true;
-        FileInteractionEventAdapter.RaiseProtocolInfoClose(NumberResult, ExecutorResult, AgentResult, CustomerAgentResult, _protocolModel);
+         FileInteractionEventAdapter.RaiseProtocolInfoClose(NumberResult, ExecutorResult, AgentResult, CustomerAgentResult, _executionInterrupted,  _protocolModel);
+        _executionInterrupted = false;
         this.Close();
       }
     }

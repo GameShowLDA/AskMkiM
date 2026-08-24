@@ -174,13 +174,20 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
 
     /// <summary>
     /// Разбирает сегмент цепи на группы.
+    /// '#' разделяет ChainModel внутри одной GroupModel.
     /// </summary>
-    private static List<GroupModel> ParseChainParts(string segment, BaseCommandModel model, RmCommandModel rm, List<ErrorItem> errors)
+    private static List<GroupModel> ParseChainParts(
+        string segment,
+        BaseCommandModel model,
+        RmCommandModel rm,
+        List<ErrorItem> errors)
     {
       var result = new List<GroupModel>();
       var chainName = ExtractChainName(ref segment);
 
       var parts = SplitParts(segment);
+
+      var group = new GroupModel();
 
       foreach (var part in parts)
       {
@@ -188,8 +195,14 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
             part,
             model,
             rm,
+            group,
             result,
             errors);
+      }
+
+      if (group.ChainModels.Count > 0)
+      {
+        result.Insert(0, group);
       }
 
       ApplyChainName(result, chainName);
@@ -219,92 +232,82 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
         group.ChainName = chainName;
     }
 
-    private static void ProcessPartWithCrossRanges(string part, BaseCommandModel model, RmCommandModel rm, List<GroupModel> result, List<ErrorItem> errors)
+    private static void ProcessPartWithCrossRanges(string part, BaseCommandModel model, RmCommandModel rm, GroupModel group, List<GroupModel> result, List<ErrorItem> errors)
     {
+      var rawTokens = SplitTokens(part);
+
+      var currentChain = new List<string>();
+
+      foreach (var tok in rawTokens)
       {
-        var rawTokens = SplitTokens(part);
-
-        var currentChain = new List<string>();
-
-        foreach (var tok in rawTokens)
+        if (tok.Contains("-*"))
         {
-          if (tok.Contains("-*"))
+          ValidateExpandedRangeNotation(tok, errors);
+
+          var expanded = ExpandRangeToken(tok, errors, model);
+
+          if (expanded.Count == 0)
+            continue;
+
+          currentChain.Add(expanded.First());
+          ValidateSinglePoint(model, currentChain, part, errors);
+
+          var (firstErrors, firstChain) =
+              CreateChain(currentChain, model, rm);
+
+          if (firstErrors.Count > 0)
           {
-            ValidateExpandedRangeNotation(tok, errors);
+            errors.AddRange(firstErrors);
+          }
+          else
+          {
+            group.ChainModels.Add(firstChain);
+          }
 
-            var expanded = ExpandRangeToken(tok, errors, model);
+          for (int i = 1; i < expanded.Count - 1; i++)
+          {
+            var (midErrors, midGroup) =
+                CreateSinglePointGroup(expanded[i], model, rm);
 
-            if (expanded.Count == 0)
-              continue;
-
-            // первый элемент остаётся в текущей цепи
-            currentChain.Add(expanded.First());
-
-            // фиксируем текущую цепь
-            ValidateSinglePoint(model, currentChain, part, errors);
-
-            var (firstErrors, firstChain) =
-                CreateChain(currentChain, model, rm);
-
-            if (firstErrors.Count > 0)
+            if (midErrors.Count > 0)
             {
-              errors.AddRange(firstErrors);
+              errors.AddRange(midErrors);
             }
             else
             {
-              result.Add(new GroupModel(
-                  new List<ChainModel> { firstChain }));
+              result.Add(midGroup);
             }
-
-            // промежуточные — отдельные группы
-            for (int i = 1; i < expanded.Count - 1; i++)
-            {
-              var (midErrors, midGroup) =
-                  CreateSinglePointGroup(expanded[i], model, rm);
-
-              if (midErrors.Count > 0)
-              {
-                errors.AddRange(midErrors);
-              }
-              else
-              {
-                result.Add(midGroup);
-              }
-            }
-
-            // последняя точка начинает новую цепь
-            currentChain = new List<string> { expanded.Last() };
           }
-          else if (tok.Contains("-"))
-          {
-            var expanded = ExpandRangeToken(tok, errors, model);
 
-            if (expanded.Count > 0)
-              currentChain.AddRange(expanded);
-          }
-          else
-          {
-            currentChain.Add(tok);
-          }
+          currentChain = new List<string> { expanded.Last() };
         }
-
-        // финальная цепь
-        if (currentChain.Count > 0)
+        else if (tok.Contains("-"))
         {
-          ValidateSinglePoint(model, currentChain, part, errors);
+          var expanded = ExpandRangeToken(tok, errors, model);
 
-          var (chainErrors, chain) =
-              CreateChain(currentChain, model, rm);
+          if (expanded.Count > 0)
+            currentChain.AddRange(expanded);
+        }
+        else
+        {
+          currentChain.Add(tok);
+        }
+      }
 
-          if (chainErrors.Count > 0)
-          {
-            errors.AddRange(chainErrors);
-          }
-          else
-          {
-            result.Add(new GroupModel(
-                new List<ChainModel> { chain }));
-          }
+      if (currentChain.Count > 0)
+      {
+        ValidateSinglePoint(model, currentChain, part, errors);
+
+        var (chainErrors, chain) =
+            CreateChain(currentChain, model, rm);
+
+        if (chainErrors.Count > 0)
+        {
+          errors.AddRange(chainErrors);
+        }
+        else
+        {
+          group.ChainModels.Add(chain);
         }
       }
     }

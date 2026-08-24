@@ -185,12 +185,15 @@ public static class ModuleRelayControlResponseProcessor
     int action = ((int)bus * 10) + (connect ? 1 : 2);
     bool result = CheckCommandResponse(response, module, $"11.{firstPoint}.{lastPoint}.{action}");
     string description = $"{firstPoint}-{lastPoint} {(connect ? "к" : "от")} шине [{bus}]";
-    await DeviceMessages.PublishOperationResultAsync(
-    module,
-    $"{(connect ? "Подключение" : "Отключение")} диапазона точек {description}",
-    result,
-    1,
-    outputService);
+    if (DeviceDisplayConfig.GetConnectionInfoVisibility())
+    {
+      await DeviceMessages.PublishOperationResultAsync(
+      module,
+      $"{(connect ? "Подключение" : "Отключение")} диапазона точек {description}",
+      result,
+      1,
+      outputService);
+    }
     return result;
   }
 
@@ -202,7 +205,7 @@ public static class ModuleRelayControlResponseProcessor
     IUserInteractionService? outputService = null)
   {
     bool result = CheckCommandResponse(response, module, $"81.{pointNumber}.{(int)bus}.0");
-    
+
     if (DeviceDisplayConfig.GetConnectionInfoVisibility())
     {
       await DeviceMessages.PublishOperationResultAsync(
