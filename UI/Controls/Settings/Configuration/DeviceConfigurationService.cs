@@ -1,3 +1,4 @@
+using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Shared.DTO.Devices.Base;
 using Ask.Core.Shared.DTO.Devices.Breakdown;
 using Ask.Core.Shared.DTO.Devices.ChassisManager;
@@ -207,6 +208,7 @@ public static class DeviceConfigurationService
 
     await transaction.CommitAsync(cancellationToken);
     DeviceRuntime.ClearCache();
+    SystemStateEventAdapter.RaiseDeviceConfigurationChanged();
   }
 
   private static JsonSerializerOptions CreateJsonOptions(bool writeIndented)

@@ -1456,7 +1456,17 @@ values remain compatible because `false/0 → None` and `true/1 → Rnd`.
 Hardware simulation is disabled for every device by default. `ExecutionControl`
 loads all eight device tables and renders one nested `SettingsCard` per concrete
 equipment row; save updates only `IsHardwareFailureSimulationEnabled` and clears
-the runtime device cache. For an enabled device every non-measurement Idle command,
+the runtime device cache. Successful device Create/Update/Delete operations in
+`DeviceEngine` and a committed bulk import publish
+`SystemStateEvents.DeviceConfigurationChanged`; the loaded `ExecutionControl`
+coalesces these notifications and rereads all device tables. Added devices therefore
+appear, edited titles/descriptions change, and deleted devices disappear without
+reopening settings. Current unsaved switches of rows whose identity and number did
+not change are preserved during the refresh. `DeviceEngine.UpdateInternalAsync`
+compares the stored and incoming
+`DeviceDto.Number`; changing the device number resets
+`IsHardwareFailureSimulationEnabled` to `false`, while other edits preserve it.
+For an enabled device every non-measurement Idle command,
 including a `Retry`, fails deterministically. Measurement commands keep their
 measurement-error flow and are not replaced by the hardware-error provider. The
 simulated failure preserves the corresponding real contract: `false`, a failed
@@ -1907,6 +1917,9 @@ Architecturally significant flows:
 
 - `SystemStateEventAdapter.PowerChanged/LockedChanged/ControlProgramActiveChanged`
   → `SystemStateManager` and `StateEventsBinder` → buttons, menu and shell lock;
+- `DeviceEngine` CRUD / committed configuration import
+  → `SystemStateEventAdapter.RaiseDeviceConfigurationChanged`
+  → `ExecutionControl` dynamically rebuilds hardware-error simulation cards;
 - `ExecutionEventAdapter.StepByStepModeChanged`
   → `ActionExecutor.StepMode`;
 - breakpoint adapters → `RunControl` model/editor synchronization;

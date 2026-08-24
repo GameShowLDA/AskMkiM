@@ -149,6 +149,13 @@ namespace Ask.Core.Services.EventCore.Events
     }
 
     /// <summary>
+    /// Событие, обозначающее изменение состава или параметров оборудования.
+    /// </summary>
+    public sealed class DeviceConfigurationChanged : IEvent
+    {
+    }
+
+    /// <summary>
     /// Событие, обозначающее изменение состояния прав администратора.
     /// </summary>
     public class ControlProgramActiveChanged : IEvent

@@ -23,6 +23,8 @@ namespace UI.Controls.Settings.Execution
   public partial class ExecutionControl : UserControl
   {
     private bool _isInitialized;
+    private bool _isHardwareErrorSimulationRefreshRunning;
+    private int _hardwareErrorSimulationRefreshVersion;
     private sealed record ErroneousMeasurementOption(TypeErroneousMeasurement Value, string Title);
     private readonly List<HardwareErrorSimulationItem> _hardwareErrorSimulationItems = [];
 
@@ -52,6 +54,7 @@ namespace UI.Controls.Settings.Execution
       InitializeComponent();
       Loaded += ExecutionControl_Loaded;
       EventAggregator.Subscribe<SystemStateEvents.PowerChanged>(e => ChangeVisible(e.IsPowered));
+      EventAggregator.Subscribe<SystemStateEvents.DeviceConfigurationChanged>(OnDeviceConfigurationChanged);
       ChangeVisible(SystemStateManager.GetIsActivePower());
     }
 
@@ -68,6 +71,46 @@ namespace UI.Controls.Settings.Execution
           IdleMode.Visibility = Visibility.Visible;
         }
       });
+    }
+
+    private void OnDeviceConfigurationChanged(SystemStateEvents.DeviceConfigurationChanged eventData)
+    {
+      Interlocked.Increment(ref _hardwareErrorSimulationRefreshVersion);
+      _ = RefreshHardwareErrorSimulationCardsAsync();
+    }
+
+    private async Task RefreshHardwareErrorSimulationCardsAsync()
+    {
+      if (!Dispatcher.CheckAccess())
+      {
+        await Dispatcher.InvokeAsync(RefreshHardwareErrorSimulationCardsAsync).Task.Unwrap();
+        return;
+      }
+
+      await Task.Delay(100);
+
+      if (_isHardwareErrorSimulationRefreshRunning || !IsLoaded)
+      {
+        return;
+      }
+
+      _isHardwareErrorSimulationRefreshRunning = true;
+      try
+      {
+        int loadedVersion;
+        do
+        {
+          loadedVersion = Volatile.Read(ref _hardwareErrorSimulationRefreshVersion);
+          await LoadHardwareErrorSimulationCardsAsync(preserveUnsavedValues: true);
+        }
+        while (loadedVersion != Volatile.Read(ref _hardwareErrorSimulationRefreshVersion) && IsLoaded);
+
+        CheckedChanged(null, false);
+      }
+      finally
+      {
+        _isHardwareErrorSimulationRefreshRunning = false;
+      }
     }
 
     private async void ExecutionControl_Loaded(object sender, RoutedEventArgs e)
@@ -239,8 +282,14 @@ namespace UI.Controls.Settings.Execution
       };
     }
 
-    private async Task LoadHardwareErrorSimulationCardsAsync()
+    private async Task LoadHardwareErrorSimulationCardsAsync(bool preserveUnsavedValues = false)
     {
+      Dictionary<(Type DeviceType, int Id, int Number), bool> unsavedValues = preserveUnsavedValues
+        ? _hardwareErrorSimulationItems
+          .Where(item => item.Card.IsChecked != item.SavedValue)
+          .ToDictionary(item => GetDeviceCardKey(item.Device), item => item.Card.IsChecked)
+        : [];
+
       await using var context = new AppDbContext();
       var devices = new List<DeviceDto>();
 
@@ -261,11 +310,15 @@ namespace UI.Controls.Settings.Execution
         .ThenBy(device => device is AttachableDeviceDto attachable ? attachable.NumberChassis : device.Number)
         .ThenBy(device => device.Number))
       {
+        bool savedValue = device.IsHardwareFailureSimulationEnabled;
+        bool currentValue = unsavedValues.TryGetValue(GetDeviceCardKey(device), out bool unsavedValue)
+          ? unsavedValue
+          : savedValue;
         var card = new SettingsCard
         {
           Title = GetDeviceCardTitle(device),
           Description = GetDeviceCardDescription(device),
-          IsChecked = device.IsHardwareFailureSimulationEnabled,
+          IsChecked = currentValue,
           Margin = new Thickness(0, 6, 10, 0),
           VerticalAlignment = VerticalAlignment.Top,
         };
@@ -276,7 +329,7 @@ namespace UI.Controls.Settings.Execution
         {
           Device = device,
           Card = card,
-          SavedValue = device.IsHardwareFailureSimulationEnabled,
+          SavedValue = savedValue,
         });
       }
     }
@@ -313,6 +366,9 @@ namespace UI.Controls.Settings.Execution
 
     private bool HasHardwareErrorSimulationChanges() =>
       _hardwareErrorSimulationItems.Any(item => item.Card.IsChecked != item.SavedValue);
+
+    private static (Type DeviceType, int Id, int Number) GetDeviceCardKey(DeviceDto device) =>
+      (device.GetType(), device.Id, device.Number);
 
     private static string GetDeviceCardTitle(DeviceDto device) =>
       device is AttachableDeviceDto attachable
