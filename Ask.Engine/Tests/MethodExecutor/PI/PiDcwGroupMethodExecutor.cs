@@ -98,7 +98,7 @@ namespace Ask.Engine.Tests.MethodExecutor.PI
 
           bool isSuccessful = answer.value < dataModel.Param;
 
-          var dischargeIndex = CurrentDischargeNumber - 1;
+          var dischargeIndex = CurrentDischargeNumber;
           var bitString = GetBitString();
           string? executionErrorMessage = !isSuccessful
             ? MeasurementMessages.BuildGroupFailure(
