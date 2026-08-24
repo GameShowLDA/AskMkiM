@@ -1296,7 +1296,10 @@ IBreakdownTester / GPT79904
 Повтор внутри `AdapterMeasurementExecutor` относится только к восстановлению после ошибки
 оборудования. Серия измерений с усреднением реализована только для ёмкости в
 `MeasurementBase.MeasureCapacitanceAsync`; количество задаётся параметром
-`ICapacitanceMeasurement.MeasureCapacitanceAsync.measurementCount`.
+`ICapacitanceMeasurement.MeasureCapacitanceAsync.measurementCount`. Каждый положительный
+замер, добавленный в коллекцию для последующего усреднения, при включённой настройке
+промежуточных результатов публикуется через `MultimeterMessages`; отброшенные неположительные
+значения в промежуточные результаты не попадают.
 
 Инициализация обоих мультиметров использует тот же журнал команд:
 
