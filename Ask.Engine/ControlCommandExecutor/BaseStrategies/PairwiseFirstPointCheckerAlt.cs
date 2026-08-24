@@ -245,7 +245,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
                 await MeasurementMessages.PublishStartAsync(CheckType.ControlProgram,
                   MeasurementTypeCommand.KC,
                   context.MessageService);
-                await MeasurementMessages.PublishResultAsync(CheckType.ControlProgram,
+                await MeasurementMessages.PublishIntermediateResultAsync(CheckType.ControlProgram,
                   context.TypeCommand,
                   new MeasurementRange(Rt, context.LowerLimit, context.HigherLimit),
                   false,
@@ -300,8 +300,8 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
                 bool success = result >= LowerBound && result <= UpperBound;
                 var range = new MeasurementRange(result, LowerBound, UpperBound);
 
-                await MeasurementMessages.PublishResultAsync(CheckType.ControlProgram,
-                  ResistanceUnit.Ohm,
+                await MeasurementMessages.PublishIntermediateResultAsync(CheckType.ControlProgram,
+                  context.TypeCommand,
                   range,
                   success,
                   measurementTarget,

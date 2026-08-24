@@ -185,7 +185,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         measurementRange.TargetValue = answer;
 
         var result = MeasurementResultEvaluator.EvaluateDisconnection(answer, lowValue);
-        await MeasurementMessages.PublishResultAsync(CheckType.ControlProgram,
+        await MeasurementMessages.PublishIntermediateResultAsync(CheckType.ControlProgram,
           MeasurementTypeCommand.PR,
           new MeasurementRange(result.Value, measurementRange.LowerBound, measurementRange.UpperBound),
           result.IsSuccessful,
@@ -223,7 +223,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
         measurementRange.TargetValue = answer;
         var result = MeasurementResultEvaluator.EvaluateDisconnection(answer, lowValue);
-        await MeasurementMessages.PublishResultAsync(CheckType.ControlProgram,
+        await MeasurementMessages.PublishIntermediateResultAsync(CheckType.ControlProgram,
           MeasurementTypeCommand.PR,
           new MeasurementRange(result.Value, measurementRange.LowerBound, measurementRange.UpperBound),
           result.IsSuccessful,
@@ -263,7 +263,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
         measurementRange.TargetValue = answer;
         var result = MeasurementResultEvaluator.Evaluate(measurementRange);
-        await MeasurementMessages.PublishResultAsync(CheckType.ControlProgram,
+        await MeasurementMessages.PublishIntermediateResultAsync(CheckType.ControlProgram,
           MeasurementTypeCommand.PR,
           new MeasurementRange(result.Value, measurementRange.LowerBound, measurementRange.UpperBound),
           result.IsSuccessful,
