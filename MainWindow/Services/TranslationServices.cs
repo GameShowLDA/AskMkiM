@@ -57,8 +57,6 @@ namespace MainWindowProgram.Services
       ".acs",
     };
 
-    private TextEditorUI _actualTextEditor;
-
     /// <summary>
     /// Проверяет, разрешено ли ставить точку остановки на указанной команде.
     /// </summary>
@@ -484,7 +482,7 @@ namespace MainWindowProgram.Services
     /// <returns>Задача, представляющая асинхронную операцию трансляции.</returns>
     public async Task RunAsync()
     {
-      var editor = _multiWindow.GetActiveTextEditor(EditorType.TextEditor); 
+      var editor = _multiWindow.GetActiveTextEditor(EditorType.TextEditor);
       var container = _multiWindow.GetActiveTextEditorContainer(EditorType.Translator);
       var runContainer = _multiWindow.GetActiveTextEditorContainer(EditorType.Run);
 
@@ -502,7 +500,10 @@ namespace MainWindowProgram.Services
         return;
       }
 
-      await BuildAsync();
+      if ((editor != null || container != null) && runContainer == null)
+      {
+        await BuildAsync();
+      }
 
       var actualContainer = _multiWindow.GetActiveTextEditorContainer(EditorType.Translator);
 
@@ -516,7 +517,7 @@ namespace MainWindowProgram.Services
         container = runContainer;
       }
 
-      if (!container.Equals(actualContainer))
+      if (!container.Equals(actualContainer) && actualContainer != null)
       {
         container = actualContainer;
       }
@@ -547,9 +548,22 @@ namespace MainWindowProgram.Services
       {
         if (foundDockItem?.Content is RunControl run)
         {
-          await PrepareRun(runContainer, _actualTextEditor, run);
-          // TODO: закрыть вкладку со старым транслятором
-          // await _multiWindow.CloseRunItem(run, EditorType.Run);
+          var actualTextEditor = GetRunEditor(run);
+          if (actualTextEditor == null)
+          {
+            ShowEditorNotFoundError();
+            return;
+          }
+
+          var runDockItem = runContainer?.GetDockControl().DockItems
+            .FirstOrDefault(item => item.Content == run);
+          runDockItem?.PerformClose();
+
+          var runControl = new RunControl
+          {
+            TranslationModels = run.TranslationModels,
+          };
+          await PrepareRun(runContainer, actualTextEditor, runControl);
         }
         else
         {
@@ -570,8 +584,8 @@ namespace MainWindowProgram.Services
           return;
         }
 
-        _actualTextEditor = translator.GetRightBox().GetTextEditor();
-        if (_actualTextEditor == null)
+        var actualTextEditor = translator.GetRightBox().GetTextEditor();
+        if (actualTextEditor == null)
         {
           ShowEditorNotFoundError();
           return;
@@ -590,8 +604,19 @@ namespace MainWindowProgram.Services
 
         RunControl runControl = new RunControl();
         runControl.TranslationModels = translator.TranslationModels;
-        await PrepareRun(runContainer, _actualTextEditor, runControl);
+        await PrepareRun(runContainer, actualTextEditor, runControl);
       }
+    }
+
+    private static TextEditorUI? GetRunEditor(RunControl runControl)
+    {
+      return runControl.FindName("ChildTextEditorContainer") is not TextEditorContainer container
+        ? null
+        : container.GetDockControl().DockItems
+          .Select(item => item.Content)
+          .OfType<TranslatorEditor>()
+          .FirstOrDefault()
+          ?.GetTextEditor();
     }
 
     /// <summary>
@@ -608,6 +633,7 @@ namespace MainWindowProgram.Services
         editor.TextEditorModel.OriginalFileName,
         ProtocolFileExtensions.Trace,
         $"protocol{ProtocolFileExtensions.Trace}");
+
       runControl.SetLeftEditor(editor);
 
       if (runContainer == null)
