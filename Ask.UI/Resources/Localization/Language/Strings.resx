@@ -283,7 +283,7 @@
     <value>Метод узла</value>
   </data>
   <data name="menu.test.tests.cross.mkr" xml:space="preserve">
-    <value>Перекрёстный тест(МКР)</value>
+    <value>Перекрёстный тест (МКР)</value>
   </data>
   <data name="menu.test.tests.piacw" xml:space="preserve">
     <value>Тест ПИ на переменном токе</value>
