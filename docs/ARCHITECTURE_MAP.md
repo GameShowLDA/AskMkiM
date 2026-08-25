@@ -677,6 +677,13 @@ executor throws
   сохраняя брак каждой текущей точки независимо (ошибка текущей точки не блокирует следующую
   точку той же цепи); возвращает `AlgorithmExecutionResult`, а создание и публикацию измерений,
   ошибок подключения точек и debug-сообщений делегирует `Ask.Protocol.Messages`;
+- измерительные делегаты проверочных команд ПР, СИ и ПИ, а также все измерения внутри
+  `PairwiseFirstPointCheckerAlt` для ЭТ публикуют значения через
+  `MeasurementMessages.PublishIntermediateResultAsync`. Поэтому успешные внутренние замеры
+  этих команд управляются настройкой промежуточных результатов; накопленные ошибки,
+  `AlgorithmExecutionResult` и запись результата команды в итоговый протокол сохраняют
+  отдельный итоговый поток. Мнемоники ПЭ и РТ в текущих production parser/executor chains
+  отсутствуют, поэтому соответствующих runtime-точек публикации пока нет;
 - измерительные делегаты проверки разобщения ПР используют
   `MeasurementResultEvaluator.EvaluateDisconnection`: разрыв подтверждается только при
   `value > DisconnectedLowerLimitResistance`; состояние `Overload` также подтверждает разрыв,
@@ -1301,7 +1308,10 @@ IBreakdownTester / GPT79904
 Повтор внутри `AdapterMeasurementExecutor` относится только к восстановлению после ошибки
 оборудования. Серия измерений с усреднением реализована только для ёмкости в
 `MeasurementBase.MeasureCapacitanceAsync`; количество задаётся параметром
-`ICapacitanceMeasurement.MeasureCapacitanceAsync.measurementCount`.
+`ICapacitanceMeasurement.MeasureCapacitanceAsync.measurementCount`. Каждый положительный
+замер, добавленный в коллекцию для последующего усреднения, при включённой настройке
+промежуточных результатов публикуется через `MultimeterMessages`; отброшенные неположительные
+значения в промежуточные результаты не попадают.
 
 Инициализация обоих мультиметров использует тот же журнал команд:
 
