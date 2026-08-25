@@ -21,7 +21,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
   {
     public string Mnemonic => EnumExtensions.GetCommandDisplayInfo(MeasurementTypeCommand.PI).DisplayName;
     private double amperhMaxDCW = 10;
-    private double amperhMaxACW = 60;
+    private double amperhMaxACW = 50;
     public async Task ExecuteAsync(CommandExecutionContext context, ProtocolModel protocolModel)
     {
       var command = GetRequiredCommand<PiCommandModel>(context);
@@ -162,7 +162,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         }
         else
         {
-          await breakDown.AcwManger.Time.SetRampTimeAsync(0.1, userMessageService);
+          await breakDown.AcwManger.Time.SetRampTimeAsync(0.4, userMessageService);
         }
       }
       else if (voltageType == VoltageEnum.Type.DCW)
@@ -178,7 +178,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         }
         else
         {
-          await breakDown.DcwManger.Time.SetRampTimeAsync(0.1, userMessageService);
+          await breakDown.DcwManger.Time.SetRampTimeAsync(0.4, userMessageService);
         }
       }
     }
