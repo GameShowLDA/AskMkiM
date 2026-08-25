@@ -485,13 +485,22 @@ namespace MainWindowProgram.Services
       var editor = _multiWindow.GetActiveTextEditor(EditorType.TextEditor);
       var container = _multiWindow.GetActiveTextEditorContainer(EditorType.Translator);
       var runContainer = _multiWindow.GetActiveTextEditorContainer(EditorType.Run);
+      var isRunContainerActive = editor == null
+        && (ReferenceEquals(_multiWindow.GetActiveWorkspaceControl(), runContainer)
+          || runContainer?.GetDockControl().DockItems.Any(
+            item => item.IsActiveItem && item.Content is RunControl) == true);
 
       if (editor != null && !EnsureSupportedExecutionSource(editor))
       {
         return;
       }
 
-      if (container == null && runContainer == null && editor == null)
+      if (editor != null)
+      {
+        await BuildAsync();
+        container = _multiWindow.GetActiveTextEditorContainer(EditorType.Translator);
+      }
+      else if (container == null && runContainer == null)
       {
         MessageBoxCustom.Show(
             $"Не удалось запустить исполнитель программы контроля.",
@@ -500,24 +509,18 @@ namespace MainWindowProgram.Services
         return;
       }
 
-      if ((editor != null || container != null) && runContainer == null)
-      {
-        await BuildAsync();
-      }
-
       var actualContainer = _multiWindow.GetActiveTextEditorContainer(EditorType.Translator);
 
-      if (container == null && editor != null)
+      if (isRunContainerActive)
       {
-        container = _multiWindow.GetActiveTextEditorContainer(EditorType.Translator);
+        container = runContainer;
       }
-
-      if (container == null && runContainer != null)
+      else if (container == null && runContainer != null)
       {
         container = runContainer;
       }
 
-      if (!container.Equals(actualContainer) && actualContainer != null)
+      if (!isRunContainerActive && !container.Equals(actualContainer) && actualContainer != null)
       {
         container = actualContainer;
       }
