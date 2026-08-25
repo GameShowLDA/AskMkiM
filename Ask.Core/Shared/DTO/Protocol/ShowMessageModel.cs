@@ -265,7 +265,7 @@ namespace Ask.Core.Shared.DTO.Protocol
     {
       if (Status == MessageType.Success)
       {
-        return $"[{SuccessMessage.Title}]";
+        return string.Empty;
       }
       else if (Status == MessageType.Error)
       {
