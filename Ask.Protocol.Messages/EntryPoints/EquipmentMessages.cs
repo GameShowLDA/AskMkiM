@@ -228,7 +228,7 @@ public static class EquipmentMessages
       connect,
       isSuccessful);
 
-    if (!DeviceDisplayConfig.GetConnectionInfoVisibility())
+    if (isSuccessful && !DeviceDisplayConfig.GetConnectionInfoVisibility())
     {
       return Task.CompletedTask;
     }

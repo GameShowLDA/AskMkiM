@@ -130,7 +130,7 @@ public static class ModuleRelayControlResponseProcessor
       response,
       module,
       $"4.{busType}.{busNumber}.{(connect ? 1 : 2)}");
-    if (DeviceDisplayConfig.GetConnectionInfoVisibility())
+    if (!result || DeviceDisplayConfig.GetConnectionInfoVisibility())
     {
       await DeviceMessages.PublishOperationResultAsync(
         module,
@@ -194,7 +194,7 @@ public static class ModuleRelayControlResponseProcessor
     int action = ((int)bus * 10) + (connect ? 1 : 2);
     bool result = CheckCommandResponse(response, module, $"11.{firstPoint}.{lastPoint}.{action}");
     string description = $"{firstPoint}-{lastPoint} {(connect ? "к" : "от")} шине [{bus}]";
-    if (DeviceDisplayConfig.GetConnectionInfoVisibility())
+    if (!result || DeviceDisplayConfig.GetConnectionInfoVisibility())
     {
       await DeviceMessages.PublishOperationResultAsync(
       module,
@@ -215,7 +215,7 @@ public static class ModuleRelayControlResponseProcessor
   {
     bool result = CheckCommandResponse(response, module, $"81.{pointNumber}.{(int)bus}.0");
 
-    if (DeviceDisplayConfig.GetConnectionInfoVisibility())
+    if (!result || DeviceDisplayConfig.GetConnectionInfoVisibility())
     {
       await DeviceMessages.PublishOperationResultAsync(
       module,
