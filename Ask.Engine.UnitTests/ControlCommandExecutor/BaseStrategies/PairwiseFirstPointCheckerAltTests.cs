@@ -44,4 +44,20 @@ public class PairwiseFirstPointCheckerAltTests
     Assert.True(actual[1][0][0]);
     Assert.True(actual[1][0][1]);
   }
+
+  [Theory]
+  [InlineData(101)]
+  [InlineData(200)]
+  public void IsPairMeasurementOverload_ResistanceWithinCommandRangeIsNotOverload(double resistance)
+  {
+    Assert.False(PairwiseFirstPointCheckerAlt.IsPairMeasurementOverload(resistance));
+  }
+
+  [Theory]
+  [InlineData(double.PositiveInfinity)]
+  [InlineData(9.9E+37)]
+  public void IsPairMeasurementOverload_MultimeterOverloadValueIsOverload(double resistance)
+  {
+    Assert.True(PairwiseFirstPointCheckerAlt.IsPairMeasurementOverload(resistance));
+  }
 }

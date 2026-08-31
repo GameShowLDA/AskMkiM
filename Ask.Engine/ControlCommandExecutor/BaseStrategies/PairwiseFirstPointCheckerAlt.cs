@@ -10,6 +10,7 @@ using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Enums.UnitEnums;
+using Ask.Core.Shared.Metadata.Static.Messages;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies.Data;
 using Ask.Engine.ControlCommandExecutor.Execution;
@@ -232,7 +233,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
             {
               Rt = await GetResistanceAsync(context.MessageService, context.Value, context.LowerLimit, context.HigherLimit);
 
-              if (context.ValidatePointConnections && Rt > 100)
+              if (context.ValidatePointConnections && IsPairMeasurementOverload(Rt))
               {
                 var errorMessageModels = MeasurementMessages.BuildMeasurementResultMessage(
                   context.TypeCommand,
@@ -385,6 +386,9 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 
     internal static bool CanMeasurePair(bool basePointConnectionError, bool currentPointError)
       => !basePointConnectionError && !currentPointError;
+
+    internal static bool IsPairMeasurementOverload(double resistance)
+      => MeasurementValueFormatter.IsOverloadValue(resistance);
 
     static private async Task ConnectToBusAAndBAsync(IUserInteractionService userMessageService, PointModel pointModel)
     {
