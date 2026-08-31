@@ -8,7 +8,7 @@ namespace Ask.Engine.UnitTests.ControlCommandAnalyser.Serialization;
 
 public class EhtCommandSerializationTests
 {
-  [Fact]
+  [Fact(DisplayName = "ЭТ: конвейер параметров сохраняет ток для сериализации")]
   public void ParameterPipeline_PreservesAmperageForSerialization()
   {
     var model = new EhtCommandModel
@@ -28,7 +28,7 @@ public class EhtCommandSerializationTests
     Assert.Equal("0.01 \u0410", model.AmperageSource);
   }
 
-  [Fact]
+  [Fact(DisplayName = "ЭТ: сериализация записывает единицу сопротивления кабеля и ток")]
   public void CommandBodyBuilder_WritesCableResistanceUnitAndAmperage()
   {
     var model = new EhtCommandModel
