@@ -1,13 +1,13 @@
-using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Services.UI;
+using Ask.Core.Shared.DTO.Devices.Breakdown;
 using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
-using Ask.Engine.ControlCommandAnalyser;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies.Data;
@@ -142,7 +142,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
     /// <param name="errorResistance">Сопротивление, используемое при моделировании ошибки.</param>
     /// <param name="typeVoltage">Тип испытательного напряжения.</param>
     /// <returns>Результат проверки и измеренное сопротивление.</returns>
-    private async Task<(bool, double)> NodeAccumulationPerformMeasurementAsync(double value, IUserInteractionService messageService, CancellationToken cancellationToken, double errorResistance = 0, VoltageEnum.Type typeVoltage = VoltageEnum.Type.ACW)
+    private async Task<(bool, double)> NodeAccumulationPerformMeasurementAsync(double value, IUserInteractionService messageService, CancellationToken cancellationToken, double errorResistance = 0, VoltageEnum.Type typeVoltage = VoltageEnum.Type.ACW, string? points = null)
     {
       var breadDown = await EquipmentService.GetBreakdownTesterOrThrow(messageService);
 
@@ -154,7 +154,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         var answer = await breadDown.IrManger.Measure.MeasureAsync(ElectricalTestFunction.InsulationResistance, measurementRange);
         measurement.Restart();
 
-        measurementRange.TargetValue = answer.value;
+        measurementRange.TargetValue = answer.Value;
         var result = MeasurementResultEvaluator.Evaluate(measurementRange);
         await MeasurementMessages.PublishResultAsync(CheckType.ControlProgram,
           MeasurementTypeCommand.SI,
@@ -178,10 +178,10 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
     /// <param name="errorResistance">Сопротивление, используемое при моделировании ошибки.</param>
     /// <param name="typeVoltage">Тип испытательного напряжения.</param>
     /// <returns>Результат проверки и измеренное сопротивление.</returns>
-    private async Task<(bool, double)> NodeFullPerformMeasurementAsync(double value, IUserInteractionService messageService, CancellationToken cancellationToken, double errorResistance = 0, VoltageEnum.Type typeVoltage = VoltageEnum.Type.ACW)
+    private async Task<(bool, double)> NodeFullPerformMeasurementAsync(double value, IUserInteractionService messageService, CancellationToken cancellationToken, double errorResistance = 0, VoltageEnum.Type typeVoltage = VoltageEnum.Type.ACW, string? points = null)
     {
       var breadDown = await EquipmentService.GetBreakdownTesterOrThrow(messageService);
-      (double Value, string Unit) answer = (-1, string.Empty);
+      BreakdownMeasurementResponse answer = new BreakdownMeasurementResponse(BreakdownMeasurementStatus.Fail, -1, string.Empty);
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
         messageService.GetCancellationToken().ThrowIfCancellationRequested();

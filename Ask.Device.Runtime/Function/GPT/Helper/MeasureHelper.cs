@@ -1,11 +1,12 @@
 using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Shared.DTO.Devices.Breakdown;
 using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.Device.ResponseProcessor.BreakdownTester.ResponseProcessing;
 using Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common;
 using Ask.Device.Runtime.Function.GPT.Command;
-using Ask.Device.ResponseProcessor.BreakdownTester.ResponseProcessing;
 using System.Diagnostics;
 using static Ask.Device.Runtime.Function.GPT.Command.FunctionCommandManager;
 using static Ask.LogLib.LoggerUtility;
@@ -20,7 +21,7 @@ namespace Ask.Device.Runtime.Function.GPT.Helper
     /// <summary>
     /// Выполняет измерение.
     /// </summary>
-    static public async Task<(double value, string unit)> MeasureAsync(
+    static public async Task<BreakdownMeasurementResponse> MeasureAsync(
       IBreakdownTester breakDown,
       double time,
       double timeRamp,
@@ -54,7 +55,7 @@ namespace Ask.Device.Runtime.Function.GPT.Helper
           responseDelay: StopPollIntervalMs,
           timeout: 1000);
         LogInformation($"{nameof(MeasureAsync)}: Устройство в Idle Mode. Возвращаем {random}.", isDeviceLog: true);
-        return (random, string.Empty);
+        return new BreakdownMeasurementResponse(BreakdownMeasurementStatus.Pass, random, string.Empty);
       }
 
       try
@@ -78,7 +79,7 @@ namespace Ask.Device.Runtime.Function.GPT.Helper
     /// - FAIL  → перезапускаем измерение
     /// - Unknown → продолжаем цикл
     /// </summary>
-    static private async Task<(double value, string unit)> MeasureFastPollingAsync(
+    static private async Task<BreakdownMeasurementResponse> MeasureFastPollingAsync(
       IBreakdownTester breakDown,
       double time,
       int delayBeforeCall)
@@ -120,24 +121,24 @@ namespace Ask.Device.Runtime.Function.GPT.Helper
       stage.Restart();
       await StopMeasure(breakDown);
       LogInformation($"[PERF][GPT][MeasureFastPolling] Stop test: {stage.ElapsedMilliseconds} ms", isDeviceLog: true);
-      var (value, unit) = ParseMeasureValue(answerDevice);
+      var answer = ParseMeasureValue(answerDevice);
 
-      if (breakDown.Mode != Ask.Core.Shared.Metadata.Enums.DeviceEnums.BreakdownTypeMode.IR)
+      if (breakDown.Mode != BreakdownTypeMode.IR)
       {
         if (BreakdownTesterResponseProcessor.IsTestFailed(answerDevice))
         {
-          value = -1;
+          answer.Value = -1;
         }
       }
 
-      LogInformation($"[PERF][GPT][MeasureFastPolling] Total: {total.ElapsedMilliseconds} ms; value={value} {unit}", isDeviceLog: true);
-      return (value, unit);
+      LogInformation($"[PERF][GPT][MeasureFastPolling] Total: {total.ElapsedMilliseconds} ms; value={answer.Value} {answer.Unit}", isDeviceLog: true);
+      return answer;
     }
 
     /// <summary>
     /// Полный режим: система полностью ждёт time + timeRamp и только после этого запрашивает результат измерения.
     /// </summary>
-    static private async Task<(double value, string unit)> MeasureFullTimeAsync(
+    static private async Task<BreakdownMeasurementResponse> MeasureFullTimeAsync(
       IBreakdownTester breakDown,
       int delayBeforeCall)
     {
@@ -165,22 +166,22 @@ namespace Ask.Device.Runtime.Function.GPT.Helper
       }
       LogInformation($"[PERF][GPT][MeasureFullTime] Poll result: {poll.ElapsedMilliseconds} ms", isDeviceLog: true);
 
-      var (value, unit) = ParseMeasureValue(answerDevice);
+      var answer = ParseMeasureValue(answerDevice);
 
-      LogInformation($"[PERF][GPT][MeasureFullTime] Total: {total.ElapsedMilliseconds} ms; value={value} {unit}", isDeviceLog: true);
-      return (value, unit);
+      LogInformation($"[PERF][GPT][MeasureFullTime] Total: {total.ElapsedMilliseconds} ms; value={answer.Value} {answer.Unit}", isDeviceLog: true);
+      return answer;
     }
 
     /// <summary>
     /// Парсит строку ответа MEASURE и извлекает значение и единицу измерения.
     /// </summary>
-    static private (double value, string unit) ParseMeasureValue(string answer)
+    static private BreakdownMeasurementResponse ParseMeasureValue(string answer)
     {
       if (!BreakdownTesterResponseProcessor.TryParseMeasurement(answer, out var response))
         throw new FormatException("Некорректный формат ответа прибора.");
 
       LogInformation($"Парсинг измерения: {response.Value} {response.Unit}", isDeviceLog: true);
-      return (response.Value, response.Unit);
+      return response;
     }
 
     /// <summary>

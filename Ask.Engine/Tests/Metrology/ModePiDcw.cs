@@ -1,16 +1,14 @@
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.DTO.Executor;
-using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
-using Ask.Core.Shared.Metadata.Enums.UnitEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
+using Ask.Core.Shared.Metadata.Enums.UnitEnums;
 using Ask.Core.Shared.Metadata.Static;
-using Ask.Core.Shared.Metadata.Static.Messages;
 using Ask.Engine.Tests.Metrology.MeasurementSystem;
 using static Ask.Engine.Tests.Base.UIValidationHelper;
 
@@ -113,18 +111,24 @@ namespace Ask.Engine.Tests.Metrology
       public override async Task<bool> PerformMeasurement(MeasurementTypeCommand metrologicalModeRole, double param, IUserInteractionService messageService, double intrinsicValue = 0)
       {
         var meterDevice = Devices.TryGetValue(metrologicalModeRole, out var meter) ? meter.OfType<IBreakdownTester>().FirstOrDefault() : null;
-        await MeasurementMessages.PublishTestVoltageOutputAsync(CheckType.Metrology,
-          MeasurementTypeCommand.PI_DCW,
-          param,
-          messageService);
+        await MeasurementMessages.PublishTestVoltageOutputAsync(CheckType.Metrology, MeasurementTypeCommand.PI_DCW, param, messageService);
 
         (LowerBound, UpperBound, var delta) = MeasurementErrorDefaults.CalculateToleranceRange(MeasurementTypeCommand.PI_DCW, param);
+        MeasurementRange measurementRangeDcw = new MeasurementRange(param, LowerBound, UpperBound);
+        var answerBreakdown = await meterDevice.DcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandDC, measurementRangeDcw);
+
+        if (answerBreakdown.Status == BreakdownMeasurementStatus.Fail)
+        {
+          await MeasurementMessages.PublishResultAsync(CheckType.Metrology,
+            MeasurementTypeCommand.PI_DCW,
+            new MeasurementRange(answerBreakdown.Value, 0, 10),
+            false,
+            outputService: messageService);
+
+          return false;
+        }
 
         var result = await MeasuredReferenceMeter(messageService, param);
-
-        MeasurementRange measurementRangeDcw = new MeasurementRange(param, LowerBound, UpperBound);
-        await meterDevice.DcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandDC, measurementRangeDcw);
-
         var answer = result < LowerBound || result > UpperBound;
         var err = result - param;
 

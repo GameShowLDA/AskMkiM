@@ -1,3 +1,4 @@
+using Ask.Core.Shared.DTO.Devices.Breakdown;
 using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
@@ -46,7 +47,7 @@ namespace Ask.Device.Runtime.Function.GPT.Managment
     }
 
     /// <inheritdoc />
-    public async Task<(double value, string unit)> MeasureAsync(ElectricalTestFunction electricalTestFunction, MeasurementRange measurementRange, bool waitFullTime = false, IUserInteractionService? userMessageService = null)
+    public async Task<BreakdownMeasurementResponse> MeasureAsync(ElectricalTestFunction electricalTestFunction, MeasurementRange measurementRange, bool waitFullTime = false, IUserInteractionService? userMessageService = null)
     {
       var time = await _getTestTime();
       var timeRamp = await _getRampTime();
@@ -71,10 +72,10 @@ namespace Ask.Device.Runtime.Function.GPT.Managment
       if (_gptModel.Mode == BreakdownTypeMode.IR)
       {
         var resistanceMOm = _gptModel.SystemInsulationResistanceGOhm * 1000;
-        result.Item1 = measurement.value * resistanceMOm / (resistanceMOm - measurement.value);
+        result.Value = measurement.Value * resistanceMOm / (resistanceMOm - measurement.Value);
       }
 
-      result = (MeasurementAdapterHelper.Round(result.value), result.unit);
+      result = new BreakdownMeasurementResponse(BreakdownMeasurementStatus.Pass, MeasurementAdapterHelper.Round(result.Value), result.Unit);
       return result;
     }
 

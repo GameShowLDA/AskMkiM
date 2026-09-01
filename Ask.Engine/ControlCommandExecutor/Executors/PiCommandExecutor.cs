@@ -1,5 +1,3 @@
-using Ask.Core.Shared.Metadata.Enums.FileEnums;
-using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Devices.Measurements;
@@ -7,9 +5,9 @@ using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
-using Ask.Core.Shared.Metadata.Static.Messages;
-using Ask.Engine.ControlCommandAnalyser;
+using Ask.Core.Shared.Metadata.Enums.UnitEnums;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies.Data;
@@ -188,39 +186,40 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
     /// Предполагается, что коммутация завершена заранее.
     /// </summary>
     /// <returns>Задача, представляющая измерение.</returns>
-    private async Task<(bool, double)> NodeAccumulationPerformMeasurementAsync(double value, IUserInteractionService messageService, CancellationToken cancellationToken, double errorResistance = 0, VoltageEnum.Type type = VoltageEnum.Type.DCW)
+    private async Task<(bool, double)> NodeAccumulationPerformMeasurementAsync(double value, IUserInteractionService messageService, CancellationToken cancellationToken, double errorResistance = 0, VoltageEnum.Type type = VoltageEnum.Type.DCW, string? points = null)
     {
       var breadDown = await EquipmentService.GetBreakdownTesterOrThrow(messageService);
 
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
-
-
         if (type == VoltageEnum.Type.ACW)
         {
-
           MeasurementRange measurementRange = new MeasurementRange(value, 0, amperhMaxACW);
-          var answer = await breadDown.AcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandAC, measurementRange, userMessageService: messageService);
-          measurementRange.TargetValue = answer.value;
+          var answer = await breadDown.AcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandAC, measurementRange);
+          measurementRange.TargetValue = answer.Value;
           var result = MeasurementResultEvaluator.Evaluate(measurementRange);
-          await MeasurementMessages.PublishResultAsync(CheckType.ControlProgram,
-            MeasurementTypeCommand.PI_ACW,
+          await MeasurementMessages.PublishInsulationStrengthResultAsync(
+            CheckType.ControlProgram,
+            points ?? "Точки не определены",
             new MeasurementRange(result.Value, measurementRange.LowerBound, measurementRange.UpperBound),
+            CurrentUnit.MilliAmpere,
             result.IsSuccessful,
-            outputService: messageService);
+            messageService);
           return result;
         }
         else
         {
           MeasurementRange measurementRange = new MeasurementRange(value, 0, amperhMaxDCW);
-          var answer = await breadDown.DcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandDC, measurementRange, userMessageService: messageService);
-          measurementRange.TargetValue = answer.value;
+          var answer = await breadDown.DcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandDC, measurementRange);
+          measurementRange.TargetValue = answer.Value;
           var result = MeasurementResultEvaluator.Evaluate(measurementRange);
-          await MeasurementMessages.PublishResultAsync(CheckType.ControlProgram,
-            MeasurementTypeCommand.PI_DCW,
+          await MeasurementMessages.PublishInsulationStrengthResultAsync(
+            CheckType.ControlProgram,
+            points ?? "Точки не определены",
             new MeasurementRange(result.Value, measurementRange.LowerBound, measurementRange.UpperBound),
+            CurrentUnit.MilliAmpere,
             result.IsSuccessful,
-            outputService: messageService);
+            messageService);
           return result;
         }
 
@@ -234,7 +233,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
     /// Предполагается, что коммутация завершена заранее.
     /// </summary>
     /// <returns>Задача, представляющая измерение.</returns>
-    private async Task<(bool, double)> NodeFullPerformMeasurementAsync(double value, IUserInteractionService messageService, CancellationToken cancellationToken, double errorResistance = 0, VoltageEnum.Type typeVoltage = VoltageEnum.Type.DCW)
+    private async Task<(bool, double)> NodeFullPerformMeasurementAsync(double value, IUserInteractionService messageService, CancellationToken cancellationToken, double errorResistance = 0, VoltageEnum.Type typeVoltage = VoltageEnum.Type.DCW, string? points = null)
     {
       var breadDown = await EquipmentService.GetBreakdownTesterOrThrow(messageService);
       double answer = -1;
@@ -244,27 +243,31 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         if (typeVoltage == VoltageEnum.Type.ACW)
         {
           MeasurementRange measurementRange = new MeasurementRange(value, 0, amperhMaxACW);
-          answer = (await breadDown.AcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandAC, measurementRange, userMessageService: messageService)).value;
+          answer = (await breadDown.AcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandAC, measurementRange)).Value;
           measurementRange.TargetValue = answer;
           var result = MeasurementResultEvaluator.Evaluate(measurementRange);
-          await MeasurementMessages.PublishResultAsync(CheckType.ControlProgram,
-            MeasurementTypeCommand.PI_ACW,
+          await MeasurementMessages.PublishInsulationStrengthResultAsync(
+            CheckType.ControlProgram,
+            points ?? "Точки не определены",
             new MeasurementRange(result.Value, measurementRange.LowerBound, measurementRange.UpperBound),
+            CurrentUnit.MilliAmpere,
             result.IsSuccessful,
-            outputService: messageService);
+            messageService);
           return result;
         }
         else
         {
           MeasurementRange measurementRange = new MeasurementRange(value, 0, amperhMaxDCW);
-          answer = (await breadDown.DcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandDC, measurementRange, userMessageService: messageService)).value;
+          answer = (await breadDown.DcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandDC, measurementRange)).Value;
           measurementRange.TargetValue = answer;
           var result = MeasurementResultEvaluator.Evaluate(measurementRange);
-          await MeasurementMessages.PublishResultAsync(CheckType.ControlProgram,
-            MeasurementTypeCommand.PI_DCW,
+          await MeasurementMessages.PublishInsulationStrengthResultAsync(
+            CheckType.ControlProgram,
+            points ?? "Точки не определены",
             new MeasurementRange(result.Value, measurementRange.LowerBound, measurementRange.UpperBound),
+            CurrentUnit.MilliAmpere,
             result.IsSuccessful,
-            outputService: messageService);
+            messageService);
           return result;
         }
       }, messageService, measurementTask: true);

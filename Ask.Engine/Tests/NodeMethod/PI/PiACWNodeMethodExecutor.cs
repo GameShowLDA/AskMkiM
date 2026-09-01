@@ -101,23 +101,24 @@ namespace Ask.Engine.Tests.NodeMethod.PI
               MeasurementRange measurementRange = new MeasurementRange(dataModel.Param / 2, 0, dataModel.Param);
               var answer = await breakDown.AcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandAC, measurementRange);
 
-              bool isSuccessful = answer.value < dataModel.Param;
+              bool isSuccessful = answer.Value < dataModel.Param;
 
               string? executionErrorMessage = !isSuccessful
                 ? MeasurementMessages.BuildNodeFailure(
                   connectResult.PointModel,
                   dataModel.Param,
-                  answer.value,
+                  answer.Value,
                   CurrentUnit.MilliAmpere,
                   MeasurementLimitKind.Maximum)
                 : null;
-              await MeasurementMessages.PublishResultAsync(CheckType.Test,
+              await MeasurementMessages.PublishInsulationStrengthResultAsync(
+                CheckType.Test,
+                $"{connectResult.PointModel}, {dataModel.FirstPoint}–{dataModel.SecondPoint}",
+                new MeasurementRange(answer.Value, 0, dataModel.Param),
                 CurrentUnit.MilliAmpere,
-                new MeasurementRange(answer.value, 0, dataModel.Param),
                 isSuccessful,
-                connectResult.PointModel.ToString(),
-                executionErrorMessage,
-                protocolUI);
+                protocolUI,
+                executionErrorMessage);
 
               return isSuccessful;
 
