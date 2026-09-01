@@ -1264,7 +1264,10 @@ executor/metrology
   точку/запятую, экспоненту и суффиксы `kV`, `mA`, `Hz`, `GOhm`/`MOhm`;
 - `TryParseState` обрабатывает `ON`/`OFF` для режима земли и системных настроек;
 - `TryParseMeasurement` через `MeasurementResponseChecker` извлекает последний измерительный
-  результат, единицу и статус `PASS`/`FAIL`/`TEST` из составного ответа GPT;
+  результат, единицу и статус `PASS`/`FAIL`/`TEST` из составного ответа GPT и возвращает общий
+  `Ask.Core.Shared.DTO.Devices.Breakdown.BreakdownMeasurementResponse` для ACW/DCW/IR;
+  статус типизирован enum `BreakdownMeasurementStatus` (`Test`, `Fail`, `Pass`), а ответ без
+  одного из этих статусов не считается корректным результатом измерения;
 - `BreakdownTesterMessages` является фасадом над `Ask.Protocol.Messages` для рабочих операций
   ACW/DCW/IR/System и самоконтроля; существующие тексты сообщений остаются в вызывающем коде.
 
@@ -2020,7 +2023,11 @@ Main contract groups:
 - `Shared/Metadata/View/EditorHost` — editor/workspace/run/translation service
   boundaries between `MainWindow` and `UI`;
 - `Shared/DTO/Devices` — EF entities, device materialization data and common
-  measurement parameters (`Measurements/MeasurementRange`);
+  measurement parameters (`Measurements/MeasurementRange`); общий результат ответа ППУ
+  `Breakdown/BreakdownMeasurementResponse` хранит типизированный
+  `BreakdownMeasurementStatus Status`, `Value` и `Unit` для ACW/DCW/IR.
+  Парсер GPT и IR runtime используют общий тип, но `IMeasurable.MeasureAsync` пока сохраняет
+  прежний возврат только измеренного значения и единицы;
 - `Shared/DTO/Settings` — persisted configuration;
 - `Shared/DTO/Protocol` — `ProtocolModel`, `ShowMessageModel` and action settings;
 - `ControlCommandAnalyser/Model` — parsed command models passed from translation
@@ -2114,7 +2121,9 @@ ErrorItem → translator/runner ErrorList
 | `DeviceBusCommutationMessages` | message facade | Ask.Device.ResponseProcessor | centralizes protocol messages emitted by УКШ self-check flows | [Equipment](#real--idle) |
 | `MultimeterResponseProcessor` | response facade | Ask.Device.ResponseProcessor | централизованно разбирает идентификацию, режим, измерения, прозвонку и системные ошибки Keysight/В7-78/3 | [Equipment](#equipment-architecture) |
 | `MultimeterMessages` | message facade | Ask.Device.ResponseProcessor | централизует публикацию рабочих сообщений и результатов самоконтроля мультиметров через Ask.Protocol.Messages; для self-test-сообщений отключает `isBlockStart`, чтобы UI не создавал сворачиваемые блоки | [Equipment](#equipment-architecture) |
-| `BreakdownTesterResponseProcessor` | response facade | Ask.Device.ResponseProcessor | централизованно проверяет идентификацию, режимы, состояния, числовые параметры и измерительные ответы GPT-79904 | [Equipment](#equipment-architecture) |
+| `BreakdownMeasurementStatus` | enum | Ask.Core | задаёт допустимые статусы ответа ППУ: `Test`, `Fail`, `Pass` | [Shared Contracts](#shared-contracts-and-dto) |
+| `BreakdownMeasurementResponse` | shared response DTO | Ask.Core | хранит типизированный статус, измеренное значение и единицу составного ответа ППУ для ACW/DCW/IR | [Shared Contracts](#shared-contracts-and-dto) |
+| `BreakdownTesterResponseProcessor` | response facade | Ask.Device.ResponseProcessor | централизованно проверяет идентификацию, режимы, состояния, числовые параметры и измерительные ответы GPT-79904; возвращает общий `BreakdownMeasurementResponse` | [Equipment](#equipment-architecture) |
 | `BreakdownTesterMessages` | message facade | Ask.Device.ResponseProcessor | маршрутизирует рабочие сообщения и результаты самоконтроля GPT через Ask.Protocol.Messages | [Equipment](#equipment-architecture) |
 | `MultimeterEmulatorProtocol` | Idle protocol | Ask.Device.Emulator | returns SCPI responses for Keysight/B7-78/3; selected by `DeviceProtocolEmulator.QueryMultimeterAsync` | [Equipment](#device-matrix) |
 | `BreakdownTesterCommandProtocol` | Real/Idle protocol router | Ask.Device.Emulator | logs every GPT79904 command/response and selects COM or Idle protocol | [Equipment](#device-matrix) |

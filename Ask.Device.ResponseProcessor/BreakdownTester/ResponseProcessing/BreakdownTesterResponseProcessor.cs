@@ -1,6 +1,6 @@
+using Ask.Core.Shared.DTO.Devices.Breakdown;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
-using Ask.Device.ResponseProcessor.BreakdownTester.ResponseModels;
 using Ask.Device.ResponseProcessor.BreakdownTester.ResponseProcessing.Checkers;
 using Ask.Protocol.Messages.EntryPoints;
 

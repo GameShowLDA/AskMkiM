@@ -1,5 +1,3 @@
-using Ask.Core.Shared.Metadata.Enums.FileEnums;
-using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Devices.Measurements;
@@ -7,9 +5,8 @@ using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
-using Ask.Core.Shared.Metadata.Static.Messages;
-using Ask.Engine.ControlCommandAnalyser;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies.Data;
@@ -194,14 +191,11 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
-
-
         if (type == VoltageEnum.Type.ACW)
         {
-
           MeasurementRange measurementRange = new MeasurementRange(value, 0, amperhMaxACW);
           var answer = await breadDown.AcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandAC, measurementRange, userMessageService: messageService);
-          measurementRange.TargetValue = answer.value;
+          measurementRange.TargetValue = answer.Value;
           var result = MeasurementResultEvaluator.Evaluate(measurementRange);
           await MeasurementMessages.PublishResultAsync(CheckType.ControlProgram,
             MeasurementTypeCommand.PI_ACW,
@@ -214,7 +208,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         {
           MeasurementRange measurementRange = new MeasurementRange(value, 0, amperhMaxDCW);
           var answer = await breadDown.DcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandDC, measurementRange, userMessageService: messageService);
-          measurementRange.TargetValue = answer.value;
+          measurementRange.TargetValue = answer.Value;
           var result = MeasurementResultEvaluator.Evaluate(measurementRange);
           await MeasurementMessages.PublishResultAsync(CheckType.ControlProgram,
             MeasurementTypeCommand.PI_DCW,
@@ -244,7 +238,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         if (typeVoltage == VoltageEnum.Type.ACW)
         {
           MeasurementRange measurementRange = new MeasurementRange(value, 0, amperhMaxACW);
-          answer = (await breadDown.AcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandAC, measurementRange, userMessageService: messageService)).value;
+          answer = (await breadDown.AcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandAC, measurementRange, userMessageService: messageService)).Value;
           measurementRange.TargetValue = answer;
           var result = MeasurementResultEvaluator.Evaluate(measurementRange);
           await MeasurementMessages.PublishResultAsync(CheckType.ControlProgram,
@@ -257,7 +251,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         else
         {
           MeasurementRange measurementRange = new MeasurementRange(value, 0, amperhMaxDCW);
-          answer = (await breadDown.DcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandDC, measurementRange, userMessageService: messageService)).value;
+          answer = (await breadDown.DcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandDC, measurementRange, userMessageService: messageService)).Value;
           measurementRange.TargetValue = answer;
           var result = MeasurementResultEvaluator.Evaluate(measurementRange);
           await MeasurementMessages.PublishResultAsync(CheckType.ControlProgram,

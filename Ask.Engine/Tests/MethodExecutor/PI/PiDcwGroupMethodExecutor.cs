@@ -96,7 +96,7 @@ namespace Ask.Engine.Tests.MethodExecutor.PI
           MeasurementRange measurementRange = new MeasurementRange(dataModel.Param / 2, 0, dataModel.Param);
           var answer = await breakDown.DcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandDC, measurementRange, userMessageService: messageService);
 
-          bool isSuccessful = answer.value < dataModel.Param;
+          bool isSuccessful = answer.Value < dataModel.Param;
 
           var dischargeIndex = CurrentDischargeNumber;
           var bitString = GetBitString();
@@ -105,13 +105,13 @@ namespace Ask.Engine.Tests.MethodExecutor.PI
               dischargeIndex,
               bitString,
               dataModel.Param,
-              answer.value,
+              answer.Value,
               CurrentUnit.MilliAmpere,
               MeasurementLimitKind.Maximum)
             : null;
           await MeasurementMessages.PublishResultAsync(CheckType.Test,
             CurrentUnit.MilliAmpere,
-            new MeasurementRange(answer.value, 0, dataModel.Param),
+            new MeasurementRange(answer.Value, 0, dataModel.Param),
             isSuccessful,
             $"Разряд {dischargeIndex} ({bitString})",
             executionErrorMessage,
