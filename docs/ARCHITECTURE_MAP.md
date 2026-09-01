@@ -18,6 +18,7 @@
 | Трансляция программы контроля | `MainWindow/Services/TranslationServices.cs` | `Ask.Engine/ControlCommandAnalyser/CommandTranslationManager.cs`, `Ask.Engine/ControlCommandAnalyser/Parser/`, `Ask.Engine/ControlCommandAnalyser/Formatter/`, `Ask.Engine/ControlCommandAnalyser/Validation/` |
 | Исполнение программы контроля | `UI/Controls/Runner/RunControl.xaml.cs` | `Ask.UI/Features/ProtocolNew/Execution/ActionExecutor.cs`, `Ask.Engine/ControlCommandExecutor/Execution/CommandExecutionManager.cs` |
 | Алгоритм конкретной команды | `Ask.Engine/ControlCommandExecutor/Executors/` | `Ask.Engine/ControlCommandExecutor/BaseStrategies/`, `Ask.Engine/ControlCommandExecutor/Execution/EquipmentService.cs` |
+| Локализация обрыва цепи ЭТ | `Ask.Engine/ControlCommandExecutor/BaseStrategies/PairwiseFirstPointCheckerAlt.cs` | `Ask.Engine/ControlCommandExecutor/BaseStrategies/EhtHighResistanceLocalizationService.cs`, `Ask.Engine/ControlCommandExecutor/Executors/EhtCommandExecutor.cs` |
 | Пауза, шаг, остановка, переход к команде | `Ask.UI/Features/ProtocolNew/Execution/ActionExecutor.cs` | `Ask.Core/Services/App/StepControlManager.cs`, `Ask.Engine/ControlCommandExecutor/Execution/CommandExecutionManager.cs`, `Ask.Engine/ControlCommandExecutor/Execution/BreakpointHandler.cs`, `Ask.Engine/ControlCommandExecutor/Execution/CommandJumpService.cs` |
 | Холостой режим и симуляция ошибок | `Ask.Core/Services/Config/AppSettings/ExecutionConfig.cs`, `IdleHardwareErrorSimulator.cs` | `UI/Controls/Settings/Execution/ExecutionControl.xaml`, целевой manager/adapter в `Ask.Device.*`, конкретный executor/strategy |
 | Ошибка оборудования и интерактивный повтор | `Ask.Core/Services/UI/UserActionHelper.cs` | `Ask.Core/Services/UI/EquipmentExecutionContext.cs`, `Ask.UI/Controls/ProtocolNew/ProtocolUI.cs`, целевой adapter/manager/transport |
@@ -55,6 +56,7 @@
 - [Database initialization](#database-startup-flow)
 - [Translation](#translation-flow)
 - [Control-program execution](#control-program-execution-flow)
+- [Локализация обрыва цепи ЭТ](#eht-chain-localization-flow)
 - [Command dispatch and emergency completion](#command-dispatch-flow)
 - [Equipment resolution](#equipment-resolution-flow)
 - [Device materialization from SQLite](#device-materialization-flow)
@@ -673,13 +675,57 @@ executor throws
   через `CommandMessages`, `ExecutionMessages` и `MeasurementMessages`;
 - `NodeFullChecker` после выполнения алгоритма полного узла снимает цепи с шины `B`,
   чтобы вложенные `ПИ/СИ*` и самостоятельные `СИ` не оставляли МКР физически подключённым;
-- `PairwiseFirstPointCheckerAlt` — специальная ЭТ-проверка; обходит все группы, цепи и точки,
-  сохраняя брак каждой текущей точки независимо (ошибка текущей точки не блокирует следующую
-  точку той же цепи); порог `100 Ом` применяется только к предварительному контролю физического
-  подключения отдельных точек, а перегрузка при измерении пары определяется через
-  `MeasurementValueFormatter.IsOverloadValue` по фактическому признаку `Overload`; возвращает
-  `AlgorithmExecutionResult`, а создание и публикацию измерений, ошибок подключения точек и
-  debug-сообщений делегирует `Ask.Protocol.Messages`;
+- `PairwiseFirstPointCheckerAlt` — специальная ЭТ-проверка; обходит каждую исходную
+  `ChainModel` независимо и сначала сравнивает её точки с первой точкой. Порог `100 Ом`
+  применяется только к предварительному контролю физического подключения точки. Результаты
+  не выше верхней границы входят в связанный с первой точкой фрагмент; в том числе брак по
+  нижней границе остаётся топологически связанным, но сохраняется как отдельная ошибка
+  диапазона. Значения выше верхней границы и фактический `Overload`, определяемый через
+  `MeasurementValueFormatter.IsOverloadValue`, образуют неразобранный остаток;
+- `EhtHighResistanceLocalizationService` — запускается после снятия исходной коммутации и
+  рекурсивно делит только неразобранный остаток ЭТ относительно его первой точки.
+  Каждая повторная пара измеряется с повторным измерением и компенсацией сопротивлений
+  контактов/кабеля; после принятия результата пара полностью отключается. Сервис добавляет
+  связанный исходный фрагмент к найденным фрагментам остатка и формирует одну локализованную
+  `DisconnectChainError` в формате `*фрагмент1**фрагмент2*`;
+
+<a id="eht-chain-localization-flow"></a>
+
+##### Локализация обрыва цепи ЭТ
+
+```text
+EhtCommandExecutor.ExecuteAsync
+→ PairwiseFirstPointCheckerAlt.CheckSequenceAsync
+→ foreach SchemeModel.GetPointsConnected group → foreach исходная ChainModel
+→ первая точка остаётся базой первичного прохода
+→ для каждой следующей точки:
+  → ConnectRelayAsync(AB) → CheckContinuityAsync (контроль контакта точки)
+  → первая точка на B + текущая точка на A → CheckContinuityAsync
+  → PairwiseFirstPointCheckerAlt.CalculateFinalResistance
+     (сопротивления контактов + ResistanceCompensation.CableResistance)
+  → result <= upper bound: добавить точку в connectedPoints
+     (result < lower bound дополнительно сохраняется как ResistanceOutOfRange)
+  → result > upper bound или Overload: добавить точку в unresolvedPoints
+→ DisconnectAllPoints для исходной ChainModel
+→ EhtHighResistanceLocalizationService.LocalizeAsync
+  → сохранить connectedPoints как первый готовый фрагмент
+  → SplitIntoFragmentsAsync(unresolvedPoints)
+    → первая точка текущего остатка становится новой базой
+    → MeasureCompensatedResistanceAsync для остальных точек остатка
+      → ConnectRelayAsync(AB) и измерение сопротивления контактов каждой точки
+      → оставить базу на B, текущую точку на A
+      → CheckContinuityAsync → CalculateFinalResistance
+      → UserActionHelper.GetRunWithUserRepeatAsync(measurementTask: true)
+      → полностью снять обе точки с A/B
+    → <= upper bound: текущий фрагмент; > upper bound/Overload: следующий остаток
+    → рекурсивно повторить только для следующего остатка
+  → PointFormater.GetFormatDisconnectPoint
+  → MeasurementMessages + CommandManager.AddErrorMethod(DisconnectChainError)
+```
+
+Инварианты: разные исходные `ChainModel` не объединяются; результат измерения всегда
+классифицирует измеренную пару; нижняя граница влияет на `НОРМА/БРАК`, но не разрывает
+физическую связность; верхняя граница и `Overload` запускают разделение цепи.
 - измерительные делегаты проверки разобщения ПР используют
   `MeasurementResultEvaluator.EvaluateDisconnection`: разрыв подтверждается только при
   `value > DisconnectedLowerLimitResistance`; состояние `Overload` также подтверждает разрыв,
@@ -1864,9 +1910,11 @@ errors there are logged and the remaining mandatory actions continue.
 `ControlProgramCommandExecutionContext`: повторно выполняется только измерение,
 а не весь `ICommandExecutor`. При выключенной настройке контекст программы
 контроля по-прежнему подавляет вложенный интерактивный цикл.
-В попарной ветке ЭХТ `PairwiseFirstPointCheckerAlt` сохраняет текущую коммутацию
+В попарной ветке ЭТ `PairwiseFirstPointCheckerAlt` сохраняет текущую коммутацию
 до решения оператора. Повтор заново читает сопротивление и рассчитывает
 компенсированный результат; переключение точек выполняется только после принятия результата.
+Рекурсивный `EhtHighResistanceLocalizationService` применяет тот же интерактивный цикл
+к каждой фактически измеряемой паре остатка и полностью снимает пару перед следующим шагом.
 Adapters/managers сохраняют существующие проверки `DeviceDisplayConfig`, после чего
 `DeviceMessages` централизованно формирует и публикует device-результат.
 Typed factories are grouped in `Ask.Core/Services/Errors/Device/`.
@@ -2063,6 +2111,8 @@ ErrorItem → translator/runner ErrorList
 | `MetrologyMessageBuilder` | internal static builder | Ask.Protocol.Messages | формирует заголовок сводки режима и сообщения о предельных погрешностях | [Protocols](#protocols-and-file-formats) |
 | `MetrologyMessagePublisher` | internal static publisher | Ask.Protocol.Messages | передаёт метрологические сводки в `IMessageOutputService` с метаданными исходного вызова | [Protocols](#protocols-and-file-formats) |
 | `MeasurementResultEvaluator` | internal static evaluator | Ask.Engine | применяет Idle-симуляцию и проверяет измеренное значение по границам либо ожидаемой перегрузке до передачи результата в `MeasurementMessages` | [Execution Engine](#execution-engine) |
+| `PairwiseFirstPointCheckerAlt` | internal strategy | Ask.Engine | выполняет первичный проход каждой цепи ЭТ относительно её первой точки и отделяет связанный фрагмент от остатка выше верхней границы | [Локализация ЭТ](#eht-chain-localization-flow) |
+| `EhtHighResistanceLocalizationService` | internal localization service | Ask.Engine | рекурсивно делит только неразобранный остаток цепи ЭТ и формирует одну ошибку с независимыми связными фрагментами | [Локализация ЭТ](#eht-chain-localization-flow) |
 | `AlgorithmExecutionResult` | result container | Ask.Protocol.Messages | контракт из `Ask.Protocol.Messages/Models/`, хранящий накопленные ошибки и информационные `ShowMessageModel` алгоритма | [Execution Engine](#execution-engine) |
 | `ProtocolModelExtensions` | static extensions | Ask.Protocol.Messages | расширение из namespace `Ask.Protocol.Messages.Extensions`, добавляющее единый `AlgorithmExecutionResult` в коллекции ошибок и информационных сообщений `ProtocolModel` | [Execution Engine](#execution-engine) |
 | `ExecutionMessages` | static facade | Ask.Protocol.Messages | проверяет видимость параметров выполнения и коммутации, публикует накопленные результаты проверки, ошибки, debug-сообщения, задержки, этапы анализа цепей и локализации, границы этапов, инициализацию, настройку оборудования и коммутацию; формирует только накапливаемую ошибку локализации | [Protocols](#protocols-and-file-formats) |

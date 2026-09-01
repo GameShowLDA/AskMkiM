@@ -30,7 +30,6 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       var messages = new AlgorithmExecutionResult(new(), new());
       var baseCommandModel = context.CommandModel;
 
-      List<List<ChainModel>> errorChain = new();
       var pointsListSource = context.SchemeModel.GetPointsConnected();
       if (pointsListSource.Count == 0)
       {
@@ -122,6 +121,12 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
               outputService: context.MessageService);
           }
 
+          var connectedPoints = basePointConnectionError
+            ? new List<PointModel>()
+            : new List<PointModel> { _basePoint };
+          var unresolvedPoints = new List<PointModel>();
+          double? firstAboveUpperBound = null;
+
           await DeviceManager.RelayModule.PointManager.DisconnectPointFromBusAAsync(_basePoint, context.MessageService, context.IsPolarityReversed);
 
           for (int i = 1; i < chains.PointModels.Count; i++)
@@ -200,6 +205,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
             await DeviceManager.RelayModule.PointManager.DisconnectPointFromBusBAsync(point, context.MessageService, context.IsPolarityReversed);
 
             double Rt = -1;
+            bool pairMeasurementOverload = false;
             var LowerBound = (baseCommandModel as EhtCommandModel).LowerLimitResistance.Value;
             var UpperBound = (baseCommandModel as EhtCommandModel).HigherLimitResistance.Value;
 
@@ -235,13 +241,9 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 
               if (context.ValidatePointConnections && IsPairMeasurementOverload(Rt))
               {
-                var errorMessageModels = MeasurementMessages.BuildMeasurementResultMessage(
-                  context.TypeCommand,
-                  new MeasurementRange(Rt, context.LowerLimit, context.HigherLimit),
-                  false,
-                  $"{_basePoint.Mnemonic}{machineAdressFirst}, {point.Mnemonic}{machineAdressSecond}",
-                  indentLevel: 1);
-                currentPointError = true;
+                pairMeasurementOverload = true;
+                firstAboveUpperBound ??= Rt;
+                unresolvedPoints.Add(point);
 
                 await MeasurementMessages.PublishStartAsync(CheckType.ControlProgram,
                   MeasurementTypeCommand.KC,
@@ -252,17 +254,6 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
                   false,
                   $"{_basePoint.Mnemonic}{machineAdressFirst}, {point.Mnemonic}{machineAdressSecond}",
                   outputService: context.MessageService);
-                context.CommandManager.AddErrorMethod(
-                  EhtErrors.CircuitOverload($"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}",
-                  $"{_basePoint.Mnemonic}{machineAdressFirst}",
-                  $"{point.Mnemonic}{machineAdressSecond}",
-                  context.MessageService.GetLastLineNumber(),
-                  baseCommandModel.FormattedStartLineNumber));
-
-                messages.Errors.Add(errorMessageModels);
-                await ExecutionMessages.PublishDebugAsync(
-                  $"Добавлена ошибка: {errorMessageModels}",
-                  context.MessageService);
               }
               else
               {
@@ -275,7 +266,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
               }
             }
 
-            if (CanMeasurePair(basePointConnectionError, currentPointError))
+            if (CanMeasurePair(basePointConnectionError, currentPointError) && !pairMeasurementOverload)
             {
               string measurementTarget = $"{_basePoint.Mnemonic}{machineAdressFirst},{point.Mnemonic}{machineAdressSecond}";
               bool useInitialMeasurement = true;
@@ -313,6 +304,19 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 
               bool succes = finalMeasurement.Connect;
               double result = finalMeasurement.Answer;
+              bool isAboveUpperBound = EhtHighResistanceLocalizationService.IsAboveUpperBound(
+                result,
+                UpperBound);
+              if (isAboveUpperBound)
+              {
+                firstAboveUpperBound ??= result;
+                unresolvedPoints.Add(point);
+              }
+              else
+              {
+                connectedPoints.Add(point);
+              }
+
               var measurementRange = new MeasurementRange(result, LowerBound, UpperBound);
               var message = MeasurementMessages.BuildMeasurementResultMessage(
                 ResistanceUnit.Ohm,
@@ -320,7 +324,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
                 succes,
                 measurementTarget);
 
-              if (!succes)
+              if (!succes && !isAboveUpperBound)
               {
                 messages.Errors.Add(message);
                 context.CommandManager.AddErrorMethod(
@@ -354,13 +358,24 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
           }
 
           await DisconnectAllPoints(context.MessageService, chains);
+
+          if (firstAboveUpperBound.HasValue &&
+              connectedPoints.Count > 0 &&
+              unresolvedPoints.Count > 0)
+          {
+            messages.AddRange(await EhtHighResistanceLocalizationService.LocalizeAsync(
+              context,
+              connectedPoints,
+              unresolvedPoints,
+              firstAboveUpperBound.Value));
+          }
         }
       }
 
       return messages;
     }
 
-    private static double CalculateFinalResistance(
+    internal static double CalculateFinalResistance(
       double measuredResistance,
       double firstPointResistance,
       double secondPointResistance,
