@@ -13,7 +13,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 {
   internal static class NodeFullChecker
   {
-    internal delegate Task<(bool Result, double Value)> PerformMeasurementAsync(double value, IUserInteractionService userMessageService, CancellationToken cancellationToken, double errorResistance, VoltageEnum.Type typeVoltage = VoltageEnum.Type.ACW);
+    internal delegate Task<(bool Result, double Value)> PerformMeasurementAsync(double value, IUserInteractionService userMessageService, CancellationToken cancellationToken, double errorResistance, VoltageEnum.Type typeVoltage = VoltageEnum.Type.ACW, string? points = null);
 
     static private List<ChainModel> ErrorsPoints = new List<ChainModel>();
 
@@ -56,7 +56,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 
         await DeviceManager.RelayModule.ChainManager.SwitchChainFromBusBToAAsync(chainModels, context.MessageService, context.IsPolarityReversed);
 
-        var answer = await context.PerformMeasurementAsync(context.Value, context.MessageService, context.MessageService.GetCancellationToken(), context.InternalResistance, context.VoltageType);
+        var answer = await context.PerformMeasurementAsync(context.Value, context.MessageService, context.MessageService.GetCancellationToken(), context.InternalResistance, context.VoltageType, chainModels.ToString());
 
         if (!answer.Result)
         {
@@ -98,7 +98,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
             context,
             chain.Chain,
             chainStr,
-            (value, service, token, resistance, type) => context.PerformMeasurementAsync(value, service, token, resistance, type),
+            (value, service, token, resistance, type, points) => context.PerformMeasurementAsync(value, service, token, resistance, type, points),
             context.VoltageType);
 
           var err = faultResult.Errors.Single();

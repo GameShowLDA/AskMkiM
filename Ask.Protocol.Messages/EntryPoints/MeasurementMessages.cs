@@ -111,6 +111,7 @@ public static class MeasurementMessages
     message.IndentLevel = 3;
     return AlgorithmExecutionResult.FromErrors(new List<ShowMessageModel> { message });
   }
+
   /// <summary>
   /// Публикует заголовок начала измерения.
   /// </summary>
@@ -181,6 +182,53 @@ public static class MeasurementMessages
     message.IndentLevel = indentLevel;
     return MeasurementMessagePublisher.PublishAsync(
       message, checkType, outputService, callerName, callerFile, callerLine, skipPause: false);
+  }
+
+  /// <summary>
+  /// Публикует качественный результат проверки прочности изоляции ACW или DCW.
+  /// </summary>
+  /// <param name="checkType">Тип выполняемой проверки.</param>
+  /// <param name="points">Обозначение проверяемых точек.</param>
+  /// <param name="measurementRange">Измеренное значение и допустимый диапазон тока утечки.</param>
+  /// <param name="measurementUnit">Единица измерения тока утечки.</param>
+  /// <param name="isSuccessful">Признак отсутствия пробоя.</param>
+  /// <param name="outputService">Сервис вывода сообщения в экранный протокол.</param>
+  /// <param name="executionErrorMessage">Описание брака для итогового заключения.</param>
+  /// <param name="callerName">Имя метода, вызвавшего публикацию.</param>
+  /// <param name="callerFile">Путь к файлу, вызвавшему публикацию.</param>
+  /// <param name="callerLine">Номер строки, вызвавшей публикацию.</param>
+  /// <returns>Задача, представляющая публикацию результата.</returns>
+  public static Task PublishInsulationStrengthResultAsync(
+    CheckType checkType,
+    string points,
+    MeasurementRange measurementRange,
+    Enum measurementUnit,
+    bool isSuccessful,
+    IMessageOutputService? outputService,
+    string? executionErrorMessage = null,
+    [CallerMemberName] string callerName = "",
+    [CallerFilePath] string callerFile = "",
+    [CallerLineNumber] int callerLine = 0)
+  {
+    var message = MeasurementMessageBuilder.BuildInsulationStrengthResult(
+      points,
+      measurementRange,
+      measurementUnit,
+      isSuccessful);
+    message.Status = isSuccessful
+      ? ShowMessageModel.MessageType.Success
+      : ShowMessageModel.MessageType.Error;
+    message.IndentLevel = 2;
+    message.ExecutionErrorMessage = executionErrorMessage;
+
+    return MeasurementMessagePublisher.PublishAsync(
+      message,
+      checkType,
+      outputService,
+      callerName,
+      callerFile,
+      callerLine,
+      isVisible: DeviceDisplayConfig.GetMeasurementResultsVisibility());
   }
 
   /// <summary>
@@ -333,14 +381,14 @@ public static class MeasurementMessages
     MeasurementTypeCommand measurementTypeCommand,
     MeasurementRange measurementRange,
     string? chains = null,
-    string comparisonSign = "=", 
+    string comparisonSign = "=",
     string points = null)
   {
     return MeasurementMessageBuilder.BuildResult(
       measurementTypeCommand,
       measurementRange,
       chains,
-      comparisonSign, 
+      comparisonSign,
       points);
   }
 
@@ -644,6 +692,25 @@ public static class MeasurementMessages
       callerLine);
   }
 
+  /// <summary>
+  /// Формирует и публикует сообщение с результатом измерения.
+  /// </summary>
+  /// <param name="measurementTypeCommand">Тип измерения.</param>
+  /// <param name="checkType">Тип проверки.</param>
+  /// <param name="measurementRange">Диапазон измерения.</param>
+  /// <param name="isSuccessful">Признак успешного прохождения проверки.</param>
+  /// <param name="isVisible">Признак отображения результата.</param>
+  /// <param name="chains">Обозначение измеряемых цепей.</param>
+  /// <param name="comparisonSign">Знак сравнения, используемый в результате проверки.</param>
+  /// <param name="points">Обозначение проверяемых точек.</param>
+  /// <param name="outputService">Сервис вывода сообщений.</param>
+  /// <param name="callerName">Имя вызывающего метода.</param>
+  /// <param name="callerFile">Путь к файлу вызывающего метода.</param>
+  /// <param name="callerLine">Номер строки вызывающего метода.</param>
+  /// <returns>Асинхронная задача публикации сообщения.</returns>
+  /// <exception cref="ArgumentNullException">
+  /// Выбрасывается, если <paramref name="measurementRange"/> равен <see langword="null"/>.
+  /// </exception>
   private static Task PublishAsync(
     MeasurementTypeCommand measurementTypeCommand,
     CheckType checkType,

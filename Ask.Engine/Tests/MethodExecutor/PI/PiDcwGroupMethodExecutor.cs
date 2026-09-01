@@ -94,7 +94,7 @@ namespace Ask.Engine.Tests.MethodExecutor.PI
         await UserActionHelper.RunWithUserRepeatAsync(async () =>
         {
           MeasurementRange measurementRange = new MeasurementRange(dataModel.Param / 2, 0, dataModel.Param);
-          var answer = await breakDown.DcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandDC, measurementRange, userMessageService: messageService);
+          var answer = await breakDown.DcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandDC, measurementRange);
 
           bool isSuccessful = answer.Value < dataModel.Param;
 
@@ -109,13 +109,14 @@ namespace Ask.Engine.Tests.MethodExecutor.PI
               CurrentUnit.MilliAmpere,
               MeasurementLimitKind.Maximum)
             : null;
-          await MeasurementMessages.PublishResultAsync(CheckType.Test,
-            CurrentUnit.MilliAmpere,
+          await MeasurementMessages.PublishInsulationStrengthResultAsync(
+            CheckType.Test,
+            $"{dataModel.FirstPoint}–{dataModel.SecondPoint}; разряд {dischargeIndex} ({bitString})",
             new MeasurementRange(answer.Value, 0, dataModel.Param),
+            CurrentUnit.MilliAmpere,
             isSuccessful,
-            $"Разряд {dischargeIndex} ({bitString})",
-            executionErrorMessage,
-            messageService);
+            messageService,
+            executionErrorMessage);
 
           return isSuccessful;
 

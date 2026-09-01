@@ -111,13 +111,14 @@ namespace Ask.Engine.Tests.NodeMethod.PI
                   CurrentUnit.MilliAmpere,
                   MeasurementLimitKind.Maximum)
                 : null;
-              await MeasurementMessages.PublishResultAsync(CheckType.Test,
-                CurrentUnit.MilliAmpere,
+              await MeasurementMessages.PublishInsulationStrengthResultAsync(
+                CheckType.Test,
+                $"{connectResult.PointModel}, {dataModel.FirstPoint}–{dataModel.SecondPoint}",
                 new MeasurementRange(answer.Value, 0, dataModel.Param),
+                CurrentUnit.MilliAmpere,
                 isSuccessful,
-                connectResult.PointModel.ToString(),
-                executionErrorMessage,
-                protocolUI);
+                protocolUI,
+                executionErrorMessage);
 
               return isSuccessful;
 

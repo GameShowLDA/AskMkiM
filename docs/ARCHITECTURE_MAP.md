@@ -670,7 +670,10 @@ executor throws
 - `MethodExecutor`, `NodeAccumulationChecker`, `NodeFullChecker` и `PairwiseFirstPointChecker`
   возвращают единый `AlgorithmExecutionResult`; формирование и публикация их заголовков,
   этапов локализации, диагностических сообщений и готовых результатов измерения проходят
-  через `CommandMessages`, `ExecutionMessages` и `MeasurementMessages`;
+  через `CommandMessages`, `ExecutionMessages` и `MeasurementMessages`. Общий делегат
+  разобщающих стратегий дополнительно передаёт строку фактически скоммутированных точек;
+  `PiCommandExecutor` использует её для качественного результата ACW/DCW, а исполнители
+  ПР/СИ принимают параметр без изменения числовой семантики своих измерений;
 - `NodeFullChecker` после выполнения алгоритма полного узла снимает цепи с шины `B`,
   чтобы вложенные `ПИ/СИ*` и самостоятельные `СИ` не оставляли МКР физически подключённым;
 - `PairwiseFirstPointCheckerAlt` — специальная ЭТ-проверка; обходит все группы, цепи и точки,
@@ -703,6 +706,13 @@ executor throws
 - `MeasurementMessages` формирует тексты брака узлового и группового методов через
   `MeasurementFailureMessageBuilder`; `MeasurementLimitKind`, старые
   `GroupMethodProtocolBuilder` и `NodeMethodProtocolBuilder` удалены из `Ask.Engine`;
+- `MeasurementMessages.PublishInsulationStrengthResultAsync` и
+  `MeasurementMessageBuilder.BuildInsulationStrengthResult` централизуют пользовательский
+  результат прочности изоляции для обычных и программных проверок: заголовок содержит
+  проверяемые точки и допустимый диапазон тока, успешный результат получает статус `НОРМА`,
+  неуспешный — текст `ПРОБОЙ` и статус `БРАК`. Измеренный ток остаётся во внутреннем
+  `BreakdownMeasurementResponse` и алгоритме сравнения, но не выводится как результат.
+  Entry point используется узловыми, групповыми и control-program исполнителями PI ACW/DCW;
 - все методы публикации `MeasurementMessages` требуют явный `CheckType`: метрологические
   исполнители передают `CheckType.Metrology`, исполнители программ контроля —
   `CheckType.ControlProgram`, обычные тесты — `CheckType.Test`, самоконтроль оборудования —
@@ -711,9 +721,11 @@ executor throws
   типов сохраняет фильтрацию через `DeviceDisplayConfig`. Ошибочные результаты настройками
   видимости не скрываются;
 - `BaseMeasurement.MeasurementPointsDisplay` централизованно форматирует обе введённые
-  точки из `BaseMeasurement.Points`; метрологические режимы передают строку точек в
-  `MeasurementMessages.PublishResultAsync`, поэтому точки отображаются в строке результата
-  над обычной строкой погрешности. Отдельные сообщения допустимого диапазона
+  точки из `BaseMeasurement.Points`. Метрологические PI ACW/DCW при штатном измерении
+  продолжают публиковать результат по фактически выдаваемому напряжению через KN-проверку;
+  при `BreakdownMeasurementStatus.Fail` они отдельно публикуют PI-результат `ПРОБОЙ` и
+  прекращают шаг. Остальные метрологические режимы также используют
+  `MeasurementMessages.PublishResultAsync`. Отдельные сообщения допустимого диапазона
   (`RangeMessages.PublishAllowedRangeAsync`) метрологические режимы не публикуют;
 - исполнители команд передают исходные строки в `CommandMessages.FormatSourceLines`;
   `CommandExecutionContext.ProtocolSourceLines` по умолчанию ссылается на `Command.SourceLines`,
@@ -2066,7 +2078,7 @@ ErrorItem → translator/runner ErrorList
 | `SelfTestMessages` | static facade | Ask.Protocol.Messages | публикует этапы, команды пошагового режима, ошибки и результаты самоконтроля мультиметра, GPT, МКР, УКШ и модуля напряжения/тока; runtime SelfCheck-классы моделей экранного протокола не создают | [Equipment](#equipment-architecture) |
 | `SelfTestMessageBuilder` | internal static builder | Ask.Protocol.Messages | формирует информационные, командные и результирующие сообщения самоконтроля, включая видимость измерений, Overload, погрешность и свойства итогового протокола | [Equipment](#equipment-architecture) |
 | `SelfTestMessagePublisher` | internal static publisher | Ask.Protocol.Messages | передаёт сообщения самоконтроля общему `MessagePublisher` с признаками блока, паузы и проверки доступности вывода | [Equipment](#equipment-architecture) |
-| `MeasurementMessages` | static facade | Ask.Protocol.Messages | формирует модели для накопления результатов и публикует начало измерения, этап измерений, ток утечки PI, эталонное значение, ошибки подключения точек, выдачу испытательного напряжения PI ACW/DCW, готовые сообщения измерений, итоговые и промежуточные результаты и погрешности; публикация требует явный `CheckType` | [Protocols](#protocols-and-file-formats) |
+| `MeasurementMessages` | static facade | Ask.Protocol.Messages | формирует модели для накопления результатов и публикует начало измерения, этап измерений, ток утечки PI, качественный результат прочности изоляции с точками, эталонное значение, ошибки подключения точек, выдачу испытательного напряжения PI ACW/DCW, готовые сообщения измерений, итоговые и промежуточные результаты и погрешности; публикация требует явный `CheckType` | [Protocols](#protocols-and-file-formats) |
 | `MeasurementMessageBuilder` | internal static builder | Ask.Protocol.Messages | формирует заголовки измерений, эталонные значения, ошибки подключения точек, переход к методу полного узла, единый формат диапазона, измеренное значение, погрешность, `ПРОБОЙ` и `Overload` | [Protocols](#protocols-and-file-formats) |
 | `MeasurementFailureMessageBuilder` | internal static builder | Ask.Protocol.Messages | формирует описания брака для точек и разрядов узлового и группового методов | [Protocols](#protocols-and-file-formats) |
 | `MeasurementLimitKind` | enum | Ask.Protocol.Messages | контракт из `Ask.Protocol.Messages/Models/`, задающий минимальный или максимальный предел при формировании описания брака | [Protocols](#protocols-and-file-formats) |

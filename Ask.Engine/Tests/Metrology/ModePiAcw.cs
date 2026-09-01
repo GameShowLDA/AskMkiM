@@ -121,10 +121,11 @@ namespace Ask.Engine.Tests.Metrology
         if (answerBreakdown.Status == BreakdownMeasurementStatus.Fail)
         {
           await MeasurementMessages.PublishResultAsync(CheckType.Metrology,
-           MeasurementTypeCommand.PI_ACW,
-           new MeasurementRange(answerBreakdown.Value, 0, maxAmpher),
-           false,
-           outputService: userMessageService);
+            MeasurementTypeCommand.PI_ACW,
+            new MeasurementRange(answerBreakdown.Value, 0, maxAmpher),
+            false,
+            outputService: userMessageService);
+
           return false;
         }
 

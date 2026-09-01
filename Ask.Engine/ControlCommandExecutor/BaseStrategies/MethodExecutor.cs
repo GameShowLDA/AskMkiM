@@ -53,7 +53,9 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         await ConnectPointsToBusAsync(binaryPoints, methodExecutionContext.SchemeModel, step, methodExecutionContext.MessageService, methodExecutionContext.IsPolarityReversed);
 
         var module = EquipmentService.GetModuleByPoint(binaryPoints.First().point.PointModels.First());
-        var result = await methodExecutionContext.PerformMeasurementAsync(methodExecutionContext.Value, methodExecutionContext.MessageService, methodExecutionContext.MessageService.GetCancellationToken(), module.SwitchResistance);
+        string measurementPoints = $"{string.Join(", ", binaryPoints.Where(item => item.reversedBinary[step] == '1').Select(item => item.point))} / " +
+          string.Join(", ", binaryPoints.Where(item => item.reversedBinary[step] == '0').Select(item => item.point));
+        var result = await methodExecutionContext.PerformMeasurementAsync(methodExecutionContext.Value, methodExecutionContext.MessageService, methodExecutionContext.MessageService.GetCancellationToken(), module.SwitchResistance, points: measurementPoints);
         if (!result.Result)
         {
           await DisconnectPointsToBusAsync(binaryPoints, methodExecutionContext.SchemeModel, step, methodExecutionContext.MessageService, methodExecutionContext.IsPolarityReversed);

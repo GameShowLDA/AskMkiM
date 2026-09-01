@@ -34,8 +34,6 @@ namespace Ask.Engine.Tests.Metrology
     /// </summary>
     private IUserInteractionService _userInteractionService;
 
-    private const int maxAmpher = 10;
-
     /// <summary>
     /// Инициализирует все необходимые настройки для компонента.
     /// Очищает предыдущий контент и добавляет новые элементы управления.
@@ -123,7 +121,7 @@ namespace Ask.Engine.Tests.Metrology
         {
           await MeasurementMessages.PublishResultAsync(CheckType.Metrology,
             MeasurementTypeCommand.PI_DCW,
-            new MeasurementRange(answerBreakdown.Value, 0, maxAmpher),
+            new MeasurementRange(answerBreakdown.Value, 0, 10),
             false,
             outputService: messageService);
 
