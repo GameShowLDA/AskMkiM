@@ -1969,6 +1969,9 @@ and `StateEventsBinder`, then calls `ApplicationEventsBinder.BindAll`.
 для запуска повторных попыток после ответа `FAIL`: каждая попытка ожидает первый непустой
 ответ `MEASURE`, ответы `PASS`/`TEST` завершают цикл, а новая попытка после `FAIL` запускается
 только до истечения окна. После цикла `StopMeasure` подтверждает состояние `TEST OFF`.
+Общие SCPI-шаги вынесены в `StartTestAsync` и `QueryMeasurementAsync`; fast-путь читает
+`ReadFirstAvailableMeasurementAsync`, а full-путь — `ReadFinalMeasurementAsync`, чтобы
+различие обработки промежуточного статуса `TEST` оставалось явным.
 Long-running loops in metrology/GPT measurement helpers are bounded by
 cancellation, timers or device conditions; inspect the concrete mode before
 changing stop semantics.
