@@ -147,7 +147,7 @@ namespace Ask.UI.Components.InputField
     public string Time => TimeTextBox.Text;
 
     /// <summary>
-    /// Время выполнения теста.
+    /// Время нарастания напряжения.
     /// </summary>
     public string TimeRamp => TimeRampTextBox.Text;
 
