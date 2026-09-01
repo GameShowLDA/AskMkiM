@@ -75,9 +75,9 @@ namespace Ask.Device.Runtime.Function.GPT.Helper
     /// <summary>
     /// Быстрый режим: циклический опрос MEASURE без полного ожидания времени измерения.
     /// - PASS  → завершаем немедленно — измерение успешно
-    /// - TEST  → тоже завершаем — устройство завершило измерение, но ещё не выдало PASS/FAIL
-    /// - FAIL  → перезапускаем измерение
-    /// - Unknown → продолжаем цикл
+    /// - TEST  → продолжаем опрос текущей попытки до конечного статуса
+    /// - FAIL  → перезапускаем измерение, пока не истекло заданное время
+    /// Уже запущенное измерение всегда ожидается до конечного статуса, даже если заданное время истекло.
     /// </summary>
     static private async Task<BreakdownMeasurementResponse> MeasureFastPollingAsync(
       IBreakdownTester breakDown,
@@ -85,17 +85,18 @@ namespace Ask.Device.Runtime.Function.GPT.Helper
       int delayBeforeCall)
     {
       var total = Stopwatch.StartNew();
-      var count = (int)time;
       var stage = Stopwatch.StartNew();
       LogInformation($"[PERF][GPT][MeasureFastPolling] Use configured test time: {stage.ElapsedMilliseconds} ms", isDeviceLog: true);
       string answerDevice = string.Empty;
+      var attempt = 0;
 
-      for (int i = 0; i < count; i++)
+      do
       {
+        attempt++;
         var query = $"{GetCommandSyntax(FunctionCommand.FUNCTION_TEST)} ON";
         stage.Restart();
         await breakDown.DeviceProtocol.QueryAsync(query, delayBeforeCall: delayBeforeCall);
-        LogInformation($"[PERF][GPT][MeasureFastPolling] Start test #{i + 1}: {stage.ElapsedMilliseconds} ms", isDeviceLog: true);
+        LogInformation($"[PERF][GPT][MeasureFastPolling] Start test #{attempt}: {stage.ElapsedMilliseconds} ms", isDeviceLog: true);
 
         var poll = Stopwatch.StartNew();
         while (true)
@@ -104,19 +105,19 @@ namespace Ask.Device.Runtime.Function.GPT.Helper
           query = $"{FunctionCommandManager.GetCommandSyntax(FunctionCommand.MEASURE)} ?";
           answerDevice = await breakDown.DeviceProtocol.QueryAsync(query, timeout: 500, delayBeforeCall: delayBeforeCall);
 
-          if (answerDevice != string.Empty
-            && !BreakdownTesterResponseProcessor.IsTestInProgress(answerDevice))
+          if (!string.IsNullOrEmpty(answerDevice))
             break;
 
           await Task.Delay(PollIntervalMs);
         }
-        LogInformation($"[PERF][GPT][MeasureFastPolling] Poll result #{i + 1}: {poll.ElapsedMilliseconds} ms", isDeviceLog: true);
+        LogInformation($"[PERF][GPT][MeasureFastPolling] Poll result #{attempt}: {poll.ElapsedMilliseconds} ms", isDeviceLog: true);
 
         if (!BreakdownTesterResponseProcessor.IsTestFailed(answerDevice))
         {
           break;
         }
       }
+      while (total.Elapsed.TotalSeconds < time);
 
       stage.Restart();
       await StopMeasure(breakDown);

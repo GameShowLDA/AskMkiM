@@ -1965,6 +1965,10 @@ and `StateEventsBinder`, then calls `ApplicationEventsBinder.BindAll`.
 | Workspace click timer | `MultiEditorControl` DispatcherTimer | double-click discrimination | control lifetime |
 | Logged exception reporter | `ExceptionDiagnosticReporter` bounded Task.Run | asynchronous crash package | throttled/timeout-limited |
 
+`MeasureHelper.MeasureFastPollingAsync` трактует настроенное время теста как временное окно
+для запуска повторных попыток после ответа `FAIL`: каждая попытка ожидает первый непустой
+ответ `MEASURE`, ответы `PASS`/`TEST` завершают цикл, а новая попытка после `FAIL` запускается
+только до истечения окна. После цикла `StopMeasure` подтверждает состояние `TEST OFF`.
 Long-running loops in metrology/GPT measurement helpers are bounded by
 cancellation, timers or device conditions; inspect the concrete mode before
 changing stop semantics.
