@@ -14,7 +14,7 @@ public class MeasurementErrorDefaultsTests
   /// Проверяет, что для команды EHT используются корректные
   /// пределы измерения, заданные в инструкции.
   /// </summary>
-  [Fact(DisplayName = "ЭТ: метаданные команды задают диапазон сопротивления 0,01–200 Ом")]
+  [Fact]
   public void EhtDisplayInfo_UsesInstructionResistanceRange()
   {
     var displayInfo = MeasurementTypeCommand.EHT.GetCommandDisplayInfo();
@@ -28,7 +28,7 @@ public class MeasurementErrorDefaultsTests
   /// Проверяет, что для команды EHT используются диапазоны
   /// погрешностей, заданные в инструкции.
   /// </summary>
-  [Fact(DisplayName = "ЭТ: диапазоны погрешности соответствуют инструкции")]
+  [Fact]
   public void EhtDefaultErrors_UseInstructionDefinedRanges()
   {
     var defaults = MeasurementErrorDefaults.GetDefaultsFor(MeasurementTypeCommand.EHT);
@@ -59,7 +59,7 @@ public class MeasurementErrorDefaultsTests
   /// <param name="expectedLowerBound">Ожидаемая нижняя граница допуска.</param>
   /// <param name="expectedUpperBound">Ожидаемая верхняя граница допуска.</param>
   /// <param name="expectedDelta">Ожидаемая абсолютная погрешность.</param>
-  [Theory(DisplayName = "ЭТ: диапазон допуска рассчитывается по погрешностям из инструкции")]
+  [Theory]
   [InlineData(0.5, 0.45, 0.55, 0.05)]
   [InlineData(10, 9.5, 10.5, 0.5)]
   public void CalculateToleranceRange_ForEht_UsesInstructionErrors(
@@ -80,7 +80,7 @@ public class MeasurementErrorDefaultsTests
   /// Проверяет, что при измерении значения ниже допустимого диапазона
   /// для команды EHT генерируется исключение.
   /// </summary>
-  [Fact(DisplayName = "ЭТ: расчёт допуска ниже определённого диапазона погрешности запрещён")]
+  [Fact]
   public void CalculateToleranceRange_ForEhtBelowDefinedAccuracy_Throws()
   {
     Assert.Throws<InvalidOperationException>(() =>
