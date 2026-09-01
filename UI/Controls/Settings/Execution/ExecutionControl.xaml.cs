@@ -1,9 +1,25 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
+using Ask.Core.Shared.DTO.Devices.Base;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.Rack;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.UninterruptiblePowerSupply;
 using Ask.Core.Shared.DTO.Settings;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.RoleEnums;
+using Ask.DataBase.Engine.Static;
+using Ask.DataBase.Provider.Context;
+using Ask.UI.Infrastructure.Localization;
+using Ask.UI.Shared.Components;
 using Message;
+using Microsoft.EntityFrameworkCore;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -16,6 +32,19 @@ namespace UI.Controls.Settings.Execution
   public partial class ExecutionControl : UserControl
   {
     private bool _isInitialized;
+    private bool _isHardwareErrorSimulationRefreshRunning;
+    private int _hardwareErrorSimulationRefreshVersion;
+    private sealed record ErroneousMeasurementOption(TypeErroneousMeasurement Value, string Title);
+    private readonly List<HardwareErrorSimulationItem> _hardwareErrorSimulationItems = [];
+
+    private sealed class HardwareErrorSimulationItem
+    {
+      public required DeviceDto Device { get; init; }
+
+      public required SettingsCard Card { get; init; }
+
+      public bool SavedValue { get; set; }
+    }
 
     /// <summary>
     /// Базовая (сохранённая) модель выполнения, считанная при загрузке.
@@ -34,6 +63,7 @@ namespace UI.Controls.Settings.Execution
       InitializeComponent();
       Loaded += ExecutionControl_Loaded;
       EventAggregator.Subscribe<SystemStateEvents.PowerChanged>(e => ChangeVisible(e.IsPowered));
+      EventAggregator.Subscribe<SystemStateEvents.DeviceConfigurationChanged>(OnDeviceConfigurationChanged);
       ChangeVisible(SystemStateManager.GetIsActivePower());
     }
 
@@ -52,10 +82,52 @@ namespace UI.Controls.Settings.Execution
       });
     }
 
+    private void OnDeviceConfigurationChanged(SystemStateEvents.DeviceConfigurationChanged eventData)
+    {
+      Interlocked.Increment(ref _hardwareErrorSimulationRefreshVersion);
+      _ = RefreshHardwareErrorSimulationCardsAsync();
+    }
+
+    private async Task RefreshHardwareErrorSimulationCardsAsync()
+    {
+      if (!Dispatcher.CheckAccess())
+      {
+        await Dispatcher.InvokeAsync(RefreshHardwareErrorSimulationCardsAsync).Task.Unwrap();
+        return;
+      }
+
+      await Task.Delay(100);
+
+      if (_isHardwareErrorSimulationRefreshRunning || !IsLoaded)
+      {
+        return;
+      }
+
+      _isHardwareErrorSimulationRefreshRunning = true;
+      try
+      {
+        int loadedVersion;
+        do
+        {
+          loadedVersion = Volatile.Read(ref _hardwareErrorSimulationRefreshVersion);
+          await LoadHardwareErrorSimulationCardsAsync(preserveUnsavedValues: true);
+        }
+        while (loadedVersion != Volatile.Read(ref _hardwareErrorSimulationRefreshVersion) && IsLoaded);
+
+        CheckedChanged(null, false);
+      }
+      finally
+      {
+        _isHardwareErrorSimulationRefreshRunning = false;
+      }
+    }
+
     private async void ExecutionControl_Loaded(object sender, RoutedEventArgs e)
     {
       _baseExecutionModel = await ExecutionConfig.GetExecitonModel();
       RootSettingsGroup.Visibility = IsRootRole() ? Visibility.Visible : Visibility.Collapsed;
+      LoadErroneousMeasurementOptions();
+      await LoadHardwareErrorSimulationCardsAsync();
       DefalultData();
 
       if (!_isInitialized)
@@ -63,8 +135,7 @@ namespace UI.Controls.Settings.Execution
         StopInError.CheckedChanged += CheckedChanged;
         RepeatMeasurement.CheckedChanged += CheckedChanged;
         StepByStepMode.CheckedChanged += CheckedChanged;
-        MeasurementErrorSimulation.CheckedChanged += CheckedChanged;
-        HardwareErrorSimulation.CheckedChanged += CheckedChanged;
+        ErroneousMeasurementTypeSelect.ValueChanged += ErroneousMeasurementTypeChanged;
         IdleMode.CheckedChanged += IdleMode_CheckedChanged;
 
         CompatibilityModeCheckBox.CheckedChanged += CheckedChanged;
@@ -86,6 +157,7 @@ namespace UI.Controls.Settings.Execution
 
     public async Task SaveData()
     {
+      await SaveHardwareErrorSimulationSettingsAsync();
       await ExecutionConfig.SaveExecutionModel(GetModel());
       _baseExecutionModel = await ExecutionConfig.GetExecitonModel();
 
@@ -125,7 +197,7 @@ namespace UI.Controls.Settings.Execution
     /// </summary>
     private void CheckedChanged(object? sender, bool e)
     {
-      if (!ProtocolEquals(_baseExecutionModel, GetModel()))
+      if (!ProtocolEquals(_baseExecutionModel, GetModel()) || HasHardwareErrorSimulationChanges())
       {
         Error.Visibility = Visibility.Visible;
         Success.Visibility = Visibility.Visible;
@@ -139,6 +211,11 @@ namespace UI.Controls.Settings.Execution
       }
     }
 
+    private void ErroneousMeasurementTypeChanged(object? sender, object? e)
+    {
+      CheckedChanged(sender, false);
+    }
+
     /// <summary>
     /// Формирует модель протокола из текущих значений элементов UI.
     /// </summary>
@@ -149,8 +226,10 @@ namespace UI.Controls.Settings.Execution
         StopOnError = StopInError.IsChecked,
         RepeatMeasurement = RepeatMeasurement.IsChecked,
         StepByStepMode = StepByStepMode.IsChecked,
-        IsErrorSimulationMode = MeasurementErrorSimulation.IsChecked,
-        IsHardwareErrorSimulationMode = HardwareErrorSimulation.IsChecked,
+        ErroneousMeasurementType = ErroneousMeasurementTypeSelect.SelectedValue is TypeErroneousMeasurement selectedType
+          ? selectedType
+          : _baseExecutionModel.ErroneousMeasurementType,
+        IsHardwareErrorSimulationMode = _baseExecutionModel.IsHardwareErrorSimulationMode,
         IdleModeExecution = IdleMode.IsChecked,
         LegacyCompatibilityMode = CompatibilityModeCheckBox.IsChecked,
         DisablePowerCheck = IsRootRole()
@@ -165,7 +244,7 @@ namespace UI.Controls.Settings.Execution
     /// </summary>
     private static bool ProtocolEquals(SettingsExecutionDto a, SettingsExecutionDto b) =>
       a.IdleModeExecution == b.IdleModeExecution &&
-      a.IsErrorSimulationMode == b.IsErrorSimulationMode &&
+      a.ErroneousMeasurementType == b.ErroneousMeasurementType &&
       a.IsHardwareErrorSimulationMode == b.IsHardwareErrorSimulationMode &&
       a.StepByStepMode == b.StepByStepMode &&
       a.StopOnError == b.StopOnError &&
@@ -179,14 +258,159 @@ namespace UI.Controls.Settings.Execution
     private void DefalultData()
     {
       IdleMode.IsChecked = _baseExecutionModel.IdleModeExecution;
-      MeasurementErrorSimulation.IsChecked = _baseExecutionModel.IsErrorSimulationMode;
-      HardwareErrorSimulation.IsChecked = _baseExecutionModel.IsHardwareErrorSimulationMode;
+      ErroneousMeasurementTypeSelect.DefaultValue = _baseExecutionModel.ErroneousMeasurementType;
+      ErroneousMeasurementTypeSelect.SelectedValue = _baseExecutionModel.ErroneousMeasurementType;
+      foreach (var item in _hardwareErrorSimulationItems)
+      {
+        item.Card.IsChecked = item.SavedValue;
+      }
+
       StepByStepMode.IsChecked = _baseExecutionModel.StepByStepMode;
       StopInError.IsChecked = _baseExecutionModel.StopOnError;
       RepeatMeasurement.IsChecked = _baseExecutionModel.RepeatMeasurement;
       CompatibilityModeCheckBox.IsChecked = _baseExecutionModel.LegacyCompatibilityMode;
       DisablePowerCheck.IsChecked = _baseExecutionModel.DisablePowerCheck;
     }
+
+    private void LoadErroneousMeasurementOptions()
+    {
+      ErroneousMeasurementTypeSelect.ItemsSource = new[]
+      {
+        new ErroneousMeasurementOption(
+          TypeErroneousMeasurement.None,
+          LocalizationService.Get("settings.execution.measurementErrorSimulation.none")),
+        new ErroneousMeasurementOption(
+          TypeErroneousMeasurement.Rnd,
+          LocalizationService.Get("settings.execution.measurementErrorSimulation.rnd")),
+        new ErroneousMeasurementOption(
+          TypeErroneousMeasurement.Low,
+          LocalizationService.Get("settings.execution.measurementErrorSimulation.low")),
+        new ErroneousMeasurementOption(
+          TypeErroneousMeasurement.High,
+          LocalizationService.Get("settings.execution.measurementErrorSimulation.high")),
+      };
+    }
+
+    private async Task LoadHardwareErrorSimulationCardsAsync(bool preserveUnsavedValues = false)
+    {
+      Dictionary<(Type DeviceType, int Id, int Number), bool> unsavedValues = preserveUnsavedValues
+        ? _hardwareErrorSimulationItems
+          .Where(item => item.Card.IsChecked != item.SavedValue)
+          .ToDictionary(item => GetDeviceCardKey(item.Device), item => item.Card.IsChecked)
+        : [];
+
+      await using var context = new AppDbContext();
+      var devices = new List<DeviceDto>();
+
+      devices.AddRange(await context.ChassisManagers.AsNoTracking().ToListAsync());
+      devices.AddRange(await context.Rack.AsNoTracking().ToListAsync());
+      devices.AddRange(await context.RelaySwitchModules.AsNoTracking().ToListAsync());
+      devices.AddRange(await context.SwitchingDevices.AsNoTracking().ToListAsync());
+      devices.AddRange(await context.PowerSourceModules.AsNoTracking().ToListAsync());
+      devices.AddRange(await context.FastMeters.AsNoTracking().ToListAsync());
+      devices.AddRange(await context.BreakdownTesters.AsNoTracking().ToListAsync());
+      devices.AddRange(await context.UninterruptiblePowerSupplies.AsNoTracking().ToListAsync());
+
+      HardwareErrorSimulationCards.Children.Clear();
+      _hardwareErrorSimulationItems.Clear();
+
+      foreach (var device in devices
+        .OrderBy(device => device.DeviceType)
+        .ThenBy(device => device is AttachableDeviceDto attachable ? attachable.NumberChassis : device.Number)
+        .ThenBy(device => device.Number))
+      {
+        bool savedValue = device.IsHardwareFailureSimulationEnabled;
+        bool currentValue = unsavedValues.TryGetValue(GetDeviceCardKey(device), out bool unsavedValue)
+          ? unsavedValue
+          : savedValue;
+        var card = new SettingsCard
+        {
+          Title = GetDeviceCardTitle(device),
+          Description = string.Empty,
+          IsChecked = currentValue,
+          Margin = new Thickness(0, 6, 10, 0),
+          VerticalAlignment = VerticalAlignment.Top,
+        };
+
+        card.CheckedChanged += CheckedChanged;
+        HardwareErrorSimulationCards.Children.Add(card);
+        _hardwareErrorSimulationItems.Add(new HardwareErrorSimulationItem
+        {
+          Device = device,
+          Card = card,
+          SavedValue = savedValue,
+        });
+      }
+    }
+
+    private async Task SaveHardwareErrorSimulationSettingsAsync()
+    {
+      var changedItems = _hardwareErrorSimulationItems
+        .Where(item => item.Card.IsChecked != item.SavedValue)
+        .ToList();
+
+      if (changedItems.Count == 0)
+      {
+        return;
+      }
+
+      await using var context = new AppDbContext();
+      foreach (var item in changedItems)
+      {
+        item.Device.IsHardwareFailureSimulationEnabled = item.Card.IsChecked;
+        context.Attach((object)item.Device);
+        context.Entry((object)item.Device)
+          .Property(nameof(DeviceDto.IsHardwareFailureSimulationEnabled))
+          .IsModified = true;
+      }
+
+      await context.SaveChangesAsync();
+      foreach (var item in changedItems)
+      {
+        await ApplyHardwareErrorSimulationToRuntimeAsync(item.Device);
+      }
+
+      foreach (var item in changedItems)
+      {
+        item.SavedValue = item.Card.IsChecked;
+      }
+    }
+
+    private static async Task ApplyHardwareErrorSimulationToRuntimeAsync(DeviceDto device)
+    {
+      IDevice? runtimeDevice = device.DeviceType switch
+      {
+        DeviceType.ChassisManager => await GetRuntimeDeviceAsync<IChassisManager>(device.Id),
+        DeviceType.Rack => await GetRuntimeDeviceAsync<IRack>(device.Id),
+        DeviceType.RelaySwitchModule => await GetRuntimeDeviceAsync<IRelaySwitchModule>(device.Id),
+        DeviceType.PowerSourceModule => await GetRuntimeDeviceAsync<IPowerSourceModule>(device.Id),
+        DeviceType.SwitchingDevice => await GetRuntimeDeviceAsync<ISwitchingDevice>(device.Id),
+        DeviceType.PrecisionMeter or DeviceType.FastMeter => await GetRuntimeDeviceAsync<IMultimeter>(device.Id),
+        DeviceType.BreakdownTester => await GetRuntimeDeviceAsync<IBreakdownTester>(device.Id),
+        DeviceType.UninterruptiblePowerSupply => await GetRuntimeDeviceAsync<IUninterruptiblePowerSupply>(device.Id),
+        _ => null,
+      };
+
+      if (runtimeDevice != null)
+      {
+        runtimeDevice.IsHardwareFailureSimulationEnabled = device.IsHardwareFailureSimulationEnabled;
+      }
+    }
+
+    private static async Task<IDevice?> GetRuntimeDeviceAsync<TDevice>(int id)
+      where TDevice : class, IDevice =>
+      await DeviceRuntime.GetByIdAsync<TDevice>(id);
+
+    private bool HasHardwareErrorSimulationChanges() =>
+      _hardwareErrorSimulationItems.Any(item => item.Card.IsChecked != item.SavedValue);
+
+    private static (Type DeviceType, int Id, int Number) GetDeviceCardKey(DeviceDto device) =>
+      (device.GetType(), device.Id, device.Number);
+
+    private static string GetDeviceCardTitle(DeviceDto device) =>
+      device is AttachableDeviceDto attachable
+        ? $"{device.Name} ({attachable.NumberChassis}.{device.Number})"
+        : $"{device.Name} ({device.Number})";
 
     /// <summary>
     /// Проверяет, обладает ли текущая сессия ролью Root.

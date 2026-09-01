@@ -174,7 +174,7 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
       //{
       //  if (ExecutionConfig.GetIsIdleModeEnabled())
       //  {
-      //    return !IdleHardwareErrorSimulator.ShouldSimulateHardwareError();
+      //    return !IdleHardwareErrorSimulator.ShouldSimulateHardwareError(_deviceBusCommutation);
       //  }
 
       //  var command = new DeviceCommand(5, numberConnector, busNumber, connect ? 1 : 2);
@@ -241,7 +241,7 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
       //{
       //  if (ExecutionConfig.GetIsIdleModeEnabled())
       //  {
-      //    return !IdleHardwareErrorSimulator.ShouldSimulateHardwareError();
+      //    return !IdleHardwareErrorSimulator.ShouldSimulateHardwareError(_deviceBusCommutation);
       //  }
 
       //  var command = new DeviceCommand(5, numberConnector, busNumber, connect ? 1 : 2);

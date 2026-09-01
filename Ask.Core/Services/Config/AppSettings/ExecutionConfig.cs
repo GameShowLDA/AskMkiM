@@ -1,5 +1,6 @@
 ﻿using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Shared.DTO.Settings;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 
 namespace Ask.Core.Services.Config.AppSettings
 {
@@ -55,10 +56,22 @@ namespace Ask.Core.Services.Config.AppSettings
     public static void SetDisablePowerCheck(bool disable) => SettingsExecutionModel.DisablePowerCheck = disable;
 
     /// <summary>
-    /// Включает или выключает симуляцию отрицательных результатов измерений.
+    /// Устанавливает режим симуляции ошибочных результатов измерений.
     /// </summary>
-    /// <param name="enable">true для включения, false для выключения.</param>
-    public static void SetIsErrorSimulationMode(bool enable) => SettingsExecutionModel.IsErrorSimulationMode = enable;
+    /// <param name="type">Тип формируемого ошибочного результата.</param>
+    public static void SetErroneousMeasurementType(TypeErroneousMeasurement type) =>
+      SettingsExecutionModel.ErroneousMeasurementType = Enum.IsDefined(type)
+        ? type
+        : TypeErroneousMeasurement.None;
+
+    /// <summary>
+    /// Включает случайную симуляцию ошибочных измерений или отключает её.
+    /// Сохранено для потребителей с булевым контрактом.
+    /// </summary>
+    public static void SetIsErrorSimulationMode(bool enable) =>
+      SetErroneousMeasurementType(enable
+        ? TypeErroneousMeasurement.Rnd
+        : TypeErroneousMeasurement.None);
 
     /// <summary>
     /// Включает или выключает симуляцию аппаратных ошибок оборудования.
@@ -70,7 +83,7 @@ namespace Ask.Core.Services.Config.AppSettings
     public static Task SetExecutionModel(SettingsExecutionDto protocolModel)
     {
       SetIdleMode(protocolModel.IdleModeExecution);
-      SetIsErrorSimulationMode(protocolModel.IsErrorSimulationMode);
+      SetErroneousMeasurementType(protocolModel.ErroneousMeasurementType);
       SetIsHardwareErrorSimulationMode(protocolModel.IsHardwareErrorSimulationMode);
       SetStepByStepMode(protocolModel.StepByStepMode);
       SetStopOnError(protocolModel.StopOnError);
@@ -97,18 +110,30 @@ namespace Ask.Core.Services.Config.AppSettings
     /// <returns>true, если включен; false, если выключен.</returns>
     public static Task<bool> GetIsStopOnErrorEnabled() => Task.FromResult(SettingsExecutionModel?.StopOnError ?? false);
 
-    /// <summary>
+	/// <summary>
     /// Проверяет, разрешён ли повтор отдельных измерений оборудования.
     /// </summary>
     /// <returns><see langword="true"/>, если повтор измерений разрешён.</returns>
     public static bool GetIsRepeatMeasurementEnabled() =>
       SettingsExecutionModel?.RepeatMeasurement ?? false;
 
-    /// <summary>
-    /// Возвращает, включена ли симуляция ошибок в холостом режиме.
+	/// <summary>
+	/// Возвращает текущий режим симуляции ошибочных результатов измерений.
     /// </summary>
-    /// <returns>true, если включена; false, если выключена.</returns>
-    public static bool GetIsErrorSimulationEnabled() => SettingsExecutionModel?.IsErrorSimulationMode ?? false;
+    public static TypeErroneousMeasurement GetErroneousMeasurementType() =>
+      SettingsExecutionModel?.ErroneousMeasurementType ?? TypeErroneousMeasurement.None;
+
+    /// <summary>
+    /// Проверяет, включена ли симуляция ошибочных результатов измерений.
+    /// </summary>
+    public static bool GetIsErroneousMeasurementEnabled() =>
+      GetErroneousMeasurementType() != TypeErroneousMeasurement.None;
+
+    /// <summary>
+    /// Возвращает признак включения любого режима ошибочных измерений.
+    /// Сохранено для потребителей с булевым контрактом.
+    /// </summary>
+    public static bool GetIsErrorSimulationEnabled() => GetIsErroneousMeasurementEnabled();
 
     /// <summary>
     /// Проверяет, включена ли симуляция аппаратных ошибок оборудования.
@@ -144,7 +169,7 @@ namespace Ask.Core.Services.Config.AppSettings
       return new SettingsExecutionDto
       {
         IdleModeExecution = SettingsExecutionModel.IdleModeExecution,
-        IsErrorSimulationMode = SettingsExecutionModel.IsErrorSimulationMode,
+        ErroneousMeasurementType = SettingsExecutionModel.ErroneousMeasurementType,
         IsHardwareErrorSimulationMode = SettingsExecutionModel.IsHardwareErrorSimulationMode,
         StepByStepMode = SettingsExecutionModel.StepByStepMode,
         StopOnError = SettingsExecutionModel.StopOnError,
@@ -159,7 +184,7 @@ namespace Ask.Core.Services.Config.AppSettings
     public static async Task SaveExecutionModel(SettingsExecutionDto execution)
     {
       SetIdleMode(execution.IdleModeExecution);
-      SetIsErrorSimulationMode(execution.IsErrorSimulationMode);
+      SetErroneousMeasurementType(execution.ErroneousMeasurementType);
       SetIsHardwareErrorSimulationMode(execution.IsHardwareErrorSimulationMode);
       SetStepByStepMode(execution.StepByStepMode);
       SetStopOnError(execution.StopOnError);

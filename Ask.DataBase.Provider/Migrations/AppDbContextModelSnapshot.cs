@@ -44,6 +44,9 @@ namespace Ask.DataBase.Provider.Migrations
                     b.Property<int>("DeviceType")
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("IsHardwareFailureSimulationEnabled")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("IRMinVoltage")
                         .HasColumnType("INTEGER");
 
@@ -93,6 +96,9 @@ namespace Ask.DataBase.Provider.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<int>("DeviceType")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsHardwareFailureSimulationEnabled")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")
@@ -503,6 +509,9 @@ namespace Ask.DataBase.Provider.Migrations
                     b.Property<int>("DeviceType")
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("IsHardwareFailureSimulationEnabled")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("MaxContinuityResistance")
                         .HasColumnType("INTEGER");
 
@@ -545,6 +554,9 @@ namespace Ask.DataBase.Provider.Migrations
                     b.Property<int>("DeviceType")
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("IsHardwareFailureSimulationEnabled")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -584,6 +596,9 @@ namespace Ask.DataBase.Provider.Migrations
                     b.Property<int>("DeviceType")
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("IsHardwareFailureSimulationEnabled")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -621,6 +636,9 @@ namespace Ask.DataBase.Provider.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<int>("DeviceType")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsHardwareFailureSimulationEnabled")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")
@@ -671,6 +689,9 @@ namespace Ask.DataBase.Provider.Migrations
                     b.Property<int>("DeviceType")
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("IsHardwareFailureSimulationEnabled")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -705,6 +726,9 @@ namespace Ask.DataBase.Provider.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<int>("DeviceType")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsHardwareFailureSimulationEnabled")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("LastResolvedDevicePath")
@@ -789,10 +813,11 @@ namespace Ask.DataBase.Provider.Migrations
                     b.Property<bool>("DisablePowerCheck")
                         .HasColumnType("INTEGER");
 
-                    b.Property<bool>("IdleModeExecution")
-                        .HasColumnType("INTEGER");
+                    b.Property<int>("ErroneousMeasurementType")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("IsErrorSimulationMode");
 
-                    b.Property<bool>("IsErrorSimulationMode")
+                    b.Property<bool>("IdleModeExecution")
                         .HasColumnType("INTEGER");
 
                     b.Property<bool>("IsHardwareErrorSimulationMode")

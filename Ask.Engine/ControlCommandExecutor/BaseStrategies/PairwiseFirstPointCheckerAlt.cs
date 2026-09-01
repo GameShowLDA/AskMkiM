@@ -409,9 +409,17 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        result = ExecutionConfig.GetIsErrorSimulationEnabled()
-          ? result
-          : (lowerBound + upperBound) / 2;
+        if (IdleMeasurementErrorSimulator.TryGetValue(
+              lowerBound,
+              upperBound,
+              out double erroneousValue))
+        {
+          result = erroneousValue;
+        }
+        else
+        {
+          result = (lowerBound / 2) + (upperBound / 2);
+        }
       }
       else
       {
