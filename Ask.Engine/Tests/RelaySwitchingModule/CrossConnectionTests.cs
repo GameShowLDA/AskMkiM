@@ -105,7 +105,7 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
     /// <param name="cancellationToken">Токен отмены операции.</param>
     private async Task ExecuteTestProcess(ActionSettings settings, IUserInteractionService _messageService, IInputFieldProvider inputFieldProvider, IInputHighlightService inputHighlightService, CancellationToken cancellationToken)
     {
-      var (ok, message, tested, tester, range) = await UIValidationHelperLightweight.TryValidateAndParseInputAsync(
+      var (ok, message, data) = await UIValidationHelperLightweight.TryValidateAndParseInputAsync(
         _messageService,
         inputFieldProvider,
         inputHighlightService);
@@ -114,18 +114,17 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
         LogError($"Валидация не пройдена: {message}");
         return;
       }
-
       await UIValidationHelper.ShowTestInputAsync(
         _messageService,
         inputFieldProvider,
         new[]
         {
-          ("Проверяемый модуль", tested),
-          ("Проверяющий модуль", tester),
-          ("Диапазон проверки", range)
+          ("Проверяемый модуль", data.TestedNumber),
+          ("Проверяющий модуль", data.TesterNumber),
+          ("Диапазон проверки", data.TestRange)
         });
 
-      if (!await SearchAndInitializeRelaySwitchModules(tested, tester))
+      if (!await SearchAndInitializeRelaySwitchModules(data.TestedNumber, data.TesterNumber))
       {
         LogError("Не были присвоены ссылки на модули");
         return;
@@ -133,7 +132,7 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
 
       LogInformation("Запуск теста CrossTestMKR...");
 
-      List<int> points = ParseRange(range);
+      List<int> points = ParseRange(data.TestRange);
 
       await ExecutionMessages.PublishEquipmentInitializationAsync(_userInteractionService);
       await RelayModuleHelper.InitializeModule(_userInteractionService, testedModuleRelayControl, _userInteractionService, cancellationToken, "тестируемый");

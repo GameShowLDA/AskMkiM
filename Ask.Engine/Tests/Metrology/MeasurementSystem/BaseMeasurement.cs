@@ -3,6 +3,7 @@ using Ask.Core.Services.Errors;
 using Ask.Core.Services.Errors.Device.Adapters;
 using Ask.Core.Services.Errors.Metrology;
 using Ask.Core.Services.Extensions;
+using Ask.Core.Shared.DTO.Devices.Base;
 using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
@@ -17,7 +18,6 @@ using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Enums.UnitEnums;
 using Ask.Core.Shared.Metadata.Static.Messages;
 using Ask.DataBase.Engine.Static.Devices;
-using static Ask.Engine.Tests.Base.UIValidationHelper;
 using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.Engine.Tests.Metrology.MeasurementSystem
