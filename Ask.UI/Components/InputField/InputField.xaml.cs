@@ -3,6 +3,7 @@ using Ask.Core.Shared.DTO.Input;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.HotkeysEnums;
+using Ask.Core.Shared.Metadata.Static;
 using Ask.UI.Features.ProtocolNew.Execution;
 using Ask.UI.Features.ProtocolNew.Hotkeys;
 using System.Windows;
@@ -193,6 +194,68 @@ namespace Ask.UI.Components.InputField
       SubscribeToValidationEvents();
       PreviewKeyDown += HotkeyChecked;
       Unloaded += InputField_Unloaded;
+
+      SetBaseData();
+    }
+
+    private void SetBaseData()
+    {
+      var data = MeasurementTestData.GetData();
+
+      if (data.FirstPoint != null)
+      {
+        FirstPointTextBox.Text = data.FirstPoint.ToString();
+      }
+
+      if (data.SecondPoint != null)
+      {
+        LastPointTextBox.Text = data.SecondPoint.ToString();
+      }
+
+      if (data.Param != 0)
+      {
+        ElectricalTextBox.Text = data.Param.ToString();
+      }
+
+      if (data.Time != 0)
+      {
+        TimeTextBox.Text = data.Time.ToString();
+      }
+
+      if (data.RampTime != 0)
+      {
+        TimeRampTextBox.Text = data.RampTime.ToString();
+      }
+
+      if (data.Voltage != 0)
+      {
+        VoltageTextBox.Text = data.Voltage.ToString();
+      }
+
+      if (data.ActiveBus != default)
+      {
+        BusSelector.SelectedBus = data.ActiveBus;
+      }
+
+      if (data.ActivePairBus != default)
+      {
+        BusGroupSelector.SelectedBusGroup = data.ActivePairBus;
+      }
+
+      if (!string.IsNullOrEmpty(data.TestedNumber))
+      {
+        TestedNumberBox.Text = data.TestedNumber;
+      }
+
+      if (!string.IsNullOrEmpty(data.TesterNumber))
+      {
+        TesterNumberBox.Text = data.TesterNumber;
+      }
+
+      if (!string.IsNullOrEmpty(data.TestRange))
+      {
+        TestRangeBox.Text = data.TestRange;
+      }
     }
 
     /// <summary>

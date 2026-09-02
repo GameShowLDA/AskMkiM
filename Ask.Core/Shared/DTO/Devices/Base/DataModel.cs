@@ -49,6 +49,21 @@ namespace Ask.Core.Shared.DTO.Devices.Base
     public SwitchingBusNew ActivePairBus { get; set; }
 
     /// <summary>
+    /// Получает или задаёт номер проверяемого устройства в формате a.b.
+    /// </summary>
+    public string TestedNumber { get; set; }
+
+    /// <summary>
+    /// Получает или задаёт номер проверяющего устройства в формате a.b.
+    /// </summary>
+    public string TesterNumber { get; set; }
+
+    /// <summary>
+    /// Получает или задаёт диапазон проверки в формате списка чисел и диапазонов (например, "1-3,5").
+    /// </summary>
+    public string TestRange { get; set; }
+
+    /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="DataModel"/>.
     /// </summary>
     /// <param name="first">Первая точка.</param>

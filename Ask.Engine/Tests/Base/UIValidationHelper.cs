@@ -9,6 +9,7 @@ using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
+using Ask.Core.Shared.Metadata.Static;
 using Ask.Core.Shared.Metadata.Static.Messages;
 using Ask.DataBase.Engine.Static.Devices;
 using System.Globalization;
@@ -83,6 +84,14 @@ namespace Ask.Engine.Tests.Base
             timeRampCheck: timeRampCheck,
             busCheck: busCheck,
             pairBusCheck: pairBusCheck);
+
+        MeasurementTestData.SaveMeasurementData(
+          result,
+          includeTime: timeCheck,
+          includeRampTime: timeRampCheck,
+          includeVoltage: voltageCheck,
+          includeBus: busCheck,
+          includeBusGroup: pairBusCheck);
 
         if (metrologyMode.HasValue)
         {

@@ -1774,6 +1774,23 @@ crash packages. Остальные исключения сохраняют пр�
 
 Проверки существования оборудования и уникальности двух точек остаются в Engine.
 
+Последние успешно проверенные значения ввода сохраняются в process-local хранилище
+`Ask.Core.Shared.Metadata.Static.MeasurementTestData`. Поток метрологии:
+`UIValidationHelper.EnsureValidMetrologyInputAsync()`
+→ полная проверка и построение `DataModel`
+→ `MeasurementTestData.SaveMeasurementData(...)` с флагами реально активных полей
+→ атомарное обновление snapshot под `lock`. Поток тестов МКР:
+`UIValidationHelperLightweight.TryValidateAndParseInputAsync()`
+→ проверка номеров модулей и диапазона
+→ `MeasurementTestData.SaveModuleTestData()`
+→ обновление только module-полей того же snapshot. При создании нового
+`Ask.UI.Components.InputField.InputField` выполняется
+`InputField.SetBaseData()` → `MeasurementTestData.GetData()`; метод возвращает копию
+snapshot, включая независимые копии `PointModel`, после чего UI восстанавливает только
+имеющиеся значения. Поэтому метрологический и модульный режимы не стирают значения
+друг друга, а скрытые optional-поля не заменяют ранее сохранённый выбор значениями по
+умолчанию.
+
 Для девяти режимов `Ask.Engine.Tests.Metrology.Mode*` в
 `EnsureValidMetrologyInputAsync(..., metrologyMode: ...)` после успешной проверки
 формируется стартовый блок протокола:
@@ -2117,6 +2134,7 @@ ErrorItem → translator/runner ErrorList
 | `InitialDeviceSoundConfigurator` | internal lifecycle helper | Ask.Device.Runtime | однократно отключает звуковую сигнализацию GPT/мультиметра после первой успешной инициализации и сохраняет Real/Idle-маршрутизацию | [Equipment](#equipment-architecture) |
 | `EquipmentExecutionContext` | async context | Ask.Core | suppresses interactive retry during mandatory finalization | [Error Handling](#equipment-error-flow) |
 | `ExecutionConfig` | static config | Ask.Core | execution/idle state | [Configuration](#configuration) |
+| `MeasurementTestData` | static snapshot store | Ask.Core | атомарно хранит последние проверенные значения метрологических и модульных полей ввода; обновляется валидаторами и читается `InputField` | [Error Handling](#input-field-validation) |
 | `RoleAuthorizationConfig` | static session state | Ask.Core | current successfully authenticated role | [Authentication/Debug](#authentication-and-debug-access-flow) |
 | `DebugAccessConfig` | derived access state | Ask.Core | central root-only Debug availability and change notification | [Authentication/Debug](#authentication-and-debug-access-flow) |
 | `IdleHardwareErrorSimulator` | static decision service | Ask.Core | independent `1/2` hardware failure decision for non-measurement Idle calls | [Real / Idle](#real--idle) |

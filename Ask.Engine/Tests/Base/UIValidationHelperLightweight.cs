@@ -1,5 +1,6 @@
-﻿using Ask.Core.Shared.DTO.Protocol;
+﻿using Ask.Core.Shared.DTO.Devices.Base;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Static;
 using System.Globalization;
 
 namespace Ask.Engine.Tests.Base
@@ -20,7 +21,7 @@ namespace Ask.Engine.Tests.Base
     /// <returns>
     /// Задача, возвращающая результат проверки, описание ошибки и нормализованные значения полей.
     /// </returns>
-    public static async Task<(bool Success, string Message, string Tested, string Tester, string Range)>
+    public static async Task<(bool Success, string Message, DataModel? data)>
         TryValidateAndParseInputAsync(
           IMessageOutputService message,
           IInputFieldProvider inputFieldProvider,
@@ -30,7 +31,7 @@ namespace Ask.Engine.Tests.Base
       IInputFieldAccessor? input = inputFieldProvider.GetInputFieldAccessor();
       if (input == null)
       {
-        return (false, "Поле ввода не найдено.", "", "", "");
+        return (false, "Поле ввода не найдено.", null);
       }
 
       // 2) Безопасно читаем сырые строки
@@ -45,7 +46,7 @@ namespace Ask.Engine.Tests.Base
       {
         await ValidationMessages.PublishInvalidTestedNumberAsync(message);
         inputHighlightService.HighlightTestedNumber();
-        return (false, "Неверный формат 'Номер проверяемого'.", "", "", "");
+        return (false, "Неверный формат 'Номер проверяемого'.", null);
       }
 
       // 4) Проверка «тестирующего» номера (формат a.b)
@@ -57,7 +58,7 @@ namespace Ask.Engine.Tests.Base
       {
         await ValidationMessages.PublishInvalidTesterNumberAsync(message);
         inputHighlightService.HighlightTesterNumber();
-        return (false, "Неверный формат 'Номер проверяющего'.", "", "", "");
+        return (false, "Неверный формат 'Номер проверяющего'.", null);
       }
 
       // 5) Нельзя совпадать
@@ -66,7 +67,7 @@ namespace Ask.Engine.Tests.Base
         await ValidationMessages.PublishDuplicateNumbersAsync(message);
         inputHighlightService.HighlightTestedNumber();
         inputHighlightService.HighlightTesterNumber();
-        return (false, "Повтор параметров.", "", "", "");
+        return (false, "Повтор параметров.", null);
       }
 
       // 6) Проверка диапазона: не пустая строка и корректный формат
@@ -75,17 +76,24 @@ namespace Ask.Engine.Tests.Base
       {
         await ValidationMessages.PublishEmptyRangeAsync(message);
         inputHighlightService.HighlightTestRange();
-        return (false, "Диапазон не задан.", "", "", "");
+        return (false, "Диапазон не задан.", null);
       }
       if (!ValidateRangeInput(rg, out var error))
       {
         await ValidationMessages.PublishInvalidRangeAsync(message, error);
         inputHighlightService.HighlightTestRange();
-        return (false, "Неверный диапазон.", "", "", "");
+        return (false, "Неверный диапазон.", null);
       }
 
+      DataModel dataModel = new DataModel();
+      dataModel.TestedNumber = t1;
+      dataModel.TesterNumber = t2;
+      dataModel.TestRange = rg;
+
+      MeasurementTestData.SaveModuleTestData(dataModel);
+
       // 7) Всё ок
-      return (true, "OK", t1, t2, rg);
+      return (true, "OK", dataModel);
     }
 
     #endregion
