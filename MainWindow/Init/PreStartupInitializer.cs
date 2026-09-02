@@ -67,6 +67,17 @@ namespace MainWindowProgram.Init
     /// </remarks>
     static internal async Task<DatabaseInitializationReport?> Initialize()
     {
+      var buildInfo = ApplicationBuildInfo.Current;
+      LogInformation($"Запуск приложения. {buildInfo.ToDiagnosticString()}");
+      try
+      {
+        string buildManifestPath = await buildInfo.WriteManifestAsync();
+        LogInformation($"Манифест сборки записан: {buildManifestPath}");
+      }
+      catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+      {
+        LogError($"Не удалось записать манифест сборки: {exception.Message}");
+      }
       // SingleInstanceManager.EnsureSingleInstance();
       var databaseReport = await DatabaseInitializer.InitializeAsync();
       InitializeAppHost();
