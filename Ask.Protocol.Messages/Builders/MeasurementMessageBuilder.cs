@@ -55,6 +55,35 @@ internal static class MeasurementMessageBuilder
   }
 
   /// <summary>
+  /// Формирует качественный результат проверки прочности изоляции.
+  /// </summary>
+  /// <param name="points">Обозначение проверяемых точек.</param>
+  /// <param name="measurementRange">Измеренное значение и допустимый диапазон тока утечки.</param>
+  /// <param name="measurementUnit">Единица измерения тока утечки.</param>
+  /// <param name="isSuccessful">Признак отсутствия пробоя.</param>
+  /// <returns>Сообщение с проверяемыми точками и результатом проверки.</returns>
+  internal static ShowMessageModel BuildInsulationStrengthResult(
+    string points,
+    MeasurementRange measurementRange,
+    Enum measurementUnit,
+    bool isSuccessful)
+  {
+    ArgumentException.ThrowIfNullOrWhiteSpace(points);
+    ArgumentNullException.ThrowIfNull(measurementRange);
+    ArgumentNullException.ThrowIfNull(measurementUnit);
+
+    string header = BuildMeasurementHeader(
+      string.Empty,
+      measurementRange,
+      measurementUnit.GetUnit(),
+      $"Проверяемые точки: {points}");
+
+    return new ShowMessageModel(
+      header,
+      message: isSuccessful ? "Результат" : "Результат: ПРОБОЙ");
+  }
+
+  /// <summary>
   /// Формирует заголовок этапа выполнения измерений.
   /// </summary>
   /// <returns>Сообщение о начале этапа измерений.</returns>

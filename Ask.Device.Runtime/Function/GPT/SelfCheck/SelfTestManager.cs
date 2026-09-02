@@ -1,21 +1,18 @@
-using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.DTO.Executor;
-using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Enums.UnitEnums;
 using Ask.Core.Shared.Metadata.Static;
 using Ask.Core.Shared.Metadata.Static.Messages;
 using System.ComponentModel;
-using static Ask.Core.Shared.DTO.Protocol.ShowMessageModel;
-using static Ask.Device.Runtime.Function.GPT.SelfCheck.SelfTestManager;
 using EquipmentMessages = Ask.Device.ResponseProcessor.BreakdownTester.ResponseProcessing.BreakdownTesterMessages;
 using MeasurementMessages = Ask.Device.ResponseProcessor.BreakdownTester.ResponseProcessing.BreakdownTesterMessages;
 using SelfTestMessages = Ask.Device.ResponseProcessor.BreakdownTester.ResponseProcessing.BreakdownTesterMessages;
@@ -138,7 +135,7 @@ namespace Ask.Device.Runtime.Function.GPT.SelfCheck
           (var lowerBound, var upperBound, var delta) = MeasurementErrorDefaults.CalculateToleranceRange(MeasurementTypeCommand.SI, param);
 
           MeasurementRange measurementRange = new MeasurementRange(param, lowerBound, upperBound);
-          var result = (await breakdownTester.IrManger.Measure.MeasureAsync(ElectricalTestFunction.InsulationResistance, measurementRange)).value;
+          var result = (await breakdownTester.IrManger.Measure.MeasureAsync(ElectricalTestFunction.InsulationResistance, measurementRange)).Value;
 
           var err = result - param;
           bool isSuccessful = result >= lowerBound && result <= upperBound;

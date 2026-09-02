@@ -90,7 +90,7 @@ namespace Ask.UI.Features.ServiceTools.Gpt.Modes
 
         MeasurementRange measurementRange = new MeasurementRange(0, 0, 0);
         var answer = await GptUiOperation.GetDevice(deviceContext).IrManger.Measure.MeasureAsync(ElectricalTestFunction.InsulationResistance, measurementRange);
-        TestResultText.Text = $"Результат теста: {answer.value:F3} ГОм";
+        TestResultText.Text = $"Результат теста: {answer.Value:F3} ГОм";
       }
       catch (Exception ex)
       {

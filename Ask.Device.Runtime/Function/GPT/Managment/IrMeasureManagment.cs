@@ -1,13 +1,13 @@
+using Ask.Core.Shared.DTO.Devices.Breakdown;
 using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.Device.ResponseProcessor.BreakdownTester.ResponseProcessing;
 using Ask.Device.Runtime.Device;
 using Ask.Device.Runtime.Function.GPT.Command;
 using Ask.Device.Runtime.Function.GPT.Helper;
 using Ask.Device.Runtime.Function.Helpers;
-using Ask.Device.ResponseProcessor.BreakdownTester.ResponseModels;
-using Ask.Device.ResponseProcessor.BreakdownTester.ResponseProcessing;
 using static Ask.Device.Runtime.Function.GPT.Command.FunctionCommandManager;
 using static Ask.LogLib.LoggerUtility;
 
@@ -48,17 +48,14 @@ namespace Ask.Device.Runtime.Function.GPT.Managment
     }
 
     /// <inheritdoc />
-    /// <summary>
-    /// Выполняет измерение сопротивления изоляции.
-    /// </summary>
-    public async Task<(double value, string unit)> MeasureAsync(
+    public async Task<BreakdownMeasurementResponse> MeasureAsync(
       ElectricalTestFunction electricalTestFunction,
       MeasurementRange measurementRange,
       bool waitFullTime = false,
       IUserInteractionService? userMessageService = null)
     {
       if (await _getIsIdleMode())
-        return (MeasurementAdapterHelper.Round(measurementRange.TargetValue), string.Empty);
+        return new BreakdownMeasurementResponse(BreakdownMeasurementStatus.Pass, MeasurementAdapterHelper.Round(measurementRange.TargetValue), string.Empty);
 
       await StopMeasure();
       await Task.Delay(_delayBeforeCall);
@@ -76,7 +73,7 @@ namespace Ask.Device.Runtime.Function.GPT.Managment
       int tickCount = 0;
       string response = string.Empty;
       var testCommand = $"{GetCommandSyntax(FunctionCommand.FUNCTION_TEST)} ON";
-      MeasurementData? model = null;
+      BreakdownMeasurementResponse? model = null;
 
       timer.Elapsed += async (s, a) =>
       {
@@ -91,11 +88,16 @@ namespace Ask.Device.Runtime.Function.GPT.Managment
         try
         {
           model = ParseMeasurement(response);
-          if (model.Status.ToLower().Contains("fail"))
+          if (model is null)
+          {
+            return;
+          }
+
+          if (model.Status == BreakdownMeasurementStatus.Fail)
           {
             await _gptModel.DeviceProtocol.QueryAsync(testCommand);
           }
-          else if (model.Status.ToLower().Contains("test") && model.Resistance > 0 && model.Resistance > measurementRange.TargetValue)
+          else if (model.Status == BreakdownMeasurementStatus.Test && model.Value > 0 && model.Value > measurementRange.TargetValue)
           {
             await StopMeasure();
             tickCount = totalTicks + 1;
@@ -158,7 +160,7 @@ namespace Ask.Device.Runtime.Function.GPT.Managment
         _ => throw new FormatException("Неизвестный формат результата измерения."),
       };
 
-      return (MeasurementAdapterHelper.Round(measurement.Value * multiplier), string.Empty);
+      return new BreakdownMeasurementResponse(BreakdownMeasurementStatus.Pass, MeasurementAdapterHelper.Round(measurement.Value * multiplier), string.Empty);
     }
 
     /// <inheritdoc />
@@ -197,10 +199,10 @@ namespace Ask.Device.Runtime.Function.GPT.Managment
     /// Разбирает строку ответа прибора в модель MeasurementData.
     /// Ищет статус PASS / FAIL / TEST в любой части ответа.
     /// </summary>
-    private MeasurementData ParseMeasurement(string response)
+    private BreakdownMeasurementResponse? ParseMeasurement(string response)
     {
       if (!BreakdownTesterResponseProcessor.TryParseMeasurement(response, out var parsed))
-        return new MeasurementData { Status = "UNKNOWN", Resistance = 0 };
+        return null;
 
       double resistance = parsed.Unit.ToUpperInvariant() switch
       {
@@ -209,27 +211,11 @@ namespace Ask.Device.Runtime.Function.GPT.Managment
         _ => parsed.Value,
       };
 
-      return new MeasurementData
+      return new BreakdownMeasurementResponse
       {
         Status = parsed.Status,
-        Resistance = resistance,
+        Value = resistance,
       };
-    }
-
-    /// <summary>
-    /// Модель для хранения результата измерения в режиме IR.
-    /// </summary>
-    public class MeasurementData
-    {
-      /// <summary>
-      /// Статус, возвращённый устройством (например: TEST, FAIL, DONE).
-      /// </summary>
-      public string Status { get; set; } = string.Empty;
-
-      /// <summary>
-      /// Измеренное сопротивление в МОм (или в другой единице, в зависимости от парсинга).
-      /// </summary>
-      public double Resistance { get; set; }
     }
   }
 }

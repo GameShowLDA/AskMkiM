@@ -7,6 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="DataAccess\**" />
+    <EmbeddedResource Remove="DataAccess\**" />
+    <None Remove="DataAccess\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.4" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.4">
       <PrivateAssets>all</PrivateAssets>
@@ -18,7 +24,6 @@
   <ItemGroup>
     <Folder Include="Contracts\" />
     <Folder Include="Initialization\" />
-    <Folder Include="DataAccess\" />
     <Folder Include="Services\" />
   </ItemGroup>
 

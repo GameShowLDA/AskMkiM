@@ -1,16 +1,15 @@
 using Ask.Core.Services.UI;
+using Ask.Core.Shared.DTO.Devices.Base;
 using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.DTO.Executor;
-using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
-using Ask.Core.Shared.Metadata.Enums.UnitEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Static;
-using Ask.Core.Shared.Metadata.Static.Messages;
+using Ask.Core.Shared.Metadata.Enums.UnitEnums;
 using Ask.Engine.Tests.Metrology.MeasurementSystem;
 using static Ask.Engine.Tests.Base.UIValidationHelper;
 
@@ -35,6 +34,8 @@ namespace Ask.Engine.Tests.Metrology
     /// Сервис взаимодействия с пользователем: вывод сообщений, запросы подтверждений, отображение результатов и ошибок.
     /// </summary>
     private IUserInteractionService _userInteractionService;
+
+    private const int maxAmpher = 40;
 
     /// <summary>
     /// Инициализирует все необходимые настройки для компонента.
@@ -104,7 +105,7 @@ namespace Ask.Engine.Tests.Metrology
         await breakDown.AcwManger.Time.SetRampTimeAsync(dataModel.RampTime, messageService);
         await breakDown.AcwManger.FrequencyConfigurable.SetFrequencyAsync(50, messageService);
         await breakDown.AcwManger.CurrentLimits.SetLowCurrentLimitAsync(0, messageService);
-        await breakDown.AcwManger.CurrentLimits.SetHighCurrentLimitAsync(40, messageService);
+        await breakDown.AcwManger.CurrentLimits.SetHighCurrentLimitAsync(maxAmpher, messageService);
         await breakDown.AcwManger.Voltage.SetVoltageAsync(dataModel.Param, messageService);
       }
 
@@ -112,18 +113,24 @@ namespace Ask.Engine.Tests.Metrology
       public override async Task<bool> PerformMeasurement(MeasurementTypeCommand metrologicalModeRole, double param, IUserInteractionService userMessageService, double intrinsicValue = 0)
       {
         var meterDevice = Devices.TryGetValue(metrologicalModeRole, out var meter) ? meter.OfType<IBreakdownTester>().FirstOrDefault() : null;
-        await MeasurementMessages.PublishTestVoltageOutputAsync(CheckType.Metrology,
-          MeasurementTypeCommand.PI_ACW,
-          param,
-          userMessageService);
-
+        await MeasurementMessages.PublishTestVoltageOutputAsync(CheckType.Metrology, MeasurementTypeCommand.PI_ACW, param, userMessageService);
         (LowerBound, UpperBound, var delta) = MeasurementErrorDefaults.CalculateToleranceRange(MeasurementTypeCommand.PI_ACW, param);
 
         MeasurementRange measurementRange = new MeasurementRange(param, LowerBound, UpperBound);
-        await meterDevice.AcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandAC, measurementRange);
+        var answerBreakdown = await meterDevice.AcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandAC, measurementRange);
+
+        if (answerBreakdown.Status == BreakdownMeasurementStatus.Fail)
+        {
+          await MeasurementMessages.PublishResultAsync(CheckType.Metrology,
+            MeasurementTypeCommand.PI_ACW,
+            new MeasurementRange(answerBreakdown.Value, 0, maxAmpher),
+            false,
+            outputService: userMessageService);
+
+          return false;
+        }
 
         var result = await MeasuredReferenceMeter(userMessageService, param);
-
         var answer = result < LowerBound || result > UpperBound;
         var err = result - param;
         Measurements.Add(err);

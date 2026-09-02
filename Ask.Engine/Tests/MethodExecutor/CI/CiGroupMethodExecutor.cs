@@ -1,4 +1,5 @@
 using Ask.Core.Services.UI;
+using Ask.Core.Shared.DTO.Devices.Base;
 using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
@@ -96,7 +97,7 @@ namespace Ask.Engine.Tests.MethodExecutor.CI
           MeasurementRange measurementRange = new MeasurementRange(dataModel.Param, dataModel.Param, 60000);
           var answer = await breakDown.IrManger.Measure.MeasureAsync(ElectricalTestFunction.InsulationResistance, measurementRange, userMessageService: messageService);
 
-          bool isSuccessful = answer.value >= dataModel.Param;
+          bool isSuccessful = answer.Value >= dataModel.Param;
 
           var dischargeIndex = CurrentDischargeNumber;
           var bitString = GetBitString();
@@ -105,13 +106,13 @@ namespace Ask.Engine.Tests.MethodExecutor.CI
               dischargeIndex,
               bitString,
               dataModel.Param,
-              answer.value,
+              answer.Value,
               ResistanceUnit.MegaOhm,
               MeasurementLimitKind.Minimum)
             : null;
           await MeasurementMessages.PublishResultAsync(CheckType.Test,
             ResistanceUnit.MegaOhm,
-            new MeasurementRange(answer.value, dataModel.Param, -1),
+            new MeasurementRange(answer.Value, dataModel.Param, -1),
             isSuccessful,
             $"Разряд {dischargeIndex} ({bitString})",
             executionErrorMessage,

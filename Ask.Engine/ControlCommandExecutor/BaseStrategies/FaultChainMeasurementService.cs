@@ -16,7 +16,8 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       IUserInteractionService messageService,
       CancellationToken cancellationToken,
       double errorResistance,
-      VoltageEnum.Type type = VoltageEnum.Type.DCW);
+      VoltageEnum.Type type = VoltageEnum.Type.DCW,
+      string? points = null);
 
     public static async Task<AlgorithmExecutionResult> MeasureAsync(
       ExecutorContext context,
@@ -50,7 +51,8 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
           context.MessageService,
           context.MessageService.GetCancellationToken(),
           switchResistance,
-          voltageType);
+          voltageType,
+          chainDisplay);
 
         return BuildResult(context, chainDisplay, measured.Value);
       }

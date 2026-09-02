@@ -1,4 +1,5 @@
 using Ask.Core.Services.UI;
+using Ask.Core.Shared.DTO.Devices.Base;
 using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
@@ -88,17 +89,16 @@ namespace Ask.Engine.Tests.MethodExecutor.PI
       {
         var breakDown = Devices.OfType<IBreakdownTester>().FirstOrDefault();
 
-        await MeasurementMessages.PublishLeakageCurrentStartAsync(CheckType.Test,
-          MeasurementTypeCommand.PI_ACW,
-          messageService);
+        await MeasurementMessages.PublishLeakageCurrentStartAsync(CheckType.Test, MeasurementTypeCommand.PI_ACW, messageService);
+
         await UserActionHelper.RunWithUserRepeatAsync(async () =>
         {
           messageService.GetCancellationToken().ThrowIfCancellationRequested();
 
           MeasurementRange measurementRange = new MeasurementRange(dataModel.Param / 2, 0, dataModel.Param);
-          var answer = await breakDown.AcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandAC, measurementRange, userMessageService: messageService);
+          var answer = await breakDown.AcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandAC, measurementRange);
 
-          bool isSuccessful = answer.value < dataModel.Param;
+          bool isSuccessful = answer.Value < dataModel.Param;
 
           var dischargeIndex = CurrentDischargeNumber;
           var bitString = GetBitString();
@@ -107,17 +107,19 @@ namespace Ask.Engine.Tests.MethodExecutor.PI
               dischargeIndex,
               bitString,
               dataModel.Param,
-              answer.value,
+              answer.Value,
               CurrentUnit.MilliAmpere,
               MeasurementLimitKind.Maximum)
             : null;
-          await MeasurementMessages.PublishResultAsync(CheckType.Test,
+
+          await MeasurementMessages.PublishInsulationStrengthResultAsync(
+            CheckType.Test,
+            $"{dataModel.FirstPoint}–{dataModel.SecondPoint}; разряд {dischargeIndex} ({bitString})",
+            new MeasurementRange(answer.Value, 0, dataModel.Param),
             CurrentUnit.MilliAmpere,
-            new MeasurementRange(answer.value, 0, dataModel.Param),
             isSuccessful,
-            $"Разряд {dischargeIndex} ({bitString})",
-            executionErrorMessage,
-            messageService);
+            messageService,
+            executionErrorMessage);
 
           return isSuccessful;
 
