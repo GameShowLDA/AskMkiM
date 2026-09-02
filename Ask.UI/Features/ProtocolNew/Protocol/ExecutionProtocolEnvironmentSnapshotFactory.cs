@@ -1,8 +1,8 @@
+using Ask.Core.Services.App;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Protocols;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
-using System.Reflection;
 
 namespace Ask.UI.Features.ProtocolNew.Protocol;
 
@@ -40,7 +40,7 @@ internal static class ExecutionProtocolEnvironmentSnapshotFactory
 
     return new ExecutionProtocolEnvironmentSnapshot(
       DateTime.Now,
-      Assembly.GetEntryAssembly()?.GetName().Version?.ToString() ?? "не определена",
+      ApplicationBuildInfo.Current.BuildIdentifier,
       RoleAuthorizationConfig.CurrentRole?.ToString() ?? "не авторизован",
       action.Name,
       action.CheckType.ToString(),

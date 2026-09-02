@@ -144,6 +144,7 @@
                FontSize="18"
                Opacity="0.45"
                Foreground="{DynamicResource ForegrounfBrushes}"
-                Text="{Binding AppVersion, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+               MouseLeftButtonDown="VersionText_MouseLeftButtonDown"
+               Text="{Binding AppVersion, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
     </Grid>
 </UserControl>

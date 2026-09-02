@@ -242,7 +242,9 @@ namespace MainWindowProgram
           $"""
           Источник: {source}
           Время: {DateTime.Now}
-          Версия: {Assembly.GetEntryAssembly()?.GetName().Version}
+          Версия: {ApplicationBuildInfo.Current.BuildIdentifier}
+          Commit: {ApplicationBuildInfo.Current.GitCommit}
+          EXE: {ApplicationBuildInfo.Current.ExecutablePath}
           
           OS: {Environment.OSVersion}
           64-bit: {Environment.Is64BitProcess}

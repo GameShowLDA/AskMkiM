@@ -1,7 +1,7 @@
+using Ask.Core.Services.App;
 using Ask.Diagnostics.Abstractions;
 using Ask.Diagnostics.Infrastructure;
 using Ask.Diagnostics.Models;
-using System.Reflection;
 using System.Runtime.InteropServices;
 
 namespace Ask.Diagnostics.Collectors
@@ -14,16 +14,19 @@ namespace Ask.Diagnostics.Collectors
 
     public async Task CollectAsync(CrashContext context, CancellationToken cancellationToken = default)
     {
-      var entryAssembly = Assembly.GetEntryAssembly();
-      var version = entryAssembly?
-        .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?
-        .InformationalVersion
-        ?? entryAssembly?.GetName().Version?.ToString()
-        ?? "unknown";
+      var buildInfo = ApplicationBuildInfo.Current;
 
       var payload = new
       {
-        appVersion = version,
+        appVersion = buildInfo.Version,
+        buildIdentifier = buildInfo.BuildIdentifier,
+        buildTimestampUtc = buildInfo.BuildTimestampUtc,
+        gitCommit = buildInfo.GitCommit,
+        gitDirty = buildInfo.IsDirty,
+        executablePath = buildInfo.ExecutablePath,
+        executableModifiedUtc = buildInfo.ExecutableModifiedUtc,
+        executableSha256 = buildInfo.ExecutableSha256,
+        moduleVersionId = buildInfo.ModuleVersionId,
         os = RuntimeInformation.OSDescription,
         dotnet = RuntimeInformation.FrameworkDescription,
         machineName = Environment.MachineName,

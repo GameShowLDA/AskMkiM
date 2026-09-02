@@ -1,0 +1,60 @@
+<Project>
+  <Target Name="CollectBuildIdentity"
+          BeforeTargets="GetAssemblyAttributes"
+          Condition="'$(MSBuildProjectName)' == 'MainWindowProgram'">
+    <PropertyGroup>
+      <BuildTimestampUtc>$([System.DateTime]::UtcNow.ToString(&quot;yyyyMMdd.HHmmss&quot;))</BuildTimestampUtc>
+      <BuildGitCommit>unknown</BuildGitCommit>
+      <BuildGitCommitShort>unknown</BuildGitCommitShort>
+      <BuildGitDirty>false</BuildGitDirty>
+    </PropertyGroup>
+
+    <Exec Command="git rev-parse HEAD"
+          WorkingDirectory="$(MSBuildThisFileDirectory)"
+          ConsoleToMSBuild="true"
+          StandardOutputImportance="Low"
+          IgnoreExitCode="true">
+      <Output TaskParameter="ConsoleOutput" PropertyName="BuildGitCommit" />
+    </Exec>
+    <Exec Command="git rev-parse --short=8 HEAD"
+          WorkingDirectory="$(MSBuildThisFileDirectory)"
+          ConsoleToMSBuild="true"
+          StandardOutputImportance="Low"
+          IgnoreExitCode="true">
+      <Output TaskParameter="ConsoleOutput" PropertyName="BuildGitCommitShort" />
+    </Exec>
+    <Exec Command="git status --porcelain --untracked-files=normal"
+          WorkingDirectory="$(MSBuildThisFileDirectory)"
+          ConsoleToMSBuild="true"
+          StandardOutputImportance="Low"
+          IgnoreExitCode="true">
+      <Output TaskParameter="ConsoleOutput" ItemName="BuildGitStatus" />
+    </Exec>
+    <Exec Command="git -c i18n.logOutputEncoding=cp866 log -20 --date=short --pretty=format:&quot;%25%25h,%25%25ad,%25%25s&quot;"
+          WorkingDirectory="$(MSBuildThisFileDirectory)"
+          ConsoleToMSBuild="true"
+          StandardOutputImportance="Low"
+          IgnoreExitCode="true">
+      <Output TaskParameter="ConsoleOutput" ItemName="BuildGitHistory" />
+    </Exec>
+
+    <PropertyGroup Condition="'@(BuildGitStatus)' != ''">
+      <BuildGitDirty>true</BuildGitDirty>
+    </PropertyGroup>
+    <PropertyGroup>
+      <BuildIdentity>$(Version)+$(BuildTimestampUtc).$(BuildGitCommitShort)</BuildIdentity>
+      <BuildIdentity Condition="'$(BuildGitDirty)' == 'true'">$(BuildIdentity)-dirty</BuildIdentity>
+      <InformationalVersion>$(BuildIdentity)</InformationalVersion>
+      <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <AssemblyMetadata Include="BuildTimestampUtc" Value="$(BuildTimestampUtc)" />
+      <AssemblyMetadata Include="GitCommit" Value="$(BuildGitCommit)" />
+      <AssemblyMetadata Include="GitCommitShort" Value="$(BuildGitCommitShort)" />
+      <AssemblyMetadata Include="GitDirty" Value="$(BuildGitDirty)" />
+      <AssemblyMetadata Include="BuildIdentity" Value="$(BuildIdentity)" />
+      <AssemblyMetadata Include="GitHistoryEntry" Value="%(BuildGitHistory.Identity)" />
+    </ItemGroup>
+  </Target>
+</Project>
