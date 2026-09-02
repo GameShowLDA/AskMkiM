@@ -1,4 +1,5 @@
 using Ask.Core.Services.UI;
+using Ask.Core.Services.Errors.Translation;
 using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
@@ -33,19 +34,20 @@ internal static class EhtHighResistanceLocalizationService
     double initialAboveUpperBound)
   {
     var result = new AlgorithmExecutionResult();
-    if (connectedPoints.Count == 0 || unresolvedPoints.Count == 0)
+    if (unresolvedPoints.Count == 0)
     {
       return result;
     }
 
     var localization = await SplitIntoFragmentsAsync(context, unresolvedPoints);
-    var fragments = new List<ChainModel>
+    var fragments = new List<ChainModel>();
+    if (connectedPoints.Count > 0)
     {
-      new(connectedPoints.ToList())
-    };
+      fragments.Add(new ChainModel(connectedPoints.ToList()));
+    }
     fragments.AddRange(localization.Fragments);
 
-    var display = await PointFormater.GetFormatDisconnectPoint(fragments);
+    var display = PointFormater.GetFormatDisconnectedFragments(fragments);
     var range = new MeasurementRange(
       initialAboveUpperBound,
       context.LowerLimit,
@@ -62,7 +64,7 @@ internal static class EhtHighResistanceLocalizationService
       context.MessageService);
     result.Errors.Add(error);
     context.CommandManager.AddErrorMethod(
-      context.CommandModel.PointErrors.DisconnectChainError(
+      EhtErrors.DisconnectedChain(
         $"{context.CommandModel.CommandNumber} {context.CommandModel.Mnemonic}",
         display,
         MeasurementValueFormatter.FormatWithUnit(initialAboveUpperBound, "Ом"),

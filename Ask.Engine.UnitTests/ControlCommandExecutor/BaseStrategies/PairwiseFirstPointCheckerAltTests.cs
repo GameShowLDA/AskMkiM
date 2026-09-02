@@ -1,4 +1,8 @@
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
+using Ask.Core.Services.Errors.Models;
+using Ask.Core.Services.Errors.Translation;
+using Ask.Engine.ControlCommandAnalyser;
+using Ask.Engine.ControlCommandAnalyser.Model.Chains;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies;
 
 namespace Ask.Engine.UnitTests.ControlCommandExecutor.BaseStrategies;
@@ -184,6 +188,38 @@ public class PairwiseFirstPointCheckerAltTests
     Assert.Empty(empty.Fragments);
     Assert.Single(single.Fragments);
     Assert.Equal(0, measurementCount);
+  }
+
+  [Fact]
+  public void GetFormatDisconnectedFragments_UsesResultingSsirtSyntax()
+  {
+    var fragments = new List<ChainModel>
+    {
+      new([CreatePoint(1), CreatePoint(2)]),
+      new([CreatePoint(3), CreatePoint(4)]),
+      new([CreatePoint(5)])
+    };
+
+    var result = PointFormater.GetFormatDisconnectedFragments(fragments);
+
+    Assert.Equal("*P1,P2**P3,P4**P5*", result);
+  }
+
+  [Fact]
+  public void DisconnectedChain_RegistersEhtErrorWithResultingSsirt()
+  {
+    var error = EhtErrors.DisconnectedChain(
+      "230 ЭТ",
+      "*P1,P2**P3*",
+      "150 Ом",
+      17,
+      23);
+
+    Assert.Equal(ErrorCode.Eht_CircuitOverload, error.Code);
+    Assert.Equal("Разрыв в цепи *P1,P2**P3*", error.Description);
+    Assert.Equal("150 Ом", error.MeasureResult);
+    Assert.Equal(17, error.SourceLineNumber);
+    Assert.Equal(23, error.FormattedLineNumber);
   }
 
   private static PointModel CreatePoint(int pointNumber) => new()

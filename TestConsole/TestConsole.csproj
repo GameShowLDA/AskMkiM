@@ -10,6 +10,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Ask.DataBase.Engine\Ask.DataBase.Engine.csproj" />
     <ProjectReference Include="..\Ask.Device.Runtime\Ask.Device.Runtime.csproj" />
+    <ProjectReference Include="..\Ask.Engine\Ask.Engine.csproj" />
     <ProjectReference Include="..\TestWPF\TestWPF.csproj" />
     <ProjectReference Include="..\UI\UI.csproj" />
   </ItemGroup>
@@ -19,6 +20,7 @@
     <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="4.8.0" />
     <PackageReference Include="Microsoft.Build.Locator" Version="1.7.8" />
     <PackageReference Include="Microsoft.Windows.Compatibility" Version="9.0.3" />
+    <PackageReference Include="Moq" Version="4.20.72" />
     <PackageReference Include="NLog" Version="5.5.0" />
   </ItemGroup>
 

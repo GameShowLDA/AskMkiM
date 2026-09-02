@@ -12,6 +12,13 @@ namespace TestConsole
     private static async Task Main(string[] args)
     {
       if (args.Any(static arg =>
+            string.Equals(arg, "eht-localization", StringComparison.OrdinalIgnoreCase)))
+      {
+        await EhtLocalizationDemo.RunAsync();
+        return;
+      }
+
+      if (args.Any(static arg =>
             string.Equals(arg, "encoding-scanner", StringComparison.OrdinalIgnoreCase)
             || string.Equals(arg, "encoding", StringComparison.OrdinalIgnoreCase)))
       {
@@ -44,10 +51,11 @@ namespace TestConsole
         Console.WriteLine("20. ModuleRelayControl");
         Console.WriteLine("21. DeviceBusCommutation ConnectorManager");
         Console.WriteLine("22. Unused code Roslyn analyzer");
+        Console.WriteLine("23. Локализация разрыва ЭТ в холостом режиме");
         Console.WriteLine("0. Exit");
         Console.Write("Введите номер действия: ");
         string? input = Console.ReadLine()?.Trim().Trim('\uFEFF');
-        if (!int.TryParse(input, out int choice) || choice < 0 || choice > 22)
+        if (!int.TryParse(input, out int choice) || choice < 0 || choice > 23)
         {
           Console.Write("Введите номер действия: ");
           continue;
@@ -141,6 +149,10 @@ namespace TestConsole
 
           case 22:
             await UnusedCodeAnalyzer.RunAsync();
+            break;
+
+          case 23:
+            await EhtLocalizationDemo.RunAsync();
             break;
 
           case 0:

@@ -148,5 +148,31 @@ namespace Ask.Engine.ControlCommandAnalyser
       return result;
     }
 
+    /// <summary>
+    /// Формирует результирующий ССИРТ ожидаемо связанной цепи после локализации разрывов.
+    /// </summary>
+    /// <param name="fragments">Связные фрагменты исходной цепи в порядке локализации.</param>
+    /// <returns>
+    /// Строку, в которой точки одного фрагмента разделены запятыми, а разрывы — маркером <c>**</c>.
+    /// </returns>
+    public static string GetFormatDisconnectedFragments(IReadOnlyList<ChainModel> fragments)
+    {
+      var fragmentStrings = fragments.Select(fragment => string.Join(",", fragment.PointModels.Select(point =>
+      {
+        string address = string.Empty;
+
+        if (DeviceDisplayConfig.GetMachineAddressVisibility())
+        {
+          address = ExecutionConfig.GetIsLegacyCompatibilityModeEnabled()
+            ? $"[{LegacyCompatibilityMapper.GetCompatibilityPointByRealAddress(point.ToString())}]"
+            : $"[{point}]";
+        }
+
+        return $"{point.Mnemonic}{address}";
+      })));
+
+      return $"*{string.Join("**", fragmentStrings)}*";
+    }
+
   }
 }

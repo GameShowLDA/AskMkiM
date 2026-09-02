@@ -360,7 +360,6 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
           await DisconnectAllPoints(context.MessageService, chains);
 
           if (firstAboveUpperBound.HasValue &&
-              connectedPoints.Count > 0 &&
               unresolvedPoints.Count > 0)
           {
             messages.AddRange(await EhtHighResistanceLocalizationService.LocalizeAsync(

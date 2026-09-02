@@ -1,5 +1,10 @@
 # AskMkiM Architecture Map
 
+> Legacy baseline: рабочий алгоритм ЭТ из снимка `D:\Downloads\MKI` разобран отдельно в
+> [`legacy/MKI_LEGACY_ARCHITECTURE_MAP.md`](legacy/MKI_LEGACY_ARCHITECTURE_MAP.md). Перед
+> изменением локализации ЭТ сначала сверять текущий .NET-путь с этим baseline и затем проверять
+> фактический production-код обеих версий.
+
 > This file is a navigation and architecture index, not the source of truth.
 > Start here before broad repository exploration.
 > For targeted tasks, use this map to identify the relevant code and inspect that code directly.
@@ -237,6 +242,12 @@ AskMkiM/
 `.csproj` in the solution. Они не считаются production-сборками. `TestConsole/`,
 `TestWPF/`, `TestManyWindows/`, `TestArchive/` и `MethodDependencyExplorer/` —
 test/manual/tooling projects.
+
+`TestConsole/EhtLocalizationDemo.cs` — ручной детерминированный Idle-сценарий команды
+`160 ЭТ`: доступен пунктом меню 23 или аргументом `eht-localization`; парсит исходные строки через
+`EhtCommandParser`, запускает `CommandExecutionManager` и штатный `EhtCommandExecutor` с консольным
+протоколом и управляемыми тестовыми реализациями оборудования, затем показывает полный поток
+сообщений и запись `EHT008` для разобщённых диапазонов `К1/71-75`/`К1/81-85`.
 
 ## Entry Points
 
@@ -685,8 +696,13 @@ executor throws
   нижней границе остаётся топологически связанным, но сохраняется как отдельная ошибка
   диапазона. Значения выше верхней границы и фактический `Overload`, определяемый через
   `MeasurementValueFormatter.IsOverloadValue`, образуют неразобранный остаток;
-- `EhtHighResistanceLocalizationService` — запускается после снятия исходной коммутации и
-  рекурсивно делит только неразобранный остаток ЭТ относительно его первой точки.
+- `EhtHighResistanceLocalizationService` — запускается после снятия исходной коммутации,
+  рекурсивно делит неразобранный остаток ЭТ относительно его первой точки и формирует
+  результирующий ССИРТ вида `*P1,P2**P3,P4*`.
+- `PointFormater.GetFormatDisconnectedFragments` — форматирует связные фрагменты ЭТ через
+  legacy-маркер разрыва `**`; точки внутри одного фрагмента разделяет запятыми.
+- `EhtErrors.DisconnectedChain` регистрирует локализованный разрыв существующим кодом `EHT008`,
+  не используя ошибку команды ПР.
   Каждая повторная пара измеряется с повторным измерением и компенсацией сопротивлений
   контактов/кабеля; после принятия результата пара полностью отключается. Сервис добавляет
   связанный исходный фрагмент к найденным фрагментам остатка и формирует одну локализованную
@@ -2148,7 +2164,9 @@ ErrorItem → translator/runner ErrorList
 | `MetrologyMessagePublisher` | internal static publisher | Ask.Protocol.Messages | передаёт метрологические сводки в `IMessageOutputService` с метаданными исходного вызова | [Protocols](#protocols-and-file-formats) |
 | `MeasurementResultEvaluator` | internal static evaluator | Ask.Engine | применяет Idle-симуляцию и проверяет измеренное значение по границам либо ожидаемой перегрузке до передачи результата в `MeasurementMessages` | [Execution Engine](#execution-engine) |
 | `PairwiseFirstPointCheckerAlt` | internal strategy | Ask.Engine | выполняет первичный проход каждой цепи ЭТ относительно её первой точки и отделяет связанный фрагмент от остатка выше верхней границы | [Локализация ЭТ](#eht-chain-localization-flow) |
-| `EhtHighResistanceLocalizationService` | internal localization service | Ask.Engine | рекурсивно делит только неразобранный остаток цепи ЭТ и формирует одну ошибку с независимыми связными фрагментами | [Локализация ЭТ](#eht-chain-localization-flow) |
+| `EhtHighResistanceLocalizationService` | internal localization service | Ask.Engine | рекурсивно делит неразобранный остаток цепи ЭТ и формирует одну ошибку с результирующим ССИРТ | [Локализация ЭТ](#eht-chain-localization-flow) |
+| `PointFormater.GetFormatDisconnectedFragments` | formatter | Ask.Engine | записывает связные фрагменты ЭТ в формате `*fragment**fragment*` | [Локализация ЭТ](#eht-chain-localization-flow) |
+| `EhtErrors.DisconnectedChain` | error factory | Ask.Core | создаёт ошибку локализованного разрыва ЭТ с кодом `EHT008` | [Локализация ЭТ](#eht-chain-localization-flow) |
 | `AlgorithmExecutionResult` | result container | Ask.Protocol.Messages | контракт из `Ask.Protocol.Messages/Models/`, хранящий накопленные ошибки и информационные `ShowMessageModel` алгоритма | [Execution Engine](#execution-engine) |
 | `ProtocolModelExtensions` | static extensions | Ask.Protocol.Messages | расширение из namespace `Ask.Protocol.Messages.Extensions`, добавляющее единый `AlgorithmExecutionResult` в коллекции ошибок и информационных сообщений `ProtocolModel` | [Execution Engine](#execution-engine) |
 | `ExecutionMessages` | static facade | Ask.Protocol.Messages | проверяет видимость параметров выполнения и коммутации, публикует накопленные результаты проверки, ошибки, debug-сообщения, задержки, этапы анализа цепей и локализации, границы этапов, инициализацию, настройку оборудования и коммутацию; формирует только накапливаемую ошибку локализации | [Protocols](#protocols-and-file-formats) |

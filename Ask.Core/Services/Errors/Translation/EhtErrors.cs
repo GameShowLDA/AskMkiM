@@ -131,5 +131,33 @@ namespace Ask.Core.Services.Errors.Translation
         DebugInfo = $"{Path.GetFileName(callerFile)} → {callerName} (строка {callerLine})",
         Description = $"*{firstPoint}**{secondPoint}*"
       };
+
+    /// <summary>
+    /// Создаёт ошибку локализованного разрыва цепи ЭТ.
+    /// </summary>
+    /// <param name="command">Номер и мнемоника команды.</param>
+    /// <param name="resultingSsirt">Результирующий ССИРТ с локализованными разрывами.</param>
+    /// <param name="measureResult">Первое измеренное сопротивление, подтвердившее разрыв.</param>
+    /// <param name="sourceLineNumber">Номер исходной строки команды.</param>
+    /// <param name="formaterLineNumber">Номер строки отформатированной команды.</param>
+    /// <returns>Описание ошибки локализации ЭТ.</returns>
+    public static ErrorItem DisconnectedChain(
+      string command,
+      string resultingSsirt,
+      string measureResult,
+      int sourceLineNumber,
+      int formaterLineNumber,
+      [CallerMemberName] string callerName = "",
+      [CallerFilePath] string callerFile = "",
+      [CallerLineNumber] int callerLine = 0) => new()
+      {
+        Command = command,
+        MeasureResult = measureResult,
+        Code = ErrorCode.Eht_CircuitOverload,
+        SourceLineNumber = sourceLineNumber,
+        FormattedLineNumber = formaterLineNumber,
+        DebugInfo = $"{Path.GetFileName(callerFile)} → {callerName} (строка {callerLine})",
+        Description = $"Разрыв в цепи {resultingSsirt}"
+      };
   }
 }
