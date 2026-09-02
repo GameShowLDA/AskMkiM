@@ -16,6 +16,7 @@ namespace Ask.Device.Runtime.Function.GPT.Helper
   static internal class MeasureHelper
   {
     private const int PollIntervalMs = 100;
+    private const int FastPollingIntervalMs = 200;
     private const int StopPollIntervalMs = 50;
 
     /// <summary>
@@ -63,7 +64,7 @@ namespace Ask.Device.Runtime.Function.GPT.Helper
         if (waitFullTime)
           return await MeasureFullTimeAsync(breakDown, delayBeforeCall);
         else
-          return await MeasureFastPollingAsync(breakDown, time, delayBeforeCall);
+          return await MeasureFastPollingAsync(breakDown, time, timeRamp, delayBeforeCall);
       }
       finally
       {
@@ -75,13 +76,14 @@ namespace Ask.Device.Runtime.Function.GPT.Helper
     /// <summary>
     /// Быстрый режим: циклический опрос MEASURE без полного ожидания времени измерения.
     /// - PASS  → завершаем немедленно — измерение успешно
-    /// - TEST  → принимаем текущее измерение и завершаем
+    /// - TEST  → продолжаем опрос текущего измерения каждые 200 мс
     /// - FAIL  → перезапускаем измерение, пока не истекло заданное время
     /// После получения результата останавливаем ППУ и ожидаем подтверждения TEST OFF.
     /// </summary>
     static private async Task<BreakdownMeasurementResponse> MeasureFastPollingAsync(
       IBreakdownTester breakDown,
       double time,
+      double timeRamp,
       int delayBeforeCall)
     {
       var total = Stopwatch.StartNew();
@@ -97,8 +99,10 @@ namespace Ask.Device.Runtime.Function.GPT.Helper
         await StartTestAsync(breakDown, delayBeforeCall);
         LogInformation($"[PERF][GPT][MeasureFastPolling] Start test #{attempt}: {stage.ElapsedMilliseconds} ms", isDeviceLog: true);
 
+        await WaitForVoltageRampAsync(timeRamp);
+
         var poll = Stopwatch.StartNew();
-        answerDevice = await ReadFirstAvailableMeasurementAsync(breakDown, delayBeforeCall);
+        answerDevice = await ReadFinalMeasurementAsync(breakDown, delayBeforeCall, FastPollingIntervalMs);
         LogInformation($"[PERF][GPT][MeasureFastPolling] Poll result #{attempt}: {poll.ElapsedMilliseconds} ms", isDeviceLog: true);
 
         if (!BreakdownTesterResponseProcessor.IsTestFailed(answerDevice))
@@ -162,25 +166,13 @@ namespace Ask.Device.Runtime.Function.GPT.Helper
     }
 
     /// <summary>
-    /// Ожидает первый непустой ответ измерения.
+    /// Ожидает завершения нарастания испытательного напряжения.
     /// </summary>
-    /// <param name="breakDown">Пробойная установка.</param>
-    /// <param name="delayBeforeCall">Задержка перед отправкой команды, мс.</param>
-    /// <returns>Первый непустой ответ на запрос измерения.</returns>
-    static private async Task<string> ReadFirstAvailableMeasurementAsync(
-      IBreakdownTester breakDown,
-      int delayBeforeCall)
+    /// <param name="timeRamp">Время нарастания напряжения в секундах.</param>
+    /// <returns>Задача, представляющая ожидание нарастания напряжения.</returns>
+    static private Task WaitForVoltageRampAsync(double timeRamp)
     {
-      while (true)
-      {
-        string answer = await QueryMeasurementAsync(breakDown, delayBeforeCall);
-        if (!string.IsNullOrEmpty(answer))
-        {
-          return answer;
-        }
-
-        await Task.Delay(PollIntervalMs);
-      }
+      return Task.Delay(TimeSpan.FromSeconds(timeRamp));
     }
 
     /// <summary>
@@ -191,11 +183,12 @@ namespace Ask.Device.Runtime.Function.GPT.Helper
     /// <returns>Ответ на запрос измерения со статусом PASS или FAIL.</returns>
     static private async Task<string> ReadFinalMeasurementAsync(
       IBreakdownTester breakDown,
-      int delayBeforeCall)
+      int delayBeforeCall,
+      int pollIntervalMs = PollIntervalMs)
     {
       while (true)
       {
-        await Task.Delay(PollIntervalMs);
+        await Task.Delay(pollIntervalMs);
 
         string answer = await QueryMeasurementAsync(breakDown, delayBeforeCall);
         if (!string.IsNullOrEmpty(answer)

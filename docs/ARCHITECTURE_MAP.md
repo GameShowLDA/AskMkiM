@@ -1984,11 +1984,13 @@ and `StateEventsBinder`, then calls `ApplicationEventsBinder.BindAll`.
 
 `MeasureHelper.MeasureFastPollingAsync` трактует настроенное время теста как временное окно
 для запуска повторных попыток после ответа `FAIL`: каждая попытка ожидает первый непустой
-ответ `MEASURE`, ответы `PASS`/`TEST` завершают цикл, а новая попытка после `FAIL` запускается
-только до истечения окна. После цикла `StopMeasure` подтверждает состояние `TEST OFF`.
-Общие SCPI-шаги вынесены в `StartTestAsync` и `QueryMeasurementAsync`; fast-путь читает
-`ReadFirstAvailableMeasurementAsync`, а full-путь — `ReadFinalMeasurementAsync`, чтобы
-различие обработки промежуточного статуса `TEST` оставалось явным.
+конечный ответ `MEASURE`: после `StartTestAsync` ждёт `Ramp Time` активного режима,
+затем 200 мс до первого запроса. Ответ `TEST` означает незавершённое измерение и вызывает
+следующий опрос через 200 мс; `PASS`/`FAIL` завершают попытку, а новая попытка после `FAIL`
+запускается только до истечения окна. После цикла `StopMeasure` подтверждает состояние
+`TEST OFF`. Общие SCPI-шаги вынесены в `StartTestAsync`, `WaitForVoltageRampAsync`,
+`QueryMeasurementAsync` и `ReadFinalMeasurementAsync`; full-путь сохраняет стандартный
+интервал опроса 100 мс.
 Long-running loops in metrology/GPT measurement helpers are bounded by
 cancellation, timers or device conditions; inspect the concrete mode before
 changing stop semantics.
