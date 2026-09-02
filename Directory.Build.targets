@@ -1,4 +1,9 @@
 <Project>
+  <PropertyGroup Condition="'$(MSBuildProjectName)' == 'MainWindowProgram'">
+    <!-- Git HEAD и состояние рабочей копии не входят в стандартный граф входов MSBuild. -->
+    <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
+  </PropertyGroup>
+
   <Target Name="CollectBuildIdentity"
           BeforeTargets="GetAssemblyAttributes"
           Condition="'$(MSBuildProjectName)' == 'MainWindowProgram'">

@@ -429,6 +429,9 @@ Engine знает DB Engine и Message, Core содержит WPF/config/applica
 генерацией `AssemblyInfo` проекта `MainWindowProgram` встраивает UTC timestamp,
 полный/короткий Git commit, признак dirty, единый `BuildIdentity` и двадцать последних
 коммитов (`hash`, дата, subject) в entry assembly.
+Для `MainWindowProgram` отключён Visual Studio Fast Up-to-date Check: Git HEAD и
+состояние working tree находятся вне стандартного MSBuild input graph, поэтому без
+этого после checkout/merge IDE могла запустить старый EXE без обновления AssemblyInfo.
 `Ask.Core.Services.App.ApplicationBuildInfo` читает атрибуты entry assembly и
 добавляет путь, время изменения, SHA-256 EXE и MVID. Это единственный runtime-источник
 версии для UI, стартового лога, протоколов и `Ask.Diagnostics`.
