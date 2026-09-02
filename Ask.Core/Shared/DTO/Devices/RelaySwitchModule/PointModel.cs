@@ -1,5 +1,4 @@
-﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
-using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
+﻿using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 
 namespace Ask.Core.Shared.DTO.Devices.RelaySwitchModule
 {
@@ -33,26 +32,34 @@ namespace Ask.Core.Shared.DTO.Devices.RelaySwitchModule
     /// <returns>Возвращает модель точки.</returns>
     public static PointModel ParsePointString(string input)
     {
-      string[] parts = input.Split('.');
-      if (parts.Length != 3)
+      try
+      {
+        string[] parts = input.Split('.');
+        if (parts.Length != 3)
+        {
+          return null;
+        }
+
+        PointModel pointModel = new PointModel();
+
+        if (!int.TryParse(parts[0], out int deviceNumber) ||
+            !int.TryParse(parts[1], out int moduleNumber) ||
+            !int.TryParse(parts[2], out int pointNumber))
+        {
+          return null;
+        }
+
+        pointModel.DeviceNumber = deviceNumber;
+        pointModel.ModuleNumber = moduleNumber;
+        pointModel.PointNumber = pointNumber;
+
+        return pointModel;
+
+      }
+      catch (Exception)
       {
         return null;
       }
-
-      PointModel pointModel = new PointModel();
-
-      if (!int.TryParse(parts[0], out int deviceNumber) ||
-          !int.TryParse(parts[1], out int moduleNumber) ||
-          !int.TryParse(parts[2], out int pointNumber))
-      {
-        return null;
-      }
-
-      pointModel.DeviceNumber = deviceNumber;
-      pointModel.ModuleNumber = moduleNumber;
-      pointModel.PointNumber = pointNumber;
-
-      return pointModel;
     }
 
     /// <summary>
