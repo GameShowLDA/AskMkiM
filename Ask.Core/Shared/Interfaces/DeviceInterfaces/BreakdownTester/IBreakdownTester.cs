@@ -66,5 +66,7 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester
     ISystemSettingsBreakdown SystemManger { get; set; }
 
     ISelfTestCheckerBreakdownTester SelfTestManager { get; set; }
+
+    ITimeManager Time { get; set; }
   }
 }
