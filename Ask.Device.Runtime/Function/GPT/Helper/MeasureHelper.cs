@@ -31,6 +31,8 @@ namespace Ask.Device.Runtime.Function.GPT.Helper
       bool waitFullTime = false,
       IUserInteractionService? userMessageService = null)
     {
+      breakDown.Time.SetTargetTime(time);
+
       if (time == 60)
       {
         waitFullTime = true;
@@ -75,6 +77,7 @@ namespace Ask.Device.Runtime.Function.GPT.Helper
           await breakDown.LimitManager.SetLowLimitAsync(1);
         }
 
+        await breakDown.Time.SetTestTimeAsync(breakDown.Time.GetTargetTime());
         return await MeasureFullTimeAsync(breakDown, delayBeforeCall);
       }
       finally
