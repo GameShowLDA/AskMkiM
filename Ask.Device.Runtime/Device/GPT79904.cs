@@ -46,6 +46,7 @@ namespace Ask.Device.Runtime.Device
       ConnectableManager = new Transport(this);
       SelfTestManager = new Function.GPT.SelfCheck.SelfTestManager();
       Time = new Function.GPT.TimeManager(this);
+      LimitManager = new Function.GPT.LimitManager(this);
 
       LogWarning($"[{GetType().Name}] ctor вызван. Hash={GetHashCode()}", isDeviceLog: true);
       Mode = BreakdownTypeMode.None;
@@ -106,6 +107,10 @@ namespace Ask.Device.Runtime.Device
 
     /// <inheritdoc />
     public ITimeManager Time { get; set; }
+
+    /// <inheritdoc />
+    public ILimitManager LimitManager { get; set; }
+
 
     /// <summary>
     /// Активный режим устройства.
