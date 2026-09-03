@@ -31,8 +31,6 @@ namespace Ask.Device.Runtime.Function.GPT.Helper
       bool waitFullTime = false,
       IUserInteractionService? userMessageService = null)
     {
-      breakDown.Time.SetTargetTime(time);
-
       if (time == 60)
       {
         waitFullTime = true;

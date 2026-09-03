@@ -2019,15 +2019,16 @@ and `StateEventsBinder`, then calls `ApplicationEventsBinder.BindAll`.
 | Workspace click timer | `MultiEditorControl` DispatcherTimer | double-click discrimination | control lifetime |
 | Logged exception reporter | `ExceptionDiagnosticReporter` bounded Task.Run | asynchronous crash package | throttled/timeout-limited |
 
-`MeasureHelper.MeasureFastPollingAsync` трактует настроенное время теста как временное окно
-для запуска повторных попыток после ответа `FAIL`: каждая попытка ожидает первый непустой
-конечный ответ `MEASURE`: после `StartTestAsync` ждёт `Ramp Time` активного режима,
-затем 200 мс до первого запроса. Ответ `TEST` означает незавершённое измерение и вызывает
-следующий опрос через 200 мс; `PASS`/`FAIL` завершают попытку, а новая попытка после `FAIL`
-запускается только до истечения окна. После цикла `StopMeasure` подтверждает состояние
-`TEST OFF`. Общие SCPI-шаги вынесены в `StartTestAsync`, `WaitForVoltageRampAsync`,
-`QueryMeasurementAsync` и `ReadFinalMeasurementAsync`; full-путь сохраняет стандартный
-интервал опроса 100 мс.
+`MeasureHelper.MeasureAsync` выполняет фактический GPT-поток через
+`MeasureFullTimeAsync`: тот отправляет `FUNC:TEST ON`, затем опрашивает `MEASURE ?` с
+интервалом 100 мс до ответа, отличного от промежуточного `TEST`. Для IR при
+`waitFullTime == false` сначала устанавливается `TestTime = 1` и выполняется пробное
+измерение; `PASS` сразу возвращается, а при другом конечном статусе устанавливается нижний
+предел `1`, восстанавливается `TestTime` из `breakDown.Time.GetTargetTime()` и запускается
+основное измерение. `TargetTime` — отдельное поле `TimeManager`, поэтому его обязан задать
+исполнитель при настройке команды (production `SiCommandExecutor.SetupAsync`); helper его
+не перезаписывает. `MeasureFastPollingAsync` остаётся private legacy-методом и текущим
+потоком не вызывается.
 Long-running loops in metrology/GPT measurement helpers are bounded by
 cancellation, timers or device conditions; inspect the concrete mode before
 changing stop semantics.

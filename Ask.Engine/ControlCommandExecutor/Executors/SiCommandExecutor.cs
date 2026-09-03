@@ -130,6 +130,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       await breakDown.IrManger.Time.SetTestTimeAsync(time, userMessageService);
       await breakDown.IrManger.ResistanceLimits.SetLowResistanceLimitAsync(resistance, userMessageService);
       await breakDown.IrManger.Voltage.SetVoltageAsync(voltage, userMessageService);
+      breakDown.Time.SetTargetTime(time);
     }
 
     /// <summary>
