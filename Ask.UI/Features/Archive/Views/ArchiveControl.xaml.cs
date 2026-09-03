@@ -2479,7 +2479,7 @@ namespace Ask.UI.Features.Archive.Views
 
       if (entries == null || entries.Count == 0)
       {
-        MessageBoxCustom.Show("??? ?????? ??? ??????", "?????? ??????", MessageBoxButton.OK, MessageBoxImage.Warning);
+        MessageBoxCustom.Show("Нет данных для печати", "Нет данных", MessageBoxButton.OK, MessageBoxImage.Warning);
         return;
       }
 
