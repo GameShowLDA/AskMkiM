@@ -67,7 +67,7 @@ namespace Ask.Device.Runtime.Function.GPT.Helper
         {
           await breakDown.Time.SetTestTimeAsync(1);
           var answer = await MeasureFullTimeAsync(breakDown, delayBeforeCall);
-          if (answer.Status != BreakdownMeasurementStatus.Fail)
+          if (answer.Status == BreakdownMeasurementStatus.Pass)
           {
             return answer;
           }
