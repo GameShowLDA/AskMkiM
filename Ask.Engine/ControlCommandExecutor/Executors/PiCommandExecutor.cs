@@ -153,6 +153,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         await breakDown.AcwManger.Time.SetTestTimeAsync(time, userMessageService);
         await breakDown.AcwManger.Voltage.SetVoltageAsync(voltage, userMessageService);
         await breakDown.AcwManger.CurrentLimits.SetHighCurrentLimitAsync(amperhMaxACW, userMessageService);
+        breakDown.Time.SetTargetTime(time);
 
         if (time == 60)
         {
