@@ -1,0 +1,189 @@
+<Window x:Class="Ask.UI.Features.BuildDiagnostics.Views.BuildHistoryWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Сведения о сборке"
+        Width="900"
+        Height="680"
+        MinWidth="720"
+        MinHeight="520"
+        WindowStartupLocation="CenterOwner"
+        ShowInTaskbar="False"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        ResizeMode="NoResize"
+        Background="Transparent"
+        Foreground="{DynamicResource ForegrounfBrushes}"
+        FontFamily="{DynamicResource WinstonLight}">
+    <Border Margin="24"
+            CornerRadius="22"
+            BorderThickness="1"
+            BorderBrush="{DynamicResource SettingsInteractiveBorderSolidColorBrush}"
+            Background="{DynamicResource SecondarySolidColorBrush}">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="32"
+                              ShadowDepth="0"
+                              Opacity="0.4"
+                              Color="#A0000000"/>
+        </Border.Effect>
+
+        <Grid ClipToBounds="True">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="76"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="82"/>
+            </Grid.RowDefinitions>
+
+            <Border Grid.Row="0"
+                    CornerRadius="21,21,0,0"
+                    Background="{DynamicResource SettingsInteractiveBackgroundSolidColorBrush}"
+                    PreviewMouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
+                <Grid Margin="24,0,16,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Border Width="42"
+                            Height="42"
+                            CornerRadius="12"
+                            Background="{DynamicResource ActiveBorderSolidColorBrush}">
+                        <TextBlock HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   FontFamily="Consolas"
+                                   FontSize="18"
+                                   FontWeight="Bold"
+                                   Foreground="{DynamicResource SecondarySolidColorBrush}"
+                                   Text="&lt;/&gt;"/>
+                    </Border>
+
+                    <StackPanel Grid.Column="1"
+                                Margin="14,0,0,0"
+                                VerticalAlignment="Center">
+                        <TextBlock FontFamily="{DynamicResource WinstonBold}"
+                                   FontSize="22"
+                                   Foreground="{DynamicResource MainTitleSolidColorBrush}"
+                                   Text="Сведения о сборке"/>
+                        <TextBlock Margin="0,3,0,0"
+                                   FontSize="12"
+                                   Foreground="{DynamicResource ForegroundSolidColorBrush60}"
+                                   Text="Диагностическая информация текущего экземпляра приложения"/>
+                    </StackPanel>
+
+                    <Button Grid.Column="2"
+                            Width="38"
+                            Height="38"
+                            Padding="0"
+                            FontSize="20"
+                            Style="{DynamicResource ButtonStyleV13}"
+                            Click="CloseButton_Click"
+                            Content="×"/>
+                </Grid>
+            </Border>
+
+            <Border Grid.Row="1"
+                    Margin="24,20,24,16"
+                    Padding="18,14"
+                    CornerRadius="14"
+                    BorderThickness="1"
+                    BorderBrush="{DynamicResource SettingsInteractiveBorderSolidColorBrush}"
+                    Background="{DynamicResource SettingsInteractiveBackgroundSolidColorBrush}">
+                <TextBlock FontSize="14"
+                           LineHeight="22"
+                           Foreground="{DynamicResource ForegrounfBrushes85}"
+                           TextWrapping="Wrap"
+                           Text="{Binding BuildSummary, Mode=OneWay}"/>
+            </Border>
+
+            <Grid Grid.Row="2" Margin="24,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <Grid Margin="2,0,2,10">
+                    <TextBlock FontFamily="{DynamicResource WinstonBold}"
+                               FontSize="16"
+                               Foreground="{DynamicResource MainTitleSolidColorBrush}"
+                               Text="Последние коммиты"/>
+                    <TextBlock HorizontalAlignment="Right"
+                               VerticalAlignment="Center"
+                               FontSize="12"
+                               Foreground="{DynamicResource ForegroundSolidColorBrush60}"
+                               Text="на момент сборки"/>
+                </Grid>
+
+                <Border Grid.Row="1"
+                        CornerRadius="14"
+                        BorderThickness="1"
+                        BorderBrush="{DynamicResource SettingsInteractiveBorderSolidColorBrush}"
+                        Background="{DynamicResource SettingsInteractiveBackgroundSolidColorBrush}">
+                    <ScrollViewer Margin="6"
+                                  Padding="8"
+                                  VerticalScrollBarVisibility="Auto"
+                                  HorizontalScrollBarVisibility="Disabled">
+                        <ItemsControl ItemsSource="{Binding Commits, Mode=OneWay}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Padding="10,8"
+                                            Margin="0,0,0,4"
+                                            CornerRadius="8"
+                                            Background="{DynamicResource SecondarySolidColorBrush}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="92"/>
+                                                <ColumnDefinition Width="104"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock FontFamily="Consolas"
+                                                       FontSize="13"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="{DynamicResource ActiveBorderSolidColorBrush}"
+                                                       Text="{Binding Hash, Mode=OneWay}"/>
+                                            <TextBlock Grid.Column="1"
+                                                       FontFamily="Consolas"
+                                                       FontSize="12"
+                                                       Foreground="{DynamicResource ForegroundSolidColorBrush60}"
+                                                       Text="{Binding Date, Mode=OneWay}"/>
+                                            <TextBlock Grid.Column="2"
+                                                       FontSize="13"
+                                                       Foreground="{DynamicResource ForegrounfBrushes85}"
+                                                       TextTrimming="CharacterEllipsis"
+                                                       Text="{Binding Subject, Mode=OneWay}"
+                                                       ToolTip="{Binding Subject, Mode=OneWay}"/>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </Border>
+            </Grid>
+
+            <Grid Grid.Row="3" Margin="24,16,24,18">
+                <TextBlock VerticalAlignment="Center"
+                           FontSize="12"
+                           Foreground="{DynamicResource ForegroundSolidColorBrush60}"
+                           Text="История встроена в приложение и соответствует этой сборке"/>
+                <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
+                    <Button Width="190"
+                            Height="44"
+                            Margin="0,0,10,0"
+                            Padding="12,7"
+                            FontSize="15"
+                            Style="{DynamicResource ButtonStyleV13}"
+                            Click="CopyButton_Click"
+                            Content="Копировать сведения"/>
+                    <Button Width="110"
+                            Height="44"
+                            Padding="12,7"
+                            FontSize="15"
+                            Style="{DynamicResource ButtonStyleV13}"
+                            IsCancel="True"
+                            Content="Закрыть"/>
+                </StackPanel>
+            </Grid>
+        </Grid>
+    </Border>
+</Window>

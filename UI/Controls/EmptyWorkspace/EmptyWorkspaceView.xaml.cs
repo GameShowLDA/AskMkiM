@@ -1,11 +1,11 @@
 using Ask.Core.Services.App;
+using Ask.Core.Services.Config.AppSettings;
+using Ask.UI.Features.BuildDiagnostics.Views;
 using System;
 using System.ComponentModel;
-using System.IO;
-using System.Linq;
-using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media.Animation;
 
 namespace UI.Controls.EmptyWorkspace
@@ -17,8 +17,6 @@ namespace UI.Controls.EmptyWorkspace
     private string _appVersion = string.Empty;
     private bool _hasAnimatedClock;
     private bool _isSubscribed;
-
-    private static Assembly AppAssembly => Assembly.GetEntryAssembly() ?? throw new InvalidOperationException("EntryAssembly not found");
 
     public DateTime CurrentDateTime
     {
@@ -74,41 +72,12 @@ namespace UI.Controls.EmptyWorkspace
       InitializeComponent();
 
       UpdateCurrentDateTime(ApplicationClockService.CurrentDateTime);
-      BuildDate = GetBuildDate();
-      AppVersion = GetAppVersion();
+      var buildInfo = ApplicationBuildInfo.Current;
+      BuildDate = buildInfo.BuildDate;
+      AppVersion = $"Версия {buildInfo.BuildIdentifier} • Сборка {BuildDate}";
 
       Loaded += EmptyWorkspaceView_Loaded;
       Unloaded += EmptyWorkspaceView_Unloaded;
-    }
-
-    private string GetBuildDate()
-    {
-      try
-      {
-        var asm = AppAssembly;
-
-        var attr = asm.GetCustomAttributes<AssemblyMetadataAttribute>()
-                      .FirstOrDefault(a => a.Key == "BuildDate");
-
-        return !string.IsNullOrWhiteSpace(attr?.Value)
-          ? attr.Value
-          : "Неизвестно";
-      }
-      catch
-      {
-        return "Неизвестно";
-      }
-    }
-
-    private string GetAppVersion()
-    {
-      var version = AppAssembly.GetName().Version;
-
-      var versionValue = version is null
-        ? "Неизвестно"
-        : $"{version.Major}.{version.Minor}.{version.Build}";
-
-      return $"Версия {versionValue} • Сборка {BuildDate}";
     }
 
     private void OnPropertyChanged(string propertyName)
@@ -123,6 +92,21 @@ namespace UI.Controls.EmptyWorkspace
     private void EmptyWorkspaceView_Unloaded(object sender, RoutedEventArgs e)
     {
       UnsubscribeFromClock();
+    }
+
+    private void VersionText_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+      if (e.ClickCount != 2 || !DebugAccessConfig.IsDebugEnabled)
+      {
+        return;
+      }
+
+      var window = new BuildHistoryWindow(ApplicationBuildInfo.Current)
+      {
+        Owner = Window.GetWindow(this),
+      };
+      window.ShowDialog();
+      e.Handled = true;
     }
 
     private void UpdateCurrentDateTime(DateTime now)

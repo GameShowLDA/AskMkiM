@@ -14,6 +14,7 @@
 | Нужно изменить | Сначала смотреть | Затем смотреть |
 | --- | --- | --- |
 | Запуск приложения | `MainWindow/App.xaml.cs`, `MainWindow/Init/PreStartupInitializer.cs` | `MainWindow/Init/DatabaseInitializer.cs`, `MainWindow/Engine/AppServices.cs`, `MainWindow/MainWindow.xaml.cs` |
+| Версия, история коммитов и идентификация сборки | `Directory.Build.targets`, `Ask.Core/Services/App/ApplicationBuildInfo.cs` | `Ask.UI/Features/BuildDiagnostics/Views/BuildHistoryWindow.xaml`, `UI/Controls/EmptyWorkspace/EmptyWorkspaceView.xaml.cs`, `MainWindow/Init/PreStartupInitializer.cs`, `Ask.Diagnostics/Collectors/SystemInfoCollector.cs`, `Ask.Core/Services/Protocols/ExecutionProtocolHistoryService.cs` |
 | DI и composition root | `MainWindow/Init/PreStartupInitializer.cs` | `Ask.Diagnostics/Extensions/ServiceCollectionExtensions.cs`, `Ask.Core/Services/App/ServiceLocator.cs`, `MainWindow/Engine/AppServices.cs` |
 | Трансляция программы контроля | `MainWindow/Services/TranslationServices.cs` | `Ask.Engine/ControlCommandAnalyser/CommandTranslationManager.cs`, `Ask.Engine/ControlCommandAnalyser/Parser/`, `Ask.Engine/ControlCommandAnalyser/Formatter/`, `Ask.Engine/ControlCommandAnalyser/Validation/` |
 | Исполнение программы контроля | `UI/Controls/Runner/RunControl.xaml.cs` | `Ask.UI/Features/ProtocolNew/Execution/ActionExecutor.cs`, `Ask.Engine/ControlCommandExecutor/Execution/CommandExecutionManager.cs` |
@@ -87,7 +88,7 @@
 | `Ask.Device.ResponseProcessor` | `Ask.Device.ResponseProcessor/Ask.Device.ResponseProcessor.csproj` | Модели, строгая проверка протокольных ответов и централизованная публикация сообщений МКР, УКШ, мультиметров и пробойной установки GPT | `Ask.Core` (контракты устройства/UI), `Ask.Protocol.Messages` (публикация операций и самоконтроля) |
 | `Ask.DataBase.Engine` | `Ask.DataBase.Engine/Ask.DataBase.Engine.csproj` | Runtime device facade, cache, reflection factory, DTO↔device mapping; `Ask.DataBase.Engine.*` | `Ask.Core`, `Ask.Device.Application`, `Ask.DataBase.Provider` |
 | `Ask.DataBase.Provider` | `Ask.DataBase.Provider/Ask.DataBase.Provider.csproj` | EF Core/SQLite context, migrations and CRUD services; `Ask.DataBase.Provider.*` | `Ask.Core`, `Ask.LogLib` |
-| `Ask.Diagnostics` | `Ask.Diagnostics/Ask.Diagnostics.csproj` | Crash packages, command history, diagnostic collectors; `Ask.Diagnostics.*` | нет |
+| `Ask.Diagnostics` | `Ask.Diagnostics/Ask.Diagnostics.csproj` | Crash packages, command history, diagnostic collectors; `Ask.Diagnostics.*` | `Ask.Core` |
 | `Ask.Support` | `Ask.Support/Ask.Support.csproj` | Local Kestrel help server, Photino help window, WPF help routing; `Ask.Support` | `Ask.LogLib` |
 | `ConsoleUI` | `ConsoleUI/ConsoleUI.csproj` | Встроенная сервисная консоль и команды; `ConsoleUI.*` | `Ask.DataBase.Engine` |
 | `Message` | `Message/Message.csproj` | Кастомные WPF message boxes; `Message` | нет |
@@ -131,7 +132,7 @@ MainWindowProgram
 │  ├─ Ask.Device.Runtime
 │  └─ Message
 ├─ Ask.DataBase.Engine
-├─ Ask.Diagnostics
+├─ Ask.Diagnostics ── Ask.Core
 ├─ Ask.Support
 ├─ Ask.UI
 ├─ ConsoleUI
@@ -423,6 +424,24 @@ Ask.DataBase.Provider      Ask.Device.Runtime
 Зависимости не образуют строгую clean architecture: UI знает Provider и Runtime,
 Engine знает DB Engine и Message, Core содержит WPF/config/application concerns.
 При изменении ориентироваться на существующие seams, а не на целевую схему.
+
+Идентификация сборки проходит поперёк runtime-слоёв: `Directory.Build.targets` перед
+генерацией `AssemblyInfo` проекта `MainWindowProgram` встраивает UTC timestamp,
+полный/короткий Git commit, признак dirty, единый `BuildIdentity` и двадцать последних
+коммитов (`hash`, дата, subject) в entry assembly.
+Для `MainWindowProgram` отключён Visual Studio Fast Up-to-date Check: Git HEAD и
+состояние working tree находятся вне стандартного MSBuild input graph, поэтому без
+этого после checkout/merge IDE могла запустить старый EXE без обновления AssemblyInfo.
+`Ask.Core.Services.App.ApplicationBuildInfo` читает атрибуты entry assembly и
+добавляет путь, время изменения, SHA-256 EXE и MVID. Это единственный runtime-источник
+версии для UI, стартового лога, протоколов и `Ask.Diagnostics`.
+
+На пустом рабочем пространстве `EmptyWorkspaceView.VersionText_MouseLeftButtonDown`
+только для роли `Root` по двойному нажатию на строку версии открывает размещённое в
+`Ask.UI` окно `BuildHistoryWindow`. Окно показывает
+идентификатор и ревизию текущей сборки, встроенный на момент компиляции список коммитов
+и позволяет скопировать эти сведения; установленному приложению не требуются Git или
+исходный репозиторий.
 
 ## Subsystems
 
@@ -1004,6 +1023,9 @@ pre-structured text traces.
 протокола и отображения оборудования, версии/роли/режима и устройств, фактически
 зарегистрированных в `EquipmentUsageSession`; снимок сохраняется первой скрытой
 записью `.asktrace` и раскрывается в начале документа только для `Root`.
+`ApplicationVersion` снимка содержит полный `ApplicationBuildInfo.BuildIdentifier`.
+При сохранении `.askresult/.askreport` `ExecutionProtocolHistoryService.SaveInspectionAsync`
+добавляет видимые строки версии и Git-ревизии перед текстом итогового протокола.
 
 Автопечать:
 
@@ -1085,6 +1107,13 @@ TaskScheduler.UnobservedTaskException / LoggerUtility.ExceptionLogged
 → Bin/CrashReports
 → NotificationHostService
 ```
+
+`PreStartupInitializer.Initialize` первым диагностическим сообщением записывает
+`ApplicationBuildInfo.ToDiagnosticString()` и создаёт рядом с EXE
+`build-manifest.json`. `SystemInfoCollector` сохраняет version/build/commit/dirty,
+путь, timestamp, SHA-256 и MVID в `system-info.json`; `CrashPackageService.BuildMetadata`
+дублирует критичные build-поля в `metadata.json`, поэтому ревизия доступна даже при
+частичном отказе collectors.
 
 Для необработанного исключения трансляции используется синхронизированный с UI
 путь, гарантирующий создание отчёта до окна ошибки:
@@ -1536,6 +1565,13 @@ same path with gates enabled and performs real transport I/O.
 
 ## UI Architecture
 
+> **Обязательное правило для новых изменений:** всю новую UI-функциональность —
+> окна, диалоги, controls, ViewModels и связанные UI-services — создавать в проекте
+> `Ask.UI`. Проект `UI` является legacy-слоем: добавлять в него новую функциональность
+> запрещено. Его допустимо изменять только минимально для подключения компонентов из
+> `Ask.UI` к существующим legacy entry points. Наличие вызывающего View/обработчика в
+> `UI` не является основанием размещать там новый UI-компонент.
+
 `MainWindow` is shell and menu host. `MainWindowViewModel` exposes File,
 Translation, Run, Metrology, Test, SelfTest, Settings, Admin and Window ViewModels.
 Their services generally route operations into `MultiWindowService`.
@@ -1586,8 +1622,9 @@ formatted editors; `RunControl` hosts ProtocolUI, translated source and error li
 транслированного файла и итогового протокола; вкладка состояния оборудования её скрывает.
 
 `Ask.UI` contains newer feature-oriented code: ProtocolNew, Archive, Notifications,
-RoleManagement, ExecutionSelection and reusable controls. Both UI projects are
-active; do not assume one replaces the other.
+RoleManagement, ExecutionSelection and reusable controls. Оба UI-проекта пока
+участвуют в runtime, но `UI` поддерживается только как legacy-интеграционный слой;
+новые компоненты размещаются в `Ask.UI` согласно правилу выше.
 
 ### Валидация конфигурации устройств
 
@@ -2148,6 +2185,7 @@ ErrorItem → translator/runner ErrorList
 | `DebugAccessConfig` | derived access state | Ask.Core | central root-only Debug availability and change notification | [Authentication/Debug](#authentication-and-debug-access-flow) |
 | `IdleHardwareErrorSimulator` | static decision service | Ask.Core | independent `1/2` hardware failure decision for non-measurement Idle calls | [Real / Idle](#real--idle) |
 | `EventAggregator` | event bus | Ask.Core | in-process publish/subscribe | [Events](#events-and-callbacks) |
+| `ApplicationBuildInfo` | runtime build descriptor | Ask.Core | читает встроенную версию/revision и идентифицирует запущенный EXE | [Support](#support-and-diagnostics) |
 | `DeviceApplicationComposer` | composer | Ask.Device.Application | replaces raw managers with adapters | [Equipment](#adapters-and-error-boundary) |
 | `DeviceProtocolEmulator` | public static factory | Ask.Device.Emulator | returns Real/Idle-selecting protocols for chassis and МКР | [Equipment](#real--idle) |
 | `ChassisQueryExecutor` | runtime helper | Ask.Device.Runtime | routes and logs chassis commands through the real protocol or emulator | [Equipment](#real--idle) |
