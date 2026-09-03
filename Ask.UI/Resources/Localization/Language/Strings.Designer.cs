@@ -286,7 +286,7 @@ namespace Ask.UI.Resources.Localization.Language {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на Скачать архивы.
+        ///   Ищет локализованную строку, похожую на Экспортировать архивы.
         /// </summary>
         internal static string menu_file_downloadArchives {
             get {
@@ -439,7 +439,7 @@ namespace Ask.UI.Resources.Localization.Language {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на Загрузить архив.
+        ///   Ищет локализованную строку, похожую на Импортировать архив.
         /// </summary>
         internal static string menu_file_uploadArchive {
             get {
@@ -1051,6 +1051,24 @@ namespace Ask.UI.Resources.Localization.Language {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на Разрешает запуск метрологии, программ контроля и самоконтроля без проверки состояния питания системы. Настройка доступна только роли Root..
+        /// </summary>
+        internal static string settings_execution_disablePowerCheck_description {
+            get {
+                return ResourceManager.GetString("settings.execution.disablePowerCheck.description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Отключить проверку питания.
+        /// </summary>
+        internal static string settings_execution_disablePowerCheck_title {
+            get {
+                return ResourceManager.GetString("settings.execution.disablePowerCheck.title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на Настройки искусственных ошибок при выполнении в холостом режиме..
         /// </summary>
         internal static string settings_execution_errorSimulation_description {
@@ -1119,6 +1137,24 @@ namespace Ask.UI.Resources.Localization.Language {
         internal static string settings_execution_measurementErrorSimulation_title {
             get {
                 return ResourceManager.GetString("settings.execution.measurementErrorSimulation.title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Разрешает повторять отдельные измерения оборудования. Не влияет на повтор всей команды, теста или программы контроля..
+        /// </summary>
+        internal static string settings_execution_repeatMeasurement_description {
+            get {
+                return ResourceManager.GetString("settings.execution.repeatMeasurement.description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Повтор измерения.
+        /// </summary>
+        internal static string settings_execution_repeatMeasurement_title {
+            get {
+                return ResourceManager.GetString("settings.execution.repeatMeasurement.title", resourceCulture);
             }
         }
         

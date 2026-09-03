@@ -139,10 +139,10 @@
                       Header="Создать архив"
                       Visibility="{Binding ContextMenu.CreateArchiveVisibility}" Command="{Binding CreateArchiveCommand}" />
                                 <MenuItem x:Name="UploadArchiveMenuItem"
-                      Header="Загрузить архив"
+                      Header="Импортировать архив"
                       Visibility="{Binding ContextMenu.UploadArchiveVisibility}" Command="{Binding UploadArchiveCommand}" />
                                 <MenuItem x:Name="DownloadArchivesMenuItem"
-                      Header="Скачать архивы"
+                      Header="Экспортировать архивы"
                       Visibility="{Binding ContextMenu.DownloadArchivesVisibility}" Command="{Binding DownloadArchivesCommand}" />
                                 <MenuItem x:Name="OpenArchiveMenuItem"
                       Header="Открыть"

@@ -193,10 +193,10 @@
     <value>Создать архив</value>
   </data>
   <data name="menu.file.downloadArchives" xml:space="preserve">
-    <value>Скачать архивы</value>
+    <value>Экспортировать архивы</value>
   </data>
   <data name="menu.file.uploadArchive" xml:space="preserve">
-    <value>Загрузить архив</value>
+    <value>Импортировать архив</value>
   </data>
   <data name="menu.settings" xml:space="preserve">
     <value>Настройки</value>
