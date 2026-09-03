@@ -160,7 +160,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         }
         else
         {
-          await breakDown.AcwManger.Time.SetRampTimeAsync(0.4, userMessageService);
+          await breakDown.AcwManger.Time.SetRampTimeAsync(1, userMessageService);
         }
       }
       else if (voltageType == VoltageEnum.Type.DCW)
