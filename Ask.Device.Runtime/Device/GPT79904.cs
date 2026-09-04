@@ -111,7 +111,6 @@ namespace Ask.Device.Runtime.Device
     /// <inheritdoc />
     public ILimitManager LimitManager { get; set; }
 
-
     /// <summary>
     /// Активный режим устройства.
     /// </summary>

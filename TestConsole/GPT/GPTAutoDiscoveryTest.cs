@@ -31,6 +31,17 @@ namespace TestConsole.GPT
       await RunControlMenuAsync(device);
     }
 
+    /// <summary>
+    /// Находит GPT-79904 среди доступных COM-портов и создаёт независимый runtime-экземпляр.
+    /// </summary>
+    /// <param name="baudRate">Скорость последовательного порта.</param>
+    /// <returns>Настроенный экземпляр GPT-79904 или <see langword="null"/>, если прибор не найден.</returns>
+    internal static async Task<GPT79904?> CreateDiscoveredDeviceAsync(int baudRate)
+    {
+      string? portName = await FindDeviceAsync(baudRate);
+      return portName == null ? null : CreateDevice(portName, baudRate);
+    }
+
     private static async Task<string?> FindDeviceAsync(int baudRate)
     {
       string[] ports = SerialPort.GetPortNames()
@@ -177,7 +188,7 @@ namespace TestConsole.GPT
       return int.TryParse(portName.AsSpan(3), out int number) ? number : int.MaxValue;
     }
 
-    private static int ReadInt(string title, int defaultValue)
+    internal static int ReadInt(string title, int defaultValue)
     {
       Console.Write($"{title} [{defaultValue}]: ");
       return int.TryParse(Console.ReadLine(), out int value) ? value : defaultValue;

@@ -61,5 +61,17 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Mode
     /// в зависимости от реализации.
     /// </returns>
     Task<double> GetRampTimeAsync();
+
+    /// <summary>
+    /// Устанавливает время проверки из команды программы контроля.
+    /// </summary>
+    /// <param name="time">Значение времени.</param>
+    void SetTargetTime(double time);
+
+    /// <summary>
+    /// Возвращает время проверки из команды программы контроля.
+    /// </summary>
+    /// <returns></returns>
+    double GetTargetTime();
   }
 }

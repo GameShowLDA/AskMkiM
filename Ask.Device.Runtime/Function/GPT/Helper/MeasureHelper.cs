@@ -45,25 +45,38 @@ namespace Ask.Device.Runtime.Function.GPT.Helper
         await breakDown.DeviceProtocol.QueryAsync(
           $"{GetCommandSyntax(FunctionCommand.FUNCTION_TEST)} ON",
           delayBeforeCall: delayBeforeCall);
+
         await breakDown.DeviceProtocol.QueryAsync(
           $"{FunctionCommandManager.GetCommandSyntax(FunctionCommand.MEASURE)} ?",
           timeout: 500,
           delayBeforeCall: delayBeforeCall);
+
         await breakDown.DeviceProtocol.QueryAsync($"{GetCommandSyntax(FunctionCommand.FUNCTION_TEST)} OFF");
         await breakDown.DeviceProtocol.QueryAsync(
           $"{GetCommandSyntax(FunctionCommand.FUNCTION_TEST)} ?",
           responseDelay: StopPollIntervalMs,
           timeout: 1000);
+
         LogInformation($"{nameof(MeasureAsync)}: Устройство в Idle Mode. Возвращаем {random}.", isDeviceLog: true);
         return new BreakdownMeasurementResponse(BreakdownMeasurementStatus.Pass, random, string.Empty);
       }
 
       try
       {
-        if (waitFullTime)
-          return await MeasureFullTimeAsync(breakDown, delayBeforeCall);
-        else
-          return await MeasureFastPollingAsync(breakDown, time, delayBeforeCall);
+        if (!waitFullTime)
+        {
+          await breakDown.Time.SetTestTimeAsync(1);
+          var answer = await MeasureFullTimeAsync(breakDown, delayBeforeCall);
+          if (answer.Status == BreakdownMeasurementStatus.Pass)
+          {
+            return answer;
+          }
+
+          await breakDown.LimitManager.SetLowLimitAsync(1);
+        }
+
+        await breakDown.Time.SetTestTimeAsync(breakDown.Time.GetTargetTime());
+        return await MeasureFullTimeAsync(breakDown, delayBeforeCall);
       }
       finally
       {
@@ -89,19 +102,20 @@ namespace Ask.Device.Runtime.Function.GPT.Helper
       var stage = Stopwatch.StartNew();
       LogInformation($"[PERF][GPT][MeasureFastPolling] Use configured test time: {stage.ElapsedMilliseconds} ms", isDeviceLog: true);
       string answerDevice = string.Empty;
+      var attempt = 0;
 
-      for (int i = 0; i < count; i++)
+      do
       {
-        var query = $"{GetCommandSyntax(FunctionCommand.FUNCTION_TEST)} ON";
+        attempt++;
         stage.Restart();
+        var query = $"{FunctionCommandManager.GetCommandSyntax(FunctionCommand.MEASURE)} ?";
+
         await breakDown.DeviceProtocol.QueryAsync(query, delayBeforeCall: delayBeforeCall);
-        LogInformation($"[PERF][GPT][MeasureFastPolling] Start test #{i + 1}: {stage.ElapsedMilliseconds} ms", isDeviceLog: true);
+        LogInformation($"[PERF][GPT][MeasureFastPolling] Start test #{attempt}: {stage.ElapsedMilliseconds} ms", isDeviceLog: true);
 
         var poll = Stopwatch.StartNew();
         while (true)
         {
-
-          query = $"{FunctionCommandManager.GetCommandSyntax(FunctionCommand.MEASURE)} ?";
           answerDevice = await breakDown.DeviceProtocol.QueryAsync(query, timeout: 500, delayBeforeCall: delayBeforeCall);
 
           if (answerDevice != string.Empty
@@ -110,13 +124,14 @@ namespace Ask.Device.Runtime.Function.GPT.Helper
 
           await Task.Delay(PollIntervalMs);
         }
-        LogInformation($"[PERF][GPT][MeasureFastPolling] Poll result #{i + 1}: {poll.ElapsedMilliseconds} ms", isDeviceLog: true);
+        LogInformation($"[PERF][GPT][MeasureFastPolling] Poll result #{attempt}: {poll.ElapsedMilliseconds} ms", isDeviceLog: true);
 
         if (!BreakdownTesterResponseProcessor.IsTestFailed(answerDevice))
         {
           break;
         }
       }
+      while (total.Elapsed.TotalSeconds < time);
 
       stage.Restart();
       await StopMeasure(breakDown);
@@ -136,8 +151,12 @@ namespace Ask.Device.Runtime.Function.GPT.Helper
     }
 
     /// <summary>
-    /// Полный режим: система полностью ждёт time + timeRamp и только после этого запрашивает результат измерения.
+    /// Выполняет измерение с полным ожиданием времени тестирования и времени нарастания,
+    /// после чего запрашивает результат измерения.
     /// </summary>
+    /// <param name="breakDown">Устройство для проведения испытания на пробой.</param>
+    /// <param name="delayBeforeCall">Задержка перед выполнением команды устройства.</param>
+    /// <returns>Результат измерения после завершения испытания.</returns>
     static private async Task<BreakdownMeasurementResponse> MeasureFullTimeAsync(
       IBreakdownTester breakDown,
       int delayBeforeCall)
