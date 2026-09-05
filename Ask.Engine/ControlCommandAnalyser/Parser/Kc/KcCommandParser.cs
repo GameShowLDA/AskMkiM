@@ -7,6 +7,7 @@ using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.ParserContext;
 using Ask.DataBase.Engine.Static.Devices;
 using Ask.Engine.ControlCommandAnalyser.Attributes;
+using Ask.Engine.ControlCommandAnalyser.Diagnostics;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Model.Ks;
 using Ask.Engine.ControlCommandAnalyser.Parser.Common.HelperParserParametr;
@@ -77,7 +78,9 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Kc
       }
 
       var ctx = ParameterContext.Create(commandNumber, mnemonic, numberLine);
-      var meter = FastMeters.GetAllAsync().GetAwaiter().GetResult().FirstOrDefault();
+      var meter = CommandAnalysisContext.IsTextDiagnostics
+        ? null
+        : FastMeters.GetAllAsync().GetAwaiter().GetResult().FirstOrDefault();
       remainder = KsParameterPipeline.Execute(model, remainder, ctx, meter);
       model.Scheme = SchemeManager.GetScheme(model, rmCommandModel, numberLine, ref remainder);
 

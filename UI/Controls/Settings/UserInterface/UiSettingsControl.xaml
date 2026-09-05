@@ -255,9 +255,25 @@
                                         Title="{Binding Source={StaticResource Settings_UserInterface_ChainPointBodyBackground_Title}, Path=Value}"
                                         Description="{Binding Source={StaticResource Settings_UserInterface_ChainPointBodyBackground_Description}, Path=Value}"
                                         IsChecked="{Binding IdleMode, Mode=TwoWay}"
-                                        Margin="0,6,0,0"
+                                        Margin="0,6,10,0"
                                         VerticalAlignment="Top"
                                         x:Name="ChainPointBodyBackgroundHighlighting"/>
+
+                                <SharedComponents:SettingsCard
+                                        Title="{Binding Source={StaticResource Settings_UserInterface_WarningUnderline_Title}, Path=Value}"
+                                        Description="{Binding Source={StaticResource Settings_UserInterface_WarningUnderline_Description}, Path=Value}"
+                                        IsChecked="{Binding IdleMode, Mode=TwoWay}"
+                                        Margin="0,6,10,0"
+                                        VerticalAlignment="Top"
+                                        x:Name="WarningUnderlineHighlighting"/>
+
+                                <SharedComponents:SettingsCard
+                                        Title="{Binding Source={StaticResource Settings_UserInterface_ErrorUnderline_Title}, Path=Value}"
+                                        Description="{Binding Source={StaticResource Settings_UserInterface_ErrorUnderline_Description}, Path=Value}"
+                                        IsChecked="{Binding IdleMode, Mode=TwoWay}"
+                                        Margin="0,6,0,0"
+                                        VerticalAlignment="Top"
+                                        x:Name="ErrorUnderlineHighlighting"/>
                             </WrapPanel>
                         </StackPanel>
                     </Grid>

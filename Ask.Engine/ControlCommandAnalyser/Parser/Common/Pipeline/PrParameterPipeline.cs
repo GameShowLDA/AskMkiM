@@ -40,7 +40,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Pipeline
         PrCommandModel model,
         string remainder,
         ParameterContext ctx,
-        IMultimeter meter)
+        IMultimeter? meter)
         => _pipeline.Execute(model, remainder, ctx with { Fastmeter = meter });
   }
 }

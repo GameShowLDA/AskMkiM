@@ -23,8 +23,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Processors.Si
     /// <returns>Строка без обработанного параметра.</returns>
     public string Process(SiCommandModel model, string remainder, ParameterContext ctx)
     {
-      var breakdown = ctx.Breakdown!;
-
       var (voltageRaw, unit, rest) =
           CommonParameterParser.VoltageParser.ParseVoltage(remainder);
 
@@ -35,6 +33,14 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Processors.Si
       }
 
       var value = CommonParameterParser.ParseToDouble(voltageRaw);
+
+      var breakdown = ctx.Breakdown;
+      if (breakdown == null)
+      {
+        model.Voltage = value;
+        model.VoltageSource = MeasurementSourceValueFormatter.FormatCompact(value, unit);
+        return rest;
+      }
 
       VoltageManager.ApplySingleVoltage(
           model,

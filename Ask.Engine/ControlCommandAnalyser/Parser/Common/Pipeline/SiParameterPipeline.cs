@@ -37,7 +37,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Pipeline
         SiCommandModel model,
         string remainder,
         ParameterContext ctx,
-        IBreakdownTester breakdown)
+        IBreakdownTester? breakdown)
         => _pipeline.Execute(model, remainder, ctx with { Breakdown = breakdown });
   }
 

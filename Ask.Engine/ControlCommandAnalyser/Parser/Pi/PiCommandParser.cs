@@ -8,6 +8,7 @@ using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.ParserContext;
 using Ask.DataBase.Engine.Static.Devices;
 using Ask.Engine.ControlCommandAnalyser.Model;
+using Ask.Engine.ControlCommandAnalyser.Diagnostics;
 using Ask.Engine.ControlCommandAnalyser.Parser.Common;
 using Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers;
 using Ask.Engine.ControlCommandAnalyser.Parser.Common.Pipeline;
@@ -52,6 +53,9 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pi
       int numberLine,
       List<string> lines)
     {
+      if (CommandAnalysisContext.IsTextDiagnostics)
+        return true;
+
       var breakdown = BreakdownTesters.GetAllAsync().GetAwaiter().GetResult().FirstOrDefault();
       if (breakdown == null)
       {
@@ -79,7 +83,13 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pi
       string mnemonic,
       int numberLine,
       PiCommandModel model)
-      => new(commandNumber, mnemonic, numberLine, BreakdownTesters.GetAllAsync().GetAwaiter().GetResult().FirstOrDefault());
+      => CommandAnalysisContext.IsTextDiagnostics
+        ? new ParameterContext(commandNumber, mnemonic, numberLine)
+        : new ParameterContext(
+          commandNumber,
+          mnemonic,
+          numberLine,
+          BreakdownTesters.GetAllAsync().GetAwaiter().GetResult().FirstOrDefault());
 
     /// <summary>
     /// Выполняет разбор параметров ПИ и вложенной части СИ.
@@ -87,7 +97,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pi
     protected override string ParseParameters(PiCommandModel model, string remainder, ParameterContext ctx, List<string> lines)
     {
       var breakdown = ctx.Breakdown;
-      if (breakdown == null)
+      if (breakdown == null && !CommandAnalysisContext.IsTextDiagnostics)
         return remainder;
 
       remainder = PiSiSplitter.PreNormalize(remainder);

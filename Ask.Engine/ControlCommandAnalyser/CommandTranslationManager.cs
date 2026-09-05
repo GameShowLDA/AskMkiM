@@ -8,10 +8,12 @@ using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
 using Ask.DataBase.Engine.Static.Devices;
 using Ask.Engine.ControlCommandAnalyser.ComandBody;
+using Ask.Engine.ControlCommandAnalyser.Diagnostics;
 using Ask.Engine.ControlCommandAnalyser.Formatter.Base;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Parser;
 using Ask.Engine.ControlCommandAnalyser.Validation;
+using System.Collections.Immutable;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -21,6 +23,13 @@ namespace Ask.Engine.ControlCommandAnalyser
   public class CommandTranslationManager
   {
     private static readonly Regex CommandHeaderRegex = new(@"^\s*(\d+)\s+([\p{L}_]{2,})(?=\s|$)", RegexOptions.Compiled);
+    private static readonly object ParseLock = new();
+    private static readonly Lazy<List<ICommandParser>> ParserCache = new(CreateAllParsers);
+    private static readonly Lazy<List<ICommandFormatter>> FormatterCache = new(CreateAllFormatters);
+    private static readonly Lazy<List<ICommandBody>> CommandBodyBuilderCache = new(CreateAllCommandBuilders);
+    private static readonly Lazy<IReadOnlyList<string>> KnownCommandMnemonicCache = new(CreateKnownCommandMnemonics);
+    private static readonly Lazy<IReadOnlyDictionary<string, IReadOnlyList<AlgorithmKey>>> KnownCommandKeysCache = new(CreateKnownCommandKeysByMnemonic);
+
     private readonly List<ICommandParser> _parsers;
     private readonly List<ICommandFormatter> _formatters;
     private readonly List<ICommandBody> _commandBodyBuilders;
@@ -32,7 +41,118 @@ namespace Ask.Engine.ControlCommandAnalyser
       _commandBodyBuilders = GetAllCommandBuilders();
     }
 
-    private static List<ICommandParser> GetAllParsers()
+    /// <summary>
+    /// Возвращает мнемоники команд, для которых в текущей сборке найден парсер.
+    /// Используется редактором для быстрой проверки заголовков без дублирования
+    /// списка команд в UI-слое.
+    /// </summary>
+    public static IReadOnlyList<string> GetKnownCommandMnemonics()
+      => KnownCommandMnemonicCache.Value;
+
+    /// <summary>
+    /// Возвращает допустимые ключи по мнемоникам команд, для которых найден парсер.
+    /// Данные собираются из моделей команд и их атрибутов <see cref="Attributes.AllowedKeysAttribute"/>.
+    /// </summary>
+    public static IReadOnlyDictionary<string, IReadOnlyList<AlgorithmKey>> GetKnownCommandKeysByMnemonic()
+      => KnownCommandKeysCache.Value;
+
+    /// <summary>
+    /// Разбирает текст программы контроля и выполняет легковесный пост-анализ
+    /// без форматирования, автодобавления команд и сообщений в UI.
+    /// </summary>
+    /// <param name="text">Исходный текст программы контроля.</param>
+    /// <returns>Список моделей команд с заполненными ошибками и предупреждениями.</returns>
+    public List<BaseCommandModel> ParseForDiagnostics(string text)
+    {
+      if (string.IsNullOrWhiteSpace(text))
+      {
+        return new List<BaseCommandModel>();
+      }
+
+      lock (ParseLock)
+      {
+        var previousCommands = CommandsModel.CommandModels.ToList();
+        using var diagnosticsScope = CommandAnalysisContext.EnterTextDiagnostics();
+
+        try
+        {
+          var models = ParseAllCore(
+            text,
+            emitMessages: false,
+            stopOnCriticalStructuralErrors: false);
+
+          CommandPostAnalyzer.Analyze(models);
+          CkCommandValidator.ValidateVshCompatibility(models);
+
+          return models;
+        }
+        finally
+        {
+          CommandsModel.CommandModels.Clear();
+          CommandsModel.CommandModels.AddRange(previousCommands);
+        }
+      }
+    }
+
+    private static List<ICommandParser> GetAllParsers() => ParserCache.Value;
+
+    private static List<ICommandFormatter> GetAllFormatters() => FormatterCache.Value;
+
+    private static List<ICommandBody> GetAllCommandBuilders() => CommandBodyBuilderCache.Value;
+
+    private static IReadOnlyList<string> CreateKnownCommandMnemonics()
+    {
+      var parsers = GetAllParsers();
+
+      return GetCommandMnemonicCandidates()
+        .Where(mnemonic => parsers.Any(parser => parser.CanParse(mnemonic)))
+        .Distinct(StringComparer.OrdinalIgnoreCase)
+        .OrderBy(mnemonic => mnemonic)
+        .ToList();
+    }
+
+    private static IReadOnlyDictionary<string, IReadOnlyList<AlgorithmKey>> CreateKnownCommandKeysByMnemonic()
+    {
+      var knownMnemonics = KnownCommandMnemonicCache.Value.ToHashSet(StringComparer.OrdinalIgnoreCase);
+      var result = new Dictionary<string, IReadOnlyList<AlgorithmKey>>(StringComparer.OrdinalIgnoreCase);
+
+      foreach (var type in Assembly.GetExecutingAssembly()
+                 .GetTypes()
+                 .Where(t => !t.IsAbstract && typeof(BaseCommandModel).IsAssignableFrom(t)))
+      {
+        var model = TryCreateCommandModel(type);
+        if (model == null)
+        {
+          continue;
+        }
+
+        var mnemonic = NormalizeCommandMnemonic(model.Mnemonic);
+        if (string.IsNullOrWhiteSpace(mnemonic) ||
+            !knownMnemonics.Contains(mnemonic) ||
+            result.ContainsKey(mnemonic))
+        {
+          continue;
+        }
+
+        result[mnemonic] = KeysHelper.GetAllowedKeysForModel(model);
+      }
+
+      return result;
+    }
+
+    private static BaseCommandModel? TryCreateCommandModel(Type type)
+    {
+      try
+      {
+        return Activator.CreateInstance(type) as BaseCommandModel;
+      }
+      catch
+      {
+        return null;
+      }
+    }
+
+    private static List<ICommandParser> CreateAllParsers()
     {
       var iface = typeof(ICommandParser);
 
@@ -44,7 +164,28 @@ namespace Ask.Engine.ControlCommandAnalyser
         .ToList();
     }
 
-    private static List<ICommandFormatter> GetAllFormatters()
+    private static IEnumerable<string> GetCommandMnemonicCandidates()
+    {
+      foreach (MeasurementTypeCommand command in Enum.GetValues<MeasurementTypeCommand>())
+      {
+        var displayName = command.GetDisplayInfo()?.DisplayName;
+        if (!string.IsNullOrWhiteSpace(displayName))
+        {
+          yield return displayName;
+        }
+      }
+
+      foreach (OrganizationalComands command in Enum.GetValues<OrganizationalComands>())
+      {
+        var displayName = command.GetDisplayOrganizationalInfo()?.DisplayName;
+        if (!string.IsNullOrWhiteSpace(displayName))
+        {
+          yield return displayName;
+        }
+      }
+    }
+
+    private static List<ICommandFormatter> CreateAllFormatters()
     {
       var iface = typeof(ICommandFormatter);
       return Assembly.GetExecutingAssembly()
@@ -55,7 +196,7 @@ namespace Ask.Engine.ControlCommandAnalyser
         .ToList();
     }
 
-    private static List<ICommandBody> GetAllCommandBuilders()
+    private static List<ICommandBody> CreateAllCommandBuilders()
     {
       var iface = typeof(ICommandBody);
       return Assembly.GetExecutingAssembly()
@@ -85,36 +226,39 @@ namespace Ask.Engine.ControlCommandAnalyser
     /// <returns>Отформатированный исходный текст.</returns>
     public string BuildFormattedSourceText(string text)
     {
-      if (string.IsNullOrWhiteSpace(text))
+      lock (ParseLock)
       {
-        return string.Empty;
-      }
-
-      var models = ParseAll(text, emitMessages: false);
-      var originalSourceLines = models.ToDictionary(
-        model => model,
-        model => model.SourceLines?.ToList() ?? new List<string>());
-
-      SetSourseLines(models);
-
-      var formattedLines = new List<string>();
-
-      foreach (var model in models)
-      {
-        var lines = model switch
+        if (string.IsNullOrWhiteSpace(text))
         {
-          UnknownCommandModel => NormalizeUnknownSourceLines(originalSourceLines[model]),
-          CpCommandModel or CuCommandModel => NormalizeVerbatimBodySourceLines(
-            originalSourceLines[model],
-            model.CommandNumber,
-            model.Mnemonic),
-          _ => NormalizeGeneratedSourceLines(model.SourceLines),
-        };
+          return string.Empty;
+        }
 
-        formattedLines.AddRange(lines);
+        var models = ParseAllCore(text, emitMessages: false);
+        var originalSourceLines = models.ToDictionary(
+          model => model,
+          model => model.SourceLines?.ToList() ?? new List<string>());
+
+        SetSourseLines(models);
+
+        var formattedLines = new List<string>();
+
+        foreach (var model in models)
+        {
+          var lines = model switch
+          {
+            UnknownCommandModel => NormalizeUnknownSourceLines(originalSourceLines[model]),
+            CpCommandModel or CuCommandModel => NormalizeVerbatimBodySourceLines(
+              originalSourceLines[model],
+              model.CommandNumber,
+              model.Mnemonic),
+            _ => NormalizeGeneratedSourceLines(model.SourceLines),
+          };
+
+          formattedLines.AddRange(lines);
+        }
+
+        return string.Join(Environment.NewLine, formattedLines);
       }
-
-      return string.Join(Environment.NewLine, formattedLines);
     }
 
     /// <summary>
@@ -126,32 +270,35 @@ namespace Ask.Engine.ControlCommandAnalyser
     /// <returns>Скомпилированные модели и итоговый текст трансляции.</returns>
     public TranslationBuildResult BuildTranslation(string text, IProgress<string>? progress = null)
     {
-      ReportProgress(progress, "Начало трансляции");
-      var models = ParseAll(text);
+      lock (ParseLock)
+      {
+        ReportProgress(progress, "Начало трансляции");
+        var models = ParseAllCore(text, emitMessages: true);
 
-      if (HasCriticalStructuralErrors(models))
-        return CompleteCriticalTranslation(models, progress);
+        if (HasCriticalStructuralErrors(models))
+          return CompleteCriticalTranslation(models, progress);
 
-      CheckVshModel(models);
-      CkCommandValidator.ValidateVshCompatibility(models);
+        CheckVshModel(models);
+        CkCommandValidator.ValidateVshCompatibility(models);
 
-      if (HasCriticalStructuralErrors(models))
-        return CompleteCriticalTranslation(models, progress);
+        if (HasCriticalStructuralErrors(models))
+          return CompleteCriticalTranslation(models, progress);
 
-      ReportProgress(progress, "Формирование данных");
-      _ = BuildFormattedText(models);
+        ReportProgress(progress, "Формирование данных");
+        _ = BuildFormattedText(models);
 
-      ReportProgress(progress, "Проверка взаимосвязей");
-      Analyze(models);
+        ReportProgress(progress, "Проверка взаимосвязей");
+        Analyze(models);
 
-      if (HasCriticalStructuralErrors(models))
-        return CompleteCriticalTranslation(models, progress);
+        if (HasCriticalStructuralErrors(models))
+          return CompleteCriticalTranslation(models, progress);
 
-      ReportProgress(progress, "Формирование данных");
-      string formattedText = BuildFormattedText(models);
+        ReportProgress(progress, "Формирование данных");
+        string formattedText = BuildFormattedText(models);
 
-      ReportProgress(progress, "Готово");
-      return new TranslationBuildResult(models, formattedText);
+        ReportProgress(progress, "Готово");
+        return new TranslationBuildResult(models, formattedText);
+      }
     }
 
     private static void CheckVshModel(List<BaseCommandModel> models)
@@ -364,6 +511,17 @@ namespace Ask.Engine.ControlCommandAnalyser
     /// </summary>
     public List<BaseCommandModel> ParseAll(string text, bool emitMessages = true)
     {
+      lock (ParseLock)
+      {
+        return ParseAllCore(text, emitMessages);
+      }
+    }
+
+    private List<BaseCommandModel> ParseAllCore(
+      string text,
+      bool emitMessages,
+      bool stopOnCriticalStructuralErrors = true)
+    {
       if (emitMessages)
       {
         MessageEventAdapter.RaiseInfoMessage("Сбор данных...");
@@ -413,7 +571,7 @@ namespace Ask.Engine.ControlCommandAnalyser
             commands.Add(model);
             CommandsModel.CommandModels.Add(model);
 
-            if (HasCriticalStructuralErrors(model))
+            if (stopOnCriticalStructuralErrors && HasCriticalStructuralErrors(model))
               return commands;
           }
 
@@ -486,7 +644,8 @@ namespace Ask.Engine.ControlCommandAnalyser
       foreach (var parser in _parsers)
         if (parser.CanParse(mnemonic))
         {
-          return parser.Parse(commandNumber, mnemonic, lineNumber, lines);
+          var model = parser.Parse(commandNumber, mnemonic, lineNumber, lines);
+          return InitializeCommandMetadata(model, mnemonic);
         }
 
       var unknownCommandModel = new UnknownCommandModel
@@ -508,7 +667,21 @@ namespace Ask.Engine.ControlCommandAnalyser
         }
       }
 
-      return unknownCommandModel;
+      return InitializeCommandMetadata(unknownCommandModel, mnemonic);
+    }
+
+    private static BaseCommandModel InitializeCommandMetadata(BaseCommandModel model, string mnemonic)
+    {
+      mnemonic = NormalizeCommandMnemonic(mnemonic);
+
+      if (string.IsNullOrWhiteSpace(model.Mnemonic))
+      {
+        model.Mnemonic = mnemonic;
+      }
+
+      model.AllowedAlgorithmKeys = KeysHelper.GetAllowedKeysForModel(model).ToImmutableHashSet();
+
+      return model;
     }
 
     private static string NormalizeCommandMnemonic(string mnemonic)

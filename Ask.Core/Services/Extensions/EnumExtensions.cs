@@ -1,4 +1,5 @@
 ﻿using Ask.Core.Shared.Metadata.Atributes;
+using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Enums.UnitEnums;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
@@ -83,10 +84,22 @@ namespace Ask.Core.Services.Extensions
       => value.GetAttribute<CommandDisplayInfoAttribute>();
 
     /// <summary>
+    /// Возвращает атрибут отображения команды измерения.
+    /// </summary>
+    public static CommandDisplayInfoAttribute GetDisplayInfo(this MeasurementTypeCommand value)
+      => value.GetCommandDisplayInfo();
+
+    /// <summary>
     /// Возвращает организационный атрибут отображения команды.
     /// </summary>
     public static CommandOrganizationalAttribute GetCommandOrganizationalInfo(this Enum value)
       => value.GetAttribute<CommandOrganizationalAttribute>();
+
+    /// <summary>
+    /// Возвращает организационный атрибут отображения команды.
+    /// </summary>
+    public static CommandOrganizationalAttribute GetDisplayOrganizationalInfo(this OrganizationalComands value)
+      => value.GetCommandOrganizationalInfo();
 
     /// <summary>
     /// Возвращает атрибут единицы измерения.

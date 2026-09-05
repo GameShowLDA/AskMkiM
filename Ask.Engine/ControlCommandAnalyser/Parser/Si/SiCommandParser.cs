@@ -8,6 +8,7 @@ using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.ParserContext;
 using Ask.DataBase.Engine.Static.Devices;
 using Ask.Engine.ControlCommandAnalyser.Model;
+using Ask.Engine.ControlCommandAnalyser.Diagnostics;
 using Ask.Engine.ControlCommandAnalyser.Parser.Common;
 using Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers;
 using Ask.Engine.ControlCommandAnalyser.Parser.Common.Pipeline;
@@ -74,6 +75,9 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Si
       int numberLine,
       List<string> lines)
     {
+      if (CommandAnalysisContext.IsTextDiagnostics)
+        return true;
+
       var breakdown = BreakdownTesters.GetAllAsync().GetAwaiter().GetResult().FirstOrDefault();
       if (breakdown == null)
       {
@@ -96,7 +100,13 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Si
       string mnemonic,
       int numberLine,
       SiCommandModel model)
-      => new(commandNumber, mnemonic, numberLine, BreakdownTesters.GetAllAsync().GetAwaiter().GetResult().FirstOrDefault());
+      => CommandAnalysisContext.IsTextDiagnostics
+        ? new ParameterContext(commandNumber, mnemonic, numberLine)
+        : new ParameterContext(
+          commandNumber,
+          mnemonic,
+          numberLine,
+          BreakdownTesters.GetAllAsync().GetAwaiter().GetResult().FirstOrDefault());
 
     /// <summary>
     /// Выполняет разбор параметров команды СИ через конвейер обработчиков.
@@ -109,7 +119,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Si
     protected override string ParseParameters(SiCommandModel model, string remainder, ParameterContext ctx, List<string> lines)
     {
       var breakdown = ctx.Breakdown;
-      if (breakdown == null)
+      if (breakdown == null && !CommandAnalysisContext.IsTextDiagnostics)
         return remainder;
 
       return SiParameterPipeline.Execute(model, remainder, ctx, breakdown);

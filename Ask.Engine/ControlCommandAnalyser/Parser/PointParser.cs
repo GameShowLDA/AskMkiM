@@ -8,6 +8,7 @@ using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.DataBase.Engine.Static.Devices;
 using Ask.Engine.ControlCommandAnalyser.Model;
+using Ask.Engine.ControlCommandAnalyser.Diagnostics;
 using Ask.Engine.ControlCommandAnalyser.Model.Chains;
 using Newtonsoft.Json.Linq;
 using System.Text.RegularExpressions;
@@ -924,6 +925,9 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
     /// </summary>
     private static bool TryValidateBusSupport(PointModel point, SwitchingBus bus, List<ErrorItem> errors)
     {
+      if (CommandAnalysisContext.IsTextDiagnostics)
+        return true;
+
       var module = RelaySwitchModules
           .GetDevicesByNumberChassisAsync(point.DeviceNumber)
           .GetAwaiter()

@@ -441,6 +441,18 @@
   <data name="settings.userinterface.chainPointBodyBackground.description" xml:space="preserve">
     <value>Включает или отключает фоновое выделение строк проверки цепей и точек в протоколе выполнения.</value>
   </data>
+  <data name="settings.userinterface.warningUnderline.title" xml:space="preserve">
+    <value>Подчеркивание предупреждений</value>
+  </data>
+  <data name="settings.userinterface.warningUnderline.description" xml:space="preserve">
+    <value>Включает или отключает волнистое подчеркивание предупреждений в редакторе протокола.</value>
+  </data>
+  <data name="settings.userinterface.errorUnderline.title" xml:space="preserve">
+    <value>Подчеркивание ошибок</value>
+  </data>
+  <data name="settings.userinterface.errorUnderline.description" xml:space="preserve">
+    <value>Включает или отключает волнистое подчеркивание ошибок в редакторе протокола.</value>
+  </data>
   <data name="settings.userinterface.language.title" xml:space="preserve">
     <value>Язык</value>
   </data>

@@ -1,12 +1,14 @@
-using Ask.Core.Services.Errors.Models;
-using Ask.Core.Shared.Interfaces.ErrorInterfaces;
-using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
-using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Ask.Core.Services.Errors.Models;
+using Ask.Core.Shared.Interfaces.ErrorInterfaces;
+using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
+using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
+using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 
 namespace Ask.Core.Shared.DTO.Executor
 {
@@ -48,6 +50,12 @@ namespace Ask.Core.Shared.DTO.Executor
     public List<string> AlgorithmKey { get; set; } = new();
 
     /// <summary>
+    /// Ключи алгоритма проверки, допустимые для текущего типа команды.
+    /// Заполняется анализатором после определения конкретной модели команды.
+    /// </summary>
+    public IReadOnlySet<AlgorithmKey> AllowedAlgorithmKeys { get; set; } = ImmutableHashSet<AlgorithmKey>.Empty;
+
+    /// <summary>
     /// Комментарии, указанные в команде.
     /// </summary>
     public List<string> Comment { get; set; } = new();
@@ -79,6 +87,23 @@ namespace Ask.Core.Shared.DTO.Executor
     public bool IsBreakpointEnabled { get; set; } = true;
 
     #region Методы
+    /// <summary>
+    /// Проверяет, соответствует ли модель указанной мнемонике команды.
+    /// </summary>
+    public bool IsCommandMnemonic(string mnemonic)
+    {
+      return !string.IsNullOrWhiteSpace(mnemonic)
+        && string.Equals(Mnemonic, mnemonic, StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
+    /// Проверяет, разрешён ли алгоритмический ключ для текущего типа команды.
+    /// </summary>
+    public bool AllowsAlgorithmKey(AlgorithmKey key)
+    {
+      return AllowedAlgorithmKeys.Contains(key);
+    }
+
     public virtual T GetModel<T>(BaseCommandModel baseCommandModel) where T : class
     {
       return baseCommandModel as T;

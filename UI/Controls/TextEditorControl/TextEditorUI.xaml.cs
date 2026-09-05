@@ -1,3 +1,14 @@
+using System.IO;
+using System.Reflection;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Threading;
+using System.Xml;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Config.Base;
 using Ask.Core.Services.Errors.Models;
@@ -8,6 +19,7 @@ using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
+using Ask.Engine.ControlCommandAnalyser;
 using Ask.Support;
 using Ask.UI.Shared.Contracts.Ask.UI.Shared.Contracts;
 using ICSharpCode.AvalonEdit.Document;
@@ -16,15 +28,7 @@ using ICSharpCode.AvalonEdit.Folding;
 using ICSharpCode.AvalonEdit.Highlighting;
 using ICSharpCode.AvalonEdit.Highlighting.Xshd;
 using ICSharpCode.AvalonEdit.Rendering;
-using System.IO;
-using System.Reflection;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Xml;
+using UI.Controls.TextEditorControl.Syntax;
 using static Ask.LogLib.LoggerUtility;
 
 namespace UI.Controls.TextEditorControl
@@ -74,6 +78,28 @@ namespace UI.Controls.TextEditorControl
     private Color backgroudColor = (Color)ColorConverter.ConvertFromString("#b23a48");
 
     private AvalonTextDocumentAdapter _documentAdapter;
+
+    private const string SyntaxDiagnosticMarkerTag = "SyntaxDiagnostic";
+
+    private readonly DispatcherTimer _syntaxDiagnosticTimer = new();
+
+    private static readonly Lazy<EditorSyntaxAnalyzer> SharedSyntaxAnalyzer =
+      new Lazy<EditorSyntaxAnalyzer>(CreateSyntaxAnalyzer);
+
+    private static EditorSyntaxAnalyzer SyntaxAnalyzer => SharedSyntaxAnalyzer.Value;
+
+    private readonly Color _syntaxErrorUnderline =
+      (Color)ColorConverter.ConvertFromString("#FF0000");
+
+    private readonly Color _syntaxWarningUnderline =
+      (Color)ColorConverter.ConvertFromString("#ED7014");
+
+    private IReadOnlyList<TextSyntaxDiagnostic> _syntaxDiagnostics =
+      Array.Empty<TextSyntaxDiagnostic>();
+
+    private ToolTip? _syntaxDiagnosticToolTip;
+
+    private int _syntaxAnalysisVersion;
 
     #endregion
 
@@ -644,6 +670,207 @@ namespace UI.Controls.TextEditorControl
         $"pack://application:,,,/Ask.UI;component/Resources/Assets/SyntaxHighlighting/{themeFolder}/{fileName}",
         UriKind.Absolute);
 
+    private void ScheduleSyntaxAnalysis()
+    {
+      if (textEditor.Document == null)
+        return;
+
+      if (!SupportsCommandSyntaxDiagnostics(FileType))
+      {
+        _syntaxDiagnosticTimer.Stop();
+        ClearSyntaxDiagnostics();
+        return;
+      }
+
+      _syntaxDiagnosticTimer.Stop();
+      _syntaxDiagnosticTimer.Start();
+    }
+
+    private async void AnalyzeSyntaxAndHighlight()
+    {
+      if (textEditor.Document == null || _markerService == null)
+        return;
+
+      if (!SupportsCommandSyntaxDiagnostics(FileType) ||
+          !SyntaxDiagnosticUnderlinePolicy.HasEnabledUnderlines())
+      {
+        ClearSyntaxDiagnostics();
+        return;
+      }
+
+      string textSnapshot = textEditor.Text ?? string.Empty;
+      int analysisVersion = ++_syntaxAnalysisVersion;
+
+      IReadOnlyList<TextSyntaxDiagnostic> diagnostics;
+
+      try
+      {
+        diagnostics = await Task.Run(() =>
+          SyntaxAnalyzer.Analyze(new TextDocument(textSnapshot)));
+      }
+      catch (Exception ex)
+      {
+        LogWarning($"Ошибка синтаксического анализа: {ex.Message}");
+        return;
+      }
+
+      if (analysisVersion != _syntaxAnalysisVersion ||
+          !string.Equals(textSnapshot, textEditor.Text, StringComparison.Ordinal))
+      {
+        return;
+      }
+
+      _markerService.ClearMarkersByTag(SyntaxDiagnosticMarkerTag);
+      _syntaxDiagnostics = diagnostics
+        .Where(SyntaxDiagnosticUnderlinePolicy.IsEnabled)
+        .ToList();
+
+      if (_syntaxDiagnostics.Count == 0)
+        CloseSyntaxDiagnosticToolTip();
+
+      foreach (var diagnostic in _syntaxDiagnostics
+                 .GroupBy(diagnostic => new
+                 {
+                   diagnostic.StartOffset,
+                   Length = Math.Max(1, diagnostic.Length)
+                 })
+                 .Select(group => group
+                   .OrderBy(diagnostic => diagnostic.Severity == TextSyntaxSeverity.Error ? 0 : 1)
+                   .First()))
+      {
+        _markerService.AddSquigglyUnderlineMarker(
+          diagnostic.StartOffset,
+          Math.Max(1, diagnostic.Length),
+          GetSyntaxDiagnosticUnderlineColor(diagnostic),
+          SyntaxDiagnosticMarkerTag);
+      }
+    }
+
+    private static bool SupportsCommandSyntaxDiagnostics(FileType fileType) =>
+      fileType is FileType.PK or FileType.PKW;
+
+    private void ClearSyntaxDiagnostics()
+    {
+      _markerService?.ClearMarkersByTag(SyntaxDiagnosticMarkerTag);
+      _syntaxDiagnostics = Array.Empty<TextSyntaxDiagnostic>();
+      CloseSyntaxDiagnosticToolTip();
+    }
+
+    private Color GetSyntaxDiagnosticUnderlineColor(TextSyntaxDiagnostic diagnostic) =>
+      diagnostic.Severity == TextSyntaxSeverity.Warning
+        ? _syntaxWarningUnderline
+        : _syntaxErrorUnderline;
+
+    private void TextEditor_MouseMove(object sender, MouseEventArgs e)
+    {
+      if (textEditor.Document == null || _syntaxDiagnostics.Count == 0)
+      {
+        CloseSyntaxDiagnosticToolTip();
+        return;
+      }
+
+      var mousePoint = e.GetPosition(textEditor);
+      var position = textEditor.GetPositionFromPoint(mousePoint);
+
+      if (position == null)
+      {
+        CloseSyntaxDiagnosticToolTip();
+        return;
+      }
+
+      int offset;
+
+      try
+      {
+        offset = textEditor.Document.GetOffset(position.Value.Location);
+      }
+      catch (ArgumentOutOfRangeException)
+      {
+        CloseSyntaxDiagnosticToolTip();
+        return;
+      }
+
+      var diagnostic = FindSyntaxDiagnostic(offset);
+
+      if (diagnostic == null)
+      {
+        CloseSyntaxDiagnosticToolTip();
+        return;
+      }
+
+      ShowSyntaxDiagnosticToolTip(diagnostic, mousePoint);
+    }
+
+    private void ShowSyntaxDiagnosticToolTip(TextSyntaxDiagnostic diagnostic, Point mousePoint)
+    {
+      var toolTip = GetSyntaxDiagnosticToolTip();
+      var content = FormatSyntaxDiagnosticToolTip(diagnostic);
+
+      Canvas.SetLeft(syntaxDiagnosticToolTipTarget, mousePoint.X);
+      Canvas.SetTop(syntaxDiagnosticToolTipTarget, mousePoint.Y);
+
+      if (!Equals(toolTip.Content, content))
+        toolTip.Content = content;
+
+      if (!toolTip.IsOpen)
+        toolTip.IsOpen = true;
+    }
+
+    private ToolTip GetSyntaxDiagnosticToolTip()
+    {
+      if (_syntaxDiagnosticToolTip != null)
+        return _syntaxDiagnosticToolTip;
+
+      _syntaxDiagnosticToolTip = new ToolTip
+      {
+        PlacementTarget = syntaxDiagnosticToolTipTarget,
+        StaysOpen = true
+      };
+
+      syntaxDiagnosticToolTipTarget.ToolTip = _syntaxDiagnosticToolTip;
+
+      return _syntaxDiagnosticToolTip;
+    }
+
+    private TextSyntaxDiagnostic? FindSyntaxDiagnostic(int offset)
+    {
+      return _syntaxDiagnostics
+        .Where(diagnostic => ContainsOffset(diagnostic, offset))
+        .OrderBy(diagnostic => diagnostic.Severity == TextSyntaxSeverity.Error ? 0 : 1)
+        .ThenBy(diagnostic => diagnostic.Length)
+        .FirstOrDefault();
+    }
+
+    private static bool ContainsOffset(TextSyntaxDiagnostic diagnostic, int offset)
+    {
+      int length = Math.Max(1, diagnostic.Length);
+      return offset >= diagnostic.StartOffset &&
+             offset < diagnostic.StartOffset + length;
+    }
+
+    private static string FormatSyntaxDiagnosticToolTip(TextSyntaxDiagnostic diagnostic)
+    {
+      var severity = diagnostic.Severity == TextSyntaxSeverity.Warning
+        ? "Предупреждение"
+        : "Ошибка";
+
+      return $"{severity}: {diagnostic.Message}";
+    }
+
+    private void CloseSyntaxDiagnosticToolTip()
+    {
+      if (_syntaxDiagnosticToolTip?.IsOpen == true)
+        _syntaxDiagnosticToolTip.IsOpen = false;
+    }
+
+    private static EditorSyntaxAnalyzer CreateSyntaxAnalyzer()
+    {
+      return new EditorSyntaxAnalyzer(
+        CommandTranslationManager.GetKnownCommandMnemonics(),
+        translationSyntaxAnalyzer: new CommandTranslationSyntaxAnalyzer(
+          new CommandTranslationManager()));
+    }
+
     #region Конструкторы
 
     /// <summary>
@@ -669,6 +896,12 @@ namespace UI.Controls.TextEditorControl
 
       textEditor.PreviewKeyDown += TextEditor_PreviewKeyDown;
       textEditor.PreviewMouseDown += (_, _) => ResetIssueSelectionBrush();
+
+      textEditor.MouseMove += TextEditor_MouseMove;
+      textEditor.MouseLeave += (_, _) => CloseSyntaxDiagnosticToolTip();
+      ToolTipService.SetInitialShowDelay(textEditor, 250);
+      ToolTipService.SetShowDuration(textEditor, 60000);
+
 
       if (_executionMargin == null)
       {
@@ -696,6 +929,7 @@ namespace UI.Controls.TextEditorControl
       Loaded += (s, e) =>
       {
         ApplySyntaxHighlighting(UserInterfaceConfig.GetSyntaxHighlighting());
+        Dispatcher.BeginInvoke(new Action(ScheduleSyntaxAnalysis), DispatcherPriority.Background);
       };
 
       HelpProvider.SetHelpKeyProvider(textEditor, () =>
@@ -707,17 +941,32 @@ namespace UI.Controls.TextEditorControl
       });
 
       EventAggregator.Subscribe<ThemeEvent.SyntaxHighlighting>(
-        e => ApplySyntaxHighlighting(e.IsEnabled)
-      );
+        e =>
+        {
+          ApplySyntaxHighlighting(e.IsEnabled);
+          ScheduleSyntaxAnalysis();
+        });
 
       EventAggregator.Subscribe<ThemeEvent.Change>(
-        _ => ApplySyntaxHighlighting(UserInterfaceConfig.GetSyntaxHighlighting())
-      );
+        _ =>
+        {
+          ApplySyntaxHighlighting(UserInterfaceConfig.GetSyntaxHighlighting());
+          ScheduleSyntaxAnalysis();
+        });
 
       if (textEditor.Document == null)
         textEditor.Document = new TextDocument();
 
       _documentAdapter = new AvalonTextDocumentAdapter(textEditor.Document);
+
+      _syntaxDiagnosticTimer.Interval = TimeSpan.FromMilliseconds(120);
+      _syntaxDiagnosticTimer.Tick += (_, _) =>
+      {
+        _syntaxDiagnosticTimer.Stop();
+        AnalyzeSyntaxAndHighlight();
+      };
+
+      textEditor.TextChanged += (_, _) => ScheduleSyntaxAnalysis();
     }
 
     /// <summary>

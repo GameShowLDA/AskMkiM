@@ -108,6 +108,8 @@ namespace UI.Controls.Settings.UserInterface
         SyntaxHighlighting.CheckedChanged += SettingsCard_CheckedChanged;
         CommandBodyBackgroundHighlighting.CheckedChanged += SettingsCard_CheckedChanged;
         ChainPointBodyBackgroundHighlighting.CheckedChanged += SettingsCard_CheckedChanged;
+        WarningUnderlineHighlighting.CheckedChanged += SettingsCard_CheckedChanged;
+        ErrorUnderlineHighlighting.CheckedChanged += SettingsCard_CheckedChanged;
         TopMenuIcons.CheckedChanged += SettingsCard_CheckedChanged;
         CommandAutoCollapsing.CheckedChanged += SettingsCard_CheckedChanged;
         PrintFontFamilyComboBox.SelectionChanged += (s, ev) => ValueChanged(s, ev);
@@ -190,6 +192,8 @@ namespace UI.Controls.Settings.UserInterface
       CommandAutoCollapsing.IsChecked = _baseParameterModel.UseCommandAutoCollapse;
       CommandBodyBackgroundHighlighting.IsChecked = _baseParameterModel.UseCommandBodyBackgroundHighlighting;
       ChainPointBodyBackgroundHighlighting.IsChecked = _baseParameterModel.UseChainPointBodyBackgroundHighlighting;
+      WarningUnderlineHighlighting.IsChecked = _baseParameterModel.UseWarningUnderlineHighlighting;
+      ErrorUnderlineHighlighting.IsChecked = _baseParameterModel.UseErrorUnderlineHighlighting;
       TopMenuIcons.IsChecked = _baseParameterModel.UseTopMenuIcons;
       FillPrintFontControls();
     }
@@ -252,6 +256,8 @@ namespace UI.Controls.Settings.UserInterface
         UseSyntaxHighlighting = SyntaxHighlighting.IsChecked,
         UseCommandBodyBackgroundHighlighting = CommandBodyBackgroundHighlighting.IsChecked,
         UseChainPointBodyBackgroundHighlighting = ChainPointBodyBackgroundHighlighting.IsChecked,
+        UseWarningUnderlineHighlighting = WarningUnderlineHighlighting.IsChecked,
+        UseErrorUnderlineHighlighting = ErrorUnderlineHighlighting.IsChecked,
         UseTopMenuIcons = TopMenuIcons.IsChecked,
         UseCommandAutoCollapse = CommandAutoCollapsing.IsChecked
       };
@@ -276,6 +282,8 @@ namespace UI.Controls.Settings.UserInterface
       a.UseSyntaxHighlighting == b.UseSyntaxHighlighting &&
       a.UseCommandBodyBackgroundHighlighting == b.UseCommandBodyBackgroundHighlighting &&
       a.UseChainPointBodyBackgroundHighlighting == b.UseChainPointBodyBackgroundHighlighting &&
+      a.UseWarningUnderlineHighlighting == b.UseWarningUnderlineHighlighting &&
+      a.UseErrorUnderlineHighlighting == b.UseErrorUnderlineHighlighting &&
       a.UseTopMenuIcons == b.UseTopMenuIcons &&
       a.UseCommandAutoCollapse == b.UseCommandAutoCollapse &&
       b.Theme == a.Theme;

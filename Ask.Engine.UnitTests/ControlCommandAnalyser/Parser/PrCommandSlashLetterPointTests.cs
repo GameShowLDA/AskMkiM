@@ -30,6 +30,23 @@ public class PrCommandSlashLetterPointTests : IDisposable
     Assert.DoesNotContain(", С ", parsed);
   }
 
+  [Fact(DisplayName = "Парсер ключей: блок точек является границей для составного ключа ЗС")]
+  public void ParseKeys_WithMultiCharacterKeyBeforePointBlock_RecognizesKey()
+  {
+    var pr = new PrCommandModel
+    {
+      CommandNumber = "200",
+      StartLineNumber = 200
+    };
+    const string remainder = "15<Ом, И, Г, ЗС*К1/31-35*К1/41-45*";
+
+    var parsed = KeyParser.ParseKeys(200, pr, remainder);
+
+    Assert.Contains("ЗС", pr.AlgorithmKey);
+    Assert.DoesNotContain("ЗС", parsed);
+    Assert.Contains("*К1/31-35*К1/41-45*", parsed);
+  }
+
   [Fact(DisplayName = "Команда ПР: контактные буквы после косой черты сохраняются при добавлении точек РМ по ключу С")]
   public void BuildTranslation_WithSlashLetterPointsAndKeyC_DoesNotReportPointsWithoutContactLetter()
   {
