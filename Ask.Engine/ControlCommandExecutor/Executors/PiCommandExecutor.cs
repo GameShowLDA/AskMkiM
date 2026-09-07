@@ -7,6 +7,7 @@ using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
+using Ask.Core.Shared.Metadata.Enums.UnitEnums;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies.Data;
@@ -24,38 +25,31 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
     {
       ArgumentNullException.ThrowIfNull(context);
 
-      var evaluation = MeasurementResultEvaluator.Evaluate(
-        context.Range,
-        context.IsOverloadExpected);
-      bool isSuccessful = context.SuccessOverride ?? evaluation.IsSuccessful;
-      context.PublishedValue = evaluation.Value;
-      var range = new MeasurementRange(
-        evaluation.Value,
-        context.Range.LowerBound,
-        context.Range.UpperBound);
-
-      if (context.IsIntermediate)
+      bool isSuccessful;
+      if (context.SuccessOverride == false)
       {
-        await MeasurementMessages.PublishIntermediateResultAsync(
-          context.CheckType,
-          context.MeasurementType,
-          range,
-          isSuccessful,
-          context.MeasurementTarget,
-          points: context.MeasurementPoints,
-          outputService: context.MessageService);
+        isSuccessful = false;
+        context.PublishedValue = context.Range.TargetValue;
       }
       else
       {
-        await MeasurementMessages.PublishResultAsync(
-          context.CheckType,
-          context.MeasurementType,
-          range,
-          isSuccessful,
-          context.MeasurementTarget,
-          points: context.MeasurementPoints,
-          outputService: context.MessageService);
+        var evaluation = MeasurementResultEvaluator.Evaluate(context.Range);
+        isSuccessful = evaluation.IsSuccessful;
+        context.PublishedValue = evaluation.Value;
       }
+
+      var range = new MeasurementRange(
+        context.PublishedValue,
+        context.Range.LowerBound,
+        context.Range.UpperBound);
+
+      await MeasurementMessages.PublishInsulationStrengthResultAsync(
+        context.CheckType,
+        context.MeasurementPoints ?? context.MeasurementTarget ?? context.MeasurementType.ToString(),
+        range,
+        CurrentUnit.MilliAmpere,
+        isSuccessful,
+        context.MessageService);
 
       return isSuccessful;
     }
@@ -244,6 +238,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
             MeasurementTypeCommand.PI_ACW, measurementRange, messageService)
           {
             CheckType = CheckType.Metrology,
+            MeasurementPoints = points,
             SuccessOverride = answer.Status != BreakdownMeasurementStatus.Fail,
           };
           bool isSuccessful = await PublishMeasurementResultAsync(resultContext);
@@ -260,6 +255,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
             MeasurementTypeCommand.PI_DCW, measurementRange, messageService)
           {
             CheckType = CheckType.Metrology,
+            MeasurementPoints = points,
             SuccessOverride = answer.Status != BreakdownMeasurementStatus.Fail,
           };
           bool isSuccessful = await PublishMeasurementResultAsync(resultContext);
@@ -294,6 +290,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
             MeasurementTypeCommand.PI_ACW, measurementRange, messageService)
           {
             CheckType = CheckType.Metrology,
+            MeasurementPoints = points,
             SuccessOverride = answer.Status != BreakdownMeasurementStatus.Fail,
           };
           bool isSuccessful = await PublishMeasurementResultAsync(resultContext);
@@ -310,6 +307,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
             MeasurementTypeCommand.PI_DCW, measurementRange, messageService)
           {
             CheckType = CheckType.Metrology,
+            MeasurementPoints = points,
             SuccessOverride = answer.Status != BreakdownMeasurementStatus.Fail,
           };
           bool isSuccessful = await PublishMeasurementResultAsync(resultContext);

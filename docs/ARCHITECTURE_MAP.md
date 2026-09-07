@@ -723,8 +723,12 @@ executor throws
   Метод принимает `MeasurementResultMessageContext`, применяет правила проверки конкретной
   команды, сохраняет фактически опубликованное значение после Idle-симуляции, публикует
   итоговый/промежуточный результат через `MeasurementMessages` и возвращает `bool` алгоритму.
-  `SuccessOverride` сохраняет аппаратный вердикт `ПИ` и принудительные результаты служебных
-  измерений `ЭТ`; `IsOverloadExpected` сохраняет обратный проход `НЕ`;
+  Для `PiCommandExecutor` аппаратный `Fail` немедленно формирует неуспешный результат;
+  при `Pass` итог дополнительно проверяется по допустимому диапазону тока. ПИ публикуется через
+  `MeasurementMessages.PublishInsulationStrengthResultAsync`: измеренное значение тока не
+  выводится, пользователь видит качественный результат `НОРМА` или `ПРОБОЙ`. `SuccessOverride`
+  также используется для принудительных результатов служебных измерений `ЭТ`, а
+  `IsOverloadExpected` сохраняет обратный проход `НЕ`;
 - эти же executors передают единый
   `AlgorithmExecutionResult` в `ProtocolModelExtensions.AddResult`; расширение находится
   в `Ask.Protocol.Messages/Extensions/ProtocolModelExtensions.cs` и внутри раскладывает
