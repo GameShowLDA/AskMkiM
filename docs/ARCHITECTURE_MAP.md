@@ -682,8 +682,10 @@ executor throws
 
 #### Strategies
 
-- `ConnectedPointChecker` — проверяет соединённые цепи, формирует единый `AlgorithmExecutionResult` и передаёт
-  создание и публикацию этапов и результатов в `CommandMessages`/`MeasurementMessages`;
+- `ConnectedPointChecker` — проверяет соединённые цепи и формирует единый
+  `AlgorithmExecutionResult`; непосредственная публикация результата выполняется переданным
+  измерительным делегатом конкретного command executor через
+  `IMeasurementResultMessageExecutor`, поэтому checker не дублирует строки `НОРМА`/`БРАК`;
 - `DisconnectionCheckExecutor` выбирает `MethodExecutor`,
   `NodeAccumulationChecker`, `NodeFullChecker` или pairwise strategy;
 - `MethodExecutor`, `NodeAccumulationChecker`, `NodeFullChecker` и `PairwiseFirstPointChecker`
@@ -715,7 +717,15 @@ executor throws
 - `FaultChainMeasurementService` — повторно измеряет проблемные цепи и возвращает
   `AlgorithmExecutionResult`; модель ошибки формирует `MeasurementMessages`;
 - `EhtCommandExecutor`, `IeCommandExecutor`, `KsCommandExecutor`, `NeCommandExecutor`,
-  `PiCommandExecutor`, `PrCommandExecutor` и `SiCommandExecutor` передают единый
+  `PiCommandExecutor`, `PrCommandExecutor` и `SiCommandExecutor` реализуют
+  `IMeasurementResultMessageExecutor`, причём каждый executor явно объявляет собственный
+  `PublishMeasurementResultAsync`; в `CommandExecutorBase` реализации этого контракта нет.
+  Метод принимает `MeasurementResultMessageContext`, применяет правила проверки конкретной
+  команды, сохраняет фактически опубликованное значение после Idle-симуляции, публикует
+  итоговый/промежуточный результат через `MeasurementMessages` и возвращает `bool` алгоритму.
+  `SuccessOverride` сохраняет аппаратный вердикт `ПИ` и принудительные результаты служебных
+  измерений `ЭТ`; `IsOverloadExpected` сохраняет обратный проход `НЕ`;
+- эти же executors передают единый
   `AlgorithmExecutionResult` в `ProtocolModelExtensions.AddResult`; расширение находится
   в `Ask.Protocol.Messages/Extensions/ProtocolModelExtensions.cs` и внутри раскладывает
   ошибки и информационные сообщения по коллекциям `ProtocolModel`;
@@ -2151,6 +2161,8 @@ ErrorItem → translator/runner ErrorList
 | `MetrologyMessageBuilder` | internal static builder | Ask.Protocol.Messages | формирует заголовок сводки режима и сообщения о предельных погрешностях | [Protocols](#protocols-and-file-formats) |
 | `MetrologyMessagePublisher` | internal static publisher | Ask.Protocol.Messages | передаёт метрологические сводки в `IMessageOutputService` с метаданными исходного вызова | [Protocols](#protocols-and-file-formats) |
 | `MeasurementResultEvaluator` | internal static evaluator | Ask.Engine | применяет Idle-симуляцию и проверяет измеренное значение по границам либо ожидаемой перегрузке до передачи результата в `MeasurementMessages` | [Execution Engine](#execution-engine) |
+| `IMeasurementResultMessageExecutor` | internal interface | Ask.Engine | обязательный для измерительных command executor контракт проверки и публикации результата с возвратом логического вердикта алгоритму | [Execution Engine](#execution-engine) |
+| `MeasurementResultMessageContext` | internal context | Ask.Engine | передаёт тип команды, диапазон, адресат измерения, режим сравнения, аппаратный override и хранит фактически опубликованное значение | [Execution Engine](#execution-engine) |
 | `AlgorithmExecutionResult` | result container | Ask.Protocol.Messages | контракт из `Ask.Protocol.Messages/Models/`, хранящий накопленные ошибки и информационные `ShowMessageModel` алгоритма | [Execution Engine](#execution-engine) |
 | `ProtocolModelExtensions` | static extensions | Ask.Protocol.Messages | расширение из namespace `Ask.Protocol.Messages.Extensions`, добавляющее единый `AlgorithmExecutionResult` в коллекции ошибок и информационных сообщений `ProtocolModel` | [Execution Engine](#execution-engine) |
 | `ExecutionMessages` | static facade | Ask.Protocol.Messages | проверяет видимость параметров выполнения и коммутации, публикует накопленные результаты проверки, ошибки, debug-сообщения, задержки, этапы анализа цепей и локализации, границы этапов, инициализацию, настройку оборудования и коммутацию; формирует только накапливаемую ошибку локализации | [Protocols](#protocols-and-file-formats) |
