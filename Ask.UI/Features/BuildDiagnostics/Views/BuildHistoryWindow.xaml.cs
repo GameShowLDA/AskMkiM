@@ -20,7 +20,7 @@ public partial class BuildHistoryWindow : Window
     InitializeComponent();
 
     BuildSummary = $"Версия: {buildInfo.BuildIdentifier}\n"
-      + $"Дата сборки: {buildInfo.BuildDate}\n"
+      + $"Дата и время сборки: {buildInfo.BuildDateTimeUtc}\n"
       + $"Ревизия: {buildInfo.GitCommit}"
       + (buildInfo.IsDirty ? " (есть незакоммиченные изменения)" : string.Empty);
     CommitHistory = FormatCommitHistory(buildInfo.RecentCommits);

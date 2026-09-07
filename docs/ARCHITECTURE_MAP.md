@@ -432,7 +432,8 @@ Engine знает DB Engine и Message, Core содержит WPF/config/applica
 Для `MainWindowProgram` отключён Visual Studio Fast Up-to-date Check: Git HEAD и
 состояние working tree находятся вне стандартного MSBuild input graph, поэтому без
 этого после checkout/merge IDE могла запустить старый EXE без обновления AssemblyInfo.
-`Ask.Core.Services.App.ApplicationBuildInfo` читает атрибуты entry assembly и
+`Ask.Core.Services.App.ApplicationBuildInfo` читает атрибуты entry assembly, предоставляет
+дату и точное время сборки в UTC для окна сведений о сборке и
 добавляет путь, время изменения, SHA-256 EXE и MVID. Это единственный runtime-источник
 версии для UI, стартового лога, протоколов и `Ask.Diagnostics`.
 
