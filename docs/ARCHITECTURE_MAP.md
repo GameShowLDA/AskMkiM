@@ -1324,6 +1324,11 @@ executor/metrology
   `Ask.Core.Shared.DTO.Devices.Breakdown.BreakdownMeasurementResponse` для ACW/DCW/IR;
   статус типизирован enum `BreakdownMeasurementStatus` (`Test`, `Fail`, `Pass`), а ответ без
   одного из этих статусов не считается корректным результатом измерения;
+- `MeasureHelper.MeasureFullTimeAsync` передаёт разобранный статус в
+  `Function/GPT/Managment/MeasureManagment.MeasureAsync`; при округлении значения manager
+  сохраняет исходный `Status`. Для ACW/DCW аппаратный `Fail` доходит через application adapter
+  до `PiCommandExecutor` и даёт `ПРОБОЙ` даже при токе в допустимом диапазоне.
+  Idle-ветка `MeasureHelper.MeasureAsync` возвращает симулированное значение со статусом `Pass`;
 - `BreakdownTesterMessages` является фасадом над `Ask.Protocol.Messages` для рабочих операций
   ACW/DCW/IR/System и самоконтроля; существующие тексты сообщений остаются в вызывающем коде.
 
