@@ -1,4 +1,3 @@
-using DeviceMessages = Ask.Device.ResponseProcessor.BreakdownTester.ResponseProcessing.BreakdownTesterMessages;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Errors.Device;
 using Ask.Core.Services.Errors.Device.Breakdown;
@@ -13,7 +12,7 @@ using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Application.Execution;
 using Ask.Device.Runtime.Device;
 using Ask.Device.Runtime.Function.GPT;
-using Ask.Device.Runtime.Function.Helpers;
+using DeviceMessages = Ask.Device.ResponseProcessor.BreakdownTester.ResponseProcessing.BreakdownTesterMessages;
 
 namespace Ask.Device.Application.FunctionAdapters.GPT
 {
@@ -695,7 +694,7 @@ namespace Ask.Device.Application.FunctionAdapters.GPT
       /// Результат измерения сопротивления изоляции в МОм.  
       /// В случае ошибки возвращает значение <c>-1</c>.
       /// </returns>
-      public async Task<(double value, string unit)> MeasureAsync(ElectricalTestFunction electricalTestFunction, MeasurementRange measurementRange, bool waitFullTime = false, IUserInteractionService? userMessageService = null)
+      public async Task<BreakdownMeasurementResponse> MeasureAsync(ElectricalTestFunction electricalTestFunction, MeasurementRange measurementRange, bool waitFullTime = false, IUserInteractionService? userMessageService = null)
       {
         var execution = await AdapterMeasurementExecutor.ExecuteAsync(
           _device,
@@ -719,26 +718,26 @@ namespace Ask.Device.Application.FunctionAdapters.GPT
               $"Ошибка при измерении сопротивления изоляции: {execution.ErrorMessage}");
           }
 
-          return (-1, string.Empty);
+          return new BreakdownMeasurementResponse(BreakdownMeasurementStatus.Fail, -1, string.Empty);
         }
 
-        var (result, unit) = execution.Value;
+        var answer = execution.Value;
 
-        var unitEnum = ResistanceConverter.ParseUnit(unit, "мом");
-        result = ResistanceConverter.ToMegaOhms(result, unitEnum);
+        var unitEnum = ResistanceConverter.ParseUnit(answer.Unit, "мом");
+        answer.Value = ResistanceConverter.ToMegaOhms(answer.Value, unitEnum);
 
         await DeviceMessages.PublishOperationResultAsync(
           _device,
           "Измерение сопротивления изоляции",
-          $"{result} МОм",
-          result >= measurementRange.LowerBound && result <= measurementRange.UpperBound,
+          $"{answer.Value} {answer.Unit}",
+          answer.Value >= measurementRange.LowerBound && answer.Value <= measurementRange.UpperBound,
           2,
           userMessageService);
 
-        if (result > _device.IrMaxResistanceMOhm)
-          result = _device.IrMaxResistanceMOhm;
+        if (answer.Value > _device.IrMaxResistanceMOhm)
+          answer.Value = _device.IrMaxResistanceMOhm;
 
-        return (result, unit);
+        return answer;
       }
 
       /// <summary>

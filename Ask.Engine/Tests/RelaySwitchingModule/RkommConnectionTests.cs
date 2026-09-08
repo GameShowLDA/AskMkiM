@@ -1,4 +1,5 @@
 using Ask.Core.Services.UI;
+using Ask.Core.Shared.DTO.Devices.Base;
 using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Executor;
@@ -12,8 +13,6 @@ using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Enums.UnitEnums;
 using Ask.Engine.Tests.Base;
-using Ask.Engine.Tests.NodeMethod;
-using Ask.Protocol.Messages.EntryPoints;
 using static Ask.Engine.Tests.Base.UIValidationHelper;
 
 namespace Ask.Engine.Tests.RelaySwitchingModule

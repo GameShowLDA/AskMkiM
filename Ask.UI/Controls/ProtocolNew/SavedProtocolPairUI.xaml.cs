@@ -14,7 +14,9 @@ namespace Ask.UI.Controls.ProtocolNew
       InitializeComponent();
 
       ExecutionProtocolEditor.SetFileType(FileType.Protocol);
-      ExecutionProtocolEditor.Text = executionProtocolText ?? string.Empty;
+      ExecutionProtocolEditor.Visibility = System.Windows.Visibility.Collapsed;
+      StructuredExecutionProtocol.Content = new SavedExecutionProtocolUI(executionProtocolText ?? string.Empty);
+      StructuredExecutionProtocol.Visibility = System.Windows.Visibility.Visible;
 
       ResultProtocolEditor.SetFileType(FileType.InspectionProtocol);
       ResultProtocolEditor.WordWrap = true;

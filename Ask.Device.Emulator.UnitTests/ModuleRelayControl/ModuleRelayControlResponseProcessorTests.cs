@@ -118,6 +118,33 @@ public sealed class ModuleRelayControlResponseProcessorTests
     Assert.True(result);
   }
 
+  [Theory(DisplayName = "МКР: оба штатных ответа измерителя распознаются как состояние цепи")]
+  [InlineData("7.1", true)]
+  [InlineData("7.2", false)]
+  public async Task MeterState_ValidResponse_ReturnsCircuitState(
+    string answer,
+    bool expectedState)
+  {
+    string response =
+      $"{{\"ModuleName\":\"MKR\",\"NumberDevice\":4,\"NumberChassis\":2," +
+      $"\"Answer\":\"{answer}\",\"NotDefaultState\":true}}";
+
+    bool result = await ModuleRelayControlResponseProcessor.CheckMeterStateAsync(
+      response,
+      CreateModule());
+
+    Assert.Equal(expectedState, result);
+  }
+
+  [Fact(DisplayName = "МКР: повреждённый ответ измерителя остаётся аппаратной ошибкой")]
+  public async Task MeterState_InvalidResponse_ThrowsDeviceException()
+  {
+    await Assert.ThrowsAsync<Ask.Core.Services.Errors.Device.DeviceException>(
+      () => ModuleRelayControlResponseProcessor.CheckMeterStateAsync(
+        "not-json",
+        CreateModule()));
+  }
+
   [Fact]
   public async Task InitializationAndReset_ValidResponses_ReturnTrue()
   {

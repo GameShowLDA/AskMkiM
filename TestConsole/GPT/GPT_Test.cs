@@ -19,10 +19,11 @@ namespace TestConsole.GPT
         Console.WriteLine("4. Тест завершения измерения");
         Console.WriteLine("5. Управление землей ACW/DCW");
         Console.WriteLine("6. Автопоиск и управление GPT79904 по COM");
+        Console.WriteLine("7. Проверка стабильности запуска и остановки (10 циклов)");
         Console.WriteLine("0. Выход");
 
         Console.Write("Введите номер действия: ");
-        if (!int.TryParse(Console.ReadLine(), out int choice) || choice < 0 || choice > 6)
+        if (!int.TryParse(Console.ReadLine(), out int choice) || choice < 0 || choice > 7)
         {
           Console.WriteLine("Неверный выбор. Попробуйте снова.");
           continue;
@@ -52,6 +53,10 @@ namespace TestConsole.GPT
 
           case 6:
             await GPTAutoDiscoveryTest.RunAsync();
+            break;
+
+          case 7:
+            await GptStartStopStabilityTest.RunAsync();
             break;
 
           case 0:
@@ -154,7 +159,7 @@ namespace TestConsole.GPT
       }
     }
 
-    private static async Task<bool> EnsureDeviceReadyAsync(IBreakdownTester device)
+    internal static async Task<bool> EnsureDeviceReadyAsync(IBreakdownTester device)
     {
       try
       {
@@ -224,7 +229,7 @@ namespace TestConsole.GPT
       Console.WriteLine($"Seconds: {stopwatch.Elapsed.TotalSeconds:F3}");
     }
 
-    private static IBreakdownTester SelectBreakdownTester()
+    internal static IBreakdownTester SelectBreakdownTester()
     {
       var dbc = BreakdownTesters.GetAllAsync().GetAwaiter().GetResult();
 

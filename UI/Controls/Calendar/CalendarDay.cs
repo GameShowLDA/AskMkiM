@@ -6,6 +6,14 @@ using System.Windows.Input;
 
 namespace UI.Controls.Calendar
 {
+  public enum CalendarDayAvailability
+  {
+    Unspecified,
+    None,
+    Partial,
+    Complete,
+  }
+
   public class CalendarDay : INotifyPropertyChanged
   {
     private bool _isSelected;
@@ -17,6 +25,8 @@ namespace UI.Controls.Calendar
     public bool IsCurrentMonth { get; set; }
 
     public bool IsToday => Date.Date == DateTime.Today;
+
+    public CalendarDayAvailability Availability { get; set; }
 
     public bool IsSelected
     {
@@ -47,6 +57,8 @@ namespace UI.Controls.Calendar
     private DateTime _displayMonth;
     private DateTime _selectedDate;
 
+    public Func<DateTime, CalendarDayAvailability>? AvailabilityProvider { get; set; }
+
     public CalendarViewModel()
     {
       _selectedDate = DateTime.Today;
@@ -62,11 +74,15 @@ namespace UI.Controls.Calendar
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
+    public event EventHandler? SelectedDateChanged;
+
     public ObservableCollection<CalendarDay> Days { get; } = new();
 
     public string MonthYear => ToTitleCase(_displayMonth.ToString("MMMM yyyy", _culture));
 
     public string SelectionCaption => ToTitleCase(_selectedDate.ToString("dddd, d MMMM", _culture));
+
+    public DateTime SelectedDate => _selectedDate;
 
     public ICommand PrevMonthCommand { get; }
 
@@ -75,6 +91,8 @@ namespace UI.Controls.Calendar
     public ICommand TodayCommand { get; }
 
     public ICommand SelectDateCommand { get; }
+
+    public void Refresh() => BuildCalendar();
 
     private void ChangeMonth(int offset)
     {
@@ -89,6 +107,7 @@ namespace UI.Controls.Calendar
       _displayMonth = new DateTime(_selectedDate.Year, _selectedDate.Month, 1);
       BuildCalendar();
       NotifyHeaderChanged();
+      SelectedDateChanged?.Invoke(this, EventArgs.Empty);
     }
 
     private void SelectDate(object? parameter)
@@ -102,6 +121,7 @@ namespace UI.Controls.Calendar
       _displayMonth = new DateTime(day.Date.Year, day.Date.Month, 1);
       BuildCalendar();
       NotifyHeaderChanged();
+      SelectedDateChanged?.Invoke(this, EventArgs.Empty);
     }
 
     private void BuildCalendar()
@@ -119,6 +139,7 @@ namespace UI.Controls.Calendar
           Date = date,
           IsCurrentMonth = date.Month == _displayMonth.Month && date.Year == _displayMonth.Year,
           IsSelected = date.Date == _selectedDate.Date,
+          Availability = AvailabilityProvider?.Invoke(date.Date) ?? CalendarDayAvailability.Unspecified,
         });
       }
 

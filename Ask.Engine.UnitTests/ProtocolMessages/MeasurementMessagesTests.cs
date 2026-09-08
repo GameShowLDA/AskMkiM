@@ -3,6 +3,8 @@ using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
+using Ask.Core.Shared.Metadata.Enums.UnitEnums;
+using Ask.Protocol.Messages.Builders;
 using Ask.Protocol.Messages.EntryPoints;
 using Ask.Protocol.Messages.Models;
 using Ask.Protocol.Messages.Show;
@@ -13,6 +15,24 @@ namespace Ask.Engine.UnitTests.ProtocolMessages;
 
 public sealed class MeasurementMessagesTests
 {
+  [Theory]
+  [InlineData(true, "Результат")]
+  [InlineData(false, "Результат: ПРОБОЙ")]
+  public void BuildInsulationStrengthResult_ContainsPointsAndQualitativeResult(
+    bool isSuccessful,
+    string expectedResult)
+  {
+    var message = MeasurementMessageBuilder.BuildInsulationStrengthResult(
+      "X1, X2",
+      new MeasurementRange(5, 0, 10),
+      CurrentUnit.MilliAmpere,
+      isSuccessful);
+
+    Assert.Equal("Проверяемые точки: X1, X2 (мА<10)", message.Header);
+    Assert.Equal(expectedResult, message.Message);
+    Assert.DoesNotContain("5 мА", message.ToString());
+  }
+
   [Fact]
   public async Task PublishResultAsync_MetrologyAndResultsHidden_PublishesMessage()
   {

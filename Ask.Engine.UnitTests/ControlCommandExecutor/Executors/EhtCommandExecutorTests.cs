@@ -5,7 +5,7 @@ namespace Ask.Engine.UnitTests.ControlCommandExecutor.Executors;
 
 public sealed class EhtCommandExecutorTests
 {
-  [Theory]
+  [Theory(DisplayName = "ЭТ: проверка физического подключения точек отключается только в холостом режиме")]
   [InlineData(false, true)]
   [InlineData(true, false)]
   public void ShouldValidatePointConnections_DependsOnlyOnIdleMode(

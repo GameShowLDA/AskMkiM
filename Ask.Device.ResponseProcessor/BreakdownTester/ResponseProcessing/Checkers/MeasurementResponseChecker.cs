@@ -1,4 +1,5 @@
-using Ask.Device.ResponseProcessor.BreakdownTester.ResponseModels;
+using Ask.Core.Shared.DTO.Devices.Breakdown;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using System.Globalization;
 using System.Text.RegularExpressions;
 
@@ -15,9 +16,11 @@ internal static partial class MeasurementResponseChecker
     if (string.IsNullOrWhiteSpace(response))
       return false;
 
-    string status = StatusRegex().Match(response).Value.ToUpperInvariant();
+    Match statusMatch = StatusRegex().Match(response);
     Match measurement = MeasurementRegex().Matches(response).LastOrDefault() ?? Match.Empty;
-    if (!measurement.Success
+    if (!statusMatch.Success
+      || !Enum.TryParse(statusMatch.Value, ignoreCase: true, out BreakdownMeasurementStatus status)
+      || !measurement.Success
       || !double.TryParse(
         measurement.Groups["value"].Value.Replace(',', '.'),
         NumberStyles.Float,
@@ -26,13 +29,13 @@ internal static partial class MeasurementResponseChecker
       return false;
 
     result = new BreakdownMeasurementResponse(
-      string.IsNullOrEmpty(status) ? "UNKNOWN" : status,
+      status,
       value,
       measurement.Groups["unit"].Value);
     return true;
   }
 
-  [GeneratedRegex(@"\b(?:PASS|FAIL|TEST|READY|STOP)\b", RegexOptions.IgnoreCase)]
+  [GeneratedRegex(@"\b(?:PASS|FAIL|TEST)\b", RegexOptions.IgnoreCase)]
   private static partial Regex StatusRegex();
 
   [GeneratedRegex(@"(?<value>[-+]?(?:\d+(?:[.,]\d*)?|[.,]\d+)(?:[eE][-+]?\d+)?)\s*(?<unit>GOhm|MOhm|kOhm|Ohm|kV|V|mA|uA|µA|A)", RegexOptions.IgnoreCase)]

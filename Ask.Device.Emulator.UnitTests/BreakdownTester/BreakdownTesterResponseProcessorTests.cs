@@ -1,3 +1,4 @@
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.ResponseProcessor.BreakdownTester.ResponseProcessing;
 
 namespace Ask.Device.Emulator.UnitTests.BreakdownTester;
@@ -47,13 +48,11 @@ public sealed class BreakdownTesterResponseProcessorTests
   [Fact]
   public void TryParseMeasurement_ExtractsStatusValueAndUnit()
   {
-    bool success = BreakdownTesterResponseProcessor.TryParseMeasurement(
-      "1,PASS,0.500kV,125.4MOhm",
-      out var result);
+    bool success = BreakdownTesterResponseProcessor.TryParseMeasurement("1,PASS,0.500kV,125.4MOhm", out var result);
 
     Assert.True(success);
     Assert.NotNull(result);
-    Assert.Equal("PASS", result.Status);
+    Assert.Equal(BreakdownMeasurementStatus.Pass, result.Status);
     Assert.Equal(125.4, result.Value, 6);
     Assert.Equal("MOhm", result.Unit);
   }

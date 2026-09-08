@@ -20,6 +20,11 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies.Data
     internal MeasurementTypeCommand TypeCommand { get; set; }
 
     /// <summary>
+    /// Исполнитель, проверяющий и публикующий результаты измерений текущей команды.
+    /// </summary>
+    internal IMeasurementResultMessageExecutor? ResultMessageExecutor { get; set; }
+
+    /// <summary>
     /// Модель схемы подключения, используемая для выполнения измерения.
     /// Определяет точки, пары и соединения, участвующие в текущем методе.
     /// </summary>
@@ -146,6 +151,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies.Data
       IsInvokedByAnotherCommand = other.IsInvokedByAnotherCommand;
       IsPolarityReversed = other.IsPolarityReversed;
       IsProtocolAttribute = other.IsProtocolAttribute;
+      ResultMessageExecutor = other.ResultMessageExecutor;
     }
 
     public T CreateChild<T>() where T : ExecutorContext, new()

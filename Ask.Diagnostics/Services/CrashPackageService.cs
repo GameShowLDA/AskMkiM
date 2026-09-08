@@ -1,3 +1,4 @@
+using Ask.Core.Services.App;
 using Ask.Diagnostics.Abstractions;
 using Ask.Diagnostics.Configuration;
 using Ask.Diagnostics.Infrastructure;
@@ -114,6 +115,7 @@ namespace Ask.Diagnostics.Services
 
     internal static object BuildMetadata(CrashContext context)
     {
+      var buildInfo = ApplicationBuildInfo.Current;
       return new
       {
         packageName = context.PackageName,
@@ -121,6 +123,18 @@ namespace Ask.Diagnostics.Services
         directory = context.PackageDirectory,
         zip = context.ZipPath,
         collectorFailures = context.CollectorFailures,
+        build = new
+        {
+          version = buildInfo.Version,
+          identifier = buildInfo.BuildIdentifier,
+          timestampUtc = buildInfo.BuildTimestampUtc,
+          gitCommit = buildInfo.GitCommit,
+          gitDirty = buildInfo.IsDirty,
+          executablePath = buildInfo.ExecutablePath,
+          executableModifiedUtc = buildInfo.ExecutableModifiedUtc,
+          executableSha256 = buildInfo.ExecutableSha256,
+          moduleVersionId = buildInfo.ModuleVersionId,
+        },
       };
     }
 

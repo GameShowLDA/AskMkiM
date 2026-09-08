@@ -77,7 +77,8 @@ public static class ExecutionProtocolDiagnosticFormatter
   /// </summary>
   public static IEnumerable<string> FormatProtocolForStorage(
     IEnumerable<ShowMessageModel> messages,
-    ExecutionProtocolEnvironmentSnapshot? environment)
+    ExecutionProtocolEnvironmentSnapshot? environment,
+    IReadOnlyList<ExecutionLogEntry>? logs = null)
   {
     ArgumentNullException.ThrowIfNull(messages);
     var messageList = messages.ToList();
@@ -91,7 +92,7 @@ public static class ExecutionProtocolDiagnosticFormatter
 
     var payload = new CompressedProtocolPayload(
       environment,
-      messageList.Select(ExecutionProtocolMessageSnapshot.FromModel).ToList());
+      messageList.Select(ExecutionProtocolMessageSnapshot.FromModel).ToList(), logs);
     byte[] json = JsonSerializer.SerializeToUtf8Bytes(payload);
     using var output = new MemoryStream();
     using (var brotli = new BrotliStream(output, CompressionLevel.SmallestSize, leaveOpen: true))
@@ -233,6 +234,23 @@ public static class ExecutionProtocolDiagnosticFormatter
       }
 
       var restored = payload.Messages.Select(snapshot => snapshot.ToModel(includeDiagnostics)).ToList();
+      if (includeDiagnostics && payload.Logs != null)
+      {
+        var grouped = payload.Logs.ToLookup(entry => Math.Clamp(entry.BeforeMessage, 0, restored.Count));
+        var combined = new List<ShowMessageModel>();
+        for (int i = 0; i <= restored.Count; i++)
+        {
+          foreach (var entry in grouped[i])
+            combined.Add(new ShowMessageModel
+            {
+              Debug = $"[ЛОГ ROOT] {entry.Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{entry.Level}] {entry.Text}",
+              HeaderColor = System.Windows.Media.Colors.Transparent,
+              MessageColor = System.Windows.Media.Colors.Transparent
+            });
+          if (i < restored.Count) combined.Add(restored[i]);
+        }
+        restored = combined;
+      }
       if (includeDiagnostics && payload.Environment != null)
       {
         restored.Insert(0, new ShowMessageModel
@@ -412,5 +430,6 @@ public static class ExecutionProtocolDiagnosticFormatter
 
   private sealed record CompressedProtocolPayload(
     ExecutionProtocolEnvironmentSnapshot? Environment,
-    IReadOnlyList<ExecutionProtocolMessageSnapshot> Messages);
+    IReadOnlyList<ExecutionProtocolMessageSnapshot> Messages,
+    IReadOnlyList<ExecutionLogEntry>? Logs = null);
 }

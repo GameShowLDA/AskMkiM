@@ -66,7 +66,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
           chainConnectedToBusA = true;
 
           var module = EquipmentService.GetModuleByPoint(chain.PointModels.FirstOrDefault());
-          var measured = await context.PerformMeasurementAsync(context.Value, messageService, messageService.GetCancellationToken(), module.SwitchResistance, type: context.VoltageType);
+          var measured = await context.PerformMeasurementAsync(context.Value, messageService, messageService.GetCancellationToken(), module.SwitchResistance, type: context.VoltageType, points: str);
           if (!measured.Result)
           {
             errorChains.Add((_basePoint, chain));
@@ -81,12 +81,11 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
               context,
               faultChain,
               chainStr,
-              (value, service, token, resistance, type) => context.PerformMeasurementAsync(value, service, token, resistance, type),
+              (value, service, token, resistance, type, points) => context.PerformMeasurementAsync(value, service, token, resistance, type, points),
               context.VoltageType);
 
             await DeviceManager.RelayModule.ChainManager.ConnectChainToBusBAsync(_basePoint, messageService, context.IsPolarityReversed);
             var err = faultResult.Errors.Single();
-            await MeasurementMessages.PublishBuiltMessageAsync(CheckType.ControlProgram, err, messageService);
 
             executionResult.AddRange(faultResult);
             context.CommandManager.AddErrorMethod(

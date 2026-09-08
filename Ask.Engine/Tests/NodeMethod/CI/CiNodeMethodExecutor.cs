@@ -1,4 +1,5 @@
 using Ask.Core.Services.UI;
+using Ask.Core.Shared.DTO.Devices.Base;
 using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
@@ -100,19 +101,19 @@ namespace Ask.Engine.Tests.NodeMethod.CI
               MeasurementRange measurementRange = new MeasurementRange(dataModel.Param, 1000, 60000);
               var answer = await breakDown.IrManger.Measure.MeasureAsync(ElectricalTestFunction.InsulationResistance, measurementRange);
 
-              bool isSuccessful = answer.value >= dataModel.Param;
+              bool isSuccessful = answer.Value >= dataModel.Param;
 
               string? executionErrorMessage = !isSuccessful
                 ? MeasurementMessages.BuildNodeFailure(
                   connectResult.PointModel,
                   dataModel.Param,
-                  answer.value,
+                  answer.Value,
                   ResistanceUnit.MegaOhm,
                   MeasurementLimitKind.Minimum)
                 : null;
               await MeasurementMessages.PublishResultAsync(CheckType.Test,
                 ResistanceUnit.MegaOhm,
-                new MeasurementRange(answer.value, dataModel.Param, -1),
+                new MeasurementRange(answer.Value, dataModel.Param, -1),
                 isSuccessful,
                 connectResult.PointModel.ToString(),
                 executionErrorMessage,

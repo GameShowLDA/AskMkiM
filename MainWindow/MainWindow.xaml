@@ -391,6 +391,14 @@
                     Background="Transparent"
                     >
 
+                    <Button x:Name="DailyReportButton" Style="{StaticResource CurrentUserButtonStyle}"
+                            ToolTip="Собрать отчёт за выбранный день в ZIP"
+                            AutomationProperties.Name="Собрать отчёт за день"
+                            Click="DailyReportButton_Click">
+                        <askUiIcons:DailyReportIcon Size="18"
+                            Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}"/>
+                    </Button>
+
                     <Button x:Name="CurrentUserButton"
                         Style="{StaticResource CurrentUserButtonStyle}"
                         Tag="SwitchUser"

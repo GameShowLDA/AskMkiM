@@ -4,6 +4,7 @@ using Ask.Diagnostics.Extensions;
 using Ask.Diagnostics.Models;
 using Microsoft.Extensions.DependencyInjection;
 using System.IO.Compression;
+using System.Text.Json;
 
 namespace Ask.Diagnostics.UnitTests;
 
@@ -47,8 +48,23 @@ public sealed class CrashPackageServiceTests
       using var archive = ZipFile.OpenRead(packagePath);
       Assert.NotNull(archive.GetEntry("crash.json"));
       Assert.NotNull(archive.GetEntry("stacktrace.txt"));
-      Assert.NotNull(archive.GetEntry("system-info.json"));
       Assert.NotNull(archive.GetEntry("translation-parameters.json"));
+
+      var metadataEntry = Assert.IsType<ZipArchiveEntry>(archive.GetEntry("metadata.json"));
+      using (var metadata = await ReadJsonAsync(metadataEntry))
+      {
+        var build = metadata.RootElement.GetProperty("build");
+        Assert.False(string.IsNullOrWhiteSpace(build.GetProperty("identifier").GetString()));
+        Assert.False(string.IsNullOrWhiteSpace(build.GetProperty("moduleVersionId").GetString()));
+      }
+
+      var systemInfoEntry = Assert.IsType<ZipArchiveEntry>(archive.GetEntry("system-info.json"));
+      using (var systemInfo = await ReadJsonAsync(systemInfoEntry))
+      {
+        Assert.True(systemInfo.RootElement.TryGetProperty("buildIdentifier", out _));
+        Assert.True(systemInfo.RootElement.TryGetProperty("gitCommit", out _));
+        Assert.True(systemInfo.RootElement.TryGetProperty("executableSha256", out _));
+      }
 
       var sourceEntry = Assert.IsType<ZipArchiveEntry>(archive.GetEntry("source-program.txt"));
       using var reader = new StreamReader(sourceEntry.Open());
@@ -73,5 +89,11 @@ public sealed class CrashPackageServiceTests
     {
       return exception;
     }
+  }
+
+  private static async Task<JsonDocument> ReadJsonAsync(ZipArchiveEntry entry)
+  {
+    await using var stream = entry.Open();
+    return await JsonDocument.ParseAsync(stream);
   }
 }

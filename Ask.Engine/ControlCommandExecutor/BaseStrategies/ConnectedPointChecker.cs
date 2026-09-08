@@ -351,12 +351,6 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
         messages.Errors.Add(error);
 
         RegisterDisconnectChainError(context, error.Header, error.Message);
-        await MeasurementMessages.PublishResultAsync(CheckType.ControlProgram,
-          context.TypeCommand,
-          range,
-          false,
-          failedMeasurement.Chain,
-          outputService: context.MessageService);
       }
     }
 
@@ -380,12 +374,6 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       var valueForProtocol = MeasurementValueFormatter.FormatWithUnit(value, ResolveUnit(context));
 
       messages.Errors.Add(error);
-      await MeasurementMessages.PublishResultAsync(CheckType.ControlProgram,
-        context.TypeCommand,
-        range,
-        false,
-        chainStr,
-        outputService: context.MessageService);
       RegisterDisconnectChainError(context, chainStr, valueForProtocol);
     }
 

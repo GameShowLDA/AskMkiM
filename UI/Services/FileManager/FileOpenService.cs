@@ -55,19 +55,9 @@ namespace UI.Services.FileManager
           var fileType = DetermineFileType(fileName);
           if (fileType == FileType.Protocol)
           {
-            if (!ExecutionProtocolDiagnosticFormatter.TryRestoreMessages(
-                  rawContent,
-                  DebugAccessConfig.IsDebugEnabled,
-                  out var messages))
-            {
-              messages = ExecutionProtocolDiagnosticFormatter.RestoreLegacyMessages(
-                rawContent,
-                DebugAccessConfig.IsDebugEnabled);
-            }
-
             new UI.Components.MultiEditorMethods.ControlManager(_fileManager.EditorWorkspaceModel).AddControl(
               fileName,
-              new SavedExecutionProtocolUI(messages),
+              new SavedExecutionProtocolUI(rawContent),
               TypeWindow.Files,
               path);
             return;

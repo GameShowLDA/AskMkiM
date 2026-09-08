@@ -1,7 +1,8 @@
+using Ask.Core.Services.App;
+using Ask.Core.Services.FilesUtility;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Shared.Metadata.Static;
-using Ask.Core.Services.FilesUtility;
 using System.IO;
 using System.Text;
 
@@ -27,9 +28,10 @@ public static class ExecutionProtocolHistoryService
   public static async Task<string> SaveAsync(
     string? protocolName,
     IEnumerable<ShowMessageModel> messages,
-    ExecutionProtocolEnvironmentSnapshot? environment = null)
+    ExecutionProtocolEnvironmentSnapshot? environment = null,
+    IReadOnlyList<ExecutionLogEntry>? logs = null)
   {
-    var lines = ExecutionProtocolDiagnosticFormatter.FormatProtocolForStorage(messages, environment);
+    var lines = ExecutionProtocolDiagnosticFormatter.FormatProtocolForStorage(messages, environment, logs);
 
     return await SaveLinesAsync(protocolName, lines, ProtocolFileExtensions.Trace);
   }
@@ -48,8 +50,14 @@ public static class ExecutionProtocolHistoryService
     CheckType checkType,
     string? executionProtocolPath = null)
   {
-    var lines = protocolText
-      .Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
+    var buildInfo = ApplicationBuildInfo.Current;
+    var lines = new[]
+      {
+        $"Версия ПО: {buildInfo.BuildIdentifier}",
+        $"Ревизия ПО: {buildInfo.GitCommit}{(buildInfo.IsDirty ? " (изменённая рабочая копия)" : string.Empty)}",
+        string.Empty
+      }
+      .Concat(protocolText.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None));
 
     string extension = checkType == CheckType.ControlProgram
       ? ProtocolFileExtensions.Report
