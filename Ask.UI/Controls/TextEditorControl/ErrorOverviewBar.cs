@@ -27,6 +27,8 @@ namespace Ask.UI.Controls.TextEditorControl
     private TextEditor? _editor;
     private int _lineCount;
     private Action<int>? _lineClickAction;
+    private double _viewportTop;
+    private double _viewportBottom = 1.0;
 
     public ErrorOverviewBar()
     {
@@ -54,6 +56,25 @@ namespace Ask.UI.Controls.TextEditorControl
       _editor.TextArea.TextView.ScrollOffsetChanged += TextView_Changed;
       _editor.TextArea.TextView.VisualLinesChanged += TextView_Changed;
       RebuildMarkers();
+    }
+
+    public void SetViewport(double topFraction, double bottomFraction)
+    {
+      double top = Math.Clamp(topFraction, 0.0, 1.0);
+      double bottom = Math.Clamp(bottomFraction, 0.0, 1.0);
+
+      if (bottom < top)
+        (top, bottom) = (bottom, top);
+
+      if (Math.Abs(_viewportTop - top) < double.Epsilon &&
+          Math.Abs(_viewportBottom - bottom) < double.Epsilon)
+      {
+        return;
+      }
+
+      _viewportTop = top;
+      _viewportBottom = bottom;
+      InvalidateVisual();
     }
 
     public void SetLineDiagnostics(
@@ -136,6 +157,15 @@ namespace Ask.UI.Controls.TextEditorControl
         ?? new SolidColorBrush(Color.FromArgb(28, 128, 128, 128));
       drawingContext.DrawRectangle(trackBrush, null, new Rect(0, 0, ActualWidth, ActualHeight));
 
+      var viewportBrush = new SolidColorBrush(Color.FromArgb(38, 90, 145, 205));
+      var viewportBorderBrush = new SolidColorBrush(Color.FromArgb(105, 90, 145, 205));
+      double viewportTop = _viewportTop * ActualHeight;
+      double viewportBottom = _viewportBottom * ActualHeight;
+      drawingContext.DrawRectangle(
+        viewportBrush,
+        new Pen(viewportBorderBrush, 1),
+        new Rect(0, viewportTop, ActualWidth, Math.Max(1, viewportBottom - viewportTop)));
+
       foreach (var marker in _markers)
       {
         var brush = GetMarkerBrush(marker.Severity);
@@ -203,6 +233,7 @@ namespace Ask.UI.Controls.TextEditorControl
       }
 
       double maxTop = Math.Max(0, ActualHeight - MarkerHeight);
+      ordered = CompactNearbyMarkers(ordered, lineCount, maxTop);
       double minimumSpacing = ordered.Count <= 1
         ? 0
         : Math.Min(MarkerHeight + MarkerGap, maxTop / (ordered.Count - 1));
@@ -232,6 +263,61 @@ namespace Ask.UI.Controls.TextEditorControl
 
       _markers.AddRange(ordered);
       InvalidateVisual();
+    }
+
+    private static List<OverviewMarker> CompactNearbyMarkers(
+      IReadOnlyList<OverviewMarker> markers,
+      int lineCount,
+      double maxTop)
+    {
+      if (markers.Count <= 1)
+        return markers.ToList();
+
+      var compacted = new List<OverviewMarker>();
+      int previousLineNumber = markers[0].LineNumber;
+      compacted.Add(markers[0]);
+
+      for (int i = 1; i < markers.Count; i++)
+      {
+        var marker = markers[i];
+        double previousTop = GetDesiredTop(previousLineNumber, lineCount, maxTop);
+        double currentTop = GetDesiredTop(marker.LineNumber, lineCount, maxTop);
+
+        if (currentTop - previousTop <= MarkerHeight + MarkerGap)
+        {
+          MergeMarkers(compacted[^1], marker);
+        }
+        else
+        {
+          compacted.Add(marker);
+        }
+
+        previousLineNumber = marker.LineNumber;
+      }
+
+      return compacted;
+    }
+
+    private static double GetDesiredTop(int lineNumber, int lineCount, double maxTop)
+    {
+      return lineCount <= 1
+        ? 0
+        : (lineNumber - 1) * maxTop / (lineCount - 1);
+    }
+
+    private static void MergeMarkers(OverviewMarker target, OverviewMarker source)
+    {
+      target.Count += source.Count;
+      if (source.Severity > target.Severity)
+        target.Severity = source.Severity;
+
+      if (!string.IsNullOrWhiteSpace(source.Message) &&
+          !target.Message.Contains(source.Message, StringComparison.Ordinal))
+      {
+        target.Message = string.IsNullOrWhiteSpace(target.Message)
+          ? source.Message
+          : target.Message + Environment.NewLine + source.Message;
+      }
     }
 
     private static void AddMarker(
@@ -306,7 +392,7 @@ namespace Ask.UI.Controls.TextEditorControl
         return;
       }
 
-      ToolTip = marker.Message;
+      ToolTip = marker.ToolTip;
       Cursor = Cursors.Hand;
     }
 
@@ -365,7 +451,12 @@ namespace Ask.UI.Controls.TextEditorControl
       public int LineNumber { get; }
       public ErrorOverviewSeverity Severity { get; set; }
       public string Message { get; set; }
+      public int Count { get; set; } = 1;
       public double Top { get; set; }
+
+      public string ToolTip => Count > 1
+        ? $"Сообщений: {Count}; первое — строка {LineNumber}{Environment.NewLine}{Message}"
+        : $"Строка {LineNumber}{Environment.NewLine}{Message}";
     }
 
     private sealed record OverviewDiagnostic(

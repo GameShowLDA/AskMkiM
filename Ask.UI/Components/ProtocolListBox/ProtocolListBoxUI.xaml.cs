@@ -37,8 +37,10 @@ namespace Ask.UI.Components.ProtocolListBox
     private readonly List<ShowMessageModel> _historyMessages = new();
     private readonly List<(int LineNumber, ErrorOverviewSeverity Severity, string Message)> _errorOverviewDiagnostics = new();
     private ScrollViewer? _protocolScrollViewer;
+    private bool _protocolScrollViewerSubscribed;
     private ProtocolCommandGroup? _currentGroup;
     private ProtocolCommandGroup? _pendingGroup;
+    private int _errorOverviewIndex = -1;
     private bool _scrollToEndRequested;
     private bool _settingsSubscribed;
     private bool _themeSubscribed;
@@ -110,6 +112,12 @@ namespace Ask.UI.Components.ProtocolListBox
     private void ProtocolListBoxUI_Loaded(object sender, RoutedEventArgs e)
     {
       _protocolScrollViewer ??= FindVisualChild<ScrollViewer>(ProtocolListBox);
+      if (_protocolScrollViewer != null && !_protocolScrollViewerSubscribed)
+      {
+        _protocolScrollViewer.ScrollChanged += ProtocolScrollViewer_ScrollChanged;
+        _protocolScrollViewerSubscribed = true;
+      }
+      RefreshErrorOverviewViewport();
 
       if (!_themeSubscribed)
       {
@@ -127,6 +135,12 @@ namespace Ask.UI.Components.ProtocolListBox
 
     private void ProtocolListBoxUI_Unloaded(object sender, RoutedEventArgs e)
     {
+      if (_protocolScrollViewerSubscribed && _protocolScrollViewer != null)
+      {
+        _protocolScrollViewer.ScrollChanged -= ProtocolScrollViewer_ScrollChanged;
+        _protocolScrollViewerSubscribed = false;
+      }
+
       if (!_themeSubscribed)
       {
         return;
@@ -168,6 +182,14 @@ namespace Ask.UI.Components.ProtocolListBox
     {
       if (HandleZoomShortcuts(e))
       {
+        return;
+      }
+
+      if (e.Key == Key.F8 &&
+          (Keyboard.Modifiers == ModifierKeys.None || Keyboard.Modifiers == ModifierKeys.Shift))
+      {
+        NavigateToOverviewError(Keyboard.Modifiers == ModifierKeys.Shift);
+        e.Handled = true;
         return;
       }
 
@@ -263,6 +285,25 @@ namespace Ask.UI.Components.ProtocolListBox
         _protocolScrollViewer.ScrollToVerticalOffset(_protocolScrollViewer.VerticalOffset + delta);
         e.Handled = true;
       }
+    }
+
+    private void ProtocolScrollViewer_ScrollChanged(object sender, ScrollChangedEventArgs e)
+    {
+      RefreshErrorOverviewViewport();
+    }
+
+    private void RefreshErrorOverviewViewport()
+    {
+      if (_protocolScrollViewer == null || _protocolScrollViewer.ExtentHeight <= 0)
+      {
+        errorOverviewBar.SetViewport(0, 1);
+        return;
+      }
+
+      double extentHeight = _protocolScrollViewer.ExtentHeight;
+      double top = _protocolScrollViewer.VerticalOffset / extentHeight;
+      double bottom = (_protocolScrollViewer.VerticalOffset + _protocolScrollViewer.ViewportHeight) / extentHeight;
+      errorOverviewBar.SetViewport(top, bottom);
     }
 
     private static T? FindVisualChild<T>(DependencyObject parent) where T : DependencyObject
@@ -732,10 +773,16 @@ namespace Ask.UI.Components.ProtocolListBox
 
       FinalizeLatestCommandGroup();
       RefreshErrorOverview();
+      RefreshErrorOverviewViewport();
     }
 
     private void RefreshErrorOverview()
     {
+      int currentLineNumber = _errorOverviewIndex >= 0 &&
+        _errorOverviewIndex < _errorOverviewDiagnostics.Count
+          ? _errorOverviewDiagnostics[_errorOverviewIndex].LineNumber
+          : -1;
+
       _errorOverviewDiagnostics.Clear();
 
       for (int i = 0; i < _historyMessages.Count; i++)
@@ -748,6 +795,10 @@ namespace Ask.UI.Components.ProtocolListBox
 
         _errorOverviewDiagnostics.Add((i + 1, ErrorOverviewSeverity.Error, line));
       }
+
+      _errorOverviewIndex = currentLineNumber > 0
+        ? _errorOverviewDiagnostics.FindIndex(diagnostic => diagnostic.LineNumber == currentLineNumber)
+        : -1;
 
       errorOverviewBar.SetLineDiagnostics(
         _historyMessages.Count,
@@ -764,6 +815,8 @@ namespace Ask.UI.Components.ProtocolListBox
       }
 
       var targetMessage = _historyMessages[messageIndex];
+      _errorOverviewIndex = _errorOverviewDiagnostics.FindIndex(diagnostic =>
+        diagnostic.LineNumber == lineNumber);
       var item = DisplayItems.FirstOrDefault(displayItem =>
         ReferenceEquals(displayItem.Message, targetMessage));
 
@@ -789,6 +842,28 @@ namespace Ask.UI.Components.ProtocolListBox
       ProtocolListBox.SelectedItem = item;
       ProtocolListBox.ScrollIntoView(item);
       ProtocolListBox.Focus();
+    }
+
+    private void NavigateToOverviewError(bool previous)
+    {
+      if (_errorOverviewDiagnostics.Count == 0)
+      {
+        return;
+      }
+
+      int nextIndex;
+      if (_errorOverviewIndex < 0)
+      {
+        nextIndex = previous ? _errorOverviewDiagnostics.Count - 1 : 0;
+      }
+      else
+      {
+        int direction = previous ? -1 : 1;
+        nextIndex = (_errorOverviewIndex + direction + _errorOverviewDiagnostics.Count) %
+          _errorOverviewDiagnostics.Count;
+      }
+
+      NavigateToErrorOverviewLine(_errorOverviewDiagnostics[nextIndex].LineNumber);
     }
 
     private void RefreshThemeColors()
