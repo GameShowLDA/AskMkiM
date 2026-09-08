@@ -1,0 +1,376 @@
+using Ask.Core.Services.Errors.Models;
+using ICSharpCode.AvalonEdit;
+using ICSharpCode.AvalonEdit.Document;
+using System.Windows;
+using System.Windows.Input;
+using System.Windows.Media;
+
+namespace Ask.UI.Controls.TextEditorControl
+{
+  public enum ErrorOverviewSeverity
+  {
+    Information,
+    Warning,
+    Error,
+  }
+
+  /// <summary>
+  /// Узкая полоса обзора диагностик для WPF-редактора и протокола.
+  /// </summary>
+  public sealed class ErrorOverviewBar : FrameworkElement
+  {
+    private const double MarkerHeight = 3.0;
+    private const double MarkerGap = 1.0;
+
+    private readonly List<OverviewMarker> _markers = new();
+    private IReadOnlyList<OverviewDiagnostic> _diagnostics = Array.Empty<OverviewDiagnostic>();
+    private TextEditor? _editor;
+    private int _lineCount;
+    private Action<int>? _lineClickAction;
+
+    public ErrorOverviewBar()
+    {
+      SnapsToDevicePixels = true;
+      UseLayoutRounding = true;
+      Cursor = Cursors.Arrow;
+
+      SizeChanged += (_, _) => RebuildMarkers();
+      MouseMove += ErrorOverviewBar_MouseMove;
+      MouseLeave += (_, _) => ResetToolTip();
+      MouseLeftButtonUp += ErrorOverviewBar_MouseLeftButtonUp;
+    }
+
+    public void SetEditor(TextEditor editor)
+    {
+      if (ReferenceEquals(_editor, editor))
+        return;
+
+      DetachEditor();
+      _editor = editor ?? throw new ArgumentNullException(nameof(editor));
+      _lineCount = 0;
+      _lineClickAction = null;
+      _editor.TextChanged += Editor_TextChanged;
+      _editor.DocumentChanged += Editor_DocumentChanged;
+      _editor.TextArea.TextView.ScrollOffsetChanged += TextView_Changed;
+      _editor.TextArea.TextView.VisualLinesChanged += TextView_Changed;
+      RebuildMarkers();
+    }
+
+    public void SetLineDiagnostics(
+      int lineCount,
+      IEnumerable<(int LineNumber, ErrorOverviewSeverity Severity, string Message)>? diagnostics,
+      Action<int>? lineClickAction = null)
+    {
+      DetachEditor();
+      _lineCount = Math.Max(0, lineCount);
+      _lineClickAction = lineClickAction;
+      _diagnostics = (diagnostics ?? Array.Empty<(int, ErrorOverviewSeverity, string)>())
+        .Select(diagnostic => new OverviewDiagnostic(
+          diagnostic.LineNumber,
+          diagnostic.Severity,
+          diagnostic.Message ?? string.Empty))
+        .ToArray();
+
+      RebuildMarkers();
+    }
+
+    public void SetIssues(IEnumerable<IDisplayIssue>? issues, bool useFormattedLineNumber = false)
+    {
+      _diagnostics = (issues ?? Array.Empty<IDisplayIssue>())
+        .Select(issue => new OverviewDiagnostic(
+          useFormattedLineNumber && issue.FormattedLineNumber > 0
+            ? issue.FormattedLineNumber
+            : issue.SourceLineNumber,
+          issue.IsWarning ? ErrorOverviewSeverity.Warning : ErrorOverviewSeverity.Error,
+          BuildToolTip(issue)))
+        .ToArray();
+
+      RebuildMarkers();
+    }
+
+    public void SetDiagnostics(
+      IEnumerable<(int LineNumber, ErrorOverviewSeverity Severity, string Message)>? diagnostics)
+    {
+      _diagnostics = (diagnostics ?? Array.Empty<(int, ErrorOverviewSeverity, string)>())
+        .Select(diagnostic => new OverviewDiagnostic(
+          diagnostic.LineNumber,
+          diagnostic.Severity,
+          diagnostic.Message ?? string.Empty))
+        .ToArray();
+
+      RebuildMarkers();
+    }
+
+    public void AddIssue(IDisplayIssue issue, bool useFormattedLineNumber = false)
+    {
+      ArgumentNullException.ThrowIfNull(issue);
+
+      var lineNumber = useFormattedLineNumber && issue.FormattedLineNumber > 0
+        ? issue.FormattedLineNumber
+        : issue.SourceLineNumber;
+
+      _diagnostics = _diagnostics
+        .Append(new OverviewDiagnostic(
+          lineNumber,
+          issue.IsWarning ? ErrorOverviewSeverity.Warning : ErrorOverviewSeverity.Error,
+          BuildToolTip(issue)))
+        .ToArray();
+
+      RebuildMarkers();
+    }
+
+    public void ClearIssues()
+    {
+      _diagnostics = Array.Empty<OverviewDiagnostic>();
+      RebuildMarkers();
+    }
+
+    protected override void OnRender(DrawingContext drawingContext)
+    {
+      base.OnRender(drawingContext);
+
+      if (ActualWidth <= 0 || ActualHeight <= 0)
+        return;
+
+      var trackBrush = TryFindResource("ScrollBarTrackBackground") as Brush
+        ?? new SolidColorBrush(Color.FromArgb(28, 128, 128, 128));
+      drawingContext.DrawRectangle(trackBrush, null, new Rect(0, 0, ActualWidth, ActualHeight));
+
+      foreach (var marker in _markers)
+      {
+        var brush = GetMarkerBrush(marker.Severity);
+        drawingContext.DrawRoundedRectangle(
+          brush,
+          null,
+          new Rect(1, marker.Top, Math.Max(1, ActualWidth - 2), MarkerHeight),
+          1,
+          1);
+      }
+    }
+
+    private void RebuildMarkers()
+    {
+      _markers.Clear();
+
+      var document = _editor?.Document;
+      int lineCount = document?.LineCount ?? _lineCount;
+      if (lineCount <= 0)
+      {
+        InvalidateVisual();
+        return;
+      }
+
+      var markersByLine = new Dictionary<int, OverviewMarker>();
+
+      if (document != null)
+      {
+        foreach (var line in document.Lines)
+        {
+          var lineText = document.GetText(line.Offset, line.Length);
+          if (lineText.Contains("БРАК", StringComparison.OrdinalIgnoreCase))
+          {
+            AddMarker(
+              markersByLine,
+              line.LineNumber,
+              ErrorOverviewSeverity.Error,
+              lineText.Trim());
+          }
+        }
+      }
+
+      foreach (var diagnostic in _diagnostics)
+      {
+        int lineNumber = diagnostic.LineNumber;
+
+        if (lineNumber <= 0 || lineNumber > lineCount)
+          continue;
+
+        AddMarker(
+          markersByLine,
+          lineNumber,
+          diagnostic.Severity,
+          diagnostic.Message);
+      }
+
+      var ordered = markersByLine.Values
+        .OrderBy(marker => marker.LineNumber)
+        .ToList();
+
+      if (ordered.Count == 0)
+      {
+        InvalidateVisual();
+        return;
+      }
+
+      double maxTop = Math.Max(0, ActualHeight - MarkerHeight);
+      double minimumSpacing = ordered.Count <= 1
+        ? 0
+        : Math.Min(MarkerHeight + MarkerGap, maxTop / (ordered.Count - 1));
+
+      for (int i = 0; i < ordered.Count; i++)
+      {
+        var marker = ordered[i];
+        double desiredTop = lineCount <= 1
+          ? 0
+          : (marker.LineNumber - 1) * maxTop / (lineCount - 1);
+
+        marker.Top = i == 0
+          ? desiredTop
+          : Math.Max(desiredTop, ordered[i - 1].Top + minimumSpacing);
+      }
+
+      if (ordered[^1].Top > maxTop)
+      {
+        ordered[^1].Top = maxTop;
+        for (int i = ordered.Count - 2; i >= 0; i--)
+        {
+          ordered[i].Top = Math.Min(
+            ordered[i].Top,
+            ordered[i + 1].Top - minimumSpacing);
+        }
+      }
+
+      _markers.AddRange(ordered);
+      InvalidateVisual();
+    }
+
+    private static void AddMarker(
+      IDictionary<int, OverviewMarker> markersByLine,
+      int lineNumber,
+      ErrorOverviewSeverity severity,
+      string message)
+    {
+      if (!markersByLine.TryGetValue(lineNumber, out var marker))
+      {
+        markersByLine[lineNumber] = new OverviewMarker(lineNumber, severity, message);
+        return;
+      }
+
+      if (severity > marker.Severity)
+        marker.Severity = severity;
+
+      if (!string.IsNullOrWhiteSpace(message) && !marker.Message.Contains(message, StringComparison.Ordinal))
+        marker.Message = string.IsNullOrWhiteSpace(marker.Message)
+          ? message
+          : marker.Message + Environment.NewLine + message;
+    }
+
+    private static string BuildToolTip(IDisplayIssue issue)
+    {
+      var parts = new[]
+      {
+        issue.Description,
+        issue.Command,
+        issue.MeasureResult,
+      };
+
+      return string.Join(
+        Environment.NewLine,
+        parts.Where(part => !string.IsNullOrWhiteSpace(part)).Distinct(StringComparer.Ordinal));
+    }
+
+    private Brush GetMarkerBrush(ErrorOverviewSeverity severity)
+    {
+      string resourceKey = severity switch
+      {
+        ErrorOverviewSeverity.Warning => "ErrorListWarningIconBrush",
+        ErrorOverviewSeverity.Information => "TestsProtocolMessageForeground",
+        _ => "ErrorListErrorIconBrush",
+      };
+
+      if (TryFindResource(resourceKey) is Brush brush)
+        return brush;
+
+      return severity switch
+      {
+        ErrorOverviewSeverity.Warning => Brushes.Orange,
+        ErrorOverviewSeverity.Information => Brushes.DodgerBlue,
+        _ => Brushes.Red,
+      };
+    }
+
+    private OverviewMarker? HitTestMarker(Point point)
+    {
+      return _markers.FirstOrDefault(marker =>
+        point.Y >= marker.Top - MarkerGap
+        && point.Y <= marker.Top + MarkerHeight + MarkerGap);
+    }
+
+    private void ErrorOverviewBar_MouseMove(object sender, MouseEventArgs e)
+    {
+      var marker = HitTestMarker(e.GetPosition(this));
+      if (marker == null)
+      {
+        ResetToolTip();
+        Cursor = Cursors.Arrow;
+        return;
+      }
+
+      ToolTip = marker.Message;
+      Cursor = Cursors.Hand;
+    }
+
+    private void ErrorOverviewBar_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+    {
+      var marker = HitTestMarker(e.GetPosition(this));
+      if (marker == null)
+        return;
+
+      if (_editor != null)
+      {
+        _editor.ScrollToLine(marker.LineNumber);
+        _editor.TextArea.Focus();
+      }
+      else
+      {
+        _lineClickAction?.Invoke(marker.LineNumber);
+      }
+
+      e.Handled = true;
+    }
+
+    private void ResetToolTip()
+    {
+      ToolTip = null;
+      Cursor = Cursors.Arrow;
+    }
+
+    private void Editor_TextChanged(object? sender, EventArgs e) => RebuildMarkers();
+
+    private void Editor_DocumentChanged(object? sender, EventArgs e) => RebuildMarkers();
+
+    private void TextView_Changed(object? sender, EventArgs e) => InvalidateVisual();
+
+    private void DetachEditor()
+    {
+      if (_editor == null)
+        return;
+
+      _editor.TextChanged -= Editor_TextChanged;
+      _editor.DocumentChanged -= Editor_DocumentChanged;
+      _editor.TextArea.TextView.ScrollOffsetChanged -= TextView_Changed;
+      _editor.TextArea.TextView.VisualLinesChanged -= TextView_Changed;
+      _editor = null;
+    }
+
+    private sealed class OverviewMarker
+    {
+      public OverviewMarker(int lineNumber, ErrorOverviewSeverity severity, string message)
+      {
+        LineNumber = lineNumber;
+        Severity = severity;
+        Message = message;
+      }
+
+      public int LineNumber { get; }
+      public ErrorOverviewSeverity Severity { get; set; }
+      public string Message { get; set; }
+      public double Top { get; set; }
+    }
+
+    private sealed record OverviewDiagnostic(
+      int LineNumber,
+      ErrorOverviewSeverity Severity,
+      string Message);
+  }
+}

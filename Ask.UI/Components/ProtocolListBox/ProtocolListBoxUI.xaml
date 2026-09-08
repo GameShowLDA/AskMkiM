@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:Ask.UI.Components.ProtocolListBox"
              xmlns:conv="clr-namespace:Ask.UI.Shared.Converters.Math"
+             xmlns:overview="clr-namespace:Ask.UI.Controls.TextEditorControl"
              mc:Ignorable="d"
              d:DesignHeight="450"
              d:DesignWidth="800">
@@ -243,7 +244,13 @@
     </UserControl.Resources>
 
     <Grid>
-        <Border CornerRadius="20,20,0,0"
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="12"/>
+        </Grid.ColumnDefinitions>
+
+        <Border Grid.Column="0"
+                CornerRadius="20,20,0,0"
                 Background="{DynamicResource TestsProtocolBackgroundBrush}">
             <ListBox x:Name="ProtocolListBox"
                      Background="Transparent"
@@ -328,5 +335,10 @@
                 </ListBox.ItemContainerStyle>
             </ListBox>
         </Border>
+
+        <overview:ErrorOverviewBar x:Name="errorOverviewBar"
+                                   Grid.Column="1"
+                                   HorizontalAlignment="Stretch"
+                                   VerticalAlignment="Stretch"/>
     </Grid>
 </UserControl>

@@ -1676,6 +1676,12 @@ formatted editors; `RunControl` hosts ProtocolUI, translated source and error li
 В правой области `RunControl` панель действий документа отображается только для
 транслированного файла и итогового протокола; вкладка состояния оборудования её скрывает.
 
+Открытый `.asktrace` отображается через `SavedExecutionProtocolUI` и
+`ProtocolListBoxUI`; рядом с его штатной вертикальной прокруткой размещается
+`ErrorOverviewBar`. Полоса получает строки из существующей коллекции
+`ShowMessageModel`, отмечает только сообщения с `БРАК`, показывает WPF ToolTip и
+по клику раскрывает/прокручивает соответствующую запись протокола.
+
 `Ask.UI` contains newer feature-oriented code: ProtocolNew, Archive, Notifications,
 RoleManagement, ExecutionSelection and reusable controls. Оба UI-проекта пока
 участвуют в runtime, но `UI` поддерживается только как legacy-интеграционный слой;

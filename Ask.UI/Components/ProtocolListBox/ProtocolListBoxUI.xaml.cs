@@ -5,6 +5,7 @@ using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.DTO.Settings;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
+using Ask.UI.Controls.TextEditorControl;
 using Ask.UI.Services.Notifications;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -34,6 +35,7 @@ namespace Ask.UI.Components.ProtocolListBox
     private const double DefaultFontSize = 20.0;
     private const double MouseWheelScrollStep = 48.0;
     private readonly List<ShowMessageModel> _historyMessages = new();
+    private readonly List<(int LineNumber, ErrorOverviewSeverity Severity, string Message)> _errorOverviewDiagnostics = new();
     private ScrollViewer? _protocolScrollViewer;
     private ProtocolCommandGroup? _currentGroup;
     private ProtocolCommandGroup? _pendingGroup;
@@ -400,6 +402,7 @@ namespace Ask.UI.Components.ProtocolListBox
         {
           RemoveLastVisibleMessage(removedMessages[i]);
         }
+        RefreshErrorOverview();
         removed = linesToRemove;
       });
 
@@ -456,6 +459,7 @@ namespace Ask.UI.Components.ProtocolListBox
         DisplayItems.Clear();
         _currentGroup = null;
         _pendingGroup = null;
+        RefreshErrorOverview();
         LogInformation("Протокол полностью очищен.");
       });
     }
@@ -504,6 +508,7 @@ namespace Ask.UI.Components.ProtocolListBox
 
         _historyMessages.Add(showMessageModel);
         AppendVisibleMessage(showMessageModel);
+        RefreshErrorOverview();
 
         if (lastMessage)
         {
@@ -726,6 +731,64 @@ namespace Ask.UI.Components.ProtocolListBox
       }
 
       FinalizeLatestCommandGroup();
+      RefreshErrorOverview();
+    }
+
+    private void RefreshErrorOverview()
+    {
+      _errorOverviewDiagnostics.Clear();
+
+      for (int i = 0; i < _historyMessages.Count; i++)
+      {
+        string line = ExecutionProtocolLineFormatter.Format(_historyMessages[i]);
+        if (!line.Contains("БРАК", StringComparison.OrdinalIgnoreCase))
+        {
+          continue;
+        }
+
+        _errorOverviewDiagnostics.Add((i + 1, ErrorOverviewSeverity.Error, line));
+      }
+
+      errorOverviewBar.SetLineDiagnostics(
+        _historyMessages.Count,
+        _errorOverviewDiagnostics,
+        NavigateToErrorOverviewLine);
+    }
+
+    private void NavigateToErrorOverviewLine(int lineNumber)
+    {
+      int messageIndex = lineNumber - 1;
+      if (messageIndex < 0 || messageIndex >= _historyMessages.Count)
+      {
+        return;
+      }
+
+      var targetMessage = _historyMessages[messageIndex];
+      var item = DisplayItems.FirstOrDefault(displayItem =>
+        ReferenceEquals(displayItem.Message, targetMessage));
+
+      if (item == null)
+      {
+        var groupHeader = DisplayItems.FirstOrDefault(displayItem =>
+          displayItem.Group?.BodyItems.Any(bodyItem =>
+            ReferenceEquals(bodyItem.Message, targetMessage)) == true);
+
+        if (groupHeader?.Group != null)
+        {
+          ExpandGroup(groupHeader.Group);
+          item = DisplayItems.FirstOrDefault(displayItem =>
+            ReferenceEquals(displayItem.Message, targetMessage));
+        }
+      }
+
+      if (item == null)
+      {
+        return;
+      }
+
+      ProtocolListBox.SelectedItem = item;
+      ProtocolListBox.ScrollIntoView(item);
+      ProtocolListBox.Focus();
     }
 
     private void RefreshThemeColors()
