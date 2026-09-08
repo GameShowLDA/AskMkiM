@@ -227,6 +227,7 @@ namespace Ask.UI.Features.ProtocolNew.Execution
         StepMode = false;
 
         await ProtocolSelfCheck.ClearAllMessagesAsync();
+        ProtocolSelfCheck.StartLogCapture();
         if (actionSettings.PreActionDelegate != null)
         {
           await actionSettings.PreActionDelegate(ProtocolSelfCheck.GetCancellationToken());
@@ -270,6 +271,7 @@ namespace Ask.UI.Features.ProtocolNew.Execution
         {
           LogException($"Ошибка при аварийном завершении \"{actionSettings.Name}\"", finalizeEx);
           _runGuard.Release(this);
+          ProtocolSelfCheck.StopLogCapture();
           SystemStateManager.SetIsLocked(false);
         }
       }

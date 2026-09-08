@@ -11,6 +11,22 @@
 
 ## Quick Navigation
 
+Экспорт диагностики за день: кнопка перед текущим пользователем в `MainWindow/MainWindow.xaml`
+→ `MainWindow/MainWindow.DailyReport.cs` → `UI/Controls/DailyReportDateWindow.xaml`
+→ переиспользуемый `UI/Controls/Calendar/CalendarControl.xaml`
+с индикацией доступности по каталогам протоколов и логов (полная дата содержит оба набора данных)
+→ SaveFileDialog → `Ask.Diagnostics/Services/DailyReportService.cs`. ZIP содержит `Protocols`
+из дневного каталога `ExecutionProtocolHistoryService.GetHistoryDirectory()`, `Logs` из
+`AppContext.BaseDirectory/logs/yyyy-MM-dd`, `CrashReports` из настроенного `CrashPackageOptions.Path`
+(пакеты с префиксом `yyyyMMdd_`) и `report.json` с замечаниями. Логи сбрасываются через NLog перед сбором;
+файлы читаются с FileShare.ReadWrite/Delete до длины на момент открытия. Архив формируется во временном
+файле рядом с назначением и переносится после закрытия ZIP. Экспорт доступен из общей панели;
+содержимое протоколов не расшифровывается и не зависит от роли экспортирующего пользователя.
+Иконка `Ask.UI/Shared/Components/Icons/DailyReportIcon.xaml` использует SemiIconDownload из Semi.Avalonia,
+Size/Foreground и анимации общей кнопки; лицензия сохранена рядом. Соседние иконки не заменяются.
+Результат сохранения и ошибка показываются через `NotificationHostService`; окно выбора даты использует
+безрамочный shell, тематические brushes, шрифты и стили кнопок существующих диалогов `Ask.UI`.
+
 | Нужно изменить | Сначала смотреть | Затем смотреть |
 | --- | --- | --- |
 | Запуск приложения | `MainWindow/App.xaml.cs`, `MainWindow/Init/PreStartupInitializer.cs` | `MainWindow/Init/DatabaseInitializer.cs`, `MainWindow/Engine/AppServices.cs`, `MainWindow/MainWindow.xaml.cs` |
@@ -965,6 +981,25 @@ Other runtime branches:
 - `Ask.Engine/Tests/SelfControl/`
 
 ### Protocols and file formats
+
+Диагностический журнал ASKTRACE: `Ask.Core/Services/Protocols/ExecutionLogCapture.cs`
+подписывается на `LoggerUtility.LogMessageWritten` и `ExceptionLogged` на время запуска.
+`ActionExecutor.StartAsync → ProtocolUI.StartLogCapture` начинает сбор после очистки протокола;
+`ExecutionFinalizer` прекращает сбор после сохранения, включая логи финального сброса.
+`ProtocolUI.IProtocolEntrySink.AppendLineAsync` регистрирует ссылки на сообщения; общий lock
+упорядочивает их относительно логов. При сохранении позиции привязываются к итоговому snapshot,
+в том числе после удаления сообщений повтора. Журнал включает общие логи приложения за интервал
+запуска (не только оборудование); фоновые операции приложения тоже могут попасть в него.
+`ProtocolStorageService → ExecutionProtocolHistoryService.SaveAsync →
+ExecutionProtocolDiagnosticFormatter.FormatProtocolForStorage` сохраняет необязательный массив
+`Logs` в существующем Brotli payload V3. Читаемая часть файла не содержит логов; старые файлы
+без `Logs` продолжают открываться. `ExceptionLogged` дополнительно сохраняет `Exception.ToString()`.
+`SavedExecutionProtocolUI(string)` восстанавливает ленту по `DebugAccessConfig.IsDebugEnabled`
+и подписывается на `SystemStateEvents.DebugRightsChanged` только пока control загружен.
+ROOT видит диагностические строки между сообщениями, остальные роли их не получают;
+смена роли перезагружает представление. `FileOpenService` и парный просмотр `FileService`
+передают исходный текст для повторного восстановления. Логи не участвуют в итоговом вердикте,
+печати и ASKRESULT/ASKREPORT. Сбор находится в памяти до сохранения; это не crash-журнал на диске.
 
 #### Purpose
 

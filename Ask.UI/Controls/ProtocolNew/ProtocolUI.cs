@@ -383,8 +383,14 @@ namespace Ask.UI.Controls.ProtocolNew
     }
 
     /// <inheritdoc />
-    Task IProtocolEntrySink.AppendLineAsync(ShowMessageModel message, bool isLastMessage) =>
-      protocolTextBox.AppendLineAsync(message, isLastMessage);
+    Task IProtocolEntrySink.AppendLineAsync(ShowMessageModel message, bool isLastMessage)
+    {
+      _protocolStorage.LogCapture.RecordMessage(message);
+      return protocolTextBox.AppendLineAsync(message, isLastMessage);
+    }
+
+    internal void StartLogCapture() => _protocolStorage.LogCapture.Start();
+    internal void StopLogCapture() => _protocolStorage.LogCapture.Dispose();
 
     /// <inheritdoc />
     Task IProtocolEntrySink.RemoveLastLinesAsync() => protocolTextBox.RemoveLastLinesAsync();
