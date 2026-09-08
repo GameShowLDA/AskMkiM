@@ -254,12 +254,9 @@ namespace MainWindowProgram.Services
           ? ReadSavedProtocolText(executionProtocolPath)
           : string.Empty;
         SavedProtocolPairUI viewer;
-        if (ExecutionProtocolDiagnosticFormatter.TryRestoreMessages(
-              rawExecutionProtocol,
-              DebugAccessConfig.IsDebugEnabled,
-              out var messages))
+        if (File.Exists(executionProtocolPath))
         {
-          viewer = new SavedProtocolPairUI(messages, resultProtocolText);
+          viewer = new SavedProtocolPairUI(rawExecutionProtocol, resultProtocolText);
         }
         else
         {

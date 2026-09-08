@@ -28,9 +28,10 @@ public static class ExecutionProtocolHistoryService
   public static async Task<string> SaveAsync(
     string? protocolName,
     IEnumerable<ShowMessageModel> messages,
-    ExecutionProtocolEnvironmentSnapshot? environment = null)
+    ExecutionProtocolEnvironmentSnapshot? environment = null,
+    IReadOnlyList<ExecutionLogEntry>? logs = null)
   {
-    var lines = ExecutionProtocolDiagnosticFormatter.FormatProtocolForStorage(messages, environment);
+    var lines = ExecutionProtocolDiagnosticFormatter.FormatProtocolForStorage(messages, environment, logs);
 
     return await SaveLinesAsync(protocolName, lines, ProtocolFileExtensions.Trace);
   }
