@@ -99,7 +99,7 @@ namespace Ask.UI.Features.ServiceTools.Gpt.Modes
       try
       {
         MeasurementRange measurementRange = new MeasurementRange(0, 0, 0);
-        double result = (await GptUiOperation.GetDevice(deviceContext).AcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandAC, measurementRange)).value;
+        double result = (await GptUiOperation.GetDevice(deviceContext).AcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandAC, measurementRange)).Value;
 
         TestResultText.Text = $"Результат теста: {result:F3} мА";
       }

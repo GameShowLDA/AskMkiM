@@ -1,3 +1,4 @@
+using Ask.Core.Shared.DTO.Devices.Base;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Static.Messages;
@@ -57,7 +58,7 @@ namespace Ask.Engine.UnitTests.Tests.Base
       Assert.Contains(parameters, parameter => parameter.Header == "Напряжение" && parameter.Value == "100 В");
     }
 
-    private static UIValidationHelper.DataModel CreateData() =>
+    private static DataModel CreateData() =>
       new(
         new PointModel
         {

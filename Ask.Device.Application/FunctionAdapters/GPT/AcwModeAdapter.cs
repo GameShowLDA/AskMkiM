@@ -1,4 +1,3 @@
-using DeviceMessages = Ask.Device.ResponseProcessor.BreakdownTester.ResponseProcessing.BreakdownTesterMessages;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Errors.Device;
 using Ask.Core.Services.Errors.Device.Breakdown;
@@ -12,7 +11,7 @@ using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Application.Execution;
 using Ask.Device.Runtime.Device;
 using Ask.Device.Runtime.Function.GPT;
-using Ask.Device.Runtime.Function.Helpers;
+using DeviceMessages = Ask.Device.ResponseProcessor.BreakdownTester.ResponseProcessing.BreakdownTesterMessages;
 
 namespace Ask.Device.Application.FunctionAdapters.GPT
 {
@@ -883,7 +882,7 @@ namespace Ask.Device.Application.FunctionAdapters.GPT
       /// Генерируется при ошибке выполнения измерения.  
       /// Сообщение исключения содержит текст ошибки, полученный от устройства.
       /// </exception>
-      public async Task<(double value, string unit)> MeasureAsync(ElectricalTestFunction electricalTestFunction, MeasurementRange measurementRange, bool waitFullTime = false, IUserInteractionService? userMessageService = null)
+      public async Task<BreakdownMeasurementResponse> MeasureAsync(ElectricalTestFunction electricalTestFunction, MeasurementRange measurementRange, bool waitFullTime = false, IUserInteractionService? userMessageService = null)
       {
         var execution = await AdapterMeasurementExecutor.ExecuteAsync(
           _device,
@@ -904,17 +903,17 @@ namespace Ask.Device.Application.FunctionAdapters.GPT
           throw new DeviceException($"Ошибка при измерении тока ACW: {execution.ErrorMessage}");
         }
 
-        var (result, unit) = execution.Value;
+        var answer = execution.Value;
 
         await DeviceMessages.PublishOperationResultAsync(
           _device,
           "Измерение тока ACW",
-          $"{result} мА",
-          result < measurementRange.TargetValue,
+          $"{answer.Value} {answer.Unit}",
+          answer.Value < measurementRange.TargetValue,
           2,
           userMessageService);
 
-        return (result, unit);
+        return answer;
       }
 
       /// <summary>

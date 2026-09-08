@@ -10,6 +10,7 @@ using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Enums.UnitEnums;
+using Ask.Core.Shared.Metadata.Static.Messages;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies.Data;
 using Ask.Engine.ControlCommandExecutor.Execution;
@@ -121,6 +122,12 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
               outputService: context.MessageService);
           }
 
+          var localizationPoints = basePointConnectionError
+            ? new List<PointModel>()
+            : new List<PointModel> { _basePoint };
+          bool requiresHighResistanceLocalization = false;
+          double? firstAboveUpperBound = null;
+
           await DeviceManager.RelayModule.PointManager.DisconnectPointFromBusAAsync(_basePoint, context.MessageService, context.IsPolarityReversed);
 
           for (int i = 1; i < chains.PointModels.Count; i++)
@@ -196,6 +203,11 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
                 outputService: context.MessageService);
             }
 
+            if (!currentPointError && localizationPoints.Count > 0)
+            {
+              localizationPoints.Add(point);
+            }
+
             await DeviceManager.RelayModule.PointManager.DisconnectPointFromBusBAsync(point, context.MessageService, context.IsPolarityReversed);
 
             double Rt = -1;
@@ -232,7 +244,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
             {
               Rt = await GetResistanceAsync(context.MessageService, context.Value, context.LowerLimit, context.HigherLimit);
 
-              if (context.ValidatePointConnections && Rt > 100)
+              if (context.ValidatePointConnections && IsPairMeasurementOverload(Rt))
               {
                 var errorMessageModels = MeasurementMessages.BuildMeasurementResultMessage(
                   context.TypeCommand,
@@ -312,6 +324,14 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 
               bool succes = finalMeasurement.Connect;
               double result = finalMeasurement.Answer;
+              bool isAboveUpperBound = EhtHighResistanceLocalizationService.IsAboveUpperBound(
+                result,
+                UpperBound);
+              requiresHighResistanceLocalization |= isAboveUpperBound;
+              if (isAboveUpperBound)
+              {
+                firstAboveUpperBound ??= result;
+              }
               var measurementRange = new MeasurementRange(result, LowerBound, UpperBound);
               var message = MeasurementMessages.BuildMeasurementResultMessage(
                 ResistanceUnit.Ohm,
@@ -319,7 +339,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
                 succes,
                 measurementTarget);
 
-              if (!succes)
+              if (!succes && !isAboveUpperBound)
               {
                 messages.Errors.Add(message);
                 context.CommandManager.AddErrorMethod(
@@ -352,6 +372,14 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
               context.IsPolarityReversed);
           }
 
+          if (requiresHighResistanceLocalization && firstAboveUpperBound.HasValue)
+          {
+            messages.AddRange(await EhtHighResistanceLocalizationService.LocalizeAsync(
+              context,
+              new ChainModel(localizationPoints),
+              firstAboveUpperBound.Value));
+          }
+
           await DisconnectAllPoints(context.MessageService, chains);
         }
       }
@@ -359,7 +387,17 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
       return messages;
     }
 
-    private static double CalculateFinalResistance(
+    /// <summary>
+    /// Рассчитывает сопротивление участка с учётом контактных сопротивлений и сопротивления кабеля.
+    /// </summary>
+    /// <param name="measuredResistance">Измеренное сопротивление между точками.</param>
+    /// <param name="firstPointResistance">Контактное сопротивление первой точки.</param>
+    /// <param name="secondPointResistance">Контактное сопротивление второй точки.</param>
+    /// <param name="lowerBound">Нижняя допустимая граница сопротивления.</param>
+    /// <param name="upperBound">Верхняя допустимая граница сопротивления.</param>
+    /// <param name="cableResistance">Сопротивление кабеля.</param>
+    /// <returns>Скомпенсированное сопротивление участка.</returns>
+    internal static double CalculateFinalResistance(
       double measuredResistance,
       double firstPointResistance,
       double secondPointResistance,
@@ -385,6 +423,17 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 
     internal static bool CanMeasurePair(bool basePointConnectionError, bool currentPointError)
       => !basePointConnectionError && !currentPointError;
+
+    /// <summary>
+    /// Проверяет, соответствует ли результат измерения пары признаку перегрузки мультиметра.
+    /// </summary>
+    /// <param name="resistance">Измеренное сопротивление.</param>
+    /// <returns>
+    /// <see langword="true"/>, если мультиметр вернул перегрузку.
+    /// В противном случае — <see langword="false"/>.
+    /// </returns>
+    internal static bool IsPairMeasurementOverload(double resistance)
+      => MeasurementValueFormatter.IsOverloadValue(resistance);
 
     static private async Task ConnectToBusAAndBAsync(IUserInteractionService userMessageService, PointModel pointModel)
     {

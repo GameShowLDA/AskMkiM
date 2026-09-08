@@ -22,7 +22,6 @@
 		<AssemblyVersion>1.0.0.0</AssemblyVersion>
 		<FileVersion>1.0.0.0</FileVersion>
 
-		<BuildDate>$([System.DateTime]::Now.ToString("dd.MM.yyyy"))</BuildDate>
 	</PropertyGroup>
 
 	<PropertyGroup>
@@ -36,10 +35,6 @@
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
 		<WarningLevel>9999</WarningLevel>
 	</PropertyGroup>
-
-	<ItemGroup>
-		<AssemblyMetadata Include="BuildDate" Value="$(BuildDate)" />
-	</ItemGroup>
 
 	<ItemGroup>
 		<None Remove="Resources\logo.png" />

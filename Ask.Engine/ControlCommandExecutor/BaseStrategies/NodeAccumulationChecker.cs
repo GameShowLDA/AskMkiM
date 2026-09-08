@@ -23,7 +23,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     /// <param name="value">Ожидаемое значение.</param>
     /// <param name="userMessageService">Элемент управления для вывода сообщений.</param>
     /// <param name="cancellationToken">Токен отмены.</param>
-    internal delegate Task<(bool Result, double Value)> PerformMeasurementAsync(double value, IUserInteractionService userMessageService, CancellationToken cancellationToken, double errorResistance, VoltageEnum.Type type = VoltageEnum.Type.DCW);
+    internal delegate Task<(bool Result, double Value)> PerformMeasurementAsync(double value, IUserInteractionService userMessageService, CancellationToken cancellationToken, double errorResistance, VoltageEnum.Type type = VoltageEnum.Type.DCW, string? points = null);
     static private int step = 0;
 
     /// <summary>
@@ -69,7 +69,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
           await DeviceManager.RelayModule.PointManager.ConnectPointToBusAAsync(point, messageService, context.IsPolarityReversed);
         }
 
-        var measured = await context.PerformMeasurementAsync(context.Value, messageService, cancellationToken, context.InternalResistance, context.VoltageType);
+        var measured = await context.PerformMeasurementAsync(context.Value, messageService, cancellationToken, context.InternalResistance, context.VoltageType, str);
         if (!measured.Result)
         {
           step = 0;
@@ -85,7 +85,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
               context,
               faultChain,
               strError,
-              (value, service, token, resistance, type) => context.PerformMeasurementAsync(value, service, token, resistance, type),
+              (value, service, token, resistance, type, points) => context.PerformMeasurementAsync(value, service, token, resistance, type, points),
               context.VoltageType);
 
             var err = faultResult.Errors.Single();
@@ -176,7 +176,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
           "Отключение левой части группы точек", messageService);
         await DeviceManager.RelayModule.GroupManager.DisconnectAllPointFromBusBAsync(leftPart, messageService, revers);
 
-        var measuredWithoutLeft = await performMeasurementAsync(resistance, messageService, cancellationToken, switchResistance, type: type);
+        var measuredWithoutLeft = await performMeasurementAsync(resistance, messageService, cancellationToken, switchResistance, type: type, points: await PointFormater.GetFormatDisconnectPoint(rightPart.ChainModels));
         if (!measuredWithoutLeft.Result)
         {
           return rightPart.ChainModels.Count == 1
@@ -192,7 +192,7 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
           "Подключение левой части группы точек", messageService);
         await DeviceManager.RelayModule.GroupManager.ConnectAllFromBusBAsync(leftPart, messageService, revers);
 
-        var measuredWithoutRight = await performMeasurementAsync(resistance, messageService, cancellationToken, switchResistance, type: type);
+        var measuredWithoutRight = await performMeasurementAsync(resistance, messageService, cancellationToken, switchResistance, type: type, points: await PointFormater.GetFormatDisconnectPoint(leftPart.ChainModels));
         if (!measuredWithoutRight.Result)
         {
           return leftPart.ChainModels.Count == 1

@@ -240,16 +240,38 @@ namespace Ask.Core.Shared.DTO.Protocol
           {
             continue;
           }
+          var messageText = BuildProtocolMessage(message);
 
           var prefix = kind == ProtocolMessageKind.Error
             ? $"ERR{sequenceIndex++}"
             : $"DOC{sequenceIndex++}";
 
-          sb.AppendLine($"{prefix} {command}: {message}");
+          sb.AppendLine($"{prefix} {command}: {messageText}");
         }
       }
 
       return sb.ToString();
+    }
+
+    private static string BuildProtocolMessage(ShowMessageModel message)
+    {
+      var text = message.ToString() ?? string.Empty;
+
+      text = text
+          .Replace("[БРАК]", string.Empty, StringComparison.Ordinal)
+          .Replace("[НОРМА]", string.Empty, StringComparison.Ordinal)
+          .Trim();
+
+      var qualityPrefix = message.GetQualityPrefix();
+
+      if (string.IsNullOrEmpty(qualityPrefix))
+      {
+        return text;
+      }
+
+      return string.IsNullOrEmpty(text)
+          ? qualityPrefix
+          : $"{text} {qualityPrefix}";
     }
 
     private static string BuildMessageSignature(ShowMessageModel message)

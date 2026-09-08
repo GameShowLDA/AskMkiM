@@ -14,6 +14,7 @@
 | Нужно изменить | Сначала смотреть | Затем смотреть |
 | --- | --- | --- |
 | Запуск приложения | `MainWindow/App.xaml.cs`, `MainWindow/Init/PreStartupInitializer.cs` | `MainWindow/Init/DatabaseInitializer.cs`, `MainWindow/Engine/AppServices.cs`, `MainWindow/MainWindow.xaml.cs` |
+| Версия, история коммитов и идентификация сборки | `Directory.Build.targets`, `Ask.Core/Services/App/ApplicationBuildInfo.cs` | `Ask.UI/Features/BuildDiagnostics/Views/BuildHistoryWindow.xaml`, `UI/Controls/EmptyWorkspace/EmptyWorkspaceView.xaml.cs`, `MainWindow/Init/PreStartupInitializer.cs`, `Ask.Diagnostics/Collectors/SystemInfoCollector.cs`, `Ask.Core/Services/Protocols/ExecutionProtocolHistoryService.cs` |
 | DI и composition root | `MainWindow/Init/PreStartupInitializer.cs` | `Ask.Diagnostics/Extensions/ServiceCollectionExtensions.cs`, `Ask.Core/Services/App/ServiceLocator.cs`, `MainWindow/Engine/AppServices.cs` |
 | Трансляция программы контроля | `MainWindow/Services/TranslationServices.cs` | `Ask.Engine/ControlCommandAnalyser/CommandTranslationManager.cs`, `Ask.Engine/ControlCommandAnalyser/Parser/`, `Ask.Engine/ControlCommandAnalyser/Formatter/`, `Ask.Engine/ControlCommandAnalyser/Validation/` |
 | Исполнение программы контроля | `UI/Controls/Runner/RunControl.xaml.cs` | `Ask.UI/Features/ProtocolNew/Execution/ActionExecutor.cs`, `Ask.Engine/ControlCommandExecutor/Execution/CommandExecutionManager.cs` |
@@ -87,7 +88,7 @@
 | `Ask.Device.ResponseProcessor` | `Ask.Device.ResponseProcessor/Ask.Device.ResponseProcessor.csproj` | Модели, строгая проверка протокольных ответов и централизованная публикация сообщений МКР, УКШ, мультиметров и пробойной установки GPT | `Ask.Core` (контракты устройства/UI), `Ask.Protocol.Messages` (публикация операций и самоконтроля) |
 | `Ask.DataBase.Engine` | `Ask.DataBase.Engine/Ask.DataBase.Engine.csproj` | Runtime device facade, cache, reflection factory, DTO↔device mapping; `Ask.DataBase.Engine.*` | `Ask.Core`, `Ask.Device.Application`, `Ask.DataBase.Provider` |
 | `Ask.DataBase.Provider` | `Ask.DataBase.Provider/Ask.DataBase.Provider.csproj` | EF Core/SQLite context, migrations and CRUD services; `Ask.DataBase.Provider.*` | `Ask.Core`, `Ask.LogLib` |
-| `Ask.Diagnostics` | `Ask.Diagnostics/Ask.Diagnostics.csproj` | Crash packages, command history, diagnostic collectors; `Ask.Diagnostics.*` | нет |
+| `Ask.Diagnostics` | `Ask.Diagnostics/Ask.Diagnostics.csproj` | Crash packages, command history, diagnostic collectors; `Ask.Diagnostics.*` | `Ask.Core` |
 | `Ask.Support` | `Ask.Support/Ask.Support.csproj` | Local Kestrel help server, Photino help window, WPF help routing; `Ask.Support` | `Ask.LogLib` |
 | `ConsoleUI` | `ConsoleUI/ConsoleUI.csproj` | Встроенная сервисная консоль и команды; `ConsoleUI.*` | `Ask.DataBase.Engine` |
 | `Message` | `Message/Message.csproj` | Кастомные WPF message boxes; `Message` | нет |
@@ -131,7 +132,7 @@ MainWindowProgram
 │  ├─ Ask.Device.Runtime
 │  └─ Message
 ├─ Ask.DataBase.Engine
-├─ Ask.Diagnostics
+├─ Ask.Diagnostics ── Ask.Core
 ├─ Ask.Support
 ├─ Ask.UI
 ├─ ConsoleUI
@@ -424,6 +425,24 @@ Ask.DataBase.Provider      Ask.Device.Runtime
 Engine знает DB Engine и Message, Core содержит WPF/config/application concerns.
 При изменении ориентироваться на существующие seams, а не на целевую схему.
 
+Идентификация сборки проходит поперёк runtime-слоёв: `Directory.Build.targets` перед
+генерацией `AssemblyInfo` проекта `MainWindowProgram` встраивает UTC timestamp,
+полный/короткий Git commit, признак dirty, единый `BuildIdentity` и двадцать последних
+коммитов (`hash`, дата, subject) в entry assembly.
+Для `MainWindowProgram` отключён Visual Studio Fast Up-to-date Check: Git HEAD и
+состояние working tree находятся вне стандартного MSBuild input graph, поэтому без
+этого после checkout/merge IDE могла запустить старый EXE без обновления AssemblyInfo.
+`Ask.Core.Services.App.ApplicationBuildInfo` читает атрибуты entry assembly и
+добавляет путь, время изменения, SHA-256 EXE и MVID. Это единственный runtime-источник
+версии для UI, стартового лога, протоколов и `Ask.Diagnostics`.
+
+На пустом рабочем пространстве `EmptyWorkspaceView.VersionText_MouseLeftButtonDown`
+только для роли `Root` по двойному нажатию на строку версии открывает размещённое в
+`Ask.UI` окно `BuildHistoryWindow`. Окно показывает
+идентификатор и ревизию текущей сборки, встроенный на момент компиляции список коммитов
+и позволяет скопировать эти сведения; установленному приложению не требуются Git или
+исходный репозиторий.
+
 ## Subsystems
 
 ### Translation and command language
@@ -670,14 +689,25 @@ executor throws
 - `MethodExecutor`, `NodeAccumulationChecker`, `NodeFullChecker` и `PairwiseFirstPointChecker`
   возвращают единый `AlgorithmExecutionResult`; формирование и публикация их заголовков,
   этапов локализации, диагностических сообщений и готовых результатов измерения проходят
-  через `CommandMessages`, `ExecutionMessages` и `MeasurementMessages`;
+  через `CommandMessages`, `ExecutionMessages` и `MeasurementMessages`. Общий делегат
+  разобщающих стратегий дополнительно передаёт строку фактически скоммутированных точек;
+  `PiCommandExecutor` использует её для качественного результата ACW/DCW, а исполнители
+  ПР/СИ принимают параметр без изменения числовой семантики своих измерений;
 - `NodeFullChecker` после выполнения алгоритма полного узла снимает цепи с шины `B`,
   чтобы вложенные `ПИ/СИ*` и самостоятельные `СИ` не оставляли МКР физически подключённым;
 - `PairwiseFirstPointCheckerAlt` — специальная ЭТ-проверка; обходит все группы, цепи и точки,
   сохраняя брак каждой текущей точки независимо (ошибка текущей точки не блокирует следующую
-  точку той же цепи); возвращает `AlgorithmExecutionResult`, а создание и публикацию измерений,
-  ошибок подключения точек и debug-сообщений делегирует `Ask.Protocol.Messages`;
-- измерительные делегаты проверочных команд ПР, СИ и ПИ, а также все измерения внутри
+  точку той же цепи); порог `100 Ом` применяется только к предварительному контролю физического
+  подключения отдельных точек, а перегрузка при измерении пары определяется через
+  `MeasurementValueFormatter.IsOverloadValue` по фактическому признаку `Overload`;
+  `EhtHighResistanceLocalizationService` запускается только после принятого результата выше
+  верхней границы, повторно измеряет такие точки и рекурсивно разбивает цепь на связные фрагменты
+  аналогично локализации ПР; если повтор не подтверждает точное разбиение, исходный верхний брак
+  сохраняется для всей проверяемой цепи; результаты ниже нижней границы остаются обычными ошибками
+  пары и не участвуют в разбиении; возвращает
+  `AlgorithmExecutionResult`, а создание и публикацию измерений, ошибок подключения точек и
+  debug-сообщений делегирует `Ask.Protocol.Messages`;
+- измерительные делегаты проверочных команд ПР и СИ, а также все измерения внутри
   `PairwiseFirstPointCheckerAlt` для ЭТ публикуют значения через
   `MeasurementMessages.PublishIntermediateResultAsync`. Поэтому успешные внутренние замеры
   этих команд управляются настройкой промежуточных результатов; накопленные ошибки,
@@ -702,6 +732,13 @@ executor throws
 - `MeasurementMessages` формирует тексты брака узлового и группового методов через
   `MeasurementFailureMessageBuilder`; `MeasurementLimitKind`, старые
   `GroupMethodProtocolBuilder` и `NodeMethodProtocolBuilder` удалены из `Ask.Engine`;
+- `MeasurementMessages.PublishInsulationStrengthResultAsync` и
+  `MeasurementMessageBuilder.BuildInsulationStrengthResult` централизуют пользовательский
+  результат прочности изоляции для обычных и программных проверок: заголовок содержит
+  проверяемые точки и допустимый диапазон тока, успешный результат получает статус `НОРМА`,
+  неуспешный — текст `ПРОБОЙ` и статус `БРАК`. Измеренный ток остаётся во внутреннем
+  `BreakdownMeasurementResponse` и алгоритме сравнения, но не выводится как результат.
+  Entry point используется узловыми, групповыми и control-program исполнителями PI ACW/DCW;
 - все методы публикации `MeasurementMessages` требуют явный `CheckType`: метрологические
   исполнители передают `CheckType.Metrology`, исполнители программ контроля —
   `CheckType.ControlProgram`, обычные тесты — `CheckType.Test`, самоконтроль оборудования —
@@ -710,9 +747,11 @@ executor throws
   типов сохраняет фильтрацию через `DeviceDisplayConfig`. Ошибочные результаты настройками
   видимости не скрываются;
 - `BaseMeasurement.MeasurementPointsDisplay` централизованно форматирует обе введённые
-  точки из `BaseMeasurement.Points`; метрологические режимы передают строку точек в
-  `MeasurementMessages.PublishResultAsync`, поэтому точки отображаются в строке результата
-  над обычной строкой погрешности. Отдельные сообщения допустимого диапазона
+  точки из `BaseMeasurement.Points`. Метрологические PI ACW/DCW при штатном измерении
+  продолжают публиковать результат по фактически выдаваемому напряжению через KN-проверку;
+  при `BreakdownMeasurementStatus.Fail` они отдельно публикуют PI-результат `ПРОБОЙ` и
+  прекращают шаг. Остальные метрологические режимы также используют
+  `MeasurementMessages.PublishResultAsync`. Отдельные сообщения допустимого диапазона
   (`RangeMessages.PublishAllowedRangeAsync`) метрологические режимы не публикуют;
 - исполнители команд передают исходные строки в `CommandMessages.FormatSourceLines`;
   `CommandExecutionContext.ProtocolSourceLines` по умолчанию ссылается на `Command.SourceLines`,
@@ -991,6 +1030,9 @@ pre-structured text traces.
 протокола и отображения оборудования, версии/роли/режима и устройств, фактически
 зарегистрированных в `EquipmentUsageSession`; снимок сохраняется первой скрытой
 записью `.asktrace` и раскрывается в начале документа только для `Root`.
+`ApplicationVersion` снимка содержит полный `ApplicationBuildInfo.BuildIdentifier`.
+При сохранении `.askresult/.askreport` `ExecutionProtocolHistoryService.SaveInspectionAsync`
+добавляет видимые строки версии и Git-ревизии перед текстом итогового протокола.
 
 Автопечать:
 
@@ -1072,6 +1114,13 @@ TaskScheduler.UnobservedTaskException / LoggerUtility.ExceptionLogged
 → Bin/CrashReports
 → NotificationHostService
 ```
+
+`PreStartupInitializer.Initialize` первым диагностическим сообщением записывает
+`ApplicationBuildInfo.ToDiagnosticString()` и создаёт рядом с EXE
+`build-manifest.json`. `SystemInfoCollector` сохраняет version/build/commit/dirty,
+путь, timestamp, SHA-256 и MVID в `system-info.json`; `CrashPackageService.BuildMetadata`
+дублирует критичные build-поля в `metadata.json`, поэтому ревизия доступна даже при
+частичном отказе collectors.
 
 Для необработанного исключения трансляции используется синхронизированный с UI
 путь, гарантирующий создание отчёта до окна ошибки:
@@ -1207,6 +1256,11 @@ device-строку вида `Модуль МКР-350(1.6) - Подключен�
 `BaseResponse.FromJson` для ответов МКР. Публикация результатов этих операций, включая
 инициализацию, сброс и агрегированное отключение сохранённых точек, вызывается через processor;
 заголовки и информационные строки самоконтроля МКР также маршрутизируются через processor.
+Для команды измерителя `7` processor различает оба штатных ответа: `7.1` означает наличие
+замыкания, `7.2` — его отсутствие; повреждённый ответ или чужой адрес остаётся аппаратной
+ошибкой. `MeterManagerAdapter` считает оба состояния успешно полученным измерением и запускает
+интерактивный повтор только при исключении. `CrossConnectionTests` повторно включает измеритель
+проверяющего МКР перед каждой точечной частью, поскольку сброс после предыдущей части выключает его.
 В `Ask.Device.Runtime/Function/ModuleRelayControl/` и соответствующих application adapters
 не осталось прямого разбора JSON или прямых вызовов `DeviceMessages`, `EquipmentMessages` и
 `SelfTestMessages`; решение о видимости остаётся внутри `Ask.Protocol.Messages`.
@@ -1258,7 +1312,10 @@ executor/metrology
   точку/запятую, экспоненту и суффиксы `kV`, `mA`, `Hz`, `GOhm`/`MOhm`;
 - `TryParseState` обрабатывает `ON`/`OFF` для режима земли и системных настроек;
 - `TryParseMeasurement` через `MeasurementResponseChecker` извлекает последний измерительный
-  результат, единицу и статус `PASS`/`FAIL`/`TEST` из составного ответа GPT;
+  результат, единицу и статус `PASS`/`FAIL`/`TEST` из составного ответа GPT и возвращает общий
+  `Ask.Core.Shared.DTO.Devices.Breakdown.BreakdownMeasurementResponse` для ACW/DCW/IR;
+  статус типизирован enum `BreakdownMeasurementStatus` (`Test`, `Fail`, `Pass`), а ответ без
+  одного из этих статусов не считается корректным результатом измерения;
 - `BreakdownTesterMessages` является фасадом над `Ask.Protocol.Messages` для рабочих операций
   ACW/DCW/IR/System и самоконтроля; существующие тексты сообщений остаются в вызывающем коде.
 
@@ -1518,6 +1575,13 @@ same path with gates enabled and performs real transport I/O.
 
 ## UI Architecture
 
+> **Обязательное правило для новых изменений:** всю новую UI-функциональность —
+> окна, диалоги, controls, ViewModels и связанные UI-services — создавать в проекте
+> `Ask.UI`. Проект `UI` является legacy-слоем: добавлять в него новую функциональность
+> запрещено. Его допустимо изменять только минимально для подключения компонентов из
+> `Ask.UI` к существующим legacy entry points. Наличие вызывающего View/обработчика в
+> `UI` не является основанием размещать там новый UI-компонент.
+
 `MainWindow` is shell and menu host. `MainWindowViewModel` exposes File,
 Translation, Run, Metrology, Test, SelfTest, Settings, Admin and Window ViewModels.
 Their services generally route operations into `MultiWindowService`.
@@ -1568,8 +1632,9 @@ formatted editors; `RunControl` hosts ProtocolUI, translated source and error li
 транслированного файла и итогового протокола; вкладка состояния оборудования её скрывает.
 
 `Ask.UI` contains newer feature-oriented code: ProtocolNew, Archive, Notifications,
-RoleManagement, ExecutionSelection and reusable controls. Both UI projects are
-active; do not assume one replaces the other.
+RoleManagement, ExecutionSelection and reusable controls. Оба UI-проекта пока
+участвуют в runtime, но `UI` поддерживается только как legacy-интеграционный слой;
+новые компоненты размещаются в `Ask.UI` согласно правилу выше.
 
 ### Валидация конфигурации устройств
 
@@ -1756,6 +1821,23 @@ crash packages. Остальные исключения сохраняют пр�
 
 Проверки существования оборудования и уникальности двух точек остаются в Engine.
 
+Последние успешно проверенные значения ввода сохраняются в process-local хранилище
+`Ask.Core.Shared.Metadata.Static.MeasurementTestData`. Поток метрологии:
+`UIValidationHelper.EnsureValidMetrologyInputAsync()`
+→ полная проверка и построение `DataModel`
+→ `MeasurementTestData.SaveMeasurementData(...)` с флагами реально активных полей
+→ атомарное обновление snapshot под `lock`. Поток тестов МКР:
+`UIValidationHelperLightweight.TryValidateAndParseInputAsync()`
+→ проверка номеров модулей и диапазона
+→ `MeasurementTestData.SaveModuleTestData()`
+→ обновление только module-полей того же snapshot. При создании нового
+`Ask.UI.Components.InputField.InputField` выполняется
+`InputField.SetBaseData()` → `MeasurementTestData.GetData()`; метод возвращает копию
+snapshot, включая независимые копии `PointModel`, после чего UI восстанавливает только
+имеющиеся значения. Поэтому метрологический и модульный режимы не стирают значения
+друг друга, а скрытые optional-поля не заменяют ранее сохранённый выбор значениями по
+умолчанию.
+
 Для девяти режимов `Ask.Engine.Tests.Metrology.Mode*` в
 `EnsureValidMetrologyInputAsync(..., metrologyMode: ...)` после успешной проверки
 формируется стартовый блок протокола:
@@ -1774,6 +1856,17 @@ crash packages. Остальные исключения сохраняют пр�
 выведенные строки в `ActionSettings.InputParameters`. При завершении теста
 `InspectionProtocolBuilder.Build()` вставляет раздел `Введённые данные` перед
 `Заключением`; потоковый и итоговый протокол используют один набор значений.
+Экранный протокол `CrossConnectionTests` выводит только этап, номер точки и результаты
+проверок подключения/отключения. `DeviceMessages` и `EquipmentMessages` используют
+общую политику `DeviceDisplayConfig.ShouldDisplayOperationResult()`: ошибки оборудования
+выводятся всегда, успешные служебные операции — только при включённом параметре
+`ShowDeviceExecutionParameters`. `CrossConnectionTests` передаёт исходный
+`IUserInteractionService`, поэтому отмена и интерактивный повтор остаются в общем потоке.
+Каждый этап публикуется как командный заголовок начала блока, поэтому его точки и
+результаты отображаются в отдельной сворачиваемой секции экранного протокола.
+В холостом режиме без измерительной и аппаратной симуляции ошибок
+`CrossConnectionTests` локально использует ожидаемое состояние цепи; при включении
+любой симуляции ошибок и в реальном режиме проверяется фактический ответ измерителя.
 Обе темы `Ask.UI/Resources/Assets/SyntaxHighlighting/{Dark,Light}/MKI_RESULT_PROTOCOL.xshd`
 подсвечивают заголовок раздела и все формируемые названия входных параметров цветом
 `ProtocolMain`, а единицы `Ом/кОм/МОм/ГОм`, `В/мВ/кВ`, `А/мА`,
@@ -1936,6 +2029,16 @@ and `StateEventsBinder`, then calls `ApplicationEventsBinder.BindAll`.
 | Workspace click timer | `MultiEditorControl` DispatcherTimer | double-click discrimination | control lifetime |
 | Logged exception reporter | `ExceptionDiagnosticReporter` bounded Task.Run | asynchronous crash package | throttled/timeout-limited |
 
+`MeasureHelper.MeasureAsync` выполняет фактический GPT-поток через
+`MeasureFullTimeAsync`: тот отправляет `FUNC:TEST ON`, затем опрашивает `MEASURE ?` с
+интервалом 100 мс до ответа, отличного от промежуточного `TEST`. Для IR при
+`waitFullTime == false` сначала устанавливается `TestTime = 1` и выполняется пробное
+измерение; `PASS` сразу возвращается, а при другом конечном статусе устанавливается нижний
+предел `1`, восстанавливается `TestTime` из `breakDown.Time.GetTargetTime()` и запускается
+основное измерение. `TargetTime` — отдельное поле `TimeManager`, поэтому его обязан задать
+исполнитель при настройке команды (production `SiCommandExecutor.SetupAsync`); helper его
+не перезаписывает. `MeasureFastPollingAsync` остаётся private legacy-методом и текущим
+потоком не вызывается.
 Long-running loops in metrology/GPT measurement helpers are bounded by
 cancellation, timers or device conditions; inspect the concrete mode before
 changing stop semantics.
@@ -2006,7 +2109,11 @@ Main contract groups:
 - `Shared/Metadata/View/EditorHost` — editor/workspace/run/translation service
   boundaries between `MainWindow` and `UI`;
 - `Shared/DTO/Devices` — EF entities, device materialization data and common
-  measurement parameters (`Measurements/MeasurementRange`);
+  measurement parameters (`Measurements/MeasurementRange`); общий результат ответа ППУ
+  `Breakdown/BreakdownMeasurementResponse` хранит типизированный
+  `BreakdownMeasurementStatus Status`, `Value` и `Unit` для ACW/DCW/IR.
+  Парсер GPT и IR runtime используют общий тип, но `IMeasurable.MeasureAsync` пока сохраняет
+  прежний возврат только измеренного значения и единицы;
 - `Shared/DTO/Settings` — persisted configuration;
 - `Shared/DTO/Protocol` — `ProtocolModel`, `ShowMessageModel` and action settings;
 - `ControlCommandAnalyser/Model` — parsed command models passed from translation
@@ -2045,7 +2152,7 @@ ErrorItem → translator/runner ErrorList
 | `SelfTestMessages` | static facade | Ask.Protocol.Messages | публикует этапы, команды пошагового режима, ошибки и результаты самоконтроля мультиметра, GPT, МКР, УКШ и модуля напряжения/тока; runtime SelfCheck-классы моделей экранного протокола не создают | [Equipment](#equipment-architecture) |
 | `SelfTestMessageBuilder` | internal static builder | Ask.Protocol.Messages | формирует информационные, командные и результирующие сообщения самоконтроля, включая видимость измерений, Overload, погрешность и свойства итогового протокола | [Equipment](#equipment-architecture) |
 | `SelfTestMessagePublisher` | internal static publisher | Ask.Protocol.Messages | передаёт сообщения самоконтроля общему `MessagePublisher` с признаками блока, паузы и проверки доступности вывода | [Equipment](#equipment-architecture) |
-| `MeasurementMessages` | static facade | Ask.Protocol.Messages | формирует модели для накопления результатов и публикует начало измерения, этап измерений, ток утечки PI, эталонное значение, ошибки подключения точек, выдачу испытательного напряжения PI ACW/DCW, готовые сообщения измерений, итоговые и промежуточные результаты и погрешности; публикация требует явный `CheckType` | [Protocols](#protocols-and-file-formats) |
+| `MeasurementMessages` | static facade | Ask.Protocol.Messages | формирует модели для накопления результатов и публикует начало измерения, этап измерений, ток утечки PI, качественный результат прочности изоляции с точками, эталонное значение, ошибки подключения точек, выдачу испытательного напряжения PI ACW/DCW, готовые сообщения измерений, итоговые и промежуточные результаты и погрешности; публикация требует явный `CheckType` | [Protocols](#protocols-and-file-formats) |
 | `MeasurementMessageBuilder` | internal static builder | Ask.Protocol.Messages | формирует заголовки измерений, эталонные значения, ошибки подключения точек, переход к методу полного узла, единый формат диапазона, измеренное значение, погрешность, `ПРОБОЙ` и `Overload` | [Protocols](#protocols-and-file-formats) |
 | `MeasurementFailureMessageBuilder` | internal static builder | Ask.Protocol.Messages | формирует описания брака для точек и разрядов узлового и группового методов | [Protocols](#protocols-and-file-formats) |
 | `MeasurementLimitKind` | enum | Ask.Protocol.Messages | контракт из `Ask.Protocol.Messages/Models/`, задающий минимальный или максимальный предел при формировании описания брака | [Protocols](#protocols-and-file-formats) |
@@ -2084,10 +2191,12 @@ ErrorItem → translator/runner ErrorList
 | `InitialDeviceSoundConfigurator` | internal lifecycle helper | Ask.Device.Runtime | однократно отключает звуковую сигнализацию GPT/мультиметра после первой успешной инициализации и сохраняет Real/Idle-маршрутизацию | [Equipment](#equipment-architecture) |
 | `EquipmentExecutionContext` | async context | Ask.Core | suppresses interactive retry during mandatory finalization | [Error Handling](#equipment-error-flow) |
 | `ExecutionConfig` | static config | Ask.Core | execution/idle state | [Configuration](#configuration) |
+| `MeasurementTestData` | static snapshot store | Ask.Core | атомарно хранит последние проверенные значения метрологических и модульных полей ввода; обновляется валидаторами и читается `InputField` | [Error Handling](#input-field-validation) |
 | `RoleAuthorizationConfig` | static session state | Ask.Core | current successfully authenticated role | [Authentication/Debug](#authentication-and-debug-access-flow) |
 | `DebugAccessConfig` | derived access state | Ask.Core | central root-only Debug availability and change notification | [Authentication/Debug](#authentication-and-debug-access-flow) |
 | `IdleHardwareErrorSimulator` | static decision service | Ask.Core | independent `1/2` hardware failure decision for non-measurement Idle calls | [Real / Idle](#real--idle) |
 | `EventAggregator` | event bus | Ask.Core | in-process publish/subscribe | [Events](#events-and-callbacks) |
+| `ApplicationBuildInfo` | runtime build descriptor | Ask.Core | читает встроенную версию/revision и идентифицирует запущенный EXE | [Support](#support-and-diagnostics) |
 | `DeviceApplicationComposer` | composer | Ask.Device.Application | replaces raw managers with adapters | [Equipment](#adapters-and-error-boundary) |
 | `DeviceProtocolEmulator` | public static factory | Ask.Device.Emulator | returns Real/Idle-selecting protocols for chassis and МКР | [Equipment](#real--idle) |
 | `ChassisQueryExecutor` | runtime helper | Ask.Device.Runtime | routes and logs chassis commands through the real protocol or emulator | [Equipment](#real--idle) |
@@ -2100,7 +2209,9 @@ ErrorItem → translator/runner ErrorList
 | `DeviceBusCommutationMessages` | message facade | Ask.Device.ResponseProcessor | centralizes protocol messages emitted by УКШ self-check flows | [Equipment](#real--idle) |
 | `MultimeterResponseProcessor` | response facade | Ask.Device.ResponseProcessor | централизованно разбирает идентификацию, режим, измерения, прозвонку и системные ошибки Keysight/В7-78/3 | [Equipment](#equipment-architecture) |
 | `MultimeterMessages` | message facade | Ask.Device.ResponseProcessor | централизует публикацию рабочих сообщений и результатов самоконтроля мультиметров через Ask.Protocol.Messages; для self-test-сообщений отключает `isBlockStart`, чтобы UI не создавал сворачиваемые блоки | [Equipment](#equipment-architecture) |
-| `BreakdownTesterResponseProcessor` | response facade | Ask.Device.ResponseProcessor | централизованно проверяет идентификацию, режимы, состояния, числовые параметры и измерительные ответы GPT-79904 | [Equipment](#equipment-architecture) |
+| `BreakdownMeasurementStatus` | enum | Ask.Core | задаёт допустимые статусы ответа ППУ: `Test`, `Fail`, `Pass` | [Shared Contracts](#shared-contracts-and-dto) |
+| `BreakdownMeasurementResponse` | shared response DTO | Ask.Core | хранит типизированный статус, измеренное значение и единицу составного ответа ППУ для ACW/DCW/IR | [Shared Contracts](#shared-contracts-and-dto) |
+| `BreakdownTesterResponseProcessor` | response facade | Ask.Device.ResponseProcessor | централизованно проверяет идентификацию, режимы, состояния, числовые параметры и измерительные ответы GPT-79904; возвращает общий `BreakdownMeasurementResponse` | [Equipment](#equipment-architecture) |
 | `BreakdownTesterMessages` | message facade | Ask.Device.ResponseProcessor | маршрутизирует рабочие сообщения и результаты самоконтроля GPT через Ask.Protocol.Messages | [Equipment](#equipment-architecture) |
 | `MultimeterEmulatorProtocol` | Idle protocol | Ask.Device.Emulator | returns SCPI responses for Keysight/B7-78/3; selected by `DeviceProtocolEmulator.QueryMultimeterAsync` | [Equipment](#device-matrix) |
 | `BreakdownTesterCommandProtocol` | Real/Idle protocol router | Ask.Device.Emulator | logs every GPT79904 command/response and selects COM or Idle protocol | [Equipment](#device-matrix) |

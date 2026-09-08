@@ -1,11 +1,12 @@
 using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Shared.DTO.Devices.Breakdown;
 using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.Device.ResponseProcessor.BreakdownTester.ResponseProcessing;
 using Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common;
 using Ask.Device.Runtime.Function.GPT.Command;
-using Ask.Device.ResponseProcessor.BreakdownTester.ResponseProcessing;
 using System.Diagnostics;
 using static Ask.Device.Runtime.Function.GPT.Command.FunctionCommandManager;
 using static Ask.LogLib.LoggerUtility;
@@ -20,7 +21,7 @@ namespace Ask.Device.Runtime.Function.GPT.Helper
     /// <summary>
     /// Выполняет измерение.
     /// </summary>
-    static public async Task<(double value, string unit)> MeasureAsync(
+    static public async Task<BreakdownMeasurementResponse> MeasureAsync(
       IBreakdownTester breakDown,
       double time,
       double timeRamp,
@@ -44,25 +45,38 @@ namespace Ask.Device.Runtime.Function.GPT.Helper
         await breakDown.DeviceProtocol.QueryAsync(
           $"{GetCommandSyntax(FunctionCommand.FUNCTION_TEST)} ON",
           delayBeforeCall: delayBeforeCall);
+
         await breakDown.DeviceProtocol.QueryAsync(
           $"{FunctionCommandManager.GetCommandSyntax(FunctionCommand.MEASURE)} ?",
           timeout: 500,
           delayBeforeCall: delayBeforeCall);
+
         await breakDown.DeviceProtocol.QueryAsync($"{GetCommandSyntax(FunctionCommand.FUNCTION_TEST)} OFF");
         await breakDown.DeviceProtocol.QueryAsync(
           $"{GetCommandSyntax(FunctionCommand.FUNCTION_TEST)} ?",
           responseDelay: StopPollIntervalMs,
           timeout: 1000);
+
         LogInformation($"{nameof(MeasureAsync)}: Устройство в Idle Mode. Возвращаем {random}.", isDeviceLog: true);
-        return (random, string.Empty);
+        return new BreakdownMeasurementResponse(BreakdownMeasurementStatus.Pass, random, string.Empty);
       }
 
       try
       {
-        if (waitFullTime)
-          return await MeasureFullTimeAsync(breakDown, delayBeforeCall);
-        else
-          return await MeasureFastPollingAsync(breakDown, time, delayBeforeCall);
+        if (!waitFullTime)
+        {
+          await breakDown.Time.SetTestTimeAsync(1);
+          var answer = await MeasureFullTimeAsync(breakDown, delayBeforeCall);
+          if (answer.Status == BreakdownMeasurementStatus.Pass)
+          {
+            return answer;
+          }
+
+          await breakDown.LimitManager.SetLowLimitAsync(1);
+        }
+
+        await breakDown.Time.SetTestTimeAsync(breakDown.Time.GetTargetTime());
+        return await MeasureFullTimeAsync(breakDown, delayBeforeCall);
       }
       finally
       {
@@ -78,7 +92,7 @@ namespace Ask.Device.Runtime.Function.GPT.Helper
     /// - FAIL  → перезапускаем измерение
     /// - Unknown → продолжаем цикл
     /// </summary>
-    static private async Task<(double value, string unit)> MeasureFastPollingAsync(
+    static private async Task<BreakdownMeasurementResponse> MeasureFastPollingAsync(
       IBreakdownTester breakDown,
       double time,
       int delayBeforeCall)
@@ -88,19 +102,20 @@ namespace Ask.Device.Runtime.Function.GPT.Helper
       var stage = Stopwatch.StartNew();
       LogInformation($"[PERF][GPT][MeasureFastPolling] Use configured test time: {stage.ElapsedMilliseconds} ms", isDeviceLog: true);
       string answerDevice = string.Empty;
+      var attempt = 0;
 
-      for (int i = 0; i < count; i++)
+      do
       {
-        var query = $"{GetCommandSyntax(FunctionCommand.FUNCTION_TEST)} ON";
+        attempt++;
         stage.Restart();
+        var query = $"{FunctionCommandManager.GetCommandSyntax(FunctionCommand.MEASURE)} ?";
+
         await breakDown.DeviceProtocol.QueryAsync(query, delayBeforeCall: delayBeforeCall);
-        LogInformation($"[PERF][GPT][MeasureFastPolling] Start test #{i + 1}: {stage.ElapsedMilliseconds} ms", isDeviceLog: true);
+        LogInformation($"[PERF][GPT][MeasureFastPolling] Start test #{attempt}: {stage.ElapsedMilliseconds} ms", isDeviceLog: true);
 
         var poll = Stopwatch.StartNew();
         while (true)
         {
-
-          query = $"{FunctionCommandManager.GetCommandSyntax(FunctionCommand.MEASURE)} ?";
           answerDevice = await breakDown.DeviceProtocol.QueryAsync(query, timeout: 500, delayBeforeCall: delayBeforeCall);
 
           if (answerDevice != string.Empty
@@ -109,35 +124,40 @@ namespace Ask.Device.Runtime.Function.GPT.Helper
 
           await Task.Delay(PollIntervalMs);
         }
-        LogInformation($"[PERF][GPT][MeasureFastPolling] Poll result #{i + 1}: {poll.ElapsedMilliseconds} ms", isDeviceLog: true);
+        LogInformation($"[PERF][GPT][MeasureFastPolling] Poll result #{attempt}: {poll.ElapsedMilliseconds} ms", isDeviceLog: true);
 
         if (!BreakdownTesterResponseProcessor.IsTestFailed(answerDevice))
         {
           break;
         }
       }
+      while (total.Elapsed.TotalSeconds < time);
 
       stage.Restart();
       await StopMeasure(breakDown);
       LogInformation($"[PERF][GPT][MeasureFastPolling] Stop test: {stage.ElapsedMilliseconds} ms", isDeviceLog: true);
-      var (value, unit) = ParseMeasureValue(answerDevice);
+      var answer = ParseMeasureValue(answerDevice);
 
-      if (breakDown.Mode != Ask.Core.Shared.Metadata.Enums.DeviceEnums.BreakdownTypeMode.IR)
+      if (breakDown.Mode != BreakdownTypeMode.IR)
       {
         if (BreakdownTesterResponseProcessor.IsTestFailed(answerDevice))
         {
-          value = -1;
+          answer.Value = -1;
         }
       }
 
-      LogInformation($"[PERF][GPT][MeasureFastPolling] Total: {total.ElapsedMilliseconds} ms; value={value} {unit}", isDeviceLog: true);
-      return (value, unit);
+      LogInformation($"[PERF][GPT][MeasureFastPolling] Total: {total.ElapsedMilliseconds} ms; value={answer.Value} {answer.Unit}", isDeviceLog: true);
+      return answer;
     }
 
     /// <summary>
-    /// Полный режим: система полностью ждёт time + timeRamp и только после этого запрашивает результат измерения.
+    /// Выполняет измерение с полным ожиданием времени тестирования и времени нарастания,
+    /// после чего запрашивает результат измерения.
     /// </summary>
-    static private async Task<(double value, string unit)> MeasureFullTimeAsync(
+    /// <param name="breakDown">Устройство для проведения испытания на пробой.</param>
+    /// <param name="delayBeforeCall">Задержка перед выполнением команды устройства.</param>
+    /// <returns>Результат измерения после завершения испытания.</returns>
+    static private async Task<BreakdownMeasurementResponse> MeasureFullTimeAsync(
       IBreakdownTester breakDown,
       int delayBeforeCall)
     {
@@ -165,22 +185,22 @@ namespace Ask.Device.Runtime.Function.GPT.Helper
       }
       LogInformation($"[PERF][GPT][MeasureFullTime] Poll result: {poll.ElapsedMilliseconds} ms", isDeviceLog: true);
 
-      var (value, unit) = ParseMeasureValue(answerDevice);
+      var answer = ParseMeasureValue(answerDevice);
 
-      LogInformation($"[PERF][GPT][MeasureFullTime] Total: {total.ElapsedMilliseconds} ms; value={value} {unit}", isDeviceLog: true);
-      return (value, unit);
+      LogInformation($"[PERF][GPT][MeasureFullTime] Total: {total.ElapsedMilliseconds} ms; value={answer.Value} {answer.Unit}", isDeviceLog: true);
+      return answer;
     }
 
     /// <summary>
     /// Парсит строку ответа MEASURE и извлекает значение и единицу измерения.
     /// </summary>
-    static private (double value, string unit) ParseMeasureValue(string answer)
+    static private BreakdownMeasurementResponse ParseMeasureValue(string answer)
     {
       if (!BreakdownTesterResponseProcessor.TryParseMeasurement(answer, out var response))
         throw new FormatException("Некорректный формат ответа прибора.");
 
       LogInformation($"Парсинг измерения: {response.Value} {response.Unit}", isDeviceLog: true);
-      return (response.Value, response.Unit);
+      return response;
     }
 
     /// <summary>
