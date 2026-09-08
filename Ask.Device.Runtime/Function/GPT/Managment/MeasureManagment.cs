@@ -75,7 +75,7 @@ namespace Ask.Device.Runtime.Function.GPT.Managment
         result.Value = measurement.Value * resistanceMOm / (resistanceMOm - measurement.Value);
       }
 
-      result = new BreakdownMeasurementResponse(BreakdownMeasurementStatus.Pass, MeasurementAdapterHelper.Round(result.Value), result.Unit);
+      result = new BreakdownMeasurementResponse(result.Status, MeasurementAdapterHelper.Round(result.Value), result.Unit);
       return result;
     }
 

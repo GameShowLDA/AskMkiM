@@ -15,11 +15,45 @@ using Ask.Engine.ControlCommandExecutor.Execution;
 
 namespace Ask.Engine.ControlCommandExecutor.Executors
 {
-  internal class PiCommandExecutor : CommandExecutorBase, ICommandExecutor
+  internal class PiCommandExecutor : CommandExecutorBase, ICommandExecutor, IMeasurementResultMessageExecutor
   {
     public string Mnemonic => EnumExtensions.GetCommandDisplayInfo(MeasurementTypeCommand.PI).DisplayName;
     private double amperhMaxDCW = 10;
-    private double amperhMaxACW = 50;
+    private double amperhMaxACW = 40;
+
+    public async Task<bool> PublishMeasurementResultAsync(MeasurementResultMessageContext context)
+    {
+      ArgumentNullException.ThrowIfNull(context);
+
+      bool isSuccessful;
+      if (context.SuccessOverride == false)
+      {
+        isSuccessful = false;
+        context.PublishedValue = context.Range.TargetValue;
+      }
+      else
+      {
+        var evaluation = MeasurementResultEvaluator.Evaluate(context.Range);
+        isSuccessful = evaluation.IsSuccessful;
+        context.PublishedValue = evaluation.Value;
+      }
+
+      var range = new MeasurementRange(
+        context.PublishedValue,
+        context.Range.LowerBound,
+        context.Range.UpperBound);
+
+      await MeasurementMessages.PublishInsulationStrengthResultAsync(
+        context.CheckType,
+        context.MeasurementPoints ?? context.MeasurementTarget ?? context.MeasurementType.ToString(),
+        range,
+        CurrentUnit.MilliAmpere,
+        isSuccessful,
+        context.MessageService);
+
+      return isSuccessful;
+    }
+
     public async Task ExecuteAsync(CommandExecutionContext context, ProtocolModel protocolModel)
     {
       var command = GetRequiredCommand<PiCommandModel>(context);
@@ -196,33 +230,38 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         if (type == VoltageEnum.Type.ACW)
         {
           MeasurementRange measurementRange = new MeasurementRange(value, 0, amperhMaxACW);
+
           var answer = await breadDown.AcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandAC, measurementRange);
           measurementRange.TargetValue = answer.Value;
-          var result = MeasurementResultEvaluator.Evaluate(measurementRange);
-          await MeasurementMessages.PublishInsulationStrengthResultAsync(
-            CheckType.ControlProgram,
-            points ?? "Точки не определены",
-            new MeasurementRange(result.Value, measurementRange.LowerBound, measurementRange.UpperBound),
-            CurrentUnit.MilliAmpere,
-            result.IsSuccessful,
-            messageService);
-          return result;
+
+          var resultContext = new MeasurementResultMessageContext(
+            MeasurementTypeCommand.PI_ACW, measurementRange, messageService)
+          {
+            CheckType = CheckType.Metrology,
+            MeasurementPoints = points,
+            SuccessOverride = answer.Status != BreakdownMeasurementStatus.Fail,
+          };
+          bool isSuccessful = await PublishMeasurementResultAsync(resultContext);
+          return (isSuccessful, resultContext.PublishedValue);
         }
         else
         {
           MeasurementRange measurementRange = new MeasurementRange(value, 0, amperhMaxDCW);
+
           var answer = await breadDown.DcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandDC, measurementRange);
           measurementRange.TargetValue = answer.Value;
-          var result = MeasurementResultEvaluator.Evaluate(measurementRange);
-          await MeasurementMessages.PublishInsulationStrengthResultAsync(
-            CheckType.ControlProgram,
-            points ?? "Точки не определены",
-            new MeasurementRange(result.Value, measurementRange.LowerBound, measurementRange.UpperBound),
-            CurrentUnit.MilliAmpere,
-            result.IsSuccessful,
-            messageService);
-          return result;
+
+          var resultContext = new MeasurementResultMessageContext(
+            MeasurementTypeCommand.PI_DCW, measurementRange, messageService)
+          {
+            CheckType = CheckType.Metrology,
+            MeasurementPoints = points,
+            SuccessOverride = answer.Status != BreakdownMeasurementStatus.Fail,
+          };
+          bool isSuccessful = await PublishMeasurementResultAsync(resultContext);
+          return (isSuccessful, resultContext.PublishedValue);
         }
+
 
       }, messageService, measurementTask: true);
 
@@ -237,39 +276,42 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
     private async Task<(bool, double)> NodeFullPerformMeasurementAsync(double value, IUserInteractionService messageService, CancellationToken cancellationToken, double errorResistance = 0, VoltageEnum.Type typeVoltage = VoltageEnum.Type.DCW, string? points = null)
     {
       var breadDown = await EquipmentService.GetBreakdownTesterOrThrow(messageService);
-      double answer = -1;
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
         messageService.GetCancellationToken().ThrowIfCancellationRequested();
         if (typeVoltage == VoltageEnum.Type.ACW)
         {
           MeasurementRange measurementRange = new MeasurementRange(value, 0, amperhMaxACW);
-          answer = (await breadDown.AcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandAC, measurementRange)).Value;
-          measurementRange.TargetValue = answer;
-          var result = MeasurementResultEvaluator.Evaluate(measurementRange);
-          await MeasurementMessages.PublishInsulationStrengthResultAsync(
-            CheckType.ControlProgram,
-            points ?? "Точки не определены",
-            new MeasurementRange(result.Value, measurementRange.LowerBound, measurementRange.UpperBound),
-            CurrentUnit.MilliAmpere,
-            result.IsSuccessful,
-            messageService);
-          return result;
+
+          var answer = await breadDown.AcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandAC, measurementRange);
+          measurementRange.TargetValue = answer.Value;
+
+          var resultContext = new MeasurementResultMessageContext(
+            MeasurementTypeCommand.PI_ACW, measurementRange, messageService)
+          {
+            CheckType = CheckType.Metrology,
+            MeasurementPoints = points,
+            SuccessOverride = answer.Status != BreakdownMeasurementStatus.Fail,
+          };
+          bool isSuccessful = await PublishMeasurementResultAsync(resultContext);
+          return (isSuccessful, resultContext.PublishedValue);
         }
         else
         {
           MeasurementRange measurementRange = new MeasurementRange(value, 0, amperhMaxDCW);
-          answer = (await breadDown.DcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandDC, measurementRange)).Value;
-          measurementRange.TargetValue = answer;
-          var result = MeasurementResultEvaluator.Evaluate(measurementRange);
-          await MeasurementMessages.PublishInsulationStrengthResultAsync(
-            CheckType.ControlProgram,
-            points ?? "Точки не определены",
-            new MeasurementRange(result.Value, measurementRange.LowerBound, measurementRange.UpperBound),
-            CurrentUnit.MilliAmpere,
-            result.IsSuccessful,
-            messageService);
-          return result;
+
+          var answer = await breadDown.DcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandDC, measurementRange);
+          measurementRange.TargetValue = answer.Value;
+
+          var resultContext = new MeasurementResultMessageContext(
+            MeasurementTypeCommand.PI_DCW, measurementRange, messageService)
+          {
+            CheckType = CheckType.Metrology,
+            MeasurementPoints = points,
+            SuccessOverride = answer.Status != BreakdownMeasurementStatus.Fail,
+          };
+          bool isSuccessful = await PublishMeasurementResultAsync(resultContext);
+          return (isSuccessful, resultContext.PublishedValue);
         }
       }, messageService, measurementTask: true);
 

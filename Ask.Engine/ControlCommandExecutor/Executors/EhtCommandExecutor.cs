@@ -13,11 +13,46 @@ using Ask.Engine.ControlCommandExecutor.Execution;
 
 namespace Ask.Engine.ControlCommandExecutor.Executors
 {
-  internal class EhtCommandExecutor : CommandExecutorBase, ICommandExecutor
+  internal class EhtCommandExecutor : CommandExecutorBase, ICommandExecutor, IMeasurementResultMessageExecutor
   {
     public string Mnemonic => "ЭТ";
     private double firstValue = 0;
     private double secondValue = 1000;
+
+    public async Task<bool> PublishMeasurementResultAsync(MeasurementResultMessageContext context)
+    {
+      ArgumentNullException.ThrowIfNull(context);
+
+      double value = context.Range.TargetValue;
+      bool isSuccessful = context.SuccessOverride ??
+        (value >= context.Range.LowerBound && value <= context.Range.UpperBound);
+      context.PublishedValue = value;
+
+      if (context.IsIntermediate)
+      {
+        await MeasurementMessages.PublishIntermediateResultAsync(
+          context.CheckType,
+          context.MeasurementType,
+          context.Range,
+          isSuccessful,
+          context.MeasurementTarget,
+          points: context.MeasurementPoints,
+          outputService: context.MessageService);
+      }
+      else
+      {
+        await MeasurementMessages.PublishResultAsync(
+          context.CheckType,
+          context.MeasurementType,
+          context.Range,
+          isSuccessful,
+          context.MeasurementTarget,
+          points: context.MeasurementPoints,
+          outputService: context.MessageService);
+      }
+
+      return isSuccessful;
+    }
     public async Task ExecuteAsync(CommandExecutionContext context, ProtocolModel protocolModel)
     {
       var command = GetRequiredCommand<EhtCommandModel>(context);
@@ -61,6 +96,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         secondValue);
       pairwiseFirstPointCheckerAlt.CabelResistance = cabelResistance;
       pairwiseFirstPointCheckerAlt.ValidatePointConnections = ShouldValidatePointConnections();
+      pairwiseFirstPointCheckerAlt.ResultMessageExecutor = this;
 
       if (command.AlgorithmKey.Contains("Д"))
       {

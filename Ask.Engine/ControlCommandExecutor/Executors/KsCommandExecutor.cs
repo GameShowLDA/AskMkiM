@@ -16,11 +16,52 @@ using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 
 namespace Ask.Engine.ControlCommandExecutor.Executors
 {
-  internal class KsCommandExecutor : CommandExecutorBase, ICommandExecutor
+  internal class KsCommandExecutor : CommandExecutorBase, ICommandExecutor, IMeasurementResultMessageExecutor
   {
     public string Mnemonic => EnumExtensions.GetCommandDisplayInfo(MeasurementTypeCommand.KC).DisplayName;
     private double firstValue = 0;
     private double secondValue = -1;
+
+    public async Task<bool> PublishMeasurementResultAsync(MeasurementResultMessageContext context)
+    {
+      ArgumentNullException.ThrowIfNull(context);
+
+      var evaluation = MeasurementResultEvaluator.Evaluate(
+        context.Range,
+        context.IsOverloadExpected);
+      bool isSuccessful = context.SuccessOverride ?? evaluation.IsSuccessful;
+      context.PublishedValue = evaluation.Value;
+      var range = new MeasurementRange(
+        evaluation.Value,
+        context.Range.LowerBound,
+        context.Range.UpperBound);
+
+      if (context.IsIntermediate)
+      {
+        await MeasurementMessages.PublishIntermediateResultAsync(
+          context.CheckType,
+          context.MeasurementType,
+          range,
+          isSuccessful,
+          context.MeasurementTarget,
+          points: context.MeasurementPoints,
+          outputService: context.MessageService);
+      }
+      else
+      {
+        await MeasurementMessages.PublishResultAsync(
+          context.CheckType,
+          context.MeasurementType,
+          range,
+          isSuccessful,
+          context.MeasurementTarget,
+          points: context.MeasurementPoints,
+          outputService: context.MessageService);
+      }
+
+      return isSuccessful;
+    }
+
 
     public async Task ExecuteAsync(CommandExecutionContext context, ProtocolModel protocolModel)
     {
@@ -120,13 +161,10 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
           !ExecutionConfig.GetIsIdleModeEnabled());
 
         measurementRange.TargetValue = answer;
-        var result = MeasurementResultEvaluator.Evaluate(measurementRange);
-        await MeasurementMessages.PublishResultAsync(CheckType.ControlProgram,
-          MeasurementTypeCommand.KC,
-          new MeasurementRange(result.Value, measurementRange.LowerBound, measurementRange.UpperBound),
-          result.IsSuccessful,
-          outputService: messageService);
-        return result;
+        var resultContext = new MeasurementResultMessageContext(
+          MeasurementTypeCommand.KC, measurementRange, messageService);
+        bool isSuccessful = await PublishMeasurementResultAsync(resultContext);
+        return (isSuccessful, resultContext.PublishedValue);
       }, messageService, measurementTask: true);
 
       return result;
@@ -152,13 +190,10 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
           !ExecutionConfig.GetIsIdleModeEnabled());
 
         measurementRange.TargetValue = answer;
-        var result = MeasurementResultEvaluator.Evaluate(measurementRange);
-        await MeasurementMessages.PublishResultAsync(CheckType.ControlProgram,
-          MeasurementTypeCommand.KC,
-          new MeasurementRange(result.Value, measurementRange.LowerBound, measurementRange.UpperBound),
-          result.IsSuccessful,
-          outputService: messageService);
-        return result;
+        var resultContext = new MeasurementResultMessageContext(
+          MeasurementTypeCommand.KC, measurementRange, messageService);
+        bool isSuccessful = await PublishMeasurementResultAsync(resultContext);
+        return (isSuccessful, resultContext.PublishedValue);
 
       }, messageService, measurementTask: true);
 

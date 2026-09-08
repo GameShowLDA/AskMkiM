@@ -16,11 +16,52 @@ using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 
 namespace Ask.Engine.ControlCommandExecutor.Executors
 {
-  internal class NeCommandExecutor : CommandExecutorBase, ICommandExecutor
+  internal class NeCommandExecutor : CommandExecutorBase, ICommandExecutor, IMeasurementResultMessageExecutor
   {
     public string Mnemonic => EnumExtensions.GetCommandDisplayInfo(MeasurementTypeCommand.NE).DisplayName;
     private double firstValue = 0;
     private double secondValue = -1;
+
+    public async Task<bool> PublishMeasurementResultAsync(MeasurementResultMessageContext context)
+    {
+      ArgumentNullException.ThrowIfNull(context);
+
+      var evaluation = MeasurementResultEvaluator.Evaluate(
+        context.Range,
+        context.IsOverloadExpected);
+      bool isSuccessful = context.SuccessOverride ?? evaluation.IsSuccessful;
+      context.PublishedValue = evaluation.Value;
+      var range = new MeasurementRange(
+        evaluation.Value,
+        context.Range.LowerBound,
+        context.Range.UpperBound);
+
+      if (context.IsIntermediate)
+      {
+        await MeasurementMessages.PublishIntermediateResultAsync(
+          context.CheckType,
+          context.MeasurementType,
+          range,
+          isSuccessful,
+          context.MeasurementTarget,
+          points: context.MeasurementPoints,
+          outputService: context.MessageService);
+      }
+      else
+      {
+        await MeasurementMessages.PublishResultAsync(
+          context.CheckType,
+          context.MeasurementType,
+          range,
+          isSuccessful,
+          context.MeasurementTarget,
+          points: context.MeasurementPoints,
+          outputService: context.MessageService);
+      }
+
+      return isSuccessful;
+    }
+
 
     public async Task ExecuteAsync(CommandExecutionContext context, ProtocolModel protocolModel)
     {
@@ -143,20 +184,15 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         }
 
         MeasurementRange measurementRange = new MeasurementRange(answer, firstValue, secondValue);
-        var measurementResult = MeasurementResultEvaluator.Evaluate(
-          measurementRange,
-          pointContext.IsOverloadExpected);
         var points = $"{pointContext.CurrentNeDirectionSign}{firstPoint}, {checkedPoint.ToString()}";
-        await MeasurementMessages.PublishResultAsync(CheckType.ControlProgram,
-          MeasurementTypeCommand.NE,
-          new MeasurementRange(
-            measurementResult.Value,
-            measurementRange.LowerBound,
-            measurementRange.UpperBound),
-          measurementResult.IsSuccessful,
-          points: points,
-          outputService: messageService);
-        return measurementResult;
+        var resultContext = new MeasurementResultMessageContext(
+          MeasurementTypeCommand.NE, measurementRange, messageService)
+        {
+          IsOverloadExpected = pointContext.IsOverloadExpected,
+          MeasurementPoints = points,
+        };
+        bool isSuccessful = await PublishMeasurementResultAsync(resultContext);
+        return (isSuccessful, resultContext.PublishedValue);
       }, messageService, measurementTask: true);
 
       return result;

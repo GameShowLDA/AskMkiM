@@ -432,7 +432,8 @@ Engine знает DB Engine и Message, Core содержит WPF/config/applica
 Для `MainWindowProgram` отключён Visual Studio Fast Up-to-date Check: Git HEAD и
 состояние working tree находятся вне стандартного MSBuild input graph, поэтому без
 этого после checkout/merge IDE могла запустить старый EXE без обновления AssemblyInfo.
-`Ask.Core.Services.App.ApplicationBuildInfo` читает атрибуты entry assembly и
+`Ask.Core.Services.App.ApplicationBuildInfo` читает атрибуты entry assembly, предоставляет
+дату и точное время сборки в UTC для окна сведений о сборке и
 добавляет путь, время изменения, SHA-256 EXE и MVID. Это единственный runtime-источник
 версии для UI, стартового лога, протоколов и `Ask.Diagnostics`.
 
@@ -682,8 +683,10 @@ executor throws
 
 #### Strategies
 
-- `ConnectedPointChecker` — проверяет соединённые цепи, формирует единый `AlgorithmExecutionResult` и передаёт
-  создание и публикацию этапов и результатов в `CommandMessages`/`MeasurementMessages`;
+- `ConnectedPointChecker` — проверяет соединённые цепи и формирует единый
+  `AlgorithmExecutionResult`; непосредственная публикация результата выполняется переданным
+  измерительным делегатом конкретного command executor через
+  `IMeasurementResultMessageExecutor`, поэтому checker не дублирует строки `НОРМА`/`БРАК`;
 - `DisconnectionCheckExecutor` выбирает `MethodExecutor`,
   `NodeAccumulationChecker`, `NodeFullChecker` или pairwise strategy;
 - `MethodExecutor`, `NodeAccumulationChecker`, `NodeFullChecker` и `PairwiseFirstPointChecker`
@@ -715,7 +718,19 @@ executor throws
 - `FaultChainMeasurementService` — повторно измеряет проблемные цепи и возвращает
   `AlgorithmExecutionResult`; модель ошибки формирует `MeasurementMessages`;
 - `EhtCommandExecutor`, `IeCommandExecutor`, `KsCommandExecutor`, `NeCommandExecutor`,
-  `PiCommandExecutor`, `PrCommandExecutor` и `SiCommandExecutor` передают единый
+  `PiCommandExecutor`, `PrCommandExecutor` и `SiCommandExecutor` реализуют
+  `IMeasurementResultMessageExecutor`, причём каждый executor явно объявляет собственный
+  `PublishMeasurementResultAsync`; в `CommandExecutorBase` реализации этого контракта нет.
+  Метод принимает `MeasurementResultMessageContext`, применяет правила проверки конкретной
+  команды, сохраняет фактически опубликованное значение после Idle-симуляции, публикует
+  итоговый/промежуточный результат через `MeasurementMessages` и возвращает `bool` алгоритму.
+  Для `PiCommandExecutor` аппаратный `Fail` немедленно формирует неуспешный результат;
+  при `Pass` итог дополнительно проверяется по допустимому диапазону тока. ПИ публикуется через
+  `MeasurementMessages.PublishInsulationStrengthResultAsync`: измеренное значение тока не
+  выводится, пользователь видит качественный результат `НОРМА` или `ПРОБОЙ`. `SuccessOverride`
+  также используется для принудительных результатов служебных измерений `ЭТ`, а
+  `IsOverloadExpected` сохраняет обратный проход `НЕ`;
+- эти же executors передают единый
   `AlgorithmExecutionResult` в `ProtocolModelExtensions.AddResult`; расширение находится
   в `Ask.Protocol.Messages/Extensions/ProtocolModelExtensions.cs` и внутри раскладывает
   ошибки и информационные сообщения по коллекциям `ProtocolModel`;
@@ -1309,6 +1324,11 @@ executor/metrology
   `Ask.Core.Shared.DTO.Devices.Breakdown.BreakdownMeasurementResponse` для ACW/DCW/IR;
   статус типизирован enum `BreakdownMeasurementStatus` (`Test`, `Fail`, `Pass`), а ответ без
   одного из этих статусов не считается корректным результатом измерения;
+- `MeasureHelper.MeasureFullTimeAsync` передаёт разобранный статус в
+  `Function/GPT/Managment/MeasureManagment.MeasureAsync`; при округлении значения manager
+  сохраняет исходный `Status`. Для ACW/DCW аппаратный `Fail` доходит через application adapter
+  до `PiCommandExecutor` и даёт `ПРОБОЙ` даже при токе в допустимом диапазоне.
+  Idle-ветка `MeasureHelper.MeasureAsync` возвращает симулированное значение со статусом `Pass`;
 - `BreakdownTesterMessages` является фасадом над `Ask.Protocol.Messages` для рабочих операций
   ACW/DCW/IR/System и самоконтроля; существующие тексты сообщений остаются в вызывающем коде.
 
@@ -2151,6 +2171,8 @@ ErrorItem → translator/runner ErrorList
 | `MetrologyMessageBuilder` | internal static builder | Ask.Protocol.Messages | формирует заголовок сводки режима и сообщения о предельных погрешностях | [Protocols](#protocols-and-file-formats) |
 | `MetrologyMessagePublisher` | internal static publisher | Ask.Protocol.Messages | передаёт метрологические сводки в `IMessageOutputService` с метаданными исходного вызова | [Protocols](#protocols-and-file-formats) |
 | `MeasurementResultEvaluator` | internal static evaluator | Ask.Engine | применяет Idle-симуляцию и проверяет измеренное значение по границам либо ожидаемой перегрузке до передачи результата в `MeasurementMessages` | [Execution Engine](#execution-engine) |
+| `IMeasurementResultMessageExecutor` | internal interface | Ask.Engine | обязательный для измерительных command executor контракт проверки и публикации результата с возвратом логического вердикта алгоритму | [Execution Engine](#execution-engine) |
+| `MeasurementResultMessageContext` | internal context | Ask.Engine | передаёт тип команды, диапазон, адресат измерения, режим сравнения, аппаратный override и хранит фактически опубликованное значение | [Execution Engine](#execution-engine) |
 | `AlgorithmExecutionResult` | result container | Ask.Protocol.Messages | контракт из `Ask.Protocol.Messages/Models/`, хранящий накопленные ошибки и информационные `ShowMessageModel` алгоритма | [Execution Engine](#execution-engine) |
 | `ProtocolModelExtensions` | static extensions | Ask.Protocol.Messages | расширение из namespace `Ask.Protocol.Messages.Extensions`, добавляющее единый `AlgorithmExecutionResult` в коллекции ошибок и информационных сообщений `ProtocolModel` | [Execution Engine](#execution-engine) |
 | `ExecutionMessages` | static facade | Ask.Protocol.Messages | проверяет видимость параметров выполнения и коммутации, публикует накопленные результаты проверки, ошибки, debug-сообщения, задержки, этапы анализа цепей и локализации, границы этапов, инициализацию, настройку оборудования и коммутацию; формирует только накапливаемую ошибку локализации | [Protocols](#protocols-and-file-formats) |

@@ -89,8 +89,6 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
               context.VoltageType);
 
             var err = faultResult.Errors.Single();
-            await MeasurementMessages.PublishBuiltMessageAsync(CheckType.ControlProgram, err, messageService);
-
             if (context.CommandModel.PointErrors != null)
             {
               context.CommandManager.AddErrorMethod(
