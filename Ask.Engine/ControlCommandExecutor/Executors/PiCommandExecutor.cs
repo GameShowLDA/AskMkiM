@@ -7,7 +7,6 @@ using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
-using Ask.Core.Shared.Metadata.Enums.UnitEnums;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies.Data;
@@ -199,13 +198,13 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
           var answer = await breadDown.AcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandAC, measurementRange);
           measurementRange.TargetValue = answer.Value;
           var result = MeasurementResultEvaluator.Evaluate(measurementRange);
-          await MeasurementMessages.PublishInsulationStrengthResultAsync(
+          await MeasurementMessages.PublishIntermediateResultAsync(
             CheckType.ControlProgram,
-            points ?? "Точки не определены",
+            MeasurementTypeCommand.PI_ACW,
             new MeasurementRange(result.Value, measurementRange.LowerBound, measurementRange.UpperBound),
-            CurrentUnit.MilliAmpere,
             result.IsSuccessful,
-            messageService);
+            points: points,
+            outputService: messageService);
           return result;
         }
         else
@@ -214,13 +213,13 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
           var answer = await breadDown.DcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandDC, measurementRange);
           measurementRange.TargetValue = answer.Value;
           var result = MeasurementResultEvaluator.Evaluate(measurementRange);
-          await MeasurementMessages.PublishInsulationStrengthResultAsync(
+          await MeasurementMessages.PublishIntermediateResultAsync(
             CheckType.ControlProgram,
-            points ?? "Точки не определены",
+            MeasurementTypeCommand.PI_DCW,
             new MeasurementRange(result.Value, measurementRange.LowerBound, measurementRange.UpperBound),
-            CurrentUnit.MilliAmpere,
             result.IsSuccessful,
-            messageService);
+            points: points,
+            outputService: messageService);
           return result;
         }
 
@@ -247,13 +246,13 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
           answer = (await breadDown.AcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandAC, measurementRange)).Value;
           measurementRange.TargetValue = answer;
           var result = MeasurementResultEvaluator.Evaluate(measurementRange);
-          await MeasurementMessages.PublishInsulationStrengthResultAsync(
+          await MeasurementMessages.PublishIntermediateResultAsync(
             CheckType.ControlProgram,
-            points ?? "Точки не определены",
+            MeasurementTypeCommand.PI_ACW,
             new MeasurementRange(result.Value, measurementRange.LowerBound, measurementRange.UpperBound),
-            CurrentUnit.MilliAmpere,
             result.IsSuccessful,
-            messageService);
+            points: points,
+            outputService: messageService);
           return result;
         }
         else
@@ -262,13 +261,13 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
           answer = (await breadDown.DcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandDC, measurementRange)).Value;
           measurementRange.TargetValue = answer;
           var result = MeasurementResultEvaluator.Evaluate(measurementRange);
-          await MeasurementMessages.PublishInsulationStrengthResultAsync(
+          await MeasurementMessages.PublishIntermediateResultAsync(
             CheckType.ControlProgram,
-            points ?? "Точки не определены",
+            MeasurementTypeCommand.PI_DCW,
             new MeasurementRange(result.Value, measurementRange.LowerBound, measurementRange.UpperBound),
-            CurrentUnit.MilliAmpere,
             result.IsSuccessful,
-            messageService);
+            points: points,
+            outputService: messageService);
           return result;
         }
       }, messageService, measurementTask: true);
