@@ -11,6 +11,22 @@
 
 ## Quick Navigation
 
+Экспорт диагностики за день: кнопка перед текущим пользователем в `MainWindow/MainWindow.xaml`
+→ `MainWindow/MainWindow.DailyReport.cs` → `UI/Controls/DailyReportDateWindow.xaml`
+→ переиспользуемый `UI/Controls/Calendar/CalendarControl.xaml`
+с индикацией доступности по каталогам протоколов и логов (полная дата содержит оба набора данных)
+→ SaveFileDialog → `Ask.Diagnostics/Services/DailyReportService.cs`. ZIP содержит `Protocols`
+из дневного каталога `ExecutionProtocolHistoryService.GetHistoryDirectory()`, `Logs` из
+`AppContext.BaseDirectory/logs/yyyy-MM-dd`, `CrashReports` из настроенного `CrashPackageOptions.Path`
+(пакеты с префиксом `yyyyMMdd_`) и `report.json` с замечаниями. Логи сбрасываются через NLog перед сбором;
+файлы читаются с FileShare.ReadWrite/Delete до длины на момент открытия. Архив формируется во временном
+файле рядом с назначением и переносится после закрытия ZIP. Экспорт доступен из общей панели;
+содержимое протоколов не расшифровывается и не зависит от роли экспортирующего пользователя.
+Иконка `Ask.UI/Shared/Components/Icons/DailyReportIcon.xaml` использует SemiIconDownload из Semi.Avalonia,
+Size/Foreground и анимации общей кнопки; лицензия сохранена рядом. Соседние иконки не заменяются.
+Результат сохранения и ошибка показываются через `NotificationHostService`; окно выбора даты использует
+безрамочный shell, тематические brushes, шрифты и стили кнопок существующих диалогов `Ask.UI`.
+
 | Нужно изменить | Сначала смотреть | Затем смотреть |
 | --- | --- | --- |
 | Запуск приложения | `MainWindow/App.xaml.cs`, `MainWindow/Init/PreStartupInitializer.cs` | `MainWindow/Init/DatabaseInitializer.cs`, `MainWindow/Engine/AppServices.cs`, `MainWindow/MainWindow.xaml.cs` |
