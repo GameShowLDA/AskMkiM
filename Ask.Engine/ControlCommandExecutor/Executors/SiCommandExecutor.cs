@@ -20,7 +20,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
   /// <summary>
   /// Выполняет команду проверки сопротивления изоляции СИ.
   /// </summary>
-  internal class SiCommandExecutor : CommandExecutorBase, ICommandExecutor
+  internal class SiCommandExecutor : CommandExecutorBase, ICommandExecutor, IMeasurementResultMessageExecutor
   {
     /// <summary>
     /// Отображаемое имя команды СИ.
@@ -31,6 +31,47 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
     /// Нижняя граница сопротивления для измерений методом накапливающего узла.
     /// </summary>
     private double firstValue = 0;
+
+    public async Task<bool> PublishMeasurementResultAsync(MeasurementResultMessageContext context)
+    {
+      ArgumentNullException.ThrowIfNull(context);
+
+      var evaluation = MeasurementResultEvaluator.Evaluate(
+        context.Range,
+        context.IsOverloadExpected);
+      bool isSuccessful = context.SuccessOverride ?? evaluation.IsSuccessful;
+      context.PublishedValue = evaluation.Value;
+      var range = new MeasurementRange(
+        evaluation.Value,
+        context.Range.LowerBound,
+        context.Range.UpperBound);
+
+      if (context.IsIntermediate)
+      {
+        await MeasurementMessages.PublishIntermediateResultAsync(
+          context.CheckType,
+          context.MeasurementType,
+          range,
+          isSuccessful,
+          context.MeasurementTarget,
+          points: context.MeasurementPoints,
+          outputService: context.MessageService);
+      }
+      else
+      {
+        await MeasurementMessages.PublishResultAsync(
+          context.CheckType,
+          context.MeasurementType,
+          range,
+          isSuccessful,
+          context.MeasurementTarget,
+          points: context.MeasurementPoints,
+          outputService: context.MessageService);
+      }
+
+      return isSuccessful;
+    }
+
 
     /// <summary>
     /// Выполняет команду СИ и сохраняет обнаруженные ошибки в модели протокола.
@@ -156,6 +197,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         measurement.Restart();
 
         measurementRange.TargetValue = answer.Value;
+
         var result = MeasurementResultEvaluator.Evaluate(measurementRange);
         await MeasurementMessages.PublishIntermediateResultAsync(CheckType.ControlProgram,
           MeasurementTypeCommand.SI,
@@ -163,7 +205,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
           result.IsSuccessful,
           outputService: messageService);
 
-        return result;
+        return (result.IsSuccessful, result);
       }, messageService, measurementTask: true);
 
       return result;
@@ -193,13 +235,14 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
         measurement.Restart();
         measurementRange.TargetValue = answer.Value;
+
         var result = MeasurementResultEvaluator.Evaluate(measurementRange);
         await MeasurementMessages.PublishIntermediateResultAsync(CheckType.ControlProgram,
           MeasurementTypeCommand.SI,
           new MeasurementRange(result.Value, measurementRange.LowerBound, measurementRange.UpperBound),
           result.IsSuccessful,
           outputService: messageService);
-        return result;
+        return (result.IsSuccessful, result);
 
       }, messageService, measurementTask: true);
 

@@ -35,6 +35,16 @@ public sealed record ApplicationBuildInfo
       ? timestamp.ToString("dd.MM.yyyy", CultureInfo.InvariantCulture)
       : "Неизвестно";
 
+  /// <summary>Дата и время сборки в формате UTC для отображения пользователю.</summary>
+  public string BuildDateTimeUtc => DateTime.TryParseExact(
+    BuildTimestampUtc,
+    "yyyyMMdd.HHmmss",
+    CultureInfo.InvariantCulture,
+    DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal,
+    out DateTime timestamp)
+      ? timestamp.ToString("dd.MM.yyyy HH:mm:ss 'UTC'", CultureInfo.InvariantCulture)
+      : "Неизвестно";
+
   /// <summary>Полный хеш Git-коммита.</summary>
   public required string GitCommit { get; init; }
 

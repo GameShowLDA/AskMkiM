@@ -95,7 +95,7 @@ namespace Ask.Engine.Tests.MethodExecutor.CI
             indentLevel: 1);
 
           MeasurementRange measurementRange = new MeasurementRange(dataModel.Param, dataModel.Param, 60000);
-          var answer = await breakDown.IrManger.Measure.MeasureAsync(ElectricalTestFunction.InsulationResistance, measurementRange, userMessageService: messageService);
+          var answer = await breakDown.IrManger.Measure.MeasureAsync(ElectricalTestFunction.InsulationResistance, measurementRange);
 
           bool isSuccessful = answer.Value >= dataModel.Param;
 

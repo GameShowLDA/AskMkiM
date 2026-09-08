@@ -114,12 +114,16 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
               }
             }
 
-            await MeasurementMessages.PublishIntermediateResultAsync(CheckType.ControlProgram,
-              context.TypeCommand,
-              new MeasurementRange(Rt1, context.LowerLimit, context.HigherLimit),
-              true,
-              $"{_basePoint.Mnemonic}{machineAddress}",
-              outputService: context.MessageService);
+            await GetResultMessageExecutor(context).PublishMeasurementResultAsync(
+              new MeasurementResultMessageContext(
+                context.TypeCommand,
+                new MeasurementRange(Rt1, context.LowerLimit, context.HigherLimit),
+                context.MessageService,
+                $"{_basePoint.Mnemonic}{machineAddress}")
+              {
+                IsIntermediate = true,
+                SuccessOverride = true,
+              });
           }
 
           var localizationPoints = basePointConnectionError
@@ -195,12 +199,16 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
                 }
               }
 
-              await MeasurementMessages.PublishIntermediateResultAsync(CheckType.ControlProgram,
-                context.TypeCommand,
-                new MeasurementRange(Rt2, context.LowerLimit, context.HigherLimit),
-                true,
-                $"{point.Mnemonic}{machineAdress}",
-                outputService: context.MessageService);
+              await GetResultMessageExecutor(context).PublishMeasurementResultAsync(
+                new MeasurementResultMessageContext(
+                  context.TypeCommand,
+                  new MeasurementRange(Rt2, context.LowerLimit, context.HigherLimit),
+                  context.MessageService,
+                  $"{point.Mnemonic}{machineAdress}")
+                {
+                  IsIntermediate = true,
+                  SuccessOverride = true,
+                });
             }
 
             if (!currentPointError && localizationPoints.Count > 0)
@@ -257,12 +265,14 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
                 await MeasurementMessages.PublishStartAsync(CheckType.ControlProgram,
                   MeasurementTypeCommand.KC,
                   context.MessageService);
+
                 await MeasurementMessages.PublishIntermediateResultAsync(CheckType.ControlProgram,
                   context.TypeCommand,
                   new MeasurementRange(Rt, context.LowerLimit, context.HigherLimit),
                   false,
                   $"{_basePoint.Mnemonic}{machineAdressFirst}, {point.Mnemonic}{machineAdressSecond}",
                   outputService: context.MessageService);
+
                 context.CommandManager.AddErrorMethod(
                   EhtErrors.CircuitOverload($"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}",
                   $"{_basePoint.Mnemonic}{machineAdressFirst}",
@@ -277,12 +287,16 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
               }
               else
               {
-                await MeasurementMessages.PublishIntermediateResultAsync(CheckType.ControlProgram,
-                  context.TypeCommand,
-                  new MeasurementRange(Rt, context.LowerLimit, context.HigherLimit),
-                  true,
-                  $"{_basePoint.Mnemonic}{machineAdressFirst},{point.Mnemonic}{machineAdressSecond}",
-                  outputService: context.MessageService);
+                await GetResultMessageExecutor(context).PublishMeasurementResultAsync(
+                  new MeasurementResultMessageContext(
+                    context.TypeCommand,
+                    new MeasurementRange(Rt, context.LowerLimit, context.HigherLimit),
+                    context.MessageService,
+                    $"{_basePoint.Mnemonic}{machineAdressFirst},{point.Mnemonic}{machineAdressSecond}")
+                  {
+                    IsIntermediate = true,
+                    SuccessOverride = true,
+                  });
               }
             }
 
@@ -309,7 +323,6 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
                   LowerBound,
                   UpperBound,
                   context.CabelResistance);
-                bool success = result >= LowerBound && result <= UpperBound;
                 var range = new MeasurementRange(result, LowerBound, UpperBound);
 
                 await MeasurementMessages.PublishIntermediateResultAsync(CheckType.ControlProgram,
@@ -423,6 +436,12 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 
     internal static bool CanMeasurePair(bool basePointConnectionError, bool currentPointError)
       => !basePointConnectionError && !currentPointError;
+
+    private static IMeasurementResultMessageExecutor GetResultMessageExecutor(
+      PairwiseFirstPointAltContext context)
+      => context.ResultMessageExecutor
+        ?? throw new InvalidOperationException(
+          "Не задан исполнитель сообщений результатов измерения.");
 
     /// <summary>
     /// Проверяет, соответствует ли результат измерения пары признаку перегрузки мультиметра.

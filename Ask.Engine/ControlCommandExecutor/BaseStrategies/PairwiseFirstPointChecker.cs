@@ -86,7 +86,6 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 
             await DeviceManager.RelayModule.ChainManager.ConnectChainToBusBAsync(_basePoint, messageService, context.IsPolarityReversed);
             var err = faultResult.Errors.Single();
-            await MeasurementMessages.PublishBuiltMessageAsync(CheckType.ControlProgram, err, messageService);
 
             executionResult.AddRange(faultResult);
             context.CommandManager.AddErrorMethod(
