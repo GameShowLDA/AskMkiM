@@ -19,7 +19,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
   {
     public string Mnemonic => EnumExtensions.GetCommandDisplayInfo(MeasurementTypeCommand.PI).DisplayName;
     private double amperhMaxDCW = 10;
-    private double amperhMaxACW = 50;
+    private double amperhMaxACW = 40;
 
     public async Task<bool> PublishMeasurementResultAsync(MeasurementResultMessageContext context)
     {
