@@ -7,6 +7,7 @@ using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
+using Ask.Core.Shared.Metadata.Enums.UnitEnums;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies.Data;
@@ -241,7 +242,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
             result.IsSuccessful,
             points: points,
             outputService: messageService);
-          return (result.IsSuccessful, result);
+          return (result.IsSuccessful, result.Value);
         }
         else
         {
@@ -258,7 +259,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
             result.IsSuccessful,
             points: points,
             outputService: messageService);
-          return (result.IsSuccessful, result);
+          return (result.IsSuccessful, result.Value);
         }
 
 
@@ -282,7 +283,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         {
           MeasurementRange measurementRange = new MeasurementRange(value, 0, amperhMaxACW);
 
-          answer = (await breadDown.AcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandAC, measurementRange)).Value;
+          var answer = (await breadDown.AcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandAC, measurementRange)).Value;
           measurementRange.TargetValue = answer;
           var result = MeasurementResultEvaluator.Evaluate(measurementRange);
           await MeasurementMessages.PublishIntermediateResultAsync(
@@ -292,13 +293,13 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
             result.IsSuccessful,
             points: points,
             outputService: messageService);
-          return (result.IsSuccessful, result);
+          return (result.IsSuccessful, result.Value);
         }
         else
         {
           MeasurementRange measurementRange = new MeasurementRange(value, 0, amperhMaxDCW);
 
-          answer = (await breadDown.DcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandDC, measurementRange)).Value;
+          var answer = (await breadDown.DcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandDC, measurementRange)).Value;
           measurementRange.TargetValue = answer;
           var result = MeasurementResultEvaluator.Evaluate(measurementRange);
           await MeasurementMessages.PublishIntermediateResultAsync(
@@ -308,7 +309,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
             result.IsSuccessful,
             points: points,
             outputService: messageService);
-          return (result.IsSuccessful, result);
+          return (result.IsSuccessful, result.Value);
         }
       }, messageService, measurementTask: true);
 

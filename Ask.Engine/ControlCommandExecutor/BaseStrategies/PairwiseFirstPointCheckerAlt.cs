@@ -325,12 +325,12 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
                   context.CabelResistance);
                 var range = new MeasurementRange(result, LowerBound, UpperBound);
 
-                await MeasurementMessages.PublishIntermediateResultAsync(CheckType.ControlProgram,
-                  context.TypeCommand,
-                  range,
-                  success,
-                  measurementTarget,
-                  outputService: context.MessageService);
+                bool success = await GetResultMessageExecutor(context).PublishMeasurementResultAsync(
+                  new MeasurementResultMessageContext(
+                    context.TypeCommand,
+                    range,
+                    context.MessageService,
+                    measurementTarget));
 
                 return (success, result);
               }, context.MessageService, measurementTask: true);

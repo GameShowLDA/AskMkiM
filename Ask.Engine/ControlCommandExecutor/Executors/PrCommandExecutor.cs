@@ -232,7 +232,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
           new MeasurementRange(result.Value, measurementRange.LowerBound, measurementRange.UpperBound),
           result.IsSuccessful,
           outputService: messageService);
-        return (result.IsSuccessful, result);
+        return (result.IsSuccessful, result.Value);
 
       }, messageService, measurementTask: true);
 
@@ -271,7 +271,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
           new MeasurementRange(result.Value, measurementRange.LowerBound, measurementRange.UpperBound),
           result.IsSuccessful,
           outputService: messageService);
-        return (result.IsSuccessful, result);
+        return (result.IsSuccessful, result.Value);
       }, messageService, measurementTask: true);
 
       return result;
@@ -312,7 +312,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
           new MeasurementRange(result.Value, measurementRange.LowerBound, measurementRange.UpperBound),
           result.IsSuccessful,
           outputService: messageService);
-        return (result.IsSuccessful, result);
+        return (result.IsSuccessful, result.Value);
 
       }, messageService, measurementTask: true);
 
