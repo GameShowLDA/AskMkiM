@@ -20,6 +20,8 @@
         <LocalizeStrings:LocalizedString x:Key="Settings_Execution_StepByStepMode_Description" Key="settings.execution.stepByStepMode.description" />
         <LocalizeStrings:LocalizedString x:Key="Settings_Execution_IdleMode_Title" Key="settings.execution.idleMode.title" />
         <LocalizeStrings:LocalizedString x:Key="Settings_Execution_IdleMode_Description" Key="settings.execution.idleMode.description" />
+        <LocalizeStrings:LocalizedString x:Key="Settings_Execution_ErrorSimulation_Title" Key="settings.execution.errorSimulation.title" />
+        <LocalizeStrings:LocalizedString x:Key="Settings_Execution_ErrorSimulation_Description" Key="settings.execution.errorSimulation.description" />
         <LocalizeStrings:LocalizedString x:Key="Settings_Execution_MeasurementErrorSimulation_Title" Key="settings.execution.measurementErrorSimulation.title" />
         <LocalizeStrings:LocalizedString x:Key="Settings_Execution_MeasurementErrorSimulation_Description" Key="settings.execution.measurementErrorSimulation.description" />
         <LocalizeStrings:LocalizedString x:Key="Settings_Execution_HardwareErrorSimulation_Title" Key="settings.execution.hardwareErrorSimulation.title" />
@@ -162,10 +164,12 @@
                         x:Name="DisablePowerCheck" />
                 </WrapPanel>
 
-                <StackPanel x:Name="ErrorSimulationGroup"
-                            Margin="10,0,10,10">
-                    <StackPanel.Style>
-                        <Style TargetType="StackPanel">
+                <Border x:Name="ErrorSimulationGroup"
+                        Margin="10,4,10,10"
+                        Padding="16"
+                        Background="{DynamicResource SettingsNestedGroupBackgroundSolidColorBrush}">
+                    <Border.Style>
+                        <Style TargetType="Border" BasedOn="{StaticResource SettingCardStyle}">
                             <Setter Property="Visibility" Value="Collapsed"/>
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding ElementName=IdleMode, Path=IsChecked}"
@@ -174,77 +178,100 @@
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>
-                    </StackPanel.Style>
+                    </Border.Style>
 
-                    <Components:SettingsCardSelect
-                        Title="{Binding Source={StaticResource Settings_Execution_MeasurementErrorSimulation_Title}, Path=Value}"
-                        Description="{Binding Source={StaticResource Settings_Execution_MeasurementErrorSimulation_Description}, Path=Value}"
-                        Margin="0,10,0,0"
-                        HorizontalAlignment="Left"
-                        VerticalAlignment="Top"
-                        DisplayMemberPath="Title"
-                        SelectedValuePath="Value"
-                        x:Name="ErroneousMeasurementTypeSelect"/>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
 
-                    <Border Margin="0,10,0,0"
-                            HorizontalAlignment="Left"
-                            Padding="10"
-                            Background="{DynamicResource SettingsNestedGroupBackgroundSolidColorBrush}"
-                            Style="{DynamicResource SettingCardStyle}">
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                            </Grid.RowDefinitions>
-
-                            <Grid Grid.Row="0">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-
-                                <TextBlock Grid.Column="0"
-                                           Text="{Binding Source={StaticResource Settings_Execution_HardwareErrorSimulation_Title}, Path=Value}"
-                                           Style="{DynamicResource SettingsTitleStyle}"
-                                           Padding="0,4,0,4"
-                                           Margin="0,0,6,0"/>
-
-                                <Icons:ArrowButton x:Name="ToggleHardwareErrorSimulationButton"
-                                                   Grid.Column="1"
-                                                   HorizontalAlignment="Left"
-                                                   Width="30"
-                                                   Height="30"
-                                                   Margin="0"
-                                                   ButtonBackground="{DynamicResource SettingsInteractiveBackgroundSolidColorBrush}"
-                                                   ButtonBorder="{DynamicResource SettingsInteractiveBorderSolidColorBrush}"
-                                                   ArrowBrush="{DynamicResource SettingsInteractiveBorderSolidColorBrush}"
-                                                   ArrowHoverBrush="{DynamicResource SettingsInteractivePressedSolidColorBrush}"
-                                                   VerticalAlignment="Center"/>
-                            </Grid>
-
-                            <StackPanel Grid.Row="1">
-                                <StackPanel.Style>
-                                    <Style TargetType="StackPanel">
-                                        <Setter Property="Visibility" Value="Visible"/>
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding ElementName=ToggleHardwareErrorSimulationButton, Path=IsArrowUp}"
-                                                         Value="False">
-                                                <Setter Property="Visibility" Value="Collapsed"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </StackPanel.Style>
-
-                                <TextBlock Text="{Binding Source={StaticResource Settings_Execution_HardwareErrorSimulation_Description}, Path=Value}"
-                                           Style="{DynamicResource SettingsDescriptionStyle}"
-                                           Margin="0,0,0,8"/>
-
-                                <WrapPanel x:Name="HardwareErrorSimulationCards"
-                                           Orientation="Horizontal"/>
+                        <Grid Grid.Row="0">
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="{Binding Source={StaticResource Settings_Execution_ErrorSimulation_Title}, Path=Value}"
+                                           Style="{DynamicResource SettingsTitleStyle}"/>
+                                <TextBlock Text="{Binding Source={StaticResource Settings_Execution_ErrorSimulation_Description}, Path=Value}"
+                                           Margin="0,2,0,0"
+                                           Style="{DynamicResource SettingsDescriptionStyle}"/>
                             </StackPanel>
                         </Grid>
-                    </Border>
-                </StackPanel>
+
+                        <Grid Grid.Row="1"
+                              Margin="0,16,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="300"/>
+                                <ColumnDefinition Width="14"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <Components:SettingsCardSelect
+                                Grid.Column="0"
+                                Title="{Binding Source={StaticResource Settings_Execution_MeasurementErrorSimulation_Title}, Path=Value}"
+                                Description="{Binding Source={StaticResource Settings_Execution_MeasurementErrorSimulation_Description}, Path=Value}"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Top"
+                                DisplayMemberPath="Title"
+                                SelectedValuePath="Value"
+                                x:Name="ErroneousMeasurementTypeSelect"/>
+
+                            <Border Grid.Column="2"
+                                    Padding="12,10"
+                                    HorizontalAlignment="Stretch"
+                                    VerticalAlignment="Stretch"
+                                    Style="{DynamicResource SettingCardStyle}">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+
+                                    <Grid Grid.Row="0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <StackPanel Grid.Column="0"
+                                                    Margin="0,0,12,0">
+                                            <TextBlock Text="{Binding Source={StaticResource Settings_Execution_HardwareErrorSimulation_Title}, Path=Value}"
+                                                       Style="{DynamicResource SettingsHeaderStyle}"/>
+                                            <TextBlock Text="{Binding Source={StaticResource Settings_Execution_HardwareErrorSimulation_Description}, Path=Value}"
+                                                       Margin="0,2,0,0"
+                                                       Style="{DynamicResource SettingsDescriptionStyle}"/>
+                                        </StackPanel>
+
+                                        <Icons:ArrowButton x:Name="ToggleHardwareErrorSimulationButton"
+                                                           Grid.Column="1"
+                                                           Width="30"
+                                                           Height="30"
+                                                           ButtonBackground="{DynamicResource SettingsInteractiveBackgroundSolidColorBrush}"
+                                                           ButtonBorder="{DynamicResource SettingsInteractiveBorderSolidColorBrush}"
+                                                           ArrowBrush="{DynamicResource SettingsInteractiveBorderSolidColorBrush}"
+                                                           ArrowHoverBrush="{DynamicResource SettingsInteractivePressedSolidColorBrush}"
+                                                           VerticalAlignment="Center"/>
+                                    </Grid>
+
+                                    <WrapPanel x:Name="HardwareErrorSimulationCards"
+                                               Grid.Row="1"
+                                               Margin="0,8,0,0"
+                                               Orientation="Horizontal">
+                                        <WrapPanel.Style>
+                                            <Style TargetType="WrapPanel">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding ElementName=ToggleHardwareErrorSimulationButton, Path=IsArrowUp}"
+                                                                 Value="True">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </WrapPanel.Style>
+                                    </WrapPanel>
+                                </Grid>
+                            </Border>
+                        </Grid>
+                    </Grid>
+                </Border>
             </StackPanel>
 
         </Grid>

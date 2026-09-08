@@ -328,7 +328,8 @@ namespace UI.Controls.Settings.Execution
           Title = GetDeviceCardTitle(device),
           Description = string.Empty,
           IsChecked = currentValue,
-          Margin = new Thickness(0, 6, 10, 0),
+          Width = 260,
+          Margin = new Thickness(0, 6, 8, 0),
           VerticalAlignment = VerticalAlignment.Top,
         };
 
@@ -341,6 +342,7 @@ namespace UI.Controls.Settings.Execution
           SavedValue = savedValue,
         });
       }
+
     }
 
     private async Task SaveHardwareErrorSimulationSettingsAsync()
