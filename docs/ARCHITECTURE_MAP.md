@@ -1685,8 +1685,20 @@ formatted editors; `RunControl` hosts ProtocolUI, translated source and error li
 Открытый `.asktrace` отображается через `SavedExecutionProtocolUI` и
 `ProtocolListBoxUI`; рядом с его штатной вертикальной прокруткой размещается
 `ErrorOverviewBar`. Полоса получает строки из существующей коллекции
-`ShowMessageModel`, отмечает только сообщения с `БРАК`, показывает WPF ToolTip и
-по клику раскрывает/прокручивает соответствующую запись протокола.
+`ShowMessageModel`: `Status.Error` или `ExecutionError`; для старых строк `Info`/`null`
+сохраняется распознавание явной метки `[БРАК]`. `AppendLineAsync → AddOverviewDiagnostic`
+индексирует только новое сообщение; `RefreshErrorOverview` пересоздаёт индекс после загрузки/удаления.
+`RequestOverviewUpdate` объединяет обновления через Dispatcher; прокрутка обновляет только viewport.
+Маркеры и viewport используют логические индексы истории, viewport определяется по видимым
+виртуализированным контейнерам с учётом свёрнутых команд. `_messageItems` сопоставляет сообщения
+с визуальными элементами (включая прикреплённые ROOT-логи), `_itemGroups` — с владельцами-командами.
+Кнопки справа и F8/Shift+F8 вызывают `NavigateToOverviewError → NavigateToErrorOverviewLine`
+с раскрытием группы и `ScrollIntoView`; активная ошибка сохраняется ссылкой на сообщение.
+Панель показывает счётчик, активный маркер и тематические подсказки; клик по свободной области
+переходит к позиции в истории. Близкие маркеры объединяются в ограниченные по высоте кластеры:
+повторные клики обходят их строки, Shift+клик меняет направление. Реализация:
+`Ask.UI/Controls/TextEditorControl/ErrorOverviewBar.cs`,
+`Ask.UI/Components/ProtocolListBox/ProtocolListBoxUI.xaml{,.cs}`.
 
 `Ask.UI` contains newer feature-oriented code: ProtocolNew, Archive, Notifications,
 RoleManagement, ExecutionSelection and reusable controls. Оба UI-проекта пока

@@ -2,6 +2,7 @@ using Ask.Core.Services.Errors.Models;
 using ICSharpCode.AvalonEdit;
 using ICSharpCode.AvalonEdit.Document;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 
@@ -29,6 +30,8 @@ namespace Ask.UI.Controls.TextEditorControl
     private Action<int>? _lineClickAction;
     private double _viewportTop;
     private double _viewportBottom = 1.0;
+    private int _activeLine = -1;
+    private OverviewMarker? _hoveredMarker;
 
     public ErrorOverviewBar()
     {
@@ -38,8 +41,14 @@ namespace Ask.UI.Controls.TextEditorControl
 
       SizeChanged += (_, _) => RebuildMarkers();
       MouseMove += ErrorOverviewBar_MouseMove;
-      MouseLeave += (_, _) => ResetToolTip();
+      MouseLeave += (_, _) => { _hoveredMarker = null; ResetToolTip(); InvalidateVisual(); };
       MouseLeftButtonUp += ErrorOverviewBar_MouseLeftButtonUp;
+    }
+
+    public void SetActiveLine(int lineNumber)
+    {
+      _activeLine = lineNumber;
+      InvalidateVisual();
     }
 
     public void SetEditor(TextEditor editor)
@@ -155,10 +164,11 @@ namespace Ask.UI.Controls.TextEditorControl
 
       var trackBrush = TryFindResource("ScrollBarTrackBackground") as Brush
         ?? new SolidColorBrush(Color.FromArgb(28, 128, 128, 128));
-      drawingContext.DrawRectangle(trackBrush, null, new Rect(0, 0, ActualWidth, ActualHeight));
+      drawingContext.DrawRoundedRectangle(trackBrush, null, new Rect(0, 0, ActualWidth, ActualHeight), 5, 5);
 
-      var viewportBrush = new SolidColorBrush(Color.FromArgb(38, 90, 145, 205));
-      var viewportBorderBrush = new SolidColorBrush(Color.FromArgb(105, 90, 145, 205));
+      var viewportBorderBrush = TryFindResource("TextEditorLineNumberBrush") as Brush ?? Brushes.SlateGray;
+      var viewportBrush = viewportBorderBrush.Clone();
+      viewportBrush.Opacity = 0.14;
       double viewportTop = _viewportTop * ActualHeight;
       double viewportBottom = _viewportBottom * ActualHeight;
       drawingContext.DrawRectangle(
@@ -169,10 +179,12 @@ namespace Ask.UI.Controls.TextEditorControl
       foreach (var marker in _markers)
       {
         var brush = GetMarkerBrush(marker.Severity);
+        bool active = marker.Lines.Contains(_activeLine);
         drawingContext.DrawRoundedRectangle(
           brush,
-          null,
-          new Rect(1, marker.Top, Math.Max(1, ActualWidth - 2), MarkerHeight),
+          active ? new Pen(viewportBorderBrush, 2) : null,
+          new Rect(3, marker.Top, Math.Max(1, ActualWidth - 6),
+            active || ReferenceEquals(marker, _hoveredMarker) ? MarkerHeight + 2 : MarkerHeight),
           1,
           1);
       }
@@ -274,13 +286,12 @@ namespace Ask.UI.Controls.TextEditorControl
         return markers.ToList();
 
       var compacted = new List<OverviewMarker>();
-      int previousLineNumber = markers[0].LineNumber;
       compacted.Add(markers[0]);
 
       for (int i = 1; i < markers.Count; i++)
       {
         var marker = markers[i];
-        double previousTop = GetDesiredTop(previousLineNumber, lineCount, maxTop);
+        double previousTop = GetDesiredTop(compacted[^1].LineNumber, lineCount, maxTop);
         double currentTop = GetDesiredTop(marker.LineNumber, lineCount, maxTop);
 
         if (currentTop - previousTop <= MarkerHeight + MarkerGap)
@@ -292,7 +303,6 @@ namespace Ask.UI.Controls.TextEditorControl
           compacted.Add(marker);
         }
 
-        previousLineNumber = marker.LineNumber;
       }
 
       return compacted;
@@ -308,6 +318,7 @@ namespace Ask.UI.Controls.TextEditorControl
     private static void MergeMarkers(OverviewMarker target, OverviewMarker source)
     {
       target.Count += source.Count;
+      target.Lines.AddRange(source.Lines);
       if (source.Severity > target.Severity)
         target.Severity = source.Severity;
 
@@ -316,7 +327,7 @@ namespace Ask.UI.Controls.TextEditorControl
       {
         target.Message = string.IsNullOrWhiteSpace(target.Message)
           ? source.Message
-          : target.Message + Environment.NewLine + source.Message;
+          : target.Message.Length < 600 ? target.Message + Environment.NewLine + source.Message : target.Message;
       }
     }
 
@@ -385,6 +396,11 @@ namespace Ask.UI.Controls.TextEditorControl
     private void ErrorOverviewBar_MouseMove(object sender, MouseEventArgs e)
     {
       var marker = HitTestMarker(e.GetPosition(this));
+      if (!ReferenceEquals(_hoveredMarker, marker))
+      {
+        _hoveredMarker = marker;
+        InvalidateVisual();
+      }
       if (marker == null)
       {
         ResetToolTip();
@@ -392,27 +408,47 @@ namespace Ask.UI.Controls.TextEditorControl
         return;
       }
 
-      ToolTip = marker.ToolTip;
+      if (ToolTip is not TextBlock text || text.Text != marker.ToolTip)
+        ToolTip = new TextBlock { Text = marker.ToolTip, MaxWidth = 360, TextWrapping = TextWrapping.Wrap };
       Cursor = Cursors.Hand;
     }
 
     private void ErrorOverviewBar_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
     {
-      var marker = HitTestMarker(e.GetPosition(this));
+      NavigateAt(e.GetPosition(this).Y, (Keyboard.Modifiers & ModifierKeys.Shift) != 0);
+      e.Handled = true;
+    }
+
+    internal void NavigateAt(double y, bool previous)
+    {
+      var marker = HitTestMarker(new Point(0, y));
+      int lineCount = _editor?.Document?.LineCount ?? _lineCount;
+      if (lineCount <= 0) return;
+      int lineNumber;
       if (marker == null)
-        return;
+      {
+        lineNumber = 1 + (int)Math.Round(Math.Clamp(y /
+          Math.Max(1, ActualHeight - MarkerHeight), 0, 1) * (lineCount - 1));
+      }
+      else
+      {
+        int current = marker.Lines.IndexOf(_activeLine);
+        int next = current < 0 ? (previous ? marker.Lines.Count - 1 : 0)
+          : (current + (previous ? -1 : 1) + marker.Lines.Count) % marker.Lines.Count;
+        lineNumber = marker.Lines[next];
+      }
+      SetActiveLine(lineNumber);
 
       if (_editor != null)
       {
-        _editor.ScrollToLine(marker.LineNumber);
+        _editor.ScrollToLine(lineNumber);
         _editor.TextArea.Focus();
       }
       else
       {
-        _lineClickAction?.Invoke(marker.LineNumber);
+        _lineClickAction?.Invoke(lineNumber);
       }
 
-      e.Handled = true;
     }
 
     private void ResetToolTip()
@@ -425,7 +461,14 @@ namespace Ask.UI.Controls.TextEditorControl
 
     private void Editor_DocumentChanged(object? sender, EventArgs e) => RebuildMarkers();
 
-    private void TextView_Changed(object? sender, EventArgs e) => InvalidateVisual();
+    private void TextView_Changed(object? sender, EventArgs e)
+    {
+      if (_editor?.Document is not { } document) return;
+      var view = _editor.TextArea.TextView;
+      if (!view.VisualLinesValid || view.VisualLines.Count == 0) return;
+      SetViewport((double)(view.VisualLines[0].FirstDocumentLine.LineNumber - 1) / document.LineCount,
+        (double)view.VisualLines[^1].LastDocumentLine.LineNumber / document.LineCount);
+    }
 
     private void DetachEditor()
     {
@@ -444,11 +487,13 @@ namespace Ask.UI.Controls.TextEditorControl
       public OverviewMarker(int lineNumber, ErrorOverviewSeverity severity, string message)
       {
         LineNumber = lineNumber;
+        Lines.Add(lineNumber);
         Severity = severity;
         Message = message;
       }
 
       public int LineNumber { get; }
+      public List<int> Lines { get; } = new();
       public ErrorOverviewSeverity Severity { get; set; }
       public string Message { get; set; }
       public int Count { get; set; } = 1;
