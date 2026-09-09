@@ -3,11 +3,27 @@ using System.Threading;
 namespace Ask.Core.Services.UI;
 
 /// <summary>
-/// Содержит контекст выполнения обязательных завершающих операций оборудования.
+/// Содержит контекст самоконтроля и обязательных завершающих операций оборудования.
 /// </summary>
 public static class EquipmentExecutionContext
 {
   private static readonly AsyncLocal<int> MandatoryFinalizationDepth = new();
+  private static readonly AsyncLocal<int> SelfTestDepth = new();
+
+  /// <summary>
+  /// Самоконтроль использует независимое от тестера питание и подключение МКР.
+  /// </summary>
+  public static bool IsSelfTest => SelfTestDepth.Value > 0;
+
+  /// <summary>
+  /// Открывает область самоконтроля, включая подготовку и сброс оборудования.
+  /// Не отключает собственную симуляцию сбоя устройства.
+  /// </summary>
+  public static IDisposable EnterSelfTest()
+  {
+    SelfTestDepth.Value++;
+    return new ExecutionScope(SelfTestDepth);
+  }
 
   /// <summary>
   /// Признак выполнения обязательной завершающей операции.
@@ -21,10 +37,10 @@ public static class EquipmentExecutionContext
   public static IDisposable EnterMandatoryFinalization()
   {
     MandatoryFinalizationDepth.Value++;
-    return new MandatoryFinalizationScope();
+    return new ExecutionScope(MandatoryFinalizationDepth);
   }
 
-  private sealed class MandatoryFinalizationScope : IDisposable
+  private sealed class ExecutionScope(AsyncLocal<int> depth) : IDisposable
   {
     private bool _disposed;
 
@@ -36,7 +52,7 @@ public static class EquipmentExecutionContext
       }
 
       _disposed = true;
-      MandatoryFinalizationDepth.Value = Math.Max(0, MandatoryFinalizationDepth.Value - 1);
+      depth.Value = Math.Max(0, depth.Value - 1);
     }
   }
 }

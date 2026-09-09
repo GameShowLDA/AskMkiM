@@ -1,5 +1,6 @@
 ﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.UI;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
@@ -21,8 +22,8 @@ namespace Ask.Device.Emulator
   /// </summary>
   public static class DeviceProtocolEmulator
   {
-    private static readonly ConditionalWeakTable<IChassisManager, IDeviceProtocol> Chassis = new();
-    private static readonly ConditionalWeakTable<IRelaySwitchModule, IDeviceProtocol> RelaySwitchModules = new();
+    private static readonly ConditionalWeakTable<IChassisManager, ChassisProtocolEntry> Chassis = new();
+    private static readonly ConditionalWeakTable<IRelaySwitchModule, RelayProtocolEntry> RelaySwitchModules = new();
     private static readonly ConditionalWeakTable<ISwitchingDevice, IDeviceProtocol> SwitchingDevices = new();
 
     /// <summary>
@@ -98,13 +99,11 @@ namespace Ask.Device.Emulator
     public static IDeviceProtocol CreateModuleRelayControl(IRelaySwitchModule module)
     {
       ArgumentNullException.ThrowIfNull(module);
-      return RelaySwitchModules.GetValue(
+      return CreateModuleRelayControl(
         module,
-        device => CreateModuleRelayControl(
-          device,
-          () => device.DeviceProtocol,
-          () => device.Number,
-          () => device.NumberChassis));
+        () => module.DeviceProtocol,
+        () => module.Number,
+        () => module.NumberChassis);
     }
 
     /// <summary>
@@ -118,13 +117,47 @@ namespace Ask.Device.Emulator
     {
       ArgumentNullException.ThrowIfNull(module);
 
-      return new ModeSelectingDeviceProtocol(
-        realProtocolProvider,
-        new ModuleRelayControlEmulatorProtocol(
+      return RelaySwitchModules.GetValue(module, device =>
+      {
+        var emulator = new ModuleRelayControlEmulatorProtocol(
           moduleNumberProvider,
           chassisNumberProvider,
-          () => IdleHardwareErrorSimulator.ShouldSimulateHardwareError(module),
-          ExecutionConfig.GetIsErrorSimulationEnabled));
+          () => IdleHardwareErrorSimulator.ShouldSimulateHardwareError(device),
+          ExecutionConfig.GetIsErrorSimulationEnabled,
+          () => Random.Shared.Next(3),
+          () => EquipmentExecutionContext.IsSelfTest || IsRelayPowerAvailable(chassisNumberProvider()));
+        return new RelayProtocolEntry(
+          new ModeSelectingDeviceProtocol(realProtocolProvider, emulator), emulator);
+      }).Protocol;
+    }
+
+    /// <summary>
+    /// Связывает общий сброс эмулятора с состоянием точек и шин runtime-МКР.
+    /// </summary>
+    public static void RegisterRelayChassisReset(IRelaySwitchModule module, Action onReset)
+    {
+      ArgumentNullException.ThrowIfNull(onReset);
+      CreateModuleRelayControl(module);
+      if (RelaySwitchModules.TryGetValue(module, out var entry))
+      {
+        entry.Emulator.ChassisReset += onReset;
+      }
+    }
+
+    private static bool IsRelayPowerAvailable(int chassisNumber)
+    {
+      return !Chassis.Any(entry => entry.Key.Number == chassisNumber && !entry.Value.Emulator.PowerEnabled);
+    }
+
+    private static void ResetRelayModules(int chassisNumber)
+    {
+      foreach (var entry in RelaySwitchModules)
+      {
+        if (entry.Key.NumberChassis == chassisNumber && !EquipmentExecutionContext.IsSelfTest)
+        {
+          entry.Value.Emulator.ResetFromChassis();
+        }
+      }
     }
 
     /// <summary>
@@ -135,10 +168,17 @@ namespace Ask.Device.Emulator
       ArgumentNullException.ThrowIfNull(chassis);
       return Chassis.GetValue(
         chassis,
-        device => new ModeSelectingDeviceProtocol(
-          () => device.DeviceProtocol,
-          new ChassisEmulatorProtocol(
-            () => IdleHardwareErrorSimulator.ShouldSimulateHardwareError(device))));
+        device =>
+        {
+          var emulator = new ChassisEmulatorProtocol(
+            () => IdleHardwareErrorSimulator.ShouldSimulateHardwareError(device),
+            () => ResetRelayModules(device.Number));
+          return new ChassisProtocolEntry(
+            new ModeSelectingDeviceProtocol(() => device.DeviceProtocol, emulator), emulator);
+        }).Protocol;
     }
+
+    private sealed record ChassisProtocolEntry(IDeviceProtocol Protocol, ChassisEmulatorProtocol Emulator);
+    private sealed record RelayProtocolEntry(IDeviceProtocol Protocol, ModuleRelayControlEmulatorProtocol Emulator);
   }
 }

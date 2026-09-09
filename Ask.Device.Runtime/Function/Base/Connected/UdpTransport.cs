@@ -10,6 +10,7 @@ using Ask.Device.Runtime.Function.ModuleRelayControl;
 using Ask.Device.ResponseProcessor.ModuleRelayControl.ResponseProcessing;
 using Ask.Device.ResponseProcessor.DeviceBusCommutation.ResponseProcessing;
 using Ask.Device.Runtime.Function.DeviceBusCommutation;
+using Ask.Device.Emulator;
 
 namespace Ask.Device.Runtime.Function.Connected
 {
@@ -35,6 +36,10 @@ namespace Ask.Device.Runtime.Function.Connected
     public UdpTransport(DeviceWithUdpIp device)
     {
       _device = device ?? throw new ArgumentNullException(nameof(device));
+      if (device is IRelaySwitchModule module)
+      {
+        DeviceProtocolEmulator.RegisterRelayChassisReset(module, () => IsReset?.Invoke());
+      }
     }
 
     /// <inheritdoc />
@@ -79,14 +84,17 @@ namespace Ask.Device.Runtime.Function.Connected
     {
       if (string.IsNullOrEmpty(response))
       {
-        IsReset?.Invoke();
+        if (!ExecutionConfig.GetIsIdleModeEnabled() || _device is not IRelaySwitchModule)
+        {
+          IsReset?.Invoke();
+        }
         return (false, $"Нет ответа от устройства {_device.Name}({_device.Number})");
       }
 
       if (_device is IRelaySwitchModule module)
       {
         bool success = ModuleRelayControlResponseProcessor.CheckInitialization(response, module);
-        if (!success)
+        if (!success && !ExecutionConfig.GetIsIdleModeEnabled())
         {
           IsReset?.Invoke();
         }
@@ -177,7 +185,10 @@ namespace Ask.Device.Runtime.Function.Connected
         ISwitchingDevice switchingDevice => DeviceBusCommutationResponseProcessor.CheckReset(response, switchingDevice),
         _ => _device.ResetValidationDelegate(response, _device)
       };
-      IsReset?.Invoke();
+      if (resetResult || !ExecutionConfig.GetIsIdleModeEnabled() || _device is not IRelaySwitchModule)
+      {
+        IsReset?.Invoke();
+      }
 
       return resetResult;
     }

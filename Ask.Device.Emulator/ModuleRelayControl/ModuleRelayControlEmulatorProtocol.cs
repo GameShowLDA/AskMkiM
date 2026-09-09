@@ -14,6 +14,7 @@ namespace Ask.Device.Emulator.ModuleRelayControl
     private readonly Func<bool> _hardwareErrorProvider;
     private readonly Func<bool> _measurementErrorProvider;
     private readonly Func<int> _externalBusFailedStageProvider;
+    private readonly Func<bool> _powerAvailableProvider;
     private bool _notDefaultState;
     private bool _meterEnabled;
 
@@ -44,7 +45,8 @@ namespace Ask.Device.Emulator.ModuleRelayControl
       Func<int> chassisNumberProvider,
       Func<bool> hardwareErrorProvider,
       Func<bool> measurementErrorProvider,
-      Func<int> externalBusFailedStageProvider)
+      Func<int> externalBusFailedStageProvider,
+      Func<bool>? powerAvailableProvider = null)
     {
       _moduleNumberProvider = moduleNumberProvider
         ?? throw new ArgumentNullException(nameof(moduleNumberProvider));
@@ -56,6 +58,24 @@ namespace Ask.Device.Emulator.ModuleRelayControl
         ?? throw new ArgumentNullException(nameof(measurementErrorProvider));
       _externalBusFailedStageProvider = externalBusFailedStageProvider
         ?? throw new ArgumentNullException(nameof(externalBusFailedStageProvider));
+      _powerAvailableProvider = powerAvailableProvider ?? (() => true);
+    }
+
+    /// <summary>
+    /// Уведомляет runtime о выполненном общем сбросе, без адресной команды МКР.
+    /// </summary>
+    internal event Action? ChassisReset;
+
+    internal void ResetFromChassis()
+    {
+      ResetState();
+      ChassisReset?.Invoke();
+    }
+
+    private void ResetState()
+    {
+      _notDefaultState = false;
+      _meterEnabled = false;
     }
 
     /// <inheritdoc />
@@ -75,7 +95,7 @@ namespace Ask.Device.Emulator.ModuleRelayControl
         await Task.Delay(TimeSpan.FromMilliseconds(delayBeforeCall), cancellationToken);
       }
 
-      if (!TryParse(command, out int[] parts))
+      if (!_powerAvailableProvider() || !TryParse(command, out int[] parts))
       {
         return string.Empty;
       }
@@ -99,8 +119,7 @@ namespace Ask.Device.Emulator.ModuleRelayControl
           return Envelope(new { NotDefaultState = _notDefaultState });
 
         case 2 when parts.Length >= 2:
-          _notDefaultState = false;
-          _meterEnabled = false;
+          ResetState();
           return Envelope(new { Answer = "2.0.1", NotDefaultState = false });
 
         case 4 when IsCommand(parts, 4) && parts[1] is >= 1 and <= 3

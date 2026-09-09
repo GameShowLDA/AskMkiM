@@ -39,6 +39,7 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
     /// <inheritdoc />
     public async Task StartSelfCheck(CancellationToken cancellationToken, System.Enum typeConnector, ActionSettings settings, IUserInteractionService? userMessageService = null, ISwitchingDevice device = null)
     {
+      using var selfTest = EquipmentExecutionContext.EnterSelfTest();
       settings.DeviceResults.Add(new DeviceExecutionResult(_moduleRelay.Name, _moduleRelay.NumberChassis, _moduleRelay.Number));
       await ModuleRelayControlResponseProcessor.PublishSelfTestTitleAsync(_moduleRelay, userMessageService);
 

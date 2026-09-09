@@ -4,6 +4,7 @@ using Ask.Core.Services.Devices;
 using Ask.Core.Services.Errors.Models;
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
+using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Exceptions;
@@ -297,6 +298,9 @@ namespace Ask.UI.Features.ProtocolNew.Execution
     /// <returns>Задача, представляющая асинхронную операцию завершения.</returns>
     internal async Task FinalizeAsync(ActionSettings actionSettings)
     {
+      using var selfTest = actionSettings.CheckType == CheckType.SelfTest
+        ? EquipmentExecutionContext.EnterSelfTest()
+        : null;
       if (isExit)
       {
         return;
@@ -744,6 +748,9 @@ namespace Ask.UI.Features.ProtocolNew.Execution
     /// <returns>Задача, представляющая асинхронную операцию выполнения.</returns>
     private async Task ExecuteTaskAsync(ActionSettings actionSettings)
     {
+      using var selfTest = actionSettings.CheckType == CheckType.SelfTest
+        ? EquipmentExecutionContext.EnterSelfTest()
+        : null;
       isExit = false;
 
       var session = _session

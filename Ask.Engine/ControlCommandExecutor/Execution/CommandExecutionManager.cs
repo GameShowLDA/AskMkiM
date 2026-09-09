@@ -343,13 +343,12 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
 
           continue;
         }
-        //catch (OperationCanceledException)
-        //{
-        //  _protocolModel.CompletionStatus =
-        //      ExecutionCompletionStatus.Interrupted;
-        //}
         catch (Exception ex)
         {
+          if (ex is OperationCanceledException)
+          {
+            _protocolModel.CompletionStatus = ExecutionCompletionStatus.Interrupted;
+          }
           FlushAttemptErrors();
           await _console.CompleteCommandAsync(true);
           await ExecuteKscOnExceptionAsync(command, ex);

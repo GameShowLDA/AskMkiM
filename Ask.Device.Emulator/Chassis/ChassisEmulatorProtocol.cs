@@ -9,13 +9,18 @@ namespace Ask.Device.Emulator.Chassis
   internal sealed class ChassisEmulatorProtocol : IDeviceProtocol
   {
     private readonly Func<bool> _hardwareErrorProvider;
-    private bool _powerEnabled;
+    private readonly Action? _resetModules;
+    // Питание появляется только после успешной команды включения.
+    private volatile bool _powerEnabled;
 
-    internal ChassisEmulatorProtocol(Func<bool> hardwareErrorProvider)
+    internal ChassisEmulatorProtocol(Func<bool> hardwareErrorProvider, Action? resetModules = null)
     {
       _hardwareErrorProvider = hardwareErrorProvider
         ?? throw new ArgumentNullException(nameof(hardwareErrorProvider));
+      _resetModules = resetModules;
     }
+
+    internal bool PowerEnabled => _powerEnabled;
 
     public SemaphoreSlim OperationLock { get; set; } = new(1, 1);
 
@@ -44,7 +49,10 @@ namespace Ask.Device.Emulator.Chassis
 
       if (parts.SequenceEqual(new[] { 2, 1, 0, 0 }))
       {
-        _powerEnabled = false;
+        if (_powerEnabled)
+        {
+          _resetModules?.Invoke();
+        }
         return "2.0.1";
       }
 
@@ -57,6 +65,7 @@ namespace Ask.Device.Emulator.Chassis
       if (parts.SequenceEqual(new[] { 2, 2, 1, 0 }))
       {
         _powerEnabled = false;
+        _resetModules?.Invoke();
         return "1";
       }
 

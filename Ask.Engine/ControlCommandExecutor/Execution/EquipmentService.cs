@@ -1,5 +1,8 @@
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Services.Devices;
+using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Errors.Device;
+using Ask.Core.Services.UI;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
@@ -92,7 +95,7 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
     }
 
     /// <summary>
-    /// Проверяет наличие менеджеров шасси, указанных в точках.
+    /// Проверяет наличие шасси и подготавливает их питание и общий сброс в холостом режиме.
     /// </summary>
     /// <param name="points">Список точек подключения.</param>
     /// <param name="messageService">Сервис отображения сообщений пользователю.</param>
@@ -105,7 +108,8 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
 
       foreach (var chassisNumber in allNumbers)
       {
-        if (await ChassisManagers.GetByNumberAsync(chassisNumber) == null)
+        var chassis = await ChassisManagers.GetByNumberAsync(chassisNumber);
+        if (chassis == null)
         {
           await ValidationMessages.PublishEquipmentConfigurationErrorAsync(
             $"Менеджер шасси {chassisNumber}",
@@ -115,6 +119,28 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
         }
         else
         {
+          // Обычный Idle-запуск пропускает реальное управление питанием.
+          // Выполняем команды тестера через его эмулятор до обращения к МКР:
+          // одного наличия записи шасси в конфигурации недостаточно.
+          if (ExecutionConfig.GetIsIdleModeEnabled() && !EquipmentExecutionContext.IsSelfTest)
+          {
+            try
+            {
+              // Подготовка эмулятора не добавляет строки в протокол.
+              await chassis.PowerManager.StartPowerAsync();
+              if (!await chassis.ConnectableManager.ResetAsync())
+              {
+                throw new OperationCanceledException(messageService.GetCancellationToken());
+              }
+            }
+            catch (DeviceException ex)
+            {
+              // Штатное прерывание сохраняет КЦ и финализацию, но не выводит
+              // сообщения об аварийном завершении и системной ошибке.
+              throw new OperationCanceledException(null, ex, messageService.GetCancellationToken());
+            }
+          }
+
           validNumbers.Add(chassisNumber);
         }
       }
