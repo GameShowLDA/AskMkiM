@@ -112,7 +112,13 @@ namespace Ask.UI.Controls.TextEditorControl
     {
       _linePositions = positions;
       _positionClickAction = positionClickAction;
-      RebuildMarkers();
+      double maxTop = Math.Max(0, ActualHeight - MarkerHeight);
+      foreach (var marker in _markers)
+      {
+        if (_linePositions.TryGetValue(marker.LineNumber, out double position))
+          marker.Top = Math.Clamp(position, 0, 1) * maxTop;
+      }
+      InvalidateVisual();
     }
 
     public void SetIssues(IEnumerable<IDisplayIssue>? issues, bool useFormattedLineNumber = false)
@@ -237,8 +243,6 @@ namespace Ask.UI.Controls.TextEditorControl
 
         if (lineNumber <= 0 || lineNumber > lineCount)
           continue;
-        if (_linePositions != null && !_linePositions.ContainsKey(lineNumber)) continue;
-
         AddMarker(
           markersByLine,
           lineNumber,

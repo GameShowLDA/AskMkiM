@@ -115,7 +115,7 @@ namespace Ask.UI.Components.ProtocolListBox
       DisplayItems.CollectionChanged += (_, _) =>
       {
         _visibleIndicesDirty = true;
-        RequestOverviewUpdate(diagnosticsChanged: false);
+        RequestOverviewUpdate(diagnosticsChanged: true);
       };
       PreviewKeyDown += ProtocolListBoxUI_PreviewKeyDown;
       Loaded += ProtocolListBoxUI_Loaded;
@@ -131,6 +131,9 @@ namespace Ask.UI.Components.ProtocolListBox
         _protocolScrollViewerSubscribed = true;
       }
       RefreshErrorOverviewViewport();
+      Dispatcher.BeginInvoke(
+        () => RefreshOverviewPositions(_protocolScrollViewer?.ExtentHeight ?? 0),
+        DispatcherPriority.ContextIdle);
 
       if (!_themeSubscribed)
       {
@@ -319,24 +322,6 @@ namespace Ask.UI.Components.ProtocolListBox
       errorOverviewBar.SetViewport(_protocolScrollViewer.VerticalOffset / extent,
         (_protocolScrollViewer.VerticalOffset + _protocolScrollViewer.ViewportHeight) / extent);
 
-      var scrollBar = _protocolScrollViewer.Template.FindName("PART_VerticalScrollBar", _protocolScrollViewer) as ScrollBar;
-      var track = scrollBar?.Template.FindName("PART_Track", scrollBar) as Track;
-      if (track is { ActualHeight: > 0, Thumb: not null } && scrollBar!.Visibility == Visibility.Visible)
-      {
-        double top = Math.Max(0, track.TranslatePoint(new Point(), OverviewTrackHost).Y);
-        var margin = new Thickness(10, top, 10,
-          Math.Max(0, OverviewTrackHost.ActualHeight - top - track.ActualHeight));
-        if (errorOverviewBar.Margin != margin)
-        {
-          errorOverviewBar.Margin = margin;
-          RequestOverviewUpdate(diagnosticsChanged: false);
-        }
-        double thumbTop = track.Thumb.TranslatePoint(new Point(), track).Y;
-        errorOverviewBar.SetViewport(thumbTop / track.ActualHeight,
-          (thumbTop + track.Thumb.ActualHeight) / track.ActualHeight);
-      }
-
-      RefreshOverviewPositions(extent);
     }
 
     private void RefreshOverviewPositions(double extent)
@@ -951,6 +936,7 @@ namespace Ask.UI.Components.ProtocolListBox
           _overviewDiagnosticsDirty = false;
           errorOverviewBar.SetLineDiagnostics(_historyMessages.Count,
             _overviewDiagnostics, NavigateToErrorOverviewLine);
+          RefreshOverviewPositions(_protocolScrollViewer?.ExtentHeight ?? 0);
         }
         UpdateOverviewSelection();
         RefreshErrorOverviewViewport();
