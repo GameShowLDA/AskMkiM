@@ -12,9 +12,9 @@ using Ask.Core.Shared.Metadata.Enums.UnitEnums;
 using Ask.Engine.Tests.MethodExecutor.MeasurementSystem;
 using static Ask.Engine.Tests.Base.UIValidationHelper;
 
-namespace Ask.Engine.Tests.MethodExecutor.CI
+namespace Ask.Engine.Tests.MethodExecutor.Si
 {
-  public class CiGroupMethodExecutor
+  public class SiGroupMethodExecutor
   {
     /// <summary>
     /// Инициализирует все необходимые настройки для компонента.
@@ -79,6 +79,7 @@ namespace Ask.Engine.Tests.MethodExecutor.CI
         await breakDown.IrManger.Mode.SetModeAsync(messageService);
         await breakDown.IrManger.Voltage.SetVoltageAsync(dataModel.Voltage, messageService);
         await breakDown.IrManger.Time.SetTestTimeAsync(dataModel.Time, messageService);
+        breakDown.Time.SetTargetTime(dataModel.Time);
       }
 
       /// <inheritdoc />

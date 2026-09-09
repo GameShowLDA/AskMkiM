@@ -11,9 +11,9 @@ using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Enums.UnitEnums;
 using static Ask.Engine.Tests.Base.UIValidationHelper;
 
-namespace Ask.Engine.Tests.NodeMethod.CI
+namespace Ask.Engine.Tests.NodeMethod.Si
 {
-  public class CiNodeMethodExecutor
+  public class SiNodeMethodExecutor
   {
     /// <summary>
     /// Инициализирует все необходимые настройки для компонента.
@@ -39,7 +39,7 @@ namespace Ask.Engine.Tests.NodeMethod.CI
     private async Task ExecuteMeasurementProcess(ActionSettings settings, IUserInteractionService _messageService, IInputFieldProvider inputFieldProvider, IInputHighlightService inputHighlightService, CancellationToken cancellationToken)
     {
       var data = await EnsureValidMetrologyInputAsync(inputFieldProvider, _messageService, metrologyMode: MeasurementTypeCommand.SI, timeCheck: true, voltageCheck: true);
-      CiNodeMethod testMeasurement = new CiNodeMethod();
+      SiNodeMethod testMeasurement = new SiNodeMethod();
       try
       {
         var connect = await testMeasurement.ConnectToEquipment(data.FirstPoint, data.SecondPoint, _messageService);
@@ -59,9 +59,9 @@ namespace Ask.Engine.Tests.NodeMethod.CI
       }
     }
 
-    private class CiNodeMethod : BaseNodeTest
+    private class SiNodeMethod : BaseNodeTest
     {
-      public CiNodeMethod() : base() { }
+      public SiNodeMethod() : base() { }
 
       /// <inheritdoc />
       public override async Task ConfigureMeter(IUserInteractionService messageService, DataModel dataModel = null)
@@ -75,6 +75,7 @@ namespace Ask.Engine.Tests.NodeMethod.CI
         await breakDown.IrManger.Mode.SetModeAsync(messageService);
         await breakDown.IrManger.Voltage.SetVoltageAsync(dataModel.Voltage, messageService);
         await breakDown.IrManger.Time.SetTestTimeAsync(dataModel.Time, messageService);
+        breakDown.Time.SetTargetTime(dataModel.Time);
       }
 
       /// <inheritdoc />

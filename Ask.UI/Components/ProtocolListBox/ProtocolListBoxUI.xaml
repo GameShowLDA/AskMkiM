@@ -5,11 +5,38 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:Ask.UI.Components.ProtocolListBox"
              xmlns:conv="clr-namespace:Ask.UI.Shared.Converters.Math"
+             xmlns:overview="clr-namespace:Ask.UI.Controls.TextEditorControl"
              mc:Ignorable="d"
              d:DesignHeight="450"
              d:DesignWidth="800">
 
     <UserControl.Resources>
+        <Style x:Key="OverviewNavigationButton" TargetType="Button">
+            <Setter Property="Height" Value="28"/>
+            <Setter Property="Margin" Value="3,2"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextEditorLineNumberBrush}"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Surface" Background="{TemplateBinding Background}" CornerRadius="6">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Surface" Property="Background" Value="{DynamicResource ScrollBarTrackBackground}"/>
+                            </Trigger>
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter TargetName="Surface" Property="BorderBrush" Value="{DynamicResource TextEditorLineNumberBrush}"/>
+                                <Setter TargetName="Surface" Property="BorderThickness" Value="1"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False"><Setter Property="Opacity" Value="0.3"/></Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
         <conv:MultiplyConverter x:Key="MultiplyConverter"/>
         <local:ColorToBrushConverter x:Key="ColorToBrushConverter"/>
         <local:IndentToMarginConverter x:Key="IndentToMarginConverter"/>
@@ -343,7 +370,17 @@
     </UserControl.Resources>
 
     <Grid>
-        <Border CornerRadius="20,20,0,0"
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto" MinWidth="52"/>
+        </Grid.ColumnDefinitions>
+
+        <Border Grid.Row="1" Grid.Column="0"
+                CornerRadius="20,20,0,0"
                 Background="{DynamicResource TestsProtocolBackgroundBrush}">
             <ListBox x:Name="ProtocolListBox"
                      Background="Transparent"
@@ -427,6 +464,12 @@
                     </Style>
                 </ListBox.ItemContainerStyle>
             </ListBox>
+        </Border>
+
+        <Border x:Name="OverviewTrackHost" Grid.Row="1" Grid.Column="1" Margin="4,0,2,0" CornerRadius="8"
+                Background="{DynamicResource TestsProtocolBackgroundBrush}">
+                <overview:ErrorOverviewBar x:Name="errorOverviewBar" Margin="10,4,10,6"
+                                          AutomationProperties.Name="Карта команд и ошибок протокола"/>
         </Border>
     </Grid>
 </UserControl>
