@@ -41,6 +41,7 @@ namespace Ask.UI.Components.ProtocolListBox
     private ProtocolCommandGroup? _currentGroup;
     private ProtocolCommandGroup? _pendingGroup;
     private int _errorOverviewIndex = -1;
+    private ProtocolDisplayItem? _lastMessageItem;
     private bool _scrollToEndRequested;
     private bool _settingsSubscribed;
     private bool _themeSubscribed;
@@ -606,6 +607,12 @@ namespace Ask.UI.Components.ProtocolListBox
 
     private void AppendVisibleMessage(ShowMessageModel model)
     {
+      if (IsStandaloneServiceLog(model) && _lastMessageItem != null)
+      {
+        _lastMessageItem.AddServiceLog(model.Debug!);
+        return;
+      }
+
       if (model.Status == ShowMessageModel.MessageType.Command)
       {
         StartCommandGroup(model);
@@ -620,6 +627,7 @@ namespace Ask.UI.Components.ProtocolListBox
       EnsureCurrentGroupStarted();
 
       var lineItem = ProtocolDisplayItem.CreateLine(model, isInsideCommandGroup: _currentGroup != null);
+      _lastMessageItem = lineItem;
 
       if (_currentGroup != null)
       {
@@ -649,6 +657,7 @@ namespace Ask.UI.Components.ProtocolListBox
       }
 
       var group = new ProtocolCommandGroup(model);
+      _lastMessageItem = group.HeaderItem;
       _pendingGroup = group;
 
       DisplayItems.Add(group.HeaderItem);
@@ -761,11 +770,25 @@ namespace Ask.UI.Components.ProtocolListBox
       e.Handled = true;
     }
 
+    private void ServiceLogsToggleButton_Click(object sender, RoutedEventArgs e)
+    {
+      if (sender is ToggleButton { DataContext: ProtocolDisplayItem item })
+        item.AreServiceLogsExpanded = !item.AreServiceLogsExpanded;
+
+      e.Handled = true;
+    }
+
+    private static bool IsStandaloneServiceLog(ShowMessageModel message)
+      => string.IsNullOrWhiteSpace(message.Header) &&
+         string.IsNullOrWhiteSpace(message.Message) &&
+         message.Debug?.TrimStart().StartsWith("[ЛОГ ROOT]", StringComparison.Ordinal) == true;
+
     private void RestoreVisibleItems()
     {
       DisplayItems.Clear();
       _currentGroup = null;
       _pendingGroup = null;
+      _lastMessageItem = null;
       for (int i = 0; i < _historyMessages.Count; i++)
       {
         AppendVisibleMessage(_historyMessages[i]);
