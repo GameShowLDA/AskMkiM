@@ -79,6 +79,7 @@ namespace Ask.Engine.Tests.MethodExecutor.CI
         await breakDown.IrManger.Mode.SetModeAsync(messageService);
         await breakDown.IrManger.Voltage.SetVoltageAsync(dataModel.Voltage, messageService);
         await breakDown.IrManger.Time.SetTestTimeAsync(dataModel.Time, messageService);
+        breakDown.Time.SetTargetTime(dataModel.Time);
       }
 
       /// <inheritdoc />
