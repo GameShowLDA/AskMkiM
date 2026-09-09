@@ -327,7 +327,6 @@ public sealed class DeviceResetServiceTests
       .Setup(x => x.DisconnectingAllPoint(It.IsAny<IUserInteractionService?>()))
       .Callback(() => callOrder.Add("disconnect-all"))
       .ReturnsAsync(disconnectAllResult);
-
     var device = new Mock<IRelaySwitchModule>();
     device.SetupProperty(x => x.Number, number);
     device.SetupProperty(x => x.NumberChassis, 1);

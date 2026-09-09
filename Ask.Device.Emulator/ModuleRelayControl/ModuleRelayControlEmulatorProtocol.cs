@@ -115,7 +115,7 @@ namespace Ask.Device.Emulator.ModuleRelayControl
           && parts[2] is >= 1 and <= 3 && parts[3] is 1 or 2:
         case 9 when Matches(parts, 3) && parts[1] is >= 1 and <= 3 && parts[2] is 1 or 2:
         case 11 when IsCommand(parts, 4) && parts[1] > 0
-          && parts[2] >= parts[1] && parts[3] is 11 or 12 or 21 or 22:
+          && parts[2] >= parts[1] && parts[3] is 11 or 12 or 21 or 22 or 31 or 32:
         case 81 when (IsCommand(parts, 3) || (IsCommand(parts, 4) && parts[3] == 0))
           && parts[1] > 0 && parts[2] is 1 or 2:
           _notDefaultState = true;
