@@ -122,6 +122,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       NodeFullContext nodeFullContext = new NodeFullContext(context, command, command, command.Resistance.Value + 1, command.Resistance.Value, -1);
       nodeFullContext.IsInvokedByAnotherCommand = context.IsInvokedByAnotherCommand;
 
+      firstValue = command.Resistance.Value;
       MethodExecutionContext methodExecutionContext = nodeFullContext.CreateChild<MethodExecutionContext>();
       NodeAccumulationContext nodeAccumulationContext = nodeFullContext.CreateChild<NodeAccumulationContext>();
       PairwiseFirstPointContext pairwiseFirstPointContext = nodeFullContext.CreateChild<PairwiseFirstPointContext>();
@@ -129,7 +130,6 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       methodExecutionContext.PerformMeasurementAsync = NodeFullPerformMeasurementAsync;
       pairwiseFirstPointContext.PerformMeasurementAsync = NodeAccumulationPerformMeasurementAsync;
       nodeAccumulationContext.PerformMeasurementAsync = NodeAccumulationPerformMeasurementAsync;
-      firstValue = command.Resistance.Value;
 
       DisconnectionCheckRequest disconnectionCheckRequest = new DisconnectionCheckRequest()
       {
