@@ -1254,6 +1254,12 @@ executor/strategy
     → existing Retry / Continue / Abort equipment flow
 ```
 
+Сброс всех точек МКР использует пакетную команду
+`11.1.<PointCount>.32` через `PointManager.DisconnectingAllPoint`;
+Idle-эмулятор должен возвращать подтверждение для действий диапазона `31/32`,
+иначе `ModuleRelayControlQueryExecutor` получает пустой ответ и считает операцию
+неуспешной.
+
 `Ask.Device.ResponseProcessor.ModuleRelayControl.ResponseProcessing.ModuleRelayControlResponseProcessor`
 предоставляет новые проверки ответов подключения/отключения одной точки. Методы
 `CheckPointConnectionAsync`, `CheckPointDisconnectionAsync`,

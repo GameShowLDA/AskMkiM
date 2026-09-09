@@ -1,6 +1,7 @@
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using System.Windows.Media;
@@ -131,17 +132,17 @@ public static class DeviceResetService
     IUserInteractionService? messageService)
   {
     // TODO : Включить если не пойдёт сброс МКР
-    //if (device is IRelaySwitchModule relayModule)
-    //{
-    //  bool disconnected = await relayModule.PointManager.DisconnectingAllPoint(messageService);
-    //  if (!disconnected)
-    //  {
-    //    LogError(
-    //      $"{GetDeviceLabel(device)}: не удалось физически отключить все точки МКР перед адресным сбросом.",
-    //      isDeviceLog: true);
-    //    return false;
-    //  }
-    //}
+    if (device is IRelaySwitchModule relayModule)
+    {
+      bool disconnected = await relayModule.PointManager.DisconnectingAllPoint(messageService);
+      if (!disconnected)
+      {
+        LogError(
+          $"{GetDeviceLabel(device)}: не удалось физически отключить все точки МКР перед адресным сбросом.",
+          isDeviceLog: true);
+        return false;
+      }
+    }
 
     return await device.ConnectableManager.ResetAsync();
   }

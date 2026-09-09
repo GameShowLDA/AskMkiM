@@ -34,6 +34,7 @@ public sealed class ModuleRelayControlEmulatorProtocolTests
   [Theory(DisplayName = "МКР: поддерживаемая команда возвращает подтверждение с исходными параметрами")]
   [InlineData("4.1.2.1", "4.1.2.1")]
   [InlineData("8.10.2.1", "8.10.2.1")]
+  [InlineData("11.1.350.32", "11.1.350.32")]
   [InlineData("9.3.1.0", "9.3.1")]
   [InlineData("81.7.2.0", "81.7.2.0")]
   public async Task SupportedCommand_ReturnsAnswer(string command, string expectedAnswer)
