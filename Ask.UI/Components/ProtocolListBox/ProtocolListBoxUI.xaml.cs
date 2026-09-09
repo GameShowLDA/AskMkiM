@@ -112,6 +112,7 @@ namespace Ask.UI.Components.ProtocolListBox
     public ProtocolListBoxUI()
     {
       InitializeComponent();
+      errorOverviewBar.SetPositionPreviewFactory(GetOverviewPreview);
       DisplayItems.CollectionChanged += (_, _) =>
       {
         _visibleIndicesDirty = true;
@@ -953,6 +954,41 @@ namespace Ask.UI.Components.ProtocolListBox
 
     private void PreviousErrorButton_Click(object sender, RoutedEventArgs e) => NavigateToOverviewError(true);
     private void NextErrorButton_Click(object sender, RoutedEventArgs e) => NavigateToOverviewError(false);
+
+    internal string? GetOverviewPreview(double fraction)
+    {
+      if (_historyMessages.Count == 0) return null;
+
+      var relevant = Enumerable.Range(0, _historyMessages.Count)
+        .Where(index => GetOverviewSeverity(_historyMessages[index]) != null)
+        .ToArray();
+      if (relevant.Length == 0) return null;
+
+      int target = (int)Math.Round(Math.Clamp(fraction, 0, 1) * (_historyMessages.Count - 1));
+      int centerPosition = Array.BinarySearch(relevant, target);
+      if (centerPosition < 0) centerPosition = ~centerPosition;
+      centerPosition = Math.Clamp(centerPosition, 0, relevant.Length - 1);
+      if (centerPosition > 0 &&
+          (centerPosition == relevant.Length - 1 ||
+           target - relevant[centerPosition - 1] <= relevant[centerPosition] - target))
+      {
+        centerPosition--;
+      }
+
+      int startPosition = Math.Max(0, centerPosition - 1);
+      int endPosition = Math.Min(relevant.Length - 1, centerPosition + 1);
+      int centerLine = relevant[centerPosition] + 1;
+      var lines = new List<string> { $"Команды и ошибки · строка {centerLine}" };
+      for (int position = startPosition; position <= endPosition; position++)
+      {
+        int index = relevant[position];
+        string line = ExecutionProtocolLineFormatter.Format(_historyMessages[index]);
+        line = line.Replace("\r", " ").Replace("\n", " ").Trim();
+        if (line.Length > 180) line = line[..177] + "...";
+        lines.Add($"{(position == centerPosition ? "▸" : " ")} {index + 1,5}: {line}");
+      }
+      return string.Join(Environment.NewLine, lines);
+    }
 
     internal void NavigateToErrorOverviewLine(int lineNumber)
     {

@@ -3,6 +3,7 @@ using ICSharpCode.AvalonEdit;
 using ICSharpCode.AvalonEdit.Document;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
 
@@ -34,16 +35,74 @@ namespace Ask.UI.Controls.TextEditorControl
     private OverviewMarker? _hoveredMarker;
     private IReadOnlyDictionary<int, double>? _linePositions;
     private Action<double>? _positionClickAction;
+    private Func<double, string?>? _positionPreviewFactory;
+    private double _lastPreviewFraction = -1;
+    private readonly Popup _previewPopup;
+    private readonly TextBlock _previewText;
+    private readonly Border _previewBorder;
 
     public ErrorOverviewBar()
     {
       SnapsToDevicePixels = true;
       UseLayoutRounding = true;
       Cursor = Cursors.Arrow;
+      ToolTipService.SetPlacement(this, PlacementMode.Left);
+      ToolTipService.SetInitialShowDelay(this, 120);
+      ToolTipService.SetBetweenShowDelay(this, 80);
+
+      _previewText = new TextBlock
+      {
+        FontFamily = new FontFamily("Consolas"),
+        FontSize = 12.5,
+        LineHeight = 16,
+        TextWrapping = TextWrapping.NoWrap,
+        Foreground = Brushes.WhiteSmoke,
+      };
+      var previewLayout = new Grid();
+      previewLayout.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(3) });
+      previewLayout.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+      var previewAccent = new Border
+      {
+        Background = new SolidColorBrush(Color.FromRgb(41, 146, 255)),
+        CornerRadius = new CornerRadius(2),
+        Margin = new Thickness(0, 1, 9, 1),
+      };
+      Grid.SetColumn(previewAccent, 0);
+      Grid.SetColumn(_previewText, 1);
+      previewLayout.Children.Add(previewAccent);
+      previewLayout.Children.Add(_previewText);
+      _previewBorder = new Border
+      {
+        Child = previewLayout,
+        Width = 680,
+        Padding = new Thickness(11, 8, 12, 8),
+        CornerRadius = new CornerRadius(6),
+        BorderThickness = new Thickness(1),
+        Background = new SolidColorBrush(Color.FromArgb(245, 28, 34, 43)),
+        BorderBrush = new SolidColorBrush(Color.FromArgb(255, 72, 91, 113)),
+        Effect = new System.Windows.Media.Effects.DropShadowEffect
+        {
+          Color = Colors.Black,
+          BlurRadius = 14,
+          ShadowDepth = 3,
+          Opacity = 0.45,
+        },
+      };
+      _previewPopup = new Popup
+      {
+        PlacementTarget = this,
+        Placement = PlacementMode.RelativePoint,
+        AllowsTransparency = true,
+        // Закрываем предпросмотр сами при уходе мыши с полосы. Это не даёт
+        // Popup немедленно закрыться, пока указатель находится над полосой,
+        // но ещё не над содержимым подсказки.
+        StaysOpen = true,
+        Child = _previewBorder,
+      };
 
       SizeChanged += (_, _) => RebuildMarkers();
       MouseMove += ErrorOverviewBar_MouseMove;
-      MouseLeave += (_, _) => { _hoveredMarker = null; ResetToolTip(); InvalidateVisual(); };
+      MouseLeave += (_, _) => { _hoveredMarker = null; _lastPreviewFraction = -1; _previewPopup.IsOpen = false; ResetToolTip(); InvalidateVisual(); };
       MouseLeftButtonUp += ErrorOverviewBar_MouseLeftButtonUp;
     }
 
@@ -119,6 +178,11 @@ namespace Ask.UI.Controls.TextEditorControl
           marker.Top = Math.Clamp(position, 0, 1) * maxTop;
       }
       InvalidateVisual();
+    }
+
+    internal void SetPositionPreviewFactory(Func<double, string?>? previewFactory)
+    {
+      _positionPreviewFactory = previewFactory;
     }
 
     public void SetIssues(IEnumerable<IDisplayIssue>? issues, bool useFormattedLineNumber = false)
@@ -417,16 +481,37 @@ namespace Ask.UI.Controls.TextEditorControl
         _hoveredMarker = marker;
         InvalidateVisual();
       }
-      if (marker == null)
+
+      Point pointer = e.GetPosition(this);
+      double fraction = Math.Clamp(pointer.Y / Math.Max(1, ActualHeight), 0, 1);
+      string? preview = _positionPreviewFactory?.Invoke(fraction);
+      if (marker != null)
       {
-        ResetToolTip();
-        Cursor = Cursors.Arrow;
-        return;
+        preview = string.IsNullOrWhiteSpace(preview)
+          ? marker.ToolTip
+          : marker.ToolTip + Environment.NewLine + Environment.NewLine + preview;
       }
 
-      if (ToolTip is not TextBlock text || text.Text != marker.ToolTip)
-        ToolTip = new TextBlock { Text = marker.ToolTip, MaxWidth = 360, TextWrapping = TextWrapping.Wrap };
-      Cursor = Cursors.Hand;
+      if (!string.IsNullOrWhiteSpace(preview))
+      {
+        if (Math.Abs(fraction - _lastPreviewFraction) > 0.01 || !_previewPopup.IsOpen)
+          _lastPreviewFraction = fraction;
+        _previewText.Text = preview;
+        // RelativePoint задаёт координату относительно верхнего левого угла
+        // полосы. Поэтому карточка появляется на той же высоте, где находится
+        // курсор, и сразу слева от полосы.
+        _previewPopup.HorizontalOffset = -_previewBorder.Width - 8;
+        _previewPopup.VerticalOffset = Math.Clamp(pointer.Y - 22, 0, Math.Max(0, ActualHeight - 44));
+        _previewPopup.IsOpen = true;
+      }
+      else
+      {
+        _lastPreviewFraction = -1;
+        _previewPopup.IsOpen = false;
+      }
+
+      ResetToolTip();
+      Cursor = marker != null || _positionClickAction != null ? Cursors.Hand : Cursors.Arrow;
     }
 
     private void ErrorOverviewBar_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)

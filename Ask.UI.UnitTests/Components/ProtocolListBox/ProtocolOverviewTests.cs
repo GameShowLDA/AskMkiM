@@ -24,6 +24,24 @@ public sealed class ProtocolOverviewTests
     Assert.Equal(expected, ProtocolListBoxUI.GetOverviewSeverity(message));
   }
 
+  [Fact]
+  public void HoverPreviewContainsSelectedAndAdjacentProtocolLines()
+  {
+    RunInSta(() =>
+    {
+      var control = new ProtocolListBoxUI();
+      control.LoadMessages(Enumerable.Range(1, 5).Select(i =>
+        new ShowMessageModel { Header = $"Строка {i}", Status = ShowMessageModel.MessageType.Command }));
+
+      string preview = control.GetOverviewPreview(0.5)!;
+
+      Assert.Contains("строка 3", preview);
+      Assert.Contains("▸", preview);
+      Assert.Contains("Строка 2", preview);
+      Assert.Contains("Строка 4", preview);
+    });
+  }
+
   [Theory]
   [InlineData(ShowMessageModel.MessageType.Info, false, "Количество брака: 0", false)]
   [InlineData(ShowMessageModel.MessageType.Info, false, "[БРАК] R = 20", true)]
