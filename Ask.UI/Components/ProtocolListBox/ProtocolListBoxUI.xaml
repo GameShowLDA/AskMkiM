@@ -5,11 +5,38 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:Ask.UI.Components.ProtocolListBox"
              xmlns:conv="clr-namespace:Ask.UI.Shared.Converters.Math"
+             xmlns:overview="clr-namespace:Ask.UI.Controls.TextEditorControl"
              mc:Ignorable="d"
              d:DesignHeight="450"
              d:DesignWidth="800">
 
     <UserControl.Resources>
+        <Style x:Key="OverviewNavigationButton" TargetType="Button">
+            <Setter Property="Height" Value="28"/>
+            <Setter Property="Margin" Value="3,2"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextEditorLineNumberBrush}"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Surface" Background="{TemplateBinding Background}" CornerRadius="6">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Surface" Property="Background" Value="{DynamicResource ScrollBarTrackBackground}"/>
+                            </Trigger>
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter TargetName="Surface" Property="BorderBrush" Value="{DynamicResource TextEditorLineNumberBrush}"/>
+                                <Setter TargetName="Surface" Property="BorderThickness" Value="1"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False"><Setter Property="Opacity" Value="0.3"/></Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
         <conv:MultiplyConverter x:Key="MultiplyConverter"/>
         <local:ColorToBrushConverter x:Key="ColorToBrushConverter"/>
         <local:IndentToMarginConverter x:Key="IndentToMarginConverter"/>
@@ -19,7 +46,13 @@
 
         <DataTemplate x:Key="ProtocolLineContentTemplate">
             <Grid>
-            <TextBlock TextWrapping="Wrap"
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <TextBlock Grid.Row="0"
+                       TextWrapping="Wrap"
                        FontSize="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:ProtocolListBoxUI}}, Path=ProtocolFontSize}"
                        FontFamily="Consolas"
                        FontWeight="{Binding CommandFontWeight}"
@@ -61,10 +94,96 @@
                 <Run Text="{Binding Message.Time}"
                      Foreground="{Binding Message.TimeColor, Converter={StaticResource ColorToBrushConverter}}"/>
 
-                <Run Text="{Binding Message.Debug}" Foreground="{DynamicResource TextEditorLineNumberBrush}"/>
             </TextBlock>
 
-            <TextBox Text="{Binding SelectableText, Mode=OneWay}"
+            <TextBlock x:Name="DebugText"
+                       Grid.Row="1"
+                       Text="{Binding DisplayDebug}"
+                       TextWrapping="Wrap"
+                       FontSize="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:ProtocolListBoxUI}}, Path=ProtocolFontSize}"
+                       FontFamily="Consolas"
+                       FontWeight="{Binding CommandFontWeight}"
+                       Foreground="{DynamicResource TextEditorLineNumberBrush}"
+                       Margin="{Binding Message.IndentLevel, Converter={StaticResource IndentToMarginConverter}}"/>
+
+            <ToggleButton x:Name="ServiceLogsToggle"
+                          Grid.Row="1"
+                          Click="ServiceLogsToggleButton_Click"
+                          IsChecked="{Binding AreServiceLogsExpanded, Mode=OneWay}"
+                          Cursor="Hand"
+                          Visibility="Collapsed"
+                          Background="Transparent"
+                          BorderThickness="0"
+                          Padding="0"
+                          HorizontalContentAlignment="Stretch">
+                <ToggleButton.Template>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Grid Background="Transparent"
+                              Margin="{Binding Message.IndentLevel, Converter={StaticResource IndentToMarginConverter}}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="18"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Name="Chevron"
+                                       Text="▶"
+                                       FontSize="10"
+                                       Foreground="{DynamicResource TextEditorFoldingChevronBrush}"
+                                       VerticalAlignment="Center"/>
+                            <TextBlock Grid.Column="1"
+                                       Text="{Binding DisplayDebug}"
+                                       TextWrapping="Wrap"
+                                       FontFamily="Consolas"
+                                       FontWeight="{Binding CommandFontWeight}"
+                                       FontSize="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:ProtocolListBoxUI}}, Path=ProtocolFontSize}"
+                                       Foreground="{DynamicResource TextEditorLineNumberBrush}"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Chevron" Property="Text" Value="▼"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Chevron" Property="Foreground"
+                                        Value="{DynamicResource TextEditorFoldingChevronHoverBrush}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </ToggleButton.Template>
+            </ToggleButton>
+
+            <TextBox x:Name="ServiceLogsPanel"
+                     Grid.Row="2"
+                     Text="{Binding ServiceLogText, Mode=OneWay}"
+                     MaxHeight="420"
+                     Margin="18,0,0,0"
+                     IsReadOnly="True"
+                     IsReadOnlyCaretVisible="False"
+                     TextWrapping="NoWrap"
+                     FontFamily="Consolas"
+                     FontSize="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:ProtocolListBoxUI}}, Path=ProtocolFontSize}"
+                     Foreground="{DynamicResource TextEditorLineNumberBrush}"
+                     Background="Transparent"
+                     BorderThickness="0"
+                     Padding="0"
+                     SelectionBrush="#993A78A1"
+                     SelectionTextBrush="White"
+                     Cursor="IBeam"
+                     ScrollViewer.VerticalScrollBarVisibility="Auto"
+                     ScrollViewer.HorizontalScrollBarVisibility="Auto">
+                    <TextBox.Style>
+                        <Style TargetType="TextBox">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding AreServiceLogsExpanded}" Value="True">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBox.Style>
+            </TextBox>
+
+            <TextBox x:Name="PART_SelectableText"
+                     Grid.RowSpan="2"
+                     Text="{Binding SelectableText, Mode=OneWay}"
                      IsReadOnly="True"
                      IsReadOnlyCaretVisible="False"
                      AcceptsReturn="True"
@@ -81,7 +200,15 @@
                      SelectionTextBrush="White"
                      Cursor="IBeam"
                      VerticalContentAlignment="Top"/>
+
             </Grid>
+            <DataTemplate.Triggers>
+                <DataTrigger Binding="{Binding HasServiceLogs}" Value="True">
+                    <Setter TargetName="DebugText" Property="Visibility" Value="Collapsed"/>
+                    <Setter TargetName="ServiceLogsToggle" Property="Visibility" Value="Visible"/>
+                    <Setter TargetName="PART_SelectableText" Property="IsHitTestVisible" Value="False"/>
+                </DataTrigger>
+            </DataTemplate.Triggers>
         </DataTemplate>
 
         <DataTemplate x:Key="ProtocolLineTemplate">
@@ -243,7 +370,17 @@
     </UserControl.Resources>
 
     <Grid>
-        <Border CornerRadius="20,20,0,0"
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto" MinWidth="52"/>
+        </Grid.ColumnDefinitions>
+
+        <Border Grid.Row="1" Grid.Column="0"
+                CornerRadius="20,20,0,0"
                 Background="{DynamicResource TestsProtocolBackgroundBrush}">
             <ListBox x:Name="ProtocolListBox"
                      Background="Transparent"
@@ -327,6 +464,12 @@
                     </Style>
                 </ListBox.ItemContainerStyle>
             </ListBox>
+        </Border>
+
+        <Border x:Name="OverviewTrackHost" Grid.Row="1" Grid.Column="1" Margin="4,0,2,0" CornerRadius="8"
+                Background="{DynamicResource TestsProtocolBackgroundBrush}">
+                <overview:ErrorOverviewBar x:Name="errorOverviewBar" Margin="10,4,10,6"
+                                          AutomationProperties.Name="Карта команд и ошибок протокола"/>
         </Border>
     </Grid>
 </UserControl>

@@ -1,4 +1,4 @@
-using Ask.Engine.Tests.NodeMethod.CI;
+using Ask.Engine.Tests.NodeMethod.Si;
 using Ask.Support;
 using System.Windows.Controls;
 
@@ -9,7 +9,7 @@ namespace Ask.UI.Controls.ExecutorControls.TestsControls.NodeMethod.CI
   /// </summary>
   public partial class CiNodeMethodControl : UserControl
   {
-    private CiNodeMethodExecutor mode = new CiNodeMethodExecutor();
+    private SiNodeMethodExecutor mode = new SiNodeMethodExecutor();
     public CiNodeMethodControl()
     {
       InitializeComponent();

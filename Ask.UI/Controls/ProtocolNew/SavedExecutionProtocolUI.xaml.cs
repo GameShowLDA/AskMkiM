@@ -22,7 +22,6 @@ public partial class SavedExecutionProtocolUI : UserControl
     {
       EventAggregator.Unsubscribe<SystemStateEvents.DebugRightsChanged>(OnDebugRightsChanged);
       EventAggregator.Subscribe<SystemStateEvents.DebugRightsChanged>(OnDebugRightsChanged);
-      Reload();
     };
     Unloaded += (_, _) => EventAggregator.Unsubscribe<SystemStateEvents.DebugRightsChanged>(OnDebugRightsChanged);
     Reload();

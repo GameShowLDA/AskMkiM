@@ -1058,6 +1058,9 @@ Legacy traces without V2 snapshots are converted line-by-line by
 `ExecutionProtocolDiagnosticFormatter.RestoreLegacyMessages` and rendered in the same read-only
 `ProtocolListBoxUI`; since the legacy format contains no structured status/group metadata, those
 lines are restored as `Info` while preserving their complete text and blank-line layout.
+В `SavedExecutionProtocolUI` строки `[ЛОГ ROOT]` прикрепляются к предшествующей строке
+`[ОТЛАДКА ROOT]` и по умолчанию скрыты. Root раскрывает отдельную группу логов шевроном у нужной
+диагностической строки; сами строки `[ОТЛАДКА ROOT]` остаются видимыми.
 
 New saves use `#ASKM_PROTOCOL_V3_BR#`: `ExecutionProtocolHistoryService.SaveAsync` delegates to
 `ExecutionProtocolDiagnosticFormatter.FormatProtocolForStorage`, which writes readable protocol
@@ -1066,6 +1069,9 @@ array. Readers remain backward-compatible with V2 per-message snapshots, V1 diag
 pre-structured text traces.
 
 При открытии `.asktrace` `ExecutionProtocolDiagnosticFormatter.PrepareForDisplay`
+загрузка и расшифровка выполняются в фоне с `UI/Components/ProgressWindow.xaml`;
+для `.askresult/.askreport` тот же индикатор оборачивает чтение связанной пары в
+`MainWindow/Services/FileService.OpenLinkedResultProtocol`.
 скрывает служебные записи для обычных ролей и раскрывает источник вызова и атрибуты
 сообщения для `Root`. Старые текстовые протоколы открываются без преобразования.
 Перед сохранением `ActionExecutor.FinalizeAsync` формирует через
@@ -1247,6 +1253,12 @@ executor/strategy
     → protocol line "МКР chassis.number: operation. Системная ошибка. reason [БРАК]"
     → existing Retry / Continue / Abort equipment flow
 ```
+
+Сброс всех точек МКР использует пакетную команду
+`11.1.<PointCount>.32` через `PointManager.DisconnectingAllPoint`;
+Idle-эмулятор должен возвращать подтверждение для действий диапазона `31/32`,
+иначе `ModuleRelayControlQueryExecutor` получает пустой ответ и считает операцию
+неуспешной.
 
 `Ask.Device.ResponseProcessor.ModuleRelayControl.ResponseProcessing.ModuleRelayControlResponseProcessor`
 предоставляет новые проверки ответов подключения/отключения одной точки. Методы
@@ -1706,6 +1718,44 @@ formatted editors; `RunControl` hosts ProtocolUI, translated source and error li
 а неизменённый исходник `TranslatorItem` повторно не записывает и уведомление не показывает.
 В правой области `RunControl` панель действий документа отображается только для
 транслированного файла и итогового протокола; вкладка состояния оборудования её скрывает.
+
+Открытый `.asktrace` отображается через `SavedExecutionProtocolUI` и
+`ProtocolListBoxUI`; рядом с его штатной вертикальной прокруткой размещается
+`ErrorOverviewBar`. Полоса получает строки из существующей коллекции
+`ShowMessageModel`: `Status.Error` или `ExecutionError`; для старых строк `Info`/`null`
+сохраняется распознавание явной метки `[БРАК]`. `AppendLineAsync → AddOverviewDiagnostic`
+индексирует только новое сообщение; `RefreshErrorOverview` пересоздаёт индекс после загрузки/удаления.
+`RequestOverviewUpdate` объединяет обновления через Dispatcher; прокрутка обновляет геометрию
+без повторной классификации сообщений. `RefreshErrorOverviewViewport` выравнивает полосу по
+`PART_VerticalScrollBar → PART_Track`, а рамку — по позиции и размеру его `Thumb`;
+для шаблонов без этих частей используется `VerticalOffset/ExtentHeight` и `ViewportHeight`.
+Кнопки и счётчик находятся в общей верхней строке над списком и полосой.
+`RefreshOverviewPositions → ProjectOverviewOffset → ErrorOverviewBar.SetLinePositions`
+проецирует маркеры в пиксельную шкалу: реализованные контейнеры дают измеренные границы,
+остальные позиции интерполируются между ними и границами `ExtentHeight`.
+Вне экрана геометрия остаётся оценочной из-за виртуализации; при прокрутке она уточняется.
+Ошибки свёрнутой команды отображаются в позиции её заголовка.
+`_visibleIndices` перестраивается при изменении `DisplayItems`, а не на каждом scroll event.
+`_messageItems` сопоставляет сообщения
+с визуальными элементами (включая прикреплённые ROOT-логи), `_itemGroups` — с владельцами-командами.
+Кнопки справа и F8/Shift+F8 вызывают `NavigateToOverviewError → NavigateToErrorOverviewLine`
+с раскрытием группы и `ScrollIntoView`; активная ошибка сохраняется ссылкой на сообщение.
+Панель показывает счётчик, активный маркер и тематические подсказки.
+`GetOverviewSeverity` добавляет синие (`DodgerBlue`, `Information`)
+маркеры для всех `Status.Command` — заголовков групп протокола, включая `ПИ/ПИ1`.
+`IsControlProgramCommandHeader` управляет пошаговым выполнением и не фильтрует маркеры;
+`CommandBlock` не отмечается. `_overviewDiagnostics` содержит команды и ошибки, `_errorOverviewDiagnostics` —
+только ошибки для счётчика, стрелок и F8. Клик по команде раскрывает её и выделяет маркер.
+При объединении с ошибкой кластер становится красным, но сохраняет переходы ко всем его строкам.
+Клик по свободной области вызывает `ScrollToVerticalOffset` с центрированием выбранной позиции.
+При наведении `ErrorOverviewBar` вызывает `ProtocolListBoxUI.GetOverviewPreview` и показывает
+слева компактный фрагмент из ближайших команд/ошибок в отдельном WPF `Popup`,
+не зависящем от глобального шаблона `ToolTip`; для маркера сверху добавляется его описание.
+Позиция Popup следует за курсором по вертикали.
+Близкие маркеры объединяются в ограниченные по высоте кластеры:
+повторные клики обходят их строки, Shift+клик меняет направление. Реализация:
+`Ask.UI/Controls/TextEditorControl/ErrorOverviewBar.cs`,
+`Ask.UI/Components/ProtocolListBox/ProtocolListBoxUI.xaml{,.cs}`.
 
 `Ask.UI` contains newer feature-oriented code: ProtocolNew, Archive, Notifications,
 RoleManagement, ExecutionSelection and reusable controls. Оба UI-проекта пока

@@ -1,6 +1,6 @@
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Ask.UI.Controls.ExecutorControls.TestsControls;
-using Ask.UI.Controls.ExecutorControls.TestsControls.MethodExecutor.CI;
+using Ask.UI.Controls.ExecutorControls.TestsControls.MethodExecutor.Si;
 using Ask.UI.Controls.ExecutorControls.TestsControls.MethodExecutor.PI;
 using Ask.UI.Controls.ExecutorControls.TestsControls.NodeMethod.CI;
 using Ask.UI.Controls.ExecutorControls.TestsControls.NodeMethod.PI;
@@ -49,7 +49,7 @@ namespace MainWindowProgram.Services
     /// Добавляет элемент управления для теста групповым методом СИ в multiEditors.
     /// </summary>
     public void AddCiMethodExecutorControlAsync() =>
-       _multiWindow.WorkspaceService.AddControl("Групповой метод СИ", new CiMethodExecutor(), TypeWindow.DeviceControl);
+       _multiWindow.WorkspaceService.AddControl("Групповой метод СИ", new SiMethodExecutor(), TypeWindow.DeviceControl);
 
     /// <summary>
     /// Добавляет элемент управления для теста групповым методом ПИ(ACW) в multiEditors.

@@ -1,18 +1,18 @@
-using Ask.Engine.Tests.MethodExecutor.CI;
+using Ask.Engine.Tests.MethodExecutor.Si;
 using Ask.Support;
 using System.Windows.Controls;
 
-namespace Ask.UI.Controls.ExecutorControls.TestsControls.MethodExecutor.CI
+namespace Ask.UI.Controls.ExecutorControls.TestsControls.MethodExecutor.Si
 {
   /// <summary>
   /// Логика взаимодействия для CiMethodExecutor.xaml
   /// </summary>
-  public partial class CiMethodExecutor : UserControl
+  public partial class SiMethodExecutor : UserControl
   {
 
-    private CiGroupMethodExecutor mode = new CiGroupMethodExecutor();
+    private SiGroupMethodExecutor mode = new SiGroupMethodExecutor();
 
-    public CiMethodExecutor()
+    public SiMethodExecutor()
     {
       InitializeComponent();
 

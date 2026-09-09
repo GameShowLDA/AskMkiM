@@ -1,5 +1,5 @@
-using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Services.UI;
+using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
@@ -131,6 +131,7 @@ public static class DeviceResetService
     IDevice device,
     IUserInteractionService? messageService)
   {
+    // TODO : Включить если не пойдёт сброс МКР
     if (device is IRelaySwitchModule relayModule)
     {
       bool disconnected = await relayModule.PointManager.DisconnectingAllPoint(messageService);

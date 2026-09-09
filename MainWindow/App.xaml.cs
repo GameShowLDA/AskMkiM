@@ -1,7 +1,5 @@
 using Ask.Core.Services.App;
 using Ask.Core.Services.Config.AppSettings;
-using Ask.Core.Shared.Metadata.Enums.RoleEnums;
-using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.DataBase.Engine.Static.Devices;
 using Ask.Diagnostics.Abstractions;
 using Ask.Support;
@@ -9,7 +7,6 @@ using ConsoleUI.ConsoleLogic;
 using MainWindowProgram.Init;
 using Microsoft.Extensions.DependencyInjection;
 using System.IO;
-using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Windows;
 using UI.Theme;
