@@ -37,7 +37,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
       new ObjectCheck(4, 10_000, 5),
       new ObjectCheck(5, 100_000, 5),
       new ObjectCheck(6, 1_000_000, 5),
-      new ObjectCheck(7, 10_000_000, 5),
+      new ObjectCheck(7, 10_500_000, 5),
       //new ObjectCheck(8, 85_000_000, 5)
 
     };
