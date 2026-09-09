@@ -1058,6 +1058,9 @@ Legacy traces without V2 snapshots are converted line-by-line by
 `ExecutionProtocolDiagnosticFormatter.RestoreLegacyMessages` and rendered in the same read-only
 `ProtocolListBoxUI`; since the legacy format contains no structured status/group metadata, those
 lines are restored as `Info` while preserving their complete text and blank-line layout.
+В `SavedExecutionProtocolUI` строки `[ЛОГ ROOT]` прикрепляются к предшествующей строке
+`[ОТЛАДКА ROOT]` и по умолчанию скрыты. Root раскрывает отдельную группу логов шевроном у нужной
+диагностической строки; сами строки `[ОТЛАДКА ROOT]` остаются видимыми.
 
 New saves use `#ASKM_PROTOCOL_V3_BR#`: `ExecutionProtocolHistoryService.SaveAsync` delegates to
 `ExecutionProtocolDiagnosticFormatter.FormatProtocolForStorage`, which writes readable protocol
@@ -1066,6 +1069,9 @@ array. Readers remain backward-compatible with V2 per-message snapshots, V1 diag
 pre-structured text traces.
 
 При открытии `.asktrace` `ExecutionProtocolDiagnosticFormatter.PrepareForDisplay`
+загрузка и расшифровка выполняются в фоне с `UI/Components/ProgressWindow.xaml`;
+для `.askresult/.askreport` тот же индикатор оборачивает чтение связанной пары в
+`MainWindow/Services/FileService.OpenLinkedResultProtocol`.
 скрывает служебные записи для обычных ролей и раскрывает источник вызова и атрибуты
 сообщения для `Root`. Старые текстовые протоколы открываются без преобразования.
 Перед сохранением `ActionExecutor.FinalizeAsync` формирует через

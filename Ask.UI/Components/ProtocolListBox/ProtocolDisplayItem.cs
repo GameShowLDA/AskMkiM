@@ -14,6 +14,7 @@ namespace Ask.UI.Components.ProtocolListBox
   public sealed class ProtocolDisplayItem : INotifyPropertyChanged
   {
     private bool _isExpanded = true;
+    private bool _areServiceLogsExpanded;
     private bool _hasChildItems;
     private bool _isLastGroupItem;
     private Thickness _outerMargin;
@@ -36,6 +37,37 @@ namespace Ask.UI.Components.ProtocolListBox
     /// Сообщение, отображаемое в строке.
     /// </summary>
     public ShowMessageModel Message { get; }
+
+    public string DisplayDebug => Message.Debug?.TrimStart('\r', '\n') ?? string.Empty;
+
+    /// <summary>
+    /// Служебные логи, записанные после сообщения.
+    /// </summary>
+    public List<string> ServiceLogs { get; } = new();
+
+    public bool HasServiceLogs => ServiceLogs.Count > 0;
+
+    public string ServiceLogText => string.Join(Environment.NewLine, ServiceLogs);
+
+    public bool AreServiceLogsExpanded
+    {
+      get => _areServiceLogsExpanded;
+      set
+      {
+        if (_areServiceLogsExpanded == value)
+          return;
+
+        _areServiceLogsExpanded = value;
+        OnPropertyChanged();
+      }
+    }
+
+    public void AddServiceLog(string log)
+    {
+      ServiceLogs.Add(log);
+      OnPropertyChanged(nameof(HasServiceLogs));
+      OnPropertyChanged(nameof(ServiceLogText));
+    }
 
     /// <summary>
     /// Текст строки для посимвольного выделения и копирования.

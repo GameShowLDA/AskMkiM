@@ -26,11 +26,15 @@ namespace Ask.UI.Controls.ProtocolNew
     public SavedProtocolPairUI(
       IReadOnlyList<ShowMessageModel> executionMessages,
       string resultProtocolText)
-      : this(string.Empty, resultProtocolText)
     {
+      InitializeComponent();
       ExecutionProtocolEditor.Visibility = System.Windows.Visibility.Collapsed;
       StructuredExecutionProtocol.Content = new SavedExecutionProtocolUI(executionMessages);
       StructuredExecutionProtocol.Visibility = System.Windows.Visibility.Visible;
+
+      ResultProtocolEditor.SetFileType(FileType.InspectionProtocol);
+      ResultProtocolEditor.WordWrap = true;
+      ResultProtocolEditor.Text = resultProtocolText ?? string.Empty;
     }
   }
 }
