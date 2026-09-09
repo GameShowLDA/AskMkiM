@@ -10,6 +10,21 @@ namespace Ask.UI.UnitTests.Components.ProtocolListBox;
 public sealed class ProtocolOverviewTests
 {
   [Theory]
+  [InlineData(ShowMessageModel.MessageType.Command, true, false, ErrorOverviewSeverity.Information)]
+  [InlineData(ShowMessageModel.MessageType.Command, true, true, ErrorOverviewSeverity.Error)]
+  [InlineData(ShowMessageModel.MessageType.Command, false, false, ErrorOverviewSeverity.Information)]
+  [InlineData(ShowMessageModel.MessageType.CommandBlock, false, false, null)]
+  [InlineData(ShowMessageModel.MessageType.Info, false, false, null)]
+  public void CommandMarkersIncludeCommandsWithoutStepFlagAndPreserveErrorPriority(
+    ShowMessageModel.MessageType status, bool isCommandHeader, bool executionError,
+    ErrorOverviewSeverity? expected)
+  {
+    var message = new ShowMessageModel { Status = status,
+      IsControlProgramCommandHeader = isCommandHeader, ExecutionError = executionError };
+    Assert.Equal(expected, ProtocolListBoxUI.GetOverviewSeverity(message));
+  }
+
+  [Theory]
   [InlineData(ShowMessageModel.MessageType.Info, false, "Количество брака: 0", false)]
   [InlineData(ShowMessageModel.MessageType.Info, false, "[БРАК] R = 20", true)]
   [InlineData(ShowMessageModel.MessageType.Error, false, "Нет связи", true)]
@@ -104,6 +119,39 @@ public sealed class ProtocolOverviewTests
       Assert.Equal(1, selected);
       bar.NavigateAt(100, false);
       Assert.Equal(100, selected);
+    });
+  }
+
+  [Theory]
+  [InlineData(0, 0)]
+  [InlineData(1, 20)]
+  [InlineData(2, 220)]
+  [InlineData(3, 240)]
+  [InlineData(4, 440)]
+  [InlineData(5, 640)]
+  public void ProjectionUsesMeasuredVariableHeightsAndInterpolatesUnrealizedItems(int index, double expected)
+  {
+    var anchors = new[] { (0, 0d), (1, 20d), (2, 220d), (3, 240d), (5, 640d) };
+    Assert.Equal(expected, ProtocolListBoxUI.ProjectOverviewOffset(index, anchors));
+  }
+
+  [Fact]
+  public void ProjectedMarkersNavigateByIdentityInsteadOfLogicalFraction()
+  {
+    RunInSta(() =>
+    {
+      var bar = new ErrorOverviewBar();
+      bar.Measure(new System.Windows.Size(24, 100));
+      bar.Arrange(new System.Windows.Rect(0, 0, 24, 100));
+      int selected = 0;
+      double scrolled = -1;
+      bar.SetLineDiagnostics(100, new[] { (2, ErrorOverviewSeverity.Information, "ПИ/ПИ1") },
+        line => selected = line);
+      bar.SetLinePositions(new Dictionary<int, double> { [2] = 0.8 }, fraction => scrolled = fraction);
+      bar.NavigateAt(78, false);
+      Assert.Equal(2, selected);
+      bar.NavigateAt(50, false);
+      Assert.Equal(0.5, scrolled);
     });
   }
 

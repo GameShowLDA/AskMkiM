@@ -32,6 +32,8 @@ namespace Ask.UI.Controls.TextEditorControl
     private double _viewportBottom = 1.0;
     private int _activeLine = -1;
     private OverviewMarker? _hoveredMarker;
+    private IReadOnlyDictionary<int, double>? _linePositions;
+    private Action<double>? _positionClickAction;
 
     public ErrorOverviewBar()
     {
@@ -60,6 +62,8 @@ namespace Ask.UI.Controls.TextEditorControl
       _editor = editor ?? throw new ArgumentNullException(nameof(editor));
       _lineCount = 0;
       _lineClickAction = null;
+      _linePositions = null;
+      _positionClickAction = null;
       _editor.TextChanged += Editor_TextChanged;
       _editor.DocumentChanged += Editor_DocumentChanged;
       _editor.TextArea.TextView.ScrollOffsetChanged += TextView_Changed;
@@ -101,6 +105,13 @@ namespace Ask.UI.Controls.TextEditorControl
           diagnostic.Message ?? string.Empty))
         .ToArray();
 
+      RebuildMarkers();
+    }
+
+    internal void SetLinePositions(IReadOnlyDictionary<int, double> positions, Action<double> positionClickAction)
+    {
+      _linePositions = positions;
+      _positionClickAction = positionClickAction;
       RebuildMarkers();
     }
 
@@ -226,6 +237,7 @@ namespace Ask.UI.Controls.TextEditorControl
 
         if (lineNumber <= 0 || lineNumber > lineCount)
           continue;
+        if (_linePositions != null && !_linePositions.ContainsKey(lineNumber)) continue;
 
         AddMarker(
           markersByLine,
@@ -235,7 +247,7 @@ namespace Ask.UI.Controls.TextEditorControl
       }
 
       var ordered = markersByLine.Values
-        .OrderBy(marker => marker.LineNumber)
+        .OrderBy(marker => GetDesiredTop(marker.LineNumber, lineCount, 1))
         .ToList();
 
       if (ordered.Count == 0)
@@ -253,9 +265,7 @@ namespace Ask.UI.Controls.TextEditorControl
       for (int i = 0; i < ordered.Count; i++)
       {
         var marker = ordered[i];
-        double desiredTop = lineCount <= 1
-          ? 0
-          : (marker.LineNumber - 1) * maxTop / (lineCount - 1);
+        double desiredTop = GetDesiredTop(marker.LineNumber, lineCount, maxTop);
 
         marker.Top = i == 0
           ? desiredTop
@@ -277,7 +287,7 @@ namespace Ask.UI.Controls.TextEditorControl
       InvalidateVisual();
     }
 
-    private static List<OverviewMarker> CompactNearbyMarkers(
+    private List<OverviewMarker> CompactNearbyMarkers(
       IReadOnlyList<OverviewMarker> markers,
       int lineCount,
       double maxTop)
@@ -308,8 +318,10 @@ namespace Ask.UI.Controls.TextEditorControl
       return compacted;
     }
 
-    private static double GetDesiredTop(int lineNumber, int lineCount, double maxTop)
+    private double GetDesiredTop(int lineNumber, int lineCount, double maxTop)
     {
+      if (_linePositions != null && _linePositions.TryGetValue(lineNumber, out double position))
+        return Math.Clamp(position, 0, 1) * maxTop;
       return lineCount <= 1
         ? 0
         : (lineNumber - 1) * maxTop / (lineCount - 1);
@@ -368,10 +380,10 @@ namespace Ask.UI.Controls.TextEditorControl
 
     private Brush GetMarkerBrush(ErrorOverviewSeverity severity)
     {
+      if (severity == ErrorOverviewSeverity.Information) return Brushes.DodgerBlue;
       string resourceKey = severity switch
       {
         ErrorOverviewSeverity.Warning => "ErrorListWarningIconBrush",
-        ErrorOverviewSeverity.Information => "TestsProtocolMessageForeground",
         _ => "ErrorListErrorIconBrush",
       };
 
@@ -427,6 +439,11 @@ namespace Ask.UI.Controls.TextEditorControl
       int lineNumber;
       if (marker == null)
       {
+        if (_positionClickAction != null)
+        {
+          _positionClickAction(Math.Clamp(y / Math.Max(1, ActualHeight), 0, 1));
+          return;
+        }
         lineNumber = 1 + (int)Math.Round(Math.Clamp(y /
           Math.Max(1, ActualHeight - MarkerHeight), 0, 1) * (lineCount - 1));
       }

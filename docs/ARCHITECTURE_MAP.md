@@ -1688,14 +1688,30 @@ formatted editors; `RunControl` hosts ProtocolUI, translated source and error li
 `ShowMessageModel`: `Status.Error` или `ExecutionError`; для старых строк `Info`/`null`
 сохраняется распознавание явной метки `[БРАК]`. `AppendLineAsync → AddOverviewDiagnostic`
 индексирует только новое сообщение; `RefreshErrorOverview` пересоздаёт индекс после загрузки/удаления.
-`RequestOverviewUpdate` объединяет обновления через Dispatcher; прокрутка обновляет только viewport.
-Маркеры и viewport используют логические индексы истории, viewport определяется по видимым
-виртуализированным контейнерам с учётом свёрнутых команд. `_messageItems` сопоставляет сообщения
+`RequestOverviewUpdate` объединяет обновления через Dispatcher; прокрутка обновляет геометрию
+без повторной классификации сообщений. `RefreshErrorOverviewViewport` выравнивает полосу по
+`PART_VerticalScrollBar → PART_Track`, а рамку — по позиции и размеру его `Thumb`;
+для шаблонов без этих частей используется `VerticalOffset/ExtentHeight` и `ViewportHeight`.
+Кнопки и счётчик находятся в общей верхней строке над списком и полосой.
+`RefreshOverviewPositions → ProjectOverviewOffset → ErrorOverviewBar.SetLinePositions`
+проецирует маркеры в пиксельную шкалу: реализованные контейнеры дают измеренные границы,
+остальные позиции интерполируются между ними и границами `ExtentHeight`.
+Вне экрана геометрия остаётся оценочной из-за виртуализации; при прокрутке она уточняется.
+Ошибки свёрнутой команды отображаются в позиции её заголовка.
+`_visibleIndices` перестраивается при изменении `DisplayItems`, а не на каждом scroll event.
+`_messageItems` сопоставляет сообщения
 с визуальными элементами (включая прикреплённые ROOT-логи), `_itemGroups` — с владельцами-командами.
 Кнопки справа и F8/Shift+F8 вызывают `NavigateToOverviewError → NavigateToErrorOverviewLine`
 с раскрытием группы и `ScrollIntoView`; активная ошибка сохраняется ссылкой на сообщение.
-Панель показывает счётчик, активный маркер и тематические подсказки; клик по свободной области
-переходит к позиции в истории. Близкие маркеры объединяются в ограниченные по высоте кластеры:
+Панель показывает счётчик, активный маркер и тематические подсказки.
+`GetOverviewSeverity` добавляет синие (`DodgerBlue`, `Information`)
+маркеры для всех `Status.Command` — заголовков групп протокола, включая `ПИ/ПИ1`.
+`IsControlProgramCommandHeader` управляет пошаговым выполнением и не фильтрует маркеры;
+`CommandBlock` не отмечается. `_overviewDiagnostics` содержит команды и ошибки, `_errorOverviewDiagnostics` —
+только ошибки для счётчика, стрелок и F8. Клик по команде раскрывает её и выделяет маркер.
+При объединении с ошибкой кластер становится красным, но сохраняет переходы ко всем его строкам.
+Клик по свободной области вызывает `ScrollToVerticalOffset` с центрированием выбранной позиции.
+Близкие маркеры объединяются в ограниченные по высоте кластеры:
 повторные клики обходят их строки, Shift+клик меняет направление. Реализация:
 `Ask.UI/Controls/TextEditorControl/ErrorOverviewBar.cs`,
 `Ask.UI/Components/ProtocolListBox/ProtocolListBoxUI.xaml{,.cs}`.
