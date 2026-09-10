@@ -28,7 +28,7 @@ public sealed class MeasurementMessagesTests
       CurrentUnit.MilliAmpere,
       isSuccessful);
 
-    Assert.Equal("Проверяемые точки: X1, X2 (мА<10)", message.Header);
+    Assert.Equal("Проверяемые точки: X1, X2 д.б. мА<10", message.Header);
     Assert.Equal(expectedResult, message.Message);
     Assert.DoesNotContain("5 мА", message.ToString());
   }
@@ -132,7 +132,7 @@ public sealed class MeasurementMessagesTests
       new MeasurementRange(5, 0, 10),
       "A1");
 
-    Assert.Contains("A1 (Ом<10)", message.Header);
+    Assert.Contains("A1 д.б. Ом<10", message.Header);
   }
 
   [Fact]
@@ -143,7 +143,7 @@ public sealed class MeasurementMessagesTests
       new MeasurementRange(9, 8, 10),
       "A1,B2");
 
-    Assert.Contains("A1,B2 (8<Ом<10)", message.Header);
+    Assert.Contains("A1,B2 д.б. 8<Ом<10", message.Header);
   }
 
   [Fact]
@@ -154,7 +154,7 @@ public sealed class MeasurementMessagesTests
       new MeasurementRange(9, 8, -1),
       "A1");
 
-    Assert.Contains("A1 (8<МОм)", message.Header);
+    Assert.Contains("A1 д.б. 8<МОм", message.Header);
   }
 
   private static Mock<IMessageOutputService> CreateOutputService()

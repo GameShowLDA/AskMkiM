@@ -94,6 +94,14 @@
                                          VerticalAlignment="Bottom"
                                          Margin="0,0,0,6"
                                          Visibility="Collapsed"/>
+                                <Ellipse x:Name="AvailabilityDot"
+                                         Width="6"
+                                         Height="6"
+                                         Fill="{DynamicResource ForegrounfBrushes35}"
+                                         VerticalAlignment="Top"
+                                         HorizontalAlignment="Right"
+                                         Margin="0,5,5,0"
+                                         Visibility="Collapsed"/>
                             </Grid>
                         </Border>
 
@@ -122,6 +130,17 @@
                                 <Setter TargetName="DaySurface" Property="BorderBrush" Value="{DynamicResource SettingsSelectorSelectedSolidColorBrush}"/>
                                 <Setter TargetName="TodayDot" Property="Visibility" Value="Collapsed"/>
                                 <Setter Property="Foreground" Value="#F7FAFF"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Availability}" Value="Partial">
+                                <Setter TargetName="AvailabilityDot" Property="Visibility" Value="Visible"/>
+                                <Setter TargetName="AvailabilityDot" Property="Fill" Value="#F2B84B"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Availability}" Value="Complete">
+                                <Setter TargetName="AvailabilityDot" Property="Visibility" Value="Visible"/>
+                                <Setter TargetName="AvailabilityDot" Property="Fill" Value="#51C878"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Availability}" Value="None">
+                                <Setter TargetName="AvailabilityDot" Property="Visibility" Value="Visible"/>
                             </DataTrigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>

@@ -72,7 +72,8 @@ internal sealed class ExecutionFinalizer
       ("вывод обязательного финального блока программы контроля",
         () => _protocolCompletionService.AppendControlProgramCompletionAsync(settings, protocol, completionStatus)),
       ("сохранение протоколов",
-        () => _protocolCompletionService.SaveAndExposeAsync(settings, protocol)));
+        () => _protocolCompletionService.SaveAndExposeAsync(settings, protocol)),
+      ("завершение сбора журнала", AsAsync(protocol.StopLogCapture)));
   }
 
   internal static async Task RunMandatoryStepsAsync(

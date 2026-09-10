@@ -283,19 +283,9 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl
     {
       bool success = true;
 
-      foreach (int number in connectionState.GetConnectedPointNumbers(BusPoint.A))
-      {
-        var result = await DisconnectRelayAsync(BusPoint.A, number, userMessageService);
-        if (!result)
-          success = false;
-      }
-
-      foreach (int number in connectionState.GetConnectedPointNumbers(BusPoint.B))
-      {
-        var result = await DisconnectRelayAsync(BusPoint.B, number, userMessageService);
-        if (!result)
-          success = false;
-      }
+      var result = await DisconnectRelayGroupAsync(BusPoint.AB, 1, _moduleRelayControl.PointCount, userMessageService);
+      if (!result)
+        success = false;
 
       return success;
     }

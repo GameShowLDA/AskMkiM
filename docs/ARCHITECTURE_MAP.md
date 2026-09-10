@@ -11,6 +11,22 @@
 
 ## Quick Navigation
 
+Экспорт диагностики за день: кнопка перед текущим пользователем в `MainWindow/MainWindow.xaml`
+→ `MainWindow/MainWindow.DailyReport.cs` → `UI/Controls/DailyReportDateWindow.xaml`
+→ переиспользуемый `UI/Controls/Calendar/CalendarControl.xaml`
+с индикацией доступности по каталогам протоколов и логов (полная дата содержит оба набора данных)
+→ SaveFileDialog → `Ask.Diagnostics/Services/DailyReportService.cs`. ZIP содержит `Protocols`
+из дневного каталога `ExecutionProtocolHistoryService.GetHistoryDirectory()`, `Logs` из
+`AppContext.BaseDirectory/logs/yyyy-MM-dd`, `CrashReports` из настроенного `CrashPackageOptions.Path`
+(пакеты с префиксом `yyyyMMdd_`) и `report.json` с замечаниями. Логи сбрасываются через NLog перед сбором;
+файлы читаются с FileShare.ReadWrite/Delete до длины на момент открытия. Архив формируется во временном
+файле рядом с назначением и переносится после закрытия ZIP. Экспорт доступен из общей панели;
+содержимое протоколов не расшифровывается и не зависит от роли экспортирующего пользователя.
+Иконка `Ask.UI/Shared/Components/Icons/DailyReportIcon.xaml` использует SemiIconDownload из Semi.Avalonia,
+Size/Foreground и анимации общей кнопки; лицензия сохранена рядом. Соседние иконки не заменяются.
+Результат сохранения и ошибка показываются через `NotificationHostService`; окно выбора даты использует
+безрамочный shell, тематические brushes, шрифты и стили кнопок существующих диалогов `Ask.UI`.
+
 | Нужно изменить | Сначала смотреть | Затем смотреть |
 | --- | --- | --- |
 | Запуск приложения | `MainWindow/App.xaml.cs`, `MainWindow/Init/PreStartupInitializer.cs` | `MainWindow/Init/DatabaseInitializer.cs`, `MainWindow/Engine/AppServices.cs`, `MainWindow/MainWindow.xaml.cs` |
@@ -974,6 +990,25 @@ Other runtime branches:
 
 ### Protocols and file formats
 
+Диагностический журнал ASKTRACE: `Ask.Core/Services/Protocols/ExecutionLogCapture.cs`
+подписывается на `LoggerUtility.LogMessageWritten` и `ExceptionLogged` на время запуска.
+`ActionExecutor.StartAsync → ProtocolUI.StartLogCapture` начинает сбор после очистки протокола;
+`ExecutionFinalizer` прекращает сбор после сохранения, включая логи финального сброса.
+`ProtocolUI.IProtocolEntrySink.AppendLineAsync` регистрирует ссылки на сообщения; общий lock
+упорядочивает их относительно логов. При сохранении позиции привязываются к итоговому snapshot,
+в том числе после удаления сообщений повтора. Журнал включает общие логи приложения за интервал
+запуска (не только оборудование); фоновые операции приложения тоже могут попасть в него.
+`ProtocolStorageService → ExecutionProtocolHistoryService.SaveAsync →
+ExecutionProtocolDiagnosticFormatter.FormatProtocolForStorage` сохраняет необязательный массив
+`Logs` в существующем Brotli payload V3. Читаемая часть файла не содержит логов; старые файлы
+без `Logs` продолжают открываться. `ExceptionLogged` дополнительно сохраняет `Exception.ToString()`.
+`SavedExecutionProtocolUI(string)` восстанавливает ленту по `DebugAccessConfig.IsDebugEnabled`
+и подписывается на `SystemStateEvents.DebugRightsChanged` только пока control загружен.
+ROOT видит диагностические строки между сообщениями, остальные роли их не получают;
+смена роли перезагружает представление. `FileOpenService` и парный просмотр `FileService`
+передают исходный текст для повторного восстановления. Логи не участвуют в итоговом вердикте,
+печати и ASKRESULT/ASKREPORT. Сбор находится в памяти до сохранения; это не crash-журнал на диске.
+
 #### Purpose
 
 `ProtocolUI` одновременно служит execution control, interaction/output service,
@@ -1031,6 +1066,9 @@ Legacy traces without V2 snapshots are converted line-by-line by
 `ExecutionProtocolDiagnosticFormatter.RestoreLegacyMessages` and rendered in the same read-only
 `ProtocolListBoxUI`; since the legacy format contains no structured status/group metadata, those
 lines are restored as `Info` while preserving their complete text and blank-line layout.
+В `SavedExecutionProtocolUI` строки `[ЛОГ ROOT]` прикрепляются к предшествующей строке
+`[ОТЛАДКА ROOT]` и по умолчанию скрыты. Root раскрывает отдельную группу логов шевроном у нужной
+диагностической строки; сами строки `[ОТЛАДКА ROOT]` остаются видимыми.
 
 New saves use `#ASKM_PROTOCOL_V3_BR#`: `ExecutionProtocolHistoryService.SaveAsync` delegates to
 `ExecutionProtocolDiagnosticFormatter.FormatProtocolForStorage`, which writes readable protocol
@@ -1039,6 +1077,9 @@ array. Readers remain backward-compatible with V2 per-message snapshots, V1 diag
 pre-structured text traces.
 
 При открытии `.asktrace` `ExecutionProtocolDiagnosticFormatter.PrepareForDisplay`
+загрузка и расшифровка выполняются в фоне с `UI/Components/ProgressWindow.xaml`;
+для `.askresult/.askreport` тот же индикатор оборачивает чтение связанной пары в
+`MainWindow/Services/FileService.OpenLinkedResultProtocol`.
 скрывает служебные записи для обычных ролей и раскрывает источник вызова и атрибуты
 сообщения для `Root`. Старые текстовые протоколы открываются без преобразования.
 Перед сохранением `ActionExecutor.FinalizeAsync` формирует через
@@ -1220,6 +1261,12 @@ executor/strategy
     → protocol line "МКР chassis.number: operation. Системная ошибка. reason [БРАК]"
     → existing Retry / Continue / Abort equipment flow
 ```
+
+Сброс всех точек МКР использует пакетную команду
+`11.1.<PointCount>.32` через `PointManager.DisconnectingAllPoint`;
+Idle-эмулятор должен возвращать подтверждение для действий диапазона `31/32`,
+иначе `ModuleRelayControlQueryExecutor` получает пустой ответ и считает операцию
+неуспешной.
 
 `Ask.Device.ResponseProcessor.ModuleRelayControl.ResponseProcessing.ModuleRelayControlResponseProcessor`
 предоставляет новые проверки ответов подключения/отключения одной точки. Методы
@@ -1651,6 +1698,44 @@ formatted editors; `RunControl` hosts ProtocolUI, translated source and error li
 а неизменённый исходник `TranslatorItem` повторно не записывает и уведомление не показывает.
 В правой области `RunControl` панель действий документа отображается только для
 транслированного файла и итогового протокола; вкладка состояния оборудования её скрывает.
+
+Открытый `.asktrace` отображается через `SavedExecutionProtocolUI` и
+`ProtocolListBoxUI`; рядом с его штатной вертикальной прокруткой размещается
+`ErrorOverviewBar`. Полоса получает строки из существующей коллекции
+`ShowMessageModel`: `Status.Error` или `ExecutionError`; для старых строк `Info`/`null`
+сохраняется распознавание явной метки `[БРАК]`. `AppendLineAsync → AddOverviewDiagnostic`
+индексирует только новое сообщение; `RefreshErrorOverview` пересоздаёт индекс после загрузки/удаления.
+`RequestOverviewUpdate` объединяет обновления через Dispatcher; прокрутка обновляет геометрию
+без повторной классификации сообщений. `RefreshErrorOverviewViewport` выравнивает полосу по
+`PART_VerticalScrollBar → PART_Track`, а рамку — по позиции и размеру его `Thumb`;
+для шаблонов без этих частей используется `VerticalOffset/ExtentHeight` и `ViewportHeight`.
+Кнопки и счётчик находятся в общей верхней строке над списком и полосой.
+`RefreshOverviewPositions → ProjectOverviewOffset → ErrorOverviewBar.SetLinePositions`
+проецирует маркеры в пиксельную шкалу: реализованные контейнеры дают измеренные границы,
+остальные позиции интерполируются между ними и границами `ExtentHeight`.
+Вне экрана геометрия остаётся оценочной из-за виртуализации; при прокрутке она уточняется.
+Ошибки свёрнутой команды отображаются в позиции её заголовка.
+`_visibleIndices` перестраивается при изменении `DisplayItems`, а не на каждом scroll event.
+`_messageItems` сопоставляет сообщения
+с визуальными элементами (включая прикреплённые ROOT-логи), `_itemGroups` — с владельцами-командами.
+Кнопки справа и F8/Shift+F8 вызывают `NavigateToOverviewError → NavigateToErrorOverviewLine`
+с раскрытием группы и `ScrollIntoView`; активная ошибка сохраняется ссылкой на сообщение.
+Панель показывает счётчик, активный маркер и тематические подсказки.
+`GetOverviewSeverity` добавляет синие (`DodgerBlue`, `Information`)
+маркеры для всех `Status.Command` — заголовков групп протокола, включая `ПИ/ПИ1`.
+`IsControlProgramCommandHeader` управляет пошаговым выполнением и не фильтрует маркеры;
+`CommandBlock` не отмечается. `_overviewDiagnostics` содержит команды и ошибки, `_errorOverviewDiagnostics` —
+только ошибки для счётчика, стрелок и F8. Клик по команде раскрывает её и выделяет маркер.
+При объединении с ошибкой кластер становится красным, но сохраняет переходы ко всем его строкам.
+Клик по свободной области вызывает `ScrollToVerticalOffset` с центрированием выбранной позиции.
+При наведении `ErrorOverviewBar` вызывает `ProtocolListBoxUI.GetOverviewPreview` и показывает
+слева компактный фрагмент из ближайших команд/ошибок в отдельном WPF `Popup`,
+не зависящем от глобального шаблона `ToolTip`; для маркера сверху добавляется его описание.
+Позиция Popup следует за курсором по вертикали.
+Близкие маркеры объединяются в ограниченные по высоте кластеры:
+повторные клики обходят их строки, Shift+клик меняет направление. Реализация:
+`Ask.UI/Controls/TextEditorControl/ErrorOverviewBar.cs`,
+`Ask.UI/Components/ProtocolListBox/ProtocolListBoxUI.xaml{,.cs}`.
 
 `Ask.UI` contains newer feature-oriented code: ProtocolNew, Archive, Notifications,
 RoleManagement, ExecutionSelection and reusable controls. Оба UI-проекта пока

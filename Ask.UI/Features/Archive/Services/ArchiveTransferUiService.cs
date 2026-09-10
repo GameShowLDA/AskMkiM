@@ -21,20 +21,20 @@ namespace Ask.UI.Features.Archive.Services
         var exportResult = ArchiveTransferService.ExportAllArchives(targetFolder);
         if (exportResult.ExportedCount == 0 || string.IsNullOrWhiteSpace(exportResult.DestinationDirectory))
         {
-          ShowArchiveNotification("Скачивание архивов", "В папке Archives нет архивов для сохранения на диск.", NotificationType.Warning);
+          ShowArchiveNotification("Экспорт архивов", "В папке Archives нет архивов для сохранения на диск.", NotificationType.Warning);
           return;
         }
 
         ShowArchiveNotification(
-          "Скачивание архивов",
-          $"Скачано архивов: {exportResult.ExportedCount}. Папка: {exportResult.DestinationDirectory}.",
+          "Экспорт архивов",
+          $"Экспортировано архивов: {exportResult.ExportedCount}. Папка: {exportResult.DestinationDirectory}.",
           NotificationType.Success);
       }
       catch (Exception ex)
       {
         ShowArchiveNotification(
-          "Скачивание архивов",
-          GetUserFriendlyArchiveTransferErrorMessage(ex, "Не удалось скачать архивы на диск."),
+          "Экспорт архивов",
+          GetUserFriendlyArchiveTransferErrorMessage(ex, "Не удалось экспортировать архивы на диск."),
           NotificationType.Error);
       }
     }
@@ -50,7 +50,7 @@ namespace Ask.UI.Features.Archive.Services
       try
       {
         var importResult = ArchiveOperationServices.Current.ExecuteImport(
-          "Загрузка готового архива",
+          "Импорт готового архива",
           () => ArchiveTransferService.ImportArchive(archivePath),
           result => new[] { result.ImportedArchivePath });
         var manifestMessage = importResult.ManifestCreated
@@ -58,15 +58,15 @@ namespace Ask.UI.Features.Archive.Services
           : string.Empty;
 
         ShowArchiveNotification(
-          "Загрузка архива",
+          "Импорт архива",
           $"Архив '{Path.GetFileName(importResult.ImportedArchivePath)}' добавлен в папку Archives.{manifestMessage}",
           NotificationType.Success);
       }
       catch (Exception ex)
       {
         ShowArchiveNotification(
-          "Загрузка архива",
-          GetUserFriendlyArchiveTransferErrorMessage(ex, "Не удалось загрузить архив в папку Archives."),
+          "Импорт архива",
+          GetUserFriendlyArchiveTransferErrorMessage(ex, "Не удалось импортировать архив в папку Archives."),
           NotificationType.Error);
       }
     }

@@ -19,6 +19,10 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies.Data
       IHasScheme hasScheme,
       double value = 0,
       double lowerLimit = 0,
-      double higherLimit = 0) : base(context, command, hasScheme, value) { }
+      double higherLimit = 0) : base(context, command, hasScheme, value)
+    {
+      LowerLimit = lowerLimit;
+      HigherLimit = higherLimit;
+    }
   }
 }

@@ -17,6 +17,7 @@ namespace Ask.UI.Features.ProtocolNew.Protocol
     /// <summary>Путь к последнему сохранённому итоговому протоколу.</summary>
     private string? _lastInspectionProtocolPath;
     private ExecutionProtocolEnvironmentSnapshot? _environmentSnapshot;
+    internal ExecutionLogCapture LogCapture { get; } = new();
 
     public void SetEnvironmentSnapshot(ExecutionProtocolEnvironmentSnapshot snapshot)
     {
@@ -54,7 +55,8 @@ namespace Ask.UI.Features.ProtocolNew.Protocol
       _lastExecutionProtocolPath = await ExecutionProtocolHistoryService.SaveAsync(
         name,
         messages,
-        _environmentSnapshot);
+        _environmentSnapshot,
+        LogCapture.Snapshot(messages));
     }
 
     /// <summary>

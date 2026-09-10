@@ -5,11 +5,10 @@ using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.DTO.Settings;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
+using Ask.UI.Controls.TextEditorControl;
 using Ask.UI.Services.Notifications;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
@@ -34,9 +33,22 @@ namespace Ask.UI.Components.ProtocolListBox
     private const double DefaultFontSize = 20.0;
     private const double MouseWheelScrollStep = 48.0;
     private readonly List<ShowMessageModel> _historyMessages = new();
+    private readonly List<(int LineNumber, ErrorOverviewSeverity Severity, string Message)> _errorOverviewDiagnostics = new();
+    private readonly List<(int LineNumber, ErrorOverviewSeverity Severity, string Message)> _overviewDiagnostics = new();
     private ScrollViewer? _protocolScrollViewer;
+    private bool _protocolScrollViewerSubscribed;
     private ProtocolCommandGroup? _currentGroup;
     private ProtocolCommandGroup? _pendingGroup;
+    private int _errorOverviewIndex = -1;
+    private ShowMessageModel? _activeErrorMessage;
+    private readonly Dictionary<ShowMessageModel, int> _messageIndices = new();
+    private bool _overviewUpdatePending;
+    private bool _overviewDiagnosticsDirty;
+    private bool _visibleIndicesDirty = true;
+    private readonly Dictionary<ProtocolDisplayItem, int> _visibleIndices = new();
+    private readonly Dictionary<ShowMessageModel, ProtocolDisplayItem> _messageItems = new();
+    private readonly Dictionary<ProtocolDisplayItem, ProtocolCommandGroup> _itemGroups = new();
+    private ProtocolDisplayItem? _lastMessageItem;
     private bool _scrollToEndRequested;
     private bool _settingsSubscribed;
     private bool _themeSubscribed;
@@ -100,6 +112,12 @@ namespace Ask.UI.Components.ProtocolListBox
     public ProtocolListBoxUI()
     {
       InitializeComponent();
+      errorOverviewBar.SetPositionPreviewFactory(GetOverviewPreview);
+      DisplayItems.CollectionChanged += (_, _) =>
+      {
+        _visibleIndicesDirty = true;
+        RequestOverviewUpdate(diagnosticsChanged: true);
+      };
       PreviewKeyDown += ProtocolListBoxUI_PreviewKeyDown;
       Loaded += ProtocolListBoxUI_Loaded;
       Unloaded += ProtocolListBoxUI_Unloaded;
@@ -108,6 +126,15 @@ namespace Ask.UI.Components.ProtocolListBox
     private void ProtocolListBoxUI_Loaded(object sender, RoutedEventArgs e)
     {
       _protocolScrollViewer ??= FindVisualChild<ScrollViewer>(ProtocolListBox);
+      if (_protocolScrollViewer != null && !_protocolScrollViewerSubscribed)
+      {
+        _protocolScrollViewer.ScrollChanged += ProtocolScrollViewer_ScrollChanged;
+        _protocolScrollViewerSubscribed = true;
+      }
+      RefreshErrorOverviewViewport();
+      Dispatcher.BeginInvoke(
+        () => RefreshOverviewPositions(_protocolScrollViewer?.ExtentHeight ?? 0),
+        DispatcherPriority.ContextIdle);
 
       if (!_themeSubscribed)
       {
@@ -125,6 +152,12 @@ namespace Ask.UI.Components.ProtocolListBox
 
     private void ProtocolListBoxUI_Unloaded(object sender, RoutedEventArgs e)
     {
+      if (_protocolScrollViewerSubscribed && _protocolScrollViewer != null)
+      {
+        _protocolScrollViewer.ScrollChanged -= ProtocolScrollViewer_ScrollChanged;
+        _protocolScrollViewerSubscribed = false;
+      }
+
       if (!_themeSubscribed)
       {
         return;
@@ -166,6 +199,14 @@ namespace Ask.UI.Components.ProtocolListBox
     {
       if (HandleZoomShortcuts(e))
       {
+        return;
+      }
+
+      if (e.Key == Key.F8 &&
+          (Keyboard.Modifiers == ModifierKeys.None || Keyboard.Modifiers == ModifierKeys.Shift))
+      {
+        NavigateToOverviewError(Keyboard.Modifiers == ModifierKeys.Shift);
+        e.Handled = true;
         return;
       }
 
@@ -257,10 +298,88 @@ namespace Ask.UI.Components.ProtocolListBox
 
       if (_protocolScrollViewer != null)
       {
-        double delta = e.Delta > 0 ? -MouseWheelScrollStep : MouseWheelScrollStep;
+        double delta = -e.Delta / 120.0 * (SystemParameters.WheelScrollLines < 0
+          ? _protocolScrollViewer.ViewportHeight
+          : SystemParameters.WheelScrollLines * MouseWheelScrollStep / 3.0);
         _protocolScrollViewer.ScrollToVerticalOffset(_protocolScrollViewer.VerticalOffset + delta);
         e.Handled = true;
       }
+    }
+
+    private void ProtocolScrollViewer_ScrollChanged(object sender, ScrollChangedEventArgs e)
+    {
+      RequestOverviewUpdate(diagnosticsChanged: false);
+    }
+
+    private void RefreshErrorOverviewViewport()
+    {
+      if (_protocolScrollViewer == null || _protocolScrollViewer.ExtentHeight <= 0)
+      {
+        errorOverviewBar.SetViewport(0, 1);
+        return;
+      }
+
+      double extent = _protocolScrollViewer.ExtentHeight;
+      errorOverviewBar.SetViewport(_protocolScrollViewer.VerticalOffset / extent,
+        (_protocolScrollViewer.VerticalOffset + _protocolScrollViewer.ViewportHeight) / extent);
+
+    }
+
+    private void RefreshOverviewPositions(double extent)
+    {
+      if (_visibleIndicesDirty)
+      {
+        _visibleIndices.Clear();
+        for (int i = 0; i < DisplayItems.Count; i++) _visibleIndices[DisplayItems[i]] = i;
+        _visibleIndicesDirty = false;
+      }
+
+      var samples = new SortedDictionary<int, double> { [0] = 0, [DisplayItems.Count] = extent };
+      var panel = FindVisualChild<VirtualizingStackPanel>(ProtocolListBox);
+      var presenter = FindVisualChild<ScrollContentPresenter>(_protocolScrollViewer!);
+      if (panel != null && presenter != null)
+      {
+        foreach (var container in panel.Children.OfType<ListBoxItem>())
+        {
+          if (container.DataContext is not ProtocolDisplayItem item ||
+              !_visibleIndices.TryGetValue(item, out int index)) continue;
+          double offset = container.TranslatePoint(new Point(), presenter).Y + _protocolScrollViewer!.VerticalOffset;
+          if (index > 0) samples[index] = Math.Clamp(offset, 0, extent);
+          if (index + 1 < DisplayItems.Count)
+            samples[index + 1] = Math.Clamp(offset + container.ActualHeight, 0, extent);
+        }
+      }
+      var anchors = samples.Select(pair => (Index: pair.Key, Offset: pair.Value)).ToArray();
+      var positions = new Dictionary<int, double>();
+      foreach (var diagnostic in _overviewDiagnostics)
+      {
+        var message = _historyMessages[diagnostic.LineNumber - 1];
+        if (!_messageItems.TryGetValue(message, out var item)) continue;
+        if (_itemGroups.TryGetValue(item, out var group) && !group.IsExpanded) item = group.HeaderItem;
+        if (_visibleIndices.TryGetValue(item, out int index))
+          positions[diagnostic.LineNumber] = ProjectOverviewOffset(index, anchors) / extent;
+      }
+      errorOverviewBar.SetLinePositions(positions, fraction =>
+        _protocolScrollViewer!.ScrollToVerticalOffset(Math.Max(0,
+          fraction * _protocolScrollViewer.ExtentHeight - _protocolScrollViewer.ViewportHeight / 2)));
+    }
+
+    // Нереализованные строки виртуализированного списка оцениваются между измеренными границами.
+    internal static double ProjectOverviewOffset(int index, IReadOnlyList<(int Index, double Offset)> anchors)
+    {
+      int low = 0;
+      int high = anchors.Count - 1;
+      while (high - low > 1)
+      {
+        int middle = (low + high) / 2;
+        if (anchors[middle].Index <= index) low = middle;
+        else high = middle;
+      }
+      var start = anchors[low];
+      var end = anchors[high];
+      if (end.Index == start.Index) return start.Offset;
+      double fraction = Math.Clamp((double)(index - start.Index) / (end.Index - start.Index), 0, 1);
+      return start.Offset + fraction * (end.Offset - start.Offset);
     }
 
     private static T? FindVisualChild<T>(DependencyObject parent) where T : DependencyObject
@@ -399,7 +518,13 @@ namespace Ask.UI.Components.ProtocolListBox
         for (int i = removedMessages.Count - 1; i >= 0; i--)
         {
           RemoveLastVisibleMessage(removedMessages[i]);
+          if (_messageItems.TryGetValue(removedMessages[i], out var removedItem) &&
+              ReferenceEquals(removedItem.Message, removedMessages[i])) _itemGroups.Remove(removedItem);
+          _messageItems.Remove(removedMessages[i]);
         }
+        _lastMessageItem = _historyMessages.Count > 0 &&
+          _messageItems.TryGetValue(_historyMessages[^1], out var tailItem) ? tailItem : null;
+        RefreshErrorOverview();
         removed = linesToRemove;
       });
 
@@ -456,6 +581,11 @@ namespace Ask.UI.Components.ProtocolListBox
         DisplayItems.Clear();
         _currentGroup = null;
         _pendingGroup = null;
+        _lastMessageItem = null;
+        _activeErrorMessage = null;
+        _messageItems.Clear();
+        _itemGroups.Clear();
+        RefreshErrorOverview();
         LogInformation("Протокол полностью очищен.");
       });
     }
@@ -504,6 +634,9 @@ namespace Ask.UI.Components.ProtocolListBox
 
         _historyMessages.Add(showMessageModel);
         AppendVisibleMessage(showMessageModel);
+        _messageIndices[showMessageModel] = _historyMessages.Count - 1;
+        AddOverviewDiagnostic(showMessageModel, _historyMessages.Count);
+        RequestOverviewUpdate();
 
         if (lastMessage)
         {
@@ -560,6 +693,13 @@ namespace Ask.UI.Components.ProtocolListBox
 
     private void AppendVisibleMessage(ShowMessageModel model)
     {
+      if (IsStandaloneServiceLog(model) && _lastMessageItem != null)
+      {
+        _lastMessageItem.AddServiceLog(model.Debug!);
+        _messageItems[model] = _lastMessageItem;
+        return;
+      }
+
       if (model.Status == ShowMessageModel.MessageType.Command)
       {
         StartCommandGroup(model);
@@ -574,9 +714,12 @@ namespace Ask.UI.Components.ProtocolListBox
       EnsureCurrentGroupStarted();
 
       var lineItem = ProtocolDisplayItem.CreateLine(model, isInsideCommandGroup: _currentGroup != null);
+      _lastMessageItem = lineItem;
+      _messageItems[model] = lineItem;
 
       if (_currentGroup != null)
       {
+        _itemGroups[lineItem] = _currentGroup;
         _currentGroup.AddBodyItem(lineItem);
 
         if (_currentGroup.IsExpanded)
@@ -603,6 +746,8 @@ namespace Ask.UI.Components.ProtocolListBox
       }
 
       var group = new ProtocolCommandGroup(model);
+      _lastMessageItem = group.HeaderItem;
+      _messageItems[model] = group.HeaderItem;
       _pendingGroup = group;
 
       DisplayItems.Add(group.HeaderItem);
@@ -715,17 +860,188 @@ namespace Ask.UI.Components.ProtocolListBox
       e.Handled = true;
     }
 
+    private void ServiceLogsToggleButton_Click(object sender, RoutedEventArgs e)
+    {
+      if (sender is ToggleButton { DataContext: ProtocolDisplayItem item })
+        item.AreServiceLogsExpanded = !item.AreServiceLogsExpanded;
+
+      e.Handled = true;
+    }
+
+    private static bool IsStandaloneServiceLog(ShowMessageModel message)
+      => string.IsNullOrWhiteSpace(message.Header) &&
+         string.IsNullOrWhiteSpace(message.Message) &&
+         message.Debug?.TrimStart().StartsWith("[ЛОГ ROOT]", StringComparison.Ordinal) == true;
+
     private void RestoreVisibleItems()
     {
       DisplayItems.Clear();
       _currentGroup = null;
       _pendingGroup = null;
+      _lastMessageItem = null;
+      _messageItems.Clear();
+      _itemGroups.Clear();
       for (int i = 0; i < _historyMessages.Count; i++)
       {
         AppendVisibleMessage(_historyMessages[i]);
       }
 
       FinalizeLatestCommandGroup();
+      RefreshErrorOverview();
+      RefreshErrorOverviewViewport();
+    }
+
+    private void RefreshErrorOverview()
+    {
+      _errorOverviewDiagnostics.Clear();
+      _overviewDiagnostics.Clear();
+      _messageIndices.Clear();
+      for (int i = 0; i < _historyMessages.Count; i++)
+      {
+        _messageIndices[_historyMessages[i]] = i;
+        AddOverviewDiagnostic(_historyMessages[i], i + 1);
+      }
+      RequestOverviewUpdate();
+    }
+
+    private void AddOverviewDiagnostic(ShowMessageModel message, int lineNumber)
+    {
+      var severity = GetOverviewSeverity(message);
+      if (severity == null) return;
+      var diagnostic = (lineNumber, severity.Value, ExecutionProtocolLineFormatter.Format(message));
+      _overviewDiagnostics.Add(diagnostic);
+      if (severity == ErrorOverviewSeverity.Error) _errorOverviewDiagnostics.Add(diagnostic);
+    }
+
+    internal static ErrorOverviewSeverity? GetOverviewSeverity(ShowMessageModel message)
+      => IsOverviewError(message) ? ErrorOverviewSeverity.Error
+        : message.Status == ShowMessageModel.MessageType.Command
+          ? ErrorOverviewSeverity.Information : null;
+
+    internal static bool IsOverviewError(ShowMessageModel message)
+      => message.Status == ShowMessageModel.MessageType.Error || message.ExecutionError ||
+        ((message.Status == null || message.Status == ShowMessageModel.MessageType.Info) &&
+         (message.Header?.Contains("[БРАК]", StringComparison.OrdinalIgnoreCase) == true ||
+          message.Message?.Contains("[БРАК]", StringComparison.OrdinalIgnoreCase) == true));
+
+    private void RequestOverviewUpdate(bool diagnosticsChanged = true)
+    {
+      _overviewDiagnosticsDirty |= diagnosticsChanged;
+      if (_overviewUpdatePending) return;
+      _overviewUpdatePending = true;
+      Dispatcher.BeginInvoke(() =>
+      {
+        _overviewUpdatePending = false;
+        if (_overviewDiagnosticsDirty)
+        {
+          _overviewDiagnosticsDirty = false;
+          errorOverviewBar.SetLineDiagnostics(_historyMessages.Count,
+            _overviewDiagnostics, NavigateToErrorOverviewLine);
+          RefreshOverviewPositions(_protocolScrollViewer?.ExtentHeight ?? 0);
+        }
+        UpdateOverviewSelection();
+        RefreshErrorOverviewViewport();
+      }, DispatcherPriority.Loaded);
+    }
+
+    private void UpdateOverviewSelection()
+    {
+      int line = _activeErrorMessage != null && _messageIndices.TryGetValue(_activeErrorMessage, out int index)
+        ? index + 1 : -1;
+      _errorOverviewIndex = _errorOverviewDiagnostics.FindIndex(d => d.LineNumber == line);
+      errorOverviewBar.SetActiveLine(line);
+    }
+
+    private void PreviousErrorButton_Click(object sender, RoutedEventArgs e) => NavigateToOverviewError(true);
+    private void NextErrorButton_Click(object sender, RoutedEventArgs e) => NavigateToOverviewError(false);
+
+    internal string? GetOverviewPreview(double fraction)
+    {
+      if (_historyMessages.Count == 0) return null;
+
+      var relevant = Enumerable.Range(0, _historyMessages.Count)
+        .Where(index => GetOverviewSeverity(_historyMessages[index]) != null)
+        .ToArray();
+      if (relevant.Length == 0) return null;
+
+      int target = (int)Math.Round(Math.Clamp(fraction, 0, 1) * (_historyMessages.Count - 1));
+      int centerPosition = Array.BinarySearch(relevant, target);
+      if (centerPosition < 0) centerPosition = ~centerPosition;
+      centerPosition = Math.Clamp(centerPosition, 0, relevant.Length - 1);
+      if (centerPosition > 0 &&
+          (centerPosition == relevant.Length - 1 ||
+           target - relevant[centerPosition - 1] <= relevant[centerPosition] - target))
+      {
+        centerPosition--;
+      }
+
+      int startPosition = Math.Max(0, centerPosition - 1);
+      int endPosition = Math.Min(relevant.Length - 1, centerPosition + 1);
+      int centerLine = relevant[centerPosition] + 1;
+      var lines = new List<string> { $"Команды и ошибки · строка {centerLine}" };
+      for (int position = startPosition; position <= endPosition; position++)
+      {
+        int index = relevant[position];
+        string line = ExecutionProtocolLineFormatter.Format(_historyMessages[index]);
+        line = line.Replace("\r", " ").Replace("\n", " ").Trim();
+        if (line.Length > 180) line = line[..177] + "...";
+        lines.Add($"{(position == centerPosition ? "▸" : " ")} {index + 1,5}: {line}");
+      }
+      return string.Join(Environment.NewLine, lines);
+    }
+
+    internal void NavigateToErrorOverviewLine(int lineNumber)
+    {
+      int messageIndex = lineNumber - 1;
+      if (messageIndex < 0 || messageIndex >= _historyMessages.Count)
+      {
+        return;
+      }
+
+      var targetMessage = _historyMessages[messageIndex];
+      _activeErrorMessage = targetMessage;
+      _errorOverviewIndex = _errorOverviewDiagnostics.FindIndex(diagnostic =>
+        diagnostic.LineNumber == lineNumber);
+      _messageItems.TryGetValue(targetMessage, out var item);
+      if (item == null)
+        item = DisplayItems.FirstOrDefault(displayItem =>
+          _messageIndices.TryGetValue(displayItem.Message, out int index) && index >= messageIndex)
+          ?? DisplayItems.LastOrDefault();
+      if (item?.Group != null) ExpandGroup(item.Group);
+      if (item != null && _itemGroups.TryGetValue(item, out var ownerGroup)) ExpandGroup(ownerGroup);
+      if (IsStandaloneServiceLog(targetMessage) && item != null) item.AreServiceLogsExpanded = true;
+
+      if (item == null)
+      {
+        return;
+      }
+
+      ProtocolListBox.SelectedItem = item;
+      ProtocolListBox.ScrollIntoView(item);
+      ProtocolListBox.Focus();
+      UpdateOverviewSelection();
+    }
+
+    private void NavigateToOverviewError(bool previous)
+    {
+      if (_errorOverviewDiagnostics.Count == 0)
+      {
+        return;
+      }
+
+      int nextIndex;
+      if (_errorOverviewIndex < 0)
+      {
+        nextIndex = previous ? _errorOverviewDiagnostics.Count - 1 : 0;
+      }
+      else
+      {
+        int direction = previous ? -1 : 1;
+        nextIndex = (_errorOverviewIndex + direction + _errorOverviewDiagnostics.Count) %
+          _errorOverviewDiagnostics.Count;
+      }
+
+      NavigateToErrorOverviewLine(_errorOverviewDiagnostics[nextIndex].LineNumber);
     }
 
     private void RefreshThemeColors()

@@ -11,6 +11,8 @@ using Message;
 using System.IO;
 using System.Text;
 using System.Windows;
+using System.Windows.Media.Effects;
+using UI.Components;
 using UI.Components.SearchControls;
 using UI.Controls.TextEditorControl;
 using static Ask.LogLib.LoggerUtility;
@@ -43,33 +45,55 @@ namespace UI.Services.FileManager
     /// <param name="path">Полный путь к файлу.</param>
     public void OpenFile(string path)
     {
-      Application.Current.Dispatcher.BeginInvoke(() =>
+      Application.Current.Dispatcher.BeginInvoke(async () =>
       {
         var fileName = ExtractFileName(path);
         if (!ValidateFileName(fileName, path))
           return;
 
+        ProgressWindow? progressWindow = null;
+        Effect? previousEffect = null;
         try
         {
-          var (rawContent, encoding) = ReadRawFileContent(path);
           var fileType = DetermineFileType(fileName);
           if (fileType == FileType.Protocol)
           {
-            if (!ExecutionProtocolDiagnosticFormatter.TryRestoreMessages(
-                  rawContent,
-                  DebugAccessConfig.IsDebugEnabled,
-                  out var messages))
+            var owner = Application.Current.MainWindow;
+            previousEffect = owner?.Effect;
+            progressWindow = new ProgressWindow
             {
-              messages = ExecutionProtocolDiagnosticFormatter.RestoreLegacyMessages(
-                rawContent,
-                DebugAccessConfig.IsDebugEnabled);
-            }
+              Owner = owner,
+              WindowStartupLocation = owner == null
+                ? WindowStartupLocation.CenterScreen
+                : WindowStartupLocation.CenterOwner,
+            };
+            progressWindow.Configure("Открытие протокола", "Загрузка данных", $"Открываем файл: {fileName}");
+            if (owner != null) owner.Effect = new BlurEffect { Radius = 8 };
+            progressWindow.Show();
+            await progressWindow.Dispatcher.InvokeAsync(() => { }, System.Windows.Threading.DispatcherPriority.Render);
+          }
 
+          var (rawContent, encoding) = fileType == FileType.Protocol
+            ? await Task.Run(() => ReadRawFileContent(path))
+            : ReadRawFileContent(path);
+          if (fileType == FileType.Protocol)
+          {
+            bool debugEnabled = DebugAccessConfig.IsDebugEnabled;
+            var messages = await Task.Run(() =>
+            {
+              if (ExecutionProtocolDiagnosticFormatter.TryRestoreMessages(rawContent, debugEnabled, out var restored))
+                return restored;
+
+              return ExecutionProtocolDiagnosticFormatter.RestoreLegacyMessages(rawContent, debugEnabled);
+            });
             new UI.Components.MultiEditorMethods.ControlManager(_fileManager.EditorWorkspaceModel).AddControl(
               fileName,
               new SavedExecutionProtocolUI(messages),
               TypeWindow.Files,
               path);
+            await Application.Current.Dispatcher.InvokeAsync(
+              () => { },
+              System.Windows.Threading.DispatcherPriority.ContextIdle);
             return;
           }
 
@@ -84,6 +108,12 @@ namespace UI.Services.FileManager
         catch (Exception ex)
         {
           HandleFileReadError(ex, path);
+        }
+        finally
+        {
+          progressWindow?.Close();
+          if (progressWindow != null && Application.Current.MainWindow != null)
+            Application.Current.MainWindow.Effect = previousEffect;
         }
       });
     }

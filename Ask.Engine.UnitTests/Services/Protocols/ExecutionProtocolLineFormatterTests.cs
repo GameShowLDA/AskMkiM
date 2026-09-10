@@ -6,6 +6,30 @@ namespace Ask.Engine.UnitTests.Services.Protocols;
 public class ExecutionProtocolLineFormatterTests
 {
   [Fact]
+  public void CompressedLogs_AreInterleavedOnlyForRoot()
+  {
+    var messages = new[] { new ShowMessageModel("Первое"), new ShowMessageModel("Второе") };
+    var logs = new[]
+    {
+      new ExecutionLogEntry(0, DateTimeOffset.UtcNow, "Debug", "До запуска"),
+      new ExecutionLogEntry(1, DateTimeOffset.UtcNow, "Exception", "SocketException\nstack trace"),
+      new ExecutionLogEntry(2, DateTimeOffset.UtcNow, "Information", "Сброс завершён")
+    };
+    string stored = string.Join("\n", ExecutionProtocolDiagnosticFormatter.FormatProtocolForStorage(messages, null, logs));
+    Assert.DoesNotContain("SocketException", stored);
+    Assert.True(ExecutionProtocolDiagnosticFormatter.TryRestoreMessages(stored, false, out var regular));
+    Assert.Equal(2, regular.Count);
+    Assert.All(regular, m => Assert.True(string.IsNullOrEmpty(m.Debug)));
+    Assert.True(ExecutionProtocolDiagnosticFormatter.TryRestoreMessages(stored, true, out var root));
+    Assert.Equal(5, root.Count);
+    Assert.Contains("До запуска", root[0].Debug);
+    Assert.Equal("Первое", root[1].Header);
+    Assert.Contains("SocketException\nstack trace", root[2].Debug);
+    Assert.Equal("Второе", root[3].Header);
+    Assert.Contains("Сброс завершён", root[4].Debug);
+  }
+
+  [Fact]
   public void Format_IncludesColonTimeAndIndentWithoutDebugSource()
   {
     var message = new ShowMessageModel

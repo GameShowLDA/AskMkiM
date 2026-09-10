@@ -782,23 +782,29 @@ namespace UI.Controls.TextEditorControl
       if (textEditor.IsReadOnly || textEditor.Document == null)
         return false;
 
+      var document = textEditor.Document;
       var caret = textEditor.TextArea.Caret;
       int lineNumber = caret.Line;
-      if (lineNumber <= 0 || lineNumber > textEditor.Document.LineCount)
+      if (lineNumber <= 0 || lineNumber > document.LineCount)
         return false;
 
-      var line = textEditor.Document.GetLineByNumber(lineNumber);
-      string lineText = textEditor.Document.GetText(line.Offset, line.Length);
-      string indent = GetLeadingWhitespace(lineText);
+      var line = document.GetLineByNumber(lineNumber);
+      string lineText = document.GetText(line.Offset, line.Length);
+      string indent = string.IsNullOrWhiteSpace(lineText)
+        ? string.Empty
+        : GetLeadingWhitespace(lineText);
 
       if (indent.Length == 0 && CommandHeaderRegex.IsMatch(lineText))
       {
         indent = "\t";
       }
 
-      string newLine = textEditor.Document.GetLineByNumber(1).DelimiterLength > 0 ? "\r\n" : Environment.NewLine;
-      textEditor.Document.Insert(caret.Offset, $"{newLine}{indent}");
-      caret.Offset += newLine.Length + indent.Length;
+      string newLine = document.GetLineByNumber(1).DelimiterLength > 0 ? "\r\n" : Environment.NewLine;
+      string insertedText = $"{newLine}{indent}";
+      int insertionOffset = caret.Offset;
+
+      document.Insert(insertionOffset, insertedText);
+      caret.Offset = insertionOffset + insertedText.Length;
       e.Handled = true;
       return true;
     }

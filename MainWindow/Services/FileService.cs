@@ -142,7 +142,7 @@ namespace MainWindowProgram.Services
     /// <summary>
     /// Открывает диалог выбора файлов и загружает их в редактор.
     /// </summary>
-    public void OpenFileAsync()
+    public async void OpenFileAsync()
     {
       if (_isLockedProvider())
       {
@@ -169,7 +169,7 @@ namespace MainWindowProgram.Services
 
           foreach (string filePath in openFileDialog.FileNames)
           {
-            OpenFileWithLegacyConversion(filePath);
+            await OpenFileWithLegacyConversion(filePath);
           }
         }
       }
@@ -199,7 +199,7 @@ namespace MainWindowProgram.Services
     /// Открывает указанный файл в редакторе.
     /// </summary>
     /// <param name="filePath">Путь к файлу.</param>
-    public void OpenFileAsync(string filePath)
+    public async void OpenFileAsync(string filePath)
     {
       if (_isLockedProvider())
       {
@@ -207,16 +207,16 @@ namespace MainWindowProgram.Services
       }
       else
       {
-        OpenFileWithLegacyConversion(filePath);
+        await OpenFileWithLegacyConversion(filePath);
       }
     }
 
-    private void OpenFileWithLegacyConversion(string filePath)
+    private async Task OpenFileWithLegacyConversion(string filePath)
     {
       string extension = Path.GetExtension(filePath);
       if (ProtocolFileExtensions.IsSummary(extension))
       {
-        OpenLinkedResultProtocol(filePath);
+        await OpenLinkedResultProtocol(filePath);
         return;
       }
 
@@ -235,10 +235,28 @@ namespace MainWindowProgram.Services
       _multiWindow.EditorDocumentService.OpenFile(filePath);
     }
 
-    private void OpenLinkedResultProtocol(string resultProtocolPath)
+    private async Task OpenLinkedResultProtocol(string resultProtocolPath)
     {
+      var owner = Application.Current?.MainWindow;
+      var previousEffect = owner?.Effect;
+      ProgressWindow? progressWindow = null;
       try
       {
+        progressWindow = new ProgressWindow
+        {
+          Owner = owner,
+          WindowStartupLocation = owner == null
+            ? WindowStartupLocation.CenterScreen
+            : WindowStartupLocation.CenterOwner,
+        };
+        progressWindow.Configure(
+          "Открытие протокола",
+          "Загрузка данных",
+          $"Открываем файл: {Path.GetFileName(resultProtocolPath)}");
+        if (owner != null) owner.Effect = new BlurEffect { Radius = 8 };
+        progressWindow.Show();
+        await WaitForProgressWindowAsync(progressWindow);
+
         string fullResultPath = Path.GetFullPath(resultProtocolPath);
         string resultExtension = Path.GetExtension(fullResultPath);
         string traceExtension = string.Equals(
@@ -249,32 +267,37 @@ namespace MainWindowProgram.Services
           : ProtocolFileExtensions.Trace;
         string executionProtocolPath = Path.ChangeExtension(fullResultPath, traceExtension);
 
-        string resultProtocolText = ReadSavedProtocolText(fullResultPath);
-        string rawExecutionProtocol = File.Exists(executionProtocolPath)
-          ? ReadSavedProtocolText(executionProtocolPath)
-          : string.Empty;
-        SavedProtocolPairUI viewer;
-        if (ExecutionProtocolDiagnosticFormatter.TryRestoreMessages(
-              rawExecutionProtocol,
-              DebugAccessConfig.IsDebugEnabled,
-              out var messages))
+        bool hasExecutionProtocol = File.Exists(executionProtocolPath);
+        bool debugEnabled = DebugAccessConfig.IsDebugEnabled;
+        var protocolTexts = await Task.Run(() =>
         {
-          viewer = new SavedProtocolPairUI(messages, resultProtocolText);
-        }
-        else
-        {
-          var legacyMessages = File.Exists(executionProtocolPath)
-            ? ExecutionProtocolDiagnosticFormatter.RestoreLegacyMessages(
-              rawExecutionProtocol,
-              DebugAccessConfig.IsDebugEnabled)
-            : new[] { new ShowMessageModel($"Связанный протокол выполнения не найден:\n{executionProtocolPath}") };
-          viewer = new SavedProtocolPairUI(legacyMessages, resultProtocolText);
-        }
+          string result = ReadSavedProtocolText(fullResultPath);
+          string trace = hasExecutionProtocol
+            ? ReadSavedProtocolText(executionProtocolPath)
+            : string.Empty;
+          IReadOnlyList<ShowMessageModel> messages;
+          if (hasExecutionProtocol &&
+              ExecutionProtocolDiagnosticFormatter.TryRestoreMessages(trace, debugEnabled, out var restored))
+          {
+            messages = restored;
+          }
+          else
+          {
+            messages = hasExecutionProtocol
+              ? ExecutionProtocolDiagnosticFormatter.RestoreLegacyMessages(trace, debugEnabled)
+              : new[] { new ShowMessageModel($"Связанный протокол выполнения не найден:\n{executionProtocolPath}") };
+          }
+
+          return (Result: result, Messages: messages);
+        });
+        string resultProtocolText = protocolTexts.Result;
+        var viewer = new SavedProtocolPairUI(protocolTexts.Messages, resultProtocolText);
         _multiWindow.WorkspaceService.AddControl(
           Path.GetFileName(fullResultPath),
           viewer,
           TypeWindow.Files,
           fullResultPath);
+        await Dispatcher.Yield(DispatcherPriority.ContextIdle);
       }
       catch (Exception ex)
       {
@@ -284,6 +307,11 @@ namespace MainWindowProgram.Services
           "Открытие протокола",
           MessageBoxButton.OK,
           MessageBoxImage.Error);
+      }
+      finally
+      {
+        progressWindow?.Close();
+        if (owner != null) owner.Effect = previousEffect;
       }
     }
 
