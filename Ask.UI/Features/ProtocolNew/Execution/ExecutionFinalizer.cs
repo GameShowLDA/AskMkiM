@@ -3,6 +3,7 @@ using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Metadata.Enums.ExecutionEnums;
+using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.UI.Controls.ProtocolNew;
 using Ask.UI.Features.ProtocolNew.Protocol;
 using Ask.UI.Features.ProtocolNew.Services;
@@ -56,6 +57,10 @@ internal sealed class ExecutionFinalizer
     Action resetExecutorState,
     Action<bool>? processingStateChanged)
   {
+    using var selfTestScope = settings.CheckType == CheckType.SelfTest
+      ? EquipmentExecutionContext.EnterSelfTest()
+      : null;
+
     await RunMandatoryStepsAsync(
       ("остановка выполняемой задачи", cancelProcessAsync),
       ("финальный сброс использованного оборудования", resetUsedEquipmentAsync),

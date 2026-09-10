@@ -1,5 +1,8 @@
+using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.UI;
 using Ask.Core.Services.Validation.Devices;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule.Capabilities;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
@@ -40,6 +43,30 @@ namespace Ask.Device.Runtime.Device
 
     /// <inheritdoc />
     public int NumberChassis { get; set; }
+
+    /// <summary>
+    /// Получает актуальный экземпляр тестера, которому принадлежит модуль.
+    /// Задаётся при построении runtime-устройства.
+    /// </summary>
+    public Func<Task<IChassisManager?>>? ChassisManagerProvider { get; set; }
+
+    /// <summary>
+    /// Проверяет, блокирует ли симуляция сбоя тестера ответы этого МКР на любые команды.
+    /// </summary>
+    internal async Task<bool> ShouldSimulateChassisFailureAsync()
+    {
+      if (!ExecutionConfig.GetIsIdleModeEnabled()
+        || EquipmentExecutionContext.IsSelfTest
+        || ChassisManagerProvider == null)
+      {
+        return false;
+      }
+
+      var chassis = await ChassisManagerProvider();
+      return chassis != null
+        && chassis.Number == NumberChassis
+        && IdleHardwareErrorSimulator.ShouldSimulateHardwareError(chassis);
+    }
 
     /// <inheritdoc />
     public int PointCount
