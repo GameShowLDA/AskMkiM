@@ -2,8 +2,6 @@ using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Engine.ControlCommandAnalyser;
 using ICSharpCode.AvalonEdit;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 
 namespace Ask.UI.Controls.TextEditorControl.Diagnostics;
@@ -16,7 +14,8 @@ public sealed class LiveDiagnosticsController
   private readonly TextEditor _editor;
   private readonly DiagnosticUnderlineRenderer _renderer;
   private readonly Func<string, CancellationToken, IReadOnlyList<SourceDiagnostic>> _analyze;
-  private readonly ToolTip _toolTip = new() { Placement = PlacementMode.Mouse, MaxWidth = 620 };
+  private readonly DiagnosticHoverPopup _hoverPopup;
+  private Window? _hostWindow;
   private CancellationTokenSource? _pending;
   private bool _enabled;
 
@@ -29,14 +28,23 @@ public sealed class LiveDiagnosticsController
     _editor = editor;
     _analyze = analyze;
     _renderer = new DiagnosticUnderlineRenderer(editor.TextArea.TextView);
+    _hoverPopup = new DiagnosticHoverPopup(editor.TextArea.TextView);
     editor.TextArea.TextView.BackgroundRenderers.Add(_renderer);
     editor.TextChanged += OnTextChanged;
     editor.DocumentChanged += OnTextChanged;
     editor.Loaded += OnLoaded;
     editor.Unloaded += OnUnloaded;
     editor.MouseHover += OnMouseHover;
-    editor.MouseHoverStopped += OnMouseHoverStopped;
-    editor.MouseLeave += OnMouseHoverStopped;
+    editor.MouseMove += OnMouseMove;
+    editor.MouseLeave += (_, _) => _hoverPopup.ScheduleClose();
+    editor.PreviewMouseDown += OnDismissHover;
+    editor.PreviewKeyDown += OnDismissHover;
+    editor.PreviewMouseWheel += OnDismissHover;
+    editor.SizeChanged += OnDismissHover;
+    editor.TextArea.TextView.ScrollOffsetChanged += OnDismissHover;
+    // Opening a Popup can itself rebuild visual lines during WPF layout.
+    // Close for user navigation/resize, not for every VisualLinesChanged event.
+    if (editor.IsLoaded) AttachWindow();
   }
 
   public void Configure(FileType fileType)
@@ -105,30 +113,68 @@ public sealed class LiveDiagnosticsController
     _pending?.Cancel();
     _pending = null;
     _renderer.SetDiagnostics(Array.Empty<SourceDiagnostic>());
-    _toolTip.IsOpen = false;
+    _hoverPopup.Close();
   }
 
-  private void OnLoaded(object sender, RoutedEventArgs e) => Refresh();
-  private void OnUnloaded(object sender, RoutedEventArgs e) => CancelPending();
+  private void OnLoaded(object sender, RoutedEventArgs e)
+  {
+    AttachWindow();
+    Refresh();
+  }
+
+  private void OnUnloaded(object sender, RoutedEventArgs e)
+  {
+    CancelPending();
+    DetachWindow();
+  }
+
   private void OnTextChanged(object? sender, EventArgs e) => Refresh();
-  private void OnMouseHoverStopped(object sender, MouseEventArgs e) => _toolTip.IsOpen = false;
+  private void OnDismissHover(object? sender, EventArgs e)
+  {
+    // Popup input can route through its placement target. Allow scrolling the card.
+    if (e is MouseEventArgs && _hoverPopup.Content.IsMouseOver) return;
+    _hoverPopup.Close();
+  }
+
+  private void AttachWindow()
+  {
+    DetachWindow();
+    _hostWindow = Window.GetWindow(_editor);
+    if (_hostWindow == null) return;
+    _hostWindow.Deactivated += OnDismissHover;
+    _hostWindow.LocationChanged += OnDismissHover;
+  }
+
+  private void DetachWindow()
+  {
+    if (_hostWindow == null) return;
+    _hostWindow.Deactivated -= OnDismissHover;
+    _hostWindow.LocationChanged -= OnDismissHover;
+    _hostWindow = null;
+  }
 
   private void OnMouseHover(object sender, MouseEventArgs e)
   {
-    var position = _editor.GetPositionFromPoint(e.GetPosition(_editor));
-    if (position == null || _editor.Document == null) return;
-    int offset = _editor.Document.GetOffset(position.Value.Location);
-    var diagnostics = _renderer.GetDiagnosticsAt(offset);
-    if (diagnostics.Count == 0) return;
-    _toolTip.Content = new TextBlock
+    if (UpdateHover(e.GetPosition(_editor.TextArea.TextView))) e.Handled = true;
+  }
+
+  private void OnMouseMove(object sender, MouseEventArgs e)
+  {
+    if (_hoverPopup.IsOpen && !_hoverPopup.Content.IsMouseOver)
+      UpdateHover(e.GetPosition(_editor.TextArea.TextView));
+  }
+
+  internal DiagnosticHoverPopup HoverPopup => _hoverPopup;
+
+  internal bool UpdateHover(Point point)
+  {
+    var diagnostics = _renderer.GetDiagnosticsAt(point, out var anchor);
+    if (diagnostics.Count == 0)
     {
-      Text = string.Join(Environment.NewLine, diagnostics.Select(d =>
-        $"{(d.IsWarning ? "Предупреждение" : "Ошибка")}: {d.Description}").Distinct()),
-      TextWrapping = TextWrapping.Wrap,
-      MaxWidth = 600,
-    };
-    _toolTip.PlacementTarget = _editor;
-    _toolTip.IsOpen = true;
-    e.Handled = true;
+      _hoverPopup.ScheduleClose();
+      return false;
+    }
+    _hoverPopup.Show(diagnostics, anchor);
+    return true;
   }
 }

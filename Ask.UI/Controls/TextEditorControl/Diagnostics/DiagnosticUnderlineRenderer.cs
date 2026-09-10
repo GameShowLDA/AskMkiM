@@ -32,6 +32,32 @@ internal sealed class DiagnosticUnderlineRenderer : IBackgroundRenderer
       .Where(s => offset < s.EndOffset)
       .Select(s => s.Diagnostic).OrderBy(d => d.IsWarning).ToArray();
 
+  internal IReadOnlyList<SourceDiagnostic> GetDiagnosticsAt(Point point, out Rect anchor)
+  {
+    anchor = Rect.Empty;
+    if (!_view.VisualLinesValid || _view.VisualLines.Count == 0
+      || !new Rect(_view.RenderSize).Contains(point)) return Array.Empty<SourceDiagnostic>();
+
+    int start = _view.VisualLines[0].FirstDocumentLine.Offset;
+    int end = _view.VisualLines[^1].LastDocumentLine.EndOffset;
+    var matches = new List<SourceDiagnostic>();
+    foreach (var segment in _segments.FindOverlappingSegments(start, end - start))
+    {
+      foreach (var rect in BackgroundGeometryBuilder.GetRectsForSegment(_view, segment))
+      {
+        // Hit the actual glyph/underline rectangle, including the last character.
+        // A nearest-caret lookup can round that character to the end of the span.
+        if (!rect.Contains(point)) continue;
+        var visible = Rect.Intersect(rect, new Rect(_view.RenderSize));
+        if (anchor.IsEmpty) anchor = visible;
+        else anchor.Union(visible);
+        matches.Add(segment.Diagnostic);
+        break;
+      }
+    }
+    return matches.OrderBy(d => d.IsWarning).ToArray();
+  }
+
   public void Draw(TextView textView, DrawingContext drawingContext)
   {
     if (!textView.VisualLinesValid || textView.VisualLines.Count == 0) return;
