@@ -48,6 +48,9 @@ WPF-свойства. `Padding` и внешняя рамка уменьшают 
 `Ask.UI/Components/ProtocolListBox/ProtocolListBoxUI.xaml`.
 У обоих установлен `Background="Transparent"`, рамки отключены,
 у полосы — `IsViewportVisible="False"`, поэтому видны только маркеры.
+Полоса маркеров находится между списком и правым `ProtocolVerticalScrollBar`.
+Внутренний скролл списка скрыт; внешний синхронизируется с тем же ScrollViewer
+через `RefreshVerticalScrollBar` и `ProtocolVerticalScrollBar_Scroll`.
 Пример ниже применим при подключении соответствующих свойств хоста к элементам.
 
 ```xml

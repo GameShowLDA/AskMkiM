@@ -1744,7 +1744,13 @@ formatted editors; `RunControl` hosts ProtocolUI, translated source and error li
 `IsViewportVisible=false`: на общем фоне протокола видны только маркеры.
 Свойства `OverviewBarStyle`, `OverviewHostStyle`, `OverviewVisibility` и
 `ProtocolVerticalScrollBarVisibility` объявлены в `ProtocolListBoxUI.OverviewProperties.cs`,
-но текущая разметка не привязывается к ним; штатный вертикальный ScrollBar использует `Auto`.
+но текущая разметка не привязывается к ним.
+Порядок колонок: список → прозрачная полоса маркеров → `ProtocolVerticalScrollBar`.
+Внутренний ScrollBar списка скрыт через `Hidden`, прокрутка и виртуализация остаются у его ScrollViewer.
+`Loaded` и `ProtocolScrollViewer_ScrollChanged → RefreshVerticalScrollBar` синхронизируют
+диапазон, размер Thumb, шаг страницы и позицию внешнего стандартного WPF ScrollBar;
+при отсутствии прокрутки он сворачивается. `ProtocolVerticalScrollBar_Scroll`
+передаёт `ScrollEventArgs.NewValue → ScrollToVerticalOffset` того же ScrollViewer.
 Кнопки/F8 и счётчик протокола независимы от этих локальных настроек.
 Свойства и примеры: [ErrorOverviewBar](controls/ErrorOverviewBar.md).
 

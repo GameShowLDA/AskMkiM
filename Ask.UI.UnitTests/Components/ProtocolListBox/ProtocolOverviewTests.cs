@@ -323,6 +323,51 @@ public sealed class ProtocolOverviewTests
     });
   }
 
+  [Fact]
+  public void RightScrollBarTracksViewerAndScrollsProtocol()
+  {
+    RunInSta(() =>
+    {
+      var control = new ProtocolListBoxUI();
+      control.LoadMessages(Enumerable.Range(1, 200).Select(i =>
+        new ShowMessageModel { Header = $"Строка {i}", Message = "Результат измерения", Status = ShowMessageModel.MessageType.Info }));
+      void Layout()
+      {
+        control.Measure(new System.Windows.Size(800, 400));
+        control.Arrange(new System.Windows.Rect(0, 0, 800, 400));
+        control.UpdateLayout();
+        System.Windows.Threading.Dispatcher.CurrentDispatcher.Invoke(() => { },
+          System.Windows.Threading.DispatcherPriority.ApplicationIdle);
+      }
+      Layout();
+      control.RaiseEvent(new System.Windows.RoutedEventArgs(System.Windows.FrameworkElement.LoadedEvent));
+      try
+      {
+        Layout();
+        var viewer = FindDescendant<ScrollViewer>((ListBox)control.FindName("ProtocolListBox"))!;
+        var scroll = (System.Windows.Controls.Primitives.ScrollBar)control.FindName("ProtocolVerticalScrollBar");
+        var overview = (Border)control.FindName("OverviewTrackHost");
+        Assert.True(scroll.Maximum > 0);
+        Assert.Equal(System.Windows.Visibility.Visible, scroll.Visibility);
+        Assert.True(overview.TranslatePoint(new System.Windows.Point(overview.ActualWidth, 0), control).X <=
+          scroll.TranslatePoint(new System.Windows.Point(), control).X);
+        viewer.ScrollToVerticalOffset(100);
+        Layout();
+        Assert.Equal(viewer.VerticalOffset, scroll.Value);
+        Assert.Equal(viewer.ViewportHeight, scroll.ViewportSize);
+        scroll.RaiseEvent(new System.Windows.Controls.Primitives.ScrollEventArgs(
+          System.Windows.Controls.Primitives.ScrollEventType.ThumbTrack, 200));
+        Layout();
+        Assert.Equal(200, viewer.VerticalOffset);
+        Assert.Equal(viewer.VerticalOffset, scroll.Value);
+      }
+      finally
+      {
+        control.RaiseEvent(new System.Windows.RoutedEventArgs(System.Windows.FrameworkElement.UnloadedEvent));
+      }
+    });
+  }
+
   private static T? FindDescendant<T>(System.Windows.DependencyObject parent) where T : System.Windows.DependencyObject
   {
     for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
