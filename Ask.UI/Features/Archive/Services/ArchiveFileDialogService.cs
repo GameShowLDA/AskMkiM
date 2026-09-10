@@ -60,7 +60,7 @@ namespace Ask.UI.Features.Archive.Services
     {
       var dialog = new OpenFileDialog
       {
-        Title = "Загрузить архив",
+        Title = "Импортировать архив",
         Filter = "Архив ASK (*.apkw)|*.apkw",
         CheckFileExists = true,
         Multiselect = false,

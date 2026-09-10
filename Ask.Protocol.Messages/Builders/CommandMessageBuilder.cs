@@ -171,7 +171,7 @@ internal static class CommandMessageBuilder
     string objectCode)
   {
     return new ShowMessageModel(
-      $"Выполнение программы контроля для \"{objectName}({objectCode})\"",
+      $"Протокол выполнения программы контроля для \"{objectName}({objectCode})\"",
       type: ShowMessageModel.MessageType.Command)
     {
       IsControlProgramCommandHeader = true,
