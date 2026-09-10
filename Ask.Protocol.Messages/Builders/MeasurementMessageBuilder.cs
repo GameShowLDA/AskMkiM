@@ -267,18 +267,18 @@ internal static class MeasurementMessageBuilder
     string unit,
     string points)
   {
-    string range = measurementRange.UpperBound == -1
+    string range = measurementRange.UpperBound <= 0
       ? $"{FormatMeasurementLimit(measurementRange.LowerBound)}<{unit}"
       : measurementRange.LowerBound == 0
         ? $"{unit}<{FormatMeasurementLimit(measurementRange.UpperBound)}"
         : $"{FormatMeasurementLimit(measurementRange.LowerBound)}<{unit}<" +
           FormatMeasurementLimit(measurementRange.UpperBound);
     var result = string.IsNullOrWhiteSpace(points)
-      ? $"({range})"
-      : $"{points} ({range})";
+      ? $"д.б. {range}"
+      : $"{points} д.б. {range}";
     return string.IsNullOrWhiteSpace(chains)
       ? $"{result}"
-      : $"{chains} ({range})";
+      : $"{chains} д.б. {range}";
   }
 
   private static string FormatMeasurementLimit(double value)
