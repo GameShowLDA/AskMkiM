@@ -225,48 +225,18 @@
                                         <RowDefinition Height="Auto"/>
                                     </Grid.RowDefinitions>
 
-                                    <Grid Grid.Row="0">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*"/>
-                                            <ColumnDefinition Width="Auto"/>
-                                        </Grid.ColumnDefinitions>
-
-                                        <StackPanel Grid.Column="0"
-                                                    Margin="0,0,12,0">
-                                            <TextBlock Text="{Binding Source={StaticResource Settings_Execution_HardwareErrorSimulation_Title}, Path=Value}"
-                                                       Style="{DynamicResource SettingsHeaderStyle}"/>
-                                            <TextBlock Text="{Binding Source={StaticResource Settings_Execution_HardwareErrorSimulation_Description}, Path=Value}"
-                                                       Margin="0,2,0,0"
-                                                       Style="{DynamicResource SettingsDescriptionStyle}"/>
-                                        </StackPanel>
-
-                                        <Icons:ArrowButton x:Name="ToggleHardwareErrorSimulationButton"
-                                                           Grid.Column="1"
-                                                           Width="30"
-                                                           Height="30"
-                                                           ButtonBackground="{DynamicResource SettingsInteractiveBackgroundSolidColorBrush}"
-                                                           ButtonBorder="{DynamicResource SettingsInteractiveBorderSolidColorBrush}"
-                                                           ArrowBrush="{DynamicResource SettingsInteractiveBorderSolidColorBrush}"
-                                                           ArrowHoverBrush="{DynamicResource SettingsInteractivePressedSolidColorBrush}"
-                                                           VerticalAlignment="Center"/>
-                                    </Grid>
+                                    <StackPanel Grid.Row="0">
+                                        <TextBlock Text="{Binding Source={StaticResource Settings_Execution_HardwareErrorSimulation_Title}, Path=Value}"
+                                                   Style="{DynamicResource SettingsHeaderStyle}"/>
+                                        <TextBlock Text="{Binding Source={StaticResource Settings_Execution_HardwareErrorSimulation_Description}, Path=Value}"
+                                                   Margin="0,2,0,0"
+                                                   Style="{DynamicResource SettingsDescriptionStyle}"/>
+                                    </StackPanel>
 
                                     <WrapPanel x:Name="HardwareErrorSimulationCards"
                                                Grid.Row="1"
                                                Margin="0,8,0,0"
-                                               Orientation="Horizontal">
-                                        <WrapPanel.Style>
-                                            <Style TargetType="WrapPanel">
-                                                <Setter Property="Visibility" Value="Collapsed"/>
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding ElementName=ToggleHardwareErrorSimulationButton, Path=IsArrowUp}"
-                                                                 Value="True">
-                                                        <Setter Property="Visibility" Value="Visible"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </WrapPanel.Style>
-                                    </WrapPanel>
+                                               Orientation="Horizontal"/>
                                 </Grid>
                             </Border>
                         </Grid>
