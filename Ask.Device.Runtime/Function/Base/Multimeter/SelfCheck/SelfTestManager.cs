@@ -46,7 +46,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
     {
       new ObjectCheck(1, 3.6, 10),
       new ObjectCheck(2, 11, 10),
-      new ObjectCheck(3, 125, 10),
+      new ObjectCheck(3, 135, 10),
       new ObjectCheck(4, 1_000, 10),
       // Неисправны.
       //new ObjectCheck(5, 6_800, 10),
