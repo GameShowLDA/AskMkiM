@@ -1,9 +1,7 @@
 using Ask.Core.Services.Errors.Models;
 using ICSharpCode.AvalonEdit;
-using ICSharpCode.AvalonEdit.Document;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
 
@@ -19,11 +17,8 @@ namespace Ask.UI.Controls.TextEditorControl
   /// <summary>
   /// Узкая полоса обзора диагностик для WPF-редактора и протокола.
   /// </summary>
-  public sealed class ErrorOverviewBar : FrameworkElement
+  public sealed partial class ErrorOverviewBar : UserControl
   {
-    private const double MarkerHeight = 3.0;
-    private const double MarkerGap = 1.0;
-
     private readonly List<OverviewMarker> _markers = new();
     private IReadOnlyList<OverviewDiagnostic> _diagnostics = Array.Empty<OverviewDiagnostic>();
     private TextEditor? _editor;
@@ -37,79 +32,25 @@ namespace Ask.UI.Controls.TextEditorControl
     private Action<double>? _positionClickAction;
     private Func<double, string?>? _positionPreviewFactory;
     private double _lastPreviewFraction = -1;
-    private readonly Popup _previewPopup;
-    private readonly TextBlock _previewText;
-    private readonly Border _previewBorder;
 
     public ErrorOverviewBar()
     {
+      InitializeComponent();
+      OverviewSurface.Owner = this;
       SnapsToDevicePixels = true;
       UseLayoutRounding = true;
-      Cursor = Cursors.Arrow;
-      ToolTipService.SetPlacement(this, PlacementMode.Left);
-      ToolTipService.SetInitialShowDelay(this, 120);
-      ToolTipService.SetBetweenShowDelay(this, 80);
-
-      _previewText = new TextBlock
-      {
-        FontFamily = new FontFamily("Consolas"),
-        FontSize = 12.5,
-        LineHeight = 16,
-        TextWrapping = TextWrapping.NoWrap,
-        Foreground = Brushes.WhiteSmoke,
-      };
-      var previewLayout = new Grid();
-      previewLayout.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(3) });
-      previewLayout.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-      var previewAccent = new Border
-      {
-        Background = new SolidColorBrush(Color.FromRgb(41, 146, 255)),
-        CornerRadius = new CornerRadius(2),
-        Margin = new Thickness(0, 1, 9, 1),
-      };
-      Grid.SetColumn(previewAccent, 0);
-      Grid.SetColumn(_previewText, 1);
-      previewLayout.Children.Add(previewAccent);
-      previewLayout.Children.Add(_previewText);
-      _previewBorder = new Border
-      {
-        Child = previewLayout,
-        Width = 680,
-        Padding = new Thickness(11, 8, 12, 8),
-        CornerRadius = new CornerRadius(6),
-        BorderThickness = new Thickness(1),
-        Background = new SolidColorBrush(Color.FromArgb(245, 28, 34, 43)),
-        BorderBrush = new SolidColorBrush(Color.FromArgb(255, 72, 91, 113)),
-        Effect = new System.Windows.Media.Effects.DropShadowEffect
-        {
-          Color = Colors.Black,
-          BlurRadius = 14,
-          ShadowDepth = 3,
-          Opacity = 0.45,
-        },
-      };
-      _previewPopup = new Popup
-      {
-        PlacementTarget = this,
-        Placement = PlacementMode.RelativePoint,
-        AllowsTransparency = true,
-        // Закрываем предпросмотр сами при уходе мыши с полосы. Это не даёт
-        // Popup немедленно закрыться, пока указатель находится над полосой,
-        // но ещё не над содержимым подсказки.
-        StaysOpen = true,
-        Child = _previewBorder,
-      };
-
-      SizeChanged += (_, _) => RebuildMarkers();
+      Unloaded += (_, _) => _previewPopup.IsOpen = false;
+      IsVisibleChanged += (_, _) => { if (!IsVisible) _previewPopup.IsOpen = false; };
+      OverviewSurface.SizeChanged += (_, _) => RebuildMarkers();
       MouseMove += ErrorOverviewBar_MouseMove;
-      MouseLeave += (_, _) => { _hoveredMarker = null; _lastPreviewFraction = -1; _previewPopup.IsOpen = false; ResetToolTip(); InvalidateVisual(); };
+      MouseLeave += (_, _) => { _hoveredMarker = null; _lastPreviewFraction = -1; _previewPopup.IsOpen = false; ResetToolTip(); OverviewSurface?.InvalidateVisual(); };
       MouseLeftButtonUp += ErrorOverviewBar_MouseLeftButtonUp;
     }
 
     public void SetActiveLine(int lineNumber)
     {
       _activeLine = lineNumber;
-      InvalidateVisual();
+      OverviewSurface?.InvalidateVisual();
     }
 
     public void SetEditor(TextEditor editor)
@@ -146,7 +87,7 @@ namespace Ask.UI.Controls.TextEditorControl
 
       _viewportTop = top;
       _viewportBottom = bottom;
-      InvalidateVisual();
+      OverviewSurface?.InvalidateVisual();
     }
 
     public void SetLineDiagnostics(
@@ -171,13 +112,13 @@ namespace Ask.UI.Controls.TextEditorControl
     {
       _linePositions = positions;
       _positionClickAction = positionClickAction;
-      double maxTop = Math.Max(0, ActualHeight - MarkerHeight);
+      double maxTop = Math.Max(0, PlotHeight - MarkerHeight);
       foreach (var marker in _markers)
       {
         if (_linePositions.TryGetValue(marker.LineNumber, out double position))
           marker.Top = Math.Clamp(position, 0, 1) * maxTop;
       }
-      InvalidateVisual();
+      OverviewSurface?.InvalidateVisual();
     }
 
     internal void SetPositionPreviewFactory(Func<double, string?>? previewFactory)
@@ -236,50 +177,70 @@ namespace Ask.UI.Controls.TextEditorControl
       RebuildMarkers();
     }
 
-    protected override void OnRender(DrawingContext drawingContext)
+    protected override void OnPropertyChanged(DependencyPropertyChangedEventArgs e)
     {
-      base.OnRender(drawingContext);
+      base.OnPropertyChanged(e);
+      if (e.Property == BackgroundProperty)
+        OverviewSurface?.InvalidateVisual();
+    }
 
-      if (ActualWidth <= 0 || ActualHeight <= 0)
+    internal void RenderOverview(DrawingContext drawingContext)
+    {
+
+      if (PlotWidth <= 0 || PlotHeight <= 0)
         return;
 
-      var trackBrush = TryFindResource("ScrollBarTrackBackground") as Brush
+      var trackBrush = Background ?? TryFindResource("ScrollBarTrackBackground") as Brush
         ?? new SolidColorBrush(Color.FromArgb(28, 128, 128, 128));
-      drawingContext.DrawRoundedRectangle(trackBrush, null, new Rect(0, 0, ActualWidth, ActualHeight), 5, 5);
+      drawingContext.DrawRoundedRectangle(trackBrush, null, new Rect(0, 0, PlotWidth, PlotHeight), TrackCornerRadius, TrackCornerRadius);
 
-      var viewportBorderBrush = TryFindResource("TextEditorLineNumberBrush") as Brush ?? Brushes.SlateGray;
-      var viewportBrush = viewportBorderBrush.Clone();
-      viewportBrush.Opacity = 0.14;
-      double viewportTop = _viewportTop * ActualHeight;
-      double viewportBottom = _viewportBottom * ActualHeight;
-      drawingContext.DrawRectangle(
-        viewportBrush,
-        new Pen(viewportBorderBrush, 1),
-        new Rect(0, viewportTop, ActualWidth, Math.Max(1, viewportBottom - viewportTop)));
+      var viewportBorderBrush = ViewportBorderBrush
+        ?? TryFindResource("TextEditorLineNumberBrush") as Brush ?? Brushes.SlateGray;
+      if (IsViewportVisible)
+      {
+        var viewportBrush = ViewportBrush ?? viewportBorderBrush;
+        double viewportTop = _viewportTop * PlotHeight;
+        double viewportBottom = _viewportBottom * PlotHeight;
+        drawingContext.PushOpacity(ViewportOpacity);
+        drawingContext.DrawRoundedRectangle(viewportBrush, null,
+          new Rect(0, viewportTop, PlotWidth, Math.Max(0, viewportBottom - viewportTop)),
+          ViewportCornerRadius, ViewportCornerRadius);
+        drawingContext.Pop();
+        drawingContext.DrawRoundedRectangle(null, new Pen(viewportBorderBrush, ViewportBorderThickness),
+          new Rect(0, viewportTop, PlotWidth, Math.Max(0, viewportBottom - viewportTop)),
+          ViewportCornerRadius, ViewportCornerRadius);
+      }
 
       foreach (var marker in _markers)
       {
         var brush = GetMarkerBrush(marker.Severity);
         bool active = marker.Lines.Contains(_activeLine);
-        drawingContext.DrawRoundedRectangle(
-          brush,
-          active ? new Pen(viewportBorderBrush, 2) : null,
-          new Rect(3, marker.Top, Math.Max(1, ActualWidth - 6),
-            active || ReferenceEquals(marker, _hoveredMarker) ? MarkerHeight + 2 : MarkerHeight),
-          1,
-          1);
+        bool hovered = ReferenceEquals(marker, _hoveredMarker);
+        brush = active ? ActiveMarkerBrush ?? brush : hovered ? HoverMarkerBrush ?? brush : brush;
+        var borderBrush = active ? ActiveMarkerBorderBrush ?? viewportBorderBrush
+          : hovered ? HoverMarkerBorderBrush ?? MarkerBorderBrush : MarkerBorderBrush;
+        double borderWidth = active ? ActiveMarkerBorderThickness
+          : hovered ? HoverMarkerBorderThickness : MarkerBorderThickness;
+        drawingContext.DrawRoundedRectangle(brush,
+          borderBrush == null ? null : new Pen(borderBrush, borderWidth),
+          new Rect(MarkerInset, marker.Top, Math.Max(0, PlotWidth - 2 * MarkerInset),
+            Math.Min(Math.Max(0, PlotHeight - marker.Top),
+              active ? ActiveMarkerHeight : hovered ? HoverMarkerHeight : MarkerHeight)),
+          MarkerCornerRadius, MarkerCornerRadius);
       }
     }
 
     private void RebuildMarkers()
     {
       _markers.Clear();
+      _hoveredMarker = null;
+      if (_previewPopup != null) _previewPopup.IsOpen = false;
 
       var document = _editor?.Document;
       int lineCount = document?.LineCount ?? _lineCount;
       if (lineCount <= 0)
       {
-        InvalidateVisual();
+        OverviewSurface?.InvalidateVisual();
         return;
       }
 
@@ -315,17 +276,19 @@ namespace Ask.UI.Controls.TextEditorControl
       }
 
       var ordered = markersByLine.Values
+        .Where(marker => IsSeverityVisible(marker.Severity))
         .OrderBy(marker => GetDesiredTop(marker.LineNumber, lineCount, 1))
         .ToList();
 
       if (ordered.Count == 0)
       {
-        InvalidateVisual();
+        OverviewSurface?.InvalidateVisual();
         return;
       }
 
-      double maxTop = Math.Max(0, ActualHeight - MarkerHeight);
-      ordered = CompactNearbyMarkers(ordered, lineCount, maxTop);
+      double maxTop = Math.Max(0, PlotHeight - MarkerHeight);
+      if (IsMarkerGroupingEnabled)
+        ordered = CompactNearbyMarkers(ordered, lineCount, maxTop);
       double minimumSpacing = ordered.Count <= 1
         ? 0
         : Math.Min(MarkerHeight + MarkerGap, maxTop / (ordered.Count - 1));
@@ -352,7 +315,7 @@ namespace Ask.UI.Controls.TextEditorControl
       }
 
       _markers.AddRange(ordered);
-      InvalidateVisual();
+      OverviewSurface?.InvalidateVisual();
     }
 
     private List<OverviewMarker> CompactNearbyMarkers(
@@ -411,12 +374,13 @@ namespace Ask.UI.Controls.TextEditorControl
       }
     }
 
-    private static void AddMarker(
+    private void AddMarker(
       IDictionary<int, OverviewMarker> markersByLine,
       int lineNumber,
       ErrorOverviewSeverity severity,
       string message)
     {
+      if (!IsSeverityVisible(severity)) return;
       if (!markersByLine.TryGetValue(lineNumber, out var marker))
       {
         markersByLine[lineNumber] = new OverviewMarker(lineNumber, severity, message);
@@ -448,7 +412,9 @@ namespace Ask.UI.Controls.TextEditorControl
 
     private Brush GetMarkerBrush(ErrorOverviewSeverity severity)
     {
-      if (severity == ErrorOverviewSeverity.Information) return Brushes.DodgerBlue;
+      if (severity == ErrorOverviewSeverity.Information) return CommandBrush;
+      Brush? configured = severity == ErrorOverviewSeverity.Warning ? WarningBrush : ErrorBrush;
+      if (configured != null) return configured;
       string resourceKey = severity switch
       {
         ErrorOverviewSeverity.Warning => "ErrorListWarningIconBrush",
@@ -469,22 +435,29 @@ namespace Ask.UI.Controls.TextEditorControl
     private OverviewMarker? HitTestMarker(Point point)
     {
       return _markers.FirstOrDefault(marker =>
-        point.Y >= marker.Top - MarkerGap
-        && point.Y <= marker.Top + MarkerHeight + MarkerGap);
+        point.Y >= marker.Top - MarkerHitPadding
+        && point.Y <= marker.Top + (marker.Lines.Contains(_activeLine) ? ActiveMarkerHeight
+          : ReferenceEquals(marker, _hoveredMarker) ? HoverMarkerHeight : MarkerHeight) + MarkerHitPadding);
     }
 
     private void ErrorOverviewBar_MouseMove(object sender, MouseEventArgs e)
     {
-      var marker = HitTestMarker(e.GetPosition(this));
+      var marker = HitTestMarker(e.GetPosition(OverviewSurface));
       if (!ReferenceEquals(_hoveredMarker, marker))
       {
         _hoveredMarker = marker;
-        InvalidateVisual();
+        OverviewSurface?.InvalidateVisual();
       }
 
-      Point pointer = e.GetPosition(this);
-      double fraction = Math.Clamp(pointer.Y / Math.Max(1, ActualHeight), 0, 1);
-      string? preview = _positionPreviewFactory?.Invoke(fraction);
+      Cursor = IsNavigationEnabled && (marker != null || IsTrackNavigationEnabled) ? Cursors.Hand : Cursors.Arrow;
+      if (!AreToolTipsEnabled)
+      {
+        _previewPopup.IsOpen = false;
+        return;
+      }
+      Point pointer = e.GetPosition(OverviewSurface);
+      double fraction = Math.Clamp(pointer.Y / Math.Max(1, PlotHeight), 0, 1);
+      string? preview = IsPositionPreviewEnabled ? _positionPreviewFactory?.Invoke(fraction) : null;
       if (marker != null)
       {
         preview = string.IsNullOrWhiteSpace(preview)
@@ -496,12 +469,12 @@ namespace Ask.UI.Controls.TextEditorControl
       {
         if (Math.Abs(fraction - _lastPreviewFraction) > 0.01 || !_previewPopup.IsOpen)
           _lastPreviewFraction = fraction;
-        _previewText.Text = preview;
+        _previewContent.Content = preview;
         // RelativePoint задаёт координату относительно верхнего левого угла
         // полосы. Поэтому карточка появляется на той же высоте, где находится
         // курсор, и сразу слева от полосы.
-        _previewPopup.HorizontalOffset = -_previewBorder.Width - 8;
-        _previewPopup.VerticalOffset = Math.Clamp(pointer.Y - 22, 0, Math.Max(0, ActualHeight - 44));
+        _previewPopup.HorizontalOffset = -PreviewWidth - PreviewHorizontalGap;
+        _previewPopup.VerticalOffset = Math.Clamp(pointer.Y + PreviewVerticalOffset, 0, Math.Max(0, PlotHeight - 44));
         _previewPopup.IsOpen = true;
       }
       else
@@ -509,32 +482,32 @@ namespace Ask.UI.Controls.TextEditorControl
         _lastPreviewFraction = -1;
         _previewPopup.IsOpen = false;
       }
-
-      ResetToolTip();
-      Cursor = marker != null || _positionClickAction != null ? Cursors.Hand : Cursors.Arrow;
     }
 
     private void ErrorOverviewBar_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
     {
-      NavigateAt(e.GetPosition(this).Y, (Keyboard.Modifiers & ModifierKeys.Shift) != 0);
+      if (!IsNavigationEnabled) return;
+      NavigateAt(e.GetPosition(OverviewSurface).Y, (Keyboard.Modifiers & ModifierKeys.Shift) != 0);
       e.Handled = true;
     }
 
     internal void NavigateAt(double y, bool previous)
     {
+      if (!IsNavigationEnabled) return;
       var marker = HitTestMarker(new Point(0, y));
       int lineCount = _editor?.Document?.LineCount ?? _lineCount;
       if (lineCount <= 0) return;
       int lineNumber;
       if (marker == null)
       {
+        if (!IsTrackNavigationEnabled) return;
         if (_positionClickAction != null)
         {
-          _positionClickAction(Math.Clamp(y / Math.Max(1, ActualHeight), 0, 1));
+          _positionClickAction(Math.Clamp(y / Math.Max(1, PlotHeight), 0, 1));
           return;
         }
         lineNumber = 1 + (int)Math.Round(Math.Clamp(y /
-          Math.Max(1, ActualHeight - MarkerHeight), 0, 1) * (lineCount - 1));
+          Math.Max(1, PlotHeight - MarkerHeight), 0, 1) * (lineCount - 1));
       }
       else
       {
@@ -559,9 +532,18 @@ namespace Ask.UI.Controls.TextEditorControl
 
     private void ResetToolTip()
     {
-      ToolTip = null;
       Cursor = Cursors.Arrow;
     }
+
+    private double PlotWidth => OverviewSurface?.ActualWidth ?? 0;
+    private double PlotHeight => OverviewSurface?.ActualHeight ?? 0;
+
+    private bool IsSeverityVisible(ErrorOverviewSeverity severity) => severity switch
+    {
+      ErrorOverviewSeverity.Information => AreCommandMarkersVisible,
+      ErrorOverviewSeverity.Warning => AreWarningMarkersVisible,
+      _ => AreErrorMarkersVisible,
+    };
 
     private void Editor_TextChanged(object? sender, EventArgs e) => RebuildMarkers();
 

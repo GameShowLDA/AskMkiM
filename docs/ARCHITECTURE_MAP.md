@@ -56,6 +56,7 @@ Size/Foreground и анимации общей кнопки; лицензия с
 | Печать протокола | `Ask.UI/Features/ProtocolNew/Protocol/ProtocolCompletionService.cs` | `Ask.UI/Features/ProtocolNew/Execution/ExecutionFinalizer.cs`, `Ask.Core/Services/Config/AppSettings/ProtocolConfig.cs`, `PrintUtility` usages |
 | Метрология | `MainWindow/Services/MetrologyService.cs` | `Ask.Core/Services/Metrology/MetrologyControlFactory.cs`, `Ask.UI/Controls/ExecutorControls/MetrologyControls/`, `Ask.Engine/Tests/Metrology/` |
 | Самоконтроль и инженерные тесты | `MainWindow/Services/TestService.cs`, `MainWindow/Services/SelfTestServices.cs` | `Ask.Device.Runtime/Function/*/SelfCheck/`, `Ask.Protocol.Messages/EntryPoints/SelfTestMessages.cs`, `Ask.UI/Controls/ExecutorControls/TestsControls/`, `Ask.Engine/Tests/` |
+| Внешний вид полосы команд/ошибок, подсказки и прокрутка протокола | `Ask.UI/Controls/TextEditorControl/ErrorOverviewBar.xaml`, `ErrorOverviewBar.Properties.cs` | [Настройка ErrorOverviewBar](controls/ErrorOverviewBar.md), `Ask.UI/Components/ProtocolListBox/ProtocolListBoxUI.OverviewProperties.cs` |
 | Ошибки трансляции | `Ask.Core/Services/Errors/Translation/` | целевой parser/validator, `Ask.UI/Controls/ErrorList/`, `UI/Controls/ErrorList/` |
 | Crash reports | `MainWindow/App.xaml.cs`, `MainWindow/Init/PreStartupInitializer.cs`, `MainWindow/Services/TranslationServices.cs` | `Ask.Diagnostics/Services/CrashPackageService.cs`, `Ask.Diagnostics/Services/ExceptionDiagnosticReporter.cs`, `Ask.Diagnostics/Collectors/` |
 | Архивы APK/APKW | `Ask.UI/Features/Archive/` | `Ask.Core/Services/FileFormats/Apk/`, `MainWindow/Services/Conversion/` |
@@ -1695,9 +1696,8 @@ formatted editors; `RunControl` hosts ProtocolUI, translated source and error li
 сохраняется распознавание явной метки `[БРАК]`. `AppendLineAsync → AddOverviewDiagnostic`
 индексирует только новое сообщение; `RefreshErrorOverview` пересоздаёт индекс после загрузки/удаления.
 `RequestOverviewUpdate` объединяет обновления через Dispatcher; прокрутка обновляет геометрию
-без повторной классификации сообщений. `RefreshErrorOverviewViewport` выравнивает полосу по
-`PART_VerticalScrollBar → PART_Track`, а рамку — по позиции и размеру его `Thumb`;
-для шаблонов без этих частей используется `VerticalOffset/ExtentHeight` и `ViewportHeight`.
+без повторной классификации сообщений. `RefreshErrorOverviewViewport` задаёт видимый диапазон через `VerticalOffset/ExtentHeight`
+и `(VerticalOffset + ViewportHeight)/ExtentHeight`; от наличия штатного ScrollBar/Thumb он не зависит.
 Кнопки и счётчик находятся в общей верхней строке над списком и полосой.
 `RefreshOverviewPositions → ProjectOverviewOffset → ErrorOverviewBar.SetLinePositions`
 проецирует маркеры в пиксельную шкалу: реализованные контейнеры дают измеренные границы,
@@ -1725,6 +1725,28 @@ formatted editors; `RunControl` hosts ProtocolUI, translated source and error li
 повторные клики обходят их строки, Shift+клик меняет направление. Реализация:
 `Ask.UI/Controls/TextEditorControl/ErrorOverviewBar.cs`,
 `Ask.UI/Components/ProtocolListBox/ProtocolListBoxUI.xaml{,.cs}`.
+
+`ErrorOverviewBar` — `UserControl`: `ErrorOverviewBar.xaml` задаёт рамку и Popup,
+`ErrorOverviewSurface.OnRender → ErrorOverviewBar.RenderOverview` рисует фон, viewport
+и маркеры. `ErrorOverviewBar.Properties.cs` содержит dependency properties цветов,
+геометрии, рамок, состояний, видимости категорий и подсказок; стандартные WPF
+`Background/BorderBrush/BorderThickness/Padding/Opacity/Visibility` также доступны.
+Изменение геометрии/фильтров → `OnAppearanceChanged → RebuildMarkers`; изменение
+кистей → invalidate поверхности. Фильтры категорий проверяются в `AddMarker` до
+приоритизации severity и объединения кластеров. Геометрия и mouse coordinates относятся
+к внутренней поверхности, поэтому рамка и padding не смещают навигацию.
+`AreToolTipsEnabled=false` закрывает Popup и исключает вызов фабрики;
+`IsPositionPreviewEnabled=false` оставляет только описание маркера.
+`IsNavigationEnabled` отключает клики полосы, `IsTrackNavigationEnabled` — только пустую область.
+`PreviewContentTemplate` принимает строку как DataContext и заменяет содержимое карточки.
+В текущем `ProtocolListBoxUI.xaml` оформление задано непосредственно на элементах:
+`OverviewTrackHost.Background` и `errorOverviewBar.Background` — `Transparent`, рамки отключены,
+`IsViewportVisible=false`: на общем фоне протокола видны только маркеры.
+Свойства `OverviewBarStyle`, `OverviewHostStyle`, `OverviewVisibility` и
+`ProtocolVerticalScrollBarVisibility` объявлены в `ProtocolListBoxUI.OverviewProperties.cs`,
+но текущая разметка не привязывается к ним; штатный вертикальный ScrollBar использует `Auto`.
+Кнопки/F8 и счётчик протокола независимы от этих локальных настроек.
+Свойства и примеры: [ErrorOverviewBar](controls/ErrorOverviewBar.md).
 
 `Ask.UI` contains newer feature-oriented code: ProtocolNew, Archive, Notifications,
 RoleManagement, ExecutionSelection and reusable controls. Оба UI-проекта пока

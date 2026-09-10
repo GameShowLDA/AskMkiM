@@ -173,6 +173,167 @@ public sealed class ProtocolOverviewTests
     });
   }
 
+  [Fact]
+  public void NavigationCanDisableTrackIndependentlyOfMarkers()
+  {
+    RunInSta(() =>
+    {
+      var bar = new ErrorOverviewBar { IsTrackNavigationEnabled = false };
+      bar.Measure(new System.Windows.Size(24, 100));
+      bar.Arrange(new System.Windows.Rect(0, 0, 24, 100));
+      int selected = 0;
+      bar.SetLineDiagnostics(100, new[] { (1, ErrorOverviewSeverity.Error, "Ошибка") },
+        line => selected = line);
+      bar.NavigateAt(50, false);
+      Assert.Equal(0, selected);
+      bar.NavigateAt(0, false);
+      Assert.Equal(1, selected);
+      selected = 0;
+      bar.IsNavigationEnabled = false;
+      bar.NavigateAt(0, false);
+      Assert.Equal(0, selected);
+    });
+  }
+
+  [Fact]
+  public void HiddenSeverityDoesNotConsumeVisibleCommandOnSameLine()
+  {
+    RunInSta(() =>
+    {
+      var bar = new ErrorOverviewBar { IsTrackNavigationEnabled = false };
+      bar.Measure(new System.Windows.Size(24, 100));
+      bar.Arrange(new System.Windows.Rect(0, 0, 24, 100));
+      int selected = 0;
+      bar.SetLineDiagnostics(100, new[] {
+        (1, ErrorOverviewSeverity.Error, "Ошибка"),
+        (1, ErrorOverviewSeverity.Information, "Команда") }, line => selected = line);
+      bar.AreErrorMarkersVisible = false;
+      bar.NavigateAt(0, false);
+      Assert.Equal(1, selected);
+      selected = 0;
+      bar.AreCommandMarkersVisible = false;
+      bar.NavigateAt(0, false);
+      Assert.Equal(0, selected);
+      bar.AreErrorMarkersVisible = true;
+      bar.NavigateAt(0, false);
+      Assert.Equal(1, selected);
+    });
+  }
+
+  [Fact]
+  public void XamlStylesAndDynamicResourcesReachRenderingAndPreview()
+  {
+    RunInSta(() =>
+    {
+      var bar = (ErrorOverviewBar)System.Windows.Markup.XamlReader.Parse("""
+        <overview:ErrorOverviewBar xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+          xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+          xmlns:overview="clr-namespace:Ask.UI.Controls.TextEditorControl;assembly=Ask.UI">
+          <overview:ErrorOverviewBar.Resources>
+            <SolidColorBrush x:Key="CommandColor" Color="Lime"/>
+          </overview:ErrorOverviewBar.Resources>
+          <overview:ErrorOverviewBar.Style>
+            <Style TargetType="overview:ErrorOverviewBar">
+              <Setter Property="CommandBrush" Value="{DynamicResource CommandColor}"/>
+              <Setter Property="PreviewWidth" Value="320"/>
+              <Setter Property="PreviewTextWrapping" Value="Wrap"/>
+              <Setter Property="MarkerHeight" Value="8"/>
+              <Setter Property="IsViewportVisible" Value="False"/>
+            </Style>
+          </overview:ErrorOverviewBar.Style>
+        </overview:ErrorOverviewBar>
+        """);
+      bar.Measure(new System.Windows.Size(24, 100));
+      bar.Arrange(new System.Windows.Rect(0, 0, 24, 100));
+      bar.SetLineDiagnostics(100, new[] { (1, ErrorOverviewSeverity.Information, "Команда") });
+      Assert.Equal(Colors.Lime, ((SolidColorBrush)bar.CommandBrush).Color);
+      bar.Resources["CommandColor"] = Brushes.Yellow;
+      Assert.Equal(Colors.Yellow, ((SolidColorBrush)bar.CommandBrush).Color);
+      var preview = (Border)bar.FindName("_previewBorder");
+      Assert.Equal(320, preview.Width);
+      var content = (ContentControl)bar.FindName("_previewContent");
+      content.Content = "Длинная строка предпросмотра";
+      preview.Measure(new System.Windows.Size(320, 100));
+      preview.Arrange(new System.Windows.Rect(0, 0, 320, 100));
+      System.Windows.Threading.Dispatcher.CurrentDispatcher.Invoke(() => { },
+        System.Windows.Threading.DispatcherPriority.ApplicationIdle);
+      var text = FindDescendant<TextBlock>(content);
+      Assert.NotNull(text);
+      Assert.Equal(System.Windows.TextWrapping.Wrap, text.TextWrapping);
+      var bitmap = new System.Windows.Media.Imaging.RenderTargetBitmap(24, 100, 96, 96, PixelFormats.Pbgra32);
+      bitmap.Render(bar);
+      var pixel = new byte[4];
+      bitmap.CopyPixels(new System.Windows.Int32Rect(10, 2, 1, 1), pixel, 4, 0);
+      Assert.Equal(new byte[] { 0, 255, 255, 255 }, pixel);
+    });
+  }
+
+  [Fact]
+  public void InvalidGeometryIsRejectedBeforeRendering()
+  {
+    RunInSta(() =>
+    {
+      var bar = new ErrorOverviewBar();
+      Assert.Throws<ArgumentException>(() => bar.MarkerHeight = 0);
+      Assert.Throws<ArgumentException>(() => bar.MarkerGap = -1);
+      Assert.Throws<ArgumentException>(() => bar.PreviewWidth = double.NaN);
+      Assert.Throws<ArgumentException>(() => bar.ViewportOpacity = 1.1);
+    });
+  }
+
+  [Fact]
+  public void ProtocolHostAcceptsOverviewStyleAndCollapsesItsColumn()
+  {
+    RunInSta(() =>
+    {
+      var style = new System.Windows.Style(typeof(ErrorOverviewBar));
+      style.Setters.Add(new System.Windows.Setter(ErrorOverviewBar.AreToolTipsEnabledProperty, false));
+      var control = new ProtocolListBoxUI { OverviewBarStyle = style,
+        OverviewVisibility = System.Windows.Visibility.Collapsed,
+        ProtocolVerticalScrollBarVisibility = ScrollBarVisibility.Hidden };
+      control.Measure(new System.Windows.Size(800, 600));
+      control.Arrange(new System.Windows.Rect(0, 0, 800, 600));
+      System.Windows.Threading.Dispatcher.CurrentDispatcher.Invoke(() => { },
+        System.Windows.Threading.DispatcherPriority.ApplicationIdle);
+      var bar = (ErrorOverviewBar)control.FindName("errorOverviewBar");
+      Assert.False(bar.AreToolTipsEnabled);
+      Assert.Equal(System.Windows.Visibility.Collapsed,
+        ((Border)control.FindName("OverviewTrackHost")).Visibility);
+      Assert.Equal(ScrollBarVisibility.Hidden,
+        ScrollViewer.GetVerticalScrollBarVisibility((ListBox)control.FindName("ProtocolListBox")));
+    });
+  }
+
+  [Fact]
+  public void DisabledTooltipsDoNotRequestPreviewContent()
+  {
+    RunInSta(() =>
+    {
+      var bar = new ErrorOverviewBar { AreToolTipsEnabled = false };
+      bool requested = false;
+      bar.SetPositionPreviewFactory(_ => { requested = true; return null; });
+      bar.RaiseEvent(new System.Windows.Input.MouseEventArgs(System.Windows.Input.Mouse.PrimaryDevice, 0)
+        { RoutedEvent = System.Windows.Input.Mouse.MouseMoveEvent });
+      Assert.False(requested);
+      Assert.False(((System.Windows.Controls.Primitives.Popup)bar.FindName("_previewPopup")).IsOpen);
+      bar.AreToolTipsEnabled = true;
+      bar.RaiseEvent(new System.Windows.Input.MouseEventArgs(System.Windows.Input.Mouse.PrimaryDevice, 0)
+        { RoutedEvent = System.Windows.Input.Mouse.MouseMoveEvent });
+      Assert.True(requested);
+    });
+  }
+
+  private static T? FindDescendant<T>(System.Windows.DependencyObject parent) where T : System.Windows.DependencyObject
+  {
+    for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+    {
+      var child = VisualTreeHelper.GetChild(parent, i);
+      if (child is T match) return match;
+      if (FindDescendant<T>(child) is { } descendant) return descendant;
+    }
+    return null;
+  }
+
   private static void RunInSta(Action action)
   {
     Exception? failure = null;
