@@ -7,7 +7,6 @@ using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
-using Ask.Core.Shared.Metadata.Enums.UnitEnums;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies.Data;
@@ -43,13 +42,14 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         context.Range.LowerBound,
         context.Range.UpperBound);
 
-      await MeasurementMessages.PublishInsulationStrengthResultAsync(
+      await MeasurementMessages.PublishIntermediateResultAsync(
         context.CheckType,
-        context.MeasurementPoints ?? context.MeasurementTarget ?? context.MeasurementType.ToString(),
+        context.MeasurementType,
         range,
-        CurrentUnit.MilliAmpere,
         isSuccessful,
-        context.MessageService);
+        context.MeasurementTarget,
+        points: context.MeasurementPoints,
+        outputService: context.MessageService);
 
       return isSuccessful;
     }

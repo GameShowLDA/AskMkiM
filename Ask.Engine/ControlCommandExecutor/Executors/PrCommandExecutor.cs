@@ -40,28 +40,14 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         context.Range.LowerBound,
         context.Range.UpperBound);
 
-      if (context.IsIntermediate)
-      {
-        await MeasurementMessages.PublishIntermediateResultAsync(
-          context.CheckType,
-          context.MeasurementType,
-          range,
-          isSuccessful,
-          context.MeasurementTarget,
-          points: context.MeasurementPoints,
-          outputService: context.MessageService);
-      }
-      else
-      {
-        await MeasurementMessages.PublishResultAsync(
-          context.CheckType,
-          context.MeasurementType,
-          range,
-          isSuccessful,
-          context.MeasurementTarget,
-          points: context.MeasurementPoints,
-          outputService: context.MessageService);
-      }
+      await MeasurementMessages.PublishIntermediateResultAsync(
+        context.CheckType,
+        context.MeasurementType,
+        range,
+        isSuccessful,
+        context.MeasurementTarget,
+        points: context.MeasurementPoints,
+        outputService: context.MessageService);
 
       return isSuccessful;
     }

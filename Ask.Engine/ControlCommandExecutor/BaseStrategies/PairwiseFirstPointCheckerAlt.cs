@@ -330,7 +330,10 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
                     context.TypeCommand,
                     range,
                     context.MessageService,
-                    measurementTarget));
+                    measurementTarget)
+                  {
+                    IsIntermediate = true,
+                  });
 
                 return (success, result);
               }, context.MessageService, measurementTask: true);
