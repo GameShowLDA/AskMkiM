@@ -193,7 +193,32 @@ public static class ModuleRelayControlResponseProcessor
   {
     int action = ((int)bus * 10) + (connect ? 1 : 2);
     bool result = CheckCommandResponse(response, module, $"11.{firstPoint}.{lastPoint}.{action}");
-    string description = $"{firstPoint}-{lastPoint} {(connect ? "к" : "от")} шине [{bus}]";
+    string description = $"{firstPoint}-{lastPoint} {(connect ? "к" : "от")} шин [{bus}]";
+
+    if (connect)
+    {
+      if (bus == BusPoint.A || bus == BusPoint.B)
+      {
+        description = $"{firstPoint}-{lastPoint} к шине [{bus}]";
+      }
+      else
+      {
+        description = $"{firstPoint}-{lastPoint} к шинам [{bus}]";
+      }
+    }
+    else
+    {
+      if (bus == BusPoint.A || bus == BusPoint.B)
+      {
+        description = $"{firstPoint}-{lastPoint} от шины [{bus}]";
+      }
+      else
+      {
+        description = $"{firstPoint}-{lastPoint} от шин [{bus}]";
+      }
+    }
+
+
     if (DeviceDisplayConfig.GetConnectionInfoVisibility())
     {
       await DeviceMessages.PublishOperationResultAsync(

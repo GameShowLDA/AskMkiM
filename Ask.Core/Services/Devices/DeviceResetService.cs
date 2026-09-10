@@ -87,7 +87,14 @@ public static class DeviceResetService
 
         try
         {
-          await ShowResultAsync(device, reset, error, messageService);
+          if (device is IRelaySwitchModule)
+          {
+
+          }
+          else
+          {
+            await ShowResultAsync(device, reset, error, messageService);
+          }
         }
         catch (Exception ex)
         {
@@ -131,7 +138,6 @@ public static class DeviceResetService
     IDevice device,
     IUserInteractionService? messageService)
   {
-    // TODO : Включить если не пойдёт сброс МКР
     if (device is IRelaySwitchModule relayModule)
     {
       bool disconnected = await relayModule.PointManager.DisconnectingAllPoint(messageService);
@@ -140,8 +146,9 @@ public static class DeviceResetService
         LogError(
           $"{GetDeviceLabel(device)}: не удалось физически отключить все точки МКР перед адресным сбросом.",
           isDeviceLog: true);
-        return false;
       }
+
+      return disconnected;
     }
 
     return await device.ConnectableManager.ResetAsync();
