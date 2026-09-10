@@ -18,16 +18,18 @@ using System.Text.RegularExpressions;
 
 namespace Ask.Engine.ControlCommandAnalyser
 {
-  public class CommandTranslationManager
+  public partial class CommandTranslationManager
   {
-    private static readonly Regex CommandHeaderRegex = new(@"^\s*(\d+)\s+([\p{L}_]{2,})(?=\s|$)", RegexOptions.Compiled);
+    private static readonly Regex CommandHeaderRegex = new(@"^\s*(\d+)\s+([\p{L}_]+)(?=\s|$)", RegexOptions.Compiled);
     private readonly List<ICommandParser> _parsers;
     private readonly List<ICommandFormatter> _formatters;
     private readonly List<ICommandBody> _commandBodyBuilders;
 
-    public CommandTranslationManager()
+    public CommandTranslationManager() : this(GetAllParsers()) { }
+
+    internal CommandTranslationManager(IEnumerable<ICommandParser> parsers)
     {
-      _parsers = GetAllParsers();
+      _parsers = parsers.ToList();
       _formatters = GetAllFormatters();
       _commandBodyBuilders = GetAllCommandBuilders();
     }
@@ -154,14 +156,14 @@ namespace Ask.Engine.ControlCommandAnalyser
       return new TranslationBuildResult(models, formattedText);
     }
 
-    private static void CheckVshModel(List<BaseCommandModel> models)
+    private static void CheckVshModel(List<BaseCommandModel> models, bool resolveEquipment = true)
     {
       if (models.FirstOrDefault(model => (model is VshCommandModel) == true) == null)
       {
         var rmIndex = models.FindLastIndex(model => model is RmCommandModel);
         if (rmIndex >= 0)
         {
-          var commandNumber = int.Parse(models[rmIndex].CommandNumber) + 1;
+          var commandNumber = System.Numerics.BigInteger.Parse(models[rmIndex].CommandNumber) + 1;
           while (models.Contains(models.FirstOrDefault(m => m.CommandNumber == commandNumber.ToString())))
           {
             commandNumber++;
@@ -178,13 +180,13 @@ namespace Ask.Engine.ControlCommandAnalyser
               { BusStructureEnum.Type.Bus2, new List<int?> () },
             }
           };
-          var managerShassi = ChassisManagers.GetAllAsync().GetAwaiter().GetResult().FirstOrDefault();
+          var managerShassi = resolveEquipment ? ChassisManagers.GetAllAsync().GetAwaiter().GetResult().FirstOrDefault() : null;
 
           if (managerShassi != null)
           {
             vshModel.BusStructure[BusStructureEnum.Type.Bus2].Add(managerShassi.Number);
           }
-          var managerRack = Racks.GetAllAsync().GetAwaiter().GetResult();
+          var managerRack = resolveEquipment ? Racks.GetAllAsync().GetAwaiter().GetResult() : null;
           if (managerRack != null && managerRack.Count > 0)
           {
             foreach (var rack in managerRack)
@@ -362,7 +364,8 @@ namespace Ask.Engine.ControlCommandAnalyser
     /// <summary>
     /// Преобразует текст в список моделей команд.
     /// </summary>
-    public List<BaseCommandModel> ParseAll(string text, bool emitMessages = true)
+    public List<BaseCommandModel> ParseAll(string text, bool emitMessages = true,
+      CancellationToken cancellationToken = default)
     {
       if (emitMessages)
       {
@@ -379,11 +382,13 @@ namespace Ask.Engine.ControlCommandAnalyser
       string commandNumber = null;
       string mnemonic = null;
       var commandLines = new List<string>();
+      var sourceLineNumbers = new List<int>();
       int currentStartLine = -1;
       int lastCommandLine = -1;
 
       foreach (var kvp in lines.OrderBy(x => x.Key))
       {
+        cancellationToken.ThrowIfCancellationRequested();
         int lineNumber = kvp.Key;
         string line = kvp.Value;
 
@@ -393,7 +398,7 @@ namespace Ask.Engine.ControlCommandAnalyser
           // --- закрываем предыдущую команду ---
           if (commandLines.Count > 0 && commandNumber != null && mnemonic != null)
           {
-            var model = ParseSingle(commandNumber, mnemonic, currentStartLine + 1, commandLines);
+            var model = ParseSourceCommand(commandNumber, mnemonic, currentStartLine + 1, commandLines, sourceLineNumbers);
             model.StartLineNumber = currentStartLine + 1;
 
             // Комментарии между предыдущей и текущей командой
@@ -413,7 +418,7 @@ namespace Ask.Engine.ControlCommandAnalyser
             commands.Add(model);
             CommandsModel.CommandModels.Add(model);
 
-            if (HasCriticalStructuralErrors(model))
+            if (HasCriticalStructuralErrors(model) && !CommandsModel.IsAnalysisScope)
               return commands;
           }
 
@@ -421,20 +426,42 @@ namespace Ask.Engine.ControlCommandAnalyser
           commandNumber = match.Groups[1].Value;
           mnemonic = NormalizeCommandMnemonic(match.Groups[2].Value);
           commandLines = new List<string> { NormalizeCommandLineMnemonic(line, match) };
+          sourceLineNumbers = new List<int> { lineNumber + 1 };
           currentStartLine = lineNumber;
           lastCommandLine = lineNumber;
         }
         else if (commandLines.Count > 0)
         {
           commandLines.Add(line);
+          sourceLineNumbers.Add(lineNumber + 1);
+        }
+        else
+        {
+          // Previously discarded silently, including a completely malformed document.
+          var invalid = new UnknownCommandModel
+          {
+            StartLineNumber = lineNumber + 1,
+            SourceLines = new List<string> { line },
+          };
+          invalid.Errors.Add(new ErrorItem
+          {
+            SourceLineNumber = lineNumber + 1,
+            Description = "Ожидается номер команды и мнемоника, например: 10 ОК Объект.",
+          });
+          commands.Add(invalid);
+          CommandsModel.CommandModels.Add(invalid);
         }
       }
 
       // --- закрываем последнюю команду ---
       if (commandLines.Count > 0 && commandNumber != null && mnemonic != null)
       {
-        var model = ParseSingle(commandNumber, mnemonic, currentStartLine + 1, commandLines);
+        cancellationToken.ThrowIfCancellationRequested();
+        var model = ParseSourceCommand(commandNumber, mnemonic, currentStartLine + 1, commandLines, sourceLineNumbers);
         model.StartLineNumber = currentStartLine + 1;
+
+        if (commands.Any(c => c.Mnemonic == mnemonic && c.CommandNumber == commandNumber))
+          model.Errors.Add(GeneralErrors.CommandAlreadyExists(mnemonic, currentStartLine + 1, $"{commandNumber} {mnemonic}"));
 
         // Все оставшиеся комментарии → последней команде
         foreach (var c in comments.ToList())
@@ -448,6 +475,43 @@ namespace Ask.Engine.ControlCommandAnalyser
       }
 
       return commands;
+    }
+
+    private BaseCommandModel ParseSourceCommand(string number, string mnemonic, int startLine,
+      List<string> lines, List<int> sourceLineNumbers)
+    {
+      BaseCommandModel model;
+      try
+      {
+        model = ParseSingle(number, mnemonic, startLine, lines);
+      }
+      catch (Exception ex) when (CommandsModel.IsAnalysisScope && ex is not OperationCanceledException)
+      {
+        Ask.LogLib.LoggerUtility.LogWarning($"Не удалось проверить команду {number} {mnemonic}: {ex.Message}");
+        model = new UnknownCommandModel
+        {
+          CommandNumber = number, Mnemonic = mnemonic, StartLineNumber = startLine,
+          SourceLines = new List<string>(lines),
+        };
+        model.Warnings.Add(new WarningItem
+        {
+          SourceLineNumber = startLine, Command = $"{number} {mnemonic}",
+          Description = "Не удалось завершить проверку команды. Запустите трансляцию для подробной диагностики.",
+        });
+      }
+
+      // Parsers number their compacted input consecutively. Restore physical lines
+      // after blank lines/comments have been removed by the preprocessor.
+      foreach (var issue in model.Errors.Cast<IDisplayIssue>().Concat(model.Warnings))
+      {
+        int index = issue.SourceLineNumber - startLine;
+        if (index >= 0 && index < sourceLineNumbers.Count)
+        {
+          if (issue is ErrorItem error) error.SourceLineNumber = sourceLineNumbers[index];
+          if (issue is WarningItem warning) warning.SourceLineNumber = sourceLineNumbers[index];
+        }
+      }
+      return model;
     }
 
     public static string NormalizeCommandMnemonics(string text)

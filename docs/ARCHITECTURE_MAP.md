@@ -33,6 +33,7 @@ Size/Foreground и анимации общей кнопки; лицензия с
 | Версия, история коммитов и идентификация сборки | `Directory.Build.targets`, `Ask.Core/Services/App/ApplicationBuildInfo.cs` | `Ask.UI/Features/BuildDiagnostics/Views/BuildHistoryWindow.xaml`, `UI/Controls/EmptyWorkspace/EmptyWorkspaceView.xaml.cs`, `MainWindow/Init/PreStartupInitializer.cs`, `Ask.Diagnostics/Collectors/SystemInfoCollector.cs`, `Ask.Core/Services/Protocols/ExecutionProtocolHistoryService.cs` |
 | DI и composition root | `MainWindow/Init/PreStartupInitializer.cs` | `Ask.Diagnostics/Extensions/ServiceCollectionExtensions.cs`, `Ask.Core/Services/App/ServiceLocator.cs`, `MainWindow/Engine/AppServices.cs` |
 | Трансляция программы контроля | `MainWindow/Services/TranslationServices.cs` | `Ask.Engine/ControlCommandAnalyser/CommandTranslationManager.cs`, `Ask.Engine/ControlCommandAnalyser/Parser/`, `Ask.Engine/ControlCommandAnalyser/Formatter/`, `Ask.Engine/ControlCommandAnalyser/Validation/` |
+| Диагностика текста при вводе | `Ask.UI/Controls/TextEditorControl/Diagnostics/LiveDiagnosticsController.cs` | `Ask.Engine/ControlCommandAnalyser/CommandTranslationManager.Diagnostics.cs`, `SourceDiagnostic.cs`, `Ask.UI/Controls/TextEditorControl/Diagnostics/DiagnosticUnderlineRenderer.cs`, оба `TextEditorUI.xaml.cs` |
 | Исполнение программы контроля | `UI/Controls/Runner/RunControl.xaml.cs` | `Ask.UI/Features/ProtocolNew/Execution/ActionExecutor.cs`, `Ask.Engine/ControlCommandExecutor/Execution/CommandExecutionManager.cs` |
 | Алгоритм конкретной команды | `Ask.Engine/ControlCommandExecutor/Executors/` | `Ask.Engine/ControlCommandExecutor/BaseStrategies/`, `Ask.Engine/ControlCommandExecutor/Execution/EquipmentService.cs` |
 | Пауза, шаг, остановка, переход к команде | `Ask.UI/Features/ProtocolNew/Execution/ActionExecutor.cs` | `Ask.Core/Services/App/StepControlManager.cs`, `Ask.Engine/ControlCommandExecutor/Execution/CommandExecutionManager.cs`, `Ask.Engine/ControlCommandExecutor/Execution/BreakpointHandler.cs`, `Ask.Engine/ControlCommandExecutor/Execution/CommandJumpService.cs` |
@@ -499,6 +500,39 @@ TranslationViewModel command
 → TranslatorItem.ApplyTranslationModels
 → ErrorList + left/right AvalonEdit editors
 ```
+
+Диагностика исходника при вводе использует те же `ICommandParser`,
+`CkCommandValidator` и `CommandPostAnalyzer` через `CommandTranslationManager.AnalyzeSource`:
+
+```text
+TextEditorUI (UI / Ask.UI), новый документ или PK/PKW
+→ LiveDiagnosticsController: Loaded / TextChanged / DocumentChanged
+→ 400 мс debounce → снимок текста на UI-потоке → Task.Run + общий SemaphoreSlim
+→ AnalyzeSource → CommandsModel.BeginAnalysisScope (AsyncLocal)
+→ ParseAll без progress-событий, проверка неявной ВШ и связей команд
+→ SourceDiagnostic[] с UTF-16 offset/length в исходном снимке
+→ актуальность документа/запроса → DiagnosticUnderlineRenderer + hover ToolTip
+```
+
+Фоновый анализ не форматирует текст и не заменяет модели обычной трансляции.
+`CommandsModel` перенаправляет обращения старых парсеров в локальную коллекцию
+только внутри analysis scope; вне scope сохраняется общая коллекция трансляции.
+`RmCommandParser` в этом scope читает конфигурацию, но не публикует
+`LegacyCompatibilityMapper`; кэш `KeysHelper` допускает конкурентные обращения.
+Неявная ВШ для проверки содержит тип шин без материализации устройств;
+её предупреждение привязывается к исходной РМ. Явные команды проверяются штатными
+парсерами с чтением конфигурации оборудования. При ошибке отдельного парсера
+анализ помечает проверку команды как незавершённую и продолжает последующие команды.
+Обычная трансляция сохраняет остановку при критической структурной ошибке.
+
+`ParseSourceCommand` восстанавливает физические номера строк после удаления
+пустых строк и комментариев. Текст до первого корректного заголовка теперь
+возвращается как ошибка, односимвольная неизвестная мнемоника не теряется,
+последняя команда также проверяется на дублирование номера/мнемоники.
+`MapDiagnostics` уточняет диапазон через `IssueSelectionHintResolver` в пределах
+команды, маскирует комментарии с сохранением колонок, иначе отмечает строку команды.
+Незакрытый комментарий получает предупреждение у открывающего разделителя:
+оставшийся текст транслятор считает комментарием.
 
 #### Error flow
 
@@ -1680,6 +1714,16 @@ Their services generally route operations into `MultiWindowService`.
 `FileManager` and `EditorWorkspaceModel` own containers, dock items, open paths and
 user controls. `TextEditorUI` wraps AvalonEdit; `TranslatorItem` holds source and
 formatted editors; `RunControl` hosts ProtocolUI, translated source and error list.
+Оба `TextEditorUI` подключают общий `LiveDiagnosticsController` из `Ask.UI`.
+В редактируемых исходниках он рисует красные волнистые подчёркивания ошибок
+и жёлтые (`Gold`) предупреждений с описаниями при наведении. Отдельный renderer
+не использует коллекцию маркеров поиска/исполнения. При изменении текста или
+документа и при `Unloaded` старые диапазоны сразу очищаются и запрос отменяется;
+устаревший результат не применяется. При повторной загрузке проверяется новый снимок.
+Read-only документы, OPK/OPKW и протоколы не анализируются. Ошибка фоновой проверки
+показывается предупреждением о незавершённом анализе; следующий edit запускает проверку заново.
+Renderer индексирует диапазоны и рисует только видимую часть подчёркиваний;
+при наложении предупреждения и ошибки красная линия рисуется последней.
 `FileCompareService` сравнивает текст исходного редактора с `SavedTextSnapshot`.
 `DockItemService` подписывает редактируемые вкладки на `TextChanged` и добавляет `*`
 только в визуальный `DockItem.TabText`; чистый `DockItem.Title` остаётся ключом пути.
@@ -2122,6 +2166,7 @@ and `StateEventsBinder`, then calls `ApplicationEventsBinder.BindAll`.
 | Archive refresh | `ArchiveControl` DispatcherTimer | refresh archive lists plus background I/O | view lifetime |
 | Role keyboard layout | `RoleLoginWindow` DispatcherTimer | keyboard layout monitoring | window lifetime |
 | Workspace click timer | `MultiEditorControl` DispatcherTimer | double-click discrimination | control lifetime |
+| Live source diagnostics | оба `TextEditorUI` → `LiveDiagnosticsController`, отменяемая задержка 400 мс + Task.Run | один фоновый анализ через SemaphoreSlim; локальные модели и диапазоны исходного снимка | edit/document replacement/Unloaded отменяют запрос; Loaded перезапускает; проверка cancellation между командами и этапами |
 | Logged exception reporter | `ExceptionDiagnosticReporter` bounded Task.Run | asynchronous crash package | throttled/timeout-limited |
 
 `MeasureHelper.MeasureAsync` выполняет фактический GPT-поток через

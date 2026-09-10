@@ -60,6 +60,7 @@ namespace UI.Controls.TextEditorControl
     /// Используется для подсветки диапазонов и отображения ошибок.
     /// </summary>
     private TextMarkerService _markerService;
+    private Ask.UI.Controls.TextEditorControl.Diagnostics.LiveDiagnosticsController? _liveDiagnostics;
 
     /// <summary>
     /// Список ожидающих подсветок, которые добавляются до момента
@@ -164,7 +165,11 @@ namespace UI.Controls.TextEditorControl
     public bool IsReadOnly
     {
       get => textEditor.IsReadOnly;
-      set => textEditor.IsReadOnly = value;
+      set
+      {
+        textEditor.IsReadOnly = value;
+        _liveDiagnostics?.Refresh();
+      }
     }
 
     /// <summary>
@@ -718,6 +723,8 @@ namespace UI.Controls.TextEditorControl
         textEditor.Document = new TextDocument();
 
       _documentAdapter = new AvalonTextDocumentAdapter(textEditor.Document);
+      _liveDiagnostics = new Ask.UI.Controls.TextEditorControl.Diagnostics.LiveDiagnosticsController(textEditor);
+      _liveDiagnostics.Configure(FileType);
     }
 
     /// <summary>
