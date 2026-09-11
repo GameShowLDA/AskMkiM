@@ -33,19 +33,10 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl
 
       LogInformation($"{mode} | [{device}] Команда МКР: \"{command}\".", isDeviceLog: true);
 
-      string response;
-      if (_module is Device.ModuleRelayControl relayModule
-        && await relayModule.ShouldSimulateChassisFailureAsync())
-      {
-        response = string.Empty;
-      }
-      else
-      {
-        response = await _protocol.QueryAsync(
-          command,
-          timeout: timeout,
-          cancellationToken: cancellationToken);
-      }
+      string response = await _protocol.QueryAsync(
+        command,
+        timeout: timeout,
+        cancellationToken: cancellationToken);
 
       LogInformation(
         $"{mode} | [{device}] Ответ МКР на \"{command}\": \"{(string.IsNullOrEmpty(response) ? "<пустой>" : response)}\".",

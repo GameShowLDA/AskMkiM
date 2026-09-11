@@ -533,10 +533,13 @@ equipment preparation, протокол, stop/finalize и аварийный `К
 ```text
 RunControl.Start(models)
 → ProtocolUI.StartAsync()
+  → Idle + проверка кроме `CheckType.SelfTest`: чтение флагов сбоя `ChassisManagers.GetAllAsync()`
+    → сбой любого настроенного АСКМ: штатное сообщение «Не удалось выполнить включение питания системы»;
+      кнопка запуска восстанавливается, выполнение не создаётся
   → рабочий режим + `ActionSettings.CheckPower`: проверка `SystemStateManager.IsActivePower`
     → питание отсутствует: сообщение об ошибке, кнопка запуска восстанавливается, выполнение не создаётся
     → Idle, специальный запуск с `CheckPower == false` или root-настройка
-      `ExecutionConfig.DisablePowerCheck`: проверка пропускается
+      `ExecutionConfig.DisablePowerCheck`: проверка физического питания пропускается
 → ActionExecutor.StartAsync(ActionSettings)
   → ExecutionRunGuard.TryAcquire
   → clear protocol/errors and reset StepControlManager
@@ -1521,7 +1524,9 @@ SettingsExecutionDto.IdleModeExecution (SQLite)
 
 Selection is distributed, not DI-based:
 
-- `ActionExecutor.StartAsync` skips power validation and system reset in idle;
+- `ProtocolUI.StartAsync` skips physical power validation in Idle, but blocks non-self-test
+  launches when a configured АСКМ has hardware failure simulation enabled;
+  `ActionExecutor.StartAsync` skips system reset in Idle;
 - chassis and МКР initialization/reset and runtime commands use
   `DeviceProtocolEmulator`, which selects the real UDP protocol or the matching
   stateful emulator;
@@ -1573,6 +1578,19 @@ ExecutionControl
 → non-measurement Idle manager/transport contract
 → existing adapter/UserActionHelper equipment-error flow
 ```
+
+Симуляция сбоя `ManagerChassis` («Тестер АСКМ») блокирует запуск проверок в
+`ProtocolUI.StartAsync` до создания сеанса и обращения к оборудованию. В Idle для любого
+типа проверки, кроме `CheckType.SelfTest`, загружаются настроенные тестеры через
+`ChassisManagers.GetAllAsync`; включённый флаг хотя бы одного тестера даёт штатное
+сообщение «Не удалось выполнить включение питания системы» и возвращает кнопку запуска.
+Флаги перечитываются при каждом запуске, поэтому отключение симуляции позволяет повторить
+запуск. Настройки обхода проверки физического питания не отменяют явно выбранную симуляцию.
+В Real и самоконтроле эта ветка не загружает тестеры и не влияет на выполнение.
+МКР больше не наследуют сбой тестера: `ModuleRelayControlQueryExecutor` всегда передаёт
+команды своему Real/Idle-протоколу; собственные флаги ошибок МКР продолжают действовать.
+Исключение для самоконтроля определяется типом проверки только при запуске. Кнопка подключения системы
+сохраняет прежнее поведение.
 
 The nested `Выполнение с ошибками` settings group is visible only while Idle is
 enabled. The measurement selector defaults to `None`; persisted legacy boolean

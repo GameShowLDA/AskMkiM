@@ -2,9 +2,7 @@ using Ask.Core.Shared.DTO.Devices.Base;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.DataBase.Engine.Factory;
 using Ask.DataBase.Engine.Mapping;
-using Ask.DataBase.Engine.Static.Devices;
 using Ask.Device.Application.Composition;
-using Ask.Device.Runtime.Device;
 
 namespace Ask.DataBase.Engine.Builder;
 
@@ -26,7 +24,7 @@ public static class DeviceBuilder
 
     var device = DeviceFactory.Create(dto.DeviceClass);
     DeviceMapperRegistry.Apply(device, dto);
-    return Compose(device);
+    return DeviceApplicationComposer.Compose(device);
   }
 
   /// <summary>
@@ -42,17 +40,6 @@ public static class DeviceBuilder
 
     var device = DeviceFactory.Create<TDevice>(dto.DeviceClass);
     DeviceMapperRegistry.Apply(device, dto);
-    return Compose(device);
-  }
-
-  private static TDevice Compose<TDevice>(TDevice device)
-    where TDevice : class, IDevice
-  {
-    if (device is ModuleRelayControl module)
-    {
-      module.ChassisManagerProvider = () => ChassisManagers.GetByNumberAsync(module.NumberChassis);
-    }
-
     return DeviceApplicationComposer.Compose(device);
   }
 
