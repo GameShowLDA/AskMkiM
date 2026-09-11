@@ -34,6 +34,9 @@ namespace Ask.Device.Runtime.Base.Device
     public string DeviceClass { get; set; } = string.Empty;
 
     /// <inheritdoc />
+    public bool IsHardwareFailureSimulationEnabled { get; set; }
+
+    /// <inheritdoc />
     public IConnectable ConnectableManager { get; set; } = null!;
 
     /// <inheritdoc />

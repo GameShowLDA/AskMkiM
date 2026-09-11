@@ -57,7 +57,9 @@ namespace Ask.Device.Emulator
 
       var protocol = new ModeSelectingDeviceProtocol(
         () => device.DeviceProtocol,
-        new MultimeterEmulatorProtocol(idleResponse));
+        new MultimeterEmulatorProtocol(
+          idleResponse,
+          () => IdleHardwareErrorSimulator.ShouldSimulateHardwareError(device)));
       bool expectsResponse = command.Contains('?');
       string response = await protocol.QueryAsync(
         command,
@@ -84,7 +86,10 @@ namespace Ask.Device.Emulator
           () => item.DeviceProtocol,
           new DeviceBusCommutationEmulatorProtocol(
             () => item.Number,
-            () => item.NumberChassis)));
+            () => item.NumberChassis,
+            () => IdleHardwareErrorSimulator.ShouldSimulateHardwareError(item),
+            ExecutionConfig.GetIsErrorSimulationEnabled,
+            () => Random.Shared.Next(4) == 0 ? Random.Shared.Next(1, 256) : 0)));
     }
 
     /// <summary>
@@ -96,6 +101,7 @@ namespace Ask.Device.Emulator
       return RelaySwitchModules.GetValue(
         module,
         device => CreateModuleRelayControl(
+          device,
           () => device.DeviceProtocol,
           () => device.Number,
           () => device.NumberChassis));
@@ -105,15 +111,20 @@ namespace Ask.Device.Emulator
     /// Создаёт протокол модуля коммутации реле с автоматическим выбором режима.
     /// </summary>
     public static IDeviceProtocol CreateModuleRelayControl(
+      IRelaySwitchModule module,
       Func<IDeviceProtocol?> realProtocolProvider,
       Func<int> moduleNumberProvider,
       Func<int> chassisNumberProvider)
     {
+      ArgumentNullException.ThrowIfNull(module);
+
       return new ModeSelectingDeviceProtocol(
         realProtocolProvider,
         new ModuleRelayControlEmulatorProtocol(
           moduleNumberProvider,
-          chassisNumberProvider));
+          chassisNumberProvider,
+          () => IdleHardwareErrorSimulator.ShouldSimulateHardwareError(module),
+          ExecutionConfig.GetIsErrorSimulationEnabled));
     }
 
     /// <summary>
@@ -126,7 +137,8 @@ namespace Ask.Device.Emulator
         chassis,
         device => new ModeSelectingDeviceProtocol(
           () => device.DeviceProtocol,
-          new ChassisEmulatorProtocol()));
+          new ChassisEmulatorProtocol(
+            () => IdleHardwareErrorSimulator.ShouldSimulateHardwareError(device))));
     }
   }
 }

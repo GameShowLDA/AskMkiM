@@ -1,5 +1,7 @@
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.DTO.Devices.Measurements;
+using Ask.Core.Shared.DTO.Settings;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies.Data;
 using Ask.Engine.UnitTests.Services.Config;
 
@@ -8,6 +10,69 @@ namespace Ask.Engine.UnitTests.ControlCommandExecutor.BaseStrategies.Data;
 [Collection(nameof(ExecutionConfigCollection))]
 public class MeasurementResultEvaluatorTests
 {
+  [Theory]
+  [InlineData(TypeErroneousMeasurement.Low)]
+  [InlineData(TypeErroneousMeasurement.High)]
+  [InlineData(TypeErroneousMeasurement.Rnd)]
+  public async Task Evaluate_IdleErrorMode_ReturnsValueOutsideAllowedRange(
+    TypeErroneousMeasurement type)
+  {
+    SettingsExecutionDto original = await ExecutionConfig.GetExecitonModel();
+    try
+    {
+      await ExecutionConfig.SetExecutionModel(new SettingsExecutionDto
+      {
+        IdleModeExecution = true,
+        ErroneousMeasurementType = type,
+      });
+      var range = new MeasurementRange(150, 100, 200);
+
+      var result = MeasurementResultEvaluator.Evaluate(range);
+
+      Assert.False(result.IsSuccessful);
+      if (type == TypeErroneousMeasurement.Low)
+      {
+        Assert.True(result.Value < range.LowerBound);
+      }
+      else if (type == TypeErroneousMeasurement.High)
+      {
+        Assert.True(result.Value > range.UpperBound);
+      }
+      else
+      {
+        Assert.True(result.Value < range.LowerBound || result.Value > range.UpperBound);
+      }
+    }
+    finally
+    {
+      await ExecutionConfig.SetExecutionModel(original);
+    }
+  }
+
+  [Fact]
+  public async Task Evaluate_IdleNoneMode_KeepsTargetValue()
+  {
+    SettingsExecutionDto original = await ExecutionConfig.GetExecitonModel();
+    try
+    {
+      await ExecutionConfig.SetExecutionModel(new SettingsExecutionDto
+      {
+        IdleModeExecution = true,
+        ErroneousMeasurementType = TypeErroneousMeasurement.None,
+      });
+      var range = new MeasurementRange(150, 100, 200);
+
+      var result = MeasurementResultEvaluator.Evaluate(range);
+
+      Assert.True(result.IsSuccessful);
+      Assert.Equal(150, result.Value);
+    }
+    finally
+    {
+      await ExecutionConfig.SetExecutionModel(original);
+    }
+  }
+
   [Fact]
   public void Evaluate_WithoutUpperBound_AcceptsValueAboveLowerBound()
   {

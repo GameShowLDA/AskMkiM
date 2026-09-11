@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 
 namespace Ask.Core.Shared.DTO.Settings;
 
@@ -22,9 +23,10 @@ public class SettingsExecutionDto
   public bool IdleModeExecution { get; set; }
 
   /// <summary>
-  /// Включает симуляцию отрицательных результатов измерений.
+  /// Задаёт режим симуляции ошибочных результатов измерений.
   /// </summary>
-  public bool IsErrorSimulationMode { get; set; }
+  [Column("IsErrorSimulationMode")]
+  public TypeErroneousMeasurement ErroneousMeasurementType { get; set; }
 
   /// <summary>
   /// Включает симуляцию аппаратных ошибок оборудования.

@@ -11,11 +11,6 @@ namespace Ask.Device.Emulator.Chassis
     private readonly Func<bool> _hardwareErrorProvider;
     private bool _powerEnabled;
 
-    public ChassisEmulatorProtocol()
-      : this(IdleHardwareErrorSimulator.ShouldSimulateHardwareError)
-    {
-    }
-
     internal ChassisEmulatorProtocol(Func<bool> hardwareErrorProvider)
     {
       _hardwareErrorProvider = hardwareErrorProvider

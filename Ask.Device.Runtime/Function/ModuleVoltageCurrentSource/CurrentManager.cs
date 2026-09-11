@@ -36,7 +36,7 @@ namespace Ask.Device.Runtime.Function.ModuleVoltageCurrentSource
 
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        if (IdleHardwareErrorSimulator.ShouldSimulateHardwareError())
+        if (IdleHardwareErrorSimulator.ShouldSimulateHardwareError(_moduleVoltageCurrentSource))
         {
           throw new DeviceException(IdleHardwareErrorSimulator.ErrorMessage);
         }
@@ -58,7 +58,7 @@ namespace Ask.Device.Runtime.Function.ModuleVoltageCurrentSource
 
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        return !IdleHardwareErrorSimulator.ShouldSimulateHardwareError();
+        return !IdleHardwareErrorSimulator.ShouldSimulateHardwareError(_moduleVoltageCurrentSource);
       }
 
       await _moduleVoltageCurrentSource.DeviceProtocol.QueryAsync(new DeviceCommand(10, current).ToString(), timeout: 2000);

@@ -2,6 +2,11 @@ using System.Reflection;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
+using Ask.Device.Emulator.BreakdownTester;
+using Ask.Device.Emulator.DeviceBusCommutation;
+using Ask.Device.Emulator.ModuleRelayControl;
+using Ask.Device.Emulator.Multimeter;
+using System.Text.Json;
 
 namespace Ask.Device.Emulator.UnitTests;
 
@@ -59,6 +64,65 @@ public sealed class DeviceProtocolEmulatorTests
 
     Assert.Contains("GPT-79904", response, StringComparison.Ordinal);
     Assert.Null(realProtocol.LastCommand);
+  }
+
+  [Theory(DisplayName = "Аппаратная симуляция: неизмерительная команда всегда проваливается")]
+  [InlineData("CONF:RES 100,0.001")]
+  [InlineData("*IDN?")]
+  public async Task HardwareError_NonMeasurementCommand_ReturnsEmpty(string command)
+  {
+    IDeviceProtocol protocol = command.StartsWith("CONF", StringComparison.Ordinal)
+      ? new MultimeterEmulatorProtocol("OK", () => true)
+      : new BreakdownTesterEmulatorProtocol(() => true);
+
+    Assert.Empty(await protocol.QueryAsync(command));
+  }
+
+  [Theory(DisplayName = "Аппаратная симуляция: измерительная команда сохраняет измерительный ответ")]
+  [InlineData("READ?")]
+  [InlineData("MEAS:RES?")]
+  [InlineData("FETC?")]
+  public async Task HardwareError_MultimeterMeasurement_ReturnsMeasurement(string command)
+  {
+    var protocol = new MultimeterEmulatorProtocol("+1.00000000E+01", () => true);
+
+    Assert.Equal("+1.00000000E+01", await protocol.QueryAsync(command));
+  }
+
+  [Fact(DisplayName = "Аппаратная симуляция: измерительная команда ППУ сохраняет результат")]
+  public async Task HardwareError_BreakdownMeasurement_ReturnsMeasurement()
+  {
+    var protocol = new BreakdownTesterEmulatorProtocol(() => true);
+
+    Assert.Equal("PASS,0,0,1.000mA", await protocol.QueryAsync("MEAS ?"));
+  }
+
+  [Fact(DisplayName = "Аппаратная симуляция: измерительный самоконтроль МКР сохраняет результат")]
+  public async Task HardwareError_RelayMeasurementSelfTest_ReturnsResult()
+  {
+    var protocol = new ModuleRelayControlEmulatorProtocol(
+      () => 4,
+      () => 2,
+      () => true,
+      () => false);
+
+    using JsonDocument response = JsonDocument.Parse(await protocol.QueryAsync("6.1"));
+
+    Assert.True(response.RootElement.GetProperty("SelfControl").GetBoolean());
+  }
+
+  [Fact(DisplayName = "Аппаратная симуляция: измерительная команда УКШ сохраняет результат")]
+  public async Task HardwareError_SwitchingMeasurementCommand_ReturnsResult()
+  {
+    var protocol = new DeviceBusCommutationEmulatorProtocol(
+      () => 20,
+      () => 1,
+      () => true,
+      () => false,
+      () => 0);
+
+    Assert.Empty(await protocol.QueryAsync("4.1.2.1"));
+    Assert.Equal("0", await protocol.QueryAsync("6.1.2.1"));
   }
 
   [Fact(DisplayName = "Фабрика протоколов: пустое устройство отклоняется понятной ошибкой")]

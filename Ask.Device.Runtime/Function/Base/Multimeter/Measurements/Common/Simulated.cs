@@ -8,7 +8,6 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
   /// </summary>
   internal class Simulated
   {
-
     /// <summary>
     /// Генератор случайных чисел.
     /// </summary>
@@ -32,39 +31,25 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
 
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        if (!ExecutionConfig.GetIsErrorSimulationEnabled())
+        if (IdleMeasurementErrorSimulator.TryGetValue(rangeFrom, rangeTo, out double erroneousValue))
         {
-          switch (measurementTypeCommand)
-          {
-            case ElectricalTestFunction.None:
-              break;
-            case ElectricalTestFunction.DielectricWithstandAC:
-              return (rangeFrom + rangeTo) / 2;
-            case ElectricalTestFunction.DielectricWithstandDC:
-              return (rangeFrom + rangeTo) / 2;
-            case ElectricalTestFunction.InsulationResistance:
-              return (rangeFrom + rangeTo) / 2;
-
-            case ElectricalTestFunction.ACVoltage:
-            case ElectricalTestFunction.DCVoltage:
-            case ElectricalTestFunction.Resistance:
-            case ElectricalTestFunction.Capacitance:
-            case ElectricalTestFunction.Continuity:
-            case ElectricalTestFunction.Diode:
-              return (rangeFrom + rangeTo) / 2;
-          }
+          return erroneousValue;
         }
-        else
+
+        switch (measurementTypeCommand)
         {
-          switch (measurementTypeCommand)
-          {
-            case ElectricalTestFunction.DielectricWithstandAC:
-              return new Random().Next(0, 80);
-            case ElectricalTestFunction.DielectricWithstandDC:
-              return new Random().Next(0, 100);
-            case ElectricalTestFunction.InsulationResistance:
-              return new Random().Next(0, 60000);
-          }
+          case ElectricalTestFunction.None:
+            break;
+          case ElectricalTestFunction.DielectricWithstandAC:
+          case ElectricalTestFunction.DielectricWithstandDC:
+          case ElectricalTestFunction.InsulationResistance:
+          case ElectricalTestFunction.ACVoltage:
+          case ElectricalTestFunction.DCVoltage:
+          case ElectricalTestFunction.Resistance:
+          case ElectricalTestFunction.Capacitance:
+          case ElectricalTestFunction.Continuity:
+          case ElectricalTestFunction.Diode:
+            return (rangeFrom + rangeTo) / 2;
         }
 
         double min = rangeFrom / 2;

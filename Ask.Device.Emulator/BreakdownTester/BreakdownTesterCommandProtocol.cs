@@ -18,7 +18,8 @@ internal sealed class BreakdownTesterCommandProtocol : IDeviceProtocol
     _device = device;
     _protocol = new Protocols.ModeSelectingDeviceProtocol(
       () => realProtocol,
-      new BreakdownTesterEmulatorProtocol());
+      new BreakdownTesterEmulatorProtocol(
+        () => IdleHardwareErrorSimulator.ShouldSimulateHardwareError(_device)));
   }
 
   /// <inheritdoc />

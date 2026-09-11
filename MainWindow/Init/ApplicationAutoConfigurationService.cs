@@ -165,7 +165,7 @@ internal sealed class ApplicationAutoConfigurationService
     var defaultSettings = new SettingsExecutionDto
     {
       IdleModeExecution = false,
-      IsErrorSimulationMode = false,
+      ErroneousMeasurementType = TypeErroneousMeasurement.None,
       IsHardwareErrorSimulationMode = false,
       StepByStepMode = false,
       StopOnError = false,

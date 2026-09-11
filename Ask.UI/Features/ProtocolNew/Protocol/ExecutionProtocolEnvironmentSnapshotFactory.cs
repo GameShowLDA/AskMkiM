@@ -18,7 +18,7 @@ internal static class ExecutionProtocolEnvironmentSnapshotFactory
     var settings = new SortedDictionary<string, string>
     {
       ["Выполнение.Холостой режим"] = State(execution.IdleModeExecution),
-      ["Выполнение.Симуляция брака"] = State(execution.IsErrorSimulationMode),
+      ["Выполнение.Симуляция брака"] = execution.ErroneousMeasurementType.ToString(),
       ["Выполнение.Симуляция аппаратных ошибок"] = State(execution.IsHardwareErrorSimulationMode),
       ["Выполнение.Пошаговый режим"] = State(execution.StepByStepMode),
       ["Выполнение.Остановка при ошибке"] = State(execution.StopOnError),

@@ -1,4 +1,3 @@
-using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using System.Collections.Concurrent;
 
@@ -10,6 +9,18 @@ namespace Ask.Device.Emulator.BreakdownTester;
 internal sealed class BreakdownTesterEmulatorProtocol : IDeviceProtocol
 {
   private readonly ConcurrentDictionary<string, string> _values = new(StringComparer.OrdinalIgnoreCase);
+  private readonly Func<bool> _hardwareErrorProvider;
+
+  public BreakdownTesterEmulatorProtocol()
+    : this(() => false)
+  {
+  }
+
+  internal BreakdownTesterEmulatorProtocol(Func<bool> hardwareErrorProvider)
+  {
+    _hardwareErrorProvider = hardwareErrorProvider
+      ?? throw new ArgumentNullException(nameof(hardwareErrorProvider));
+  }
 
   /// <inheritdoc />
   public SemaphoreSlim OperationLock { get; set; } = new(1, 1);
@@ -24,12 +35,12 @@ internal sealed class BreakdownTesterEmulatorProtocol : IDeviceProtocol
     CancellationToken cancellationToken = default)
   {
     cancellationToken.ThrowIfCancellationRequested();
-    if (IdleHardwareErrorSimulator.ShouldSimulateHardwareError())
+    string normalized = command.Trim();
+    if (_hardwareErrorProvider() && !IsMeasurementCommand(normalized))
     {
       return Task.FromResult(string.Empty);
     }
 
-    string normalized = command.Trim();
     if (normalized.Equals("*IDN?", StringComparison.OrdinalIgnoreCase))
     {
       return Task.FromResult("GW INSTEK,GPT-79904,IDLE,1.0");
@@ -58,5 +69,12 @@ internal sealed class BreakdownTesterEmulatorProtocol : IDeviceProtocol
     }
 
     return Task.FromResult(string.Empty);
+  }
+
+  private static bool IsMeasurementCommand(string command)
+  {
+    string normalized = command.Replace(" ", string.Empty, StringComparison.Ordinal);
+    return normalized.StartsWith("MEAS", StringComparison.OrdinalIgnoreCase)
+      && normalized.EndsWith('?');
   }
 }
