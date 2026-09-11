@@ -329,6 +329,10 @@ public sealed class ProtocolOverviewTests
     RunInSta(() =>
     {
       var control = new ProtocolListBoxUI();
+      var scrollStyle = new System.Windows.Style(typeof(System.Windows.Controls.Primitives.ScrollBar));
+      scrollStyle.Setters.Add(new System.Windows.Setter(System.Windows.FrameworkElement.MarginProperty,
+        new System.Windows.Thickness(0, 0, 5, 0)));
+      control.Resources[typeof(System.Windows.Controls.Primitives.ScrollBar)] = scrollStyle;
       control.LoadMessages(Enumerable.Range(1, 200).Select(i =>
         new ShowMessageModel { Header = $"Строка {i}", Message = "Результат измерения", Status = ShowMessageModel.MessageType.Info }));
       void Layout()
@@ -349,8 +353,15 @@ public sealed class ProtocolOverviewTests
         var overview = (Border)control.FindName("OverviewTrackHost");
         Assert.True(scroll.Maximum > 0);
         Assert.Equal(System.Windows.Visibility.Visible, scroll.Visibility);
-        Assert.True(overview.TranslatePoint(new System.Windows.Point(overview.ActualWidth, 0), control).X <=
-          scroll.TranslatePoint(new System.Windows.Point(), control).X);
+        var overviewBounds = new System.Windows.Rect(overview.TranslatePoint(new System.Windows.Point(), control), overview.RenderSize);
+        var scrollBounds = new System.Windows.Rect(scroll.TranslatePoint(new System.Windows.Point(), control), scroll.RenderSize);
+        Assert.True(overviewBounds.IntersectsWith(scrollBounds));
+        Assert.Equal(overviewBounds.X + overviewBounds.Width / 2,
+          scrollBounds.X + scrollBounds.Width / 2, precision: 3);
+        Assert.True(Panel.GetZIndex(overview) > Panel.GetZIndex(scroll));
+        Assert.True(overview.IsHitTestVisible);
+        Assert.Null(overview.Background);
+        Assert.True(((ErrorOverviewBar)control.FindName("errorOverviewBar")).IsMarkerHitTestOnly);
         viewer.ScrollToVerticalOffset(100);
         Layout();
         Assert.Equal(viewer.VerticalOffset, scroll.Value);
@@ -365,6 +376,45 @@ public sealed class ProtocolOverviewTests
       {
         control.RaiseEvent(new System.Windows.RoutedEventArgs(System.Windows.FrameworkElement.UnloadedEvent));
       }
+    });
+  }
+
+  [Fact]
+  public void MarkerOverlayReceivesMarkerHitsAndPassesEmptyTrackToScrollBar()
+  {
+    RunInSta(() =>
+    {
+      var scroll = new System.Windows.Controls.Primitives.ScrollBar { Maximum = 100, ViewportSize = 20 };
+      var bar = new ErrorOverviewBar { Background = Brushes.Transparent,
+        IsViewportVisible = false, IsMarkerHitTestOnly = true, MarkerHeight = 8 };
+      var host = new Border { Child = bar };
+      var grid = new Grid();
+      grid.Children.Add(scroll);
+      grid.Children.Add(host);
+      Panel.SetZIndex(host, 2);
+      using var source = new System.Windows.Interop.HwndSource(new System.Windows.Interop.HwndSourceParameters("Marker hit testing")
+      {
+        Width = 30, Height = 200, WindowStyle = unchecked((int)0x80000000),
+      });
+      source.RootVisual = grid;
+      grid.Measure(new System.Windows.Size(30, 200));
+      grid.Arrange(new System.Windows.Rect(0, 0, 30, 200));
+      int selected = 0;
+      bar.SetLineDiagnostics(100, new[] { (1, ErrorOverviewSeverity.Error, "Ошибка") },
+        line => selected = line);
+      var bitmap = new System.Windows.Media.Imaging.RenderTargetBitmap(30, 200, 96, 96, PixelFormats.Pbgra32);
+      bitmap.Render(grid);
+      Assert.Same(bar.FindName("OverviewSurface"), grid.InputHitTest(new System.Windows.Point(15, 3)));
+      bar.NavigateAt(3, false);
+      Assert.Equal(1, selected);
+      var emptyHit = grid.InputHitTest(new System.Windows.Point(15, 100)) as System.Windows.DependencyObject;
+      Assert.NotNull(emptyHit);
+      Assert.True(ReferenceEquals(scroll, emptyHit) || scroll.IsAncestorOf(emptyHit));
+      bar.AreErrorMarkersVisible = false;
+      bitmap.Render(grid);
+      var hiddenHit = grid.InputHitTest(new System.Windows.Point(15, 3)) as System.Windows.DependencyObject;
+      Assert.NotNull(hiddenHit);
+      Assert.True(ReferenceEquals(scroll, hiddenHit) || scroll.IsAncestorOf(hiddenHit));
     });
   }
 

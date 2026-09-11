@@ -432,6 +432,9 @@ namespace Ask.UI.Controls.TextEditorControl
       };
     }
 
+    internal bool IsMarkerAt(Point point) =>
+      point.X >= MarkerInset && point.X <= PlotWidth - MarkerInset && HitTestMarker(point) != null;
+
     private OverviewMarker? HitTestMarker(Point point)
     {
       return _markers.FirstOrDefault(marker =>

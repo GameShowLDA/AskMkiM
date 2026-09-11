@@ -381,7 +381,6 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto" MinWidth="30"/>
-                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
             <Border Grid.Row="1" Grid.Column="0"
@@ -470,15 +469,20 @@
                 </ListBox>
             </Border>
 
-            <Border x:Name="OverviewTrackHost" Grid.Row="1" Grid.Column="1" Background="Transparent" BorderThickness="0">
+            <Border x:Name="OverviewTrackHost" Grid.Row="1" Grid.Column="1" Panel.ZIndex="2"
+                    BorderThickness="0">
                 <overview:ErrorOverviewBar x:Name="errorOverviewBar"
                                           AutomationProperties.Name="Карта команд и ошибок протокола"
                                           Background="Transparent"
                                           BorderThickness="0"
+                                          IsMarkerHitTestOnly="True"
                                           IsViewportVisible="False"/>
             </Border>
             <ScrollBar x:Name="ProtocolVerticalScrollBar"
-                       Grid.Row="1" Grid.Column="2"
+                       Grid.Row="1" Grid.Column="1" Panel.ZIndex="1"
+                       HorizontalAlignment="Center"
+                       Margin="0"
+                       Background="Transparent"
                        Orientation="Vertical"
                        Visibility="Collapsed"
                        Minimum="0"

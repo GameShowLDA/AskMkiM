@@ -7,6 +7,21 @@ namespace Ask.UI.Controls.TextEditorControl
 {
   public sealed partial class ErrorOverviewBar
   {
+    /// <summary>
+    /// Идентификатор свойства <see cref="IsMarkerHitTestOnly"/>.
+    /// </summary>
+    public static readonly DependencyProperty IsMarkerHitTestOnlyProperty = DependencyProperty.Register(
+      nameof(IsMarkerHitTestOnly), typeof(bool), typeof(ErrorOverviewBar), new PropertyMetadata(false));
+
+    /// <summary>
+    /// Обработка мыши только над маркерами с передачей свободной области нижележащему элементу.
+    /// </summary>
+    public bool IsMarkerHitTestOnly
+    {
+      get => (bool)GetValue(IsMarkerHitTestOnlyProperty);
+      set => SetValue(IsMarkerHitTestOnlyProperty, value);
+    }
+
     private static Brush BrushFrom(string value) => (Brush)new BrushConverter().ConvertFromInvariantString(value)!;
 
     private static void OnAppearanceChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)

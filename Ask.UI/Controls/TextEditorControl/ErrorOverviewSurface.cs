@@ -10,6 +10,16 @@ namespace Ask.UI.Controls.TextEditorControl
   {
     internal ErrorOverviewBar? Owner { get; set; }
 
+    protected override HitTestResult? HitTestCore(PointHitTestParameters hitTestParameters)
+    {
+      if (Owner?.IsMarkerHitTestOnly == true)
+        return Owner.IsMarkerAt(hitTestParameters.HitPoint)
+          ? new PointHitTestResult(this, hitTestParameters.HitPoint)
+          : null;
+
+      return base.HitTestCore(hitTestParameters);
+    }
+
     protected override void OnRender(DrawingContext drawingContext)
     {
       base.OnRender(drawingContext);

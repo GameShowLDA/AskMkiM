@@ -1740,12 +1740,21 @@ formatted editors; `RunControl` hosts ProtocolUI, translated source and error li
 `IsNavigationEnabled` отключает клики полосы, `IsTrackNavigationEnabled` — только пустую область.
 `PreviewContentTemplate` принимает строку как DataContext и заменяет содержимое карточки.
 В текущем `ProtocolListBoxUI.xaml` оформление задано непосредственно на элементах:
-`OverviewTrackHost.Background` и `errorOverviewBar.Background` — `Transparent`, рамки отключены,
+`OverviewTrackHost.Background` не задан, `errorOverviewBar.Background` — `Transparent`, рамки отключены,
 `IsViewportVisible=false`: на общем фоне протокола видны только маркеры.
 Свойства `OverviewBarStyle`, `OverviewHostStyle`, `OverviewVisibility` и
 `ProtocolVerticalScrollBarVisibility` объявлены в `ProtocolListBoxUI.OverviewProperties.cs`,
 но текущая разметка не привязывается к ним.
-Порядок колонок: список → прозрачная полоса маркеров → `ProtocolVerticalScrollBar`.
+Порядок колонок: список → общая колонка обзора и `ProtocolVerticalScrollBar`.
+Прозрачная полоса маркеров лежит над скроллом (`OverviewTrackHost.Panel.ZIndex=2`);
+скролл центрирован и имеет `Panel.ZIndex=1`.
+Локальный `ProtocolVerticalScrollBar.Margin=0` перекрывает правый отступ 5 пикселей
+общего стиля `UI/Style.xaml`, чтобы центры скролла и маркеров совпадали.
+Хост маркеров не рисует фон (`Background=null`) и доступен для мыши.
+`errorOverviewBar.IsMarkerHitTestOnly=true → ErrorOverviewSurface.HitTestCore → IsMarkerAt`:
+попадание в маркер (с учётом высоты состояния и `MarkerHitPadding`) получает полоса,
+остальные позиции проходят к скроллу. Клики, Shift+клик и подсказки маркеров работают
+поверх ползунка; перетаскивание скролла начинается вне маркеров.
 Внутренний ScrollBar списка скрыт через `Hidden`, прокрутка и виртуализация остаются у его ScrollViewer.
 `Loaded` и `ProtocolScrollViewer_ScrollChanged → RefreshVerticalScrollBar` синхронизируют
 диапазон, размер Thumb, шаг страницы и позицию внешнего стандартного WPF ScrollBar;
