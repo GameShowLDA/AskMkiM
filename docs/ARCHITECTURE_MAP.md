@@ -751,7 +751,11 @@ executor throws
   `AlgorithmExecutionResult` в `ProtocolModelExtensions.AddResult`; расширение находится
   в `Ask.Protocol.Messages/Extensions/ProtocolModelExtensions.cs` и внутри раскладывает
   ошибки и информационные сообщения по коллекциям `ProtocolModel`;
-- `ParallelTestRunner` публикует этап общего сброса через `ExecutionMessages`, а
+- `ParallelTestRunner` публикует этап отключения точек через `ExecutionMessages`, затем для
+  каждого `IRelaySwitchModule` вызывает `PointManager.DisconnectingAllPoint`; прямой
+  `ConnectableManager.ResetAsync` для МКР здесь не используется, поэтому команда
+  `2.1.0.0.` не отправляется. Результат фактической групповой команды публикуется один раз
+  как сообщение диапазона точек, а
   `CiGroupMethodExecutor` передаёт ошибки подключения и результаты измерения в
   `ExecutionMessages`/`MeasurementMessages` и использует логический признак успеха;
 - `MeasurementMessages` формирует тексты брака узлового и группового методов через
@@ -1583,8 +1587,11 @@ Transport / target runtime manager
 → existing runtime response models and validation
 ```
 
-The emulator handles initialization (`1.0.0.0`), reset (`2.1.0.0`), power on/off
-and power-state query. Reset clears its in-memory power state. Hardware-error
+The emulator handles initialization (`1.0.0.0`), legacy device reset (`2.1.0.0`),
+point group operations (`11.*`) and power-state queries. For МКР point cleanup,
+runtime flows use `PointManager.DisconnectingAllPoint`, which sends the group
+disconnect command and publishes «Отключение всех точек»; direct
+`ConnectableManager.ResetAsync` is not used by those flows. Hardware-error
 simulation returns an empty response and enters the existing retry/error contract.
 The МКР emulator returns firmware-compatible JSON envelopes for bus, point,
 verified point, group, meter and self-check commands. Runtime connection stores
