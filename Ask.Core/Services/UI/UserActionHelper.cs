@@ -172,7 +172,6 @@ namespace Ask.Core.Services.UI
 
         try
         {
-          messageService?.GetCancellationToken().ThrowIfCancellationRequested();
           result = await operation();
           operationSucceeded = isSuccessful(result);
         }
