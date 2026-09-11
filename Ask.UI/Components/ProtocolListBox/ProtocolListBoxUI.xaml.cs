@@ -132,6 +132,7 @@ namespace Ask.UI.Components.ProtocolListBox
         _protocolScrollViewerSubscribed = true;
       }
       RefreshErrorOverviewViewport();
+      RefreshVerticalScrollBar();
       Dispatcher.BeginInvoke(
         () => RefreshOverviewPositions(_protocolScrollViewer?.ExtentHeight ?? 0),
         DispatcherPriority.ContextIdle);
@@ -308,7 +309,25 @@ namespace Ask.UI.Components.ProtocolListBox
 
     private void ProtocolScrollViewer_ScrollChanged(object sender, ScrollChangedEventArgs e)
     {
+      RefreshVerticalScrollBar();
       RequestOverviewUpdate(diagnosticsChanged: false);
+    }
+
+    private void RefreshVerticalScrollBar()
+    {
+      if (_protocolScrollViewer == null) return;
+      ProtocolVerticalScrollBar.Maximum = _protocolScrollViewer.ScrollableHeight;
+      ProtocolVerticalScrollBar.ViewportSize = _protocolScrollViewer.ViewportHeight;
+      ProtocolVerticalScrollBar.LargeChange = _protocolScrollViewer.ViewportHeight;
+      ProtocolVerticalScrollBar.SmallChange = MouseWheelScrollStep;
+      ProtocolVerticalScrollBar.Value = _protocolScrollViewer.VerticalOffset;
+      ProtocolVerticalScrollBar.Visibility = _protocolScrollViewer.ScrollableHeight > 0
+        ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    private void ProtocolVerticalScrollBar_Scroll(object sender, ScrollEventArgs e)
+    {
+      _protocolScrollViewer?.ScrollToVerticalOffset(e.NewValue);
     }
 
     private void RefreshErrorOverviewViewport()
