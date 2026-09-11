@@ -49,6 +49,11 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl
         return false;
       }
 
+      if (connectionState.IsConnected(bus))
+      {
+        return true;
+      }
+
       int typeVoltage = numberBus;
       DeviceCommand cmd = new DeviceCommand(4, typeBus, typeVoltage, 1);
       string commandText = cmd.ToString();

@@ -1879,6 +1879,8 @@ COM-секция делегирует создание настроек в
     `IPointManager`, `IBusManager` и `IMeterManager`, а текущие подключения
     читает через `GetConnectedPoints()` и `GetConnectedBuses()`; в Idle те же
     операции проходят через `ModuleRelayControlEmulatorProtocol`;
+    `BusManager.ConnectBusAsync` пропускает повторную команду и сообщение, если
+    `BusConnectionStateStore` уже пометил шину подключённой.
   - `Ask.UI.Features.ServiceTools.Multimeter.MultimeterControl` — сервисное
     управление мультиметрами первого шасси через общий `IMultimeter`: выбор
     Keysight/В7-78/3, подключение, инициализация, сброс, установка режима и
