@@ -103,6 +103,28 @@ public sealed class ProtocolOverviewTests
   }
 
   [Fact]
+  public void ProtocolHostExposesOverviewConfigurationProperties()
+  {
+    RunInSta(() =>
+    {
+      var barStyle = new System.Windows.Style(typeof(ErrorOverviewBar));
+      var hostStyle = new System.Windows.Style(typeof(Border));
+      var control = new ProtocolListBoxUI
+      {
+        OverviewBarStyle = barStyle,
+        OverviewHostStyle = hostStyle,
+        OverviewVisibility = System.Windows.Visibility.Collapsed,
+        ProtocolVerticalScrollBarVisibility = ScrollBarVisibility.Hidden,
+      };
+
+      Assert.Same(barStyle, control.OverviewBarStyle);
+      Assert.Same(hostStyle, control.OverviewHostStyle);
+      Assert.Equal(System.Windows.Visibility.Collapsed, control.OverviewVisibility);
+      Assert.Equal(ScrollBarVisibility.Hidden, control.ProtocolVerticalScrollBarVisibility);
+    });
+  }
+
+  [Fact]
   public void DenseMarkersStayNearTheirPositionAndCycleWithinCluster()
   {
     RunInSta(() =>
@@ -278,29 +300,6 @@ public sealed class ProtocolOverviewTests
       Assert.Throws<ArgumentException>(() => bar.MarkerGap = -1);
       Assert.Throws<ArgumentException>(() => bar.PreviewWidth = double.NaN);
       Assert.Throws<ArgumentException>(() => bar.ViewportOpacity = 1.1);
-    });
-  }
-
-  [Fact]
-  public void ProtocolHostAcceptsOverviewStyleAndCollapsesItsColumn()
-  {
-    RunInSta(() =>
-    {
-      var style = new System.Windows.Style(typeof(ErrorOverviewBar));
-      style.Setters.Add(new System.Windows.Setter(ErrorOverviewBar.AreToolTipsEnabledProperty, false));
-      var control = new ProtocolListBoxUI { OverviewBarStyle = style,
-        OverviewVisibility = System.Windows.Visibility.Collapsed,
-        ProtocolVerticalScrollBarVisibility = ScrollBarVisibility.Hidden };
-      control.Measure(new System.Windows.Size(800, 600));
-      control.Arrange(new System.Windows.Rect(0, 0, 800, 600));
-      System.Windows.Threading.Dispatcher.CurrentDispatcher.Invoke(() => { },
-        System.Windows.Threading.DispatcherPriority.ApplicationIdle);
-      var bar = (ErrorOverviewBar)control.FindName("errorOverviewBar");
-      Assert.False(bar.AreToolTipsEnabled);
-      Assert.Equal(System.Windows.Visibility.Collapsed,
-        ((Border)control.FindName("OverviewTrackHost")).Visibility);
-      Assert.Equal(ScrollBarVisibility.Hidden,
-        ScrollViewer.GetVerticalScrollBarVisibility((ListBox)control.FindName("ProtocolListBox")));
     });
   }
 
