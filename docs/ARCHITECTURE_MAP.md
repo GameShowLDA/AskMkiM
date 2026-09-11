@@ -655,8 +655,10 @@ EquipmentUsageSession.GetUsedDevices
 → DeviceResetService.ResetDevicesAsync
 → последовательно для каждого уникального устройства
   → для `IRelaySwitchModule` сначала `PointManager.DisconnectingAllPoint`
-  → только после успешного физического отключения точек `IConnectable.ResetAsync`
-  → IConnectable.ResetAsync
+  → затем `DisconnectActiveBusesAsync`
+    → `BusManager.GetConnectedBuses`
+    → `BusManager.DisconnectBusAsync` для каждой активной шины
+  → для остальных устройств `IConnectable.ResetAsync`
   → Transport → адресный UDP/TCP/COM/USB driver
   → bool/exception проверяется отдельно для устройства
   → результат записывается в лог и протокол
