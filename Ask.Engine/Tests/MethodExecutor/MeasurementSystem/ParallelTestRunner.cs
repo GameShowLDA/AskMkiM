@@ -92,7 +92,7 @@ namespace Ask.Engine.Tests.MethodExecutor.MeasurementSystem
         await Task.WhenAll(tasks);
 
         await _measurementAction(_protocolUI, dataModel);
-        await ExecutionMessages.PublishGeneralPointsResetAsync(_protocolUI);
+        await ExecutionMessages.PublishPointsDisconnectionAsync(_protocolUI);
         // задержка для теста ПИ групповым методом
         await _protocolUI.DelayWithPauseAsync(TimeSpan.FromSeconds(1));
         await ResetAllPointsAsync(groupedPoints, cancellationToken);
@@ -172,7 +172,7 @@ namespace Ask.Engine.Tests.MethodExecutor.MeasurementSystem
       foreach (var (module, points, _) in groups)
       {
         cancellationToken.ThrowIfCancellationRequested();
-        await module.ConnectableManager.ResetAsync(_protocolUI);
+        await module.PointManager.DisconnectingAllPoint(_protocolUI);
         await module.BusManager.ConnectBusAsync(SwitchingBus.A1, userMessageService: _protocolUI);
         await module.BusManager.ConnectBusAsync(SwitchingBus.B1, userMessageService: _protocolUI);
       }

@@ -30,6 +30,14 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl
       }
     }
 
+    public bool IsConnected(SwitchingBus bus)
+    {
+      lock (syncRoot)
+      {
+        return buses[GetIndex(bus)] == ConnectionState.Connected;
+      }
+    }
+
     public IReadOnlyList<BusConnectionInfo> GetConnectedBuses()
     {
       lock (syncRoot)

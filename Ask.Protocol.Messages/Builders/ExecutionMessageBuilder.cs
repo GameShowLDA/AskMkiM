@@ -72,7 +72,7 @@ internal static class ExecutionMessageBuilder
     => new($"Отлючение точки {point}");
 
   internal static ShowMessageModel BuildPointsDisconnectionMessage()
-    => new("Отлючение точек");
+    => new("Отключение точек");
 
   internal static ShowMessageModel BuildPointsResetMessage()
     => new("Сброс точек") { IndentLevel = 1 };
