@@ -134,9 +134,6 @@ namespace Ask.Device.Application.FunctionAdapters.ModuleRelayControl
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
         var succes = await _pointManager.DisconnectingAllPoint(userMessageService);
-
-        await Ask.Device.ResponseProcessor.ModuleRelayControl.ResponseProcessing.ModuleRelayControlResponseProcessor
-          .PublishOperationResultAsync(_moduleRelayControl, $"Отключение {description}", succes, userMessageService);
         return succes;
       }, userMessageService, deviceTask: true);
 
@@ -151,7 +148,7 @@ namespace Ask.Device.Application.FunctionAdapters.ModuleRelayControl
       var description = $"всех точек от шины А";
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
-        var succes = await _pointManager.DisconnectingAllPointFromBusA(userMessageService);
+        var succes = await _pointManager.DisconnectingAllPointFromBusA();
 
         await Ask.Device.ResponseProcessor.ModuleRelayControl.ResponseProcessing.ModuleRelayControlResponseProcessor
           .PublishOperationResultAsync(_moduleRelayControl, $"Отключение {description}", succes, userMessageService);
@@ -169,7 +166,7 @@ namespace Ask.Device.Application.FunctionAdapters.ModuleRelayControl
       var description = $"всех точек от шины В";
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
-        var succes = await _pointManager.DisconnectingAllPointFromBusB(userMessageService);
+        var succes = await _pointManager.DisconnectingAllPointFromBusB();
 
         await Ask.Device.ResponseProcessor.ModuleRelayControl.ResponseProcessing.ModuleRelayControlResponseProcessor
           .PublishOperationResultAsync(_moduleRelayControl, $"Отключение {description}", succes, userMessageService);
@@ -196,7 +193,7 @@ namespace Ask.Device.Application.FunctionAdapters.ModuleRelayControl
 
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
-        return await _pointManager.ConnectingPointToNewBus(bus, nubmerPoint, userMessageService);
+        return await _pointManager.ConnectingPointToNewBus(bus, nubmerPoint);
       }, userMessageService, deviceTask: true);
 
       if (!result)

@@ -41,7 +41,7 @@ namespace Ask.Device.Runtime.Function.MikUps1101rRm
     {
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        if (IdleHardwareErrorSimulator.ShouldSimulateHardwareError())
+        if (IdleHardwareErrorSimulator.ShouldSimulateHardwareError(_device))
         {
           _connected = false;
           return (false, IdleHardwareErrorSimulator.ErrorMessage);
@@ -75,7 +75,7 @@ namespace Ask.Device.Runtime.Function.MikUps1101rRm
     /// <inheritdoc />
     public Task<bool> DisconnectAsync(IUserInteractionService messageService = null)
     {
-      if (IdleHardwareErrorSimulator.ShouldSimulateHardwareError())
+      if (IdleHardwareErrorSimulator.ShouldSimulateHardwareError(_device))
       {
         return Task.FromResult(false);
       }
@@ -89,7 +89,7 @@ namespace Ask.Device.Runtime.Function.MikUps1101rRm
     /// <inheritdoc />
     public Task<bool> ResetAsync(IUserInteractionService messageService = null)
     {
-      if (IdleHardwareErrorSimulator.ShouldSimulateHardwareError())
+      if (IdleHardwareErrorSimulator.ShouldSimulateHardwareError(_device))
       {
         return Task.FromResult(false);
       }

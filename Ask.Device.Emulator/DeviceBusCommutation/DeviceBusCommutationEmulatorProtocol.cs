@@ -15,18 +15,6 @@ namespace Ask.Device.Emulator.DeviceBusCommutation
     private readonly Func<bool> measurementErrorProvider;
     private readonly Func<int> simulatedChainResultProvider;
 
-    public DeviceBusCommutationEmulatorProtocol(
-      Func<int> deviceNumberProvider,
-      Func<int> chassisNumberProvider)
-      : this(
-        deviceNumberProvider,
-        chassisNumberProvider,
-        IdleHardwareErrorSimulator.ShouldSimulateHardwareError,
-        ExecutionConfig.GetIsErrorSimulationEnabled,
-        () => Random.Shared.Next(4) == 0 ? Random.Shared.Next(1, 256) : 0)
-    {
-    }
-
     internal DeviceBusCommutationEmulatorProtocol(
       Func<int> deviceNumberProvider,
       Func<int> chassisNumberProvider,
@@ -51,11 +39,6 @@ namespace Ask.Device.Emulator.DeviceBusCommutation
       int delayBeforeCall = 0,
       CancellationToken cancellationToken = default)
     {
-      if (hardwareErrorProvider())
-      {
-        return Task.FromResult(string.Empty);
-      }
-
       string normalizedCommand = command.Trim().TrimEnd('.');
       string[] parts = normalizedCommand.Split('.');
       if (parts.Length != 4 || parts.Any(part => !int.TryParse(part, out _)))
@@ -64,6 +47,11 @@ namespace Ask.Device.Emulator.DeviceBusCommutation
       }
 
       int commandNumber = int.Parse(parts[0]);
+      if (hardwareErrorProvider() && commandNumber != 6)
+      {
+        return Task.FromResult(string.Empty);
+      }
+
       if (commandNumber == 6)
       {
         return Task.FromResult(measurementErrorProvider()

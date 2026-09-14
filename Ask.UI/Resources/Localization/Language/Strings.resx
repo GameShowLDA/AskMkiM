@@ -499,13 +499,25 @@
     <value>Симуляция ошибок измерений</value>
   </data>
   <data name="settings.execution.measurementErrorSimulation.description" xml:space="preserve">
-    <value>Добавляет существующие случайные отклонения результатов измерений от заданных норм.</value>
+    <value>Задаёт направление ошибочного результата измерения относительно допустимого диапазона.</value>
+  </data>
+  <data name="settings.execution.measurementErrorSimulation.none" xml:space="preserve">
+    <value>Без ошибок</value>
+  </data>
+  <data name="settings.execution.measurementErrorSimulation.rnd" xml:space="preserve">
+    <value>Случайно</value>
+  </data>
+  <data name="settings.execution.measurementErrorSimulation.low" xml:space="preserve">
+    <value>Ниже нормы</value>
+  </data>
+  <data name="settings.execution.measurementErrorSimulation.high" xml:space="preserve">
+    <value>Выше нормы</value>
   </data>
   <data name="settings.execution.hardwareErrorSimulation.title" xml:space="preserve">
-    <value>Симуляция ошибок оборудования</value>
+    <value>Симуляция сбоев оборудования</value>
   </data>
   <data name="settings.execution.hardwareErrorSimulation.description" xml:space="preserve">
-    <value>Имитирует ошибку выполнения не измерительной команды оборудования с вероятностью 50%.</value>
+    <value>Задаёт оборудование, для которого каждая неизмерительная команда завершается ошибкой.</value>
   </data>
   <data name="settings.protocol.operationTime.title" xml:space="preserve">
     <value>Вывод времени операции</value>

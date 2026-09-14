@@ -314,8 +314,8 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
 
       if (needRestartModuleAfter)
       {
-        await tested_module.ConnectableManager.ResetAsync();
-        await verificat_module.ConnectableManager.ResetAsync();
+        await tested_module.PointManager.DisconnectingAllPoint();
+        await verificat_module.PointManager.DisconnectingAllPoint();
       }
       return true;
     }
@@ -608,8 +608,8 @@ namespace Ask.Engine.Tests.RelaySwitchingModule
         return;
       }
 
-      await tested_module.ConnectableManager.ResetAsync(_userInteractionService);
-      await verificat_module.ConnectableManager.ResetAsync(_userInteractionService);
+      await tested_module.PointManager.DisconnectingAllPoint(_userInteractionService);
+      await verificat_module.PointManager.DisconnectingAllPoint(_userInteractionService);
     }
 
     #endregion

@@ -87,7 +87,14 @@ public static class DeviceResetService
 
         try
         {
-          await ShowResultAsync(device, reset, error, messageService);
+          if (device is IRelaySwitchModule)
+          {
+
+          }
+          else
+          {
+            await ShowResultAsync(device, reset, error, messageService);
+          }
         }
         catch (Exception ex)
         {
@@ -131,20 +138,68 @@ public static class DeviceResetService
     IDevice device,
     IUserInteractionService? messageService)
   {
-    // TODO : Включить если не пойдёт сброс МКР
     if (device is IRelaySwitchModule relayModule)
     {
-      bool disconnected = await relayModule.PointManager.DisconnectingAllPoint(messageService);
+      bool disconnected = false;
+      bool busesDisconnected = false;
+      try
+      {
+        disconnected = await relayModule.PointManager.DisconnectingAllPoint(messageService);
+      }
+      finally
+      {
+        busesDisconnected = await DisconnectActiveBusesAsync(relayModule, messageService);
+      }
+
       if (!disconnected)
       {
         LogError(
           $"{GetDeviceLabel(device)}: не удалось физически отключить все точки МКР перед адресным сбросом.",
           isDeviceLog: true);
-        return false;
       }
+
+      return disconnected && busesDisconnected;
     }
 
     return await device.ConnectableManager.ResetAsync();
+  }
+
+  /// <summary>
+  /// Отключает шины МКР, которые отмечены подключёнными в текущем состоянии устройства.
+  /// </summary>
+  /// <param name="relayModule">Модуль МКР.</param>
+  /// <param name="messageService">Сервис вывода сообщений и выбора действия при ошибке.</param>
+  /// <returns>
+  /// <see langword="true"/>, если все активные шины отключены или активных шин нет;
+  /// иначе <see langword="false"/>.
+  /// </returns>
+  private static async Task<bool> DisconnectActiveBusesAsync(
+    IRelaySwitchModule relayModule,
+    IUserInteractionService? messageService)
+  {
+    bool success = true;
+    var activeBuses = relayModule.BusManager
+      .GetConnectedBuses()
+      .Select(static connection => connection.Bus)
+      .ToArray();
+
+    foreach (var bus in activeBuses)
+    {
+      try
+      {
+        if (!await relayModule.BusManager.DisconnectBusAsync(bus, messageService))
+        {
+          success = false;
+        }
+      }
+      catch (Exception ex)
+      {
+        success = false;
+        LogException($"Ошибка отключения активной шины {bus} у {GetDeviceLabel(relayModule)}.", ex, isDeviceLog: true);
+      }
+    }
+
+    return success;
   }
 
   private static async Task ShowResultAsync(

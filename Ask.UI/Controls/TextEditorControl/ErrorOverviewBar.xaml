@@ -1,0 +1,60 @@
+﻿<UserControl x:Class="Ask.UI.Controls.TextEditorControl.ErrorOverviewBar"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:Ask.UI.Controls.TextEditorControl"
+             x:Name="Root">
+    <UserControl.Template>
+        <ControlTemplate TargetType="UserControl">
+            <ContentPresenter/>
+        </ControlTemplate>
+    </UserControl.Template>
+    <Border BorderBrush="{Binding BorderBrush, ElementName=Root}"
+            BorderThickness="{Binding BorderThickness, ElementName=Root}"
+            CornerRadius="{Binding CornerRadius, ElementName=Root}"
+            Padding="{Binding Padding, ElementName=Root}">
+        <Grid>
+            <local:ErrorOverviewSurface x:Name="OverviewSurface" ClipToBounds="True"/>
+            <Popup x:Name="_previewPopup" PlacementTarget="{Binding ElementName=OverviewSurface}"
+                   Placement="RelativePoint" AllowsTransparency="True" StaysOpen="True">
+                <Border x:Name="_previewBorder"
+                        Width="{Binding PreviewWidth, ElementName=Root}"
+                        Background="{Binding PreviewBackground, ElementName=Root}"
+                        BorderBrush="{Binding PreviewBorderBrush, ElementName=Root}"
+                        BorderThickness="{Binding PreviewBorderThickness, ElementName=Root}"
+                        CornerRadius="{Binding PreviewCornerRadius, ElementName=Root}"
+                        Padding="{Binding PreviewPadding, ElementName=Root}"
+                        Effect="{Binding PreviewEffect, ElementName=Root}">
+                    <DockPanel>
+                        <Border DockPanel.Dock="Left"
+                                Width="{Binding PreviewAccentWidth, ElementName=Root}"
+                                Background="{Binding PreviewAccentBrush, ElementName=Root}"
+                                Margin="{Binding PreviewAccentMargin, ElementName=Root}"/>
+                        <ContentControl ClipToBounds="True" x:Name="_previewContent" Tag="{Binding ElementName=Root}"
+                                        Foreground="{Binding PreviewForeground, ElementName=Root}"
+                                        FontFamily="{Binding PreviewFontFamily, ElementName=Root}"
+                                        FontSize="{Binding PreviewFontSize, ElementName=Root}">
+                            <ContentControl.Style>
+                                <Style TargetType="ContentControl">
+                                    <Setter Property="ContentTemplate" Value="{Binding PreviewContentTemplate, ElementName=Root}"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding PreviewContentTemplate, ElementName=Root}" Value="{x:Null}">
+                                            <Setter Property="ContentTemplate">
+                                                <Setter.Value>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="{Binding}"
+                                                                   TextWrapping="{Binding Tag.PreviewTextWrapping, RelativeSource={RelativeSource AncestorType=ContentControl}}"
+                                                                   LineHeight="{Binding Tag.PreviewLineHeight, RelativeSource={RelativeSource AncestorType=ContentControl}}"/>
+                                                    </DataTemplate>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </ContentControl.Style>
+                        </ContentControl>
+                    </DockPanel>
+                </Border>
+            </Popup>
+        </Grid>
+    </Border>
+</UserControl>

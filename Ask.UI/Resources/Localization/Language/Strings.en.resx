@@ -496,13 +496,25 @@
     <value>Measurement error simulation</value>
   </data>
   <data name="settings.execution.measurementErrorSimulation.description" xml:space="preserve">
-    <value>Adds the existing random deviations of measurement results from their specified limits.</value>
+    <value>Sets the erroneous measurement direction relative to the allowed range.</value>
+  </data>
+  <data name="settings.execution.measurementErrorSimulation.none" xml:space="preserve">
+    <value>No errors</value>
+  </data>
+  <data name="settings.execution.measurementErrorSimulation.rnd" xml:space="preserve">
+    <value>Random</value>
+  </data>
+  <data name="settings.execution.measurementErrorSimulation.low" xml:space="preserve">
+    <value>Below range</value>
+  </data>
+  <data name="settings.execution.measurementErrorSimulation.high" xml:space="preserve">
+    <value>Above range</value>
   </data>
   <data name="settings.execution.hardwareErrorSimulation.title" xml:space="preserve">
-    <value>Hardware error simulation</value>
+    <value>Hardware failure simulation</value>
   </data>
   <data name="settings.execution.hardwareErrorSimulation.description" xml:space="preserve">
-    <value>Simulates a non-measurement hardware command failure with a 50% probability.</value>
+    <value>Specifies the equipment for which every non‑measurement command ends in an error.</value>
   </data>
   <data name="settings.protocol.operationTime.title" xml:space="preserve">
     <value>Operation time output</value>

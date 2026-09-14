@@ -14,7 +14,7 @@ namespace Ask.Engine.UnitTests.Services.Devices;
 
 public sealed class DeviceResetServiceTests
 {
-  [Fact]
+  [Fact(DisplayName = "Сброс устройств: успешно сбрасывает все устройства и показывает результат")]
   public async Task ResetDevicesAsync_ResetsEveryDeviceAndShowsSuccess()
   {
     var first = CreateDevice(1, true);
@@ -44,7 +44,7 @@ public sealed class DeviceResetServiceTests
       Times.Exactly(2));
   }
 
-  [Fact]
+  [Fact(DisplayName = "Сброс устройств: повторяет сброс текущего устройства и продолжает список")]
   public async Task ResetDevicesAsync_RetriesCurrentDeviceAndThenContinuesList()
   {
     var first = CreateDevice(1, false, true);
@@ -60,7 +60,7 @@ public sealed class DeviceResetServiceTests
     interaction.Verify(x => x.WaitRetryOrContinueAsync(), Times.Once);
   }
 
-  [Fact]
+  [Fact(DisplayName = "Сброс устройств: переходит к следующему устройству после ошибки")]
   public async Task ResetDevicesAsync_ContinuesWithNextDeviceAfterFailure()
   {
     var first = CreateDevice(1, false);
@@ -76,7 +76,7 @@ public sealed class DeviceResetServiceTests
     interaction.Verify(x => x.WaitRetryOrContinueAsync(), Times.Once);
   }
 
-  [Fact]
+  [Fact(DisplayName = "Сброс устройств: сбрасывает дубликат устройства только один раз")]
   public async Task ResetDevicesAsync_ResetsDuplicateDeviceOnlyOnce()
   {
     var device = CreateDevice(1, true);
@@ -87,7 +87,7 @@ public sealed class DeviceResetServiceTests
     device.Connectable.Verify(x => x.ResetAsync(null), Times.Once);
   }
 
-  [Fact]
+  [Fact(DisplayName = "Сброс устройств: выводит заголовок завершения перед сбросом")]
   public async Task ResetDevicesAsync_ShowsBlankLineAndCompletionHeaderBeforeReset()
   {
     var device = CreateDevice(1, true);
@@ -120,7 +120,7 @@ public sealed class DeviceResetServiceTests
     Assert.Equal(ShowMessageModel.MessageType.Command, completionHeader.Status);
   }
 
-  [Fact]
+  [Fact(DisplayName = "Сброс устройств: обязательное завершение продолжает работу без взаимодействия")]
   public async Task ResetDevicesAsync_MandatoryFinalizationContinuesWithoutInteraction()
   {
     var first = CreateDevice(1, false);
@@ -145,7 +145,7 @@ public sealed class DeviceResetServiceTests
       It.IsAny<bool>()), Times.Never);
   }
 
-  [Fact]
+  [Fact(DisplayName = "Сброс устройств: обязательное завершение изолирует исключения сброса")]
   public async Task ResetDevicesAsync_MandatoryFinalizationIsolatesResetExceptions()
   {
     var first = CreateThrowingDevice(1);
@@ -163,7 +163,7 @@ public sealed class DeviceResetServiceTests
     third.Connectable.Verify(x => x.ResetAsync(null), Times.Once);
   }
 
-  [Fact]
+  [Fact(DisplayName = "Сброс устройств: обязательное завершение игнорирует отменённый токен")]
   public async Task ResetDevicesAsync_MandatoryFinalizationIgnoresCanceledToken()
   {
     var device = CreateDevice(1, true);
@@ -180,7 +180,7 @@ public sealed class DeviceResetServiceTests
     device.Connectable.Verify(x => x.ResetAsync(null), Times.Once);
   }
 
-  [Fact]
+  [Fact(DisplayName = "Сброс устройств: финальный сброс повторяет предыдущий сброс алгоритма")]
   public async Task ResetDevicesAsync_FinalResetRepeatsEarlierAlgorithmReset()
   {
     var device = CreateDevice(1, true, true);
@@ -195,7 +195,7 @@ public sealed class DeviceResetServiceTests
     device.Connectable.Verify(x => x.ResetAsync(null), Times.Exactly(2));
   }
 
-  [Fact]
+  [Fact(DisplayName = "Сброс устройств: в холостом режиме выполняет обязательный сброс")]
   public async Task ResetDevicesAsync_IdleMandatoryFinalizationStillResetsDevice()
   {
     bool originalIdleMode = ExecutionConfig.GetIsIdleModeEnabled();
@@ -217,7 +217,7 @@ public sealed class DeviceResetServiceTests
     device.Connectable.Verify(x => x.ResetAsync(null), Times.Once);
   }
 
-  [Fact]
+  [Fact(DisplayName = "Сброс устройств: обязательное завершение продолжает работу после ошибки протокола")]
   public async Task ResetDevicesAsync_MandatoryFinalizationContinuesAfterProtocolOutputFailure()
   {
     var first = CreateDevice(1, true);
@@ -247,7 +247,7 @@ public sealed class DeviceResetServiceTests
     second.Connectable.Verify(x => x.ResetAsync(null), Times.Once);
   }
 
-  [Fact]
+  [Fact(DisplayName = "Сброс МКР: отключает все точки пакетной командой")]
   public async Task ResetDevicesAsync_ForRelayModule_DisconnectsAllPointsBeforeReset()
   {
     var module = CreateRelayModule(1, disconnectAllResult: true, resetResult: true);
@@ -255,13 +255,13 @@ public sealed class DeviceResetServiceTests
     await DeviceResetService.ResetDevicesAsync([module.Device.Object]);
 
     Assert.Equal(
-      ["disconnect-all", "reset"],
+      ["disconnect-all"],
       module.CallOrder);
     module.PointManager.Verify(x => x.DisconnectingAllPoint(null), Times.Once);
-    module.Connectable.Verify(x => x.ResetAsync(null), Times.Once);
+    module.Connectable.Verify(x => x.ResetAsync(null), Times.Never);
   }
 
-  [Fact]
+  [Fact(DisplayName = "Сброс МКР: не выполняет сброс при ошибке отключения точек")]
   public async Task ResetDevicesAsync_ForRelayModule_DoesNotResetWhenPointDisconnectFailed()
   {
     var module = CreateRelayModule(1, disconnectAllResult: false, resetResult: true);

@@ -306,13 +306,13 @@ public class KsCommandExecutorTests : IClassFixture<FastMeterDbFixture>, IDispos
   }
 
   /// <summary>
-  /// Проверяет холостой режим с симуляцией ошибок при открытой верхней границе:
+  /// Проверяет холостой режим с симуляцией заниженного значения при открытой верхней границе:
   /// исполнитель должен принудительно сформировать ошибку, даже если прибор вернул нормальное значение.
   /// </summary>
-  [Fact(DisplayName = "КС: в холостом режиме с симуляцией ошибок формируется принудительный брак")]
-  public async Task ExecuteAsync_InIdleModeWithErrorSimulationAndOpenUpperLimit_ForcesFailure()
+  [Fact(DisplayName = "КС: в холостом режиме симуляция Low формирует брак при открытой верхней границе")]
+  public async Task ExecuteAsync_InIdleModeWithLowErrorSimulationAndOpenUpperLimit_ForcesFailure()
   {
-    using var harness = new KsExecutionHarness(idleMode: true, errorSimulation: true);
+    using var harness = new KsExecutionHarness(idleMode: true, errorSimulation: TypeErroneousMeasurement.Low);
     var command = CreateCommand(3_000_000_000, null);
 
     harness.ResistanceManagerMock
@@ -707,11 +707,12 @@ public class KsCommandExecutorTests : IClassFixture<FastMeterDbFixture>, IDispos
   private sealed class KsExecutionHarness : IDisposable
   {
     private readonly EquipmentServiceScope _scope;
+    private readonly TypeErroneousMeasurement _originalErrorSimulation = ExecutionConfig.GetErroneousMeasurementType();
 
     public KsExecutionHarness(
       double switchResistance = 0,
       bool idleMode = false,
-      bool errorSimulation = false,
+      TypeErroneousMeasurement errorSimulation = TypeErroneousMeasurement.None,
       int chassisNumber = 1,
       List<PointModel>? analyzedPoints = null,
       bool includeSwitchingDevice = true,
@@ -720,7 +721,7 @@ public class KsCommandExecutorTests : IClassFixture<FastMeterDbFixture>, IDispos
     {
       ExecutionConfig.SetIdleMode(idleMode);
       ExecutionConfig.SetStepByStepMode(false);
-      ExecutionConfig.SetIsErrorSimulationMode(errorSimulation);
+      ExecutionConfig.SetErroneousMeasurementType(errorSimulation);
       DeviceDisplayConfig.SetExecutionParametersVisibility(false);
       DeviceDisplayConfig.SetMeasurementResultsVisibility(false);
       DeviceDisplayConfig.SetMachineAddressVisibility(false);
@@ -810,7 +811,7 @@ public class KsCommandExecutorTests : IClassFixture<FastMeterDbFixture>, IDispos
       _scope.Dispose();
       ExecutionConfig.SetIdleMode(false);
       ExecutionConfig.SetStepByStepMode(false);
-      ExecutionConfig.SetIsErrorSimulationMode(false);
+      ExecutionConfig.SetErroneousMeasurementType(_originalErrorSimulation);
     }
   }
 

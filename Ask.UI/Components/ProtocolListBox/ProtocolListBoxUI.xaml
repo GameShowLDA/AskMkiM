@@ -31,7 +31,9 @@
                                 <Setter TargetName="Surface" Property="BorderBrush" Value="{DynamicResource TextEditorLineNumberBrush}"/>
                                 <Setter TargetName="Surface" Property="BorderThickness" Value="1"/>
                             </Trigger>
-                            <Trigger Property="IsEnabled" Value="False"><Setter Property="Opacity" Value="0.3"/></Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.3"/>
+                            </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
@@ -46,12 +48,12 @@
 
         <DataTemplate x:Key="ProtocolLineContentTemplate">
             <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-            </Grid.RowDefinitions>
-            <TextBlock Grid.Row="0"
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0"
                        TextWrapping="Wrap"
                        FontSize="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:ProtocolListBoxUI}}, Path=ProtocolFontSize}"
                        FontFamily="Consolas"
@@ -94,9 +96,9 @@
                 <Run Text="{Binding Message.Time}"
                      Foreground="{Binding Message.TimeColor, Converter={StaticResource ColorToBrushConverter}}"/>
 
-            </TextBlock>
+                </TextBlock>
 
-            <TextBlock x:Name="DebugText"
+                <TextBlock x:Name="DebugText"
                        Grid.Row="1"
                        Text="{Binding DisplayDebug}"
                        TextWrapping="Wrap"
@@ -106,7 +108,7 @@
                        Foreground="{DynamicResource TextEditorLineNumberBrush}"
                        Margin="{Binding Message.IndentLevel, Converter={StaticResource IndentToMarginConverter}}"/>
 
-            <ToggleButton x:Name="ServiceLogsToggle"
+                <ToggleButton x:Name="ServiceLogsToggle"
                           Grid.Row="1"
                           Click="ServiceLogsToggleButton_Click"
                           IsChecked="{Binding AreServiceLogsExpanded, Mode=OneWay}"
@@ -116,41 +118,41 @@
                           BorderThickness="0"
                           Padding="0"
                           HorizontalContentAlignment="Stretch">
-                <ToggleButton.Template>
-                    <ControlTemplate TargetType="ToggleButton">
-                        <Grid Background="Transparent"
+                    <ToggleButton.Template>
+                        <ControlTemplate TargetType="ToggleButton">
+                            <Grid Background="Transparent"
                               Margin="{Binding Message.IndentLevel, Converter={StaticResource IndentToMarginConverter}}">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="18"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <TextBlock x:Name="Chevron"
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="18"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock x:Name="Chevron"
                                        Text="▶"
                                        FontSize="10"
                                        Foreground="{DynamicResource TextEditorFoldingChevronBrush}"
                                        VerticalAlignment="Center"/>
-                            <TextBlock Grid.Column="1"
+                                <TextBlock Grid.Column="1"
                                        Text="{Binding DisplayDebug}"
                                        TextWrapping="Wrap"
                                        FontFamily="Consolas"
                                        FontWeight="{Binding CommandFontWeight}"
                                        FontSize="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:ProtocolListBoxUI}}, Path=ProtocolFontSize}"
                                        Foreground="{DynamicResource TextEditorLineNumberBrush}"/>
-                        </Grid>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsChecked" Value="True">
-                                <Setter TargetName="Chevron" Property="Text" Value="▼"/>
-                            </Trigger>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Chevron" Property="Foreground"
+                            </Grid>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter TargetName="Chevron" Property="Text" Value="▼"/>
+                                </Trigger>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="Chevron" Property="Foreground"
                                         Value="{DynamicResource TextEditorFoldingChevronHoverBrush}"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </ToggleButton.Template>
-            </ToggleButton>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </ToggleButton.Template>
+                </ToggleButton>
 
-            <TextBox x:Name="ServiceLogsPanel"
+                <TextBox x:Name="ServiceLogsPanel"
                      Grid.Row="2"
                      Text="{Binding ServiceLogText, Mode=OneWay}"
                      MaxHeight="420"
@@ -179,9 +181,9 @@
                             </Style.Triggers>
                         </Style>
                     </TextBox.Style>
-            </TextBox>
+                </TextBox>
 
-            <TextBox x:Name="PART_SelectableText"
+                <TextBox x:Name="PART_SelectableText"
                      Grid.RowSpan="2"
                      Text="{Binding SelectableText, Mode=OneWay}"
                      IsReadOnly="True"
@@ -369,20 +371,21 @@
         </DataTemplate>
     </UserControl.Resources>
 
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="Auto" MinWidth="52"/>
-        </Grid.ColumnDefinitions>
+    <Border CornerRadius="20,20,0,0" Background="{DynamicResource TestsProtocolBackgroundBrush}">
 
-        <Border Grid.Row="1" Grid.Column="0"
-                CornerRadius="20,20,0,0"
-                Background="{DynamicResource TestsProtocolBackgroundBrush}">
-            <ListBox x:Name="ProtocolListBox"
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto" MinWidth="30"/>
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Row="1" Grid.Column="0"
+                CornerRadius="20,0,0,0">
+                <ListBox x:Name="ProtocolListBox"
                      Background="Transparent"
                      BorderThickness="0"
                      ItemsSource="{Binding DisplayItems, RelativeSource={RelativeSource AncestorType=UserControl}}"
@@ -395,7 +398,7 @@
                      TextOptions.TextRenderingMode="ClearType"
                      VirtualizingStackPanel.IsVirtualizing="True"
                      VirtualizingStackPanel.VirtualizationMode="Recycling"
-                     ScrollViewer.VerticalScrollBarVisibility="Auto"
+                     ScrollViewer.VerticalScrollBarVisibility="Hidden"
                      ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                      SelectionMode="Extended"
                      Focusable="True"
@@ -406,70 +409,85 @@
                      VirtualizingPanel.CacheLength="1"
                      VirtualizingPanel.CacheLengthUnit="Page">
 
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <ContentControl Content="{Binding}"
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <ContentControl Content="{Binding}"
                                         Margin="0"
                                         HorizontalAlignment="Stretch">
-                            <ContentControl.Style>
-                                <Style TargetType="ContentControl">
-                                    <Setter Property="ContentTemplate"
+                                <ContentControl.Style>
+                                    <Style TargetType="ContentControl">
+                                        <Setter Property="ContentTemplate"
                                             Value="{StaticResource ProtocolLineTemplate}"/>
 
-                                    <Style.Triggers>
-                                        <MultiDataTrigger>
-                                            <MultiDataTrigger.Conditions>
-                                                <Condition Binding="{Binding IsCommandHeader}" Value="True"/>
-                                                <Condition Binding="{Binding HasChildItems}" Value="True"/>
-                                            </MultiDataTrigger.Conditions>
-                                            <Setter Property="ContentTemplate"
+                                        <Style.Triggers>
+                                            <MultiDataTrigger>
+                                                <MultiDataTrigger.Conditions>
+                                                    <Condition Binding="{Binding IsCommandHeader}" Value="True"/>
+                                                    <Condition Binding="{Binding HasChildItems}" Value="True"/>
+                                                </MultiDataTrigger.Conditions>
+                                                <Setter Property="ContentTemplate"
                                                     Value="{StaticResource ProtocolCommandHeaderTemplate}"/>
-                                        </MultiDataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </ContentControl.Style>
-                        </ContentControl>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
+                                            </MultiDataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </ContentControl.Style>
+                            </ContentControl>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
 
-                <ListBox.ItemContainerStyle>
-                    <Style TargetType="ListBoxItem">
-                        <Setter Property="OverridesDefaultStyle" Value="True"/>
-                        <Setter Property="Focusable" Value="True"/>
-                        <Setter Property="BorderThickness" Value="0"/>
-                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-                        <Setter Property="Background" Value="Transparent"/>
-                        <Setter Property="Padding" Value="0"/>
-                        <Setter Property="Margin" Value="0"/>
-                        <Setter Property="Template">
-                            <Setter.Value>
-                                <ControlTemplate TargetType="ListBoxItem">
-                                    <Border Background="{TemplateBinding Background}"
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem">
+                            <Setter Property="OverridesDefaultStyle" Value="True"/>
+                            <Setter Property="Focusable" Value="True"/>
+                            <Setter Property="BorderThickness" Value="0"/>
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                            <Setter Property="Background" Value="Transparent"/>
+                            <Setter Property="Padding" Value="0"/>
+                            <Setter Property="Margin" Value="0"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="ListBoxItem">
+                                        <Border Background="{TemplateBinding Background}"
                                             BorderBrush="{TemplateBinding BorderBrush}"
                                             BorderThickness="{TemplateBinding BorderThickness}"
                                             Padding="{TemplateBinding Padding}"
                                             SnapsToDevicePixels="True">
-                                        <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
                                                           VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
                                                           SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
-                                    </Border>
-                                </ControlTemplate>
-                            </Setter.Value>
-                        </Setter>
-                        <Style.Triggers>
-                            <Trigger Property="IsSelected" Value="True">
-                                <Setter Property="Background" Value="#663A78A1"/>
-                            </Trigger>
-                        </Style.Triggers>
-                    </Style>
-                </ListBox.ItemContainerStyle>
-            </ListBox>
-        </Border>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                            <Style.Triggers>
+                                <Trigger Property="IsSelected" Value="True">
+                                    <Setter Property="Background" Value="#663A78A1"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ListBox.ItemContainerStyle>
+                </ListBox>
+            </Border>
 
-        <Border x:Name="OverviewTrackHost" Grid.Row="1" Grid.Column="1" Margin="4,0,2,0" CornerRadius="8"
-                Background="{DynamicResource TestsProtocolBackgroundBrush}">
-                <overview:ErrorOverviewBar x:Name="errorOverviewBar" Margin="10,4,10,6"
-                                          AutomationProperties.Name="Карта команд и ошибок протокола"/>
-        </Border>
-    </Grid>
+            <Border x:Name="OverviewTrackHost" Grid.Row="1" Grid.Column="1" Panel.ZIndex="2"
+                    BorderThickness="0">
+                <overview:ErrorOverviewBar x:Name="errorOverviewBar"
+                                          AutomationProperties.Name="Карта команд и ошибок протокола"
+                                          Background="Transparent"
+                                          BorderThickness="0"
+                                          IsMarkerHitTestOnly="True"
+                                          IsViewportVisible="False"/>
+            </Border>
+            <ScrollBar x:Name="ProtocolVerticalScrollBar"
+                       Grid.Row="1" Grid.Column="1" Panel.ZIndex="1"
+                       HorizontalAlignment="Center"
+                       Margin="0"
+                       Background="Transparent"
+                       Orientation="Vertical"
+                       Visibility="Collapsed"
+                       Minimum="0"
+                       Scroll="ProtocolVerticalScrollBar_Scroll"/>
+        </Grid>
+
+    </Border>
 </UserControl>
