@@ -1,4 +1,5 @@
 using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Protocols;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.UI.Components.ProtocolListBox;
 using Ask.UI.Controls.TextEditorControl;
@@ -99,6 +100,80 @@ public sealed class ProtocolOverviewTests
       var item = Assert.Single(control.DisplayItems);
       Assert.Same(message, item.Message);
       Assert.True(item.AreServiceLogsExpanded);
+    });
+  }
+
+  [Theory]
+  [InlineData(false, false)]
+  [InlineData(false, true)]
+  [InlineData(true, false)]
+  public void RestoredLogsBelongToFollowingRecordAndStartCollapsed(bool commandHeaders, bool trailingLogs)
+  {
+    RunInSta(() =>
+    {
+      bool original = ProtocolConfig.GetCommandHeadersInProtocol();
+      try
+      {
+        ProtocolConfig.SetCommandHeadersInProtocol(true);
+        var status = commandHeaders ? ShowMessageModel.MessageType.Command : ShowMessageModel.MessageType.Info;
+        var messages = new[]
+        {
+          new ShowMessageModel { Header = "Команда 1", Status = status, DiagnosticSource = "Первый источник" },
+          new ShowMessageModel { Header = "Команда 2", Status = status, DiagnosticSource = "Второй источник" }
+        };
+        var logs = new List<ExecutionLogEntry>
+        {
+          new(0, DateTimeOffset.UtcNow, "Debug", "Первый запрос"),
+          new(0, DateTimeOffset.UtcNow, "Debug", "Первый ответ"),
+          new(1, DateTimeOffset.UtcNow, "Debug", "Второй запрос"),
+          new(1, DateTimeOffset.UtcNow, "Debug", "Второй ответ")
+        };
+        if (trailingLogs)
+          logs.Add(new(2, DateTimeOffset.UtcNow, "Debug", "Завершающий лог"));
+        var environment = new ExecutionProtocolEnvironmentSnapshot(
+          DateTime.UtcNow, "1.0", "Root", "Проверка", "SelfControl", "Полный",
+          new Dictionary<string, string>(), Array.Empty<ExecutionProtocolDeviceSnapshot>());
+        string stored = string.Join("\n", ExecutionProtocolDiagnosticFormatter.FormatProtocolForStorage(
+          messages, environment, logs));
+
+        Assert.True(ExecutionProtocolDiagnosticFormatter.TryRestoreMessages(stored, true, out var restored));
+        var control = new ProtocolListBoxUI();
+        control.LoadMessages(restored);
+
+        Assert.Equal(trailingLogs ? 4 : 3, control.DisplayItems.Count);
+        Assert.False(control.DisplayItems[0].HasServiceLogs);
+        var first = control.DisplayItems[1];
+        var second = control.DisplayItems[2];
+        Assert.Equal("Команда 1", first.Message.Header);
+        Assert.Equal("Команда 2", second.Message.Header);
+        Assert.Collection(first.ServiceLogs,
+          log => Assert.EndsWith("Первый запрос", log),
+          log => Assert.EndsWith("Первый ответ", log));
+        Assert.Collection(second.ServiceLogs,
+          log => Assert.EndsWith("Второй запрос", log),
+          log => Assert.EndsWith("Второй ответ", log));
+        Assert.All(control.DisplayItems, item => Assert.False(item.AreServiceLogsExpanded));
+        if (trailingLogs)
+        {
+          var tail = control.DisplayItems[3];
+          Assert.Equal("Логи после последней записи протокола", tail.DisplayDebug);
+          Assert.EndsWith("Завершающий лог", Assert.Single(tail.ServiceLogs));
+        }
+
+        control.NavigateToErrorOverviewLine(6);
+        Assert.True(second.AreServiceLogsExpanded);
+        Assert.False(first.AreServiceLogsExpanded);
+
+        Assert.True(ExecutionProtocolDiagnosticFormatter.TryRestoreMessages(stored, false, out var regular));
+        control.LoadMessages(regular);
+        Assert.Equal(2, control.DisplayItems.Count);
+        Assert.All(control.DisplayItems, item =>
+        {
+          Assert.False(item.HasServiceLogs);
+          Assert.Empty(item.DisplayDebug);
+        });
+      }
+      finally { ProtocolConfig.SetCommandHeadersInProtocol(original); }
     });
   }
 

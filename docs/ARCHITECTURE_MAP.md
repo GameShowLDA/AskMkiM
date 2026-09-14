@@ -1006,9 +1006,12 @@ ExecutionProtocolDiagnosticFormatter.FormatProtocolForStorage` сохраняе�
 без `Logs` продолжают открываться. `ExceptionLogged` дополнительно сохраняет `Exception.ToString()`.
 `SavedExecutionProtocolUI(string)` восстанавливает ленту по `DebugAccessConfig.IsDebugEnabled`
 и подписывается на `SystemStateEvents.DebugRightsChanged` только пока control загружен.
-ROOT видит диагностические строки между сообщениями, остальные роли их не получают;
-смена роли перезагружает представление. `FileOpenService` и парный просмотр `FileService`
-передают исходный текст для повторного восстановления. Логи не участвуют в итоговом вердикте,
+ROOT видит диагностические строки и блоки логов, остальные роли их не получают.
+Строковый конструктор перезагружает представление при смене роли, однако текущие пути
+`FileOpenService` и парный просмотр `FileService` восстанавливают сообщения в фоне и передают
+готовую коллекцию в `SavedExecutionProtocolUI(IEnumerable<ShowMessageModel>)` без подписки
+на смену роли: для применения новых прав требуется повторное открытие файла.
+Логи не участвуют в итоговом вердикте,
 печати и ASKRESULT/ASKREPORT. Сбор находится в памяти до сохранения; это не crash-журнал на диске.
 
 #### Purpose
@@ -1068,9 +1071,17 @@ Legacy traces without V2 snapshots are converted line-by-line by
 `ExecutionProtocolDiagnosticFormatter.RestoreLegacyMessages` and rendered in the same read-only
 `ProtocolListBoxUI`; since the legacy format contains no structured status/group metadata, those
 lines are restored as `Info` while preserving their complete text and blank-line layout.
-В `SavedExecutionProtocolUI` строки `[ЛОГ ROOT]` прикрепляются к предшествующей строке
-`[ОТЛАДКА ROOT]` и по умолчанию скрыты. Root раскрывает отдельную группу логов шевроном у нужной
-диагностической строки; сами строки `[ОТЛАДКА ROOT]` остаются видимыми.
+При восстановлении V3 `ExecutionProtocolDiagnosticFormatter.TryRestoreCompressedProtocol`
+размещает сначала сообщение с индексом `i`, затем логи `BeforeMessage == i`:
+это логи, накопленные **до** этой записи в исходной хронологии. `ProtocolListBoxUI.AppendVisibleMessage`
+прикрепляет следующие за сообщением модели `[ЛОГ ROOT]` к его `ProtocolDisplayItem.ServiceLogs`.
+Таким образом, под записью ROOT показывает предшествовавшие ей логи, а не логи следующей записи.
+Порядок логов внутри блока сохраняется; сбор и формат хранения V3 не изменены.
+Логи до первой записи принадлежат первой записи, снимок окружения остаётся отдельным элементом.
+Для логов после последней записи (`BeforeMessage == Messages.Count`) восстановление создаёт
+отдельную диагностическую строку «Логи после последней записи протокола» с собственным блоком.
+Блоки по умолчанию скрыты (`AreServiceLogsExpanded == false`); Root раскрывает их шевроном
+у диагностической строки. Сворачивание команды действует дополнительно на её строки.
 
 New saves use `#ASKM_PROTOCOL_V3_BR#`: `ExecutionProtocolHistoryService.SaveAsync` delegates to
 `ExecutionProtocolDiagnosticFormatter.FormatProtocolForStorage`, which writes readable protocol
