@@ -152,14 +152,13 @@
                     </ToggleButton.Template>
                 </ToggleButton>
 
-                <TextBox x:Name="ServiceLogsPanel"
+                <local:ProtocolServiceLogsBox x:Name="ServiceLogsPanel"
                      Grid.Row="2"
-                     Text="{Binding ServiceLogText, Mode=OneWay}"
+                     LogText="{Binding ServiceLogText, Mode=OneWay}"
                      MaxHeight="420"
                      Margin="18,0,0,0"
                      IsReadOnly="True"
                      IsReadOnlyCaretVisible="False"
-                     TextWrapping="NoWrap"
                      FontFamily="Consolas"
                      FontSize="{Binding RelativeSource={RelativeSource AncestorType={x:Type local:ProtocolListBoxUI}}, Path=ProtocolFontSize}"
                      Foreground="{DynamicResource TextEditorLineNumberBrush}"
@@ -171,8 +170,8 @@
                      Cursor="IBeam"
                      ScrollViewer.VerticalScrollBarVisibility="Auto"
                      ScrollViewer.HorizontalScrollBarVisibility="Auto">
-                    <TextBox.Style>
-                        <Style TargetType="TextBox">
+                    <local:ProtocolServiceLogsBox.Style>
+                        <Style TargetType="local:ProtocolServiceLogsBox">
                             <Setter Property="Visibility" Value="Collapsed"/>
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding AreServiceLogsExpanded}" Value="True">
@@ -180,8 +179,8 @@
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>
-                    </TextBox.Style>
-                </TextBox>
+                    </local:ProtocolServiceLogsBox.Style>
+                </local:ProtocolServiceLogsBox>
 
                 <TextBox x:Name="PART_SelectableText"
                      Grid.RowSpan="2"

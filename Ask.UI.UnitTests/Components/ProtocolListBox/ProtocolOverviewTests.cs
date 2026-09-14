@@ -177,6 +177,72 @@ public sealed class ProtocolOverviewTests
     });
   }
 
+  [Theory]
+  [InlineData("Debug", "Gray")]
+  [InlineData("Information", "LightGray")]
+  [InlineData("Warning", "Goldenrod")]
+  [InlineData("Error", "OrangeRed")]
+  [InlineData("Exception", "OrangeRed")]
+  [InlineData("Unknown", "LightGray")]
+  public void ServiceLogColorsOnlyLevelAndBulletAndPreservesMultilineText(string level, string color)
+  {
+    RunInSta(() =>
+    {
+      string first = $"[ЛОГ ROOT] 2026-09-14 12:34:56.789 +04:00 [{level}] Ответ содержит [Error]\n  stack trace";
+      string second = "[ЛОГ ROOT] 2026-09-14 12:34:57.789 +04:00 [Debug] Следующая запись";
+      var paragraph = ProtocolServiceLogsBox.CreateParagraph(first + "\n" + second);
+      var runs = paragraph.Inlines.Cast<System.Windows.Documents.Run>().ToArray();
+      Assert.Equal("● " + first + "\n● " + second, string.Concat(runs.Select(run => run.Text)));
+      var colored = runs.Where(run => run.ReadLocalValue(System.Windows.Documents.TextElement.ForegroundProperty)
+        != System.Windows.DependencyProperty.UnsetValue).ToArray();
+      Assert.Equal(new[] { "● ", $"[{level}]", "● ", "[Debug]" }, colored.Select(run => run.Text));
+      var expected = (Color)ColorConverter.ConvertFromString(color);
+      Assert.Equal(expected, ((SolidColorBrush)colored[0].Foreground).Color);
+      Assert.Equal(expected, ((SolidColorBrush)colored[1].Foreground).Color);
+      Assert.Equal(Colors.Gray, ((SolidColorBrush)colored[2].Foreground).Color);
+      Assert.Equal(Colors.Gray, ((SolidColorBrush)colored[3].Foreground).Color);
+    });
+  }
+
+  [Fact]
+  public void ServiceLogDocumentIsBuiltOnExpansionAndRemainsSelectable()
+  {
+    RunInSta(() =>
+    {
+      const string log = "[ЛОГ ROOT] 2026-09-14 12:34:56.789 +04:00 [Warning] Ответ прибора";
+      var box = new ProtocolServiceLogsBox
+      {
+        LogText = log, Visibility = System.Windows.Visibility.Collapsed,
+        FontSize = 14, Foreground = Brushes.LightGray, Background = Brushes.Black
+      };
+      using var source = new System.Windows.Interop.HwndSource(new System.Windows.Interop.HwndSourceParameters("Protocol logs")
+      {
+        Width = 900, Height = 150, WindowStyle = unchecked((int)0x80000000)
+      });
+      source.RootVisual = box;
+      Assert.DoesNotContain(log, new System.Windows.Documents.TextRange(
+        box.Document.ContentStart, box.Document.ContentEnd).Text);
+
+      box.Visibility = System.Windows.Visibility.Visible;
+      box.Measure(new System.Windows.Size(900, 150));
+      box.Arrange(new System.Windows.Rect(0, 0, 900, 150));
+      box.UpdateLayout();
+      box.SelectAll();
+      Assert.Contains("● " + log, box.Selection.Text);
+      Assert.True(box.IsReadOnly);
+      var bitmap = new System.Windows.Media.Imaging.RenderTargetBitmap(900, 150, 96, 96, PixelFormats.Pbgra32);
+      bitmap.Render(box);
+
+      box.Visibility = System.Windows.Visibility.Collapsed;
+      box.LogText = log + "\nновая строка";
+      Assert.DoesNotContain("новая строка", new System.Windows.Documents.TextRange(
+        box.Document.ContentStart, box.Document.ContentEnd).Text);
+      box.Visibility = System.Windows.Visibility.Visible;
+      box.SelectAll();
+      Assert.Contains("новая строка", box.Selection.Text);
+    });
+  }
+
   [Fact]
   public void ProtocolHostExposesOverviewConfigurationProperties()
   {

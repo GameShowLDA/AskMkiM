@@ -211,6 +211,12 @@ namespace Ask.UI.Components.ProtocolListBox
         return;
       }
 
+      if (Keyboard.FocusedElement is ProtocolServiceLogsBox &&
+          Keyboard.Modifiers == ModifierKeys.Control && (e.Key == Key.A || e.Key == Key.C))
+      {
+        return;
+      }
+
       if (e.OriginalSource is TextBox textBox)
       {
         if (Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.A)

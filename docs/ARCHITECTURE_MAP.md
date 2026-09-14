@@ -1082,6 +1082,13 @@ lines are restored as `Info` while preserving their complete text and blank-line
 отдельную диагностическую строку «Логи после последней записи протокола» с собственным блоком.
 Блоки по умолчанию скрыты (`AreServiceLogsExpanded == false`); Root раскрывает их шевроном
 у диагностической строки. Сворачивание команды действует дополнительно на её строки.
+Раскрытый блок отображает `Ask.UI/Components/ProtocolListBox/ProtocolServiceLogsBox.cs`
+(read-only `RichTextBox`): `ServiceLogText → LogText → CreateParagraph` окрашивает только
+метку уровня и точку перед записью, сохраняя нейтральный цвет текста и многострочные исключения.
+Палитра соответствует `ConsoleUI/ConsoleLogic/ConsoleTextManager.ParseColor`:
+Error/Exception — OrangeRed, Warning — Goldenrod, Debug — Gray, Information — LightGray.
+Документ создаётся при раскрытии блока; Ctrl+A/C обрабатывает сам редактор журнала,
+а не внешний список протокола. Формат хранения и привязка логов к записям не изменяются.
 
 New saves use `#ASKM_PROTOCOL_V3_BR#`: `ExecutionProtocolHistoryService.SaveAsync` delegates to
 `ExecutionProtocolDiagnosticFormatter.FormatProtocolForStorage`, which writes readable protocol
