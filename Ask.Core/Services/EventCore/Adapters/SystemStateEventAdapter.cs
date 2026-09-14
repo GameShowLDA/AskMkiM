@@ -94,5 +94,11 @@ namespace Ask.Core.Services.EventCore.Adapters
     /// <param name="isEnabled">Новое состояние доступа: true — доступно; false — скрыто и недоступно.</param>
     public static void RaiseDeviceConfigurationEditingAccessChanged(bool isEnabled) =>
       EventAggregator.Publish(new SystemStateEvents.DeviceConfigurationEditingAccessChanged(isEnabled));
+
+    /// <summary>
+    /// Генерирует событие изменения состава или параметров оборудования.
+    /// </summary>
+    public static void RaiseDeviceConfigurationChanged() =>
+      EventAggregator.Publish(new SystemStateEvents.DeviceConfigurationChanged());
   }
 }

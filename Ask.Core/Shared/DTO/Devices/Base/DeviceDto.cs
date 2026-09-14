@@ -45,4 +45,9 @@ public class DeviceDto
   /// Используется для динамического создания экземпляра.
   /// </summary>
   public string DeviceClass { get; set; } = string.Empty;
+
+  /// <summary>
+  /// Включает симуляцию аппаратных сбоев для этого устройства в холостом режиме.
+  /// </summary>
+  public bool IsHardwareFailureSimulationEnabled { get; set; }
 }

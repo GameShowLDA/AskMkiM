@@ -1,4 +1,6 @@
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies;
 
 namespace Ask.Engine.UnitTests.ControlCommandExecutor.BaseStrategies;
@@ -217,18 +219,19 @@ public class PairwiseFirstPointCheckerAltTests
   }
 
   [Theory(DisplayName = "ЭТ: холостой режим формирует результат согласно настройке симуляции ошибки")]
-  [InlineData(false, 105)]
-  [InlineData(true, 135)]
+  [InlineData(TypeErroneousMeasurement.None)]
+  [InlineData(TypeErroneousMeasurement.Low)]
+  [InlineData(TypeErroneousMeasurement.High)]
+  [InlineData(TypeErroneousMeasurement.Rnd)]
   public void CalculateFinalResistance_IdleModeUsesSimulationPolicy(
-    bool errorSimulationEnabled,
-    double expected)
+    TypeErroneousMeasurement errorSimulation)
   {
-    var originalIdleMode = Ask.Core.Services.Config.AppSettings.ExecutionConfig.GetIsIdleModeEnabled();
-    var originalErrorSimulation = Ask.Core.Services.Config.AppSettings.ExecutionConfig.GetIsErrorSimulationEnabled();
+    var originalIdleMode = ExecutionConfig.GetIsIdleModeEnabled();
+    var originalErrorSimulation = ExecutionConfig.GetErroneousMeasurementType();
     try
     {
-      Ask.Core.Services.Config.AppSettings.ExecutionConfig.SetIdleMode(true);
-      Ask.Core.Services.Config.AppSettings.ExecutionConfig.SetIsErrorSimulationMode(errorSimulationEnabled);
+      ExecutionConfig.SetIdleMode(true);
+      ExecutionConfig.SetErroneousMeasurementType(errorSimulation);
 
       var actual = PairwiseFirstPointCheckerAlt.CalculateFinalResistance(
         150,
@@ -238,12 +241,28 @@ public class PairwiseFirstPointCheckerAltTests
         200,
         50);
 
-      Assert.Equal(expected, actual);
+      Assert.True(double.IsFinite(actual));
+      Assert.True(actual >= 0);
+      switch (errorSimulation)
+      {
+        case TypeErroneousMeasurement.None:
+          Assert.Equal(105, actual);
+          break;
+        case TypeErroneousMeasurement.Low:
+          Assert.True(actual < 10);
+          break;
+        case TypeErroneousMeasurement.High:
+          Assert.True(actual > 200);
+          break;
+        case TypeErroneousMeasurement.Rnd:
+          Assert.True(actual < 10 || actual > 200);
+          break;
+      }
     }
     finally
     {
-      Ask.Core.Services.Config.AppSettings.ExecutionConfig.SetIdleMode(originalIdleMode);
-      Ask.Core.Services.Config.AppSettings.ExecutionConfig.SetIsErrorSimulationMode(originalErrorSimulation);
+      ExecutionConfig.SetIdleMode(originalIdleMode);
+      ExecutionConfig.SetErroneousMeasurementType(originalErrorSimulation);
     }
   }
 
