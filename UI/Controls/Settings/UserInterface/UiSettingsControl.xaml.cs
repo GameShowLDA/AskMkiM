@@ -106,6 +106,8 @@ namespace UI.Controls.Settings.UserInterface
         LanguageSelect.ValueChanged += ValueChanged;
         ThemeSelect.ValueChanged += ValueChanged;
         SyntaxHighlighting.CheckedChanged += SettingsCard_CheckedChanged;
+        SyntaxErrorUnderlining.CheckedChanged += SettingsCard_CheckedChanged;
+        StyleErrorUnderlining.CheckedChanged += SettingsCard_CheckedChanged;
         CommandBodyBackgroundHighlighting.CheckedChanged += SettingsCard_CheckedChanged;
         ChainPointBodyBackgroundHighlighting.CheckedChanged += SettingsCard_CheckedChanged;
         TopMenuIcons.CheckedChanged += SettingsCard_CheckedChanged;
@@ -187,6 +189,8 @@ namespace UI.Controls.Settings.UserInterface
       ThemeSelect.SelectedValue = currentTheme;
 
       SyntaxHighlighting.IsChecked = _baseParameterModel.UseSyntaxHighlighting;
+      SyntaxErrorUnderlining.IsChecked = _baseParameterModel.UseSyntaxErrorUnderlining;
+      StyleErrorUnderlining.IsChecked = _baseParameterModel.UseStyleErrorUnderlining;
       CommandAutoCollapsing.IsChecked = _baseParameterModel.UseCommandAutoCollapse;
       CommandBodyBackgroundHighlighting.IsChecked = _baseParameterModel.UseCommandBodyBackgroundHighlighting;
       ChainPointBodyBackgroundHighlighting.IsChecked = _baseParameterModel.UseChainPointBodyBackgroundHighlighting;
@@ -250,6 +254,8 @@ namespace UI.Controls.Settings.UserInterface
         Language = languageCode,
         Theme = parsedTheme,
         UseSyntaxHighlighting = SyntaxHighlighting.IsChecked,
+        UseSyntaxErrorUnderlining = SyntaxErrorUnderlining.IsChecked,
+        UseStyleErrorUnderlining = StyleErrorUnderlining.IsChecked,
         UseCommandBodyBackgroundHighlighting = CommandBodyBackgroundHighlighting.IsChecked,
         UseChainPointBodyBackgroundHighlighting = ChainPointBodyBackgroundHighlighting.IsChecked,
         UseTopMenuIcons = TopMenuIcons.IsChecked,
@@ -274,6 +280,8 @@ namespace UI.Controls.Settings.UserInterface
     private static bool UserInterfaceEquals(UserInterfaceDto a, UserInterfaceDto b) =>
       a.Language == b.Language &&
       a.UseSyntaxHighlighting == b.UseSyntaxHighlighting &&
+      a.UseSyntaxErrorUnderlining == b.UseSyntaxErrorUnderlining &&
+      a.UseStyleErrorUnderlining == b.UseStyleErrorUnderlining &&
       a.UseCommandBodyBackgroundHighlighting == b.UseCommandBodyBackgroundHighlighting &&
       a.UseChainPointBodyBackgroundHighlighting == b.UseChainPointBodyBackgroundHighlighting &&
       a.UseTopMenuIcons == b.UseTopMenuIcons &&

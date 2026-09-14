@@ -244,6 +244,20 @@
                                         x:Name="SyntaxHighlighting"/>
 
                                 <SharedComponents:SettingsCard
+                                        Title="{Binding Source={StaticResource Settings_UserInterface_SyntaxErrorUnderlining_Title}, Path=Value}"
+                                        Description="{Binding Source={StaticResource Settings_UserInterface_SyntaxErrorUnderlining_Description}, Path=Value}"
+                                        Margin="0,6,10,0"
+                                        VerticalAlignment="Top"
+                                        x:Name="SyntaxErrorUnderlining"/>
+
+                                <SharedComponents:SettingsCard
+                                        Title="{Binding Source={StaticResource Settings_UserInterface_StyleErrorUnderlining_Title}, Path=Value}"
+                                        Description="{Binding Source={StaticResource Settings_UserInterface_StyleErrorUnderlining_Description}, Path=Value}"
+                                        Margin="0,6,10,0"
+                                        VerticalAlignment="Top"
+                                        x:Name="StyleErrorUnderlining"/>
+
+                                <SharedComponents:SettingsCard
                                         Title="{Binding Source={StaticResource Settings_UserInterface_CommandBodyBackground_Title}, Path=Value}"
                                         Description="{Binding Source={StaticResource Settings_UserInterface_CommandBodyBackground_Description}, Path=Value}"
                                         IsChecked="{Binding IdleMode, Mode=TwoWay}"

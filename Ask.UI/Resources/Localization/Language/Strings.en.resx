@@ -681,4 +681,16 @@
   <data name="settings.device.breakdownTester.systemInsulationResistance" xml:space="preserve">
     <value>System insulation resistance, GOhm</value>
   </data>
+  <data name="settings.userinterface.syntaxErrorUnderlining.title" xml:space="preserve">
+    <value>Underline syntax errors</value>
+  </data>
+  <data name="settings.userinterface.syntaxErrorUnderlining.description" xml:space="preserve">
+    <value>Shows red underlines for errors in control programs and their descriptions on hover.</value>
+  </data>
+  <data name="settings.userinterface.styleErrorUnderlining.title" xml:space="preserve">
+    <value>Underline stylistic errors</value>
+  </data>
+  <data name="settings.userinterface.styleErrorUnderlining.description" xml:space="preserve">
+    <value>Shows yellow underlines for warnings in control programs and their descriptions on hover.</value>
+  </data>
 </root>

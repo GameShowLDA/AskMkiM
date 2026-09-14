@@ -462,6 +462,18 @@
   <data name="settings.userinterface.syntaxHighlighting.title" xml:space="preserve">
     <value>Подсветка синтаксиса</value>
   </data>
+  <data name="settings.userinterface.syntaxErrorUnderlining.title" xml:space="preserve">
+    <value>Подчеркивание синтаксических ошибок</value>
+  </data>
+  <data name="settings.userinterface.syntaxErrorUnderlining.description" xml:space="preserve">
+    <value>Показывает красное подчеркивание ошибок в тексте программы контроля и их описание при наведении.</value>
+  </data>
+  <data name="settings.userinterface.styleErrorUnderlining.title" xml:space="preserve">
+    <value>Подчеркивание стилистических ошибок</value>
+  </data>
+  <data name="settings.userinterface.styleErrorUnderlining.description" xml:space="preserve">
+    <value>Показывает желтое подчеркивание предупреждений в тексте программы контроля и их описание при наведении.</value>
+  </data>
   <data name="settings.userinterface.syntaxHighlighting.description" xml:space="preserve">
     <value>Включает или отключает подсветку синтаксиса в редакторе протокола.</value>
   </data>

@@ -9,6 +9,10 @@
     <LocalizeStrings:LocalizedString x:Key="Settings_UserInterface_Theme_Description" Key="settings.userinterface.theme.description" />
     <LocalizeStrings:LocalizedString x:Key="Settings_UserInterface_SyntaxHighlighting_Title" Key="settings.userinterface.syntaxHighlighting.title" />
     <LocalizeStrings:LocalizedString x:Key="Settings_UserInterface_SyntaxHighlighting_Description" Key="settings.userinterface.syntaxHighlighting.description" />
+    <LocalizeStrings:LocalizedString x:Key="Settings_UserInterface_SyntaxErrorUnderlining_Title" Key="settings.userinterface.syntaxErrorUnderlining.title" />
+    <LocalizeStrings:LocalizedString x:Key="Settings_UserInterface_SyntaxErrorUnderlining_Description" Key="settings.userinterface.syntaxErrorUnderlining.description" />
+    <LocalizeStrings:LocalizedString x:Key="Settings_UserInterface_StyleErrorUnderlining_Title" Key="settings.userinterface.styleErrorUnderlining.title" />
+    <LocalizeStrings:LocalizedString x:Key="Settings_UserInterface_StyleErrorUnderlining_Description" Key="settings.userinterface.styleErrorUnderlining.description" />
     <LocalizeStrings:LocalizedString x:Key="Settings_UserInterface_HighlightsGroup_Title" Key="settings.userinterface.highlightsGroup.title" />
     <LocalizeStrings:LocalizedString x:Key="Settings_UserInterface_HighlightsGroup_Description" Key="settings.userinterface.highlightsGroup.description" />
     <LocalizeStrings:LocalizedString x:Key="Settings_UserInterface_CommandBodyBackground_Title" Key="settings.userinterface.commandBodyBackground.title" />

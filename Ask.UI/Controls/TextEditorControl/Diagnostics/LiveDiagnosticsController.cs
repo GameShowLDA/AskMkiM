@@ -1,3 +1,6 @@
+using Ask.Core.Services.Config.Base;
+using Ask.Core.Services.EventCore.Events;
+using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Engine.ControlCommandAnalyser;
 using ICSharpCode.AvalonEdit;
@@ -18,6 +21,8 @@ public sealed class LiveDiagnosticsController
   private Window? _hostWindow;
   private CancellationTokenSource? _pending;
   private bool _enabled;
+  private bool _settingsSubscribed;
+  private IReadOnlyList<SourceDiagnostic> _diagnostics = Array.Empty<SourceDiagnostic>();
 
   public LiveDiagnosticsController(TextEditor editor)
     : this(editor, (text, token) => new CommandTranslationManager().AnalyzeSource(text, token)) { }
@@ -44,7 +49,11 @@ public sealed class LiveDiagnosticsController
     editor.TextArea.TextView.ScrollOffsetChanged += OnDismissHover;
     // Opening a Popup can itself rebuild visual lines during WPF layout.
     // Close for user navigation/resize, not for every VisualLinesChanged event.
-    if (editor.IsLoaded) AttachWindow();
+    if (editor.IsLoaded)
+    {
+      AttachWindow();
+      SubscribeToSettings();
+    }
   }
 
   public void Configure(FileType fileType)
@@ -84,7 +93,7 @@ public sealed class LiveDiagnosticsController
 
       if (!token.IsCancellationRequested && ReferenceEquals(_pending, cancellation)
         && ReferenceEquals(_editor.Document, document) && _editor.IsLoaded && !_editor.IsReadOnly)
-        _renderer.SetDiagnostics(diagnostics);
+        SetDiagnostics(diagnostics);
     }
     catch (OperationCanceledException) when (token.IsCancellationRequested) { }
     catch (Exception ex)
@@ -94,7 +103,7 @@ public sealed class LiveDiagnosticsController
         && _editor.IsLoaded && !_editor.IsReadOnly
         && _editor.Document?.Lines.FirstOrDefault(documentLine => documentLine.Length > 0) is { } line)
       {
-        _renderer.SetDiagnostics(new[]
+        SetDiagnostics(new[]
         {
           new SourceDiagnostic(line.Offset, line.Length, line.LineNumber, true,
             "Не удалось проверить текст. Выполните трансляцию для подробной диагностики.", null),
@@ -112,13 +121,44 @@ public sealed class LiveDiagnosticsController
   {
     _pending?.Cancel();
     _pending = null;
-    _renderer.SetDiagnostics(Array.Empty<SourceDiagnostic>());
+    SetDiagnostics(Array.Empty<SourceDiagnostic>());
     _hoverPopup.Close();
+  }
+
+  private void SetDiagnostics(IReadOnlyList<SourceDiagnostic> diagnostics)
+  {
+    _diagnostics = diagnostics;
+    ApplyDiagnosticVisibility();
+  }
+
+  private void ApplyDiagnosticVisibility()
+  {
+    _hoverPopup.Close();
+    bool showErrors = UserInterfaceConfig.GetSyntaxErrorUnderlining();
+    bool showWarnings = UserInterfaceConfig.GetStyleErrorUnderlining();
+    _renderer.SetDiagnostics(_diagnostics.Where(d => d.IsWarning ? showWarnings : showErrors).ToArray());
+  }
+
+  private void SubscribeToSettings()
+  {
+    if (_settingsSubscribed) return;
+    EventAggregator.Subscribe<EditorEvents.DiagnosticUnderliningChanged>(OnDiagnosticUnderliningChanged);
+    _settingsSubscribed = true;
+  }
+
+  private void OnDiagnosticUnderliningChanged(EditorEvents.DiagnosticUnderliningChanged _)
+  {
+    if (_editor.Dispatcher.CheckAccess()) ApplyDiagnosticVisibility();
+    else _editor.Dispatcher.InvokeAsync(() =>
+    {
+      if (_editor.IsLoaded) ApplyDiagnosticVisibility();
+    });
   }
 
   private void OnLoaded(object sender, RoutedEventArgs e)
   {
     AttachWindow();
+    SubscribeToSettings();
     Refresh();
   }
 
@@ -126,6 +166,8 @@ public sealed class LiveDiagnosticsController
   {
     CancelPending();
     DetachWindow();
+    EventAggregator.Unsubscribe<EditorEvents.DiagnosticUnderliningChanged>(OnDiagnosticUnderliningChanged);
+    _settingsSubscribed = false;
   }
 
   private void OnTextChanged(object? sender, EventArgs e) => Refresh();

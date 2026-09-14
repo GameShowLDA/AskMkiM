@@ -1,5 +1,7 @@
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.EventCore.Adapters;
+using Ask.Core.Services.EventCore.Events;
+using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.DTO.Settings;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
 
@@ -35,6 +37,10 @@ namespace Ask.Core.Services.Config.Base
 
     public static void SetSyntaxHighlighting(bool enable) => UserInterfaceModel.UseSyntaxHighlighting = enable;
 
+    public static void SetSyntaxErrorUnderlining(bool enable) => UserInterfaceModel.UseSyntaxErrorUnderlining = enable;
+
+    public static void SetStyleErrorUnderlining(bool enable) => UserInterfaceModel.UseStyleErrorUnderlining = enable;
+
     public static void SetCommandBodyBackgroundHighlighting(bool enable) => UserInterfaceModel.UseCommandBodyBackgroundHighlighting = enable;
 
     public static void SetChainPointBodyBackgroundHighlighting(bool enable) => UserInterfaceModel.UseChainPointBodyBackgroundHighlighting = enable;
@@ -48,10 +54,13 @@ namespace Ask.Core.Services.Config.Base
       SetLanguage(user.Language);
       SetTheme(user.Theme);
       SetSyntaxHighlighting(user.UseSyntaxHighlighting);
+      SetSyntaxErrorUnderlining(user.UseSyntaxErrorUnderlining);
+      SetStyleErrorUnderlining(user.UseStyleErrorUnderlining);
       SetCommandBodyBackgroundHighlighting(user.UseCommandBodyBackgroundHighlighting);
       SetChainPointBodyBackgroundHighlighting(user.UseChainPointBodyBackgroundHighlighting);
       SetTopMenuIcons(user.UseTopMenuIcons);
       SetCommandAutoCollapse(user.UseCommandAutoCollapse);
+      EventAggregator.Publish(new EditorEvents.DiagnosticUnderliningChanged());
 
       return Task.CompletedTask;
     }
@@ -67,6 +76,8 @@ namespace Ask.Core.Services.Config.Base
     public static Task<string> GetLanguage() => Task.FromResult(UserInterfaceModel.Language);
     public static Task<ThemeMode> GetTheme() => Task.FromResult(UserInterfaceModel.Theme);
     public static bool GetSyntaxHighlighting() => UserInterfaceModel.UseSyntaxHighlighting;
+    public static bool GetSyntaxErrorUnderlining() => UserInterfaceModel.UseSyntaxErrorUnderlining;
+    public static bool GetStyleErrorUnderlining() => UserInterfaceModel.UseStyleErrorUnderlining;
     public static bool GetCommandBodyBackgroundHighlighting() => UserInterfaceModel.UseCommandBodyBackgroundHighlighting;
     public static bool GetChainPointBodyBackgroundHighlighting() => UserInterfaceModel.UseChainPointBodyBackgroundHighlighting;
     public static bool GetTopMenuIcons() => UserInterfaceModel.UseTopMenuIcons;
@@ -79,6 +90,8 @@ namespace Ask.Core.Services.Config.Base
         Language = UserInterfaceModel.Language,
         Theme = UserInterfaceModel.Theme,
         UseSyntaxHighlighting = UserInterfaceModel.UseSyntaxHighlighting,
+        UseSyntaxErrorUnderlining = UserInterfaceModel.UseSyntaxErrorUnderlining,
+        UseStyleErrorUnderlining = UserInterfaceModel.UseStyleErrorUnderlining,
         UseCommandBodyBackgroundHighlighting = UserInterfaceModel.UseCommandBodyBackgroundHighlighting,
         UseChainPointBodyBackgroundHighlighting = UserInterfaceModel.UseChainPointBodyBackgroundHighlighting,
         UseTopMenuIcons = UserInterfaceModel.UseTopMenuIcons,
@@ -92,6 +105,8 @@ namespace Ask.Core.Services.Config.Base
       SetLanguage(parametrModel.Language);
       SetTheme(parametrModel.Theme);
       SetSyntaxHighlighting(parametrModel.UseSyntaxHighlighting);
+      SetSyntaxErrorUnderlining(parametrModel.UseSyntaxErrorUnderlining);
+      SetStyleErrorUnderlining(parametrModel.UseStyleErrorUnderlining);
       SetCommandBodyBackgroundHighlighting(parametrModel.UseCommandBodyBackgroundHighlighting);
       SetChainPointBodyBackgroundHighlighting(parametrModel.UseChainPointBodyBackgroundHighlighting);
       SetTopMenuIcons(parametrModel.UseTopMenuIcons);
@@ -99,6 +114,7 @@ namespace Ask.Core.Services.Config.Base
 
       await InvokeSaveUserInterfaceAsync(parametrModel);
       SaveUserInterfaceEvent?.Invoke(parametrModel);
+      EventAggregator.Publish(new EditorEvents.DiagnosticUnderliningChanged());
 
       LanguageSettings.SetLanguageAsync(UserInterfaceModel.Language);
       ThemeSettings.SetThemeAsync(UserInterfaceModel.Theme);
