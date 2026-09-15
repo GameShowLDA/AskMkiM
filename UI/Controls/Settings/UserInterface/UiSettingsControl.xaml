@@ -243,19 +243,14 @@
                                         VerticalAlignment="Top"
                                         x:Name="SyntaxHighlighting"/>
 
-                                <SharedComponents:SettingsCard
-                                        Title="{Binding Source={StaticResource Settings_UserInterface_SyntaxErrorUnderlining_Title}, Path=Value}"
-                                        Description="{Binding Source={StaticResource Settings_UserInterface_SyntaxErrorUnderlining_Description}, Path=Value}"
+                                <Components:SettingsCardSelect
+                                        Title="{Binding Source={StaticResource Settings_UserInterface_DiagnosticUnderlining_Title}, Path=Value}"
+                                        Description="{Binding Source={StaticResource Settings_UserInterface_DiagnosticUnderlining_Description}, Path=Value}"
+                                        DisplayMemberPath="Title"
+                                        SelectedValuePath="Mode"
                                         Margin="0,6,10,0"
                                         VerticalAlignment="Top"
-                                        x:Name="SyntaxErrorUnderlining"/>
-
-                                <SharedComponents:SettingsCard
-                                        Title="{Binding Source={StaticResource Settings_UserInterface_StyleErrorUnderlining_Title}, Path=Value}"
-                                        Description="{Binding Source={StaticResource Settings_UserInterface_StyleErrorUnderlining_Description}, Path=Value}"
-                                        Margin="0,6,10,0"
-                                        VerticalAlignment="Top"
-                                        x:Name="StyleErrorUnderlining"/>
+                                        x:Name="DiagnosticUnderliningSelect"/>
 
                                 <SharedComponents:SettingsCard
                                         Title="{Binding Source={StaticResource Settings_UserInterface_CommandBodyBackground_Title}, Path=Value}"

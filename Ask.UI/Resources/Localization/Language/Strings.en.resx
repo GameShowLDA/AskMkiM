@@ -459,6 +459,21 @@
   <data name="settings.userinterface.syntaxHighlighting.title" xml:space="preserve">
     <value>Syntax highlighting</value>
   </data>
+  <data name="settings.userinterface.diagnosticUnderlining.title" xml:space="preserve">
+    <value>Underline diagnostics</value>
+  </data>
+  <data name="settings.userinterface.diagnosticUnderlining.description" xml:space="preserve">
+    <value>Controls which errors and stylistic warnings are underlined in control programs.</value>
+  </data>
+  <data name="settings.userinterface.diagnosticUnderlining.none" xml:space="preserve">
+    <value>None</value>
+  </data>
+  <data name="settings.userinterface.diagnosticUnderlining.all" xml:space="preserve">
+    <value>All</value>
+  </data>
+  <data name="settings.userinterface.diagnosticUnderlining.errorsOnly" xml:space="preserve">
+    <value>Errors only</value>
+  </data>
   <data name="settings.userinterface.syntaxHighlighting.description" xml:space="preserve">
     <value>Enables or disables syntax highlighting in the protocol editor.</value>
   </data>
@@ -680,17 +695,5 @@
   </data>
   <data name="settings.device.breakdownTester.systemInsulationResistance" xml:space="preserve">
     <value>System insulation resistance, GOhm</value>
-  </data>
-  <data name="settings.userinterface.syntaxErrorUnderlining.title" xml:space="preserve">
-    <value>Underline syntax errors</value>
-  </data>
-  <data name="settings.userinterface.syntaxErrorUnderlining.description" xml:space="preserve">
-    <value>Shows red underlines for errors in control programs and their descriptions on hover.</value>
-  </data>
-  <data name="settings.userinterface.styleErrorUnderlining.title" xml:space="preserve">
-    <value>Underline stylistic errors</value>
-  </data>
-  <data name="settings.userinterface.styleErrorUnderlining.description" xml:space="preserve">
-    <value>Shows yellow underlines for warnings in control programs and their descriptions on hover.</value>
   </data>
 </root>

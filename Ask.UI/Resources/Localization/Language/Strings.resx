@@ -462,17 +462,20 @@
   <data name="settings.userinterface.syntaxHighlighting.title" xml:space="preserve">
     <value>Подсветка синтаксиса</value>
   </data>
-  <data name="settings.userinterface.syntaxErrorUnderlining.title" xml:space="preserve">
-    <value>Подчеркивание синтаксических ошибок</value>
+  <data name="settings.userinterface.diagnosticUnderlining.title" xml:space="preserve">
+    <value>Подчеркивание ошибок</value>
   </data>
-  <data name="settings.userinterface.syntaxErrorUnderlining.description" xml:space="preserve">
-    <value>Показывает красное подчеркивание ошибок в тексте программы контроля и их описание при наведении.</value>
+  <data name="settings.userinterface.diagnosticUnderlining.description" xml:space="preserve">
+    <value>Определяет, какие ошибки и стилистические предупреждения подчеркивать в тексте программы контроля.</value>
   </data>
-  <data name="settings.userinterface.styleErrorUnderlining.title" xml:space="preserve">
-    <value>Подчеркивание стилистических ошибок</value>
+  <data name="settings.userinterface.diagnosticUnderlining.none" xml:space="preserve">
+    <value>Нет</value>
   </data>
-  <data name="settings.userinterface.styleErrorUnderlining.description" xml:space="preserve">
-    <value>Показывает желтое подчеркивание предупреждений в тексте программы контроля и их описание при наведении.</value>
+  <data name="settings.userinterface.diagnosticUnderlining.all" xml:space="preserve">
+    <value>Всё</value>
+  </data>
+  <data name="settings.userinterface.diagnosticUnderlining.errorsOnly" xml:space="preserve">
+    <value>Только ошибки</value>
   </data>
   <data name="settings.userinterface.syntaxHighlighting.description" xml:space="preserve">
     <value>Включает или отключает подсветку синтаксиса в редакторе протокола.</value>

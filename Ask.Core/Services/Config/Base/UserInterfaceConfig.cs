@@ -41,6 +41,12 @@ namespace Ask.Core.Services.Config.Base
 
     public static void SetStyleErrorUnderlining(bool enable) => UserInterfaceModel.UseStyleErrorUnderlining = enable;
 
+    public static void SetDiagnosticUnderliningMode(DiagnosticUnderliningMode mode)
+    {
+      SetSyntaxErrorUnderlining(mode.ShowsErrors());
+      SetStyleErrorUnderlining(mode.ShowsWarnings());
+    }
+
     public static void SetCommandBodyBackgroundHighlighting(bool enable) => UserInterfaceModel.UseCommandBodyBackgroundHighlighting = enable;
 
     public static void SetChainPointBodyBackgroundHighlighting(bool enable) => UserInterfaceModel.UseChainPointBodyBackgroundHighlighting = enable;
@@ -54,8 +60,8 @@ namespace Ask.Core.Services.Config.Base
       SetLanguage(user.Language);
       SetTheme(user.Theme);
       SetSyntaxHighlighting(user.UseSyntaxHighlighting);
-      SetSyntaxErrorUnderlining(user.UseSyntaxErrorUnderlining);
-      SetStyleErrorUnderlining(user.UseStyleErrorUnderlining);
+      SetDiagnosticUnderliningMode(DiagnosticUnderliningModeExtensions.FromVisibility(
+        user.UseSyntaxErrorUnderlining, user.UseStyleErrorUnderlining));
       SetCommandBodyBackgroundHighlighting(user.UseCommandBodyBackgroundHighlighting);
       SetChainPointBodyBackgroundHighlighting(user.UseChainPointBodyBackgroundHighlighting);
       SetTopMenuIcons(user.UseTopMenuIcons);
@@ -105,8 +111,11 @@ namespace Ask.Core.Services.Config.Base
       SetLanguage(parametrModel.Language);
       SetTheme(parametrModel.Theme);
       SetSyntaxHighlighting(parametrModel.UseSyntaxHighlighting);
-      SetSyntaxErrorUnderlining(parametrModel.UseSyntaxErrorUnderlining);
-      SetStyleErrorUnderlining(parametrModel.UseStyleErrorUnderlining);
+      var diagnosticMode = DiagnosticUnderliningModeExtensions.FromVisibility(
+        parametrModel.UseSyntaxErrorUnderlining, parametrModel.UseStyleErrorUnderlining);
+      parametrModel.UseSyntaxErrorUnderlining = diagnosticMode.ShowsErrors();
+      parametrModel.UseStyleErrorUnderlining = diagnosticMode.ShowsWarnings();
+      SetDiagnosticUnderliningMode(diagnosticMode);
       SetCommandBodyBackgroundHighlighting(parametrModel.UseCommandBodyBackgroundHighlighting);
       SetChainPointBodyBackgroundHighlighting(parametrModel.UseChainPointBodyBackgroundHighlighting);
       SetTopMenuIcons(parametrModel.UseTopMenuIcons);
