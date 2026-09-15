@@ -47,7 +47,7 @@ public partial class CommandTranslationManager
     return MapDiagnostics(text, sourceModels, cancellationToken);
   }
 
-  private static IReadOnlyList<SourceDiagnostic> MapDiagnostics(
+  internal static IReadOnlyList<SourceDiagnostic> MapDiagnostics(
     string text, IReadOnlyList<BaseCommandModel> models, CancellationToken cancellationToken)
   {
     var lines = new List<(int Offset, string Code)>();
@@ -107,9 +107,21 @@ public partial class CommandTranslationManager
         }
         if (!found)
         {
-          var code = lines[target].Code;
-          int indent = code.Length - code.TrimStart().Length;
-          hint = new IssueSelectionHint(indent, code.TrimEnd().Length - indent);
+          // Some legacy diagnostics identify only the command, without a source token.
+          // In that case underline the complete command, including continuation lines.
+          int last = end - 1;
+          while (last > first && string.IsNullOrWhiteSpace(lines[last].Code)) last--;
+          var firstCode = lines[first].Code;
+          int firstColumn = firstCode.Length - firstCode.TrimStart().Length;
+          int lastColumn = lines[last].Code.TrimEnd().Length;
+          int spanOffset = lines[first].Offset + firstColumn;
+          int spanEnd = lines[last].Offset + lastColumn;
+          if (spanEnd > spanOffset)
+          {
+            diagnostics.Add(new SourceDiagnostic(spanOffset, spanEnd - spanOffset,
+              first + 1, issue.IsWarning, issue.Description, issue.CodeString));
+          }
+          continue;
         }
         if (hint.Length > 0)
           diagnostics.Add(new SourceDiagnostic(lines[target].Offset + hint.StartIndex, hint.Length,
