@@ -728,6 +728,12 @@ namespace UI.Controls.TextEditorControl
     }
 
     /// <summary>
+    /// Включает или отключает живую диагностику для конкретного экземпляра редактора.
+    /// </summary>
+    public void SetLiveDiagnosticsEnabled(bool enabled) =>
+      _liveDiagnostics?.Configure(FileType, enabled);
+
+    /// <summary>
     /// Заменяет стандартный марджин номеров строк на версию
     /// с поддержкой фоновой заливки активного диапазона команды.
     /// </summary>

@@ -56,9 +56,9 @@ public sealed class LiveDiagnosticsController
     }
   }
 
-  public void Configure(FileType fileType)
+  public void Configure(FileType fileType, bool enabled = true)
   {
-    _enabled = fileType is FileType.None or FileType.PK or FileType.PKW;
+    _enabled = enabled && (fileType is FileType.None or FileType.PK or FileType.PKW);
     Refresh();
   }
 
