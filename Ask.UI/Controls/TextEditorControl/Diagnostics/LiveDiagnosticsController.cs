@@ -43,7 +43,7 @@ public sealed class LiveDiagnosticsController
     editor.MouseMove += OnMouseMove;
     editor.MouseLeave += (_, _) => _hoverPopup.ScheduleClose();
     editor.PreviewMouseDown += OnDismissHover;
-    editor.PreviewKeyDown += OnDismissHover;
+    editor.PreviewKeyDown += OnPreviewKeyDown;
     editor.PreviewMouseWheel += OnDismissHover;
     editor.SizeChanged += OnDismissHover;
     editor.TextArea.TextView.ScrollOffsetChanged += OnDismissHover;
@@ -182,6 +182,38 @@ public sealed class LiveDiagnosticsController
   }
 
   private void OnTextChanged(object? sender, EventArgs e) => Refresh();
+
+  private void OnPreviewKeyDown(object sender, KeyEventArgs e)
+  {
+    _hoverPopup.Close();
+    if (e.Handled || !_enabled || _editor.Document == null) return;
+
+    var key = e.Key == Key.System ? e.SystemKey : e.Key;
+    var modifiers = Keyboard.Modifiers;
+    if (key != Key.F8 || (modifiers != ModifierKeys.None && modifiers != ModifierKeys.Shift)) return;
+
+    bool showErrors = UserInterfaceConfig.GetSyntaxErrorUnderlining();
+    bool showWarnings = UserInterfaceConfig.GetStyleErrorUnderlining();
+    var target = DiagnosticNavigator.FindTarget(
+      _diagnostics.GetNavigationDiagnostics(showErrors, showWarnings),
+      _editor.CaretOffset,
+      _editor.SelectionStart,
+      _editor.SelectionLength,
+      previous: modifiers == ModifierKeys.Shift);
+
+    var document = _editor.Document;
+    if (target == null || target.Offset < 0 || target.Offset >= document.TextLength) return;
+
+    int length = Math.Min(target.Length, document.TextLength - target.Offset);
+    if (length <= 0) return;
+
+    int lineNumber = document.GetLineByOffset(target.Offset).LineNumber;
+    _editor.ScrollToLine(lineNumber);
+    _editor.Select(target.Offset, length);
+    _editor.Focus();
+    e.Handled = true;
+  }
+
   private void OnDismissHover(object? sender, EventArgs e)
   {
     // Popup input can route through its placement target. Allow scrolling the card.

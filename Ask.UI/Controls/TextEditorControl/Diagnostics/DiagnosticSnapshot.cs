@@ -10,6 +10,9 @@ internal sealed class DiagnosticSnapshot
   private readonly TextSegmentCollection<DiagnosticGroup> _groups = new();
   private readonly TextSegmentCollection<TextSegment> _errors = new();
   private readonly TextSegmentCollection<TextSegment> _warnings = new();
+  private IReadOnlyList<SourceDiagnostic> _allNavigation = Array.Empty<SourceDiagnostic>();
+  private IReadOnlyList<SourceDiagnostic> _errorNavigation = Array.Empty<SourceDiagnostic>();
+  private IReadOnlyList<SourceDiagnostic> _warningNavigation = Array.Empty<SourceDiagnostic>();
 
   internal static DiagnosticSnapshot Create(IReadOnlyList<SourceDiagnostic> diagnostics,
     CancellationToken token = default)
@@ -26,15 +29,32 @@ internal sealed class DiagnosticSnapshot
       messages.Add(diagnostic);
     }
 
+    var allNavigation = new List<SourceDiagnostic>(groups.Count);
+    var errorNavigation = new List<SourceDiagnostic>();
+    var warningNavigation = new List<SourceDiagnostic>();
     TextSegment? error = null, warning = null;
     foreach (var pair in groups.OrderBy(p => p.Key.Offset).ThenBy(p => p.Key.Length))
     {
       token.ThrowIfCancellationRequested();
       var group = new DiagnosticGroup(pair.Key.Offset, pair.Key.Length, pair.Value.ToArray());
       snapshot._groups.Add(group);
-      if (group.Diagnostics.Any(d => !d.IsWarning)) Merge(snapshot._errors, ref error, group);
-      if (group.Diagnostics.Any(d => d.IsWarning)) Merge(snapshot._warnings, ref warning, group);
+      var firstError = group.Diagnostics.FirstOrDefault(d => !d.IsWarning);
+      var firstWarning = group.Diagnostics.FirstOrDefault(d => d.IsWarning);
+      if (firstError != null)
+      {
+        errorNavigation.Add(firstError);
+        Merge(snapshot._errors, ref error, group);
+      }
+      if (firstWarning != null)
+      {
+        warningNavigation.Add(firstWarning);
+        Merge(snapshot._warnings, ref warning, group);
+      }
+      allNavigation.Add(firstError ?? firstWarning!);
     }
+    snapshot._allNavigation = allNavigation.ToArray();
+    snapshot._errorNavigation = errorNavigation.ToArray();
+    snapshot._warningNavigation = warningNavigation.ToArray();
     token.ThrowIfCancellationRequested();
     return snapshot;
   }
@@ -57,6 +77,15 @@ internal sealed class DiagnosticSnapshot
 
   internal IEnumerable<DiagnosticGroup> GetGroups(int offset, int length) =>
     _groups.FindOverlappingSegments(offset, length);
+
+  internal IReadOnlyList<SourceDiagnostic> GetNavigationDiagnostics(bool showErrors, bool showWarnings) =>
+    (showErrors, showWarnings) switch
+    {
+      (true, true) => _allNavigation,
+      (true, false) => _errorNavigation,
+      (false, true) => _warningNavigation,
+      _ => Array.Empty<SourceDiagnostic>(),
+    };
 
   internal sealed class DiagnosticGroup : TextSegment
   {
