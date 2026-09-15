@@ -22,7 +22,7 @@ public sealed class LiveDiagnosticsController
   private CancellationTokenSource? _pending;
   private bool _enabled;
   private bool _settingsSubscribed;
-  private IReadOnlyList<SourceDiagnostic> _diagnostics = Array.Empty<SourceDiagnostic>();
+  private DiagnosticSnapshot _diagnostics = DiagnosticSnapshot.Empty;
 
   public LiveDiagnosticsController(TextEditor editor)
     : this(editor, (text, token) => new CommandTranslationManager().AnalyzeSource(text, token)) { }
@@ -66,6 +66,7 @@ public sealed class LiveDiagnosticsController
   {
     CancelPending();
     if (!_enabled || _editor.IsReadOnly || !_editor.IsLoaded || _editor.Document == null) return;
+    if (!UserInterfaceConfig.GetSyntaxErrorUnderlining() && !UserInterfaceConfig.GetStyleErrorUnderlining()) return;
     var cancellation = new CancellationTokenSource();
     _pending = cancellation;
     _ = AnalyzeAsync(cancellation);
@@ -77,16 +78,16 @@ public sealed class LiveDiagnosticsController
     try
     {
       await Task.Delay(400, token);
-      // Access the WPF document only on its dispatcher. Parsing sees plain text.
+      // Capture AvalonEdit's immutable rope cheaply; materialize the string on the worker.
       var document = _editor.Document;
-      string snapshot = document.Text;
+      var snapshot = document.CreateSnapshot();
       var diagnostics = await Task.Run(async () =>
       {
         await AnalysisGate.WaitAsync(token).ConfigureAwait(false);
         try
         {
           token.ThrowIfCancellationRequested();
-          return _analyze(snapshot, token);
+          return DiagnosticSnapshot.Create(_analyze(snapshot.Text, token), token);
         }
         finally { AnalysisGate.Release(); }
       }, token);
@@ -103,11 +104,11 @@ public sealed class LiveDiagnosticsController
         && _editor.IsLoaded && !_editor.IsReadOnly
         && _editor.Document?.Lines.FirstOrDefault(documentLine => documentLine.Length > 0) is { } line)
       {
-        SetDiagnostics(new[]
+        SetDiagnostics(DiagnosticSnapshot.Create(new[]
         {
           new SourceDiagnostic(line.Offset, line.Length, line.LineNumber, true,
             "Не удалось проверить текст. Выполните трансляцию для подробной диагностики.", null),
-        });
+        }));
       }
     }
     finally
@@ -121,11 +122,11 @@ public sealed class LiveDiagnosticsController
   {
     _pending?.Cancel();
     _pending = null;
-    SetDiagnostics(Array.Empty<SourceDiagnostic>());
+    SetDiagnostics(DiagnosticSnapshot.Empty);
     _hoverPopup.Close();
   }
 
-  private void SetDiagnostics(IReadOnlyList<SourceDiagnostic> diagnostics)
+  private void SetDiagnostics(DiagnosticSnapshot diagnostics)
   {
     _diagnostics = diagnostics;
     ApplyDiagnosticVisibility();
@@ -136,7 +137,7 @@ public sealed class LiveDiagnosticsController
     _hoverPopup.Close();
     bool showErrors = UserInterfaceConfig.GetSyntaxErrorUnderlining();
     bool showWarnings = UserInterfaceConfig.GetStyleErrorUnderlining();
-    _renderer.SetDiagnostics(_diagnostics.Where(d => d.IsWarning ? showWarnings : showErrors).ToArray());
+    _renderer.SetDiagnostics(_diagnostics, showErrors, showWarnings);
   }
 
   private void SubscribeToSettings()
@@ -148,11 +149,21 @@ public sealed class LiveDiagnosticsController
 
   private void OnDiagnosticUnderliningChanged(EditorEvents.DiagnosticUnderliningChanged _)
   {
-    if (_editor.Dispatcher.CheckAccess()) ApplyDiagnosticVisibility();
+    if (_editor.Dispatcher.CheckAccess()) RefreshVisibility();
     else _editor.Dispatcher.InvokeAsync(() =>
     {
-      if (_editor.IsLoaded) ApplyDiagnosticVisibility();
+      if (_editor.IsLoaded) RefreshVisibility();
     });
+  }
+
+  private void RefreshVisibility()
+  {
+    if (!UserInterfaceConfig.GetSyntaxErrorUnderlining() && !UserInterfaceConfig.GetStyleErrorUnderlining())
+      CancelPending();
+    else if (ReferenceEquals(_diagnostics, DiagnosticSnapshot.Empty) && _pending == null)
+      Refresh();
+    else
+      ApplyDiagnosticVisibility();
   }
 
   private void OnLoaded(object sender, RoutedEventArgs e)

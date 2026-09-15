@@ -13,7 +13,7 @@ internal sealed class DiagnosticHoverPopup
 {
   private readonly FrameworkElement _owner;
   private readonly Border _border;
-  private readonly StackPanel _messages = new();
+  private readonly ListBox _messages;
   private readonly Popup _popup;
   private readonly DispatcherTimer _closeTimer;
   private IReadOnlyList<SourceDiagnostic> _diagnostics = Array.Empty<SourceDiagnostic>();
@@ -21,20 +21,44 @@ internal sealed class DiagnosticHoverPopup
   internal DiagnosticHoverPopup(FrameworkElement owner)
   {
     _owner = owner;
+    var resources = new ResourceDictionary
+    {
+      Source = new Uri("/Ask.UI;component/Controls/TextEditorControl/Diagnostics/DiagnosticHoverResources.xaml", UriKind.Relative),
+    };
+    _messages = new ListBox
+    {
+      Width = 500,
+      MaxHeight = 320,
+      Background = Brushes.Transparent,
+      BorderThickness = new Thickness(0),
+      Padding = new Thickness(0),
+      Focusable = false,
+      ItemTemplate = (DataTemplate)resources["DiagnosticMessageTemplate"],
+      ItemContainerStyle = new Style(typeof(ListBoxItem))
+      {
+        Setters =
+        {
+          new Setter(Control.HorizontalContentAlignmentProperty, HorizontalAlignment.Stretch),
+          new Setter(Control.PaddingProperty, new Thickness(0)),
+          new Setter(UIElement.FocusableProperty, false),
+        },
+      },
+    };
+    ScrollViewer.SetCanContentScroll(_messages, true);
+    ScrollViewer.SetHorizontalScrollBarVisibility(_messages, ScrollBarVisibility.Disabled);
+    ScrollViewer.SetVerticalScrollBarVisibility(_messages, ScrollBarVisibility.Auto);
+    VirtualizingPanel.SetIsVirtualizing(_messages, true);
+    VirtualizingPanel.SetVirtualizationMode(_messages, VirtualizationMode.Recycling);
+    VirtualizingPanel.SetScrollUnit(_messages, ScrollUnit.Pixel);
+    TextElement.SetFontFamily(_messages, SystemFonts.MessageFontFamily);
+    TextElement.SetFontSize(_messages, 13);
     _border = new Border
     {
       Padding = new Thickness(12, 10, 14, 10),
       BorderThickness = new Thickness(1),
       CornerRadius = new CornerRadius(6),
       MaxWidth = 560,
-      Child = new ScrollViewer
-      {
-        Content = _messages,
-        MaxHeight = 320,
-        HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled,
-        VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
-        Focusable = false,
-      },
+      Child = _messages,
     };
     _popup = new Popup
     {
@@ -66,37 +90,14 @@ internal sealed class DiagnosticHoverPopup
   {
     _closeTimer.Stop();
     if (diagnostics.Count == 0) { Close(); return; }
-    if (!_popup.IsOpen || !_diagnostics.SequenceEqual(diagnostics))
+    if (!_popup.IsOpen || !ReferenceEquals(_diagnostics, diagnostics))
     {
-      _diagnostics = diagnostics.ToArray();
-      _messages.Children.Clear();
+      _diagnostics = diagnostics;
       _border.Background = GetBrush("ToolTipBackgroundBrush", Brushes.WhiteSmoke);
       _border.BorderBrush = GetBrush("ToolTipBorderBrush", Brushes.SlateGray);
-      var foreground = GetBrush("ToolTipForegroundBrush", Brushes.Black);
-
-      foreach (var diagnostic in diagnostics.DistinctBy(d => (d.IsWarning, d.Description)))
-      {
-        var text = new StackPanel();
-        text.Children.Add(new TextBlock
-        {
-          Text = diagnostic.IsWarning ? "Предупреждение" : "Ошибка",
-          FontWeight = FontWeights.SemiBold,
-          Margin = new Thickness(0, 0, 0, 4),
-        });
-        text.Children.Add(new TextBlock { Text = diagnostic.Description, TextWrapping = TextWrapping.Wrap });
-        var entry = new Border
-        {
-          BorderThickness = new Thickness(3, 0, 0, 0),
-          BorderBrush = diagnostic.IsWarning ? Brushes.Gold : Brushes.Red,
-          Padding = new Thickness(10, 0, 0, 0),
-          Margin = new Thickness(0, _messages.Children.Count == 0 ? 0 : 12, 0, 0),
-          Child = text,
-        };
-        TextElement.SetForeground(entry, foreground);
-        TextElement.SetFontFamily(entry, SystemFonts.MessageFontFamily);
-        TextElement.SetFontSize(entry, 13);
-        _messages.Children.Add(entry);
-      }
+      _messages.Foreground = GetBrush("ToolTipForegroundBrush", Brushes.Black);
+      _messages.ItemsSource = diagnostics.DistinctBy(d => (d.IsWarning, d.Description)).ToArray();
+      if (_messages.Items.Count > 0) _messages.ScrollIntoView(_messages.Items[0]);
     }
     _popup.PlacementRectangle = anchor;
     _popup.IsOpen = true;
@@ -113,7 +114,7 @@ internal sealed class DiagnosticHoverPopup
     _closeTimer.Stop();
     _popup.IsOpen = false;
     _diagnostics = Array.Empty<SourceDiagnostic>();
-    _messages.Children.Clear();
+    _messages.ItemsSource = null;
   }
 
   private Brush GetBrush(string key, Brush fallback) => _owner.TryFindResource(key) as Brush ?? fallback;

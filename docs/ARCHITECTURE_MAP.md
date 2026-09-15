@@ -508,10 +508,12 @@ TranslationViewModel command
 ```text
 TextEditorUI (UI / Ask.UI), новый документ или PK/PKW
 → LiveDiagnosticsController: Loaded / TextChanged / DocumentChanged
-→ 400 мс debounce → снимок текста на UI-потоке → Task.Run + общий SemaphoreSlim
+→ 400 мс debounce → immutable CreateSnapshot на UI-потоке → Task.Run + общий SemaphoreSlim
+→ материализация snapshot.Text на worker
 → AnalyzeSource → CommandsModel.BeginAnalysisScope (AsyncLocal)
 → ParseAll без progress-событий, проверка неявной ВШ и связей команд
 → SourceDiagnostic[] с UTF-16 offset/length в исходном снимке
+→ DiagnosticSnapshot.Create на worker: индекс сообщений + объединённые диапазоны ошибок/предупреждений
 → актуальность документа/запроса → DiagnosticUnderlineRenderer + DiagnosticHoverPopup
 ```
 
@@ -1781,16 +1783,27 @@ formatted editors; `RunControl` hosts ProtocolUI, translated source and error li
 устаревший результат не применяется. При повторной загрузке проверяется новый снимок.
 Read-only документы, OPK/OPKW и протоколы не анализируются. Ошибка фоновой проверки
 показывается предупреждением о незавершённом анализе; следующий edit запускает проверку заново.
-Renderer индексирует диапазоны и рисует только видимую часть подчёркиваний;
-при наложении предупреждения и ошибки красная линия рисуется последней.
+`Diagnostics/DiagnosticSnapshot.cs` строит индексы диапазонов в фоне с проверками отмены:
+совпадающие диапазоны хранят сообщения вместе, перекрывающиеся/смежные диапазоны
+объединяются отдельно для отрисовки ошибок и предупреждений. Сообщения не обрезаются.
+UI публикует готовый снимок заменой ссылки; переключение видимости ошибок/предупреждений
+не фильтрует и не перестраивает весь индекс. При отключении обоих видов подчёркивания
+анализ отменяется и новые проверки не запускаются до включения настройки.
+Renderer выбирает индексированные диапазоны видимой области и кэширует две frozen
+`StreamGeometry` (по одной на severity); при наложении красная линия рисуется последней.
+`VisualLinesChanged`, прокрутка, resize, смена снимка/видимости сбрасывают геометрию.
 При `MouseHover` контроллер проверяет реальные прямоугольники подчёркнутых
 фрагментов через `DiagnosticUnderlineRenderer.GetDiagnosticsAt(Point, out Rect)`:
 это учитывает последний символ, переносы строк и прокрутку без округления к позиции каретки.
+Поиск ограничен visual line под указателем, прямоугольники фрагментов кэшируются до
+изменения layout; над теми же группами возвращается прежний список сообщений.
 `Diagnostics/DiagnosticHoverPopup.cs` показывает рядом с фрагментом отдельный WPF `Popup`
 с заголовком «Ошибка»/«Предупреждение», цветной полосой и полным описанием;
 пересекающиеся сообщения отображаются вместе, ошибки первыми. Карточка использует
 `ToolTipBackgroundBrush/ToolTipForegroundBrush/ToolTipBorderBrush` текущей темы,
-перенос текста и прокрутку длинного списка, не зависит от глобального шаблона `ToolTip`.
+перенос текста и виртуализированный `ListBox` с recycling: WPF создаёт элементы только
+для видимой части списка, все сообщения доступны при прокрутке. Шаблон сообщения —
+`Diagnostics/DiagnosticHoverResources.xaml`; карточка не зависит от глобального шаблона `ToolTip`.
 `MouseMove` сохраняет карточку над тем же фрагментом; задержка закрытия 180 мс
 позволяет перевести курсор на саму карточку. Она закрывается при уходе с обеих областей,
 редактировании, смене документа, прокрутке/изменении размера редактора, клике в редакторе/нажатии клавиши,
@@ -2279,7 +2292,7 @@ and `StateEventsBinder`, then calls `ApplicationEventsBinder.BindAll`.
 | Archive refresh | `ArchiveControl` DispatcherTimer | refresh archive lists plus background I/O | view lifetime |
 | Role keyboard layout | `RoleLoginWindow` DispatcherTimer | keyboard layout monitoring | window lifetime |
 | Workspace click timer | `MultiEditorControl` DispatcherTimer | double-click discrimination | control lifetime |
-| Live source diagnostics | оба `TextEditorUI` → `LiveDiagnosticsController`, отменяемая задержка 400 мс + Task.Run | один фоновый анализ через SemaphoreSlim; локальные модели и диапазоны исходного снимка | edit/document replacement/Unloaded отменяют запрос; Loaded перезапускает; проверка cancellation между командами и этапами |
+| Live source diagnostics | оба `TextEditorUI` → `LiveDiagnosticsController`, отменяемая задержка 400 мс + Task.Run | immutable текстовый снимок; один анализ и построение `DiagnosticSnapshot` через SemaphoreSlim; UI меняет ссылку, кэширует геометрию viewport и виртуализирует hover | edit/document replacement/Unloaded и отключение обоих подчёркиваний отменяют запрос; Loaded/включение настройки перезапускают; cancellation между командами, этапами и при индексации |
 | Logged exception reporter | `ExceptionDiagnosticReporter` bounded Task.Run | asynchronous crash package | throttled/timeout-limited |
 
 `MeasureHelper.MeasureAsync` выполняет фактический GPT-поток через
