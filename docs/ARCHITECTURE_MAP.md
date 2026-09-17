@@ -51,6 +51,7 @@ Size/Foreground и анимации общей кнопки; лицензия с
 | База данных | `Ask.DataBase.Provider/Context/AppDbContext*.cs` | `Ask.DataBase.Provider/Initialization/DatabaseInitializationService.cs`, `Ask.DataBase.Engine/Services/DeviceEngine.cs` |
 | Настройки выполнения/протокола/UI | `Ask.Core/Services/Config/` | `Ask.DataBase.Engine/Static/Settings/`, `Ask.DataBase.Provider/Services/Settings/`, `MainWindow/Init/DatabaseInitializer.cs` |
 | Протокол выполнения | `Ask.UI/Controls/ProtocolNew/ProtocolUI*.cs` | `Ask.UI/Features/ProtocolNew/Protocol/`, `Ask.Core/Services/Protocols/ExecutionProtocolHistoryService.cs` |
+| Итоговый протокол программы контроля: текст ERR/DOC и подсветка точек | `Ask.Core/Shared/DTO/Protocol/ProtocolModel.cs`, `Ask.UI/Resources/Assets/SyntaxHighlighting/{Dark,Light}/MKI_RESULT_PROTOCOL.xshd` | `UI/Services/ProtocolManager/ProtocolService.cs`, `Ask.UI/Controls/TextEditorControl/TextEditorUI.xaml.cs` |
 | Формирование унифицированных сообщений протокола | `Ask.Protocol.Messages/EntryPoints/` | `Ask.Protocol.Messages/Builders/`, `Ask.Protocol.Messages/Show/`; сообщения executor-команд, блоков проверки, оборудования, измерений, допустимых диапазонов и ошибок UI-валидации формируются централизованно |
 | Форматы `.asktrace/.askresult/.askreport` | `Ask.Core/Services/Protocols/ExecutionProtocolHistoryService.cs` | `Ask.Core/Shared/Metadata/Static/ProtocolFileExtensions.cs`, `Ask.UI/Features/ProtocolNew/Protocol/ProtocolStorageService.cs` |
 | Печать протокола | `Ask.UI/Features/ProtocolNew/Protocol/ProtocolCompletionService.cs` | `Ask.UI/Features/ProtocolNew/Execution/ExecutionFinalizer.cs`, `Ask.Core/Services/Config/AppSettings/ProtocolConfig.cs`, `PrintUtility` usages |
@@ -1061,6 +1062,24 @@ ActionExecutor finalization
 `CheckType.ControlProgram`, иначе `.askresult`, и старается использовать basename
 соответствующего `.asktrace`. Каталог истории:
 `Path.GetFullPath(Path.Combine("..", FileLocations.DataSaveDirectory))`.
+
+Для старого итогового текста программы контроля `ProtocolService.BuildProtocolText`
+→ `ProtocolModel.GetProtocolWithErrorsText/GetProtocolText`
+→ `BuildMessagesBlock` (`Errors/Info` по командам, нумерация `ERR`/`DOC`)
+→ `BuildProtocolMessage` (очистка меток качества и пробелов между обозначением точки
+и её машинным адресом `[n.n.n]`). `RunControl.ShowInspectionProtocol` и
+`SavedProtocolPairUI` назначают итоговому редактору `FileType.InspectionProtocol`;
+подсветка: `TextEditorUI.ApplySyntaxHighlighting` → тематический `MKI_RESULT_PROTOCOL.xshd`;
+`ERRn` красный, номер команды и мнемоника после `ERR/DOC` имеют отдельные цвета;
+обычные слова в заголовке не трактуются как мнемоники. У точки окрашивается
+только машинный адрес в квадратных скобках, а её обозначение остаётся основным цветом текста.
+Подписи исполнителя, представителя ОТК и представителя заказчика окрашиваются
+цветом `Заключение` только до двоеточия, без полей для подписи.
+Тем же цветом отдельно выделяются `Версия ПО:`, `Ревизия ПО:`, дата после `Протокол(...) от`,
+обозначение с `Зав.N` после `сборочной единицы` и имя файла после `Программа проверки:`;
+значения версии, ревизии и остальной текст строки не захватываются.
+Те же правила доступны старым текстовым `.lst/.lstw` через `MKI_PROTOCOL.xshd`;
+этот путь не меняет структурированный `.asktrace`.
 
 Structured `.asktrace` message metadata is decoded for every role and supplies invisible segment
 markers for header/message/time highlighting; only the readable `ROOT` diagnostic expansion is

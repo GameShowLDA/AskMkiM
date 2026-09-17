@@ -9,6 +9,7 @@
 	<Color name="Error" foreground="#f1301b" />
 	<Color name="Mnemonic" foreground="#90EE90" />
 	<Color name="CommandNumber" foreground="#00BFFF" />
+	<Color name="OkParam" foreground="#FFB300" />
 	<Color name="RootDebug" foreground="#8CF3F0F9" />
 	<Color name="StatusCommand" foreground="#E69138" />
 	<Color name="StatusCommandBlock" foreground="#5DADE2" />
@@ -18,6 +19,10 @@
 	<Color name="StatusTime" foreground="#9ACD32" />
 
 	<RuleSet ignoreCase="true">
+		<Rule color="ProtocolMain">^\s*(?:Версия|Ревизия)\s+ПО:</Rule>
+		<Rule color="ProtocolMain">(?&lt;=^Протокол\([^\r\n)]*\)\s+от\s)\d{2}\.\d{2}\.\d{4}</Rule>
+		<Rule color="ProtocolMain">(?&lt;=сборочной\s+единицы\s)\S+\s+Зав\.N\s+\S+</Rule>
+		<Rule color="ProtocolMain">(?&lt;=^Программа\s+проверки:\s*)\S+</Rule>
 		<Rule color="RootDebug">⁣⁣[^⁣]*</Rule>
 		<Rule color="StatusCommand">⁣​[^⁣]*</Rule>
 		<Rule color="StatusCommandBlock">⁣‌[^⁣]*</Rule>
@@ -41,20 +46,22 @@
 		<Rule color="PurposeAndResults">^\s*Замыканий:</Rule>
 		<Rule color="PurposeAndResults">^\s*Нарушений\s+изоляции:</Rule>
 		<Rule color="ProtocolMain">^\s*Заключение:</Rule>
-		<Rule color="PKData">^\s*Исполнитель:</Rule>
+		<Rule color="ProtocolMain">^\s*Исполнитель(?=:)</Rule>
 		<Rule color="PKData">^\s*Представитель\s+ОК:</Rule>
-		<Rule color="PKData">^\s*Представитель\s+ОТК:</Rule>
-		<Rule color="PKData">^\s*Представитель\s+заказчика\s*\(ВП\):</Rule>
+		<Rule color="ProtocolMain">^\s*Представитель\s+ОТК(?=:)</Rule>
+		<Rule color="ProtocolMain">^\s*Представитель\s+заказчика\s*\(ВП\)(?=:)</Rule>
 
 		<Rule color="Error">^\s*Ошибки\s+программы.*:</Rule>
 		<Rule color="Error">^\s*Ошибки\s+команды:</Rule>
 
 		<!-- Номер команды (вместе с номером строки, чтобы не перекрывало) -->
-		<Rule color="CommandNumber">^ERR\d+\s*\d+</Rule>
+		<Rule color="Error">^ERR\d+</Rule>
+		<Rule color="CommandNumber">(?&lt;=^ERR\d+\s)\d+</Rule>
 		<Rule color="CommandNumber">^DOC\d+\s*\d+</Rule>
 
 		<!-- Мнемоника -->
-		<Rule color="Mnemonic">\b(СИ|ОК|СП|РМ|ЦУ|ПР|ПИ|КЦ|УП|КС|ИЕ|ЭТ|НЭ|ПТ|ОТ|ОС)\b</Rule>
+		<Rule color="Mnemonic">(?&lt;=^(?:ERR|DOC)\d+\s+\d+\s)(СИ|ОК|СП|РМ|ЦУ|ПР|ПИ|КЦ|УП|КС|ИЕ|ЭТ|НЭ|ПТ|ОТ|ОС)\b</Rule>
+		<Rule color="OkParam">\[\d+(?:\.\d+)*\]</Rule>
 
 		<!-- Между двоеточиями -->
 		<Rule>:\s*[^:]+:</Rule>

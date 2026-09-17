@@ -5,13 +5,25 @@
 	<Color name="Error" foreground="#C62828" fontWeight="bold" />
 	<Color name="OkParam" foreground="#006FCB" fontWeight="bold" />
 	<Color name="MeasurementUnit" foreground="#A86B00" fontWeight="bold" />
+	<Color name="CommandNumber" foreground="#2F8F4E" fontWeight="bold" />
+	<Color name="Mnemonic" foreground="#A86B00" fontWeight="bold" />
 
 	<RuleSet ignoreCase="true">
+		<Rule color="ProtocolMain">^\s*(?:Версия|Ревизия)\s+ПО:</Rule>
+		<Rule color="ProtocolMain">(?&lt;=^Протокол\([^\r\n)]*\)\s+от\s)\d{2}\.\d{2}\.\d{4}</Rule>
+		<Rule color="ProtocolMain">(?&lt;=сборочной\s+единицы\s)\S+\s+Зав\.N\s+\S+</Rule>
+		<Rule color="ProtocolMain">(?&lt;=^Программа\s+проверки:\s*)\S+</Rule>
 		<Rule color="ProtocolMain">^\s*(?:Введённые\s+данные|Начальная\s+точка|Конечная\s+точка|Заданное\s+значение\s+[^:\r\n]+|Время\s+выполнения|Время\s+нарастания|Напряжение|Шина|Группа\s+шин|Проверяемый\s+модуль|Проверяющий\s+модуль|Диапазон\s+проверки):</Rule>
 		<Rule color="ProtocolMain">^\s*Начало\s+проверки:</Rule>
 		<Rule color="ProtocolMain">^\s*Время\s+выполнения:</Rule>
 		<Rule color="ProtocolMain">(?&lt;=")[^"\r\n]+(?="\s+от\b)</Rule>
 		<Rule color="ProtocolMain">^\s*Заключение:</Rule>
+		<Rule color="ProtocolMain">^\s*(?:Исполнитель|Представитель\s+ОТК|Представитель\s+заказчика\s*\(ВП\))(?=:)</Rule>
+		<Rule color="Error">^ERR\d+</Rule>
+		<Rule color="CommandNumber">(?&lt;=^ERR\d+\s)\d+</Rule>
+		<Rule color="CommandNumber">^DOC\d+\s*\d+</Rule>
+		<Rule color="Mnemonic">(?&lt;=^(?:ERR|DOC)\d+\s+\d+\s)(СИ|ОК|СП|РМ|ЦУ|ПР|ПИ|КЦ|УП|КС|ИЕ|ЭТ|НЭ|ПТ|ОТ|ОС)\b</Rule>
+		<Rule color="OkParam">\[\d+(?:\.\d+)*\]</Rule>
 		<Rule color="OkParam">(?&lt;=Точка)\[\d+(?:\.\d+)*\]</Rule>
 		<Rule color="OkParam">(?&lt;=Разряд-\s)\d+</Rule>
 		<Rule color="MeasurementUnit">(?-i:(?&lt;![А-Яа-яA-Za-z])(?:мкФ|пФ|нФ|мА|А|ГОм|МОм|кОм|КОм|Ом|кВ|мВ|В|с)(?![А-Яа-яA-Za-z]))</Rule>

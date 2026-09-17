@@ -262,6 +262,8 @@ namespace Ask.Core.Shared.DTO.Protocol
           .Replace("[НОРМА]", string.Empty, StringComparison.Ordinal)
           .Trim();
 
+      text = Regex.Replace(text, @"(?<=[\p{L}\d]/\d+)\s+(?=\[\d+(?:\.\d+)*\])", string.Empty);
+
       var qualityPrefix = message.GetQualityPrefix();
 
       if (string.IsNullOrEmpty(qualityPrefix))
