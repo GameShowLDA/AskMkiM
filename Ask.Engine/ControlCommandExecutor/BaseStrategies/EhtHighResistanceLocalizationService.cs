@@ -1,3 +1,5 @@
+using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Config.Base;
 using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
@@ -34,7 +36,10 @@ internal static class EhtHighResistanceLocalizationService
       return result;
     }
 
+    await WaitForExecutionAsync(context.MessageService);
+    await ExecutionMessages.PublishLocalizationHeaderAsync(context.MessageService);
     var localization = await SplitIntoFragmentsAsync(context, sourceChain.PointModels);
+    await WaitForExecutionAsync(context.MessageService);
     var localized = localization.Fragments.Count >= 2 && localization.FirstAboveUpperBound.HasValue;
     var errorChains = localized
       ? localization.Fragments
@@ -42,7 +47,7 @@ internal static class EhtHighResistanceLocalizationService
     var errorValue = localized
       ? localization.FirstAboveUpperBound!.Value
       : initialAboveUpperBound;
-    var display = await PointFormater.GetFormatDisconnectPoint(errorChains);
+    var display = await FormatLocalizedBreaksAsync(errorChains);
     var error = MeasurementMessages.BuildMeasurementResultMessage(
       ResistanceUnit.Ohm,
       new MeasurementRange(
@@ -143,18 +148,30 @@ internal static class EhtHighResistanceLocalizationService
     PointModel secondPoint)
   {
     var service = context.MessageService;
+    double result;
     try
     {
+      await WaitForExecutionAsync(service);
       await ConnectToBothBusesAsync(firstPoint, service);
+
+      await WaitForExecutionAsync(service);
       var firstResistance = await MeasureAsync(context);
+
+      await WaitForExecutionAsync(service);
       await DeviceManager.RelayModule.PointManager.DisconnectPointFromBusAAsync(firstPoint, service, context.IsPolarityReversed);
 
+      await WaitForExecutionAsync(service);
       await ConnectToBothBusesAsync(secondPoint, service);
+
+      await WaitForExecutionAsync(service);
       var secondResistance = await MeasureAsync(context);
+
+      await WaitForExecutionAsync(service);
       await DeviceManager.RelayModule.PointManager.DisconnectPointFromBusBAsync(secondPoint, service, context.IsPolarityReversed);
 
+      await WaitForExecutionAsync(service);
       var pairResistance = await MeasureAsync(context);
-      return PairwiseFirstPointCheckerAlt.CalculateFinalResistance(
+      result = PairwiseFirstPointCheckerAlt.CalculateFinalResistance(
         pairResistance,
         firstResistance,
         secondResistance,
@@ -169,6 +186,89 @@ internal static class EhtHighResistanceLocalizationService
       await DeviceManager.RelayModule.PointManager.DisconnectPointFromBusAAsync(secondPoint, service, context.IsPolarityReversed);
       await DeviceManager.RelayModule.PointManager.DisconnectPointFromBusBAsync(secondPoint, service, context.IsPolarityReversed);
     }
+
+    await WaitForExecutionAsync(service);
+    await PublishIntermediateMeasurementAsync(context, firstPoint, secondPoint, result);
+    return result;
+  }
+
+  /// <summary>
+  /// Ожидает продолжения локализации и проверяет запрос на её остановку.
+  /// </summary>
+  /// <param name="service">Сервис взаимодействия с пользователем.</param>
+  /// <returns>Задача, представляющая ожидание разрешения на продолжение.</returns>
+  /// <exception cref="OperationCanceledException">
+  /// Выбрасывается, если запрошена остановка выполнения.
+  /// </exception>
+  internal static async Task WaitForExecutionAsync(IUserInteractionService service)
+  {
+    var cancellationToken = service.GetCancellationToken();
+    cancellationToken.ThrowIfCancellationRequested();
+    await service.WaitIfPausedAsync();
+    cancellationToken.ThrowIfCancellationRequested();
+  }
+
+  /// <summary>
+  /// Формирует результат локализации, сохраняя звёздочки на границах разрывов цепи.
+  /// </summary>
+  /// <param name="fragments">Связные фрагменты локализованной цепи.</param>
+  /// <returns>Последовательность фрагментов, каждый из которых ограничен звёздочками.</returns>
+  internal static async Task<string> FormatLocalizedBreaksAsync(IReadOnlyList<ChainModel> fragments)
+  {
+    var formattedFragments = new List<string>(fragments.Count);
+    foreach (var fragment in fragments)
+    {
+      formattedFragments.Add(await PointFormater.GetFormatDisconnectPoint([fragment]));
+    }
+
+    return string.Concat(formattedFragments);
+  }
+
+  /// <summary>
+  /// Публикует промежуточный результат измерения пары точек при локализации.
+  /// </summary>
+  /// <param name="context">Контекст выполнения проверки ЭТ.</param>
+  /// <param name="firstPoint">Первая точка измеряемого участка.</param>
+  /// <param name="secondPoint">Вторая точка измеряемого участка.</param>
+  /// <param name="resistance">Скомпенсированное сопротивление между точками.</param>
+  internal static async Task PublishIntermediateMeasurementAsync(
+    PairwiseFirstPointAltContext context,
+    PointModel firstPoint,
+    PointModel secondPoint,
+    double resistance)
+  {
+    var resultExecutor = context.ResultMessageExecutor
+      ?? throw new InvalidOperationException(
+        "Не задан исполнитель сообщений результатов измерения.");
+    var measurementTarget = $"{FormatPoint(firstPoint)},{FormatPoint(secondPoint)}";
+
+    await resultExecutor.PublishMeasurementResultAsync(
+      new MeasurementResultMessageContext(
+        context.TypeCommand,
+        new MeasurementRange(resistance, context.LowerLimit, context.HigherLimit),
+        context.MessageService,
+        measurementTarget)
+      {
+        IsIntermediate = true,
+      });
+  }
+
+  /// <summary>
+  /// Формирует обозначение точки для результата локализации.
+  /// </summary>
+  /// <param name="point">Точка измеряемого участка.</param>
+  /// <returns>Мнемоника точки с машинным адресом, если его отображение включено.</returns>
+  private static string FormatPoint(PointModel point)
+  {
+    if (!DeviceDisplayConfig.GetMachineAddressVisibility())
+    {
+      return point.Mnemonic;
+    }
+
+    var address = ExecutionConfig.GetIsLegacyCompatibilityModeEnabled()
+      ? LegacyCompatibilityMapper.GetCompatibilityPointByRealAddress(point.ToString())
+      : point.ToString();
+    return $"{point.Mnemonic}[{address}]";
   }
 
   /// <summary>

@@ -1,7 +1,13 @@
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
+using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
+using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies;
+using Ask.Engine.ControlCommandExecutor.BaseStrategies.Data;
+using Ask.Engine.ControlCommandExecutor.Execution;
+using Moq;
 
 namespace Ask.Engine.UnitTests.ControlCommandExecutor.BaseStrategies;
 
@@ -187,6 +193,101 @@ public class PairwiseFirstPointCheckerAltTests
     Assert.Equal(150, localization.FirstAboveUpperBound);
   }
 
+  [Fact(DisplayName = "ЭТ: локализация публикует скомпенсированный результат пары как промежуточный")]
+  public async Task PublishIntermediateMeasurementAsync_PublishesPairResultAsIntermediate()
+  {
+    bool originalMachineAddressVisibility = DeviceDisplayConfig.GetMachineAddressVisibility();
+    try
+    {
+      DeviceDisplayConfig.SetMachineAddressVisibility(false);
+      var resultExecutor = new RecordingMeasurementResultMessageExecutor();
+      var messageService = new Mock<IUserInteractionService>();
+      var context = new PairwiseFirstPointAltContext
+      {
+        TypeCommand = MeasurementTypeCommand.EHT,
+        LowerLimit = 0.01,
+        HigherLimit = 40,
+        MessageService = messageService.Object,
+        ResultMessageExecutor = resultExecutor,
+      };
+
+      await EhtHighResistanceLocalizationService.PublishIntermediateMeasurementAsync(
+        context,
+        CreatePoint(71),
+        CreatePoint(72),
+        41.25);
+
+      var publishedContext = resultExecutor.PublishedContext;
+      Assert.NotNull(publishedContext);
+      Assert.True(publishedContext.IsIntermediate);
+      Assert.Equal("P71,P72", publishedContext.MeasurementTarget);
+      Assert.Equal(41.25, publishedContext.Range.TargetValue);
+      Assert.Equal(0.01, publishedContext.Range.LowerBound);
+      Assert.Equal(40, publishedContext.Range.UpperBound);
+      Assert.Equal(1, resultExecutor.CallCount);
+    }
+    finally
+    {
+      DeviceDisplayConfig.SetMachineAddressVisibility(originalMachineAddressVisibility);
+    }
+  }
+
+  [Fact(DisplayName = "ЭТ: результат локализации обозначает разрывы звёздочками")]
+  public async Task FormatLocalizedBreaksAsync_UsesStarsBetweenDisconnectedFragments()
+  {
+    bool originalMachineAddressVisibility = DeviceDisplayConfig.GetMachineAddressVisibility();
+    try
+    {
+      DeviceDisplayConfig.SetMachineAddressVisibility(false);
+      var fragments = new[]
+      {
+        new ChainModel([CreatePoint(71), CreatePoint(72)]),
+        new ChainModel([CreatePoint(73)]),
+      };
+
+      var formatted = await EhtHighResistanceLocalizationService.FormatLocalizedBreaksAsync(fragments);
+
+      Assert.Equal("*P71#P72**P73*", formatted);
+      Assert.DoesNotContain(",,", formatted);
+    }
+    finally
+    {
+      DeviceDisplayConfig.SetMachineAddressVisibility(originalMachineAddressVisibility);
+    }
+  }
+
+  [Fact(DisplayName = "ЭТ: локализация ожидает продолжения при паузе")]
+  public async Task WaitForExecutionAsync_UsesPauseGate()
+  {
+    using var cancellation = new CancellationTokenSource();
+    var interaction = new Mock<IUserInteractionService>();
+    interaction
+      .Setup(service => service.GetCancellationToken())
+      .Returns(cancellation.Token);
+    var pauseGate = interaction.As<IExecutionPauseGate>();
+    pauseGate
+      .Setup(gate => gate.WaitIfPausedAsync(cancellation.Token))
+      .Returns(Task.CompletedTask);
+
+    await EhtHighResistanceLocalizationService.WaitForExecutionAsync(interaction.Object);
+
+    pauseGate.Verify(gate => gate.WaitIfPausedAsync(cancellation.Token), Times.Once);
+  }
+
+  [Fact(DisplayName = "ЭТ: локализация прекращается по запросу остановки")]
+  public async Task WaitForExecutionAsync_CancellationRequestedThrows()
+  {
+    using var cancellation = new CancellationTokenSource();
+    cancellation.Cancel();
+    var interaction = new Mock<IUserInteractionService>();
+    interaction
+      .Setup(service => service.GetCancellationToken())
+      .Returns(cancellation.Token);
+
+    await Assert.ThrowsAsync<OperationCanceledException>(
+      () => EhtHighResistanceLocalizationService.WaitForExecutionAsync(interaction.Object));
+  }
+
   [Theory(DisplayName = "ЭТ: итоговое сопротивление компенсирует контакты и кабель в рабочем режиме")]
   [InlineData(150, 10, 20, 5, 130)]
   [InlineData(10, 20, 20, 5, 0)]
@@ -271,4 +372,17 @@ public class PairwiseFirstPointCheckerAltTests
     PointNumber = pointNumber,
     Mnemonic = $"P{pointNumber}"
   };
+
+  private sealed class RecordingMeasurementResultMessageExecutor : IMeasurementResultMessageExecutor
+  {
+    internal MeasurementResultMessageContext? PublishedContext { get; private set; }
+    internal int CallCount { get; private set; }
+
+    public Task<bool> PublishMeasurementResultAsync(MeasurementResultMessageContext context)
+    {
+      PublishedContext = context;
+      CallCount++;
+      return Task.FromResult(false);
+    }
+  }
 }

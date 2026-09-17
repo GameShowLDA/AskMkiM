@@ -121,6 +121,9 @@ internal static class ExecutionMessageBuilder
   internal static ShowMessageModel BuildShortCircuitAnalysisMessage()
     => new("Анализ на наличие короткого замыкания между точками");
 
+  internal static ShowMessageModel BuildLocalizationHeaderMessage()
+    => new("Локализация неисправной цепи") { IndentLevel = 1 };
+
   internal static ShowMessageModel BuildLocalizationStepMessage(int step)
     => new($"Выполнение шага локализации №{step}");
 

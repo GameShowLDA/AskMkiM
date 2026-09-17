@@ -667,6 +667,23 @@ public static class ExecutionMessages
       outputService, callerName, callerFile, callerLine, isBlockStart: true);
 
   /// <summary>
+  /// Выводит заголовок локализации неисправной цепи.
+  /// </summary>
+  /// <param name="outputService">Сервис вывода сообщения в экранный протокол.</param>
+  /// <param name="callerName">Имя метода, вызвавшего публикацию.</param>
+  /// <param name="callerFile">Путь к файлу, вызвавшему публикацию.</param>
+  /// <param name="callerLine">Номер строки, вызвавшей публикацию.</param>
+  /// <returns>Задача, представляющая публикацию сообщения.</returns>
+  public static Task PublishLocalizationHeaderAsync(
+    IMessageOutputService? outputService,
+    [CallerMemberName] string callerName = "",
+    [CallerFilePath] string callerFile = "",
+    [CallerLineNumber] int callerLine = 0)
+    => ExecutionMessagePublisher.PublishAsync(
+      ExecutionMessageBuilder.BuildLocalizationHeaderMessage(),
+      outputService, callerName, callerFile, callerLine, isBlockStart: true);
+
+  /// <summary>
   /// Выводит номер выполняемого шага локализации.
   /// </summary>
   /// <param name="step">Номер шага локализации.</param>
