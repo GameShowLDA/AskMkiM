@@ -6,7 +6,7 @@ namespace Ask.Engine.UnitTests.Services.Protocols;
 public class ExecutionProtocolLineFormatterTests
 {
   [Fact]
-  public void CompressedLogs_AreInterleavedOnlyForRoot()
+  public void CompressedLogs_AreShownAfterFollowingMessageOnlyForRoot()
   {
     var messages = new[] { new ShowMessageModel("Первое"), new ShowMessageModel("Второе") };
     var logs = new[]
@@ -21,12 +21,13 @@ public class ExecutionProtocolLineFormatterTests
     Assert.Equal(2, regular.Count);
     Assert.All(regular, m => Assert.True(string.IsNullOrEmpty(m.Debug)));
     Assert.True(ExecutionProtocolDiagnosticFormatter.TryRestoreMessages(stored, true, out var root));
-    Assert.Equal(5, root.Count);
-    Assert.Contains("До запуска", root[0].Debug);
-    Assert.Equal("Первое", root[1].Header);
-    Assert.Contains("SocketException\nstack trace", root[2].Debug);
-    Assert.Equal("Второе", root[3].Header);
-    Assert.Contains("Сброс завершён", root[4].Debug);
+    Assert.Equal(6, root.Count);
+    Assert.Equal("Первое", root[0].Header);
+    Assert.Contains("До запуска", root[1].Debug);
+    Assert.Equal("Второе", root[2].Header);
+    Assert.Contains("SocketException\nstack trace", root[3].Debug);
+    Assert.Equal("Логи после последней записи протокола", root[4].Debug);
+    Assert.Contains("Сброс завершён", root[5].Debug);
   }
 
   [Fact]

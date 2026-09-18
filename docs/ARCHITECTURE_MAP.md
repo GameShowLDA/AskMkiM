@@ -36,7 +36,7 @@ Size/Foreground и анимации общей кнопки; лицензия с
 | Исполнение программы контроля | `UI/Controls/Runner/RunControl.xaml.cs` | `Ask.UI/Features/ProtocolNew/Execution/ActionExecutor.cs`, `Ask.Engine/ControlCommandExecutor/Execution/CommandExecutionManager.cs` |
 | Алгоритм конкретной команды | `Ask.Engine/ControlCommandExecutor/Executors/` | `Ask.Engine/ControlCommandExecutor/BaseStrategies/`, `Ask.Engine/ControlCommandExecutor/Execution/EquipmentService.cs` |
 | Пауза, шаг, остановка, переход к команде | `Ask.UI/Features/ProtocolNew/Execution/ActionExecutor.cs` | `Ask.Core/Services/App/StepControlManager.cs`, `Ask.Engine/ControlCommandExecutor/Execution/CommandExecutionManager.cs`, `Ask.Engine/ControlCommandExecutor/Execution/BreakpointHandler.cs`, `Ask.Engine/ControlCommandExecutor/Execution/CommandJumpService.cs` |
-| Холостой режим и симуляция ошибок | `Ask.Core/Services/Config/AppSettings/ExecutionConfig.cs`, `IdleHardwareErrorSimulator.cs` | `UI/Controls/Settings/Execution/ExecutionControl.xaml`, целевой manager/adapter в `Ask.Device.*`, конкретный executor/strategy |
+| Холостой режим и симуляция ошибок | `Ask.Core/Services/Config/AppSettings/ExecutionConfig.cs`, `IdleMeasurementErrorSimulator.cs`, `IdleHardwareErrorSimulator.cs` | `UI/Controls/Settings/Execution/ExecutionControl.xaml`, целевой manager/adapter в `Ask.Device.*`, конкретный executor/strategy |
 | Ошибка оборудования и интерактивный повтор | `Ask.Core/Services/UI/UserActionHelper.cs` | `Ask.Core/Services/UI/EquipmentExecutionContext.cs`, `Ask.UI/Controls/ProtocolNew/ProtocolUI.cs`, целевой adapter/manager/transport |
 | МКР и точки | `Ask.Core/Shared/Interfaces/DeviceInterfaces/RelaySwitchModule/` | `Ask.Device.Application/FunctionAdapters/ModuleRelayControl/`, `Ask.Device.Runtime/Function/ModuleRelayControl/`, `Ask.Device.Emulator/ModuleRelayControl/` |
 | Устройство коммутации | `Ask.Core/Shared/Interfaces/DeviceInterfaces/SwitchingDevice/` | `Ask.Device.Application/FunctionAdapters/DeviceBusCommutation/`, `Ask.Device.Runtime/Function/DeviceBusCommutation/` |
@@ -534,10 +534,13 @@ equipment preparation, протокол, stop/finalize и аварийный `К
 ```text
 RunControl.Start(models)
 → ProtocolUI.StartAsync()
+  → Idle + проверка кроме `CheckType.SelfTest`: чтение флагов сбоя `ChassisManagers.GetAllAsync()`
+    → сбой любого настроенного АСКМ: штатное сообщение «Не удалось выполнить включение питания системы»;
+      кнопка запуска восстанавливается, выполнение не создаётся
   → рабочий режим + `ActionSettings.CheckPower`: проверка `SystemStateManager.IsActivePower`
     → питание отсутствует: сообщение об ошибке, кнопка запуска восстанавливается, выполнение не создаётся
     → Idle, специальный запуск с `CheckPower == false` или root-настройка
-      `ExecutionConfig.DisablePowerCheck`: проверка пропускается
+      `ExecutionConfig.DisablePowerCheck`: проверка физического питания пропускается
 → ActionExecutor.StartAsync(ActionSettings)
   → ExecutionRunGuard.TryAcquire
   → clear protocol/errors and reset StepControlManager
@@ -655,8 +658,10 @@ EquipmentUsageSession.GetUsedDevices
 → DeviceResetService.ResetDevicesAsync
 → последовательно для каждого уникального устройства
   → для `IRelaySwitchModule` сначала `PointManager.DisconnectingAllPoint`
-  → только после успешного физического отключения точек `IConnectable.ResetAsync`
-  → IConnectable.ResetAsync
+  → затем `DisconnectActiveBusesAsync`
+    → `BusManager.GetConnectedBuses`
+    → `BusManager.DisconnectBusAsync` для каждой активной шины
+  → для остальных устройств `IConnectable.ResetAsync`
   → Transport → адресный UDP/TCP/COM/USB driver
   → bool/exception проверяется отдельно для устройства
   → результат записывается в лог и протокол
@@ -751,7 +756,11 @@ executor throws
   `AlgorithmExecutionResult` в `ProtocolModelExtensions.AddResult`; расширение находится
   в `Ask.Protocol.Messages/Extensions/ProtocolModelExtensions.cs` и внутри раскладывает
   ошибки и информационные сообщения по коллекциям `ProtocolModel`;
-- `ParallelTestRunner` публикует этап общего сброса через `ExecutionMessages`, а
+- `ParallelTestRunner` публикует этап отключения точек через `ExecutionMessages`, затем для
+  каждого `IRelaySwitchModule` вызывает `PointManager.DisconnectingAllPoint`; прямой
+  `ConnectableManager.ResetAsync` для МКР здесь не используется, поэтому команда
+  `2.1.0.0.` не отправляется. Результат фактической групповой команды публикуется один раз
+  как сообщение диапазона точек, а
   `CiGroupMethodExecutor` передаёт ошибки подключения и результаты измерения в
   `ExecutionMessages`/`MeasurementMessages` и использует логический признак успеха;
 - `MeasurementMessages` формирует тексты брака узлового и группового методов через
@@ -997,9 +1006,12 @@ ExecutionProtocolDiagnosticFormatter.FormatProtocolForStorage` сохраняе�
 без `Logs` продолжают открываться. `ExceptionLogged` дополнительно сохраняет `Exception.ToString()`.
 `SavedExecutionProtocolUI(string)` восстанавливает ленту по `DebugAccessConfig.IsDebugEnabled`
 и подписывается на `SystemStateEvents.DebugRightsChanged` только пока control загружен.
-ROOT видит диагностические строки между сообщениями, остальные роли их не получают;
-смена роли перезагружает представление. `FileOpenService` и парный просмотр `FileService`
-передают исходный текст для повторного восстановления. Логи не участвуют в итоговом вердикте,
+ROOT видит диагностические строки и блоки логов, остальные роли их не получают.
+Строковый конструктор перезагружает представление при смене роли, однако текущие пути
+`FileOpenService` и парный просмотр `FileService` восстанавливают сообщения в фоне и передают
+готовую коллекцию в `SavedExecutionProtocolUI(IEnumerable<ShowMessageModel>)` без подписки
+на смену роли: для применения новых прав требуется повторное открытие файла.
+Логи не участвуют в итоговом вердикте,
 печати и ASKRESULT/ASKREPORT. Сбор находится в памяти до сохранения; это не crash-журнал на диске.
 
 #### Purpose
@@ -1059,9 +1071,24 @@ Legacy traces without V2 snapshots are converted line-by-line by
 `ExecutionProtocolDiagnosticFormatter.RestoreLegacyMessages` and rendered in the same read-only
 `ProtocolListBoxUI`; since the legacy format contains no structured status/group metadata, those
 lines are restored as `Info` while preserving their complete text and blank-line layout.
-В `SavedExecutionProtocolUI` строки `[ЛОГ ROOT]` прикрепляются к предшествующей строке
-`[ОТЛАДКА ROOT]` и по умолчанию скрыты. Root раскрывает отдельную группу логов шевроном у нужной
-диагностической строки; сами строки `[ОТЛАДКА ROOT]` остаются видимыми.
+При восстановлении V3 `ExecutionProtocolDiagnosticFormatter.TryRestoreCompressedProtocol`
+размещает сначала сообщение с индексом `i`, затем логи `BeforeMessage == i`:
+это логи, накопленные **до** этой записи в исходной хронологии. `ProtocolListBoxUI.AppendVisibleMessage`
+прикрепляет следующие за сообщением модели `[ЛОГ ROOT]` к его `ProtocolDisplayItem.ServiceLogs`.
+Таким образом, под записью ROOT показывает предшествовавшие ей логи, а не логи следующей записи.
+Порядок логов внутри блока сохраняется; сбор и формат хранения V3 не изменены.
+Логи до первой записи принадлежат первой записи, снимок окружения остаётся отдельным элементом.
+Для логов после последней записи (`BeforeMessage == Messages.Count`) восстановление создаёт
+отдельную диагностическую строку «Логи после последней записи протокола» с собственным блоком.
+Блоки по умолчанию скрыты (`AreServiceLogsExpanded == false`); Root раскрывает их шевроном
+у диагностической строки. Сворачивание команды действует дополнительно на её строки.
+Раскрытый блок отображает `Ask.UI/Components/ProtocolListBox/ProtocolServiceLogsBox.cs`
+(read-only `RichTextBox`): `ServiceLogText → LogText → CreateParagraph` окрашивает только
+метку уровня и точку перед записью, сохраняя нейтральный цвет текста и многострочные исключения.
+Палитра соответствует `ConsoleUI/ConsoleLogic/ConsoleTextManager.ParseColor`:
+Error/Exception — OrangeRed, Warning — Goldenrod, Debug — Gray, Information — LightGray.
+Документ создаётся при раскрытии блока; Ctrl+A/C обрабатывает сам редактор журнала,
+а не внешний список протокола. Формат хранения и привязка логов к записям не изменяются.
 
 New saves use `#ASKM_PROTOCOL_V3_BR#`: `ExecutionProtocolHistoryService.SaveAsync` delegates to
 `ExecutionProtocolDiagnosticFormatter.FormatProtocolForStorage`, which writes readable protocol
@@ -1279,11 +1306,12 @@ Idle-эмулятор должен возвращать подтверждени
 прежние строки `SelfTestMessages` (`Точка N`, детализацию подключения и отключения от шин),
 добавляет `ModuleRelayControlError.PointError` в итоговые ошибки и обрабатывает повреждённый
 ответ строкой `Ошибка данных!`; прежняя runtime-модель `SelfPointModel` удалена.
-Idle `ModuleRelayControlEmulatorProtocol` для команды `6.<point>` учитывает обе настройки
-симуляции: `IsErrorSimulationMode` детерминированно делает ложным один из этапов
+Idle `ModuleRelayControlEmulatorProtocol` для команды `6.<point>` учитывает настройку
+ошибки измерения: любой `ErroneousMeasurementType`, кроме `None`, детерминированно делает ложным один из этапов
 `ConnectPoint`/`DisconnectBusA`/`DisconnectBusB` (по номеру точки) и возвращает
-`SelfControl = false`; `IsHardwareErrorSimulationMode` через
-`IdleHardwareErrorSimulator` с вероятностью 50% возвращает пустой ответ до разбора команды.
+`SelfControl = false`. Персональная аппаратная симуляция устройства не подменяет
+результаты измерительных команд `6` и `10`, но всегда возвращает пустой ответ для
+неизмерительных команд выбранного МКР.
 `ExternalBusSelfTestChecker` обрабатывает ответ команды `AUTOTEST_EXTERNAL_BUS`
 (`10.<bus>`): проверяет идентификатор МКР, ожидаемый `NumberBus`, соответствие четырёх номеров
 реле таблице прошивки, `ConnectProtect`, `ConnectMain` и `Error == 0`. Runtime
@@ -1294,7 +1322,7 @@ Idle `ModuleRelayControlEmulatorProtocol` для команды `6.<point>` уч
 как `Ошибка данных!`. Прежняя runtime-модель `SelfBusModel` удалена. В Idle команда `10.<bus>`
 при симуляции ошибки измерения случайно выбирает один из трёх равновероятных исходов: оба этапа
 исправны, отказ защитных реле или отказ основных реле. При отказе возвращается ненулевой `Error`;
-при симуляции ошибки оборудования общий emulator path возвращает пустой ответ.
+аппаратная симуляция выбранного МКР не перехватывает эту измерительную команду.
 После проверки processor напрямую вызывает
 `EquipmentMessages.PublishPointOperationResultAsync`. `EquipmentMessageBuilder` формирует
 device-строку вида `Модуль МКР-350(1.6) - Подключение точки 1 к шине [A] : [НОРМА]`;
@@ -1334,7 +1362,9 @@ executor/metrology
 → SetModeBase / RangeBase → DeviceProtocolEmulator.QueryMultimeterAsync
 → AdapterMeasurementExecutor
 → MeasurementBase.MeasureCoreAsync
-→ Simulated.GetSimulatedValue builds idleResponse
+→ Simulated.GetSimulatedValue
+  → IdleMeasurementErrorSimulator applies None/Rnd/Low/High
+  → builds idleResponse
 → DeviceProtocolEmulator.QueryMultimeterAsync(profile.Measure, idleResponse)
   → Real: TcpProtocol/UsbProtocol.QueryAsync → transport
   → Idle: SCPI-compatible scientific-notation response from MeasurementRange
@@ -1519,7 +1549,9 @@ SettingsExecutionDto.IdleModeExecution (SQLite)
 
 Selection is distributed, not DI-based:
 
-- `ActionExecutor.StartAsync` skips power validation and system reset in idle;
+- `ProtocolUI.StartAsync` skips physical power validation in Idle, but blocks non-self-test
+  launches when a configured АСКМ has hardware failure simulation enabled;
+  `ActionExecutor.StartAsync` skips system reset in Idle;
 - chassis and МКР initialization/reset and runtime commands use
   `DeviceProtocolEmulator`, which selects the real UDP protocol or the matching
   stateful emulator;
@@ -1548,27 +1580,68 @@ Selection is distributed, not DI-based:
 Idle error simulation has two independent persisted settings:
 
 ```text
-ExecutionControl
-→ SettingsExecutionDto.IsErrorSimulationMode
-→ existing measurement simulation algorithms
+ExecutionControl enum selector
+→ SettingsExecutionDto.ErroneousMeasurementType (None/Rnd/Low/High)
+→ ExecutionConfig
+→ IdleMeasurementErrorSimulator
+→ Simulated / MeasurementResultEvaluator / measurement-specific Idle branches
+→ None: normal Idle value
+→ Rnd: value below or above the allowed range, side selected randomly
+→ Low: value strictly below the lower bound
+→ High: value strictly above the effective upper bound
 
 ExecutionControl
-→ SettingsExecutionDto.IsHardwareErrorSimulationMode
-→ ExecutionConfig
-→ IdleHardwareErrorSimulator.ShouldSimulateHardwareError
-→ Random.Shared.Next(2) == 0
+→ Border "Симуляция ошибок оборудования"
+→ одна SettingsCard для каждой строки оборудования
+→ DeviceDto.IsHardwareFailureSimulationEnabled
+→ отдельная колонка строки устройства в SQLite
+→ DeviceBuilder / ReflectionMapper
+→ IDevice.IsHardwareFailureSimulationEnabled
+→ IdleHardwareErrorSimulator.ShouldSimulateHardwareError(IDevice)
+→ requires Idle + the passed device flag
+→ deterministic failure (100%)
 → non-measurement Idle manager/transport contract
 → existing adapter/UserActionHelper equipment-error flow
 ```
 
+Симуляция сбоя `ManagerChassis` («Тестер АСКМ») блокирует запуск проверок в
+`ProtocolUI.StartAsync` до создания сеанса и обращения к оборудованию. В Idle для любого
+типа проверки, кроме `CheckType.SelfTest`, загружаются настроенные тестеры через
+`ChassisManagers.GetAllAsync`; включённый флаг хотя бы одного тестера даёт штатное
+сообщение «Не удалось выполнить включение питания системы» и возвращает кнопку запуска.
+Флаги перечитываются при каждом запуске, поэтому отключение симуляции позволяет повторить
+запуск. Настройки обхода проверки физического питания не отменяют явно выбранную симуляцию.
+В Real и самоконтроле эта ветка не загружает тестеры и не влияет на выполнение.
+МКР больше не наследуют сбой тестера: `ModuleRelayControlQueryExecutor` всегда передаёт
+команды своему Real/Idle-протоколу; собственные флаги ошибок МКР продолжают действовать.
+Исключение для самоконтроля определяется типом проверки только при запуске. Кнопка подключения системы
+сохраняет прежнее поведение.
+
 The nested `Выполнение с ошибками` settings group is visible only while Idle is
-enabled. Measurement simulation retains its existing generators, probabilities
-and tolerance semantics. Hardware simulation is disabled by default and affects
-only Idle initialization/reset, connection, mode/configuration, range,
-switching, source and power operations. Every equipment call, including a
-`Retry`, makes a new independent `1/2` decision. The simulated failure preserves
-the corresponding real contract: `false`, a failed tuple/status, or the
-operation-specific exception path. Real execution never enters this mechanism.
+enabled. The measurement selector defaults to `None`; persisted legacy boolean
+values remain compatible because `false/0 → None` and `true/1 → Rnd`.
+Hardware simulation is disabled for every device by default. `ExecutionControl`
+loads all eight device tables and renders one nested `SettingsCard` per concrete
+equipment row; save updates only `IsHardwareFailureSimulationEnabled` in SQLite
+and synchronizes the same flag on the current cached runtime `IDevice` instance,
+so subsequent commands observe the change without restarting the application;
+the full runtime device cache is not cleared. Successful device Create/Update/Delete operations in
+`DeviceEngine` and a committed bulk import publish
+`SystemStateEvents.DeviceConfigurationChanged`; the loaded `ExecutionControl`
+coalesces these notifications and rereads all device tables. Added devices therefore
+appear, edited titles/descriptions change, and deleted devices disappear without
+reopening settings. Current unsaved switches of rows whose identity and number did
+not change are preserved during the refresh. `DeviceEngine.UpdateInternalAsync`
+compares the stored and incoming
+`DeviceDto.Number`; changing the device number resets
+`IsHardwareFailureSimulationEnabled` to `false`, while other edits preserve it.
+For an enabled device every non-measurement Idle command,
+including a `Retry`, fails deterministically. Measurement commands keep their
+measurement-error flow and are not replaced by the hardware-error provider. The
+simulated failure preserves the corresponding real contract: `false`, a failed
+tuple/status, or the operation-specific exception path. Real execution never
+enters this mechanism. The legacy `Execution.IsHardwareErrorSimulationMode`
+column remains readable for schema compatibility but no longer gates the simulator.
 
 Chassis, МКР and УКШ Idle flows preserve their device command contracts through
 the same response processors used for real devices:
@@ -1583,8 +1656,11 @@ Transport / target runtime manager
 → existing runtime response models and validation
 ```
 
-The emulator handles initialization (`1.0.0.0`), reset (`2.1.0.0`), power on/off
-and power-state query. Reset clears its in-memory power state. Hardware-error
+The emulator handles initialization (`1.0.0.0`), legacy device reset (`2.1.0.0`),
+point group operations (`11.*`) and power-state queries. For МКР point cleanup,
+runtime flows use `PointManager.DisconnectingAllPoint`, which sends the group
+disconnect command and publishes «Отключение всех точек»; direct
+`ConnectableManager.ResetAsync` is not used by those flows. Hardware-error
 simulation returns an empty response and enters the existing retry/error contract.
 The МКР emulator returns firmware-compatible JSON envelopes for bus, point,
 verified point, group, meter and self-check commands. Runtime connection stores
@@ -1872,6 +1948,8 @@ COM-секция делегирует создание настроек в
     `IPointManager`, `IBusManager` и `IMeterManager`, а текущие подключения
     читает через `GetConnectedPoints()` и `GetConnectedBuses()`; в Idle те же
     операции проходят через `ModuleRelayControlEmulatorProtocol`;
+    `BusManager.ConnectBusAsync` пропускает повторную команду и сообщение, если
+    `BusConnectionStateStore` уже пометил шину подключённой.
   - `Ask.UI.Features.ServiceTools.Multimeter.MultimeterControl` — сервисное
     управление мультиметрами первого шасси через общий `IMultimeter`: выбор
     Keysight/В7-78/3, подключение, инициализация, сброс, установка режима и
@@ -2123,6 +2201,9 @@ Architecturally significant flows:
 
 - `SystemStateEventAdapter.PowerChanged/LockedChanged/ControlProgramActiveChanged`
   → `SystemStateManager` and `StateEventsBinder` → buttons, menu and shell lock;
+- `DeviceEngine` CRUD / committed configuration import
+  → `SystemStateEventAdapter.RaiseDeviceConfigurationChanged`
+  → `ExecutionControl` dynamically rebuilds hardware-error simulation cards;
 - `ExecutionEventAdapter.StepByStepModeChanged`
   → `ActionExecutor.StepMode`;
 - breakpoint adapters → `RunControl` model/editor synchronization;
@@ -2202,7 +2283,12 @@ UI/Engine
 Migrations live in `Ask.DataBase.Provider/Migrations/`.
 `DatabaseInitializationService` also contains explicit compatibility DDL for old
 schemas; a migration change must account for both normal migration and supported
-legacy adoption behavior.
+legacy adoption behavior. `SettingsExecutionDto.ErroneousMeasurementType` remains
+mapped to the existing `Execution.IsErrorSimulationMode` INTEGER column; persisted
+values `0/1` retain `None/Rnd` compatibility without a schema migration.
+`AddPerDeviceHardwareFailureSimulation` adds
+`IsHardwareFailureSimulationEnabled` to every device table; the matching
+compatibility step adds any missing columns before device rows are loaded.
 
 Runtime device cache uses `(requested interface, Id)` and query caches for
 GetAll/chassis lists. Create/update/delete invalidate relevant caches; startup
@@ -2215,7 +2301,7 @@ provider error and cancellation; a later query builds a fresh runtime instance f
 
 | Runtime config | Persisted DTO/table | Load/save bridge | Major consumers |
 | --- | --- | --- | --- |
-| `ExecutionConfig` | `SettingsExecutionDto` / `Execution` | `ExecutionSettings`, `MainWindow.Init.DatabaseInitializer` | ActionExecutor, Engine, all device idle gates; independent measurement/hardware Idle error settings; `RepeatMeasurement` enables retry of explicitly marked equipment measurements |
+| `ExecutionConfig` | `SettingsExecutionDto` / `Execution` | `ExecutionSettings`, `MainWindow.Init.DatabaseInitializer` | ActionExecutor, Engine and Idle mode; measurement-error mode; `RepeatMeasurement` enables retry of explicitly marked equipment measurements. Hardware-error selection is persisted per device row by `ExecutionControl` |
 | `ProtocolConfig` | `SettingsProtocolDto` / `SettingsProtocol` | `ProtocolSettings` | protocol templates, output visibility, print |
 | `UserInterfaceConfig` | `UserInterfaceDto` / `UserInterface` | `UserInterfaceSettings` | MainWindow, theme/menu UI |
 | `DeviceDisplayConfig` | `DeviceDisplaySettingsDto` | `DeviceDisplaySettings` | adapters and device messages |
@@ -2325,10 +2411,12 @@ ErrorItem → translator/runner ErrorList
 | `InitialDeviceSoundConfigurator` | internal lifecycle helper | Ask.Device.Runtime | однократно отключает звуковую сигнализацию GPT/мультиметра после первой успешной инициализации и сохраняет Real/Idle-маршрутизацию | [Equipment](#equipment-architecture) |
 | `EquipmentExecutionContext` | async context | Ask.Core | suppresses interactive retry during mandatory finalization | [Error Handling](#equipment-error-flow) |
 | `ExecutionConfig` | static config | Ask.Core | execution/idle state | [Configuration](#configuration) |
+| `TypeErroneousMeasurement` | enum | Ask.Core | persisted None/Rnd/Low/High mode for Idle measurement errors | [Real / Idle](#real--idle) |
+| `IdleMeasurementErrorSimulator` | static value service | Ask.Core | generates values strictly below/above the configured measurement range according to `TypeErroneousMeasurement` | [Real / Idle](#real--idle) |
 | `MeasurementTestData` | static snapshot store | Ask.Core | атомарно хранит последние проверенные значения метрологических и модульных полей ввода; обновляется валидаторами и читается `InputField` | [Error Handling](#input-field-validation) |
 | `RoleAuthorizationConfig` | static session state | Ask.Core | current successfully authenticated role | [Authentication/Debug](#authentication-and-debug-access-flow) |
 | `DebugAccessConfig` | derived access state | Ask.Core | central root-only Debug availability and change notification | [Authentication/Debug](#authentication-and-debug-access-flow) |
-| `IdleHardwareErrorSimulator` | static decision service | Ask.Core | independent `1/2` hardware failure decision for non-measurement Idle calls | [Real / Idle](#real--idle) |
+| `IdleHardwareErrorSimulator` | static decision service | Ask.Core | deterministic hardware failure for non-measurement Idle calls, gated by the passed `IDevice` flag | [Real / Idle](#real--idle) |
 | `EventAggregator` | event bus | Ask.Core | in-process publish/subscribe | [Events](#events-and-callbacks) |
 | `ApplicationBuildInfo` | runtime build descriptor | Ask.Core | читает встроенную версию/revision и идентифицирует запущенный EXE | [Support](#support-and-diagnostics) |
 | `DeviceApplicationComposer` | composer | Ask.Device.Application | replaces raw managers with adapters | [Equipment](#adapters-and-error-boundary) |

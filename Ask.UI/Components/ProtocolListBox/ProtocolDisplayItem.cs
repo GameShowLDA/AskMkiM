@@ -41,7 +41,7 @@ namespace Ask.UI.Components.ProtocolListBox
     public string DisplayDebug => Message.Debug?.TrimStart('\r', '\n') ?? string.Empty;
 
     /// <summary>
-    /// Служебные логи, записанные после сообщения.
+    /// Служебные логи, отображаемые под сообщением.
     /// </summary>
     public List<string> ServiceLogs { get; } = new();
 

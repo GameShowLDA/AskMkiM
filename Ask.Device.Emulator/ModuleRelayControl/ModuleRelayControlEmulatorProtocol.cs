@@ -17,17 +17,6 @@ namespace Ask.Device.Emulator.ModuleRelayControl
     private bool _notDefaultState;
     private bool _meterEnabled;
 
-    public ModuleRelayControlEmulatorProtocol(
-      Func<int> moduleNumberProvider,
-      Func<int> chassisNumberProvider)
-      : this(
-        moduleNumberProvider,
-        chassisNumberProvider,
-        IdleHardwareErrorSimulator.ShouldSimulateHardwareError,
-        ExecutionConfig.GetIsErrorSimulationEnabled)
-    {
-    }
-
     internal ModuleRelayControlEmulatorProtocol(
       Func<int> moduleNumberProvider,
       Func<int> chassisNumberProvider,
@@ -86,7 +75,12 @@ namespace Ask.Device.Emulator.ModuleRelayControl
         await Task.Delay(TimeSpan.FromMilliseconds(delayBeforeCall), cancellationToken);
       }
 
-      if (_hardwareErrorProvider() || !TryParse(command, out int[] parts))
+      if (!TryParse(command, out int[] parts))
+      {
+        return string.Empty;
+      }
+
+      if (_hardwareErrorProvider() && parts[0] is not (6 or 10))
       {
         return string.Empty;
       }

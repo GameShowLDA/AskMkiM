@@ -57,7 +57,7 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
           await CheckBusesConnection(cancellationToken, _moduleRelay, device, settings, userMessageService, 2.ToString());
           break;
       }
-      await _moduleRelay.ConnectableManager.ResetAsync(userMessageService);
+      await _moduleRelay.PointManager.DisconnectingAllPoint(userMessageService);
     }
 
     /// <summary>
@@ -74,7 +74,7 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
         return;
       }
 
-      await _moduleRelay.ConnectableManager.ResetAsync(userMessageService);
+      await _moduleRelay.PointManager.DisconnectingAllPoint(userMessageService);
       await _moduleRelay.MeterManager.ConnectMeterAsync(
         ExecutionConfig.GetIsIdleModeEnabled() ? userMessageService : null);
       var testName = "Тест подключения точек";
@@ -114,7 +114,7 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
         return;
       }
 
-      await _moduleRelay.ConnectableManager.ResetAsync(userMessageService);
+      await _moduleRelay.PointManager.DisconnectingAllPoint(userMessageService);
 
       await switchingDevice.ConnectableManager.ResetAsync(userMessageService);
       if (!await switchingDevice.ConnectorManager.ConnectAllBuses(userMessageService))

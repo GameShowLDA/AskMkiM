@@ -240,6 +240,18 @@ public static class ExecutionProtocolDiagnosticFormatter
         var combined = new List<ShowMessageModel>();
         for (int i = 0; i <= restored.Count; i++)
         {
+          // BeforeMessage обозначает следующую запись в исходной хронологии.
+          // В представлении ROOT её логи размещаются после неё для сворачивания в UI.
+          if (i < restored.Count)
+            combined.Add(restored[i]);
+          else if (grouped.Contains(i))
+            combined.Add(new ShowMessageModel
+            {
+              Debug = "Логи после последней записи протокола",
+              HeaderColor = System.Windows.Media.Colors.Transparent,
+              MessageColor = System.Windows.Media.Colors.Transparent
+            });
+
           foreach (var entry in grouped[i])
             combined.Add(new ShowMessageModel
             {
@@ -247,7 +259,6 @@ public static class ExecutionProtocolDiagnosticFormatter
               HeaderColor = System.Windows.Media.Colors.Transparent,
               MessageColor = System.Windows.Media.Colors.Transparent
             });
-          if (i < restored.Count) combined.Add(restored[i]);
         }
         restored = combined;
       }

@@ -70,6 +70,7 @@ public static class DatabaseInitializationService
     await ApplySchemaAsync(databasePath, report, progress, cancellationToken);
     await EnsureLegacyCompatibilityModeColumnAsync(databasePath, report, progress, cancellationToken);
     await EnsureHardwareErrorSimulationModeColumnAsync(databasePath, report, progress, cancellationToken);
+    await EnsureDeviceHardwareFailureSimulationColumnsAsync(databasePath, report, progress, cancellationToken);
     await EnsureDisablePowerCheckColumnAsync(databasePath, report, progress, cancellationToken);
     await EnsureRepeatMeasurementColumnAsync(databasePath, report, progress, cancellationToken);
     await EnsureSettingsProtocolPrintColumnsAsync(databasePath, report, progress, cancellationToken);
@@ -454,6 +455,48 @@ public static class DatabaseInitializationService
       report,
       progress,
       cancellationToken);
+  }
+
+  /// <summary>
+  /// Добавляет признак симуляции аппаратных сбоев в таблицы устройств старой схемы.
+  /// </summary>
+  private static async Task EnsureDeviceHardwareFailureSimulationColumnsAsync(
+    string databasePath,
+    DatabaseInitializationReport report,
+    Action<string>? progress,
+    CancellationToken cancellationToken)
+  {
+    string[] deviceTables =
+    [
+      "BreakdownTesters",
+      "ChassisManagers",
+      "FastMeters",
+      "PowerSourceModules",
+      "Rack",
+      "RelaySwitchModules",
+      "SwitchingDevices",
+      "UninterruptiblePowerSupplies",
+    ];
+
+    await using var connection = new SqliteConnection($"Data Source={databasePath}");
+    await connection.OpenAsync(cancellationToken);
+
+    foreach (string tableName in deviceTables)
+    {
+      if (!await TableExistsAsync(connection, tableName, cancellationToken))
+      {
+        continue;
+      }
+
+      await EnsureColumnAsync(
+        connection,
+        tableName,
+        "IsHardwareFailureSimulationEnabled",
+        "INTEGER NOT NULL DEFAULT 0",
+        report,
+        progress,
+        cancellationToken);
+    }
   }
 
   private static async Task EnsureFastMeterPpuDividerCoefficientColumnAsync(

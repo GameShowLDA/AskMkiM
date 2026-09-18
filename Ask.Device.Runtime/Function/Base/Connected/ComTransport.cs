@@ -56,7 +56,7 @@ namespace Ask.Device.Runtime.Function.Connected
           return await InitializeCoreAsync();
         }
 
-        return IdleHardwareErrorSimulator.ShouldSimulateHardwareError()
+        return IdleHardwareErrorSimulator.ShouldSimulateHardwareError(_device)
           ? (false, IdleHardwareErrorSimulator.ErrorMessage)
           : (true, string.Empty);
       }
@@ -102,7 +102,7 @@ namespace Ask.Device.Runtime.Function.Connected
           return await SendResetCommandsAsync("отключении устройства");
         }
 
-        return !IdleHardwareErrorSimulator.ShouldSimulateHardwareError();
+        return !IdleHardwareErrorSimulator.ShouldSimulateHardwareError(_device);
       }
 
       using (await OperationLock.LockAsync())
@@ -144,7 +144,7 @@ namespace Ask.Device.Runtime.Function.Connected
           return isReset;
         }
 
-        return !IdleHardwareErrorSimulator.ShouldSimulateHardwareError();
+        return !IdleHardwareErrorSimulator.ShouldSimulateHardwareError(_device);
       }
 
       using (await OperationLock.LockAsync())

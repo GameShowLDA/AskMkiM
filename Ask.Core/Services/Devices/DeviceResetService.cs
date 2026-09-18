@@ -140,7 +140,17 @@ public static class DeviceResetService
   {
     if (device is IRelaySwitchModule relayModule)
     {
-      bool disconnected = await relayModule.PointManager.DisconnectingAllPoint(messageService);
+      bool disconnected = false;
+      bool busesDisconnected = false;
+      try
+      {
+        disconnected = await relayModule.PointManager.DisconnectingAllPoint(messageService);
+      }
+      finally
+      {
+        busesDisconnected = await DisconnectActiveBusesAsync(relayModule, messageService);
+      }
+
       if (!disconnected)
       {
         LogError(
@@ -148,10 +158,48 @@ public static class DeviceResetService
           isDeviceLog: true);
       }
 
-      return disconnected;
+      return disconnected && busesDisconnected;
     }
 
     return await device.ConnectableManager.ResetAsync();
+  }
+
+  /// <summary>
+  /// Отключает шины МКР, которые отмечены подключёнными в текущем состоянии устройства.
+  /// </summary>
+  /// <param name="relayModule">Модуль МКР.</param>
+  /// <param name="messageService">Сервис вывода сообщений и выбора действия при ошибке.</param>
+  /// <returns>
+  /// <see langword="true"/>, если все активные шины отключены или активных шин нет;
+  /// иначе <see langword="false"/>.
+  /// </returns>
+  private static async Task<bool> DisconnectActiveBusesAsync(
+    IRelaySwitchModule relayModule,
+    IUserInteractionService? messageService)
+  {
+    bool success = true;
+    var activeBuses = relayModule.BusManager
+      .GetConnectedBuses()
+      .Select(static connection => connection.Bus)
+      .ToArray();
+
+    foreach (var bus in activeBuses)
+    {
+      try
+      {
+        if (!await relayModule.BusManager.DisconnectBusAsync(bus, messageService))
+        {
+          success = false;
+        }
+      }
+      catch (Exception ex)
+      {
+        success = false;
+        LogException($"Ошибка отключения активной шины {bus} у {GetDeviceLabel(relayModule)}.", ex, isDeviceLog: true);
+      }
+    }
+
+    return success;
   }
 
   private static async Task ShowResultAsync(

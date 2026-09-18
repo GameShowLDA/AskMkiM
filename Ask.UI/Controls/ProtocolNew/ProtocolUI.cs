@@ -8,6 +8,7 @@ using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
+using Ask.DataBase.Engine.Static.Devices;
 using Ask.UI.Features.ProtocolNew.Controls;
 using Ask.UI.Features.ProtocolNew.Execution;
 using Ask.UI.Features.ProtocolNew.Protocol;
@@ -149,7 +150,11 @@ namespace Ask.UI.Controls.ProtocolNew
     public async Task StartAsync()
     {
       var actionSettings = _modeSettings.Current;
-      if (ShouldBlockStartForMissingPower(
+      bool simulatedPowerFailure = ExecutionConfig.GetIsIdleModeEnabled()
+        && actionSettings.CheckType != CheckType.SelfTest
+        && (await ChassisManagers.GetAllAsync()).Any(IdleHardwareErrorSimulator.ShouldSimulateHardwareError);
+
+      if (simulatedPowerFailure || ShouldBlockStartForMissingPower(
         ExecutionConfig.GetIsIdleModeEnabled(),
         SystemStateManager.GetIsActivePower(),
         actionSettings.CheckPower,
@@ -157,7 +162,9 @@ namespace Ask.UI.Controls.ProtocolNew
       {
         await ShowMessageAsync(
           new ShowMessageModel(
-            "Нет связи с системой. Пожалуйста, подключитесь к системе и повторите попытку.",
+            simulatedPowerFailure
+              ? "Не удалось выполнить включение питания системы. Проверьте подключение системы к компьютеру и повторите попытку."
+              : "Нет связи с системой. Пожалуйста, подключитесь к системе и повторите попытку.",
             type: ShowMessageModel.MessageType.Error),
           skipPause: true);
         ShowOnlyStartButton();
