@@ -32,6 +32,12 @@ public class UserInterfaceDto
   /// </summary>
   public bool UseSyntaxHighlighting { get; set; }
 
+  /// <summary>Показывает красные подчёркивания ошибок трансляции.</summary>
+  public bool UseSyntaxErrorUnderlining { get; set; } = true;
+
+  /// <summary>Показывает жёлтые подчёркивания предупреждений.</summary>
+  public bool UseStyleErrorUnderlining { get; set; } = true;
+
   /// <summary>
   /// Включает фоновую подсветку тела команды в протоколе выполнения.
   /// </summary>
