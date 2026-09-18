@@ -265,15 +265,14 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
                 await MeasurementMessages.PublishStartAsync(CheckType.ControlProgram,
                   MeasurementTypeCommand.KC,
                   context.MessageService);
-                await GetResultMessageExecutor(context).PublishMeasurementResultAsync(
-                  new MeasurementResultMessageContext(
-                    context.TypeCommand,
-                    new MeasurementRange(Rt, context.LowerLimit, context.HigherLimit),
-                    context.MessageService,
-                    $"{_basePoint.Mnemonic}{machineAdressFirst}, {point.Mnemonic}{machineAdressSecond}")
-                  {
-                    SuccessOverride = false,
-                  });
+
+                await MeasurementMessages.PublishIntermediateResultAsync(CheckType.ControlProgram,
+                  context.TypeCommand,
+                  new MeasurementRange(Rt, context.LowerLimit, context.HigherLimit),
+                  false,
+                  $"{_basePoint.Mnemonic}{machineAdressFirst}, {point.Mnemonic}{machineAdressSecond}",
+                  outputService: context.MessageService);
+
                 context.CommandManager.AddErrorMethod(
                   EhtErrors.CircuitOverload($"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}",
                   $"{_basePoint.Mnemonic}{machineAdressFirst}",
@@ -325,15 +324,16 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
                   UpperBound,
                   context.CabelResistance);
                 var range = new MeasurementRange(result, LowerBound, UpperBound);
-                var resultExecutor = context.ResultMessageExecutor
-                  ?? throw new InvalidOperationException(
-                    "Не задан исполнитель сообщений результатов измерения.");
-                bool success = await resultExecutor.PublishMeasurementResultAsync(
+
+                bool success = await GetResultMessageExecutor(context).PublishMeasurementResultAsync(
                   new MeasurementResultMessageContext(
                     context.TypeCommand,
                     range,
                     context.MessageService,
-                    measurementTarget));
+                    measurementTarget)
+                  {
+                    IsIntermediate = true,
+                  });
 
                 return (success, result);
               }, context.MessageService, measurementTask: true);
