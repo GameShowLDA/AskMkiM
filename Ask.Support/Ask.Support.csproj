@@ -1752,6 +1752,63 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabFilePart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabTrialsPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabTrialsChapter\TabMetrologyPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabTrialsChapter\TabSelfControlPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabTrialsChapter\TabTestsPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabTrialsChapter\TabTestsChapter\TabTestSIPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabTrialsChapter\TabTestsChapter\TabTestPIPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabExecutionPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabSettingsPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\Content\TranslatorChapter\ErrorListPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\Content\TranslatorChapter\ErrorListChapter\GeneralErrorsPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\Content\TranslatorChapter\ErrorListChapter\ErrorsUPPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\Content\TranslatorChapter\ErrorListChapter\ErrorsOKPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\Content\TranslatorChapter\ErrorListChapter\ErrorsRMPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\Content\TranslatorChapter\ErrorListChapter\ErrorsSIPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\Content\TranslatorChapter\ErrorListChapter\ErrorsPIPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\Content\TranslatorChapter\ErrorListChapter\KeyErrorsPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\Content\TranslatorChapter\ErrorListChapter\ErrorsKSPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	</ItemGroup>
+
+	<ItemGroup>
 	  <PackageReference Include="Microsoft.AspNetCore.Server.Kestrel" Version="2.3.9" />
 	  <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.3.9" />
 	  <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.8" />
