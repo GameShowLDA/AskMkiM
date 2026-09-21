@@ -185,13 +185,12 @@ namespace Ask.UI.Controls.ProtocolNew
 
         ErrorListBoxVertical.ItemDoubleClicked -= ErrorListBoxVertical_ErrorItemDoubleClicked;
         ErrorListBoxVertical.ItemDoubleClicked += ErrorListBoxVertical_ErrorItemDoubleClicked;
-        _attachedWindow = Application.Current?.MainWindow;
+        _attachedWindow = Window.GetWindow(this);
         if (_attachedWindow != null)
         {
-          Keyboard.AddKeyDownHandler(_attachedWindow, OnGlobalKeyDown);
+          _attachedWindow.AddHandler(Keyboard.PreviewKeyDownEvent, new KeyEventHandler(OnGlobalKeyDown), true);
         }
 
-        KeyboardManager.RegisterGlobalStepHooks();
         RegisterHotkeys();
       };
 
@@ -199,10 +198,9 @@ namespace Ask.UI.Controls.ProtocolNew
       {
         if (_attachedWindow != null)
         {
-          Keyboard.RemoveKeyDownHandler(_attachedWindow, OnGlobalKeyDown);
+          _attachedWindow.RemoveHandler(Keyboard.PreviewKeyDownEvent, new KeyEventHandler(OnGlobalKeyDown));
         }
 
-        KeyboardManager.UnregisterGlobalStepHooks();
       };
 
       ButtonService = this;
@@ -277,6 +275,9 @@ namespace Ask.UI.Controls.ProtocolNew
 
     private void OnGlobalKeyDown(object sender, KeyEventArgs e)
     {
+      if (e.Handled || !IsVisible || !IsEnabled || ActionExecutor.IsStopping
+        || !Ask.UI.Features.ProtocolNew.Execution.ExecutionRunGuard.CanHandleInput(ActionExecutor)) return;
+      RegisterHotkeys();
       _hotkeyController.HandleKeyDown(sender, e);
     }
 
@@ -291,8 +292,7 @@ namespace Ask.UI.Controls.ProtocolNew
 
     /// <inheritdoc />
     bool IProtocolHotkeyContext.CanExit =>
-      !_isRetryOrContinueInteraction
-      && (StopButtonElement.Visibility == Visibility.Visible
+      (StopButtonElement.Visibility == Visibility.Visible
           || ContinueButtonElement.Visibility == Visibility.Visible
           || PauseButtonElement.Visibility == Visibility.Visible);
 
@@ -326,7 +326,10 @@ namespace Ask.UI.Controls.ProtocolNew
     void IProtocolHotkeyContext.Repeat() => RepeatFromHotkey();
 
     /// <inheritdoc />
-    void IProtocolHotkeyContext.JumpToCommand() => RequestCommandJump();
+    void IProtocolHotkeyContext.JumpToCommand()
+    {
+      if (!KeyboardManager.TryHandleBreakpointF4()) RequestCommandJump();
+    }
 
     /// <inheritdoc />
     bool IExecutionCommandJumpGate.IsExecutionPaused => ActionExecutor.IsPaused;
@@ -338,18 +341,6 @@ namespace Ask.UI.Controls.ProtocolNew
     /// <inheritdoc />
     void IProtocolHotkeyContext.NotifyOtherKey(object sender, KeyEventArgs e) =>
       AnotherKeyPressed?.Invoke(sender, e);
-
-    private void stepOverButton_PreviewMouseDown(object sender, MouseButtonEventArgs e)
-    {
-      StepControlManager.RequestStepOverUntilNextControlCommand();
-      KeyboardManager.TriggerStep();
-    }
-
-    private void stepIntoButton_PreviewMouseDown(object sender, MouseButtonEventArgs e)
-    {
-      StepControlManager.SetStepIntoMode();
-      KeyboardManager.TriggerStep();
-    }
 
     public string GetText()
     {

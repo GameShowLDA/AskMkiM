@@ -32,7 +32,13 @@ namespace Ask.UI.Features.ProtocolNew.Hotkeys
     /// <param name="e">Аргументы события клавиатуры.</param>
     public void HandleKeyDown(object sender, KeyEventArgs e)
     {
+      if (e.Handled) return;
       var key = e.Key == Key.System ? e.SystemKey : e.Key;
+      if (e.IsRepeat && key is Key.F5 or Key.F10 or Key.F11 or Key.P or Key.Escape or Key.R)
+      {
+        e.Handled = true;
+        return;
+      }
       var modifiers = Keyboard.Modifiers;
       var drawerBlocksInput = DrawerHostService.Instance.ShouldBlockGlobalInput;
       var textInputFocused = IsTextInputFocused();
@@ -117,7 +123,7 @@ namespace Ask.UI.Features.ProtocolNew.Hotkeys
     /// <see langword="true"/>, если клавиша соответствует доступной команде выполнения.
     /// В противном случае — <see langword="false"/>.
     /// </returns>
-    private bool CanHandleWhileTextInputFocused(Key key, ModifierKeys modifiers)
+    internal bool CanHandleWhileTextInputFocused(Key key, ModifierKeys modifiers)
     {
       if (modifiers != ModifierKeys.None)
       {
@@ -126,6 +132,7 @@ namespace Ask.UI.Features.ProtocolNew.Hotkeys
 
       return key switch
       {
+        Key.F5 or Key.F10 or Key.F11 => true,
         Key.P => _context.CanContinue || _context.CanPause,
         Key.Escape => _context.CanExit,
         Key.R => _context.CanRepeat,

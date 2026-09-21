@@ -78,6 +78,10 @@ public static class DeviceResetService
             error = $"Сброс не завершён для {GetDeviceLabel(device)}.";
           }
         }
+        catch (OperationCanceledException) when (!mandatoryFinalization)
+        {
+          throw;
+        }
         catch (Exception ex)
         {
           reset = false;
@@ -115,6 +119,8 @@ public static class DeviceResetService
         }
 
         var action = await messageService.WaitRetryOrContinueAsync();
+        if (action == UserAction.Abort)
+          throw new OperationCanceledException(messageService.GetCancellationToken());
         retry = action == UserAction.Retry;
         messageService.ButtonService?.ShowOnlyStopAndFinishButtons();
       }

@@ -39,6 +39,7 @@ namespace Ask.UI.Features.ProtocolNew.Protocol
       bool skipStepModeCheck,
       bool skipPause)
     {
+      if (EquipmentExecutionContext.IsMandatoryFinalization) return;
       if (_context.IsPaused && !skipPause)
       {
         await _context.WaitWhilePausedAsync(_context.GetCancellationToken());
@@ -51,8 +52,11 @@ namespace Ask.UI.Features.ProtocolNew.Protocol
 
       if (StepControlManager.StepMode && !skipStepModeCheck && ShouldWaitForStep(message, isBlockStart))
       {
+        var token = _context.GetCancellationToken();
+        var stepWait = KeyboardManager.WaitForNextStepKeyAsync(token);
         _context.ShowPauseButtons();
-        await KeyboardManager.WaitForNextStepKeyAsync(_context.GetCancellationToken());
+        await stepWait;
+        token.ThrowIfCancellationRequested();
 
         var showStepButtons = StepControlManager.IsStepInto
           && !StepControlManager.StepOverUntilNextControlCommand;

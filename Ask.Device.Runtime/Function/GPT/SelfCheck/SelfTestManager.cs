@@ -70,13 +70,13 @@ namespace Ask.Device.Runtime.Function.GPT.SelfCheck
 
         case TypeConnector.FullCheck:
           await PerformIrCheckAsync(cancellationToken, breakdownTester, device, meter, settings, userMessageService, 1.ToString());
-          await Task.Delay(500);
+          await Task.Delay(500, cancellationToken);
 
           await PerformDcwCheckAsync(cancellationToken, breakdownTester, device, meter, settings, userMessageService, 2.ToString());
-          await Task.Delay(500);
+          await Task.Delay(500, cancellationToken);
 
           await PerformAcwCheckAsync(cancellationToken, breakdownTester, device, meter, settings, userMessageService, 3.ToString());
-          await Task.Delay(500);
+          await Task.Delay(500, cancellationToken);
           break;
       }
 
@@ -170,6 +170,10 @@ namespace Ask.Device.Runtime.Function.GPT.SelfCheck
 
         }
       }
+      catch (OperationCanceledException)
+      {
+        throw;
+      }
       catch (Exception)
       {
       }
@@ -227,7 +231,7 @@ namespace Ask.Device.Runtime.Function.GPT.SelfCheck
 
           await breakdownTester.AcwManger.Measure.ApplyVoltageAsync();
 
-          await Task.Delay(1000);
+          await Task.Delay(1000, cancellationToken);
 
           MeasurementRange measurementRangeAc = new MeasurementRange(item, lowerBound, upperBound);
           var result = await meter.AcVoltageManager.MeasureACVoltageAsync(measurementRangeAc);
@@ -271,6 +275,10 @@ namespace Ask.Device.Runtime.Function.GPT.SelfCheck
             executionErrorMessage: string.Empty);
 
         }
+      }
+      catch (OperationCanceledException)
+      {
+        throw;
       }
       catch (Exception)
       {
@@ -329,7 +337,7 @@ namespace Ask.Device.Runtime.Function.GPT.SelfCheck
 
           await breakdownTester.DcwManger.Measure.ApplyVoltageAsync();
 
-          await Task.Delay(1000);
+          await Task.Delay(1000, cancellationToken);
 
           MeasurementRange measurementRange = new MeasurementRange(item, lowerBound, upperBound);
           var result = await meter.DcVoltageManager.MeasureDCVoltageAsync(measurementRange);
@@ -372,6 +380,10 @@ namespace Ask.Device.Runtime.Function.GPT.SelfCheck
             executionErrorMessage: string.Empty);
 
         }
+      }
+      catch (OperationCanceledException)
+      {
+        throw;
       }
       catch (Exception)
       {

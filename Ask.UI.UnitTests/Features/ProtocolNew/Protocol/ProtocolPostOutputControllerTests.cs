@@ -6,6 +6,14 @@ namespace Ask.UI.UnitTests.Features.ProtocolNew.Protocol;
 
 public sealed class ProtocolPostOutputControllerTests
 {
+  [Fact]
+  public async Task MandatoryFinalizationNeverWaitsForPause()
+  {
+    var context = new RecordingPostOutputContext { IsPaused = true };
+    using var scope = Ask.Core.Services.UI.EquipmentExecutionContext.EnterMandatoryFinalization();
+    await new ProtocolPostOutputController(context).ProcessAsync(new ShowMessageModel(), false, false, false);
+    Assert.Equal(0, context.PauseWaitCount);
+  }
   [Fact(DisplayName = "Служебное сообщение не ожидает снятия паузы")]
   public async Task ProcessAsync_WhenPauseIsSkipped_DoesNotWaitForResume()
   {

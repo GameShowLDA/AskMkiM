@@ -8,6 +8,26 @@ namespace Ask.Core.Services.UI;
 public static class EquipmentExecutionContext
 {
   private static readonly AsyncLocal<int> MandatoryFinalizationDepth = new();
+  private static readonly AsyncLocal<CancellationToken> ExecutionToken = new();
+
+  /// <summary>Токен запуска; обязательный сброс не отменяется вместе с измерением.</summary>
+  public static CancellationToken CancellationToken => IsMandatoryFinalization
+    ? CancellationToken.None : ExecutionToken.Value;
+
+  /// <summary>Передаёт отмену запуска вложенным аппаратным операциям.</summary>
+  /// <param name="cancellationToken">Токен отмены запуска.</param>
+  /// <returns>Область, восстанавливающая предыдущий контекст.</returns>
+  public static IDisposable EnterExecution(CancellationToken cancellationToken)
+  {
+    var previous = ExecutionToken.Value;
+    ExecutionToken.Value = cancellationToken;
+    return new ExecutionScope(previous);
+  }
+
+  private sealed class ExecutionScope(CancellationToken previous) : IDisposable
+  {
+    public void Dispose() => ExecutionToken.Value = previous;
+  }
 
   /// <summary>
   /// Признак выполнения обязательной завершающей операции.
