@@ -139,6 +139,10 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
           LogInformation($"[{deviceLabel}] {operationName}: попытка {attempt}/{maxAttempts} завершилась успешно.", isDeviceLog: true);
           return AdapterMeasurementResult<T>.FromSuccess(value, attempt);
         }
+        catch (OperationCanceledException)
+        {
+          throw;
+        }
         catch (Exception ex)
         {
           lastErrorMessage = ex.Message;

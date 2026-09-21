@@ -276,7 +276,7 @@ namespace Ask.UI.Controls.ProtocolNew
       LogInformation($"Сработан обработчик события для кнопки \"Завершить\"");
       // TODO: добавить событие на отслеживание прерывания команды
       ExecutionEventAdapter.RaiseExecutionInterrupted();
-      ShowOnlyStartButton();
+      SetNonVisibleAllButton();
       ExitButtonPreviewMouseDown?.Invoke(this, e);
     }
     private void RegisterHotkeys()
@@ -548,6 +548,7 @@ namespace Ask.UI.Controls.ProtocolNew
 
       ExecutionConfig.SetStepByStepMode(true);
       StepControlManager.EnableStepMode(isStepInto);
+      if (!isStepInto) StepControlManager.RequestStepOverUntilNextControlCommand();
       NextButtonPreviewMouseDown?.Invoke(this, e);
       KeyboardManager.TriggerStep();
       ShowOnlyStopAndFinishButtons(isStepInto);

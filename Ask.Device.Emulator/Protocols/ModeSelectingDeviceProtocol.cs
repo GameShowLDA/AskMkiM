@@ -1,5 +1,6 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
+using Ask.Core.Services.UI;
 
 namespace Ask.Device.Emulator.Protocols
 {
@@ -50,6 +51,10 @@ namespace Ask.Device.Emulator.Protocols
       int delayBeforeCall = 0,
       CancellationToken cancellationToken = default)
     {
+      using var executionCancellation = CancellationTokenSource.CreateLinkedTokenSource(
+        cancellationToken, EquipmentExecutionContext.CancellationToken);
+      cancellationToken = executionCancellation.Token;
+      cancellationToken.ThrowIfCancellationRequested();
       bool isIdleMode = ExecutionConfig.GetIsIdleModeEnabled();
       IDeviceProtocol protocol = isIdleMode
         ? _emulatorProtocol
@@ -103,6 +108,14 @@ namespace Ask.Device.Emulator.Protocols
         throw new TimeoutException(
           $"Оборудование не завершило команду \"{command}\" за {_hardwareOperationTimeout.TotalSeconds:0.###} с.",
           ex);
+      }
+      catch (OperationCanceledException)
+      {
+        await operationCancellation.CancelAsync().ConfigureAwait(false);
+        // Не отдаём прибор сбросу, пока транспорт ещё выполняет старую команду.
+        try { await queryTask.ConfigureAwait(false); }
+        catch (Exception) when (cancellationToken.IsCancellationRequested) { }
+        throw;
       }
     }
   }

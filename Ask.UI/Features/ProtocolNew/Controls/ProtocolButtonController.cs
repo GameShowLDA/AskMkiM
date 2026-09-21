@@ -70,6 +70,7 @@ internal sealed class ProtocolButtonController
         case ProtocolButtonState.RetryOrContinue:
           _view.RepeatVisibility = Visibility.Visible;
           _view.ContinueVisibility = Visibility.Visible;
+          _view.ExitVisibility = Visibility.Visible;
           break;
 
         case ProtocolButtonState.ExitOnly:
