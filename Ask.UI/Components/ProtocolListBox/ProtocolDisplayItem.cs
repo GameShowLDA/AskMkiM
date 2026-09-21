@@ -28,7 +28,7 @@ namespace Ask.UI.Components.ProtocolListBox
     {
       Message = message;
       IsCommandHeader = isCommandHeader;
-      IsInsideCommandGroup = isInsideCommandGroup;
+      //IsInsideCommandGroup = isInsideCommandGroup;
       _outerMargin = outerMargin;
       Group = group;
     }
@@ -101,7 +101,8 @@ namespace Ask.UI.Components.ProtocolListBox
       ? FontWeights.Bold
       : FontWeights.Normal;
 
-    public GridLength GutterWidth => HasChildItems || IsInsideCommandGroup
+    public GridLength GutterWidth => HasChildItems 
+      //|| IsInsideCommandGroup
       ? new GridLength(24)
       : new GridLength(0);
 

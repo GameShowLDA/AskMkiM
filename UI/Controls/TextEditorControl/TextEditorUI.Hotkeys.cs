@@ -772,7 +772,7 @@ namespace UI.Controls.TextEditorControl
 
     /// <summary>
     /// Автоотступ при переносе строки:
-    /// копирует текущий отступ и добавляет Tab после заголовка команды.
+    /// убирает отступ, созданный автоматически при переносе строк.
     /// </summary>
     private bool HandleAutoIndentOnEnter(KeyEventArgs e)
     {
@@ -784,27 +784,17 @@ namespace UI.Controls.TextEditorControl
 
       var document = textEditor.Document;
       var caret = textEditor.TextArea.Caret;
-      int lineNumber = caret.Line;
-      if (lineNumber <= 0 || lineNumber > document.LineCount)
-        return false;
 
-      var line = document.GetLineByNumber(lineNumber);
-      string lineText = document.GetText(line.Offset, line.Length);
-      string indent = string.IsNullOrWhiteSpace(lineText)
-        ? string.Empty
-        : GetLeadingWhitespace(lineText);
+      string newLine = document.GetLineByNumber(1).DelimiterLength > 0
+          ? "\r\n"
+          : Environment.NewLine;
 
-      if (indent.Length == 0 && CommandHeaderRegex.IsMatch(lineText))
-      {
-        indent = "\t";
-      }
-
-      string newLine = document.GetLineByNumber(1).DelimiterLength > 0 ? "\r\n" : Environment.NewLine;
-      string insertedText = $"{newLine}{indent}";
       int insertionOffset = caret.Offset;
 
-      document.Insert(insertionOffset, insertedText);
-      caret.Offset = insertionOffset + insertedText.Length;
+      document.Insert(insertionOffset, newLine);
+
+      caret.Offset = insertionOffset + newLine.Length;
+
       e.Handled = true;
       return true;
     }
