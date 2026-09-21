@@ -588,13 +588,13 @@
 	  <Content Include="AppHelp\Conservation\ImplementationMonitoringProgramsChapter\PreparationForImplementationControlProgramsChapter\OptionsForExecutingMonitoringProgramsPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\LanguageControlProgramsChapter\AbbreviatedRecordSequenceIdentifiersChapter\AbbreviatedRecordEnumerationIdentifierPart.html">
+	  <Content Include="AppHelp\Conservation\LanguageControlProgramsChapter\AbbreviatedRecordSequenceIdentifiersChapter\AbbreviatedRecordEnumerationIdentifierPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\LanguageControlProgramsChapter\AbbreviatedRecordSequenceIdentifiersChapter\RangeRecordingSequenceIdentifiersPart.html">
+	  <Content Include="AppHelp\Conservation\LanguageControlProgramsChapter\AbbreviatedRecordSequenceIdentifiersChapter\RangeRecordingSequenceIdentifiersPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\LanguageControlProgramsChapter\AbbreviatedRecordSequenceIdentifiersPart.html">
+	  <Content Include="AppHelp\Conservation\LanguageControlProgramsChapter\AbbreviatedRecordSequenceIdentifiersPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\ASCDeviceManagementCommandsChapter\CommandGI_Part.html">
