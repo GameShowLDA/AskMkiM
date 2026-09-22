@@ -7,34 +7,6 @@
     xmlns:docking="clr-namespace:UI.Windows.WpfDocking.Windows.Docking"
     xmlns:primitives="clr-namespace:UI.Windows.WpfDocking.Windows.Docking.Primitives">
 
-    <Style x:Key="FloatingWindowButtonStyle" TargetType="Button">
-        <Setter Property="Background" Value="Transparent"/>
-        <Setter Property="Foreground" Value="White"/>
-        <Setter Property="BorderBrush" Value="Transparent"/>
-        <Setter Property="BorderThickness" Value="0"/>
-        <Setter Property="Padding" Value="0"/>
-        <Setter Property="Focusable" Value="False"/>
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="Button">
-                    <Border Background="{TemplateBinding Background}"
-                            BorderBrush="{TemplateBinding BorderBrush}"
-                            BorderThickness="{TemplateBinding BorderThickness}"
-                            CornerRadius="4">
-                        <ContentPresenter HorizontalAlignment="Center"
-                                          VerticalAlignment="Center"/>
-                    </Border>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-        <Style.Triggers>
-            <Trigger Property="IsMouseOver" Value="True">
-                <Setter Property="Background" Value="#33FFFFFF"/>
-                <Setter Property="Foreground" Value="{StaticResource ActiveForegroundSolidColorBrush}"/>
-            </Trigger>
-        </Style.Triggers>
-    </Style>
-
     <Style TargetType="{x:Type primitives:NativeFloatingWindow}">
         <Setter Property="Left" Value="{Binding Path=Left, Mode=TwoWay}" />
         <Setter Property="Top" Value="{Binding Path=Top, Mode=TwoWay}" />
@@ -67,8 +39,8 @@
                                         Grid.Column="1"
                                         Width="40"
                                         Height="40"
-                                        Style="{StaticResource FloatingWindowButtonStyle}"
-                                        Command="{x:Static SystemCommands.MinimizeWindowCommand}">
+                                        Style="{DynamicResource StyleWindowsButtons}"
+                                        Command="{x:Static docking:DockCommands.MinimizeWindow}">
                                     <askUiIcons:WindowMinimizeIcon Size="14"
                                                                    IsHovering="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=IsMouseOver}"
                                                                    Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" />
@@ -78,8 +50,8 @@
                                         Grid.Column="2"
                                         Width="40"
                                         Height="40"
-                                        Style="{StaticResource FloatingWindowButtonStyle}"
-                                        Command="{x:Static SystemCommands.MaximizeWindowCommand}">
+                                        Style="{DynamicResource StyleWindowsButtons}"
+                                        Command="{x:Static docking:DockCommands.ToggleWindowState}">
                                     <Grid Width="18" Height="18">
                                         <askUiIcons:WindowMaximizeIcon Size="14"
                                                                        IsHovering="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=IsMouseOver}"
@@ -116,8 +88,8 @@
                                         Grid.Column="3"
                                         Width="40"
                                         Height="40"
-                                        Style="{StaticResource FloatingWindowButtonStyle}"
-                                        Command="{x:Static SystemCommands.CloseWindowCommand}">
+                                        Style="{DynamicResource StyleWindowsButtons}"
+                                        Command="{x:Static docking:DockCommands.PerformClose}">
                                     <askUiIcons:WindowCloseIcon Size="14"
                                                                 IsHovering="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=IsMouseOver}"
                                                                 Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" />
