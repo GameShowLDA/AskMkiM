@@ -178,7 +178,7 @@ internal static class EquipmentMessageBuilder
   }
 
   /// <summary>
-  /// Формирует сообщение о результате операции с устройством.
+  /// Формирует сообщение о результате операции с устройством. 
   /// </summary>
   /// <param name="device">Устройство, над которым выполнена операция.</param>
   /// <param name="operation">Название выполненной операции.</param>

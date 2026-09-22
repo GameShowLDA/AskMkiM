@@ -93,6 +93,8 @@ public static class MeasurementMessages
   {
     ArgumentNullException.ThrowIfNull(message);
     ArgumentNullException.ThrowIfNull(outputService);
+
+    message.IsMeasurement = true;
     return MeasurementMessagePublisher.PublishAsync(
       message, checkType, outputService, callerName, callerFile, callerLine);
   }
@@ -107,6 +109,7 @@ public static class MeasurementMessages
   public static AlgorithmExecutionResult BuildFaultChainResult(MeasurementTypeCommand measurementTypeCommand, MeasurementRange measurementRange, string chainDisplay)
   {
     var message = BuildMeasurementResultMessage(measurementTypeCommand, measurementRange, chainDisplay);
+    message.IsMeasurement = true;
     message.Status = ShowMessageModel.MessageType.Error;
     message.IndentLevel = 3;
     return AlgorithmExecutionResult.FromErrors(new List<ShowMessageModel> { message });
@@ -220,6 +223,7 @@ public static class MeasurementMessages
       : ShowMessageModel.MessageType.Error;
     message.IndentLevel = 2;
     message.ExecutionErrorMessage = executionErrorMessage;
+    message.IsMeasurement = true;
 
     return MeasurementMessagePublisher.PublishAsync(
       message,
@@ -317,7 +321,8 @@ public static class MeasurementMessages
       measurementTypeCommand,
       measurementRange,
       dischargeNumber,
-      dischargeView);
+      dischargeView,
+      false);
   }
 
   /// <summary>
@@ -456,6 +461,7 @@ public static class MeasurementMessages
       ? ShowMessageModel.MessageType.Success
       : ShowMessageModel.MessageType.Error;
     message.IndentLevel = indentLevel;
+    message.IsMeasurement = true;
     return message;
   }
 
@@ -483,6 +489,7 @@ public static class MeasurementMessages
       ? ShowMessageModel.MessageType.Success
       : ShowMessageModel.MessageType.Error;
     message.IndentLevel = indentLevel;
+    message.IsMeasurement = true;
     return message;
   }
 
@@ -580,6 +587,7 @@ public static class MeasurementMessages
     message.ExecutionErrorMessage = executionErrorMessage;
     message.ExecutionError = executionError;
     message.CanBeDeleted = canBeDeleted;
+    message.IsMeasurement = true;
 
     return MeasurementMessagePublisher.PublishAsync(
       message,
@@ -637,6 +645,7 @@ public static class MeasurementMessages
       : ShowMessageModel.MessageType.Error;
     message.IndentLevel = indentLevel;
     message.ExecutionErrorMessage = executionErrorMessage;
+    message.IsMeasurement = true;
 
     return MeasurementMessagePublisher.PublishAsync(
       message,
@@ -738,6 +747,7 @@ public static class MeasurementMessages
       ? ShowMessageModel.MessageType.Success
       : ShowMessageModel.MessageType.Error;
     message.IndentLevel = 2;
+    message.IsMeasurement = true;
 
     return MeasurementMessagePublisher.PublishAsync(
       message,

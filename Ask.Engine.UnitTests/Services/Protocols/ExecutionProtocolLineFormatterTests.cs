@@ -36,7 +36,7 @@ public class ExecutionProtocolLineFormatterTests
     var message = new ShowMessageModel
     {
       Header = "Проверка подключения",
-      Message = "Соединение установлено [НОРМА]",
+      Message = "Соединение установлено [ОК]",
       Time = "00:00.125",
       Debug = "DeviceService.cs → Connect (строка 42)",
       IndentLevel = 1
@@ -45,7 +45,7 @@ public class ExecutionProtocolLineFormatterTests
     string result = ExecutionProtocolLineFormatter.Format(message);
 
     Assert.Equal(
-      "  Проверка подключения: Соединение установлено [НОРМА] | 00:00.125",
+      "  Проверка подключения: Соединение установлено [ОК] | 00:00.125",
       result);
   }
 
@@ -163,7 +163,7 @@ public class ExecutionProtocolLineFormatterTests
       .Select(index => new ShowMessageModel
       {
         Header = "Модуль МКР-350(1.6)",
-        Message = $"Подключение точки {index % 96 + 1} к шине [A]: [НОРМА]",
+        Message = $"Подключение точки {index % 96 + 1} к шине [A]: [ОК]",
         Time = $"00:00.{index:000}",
         DiagnosticSource = "EquipmentMessagePublisher.cs → PublishAsync (строка 36)",
         IsDeviceMessage = true,
