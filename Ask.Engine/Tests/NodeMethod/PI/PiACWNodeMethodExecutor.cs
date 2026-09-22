@@ -114,7 +114,7 @@ namespace Ask.Engine.Tests.NodeMethod.PI
                 : null;
               await MeasurementMessages.PublishInsulationStrengthResultAsync(
                 CheckType.Test,
-                $"{connectResult.PointModel}, {dataModel.FirstPoint}–{dataModel.SecondPoint}",
+                $"{connectResult.PointModel}[{AssignedBus}], {dataModel.FirstPoint}–{dataModel.SecondPoint}[{OppositeBus}]",
                 new MeasurementRange(answer.Value, 0, dataModel.Param),
                 CurrentUnit.MilliAmpere,
                 isSuccessful,
