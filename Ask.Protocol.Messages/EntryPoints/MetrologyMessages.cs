@@ -12,6 +12,30 @@ namespace Ask.Protocol.Messages.EntryPoints;
 public static class MetrologyMessages
 {
   /// <summary>
+  /// Публикует ошибку расчёта допустимого диапазона метрологического измерения.
+  /// </summary>
+  /// <param name="details">Описание ошибки расчёта.</param>
+  /// <param name="outputService">Сервис вывода сообщений в экранный протокол.</param>
+  /// <param name="callerName">Имя метода, вызвавшего публикацию.</param>
+  /// <param name="callerFile">Путь к файлу, вызвавшему публикацию.</param>
+  /// <param name="callerLine">Номер строки, вызвавшей публикацию.</param>
+  /// <returns>Задача, представляющая публикацию ошибки.</returns>
+  public static Task PublishToleranceCalculationErrorAsync(
+    string details,
+    IMessageOutputService outputService,
+    [CallerMemberName] string callerName = "",
+    [CallerFilePath] string callerFile = "",
+    [CallerLineNumber] int callerLine = 0)
+  {
+    return MetrologyMessagePublisher.PublishAsync(
+      MetrologyMessageBuilder.BuildToleranceCalculationError(details),
+      outputService,
+      callerName,
+      callerFile,
+      callerLine);
+  }
+
+  /// <summary>
   /// Публикует сводку предельных погрешностей метрологического режима.
   /// </summary>
   /// <param name="command">Метрологический режим.</param>

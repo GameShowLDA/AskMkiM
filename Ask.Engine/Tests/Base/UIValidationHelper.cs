@@ -77,7 +77,7 @@ namespace Ask.Engine.Tests.Base
 
       try
       {
-        var result = UIValidationHelper.TryValidateAndParseInputWithEquipment(
+        var result = TryValidateAndParseInputWithEquipment(
             protocolUI,
             timeCheck: timeCheck,
             voltageCheck: voltageCheck,

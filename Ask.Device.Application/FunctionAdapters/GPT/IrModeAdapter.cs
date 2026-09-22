@@ -725,6 +725,7 @@ namespace Ask.Device.Application.FunctionAdapters.GPT
 
         var unitEnum = ResistanceConverter.ParseUnit(answer.Unit, "мом");
         answer.Value = ResistanceConverter.ToMegaOhms(answer.Value, unitEnum);
+        answer.Value = Math.Round(answer.Value, 3);
 
         await DeviceMessages.PublishOperationResultAsync(
           _device,
@@ -733,6 +734,7 @@ namespace Ask.Device.Application.FunctionAdapters.GPT
           answer.Value >= measurementRange.LowerBound && answer.Value <= measurementRange.UpperBound,
           2,
           userMessageService);
+
 
         if (answer.Value > _device.IrMaxResistanceMOhm)
           answer.Value = _device.IrMaxResistanceMOhm;

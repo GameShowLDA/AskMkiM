@@ -1,4 +1,5 @@
 ﻿using Ask.Core.Shared.DTO.Executor.MeasurementError;
+using Ask.Core.Services.Errors.Metrology;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 
 namespace Ask.Core.Shared.Metadata.Static
@@ -130,7 +131,7 @@ namespace Ask.Core.Shared.Metadata.Static
     {
       var config = GetDefaultsFor(type);
       if (config == null)
-        throw new InvalidOperationException($"❌ Не найдены эталонные погрешности для команды: {type}");
+        throw MeasurementErrorCalculationErrors.DefaultsNotFound(type);
 
       var range = config.Ranges.FirstOrDefault(r =>
           measuredValue >= r.MinValue &&
@@ -140,14 +141,14 @@ namespace Ask.Core.Shared.Metadata.Static
       {
         var minConfiguredValue = config.Ranges.Min(r => r.MinValue);
         if (measuredValue < minConfiguredValue)
-          throw new InvalidOperationException($"❌ Не удалось определить диапазон погрешности для команды {type}");
+          throw MeasurementErrorCalculationErrors.ToleranceRangeNotFound(type);
 
         range = config.Ranges
             .OrderByDescending(r => r.MaxValue ?? double.MaxValue)
             .FirstOrDefault();
 
         if (range == null)
-          throw new InvalidOperationException($"❌ Не удалось определить диапазон погрешности для команды {type}");
+          throw MeasurementErrorCalculationErrors.ToleranceRangeNotFound(type);
       }
 
       double numericError = range.NumericError;
