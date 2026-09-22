@@ -16,7 +16,7 @@ internal sealed class InspectionProtocolBuilder : IInspectionProtocolBuilder
     ArgumentNullException.ThrowIfNull(settings);
 
     var message = new StringBuilder();
-    message.AppendLine($"Проверка \"{settings.Name}\" ({settings.Mode}).");
+    message.AppendLine($"Протокол \"{settings.Name}\" ({settings.Mode}).");
     message.AppendLine($"\tНачало проверки: {DateTime.Now:dd.MM.yyyy} {settings.StartTime:HH:mm:ss}");
     message.AppendLine($"\tВремя выполнения: {settings.ExecutionDuration:hh\\:mm\\:ss\\:fff}");
     message.AppendLine();
@@ -48,7 +48,7 @@ internal sealed class InspectionProtocolBuilder : IInspectionProtocolBuilder
       }
 
     }
-    else if(settings.DeviceResults.Count == 1)
+    else if (settings.DeviceResults.Count == 1)
     {
       foreach (var deviceResult in settings.DeviceResults)
       {
@@ -78,7 +78,7 @@ internal sealed class InspectionProtocolBuilder : IInspectionProtocolBuilder
       message.AppendLine("\nЗаключение: ошибок не обнаружено");
       return message.ToString();
     }
-    else if(settings.ExecutionErrors.Count == 1)
+    else if (settings.ExecutionErrors.Count == 1)
     {
       message.AppendLine($"\nЗаключение: обнаружена {settings.ExecutionErrors.Count} ошибка");
     }
