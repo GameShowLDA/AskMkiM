@@ -140,14 +140,14 @@ namespace Ask.Core.Shared.Metadata.Static
       {
         var minConfiguredValue = config.Ranges.Min(r => r.MinValue);
         if (measuredValue < minConfiguredValue)
-          throw new InvalidOperationException($"❌ Не удалось определить диапазон погрешности для команды {type}");
+          throw new InvalidOperationException($"Не удалось определить диапазон погрешности для команды {type}");
 
         range = config.Ranges
             .OrderByDescending(r => r.MaxValue ?? double.MaxValue)
             .FirstOrDefault();
 
         if (range == null)
-          throw new InvalidOperationException($"❌ Не удалось определить диапазон погрешности для команды {type}");
+          throw new InvalidOperationException($"Не удалось определить диапазон погрешности для команды {type}");
       }
 
       double numericError = range.NumericError;
