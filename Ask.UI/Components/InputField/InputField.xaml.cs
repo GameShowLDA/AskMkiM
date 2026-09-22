@@ -191,8 +191,7 @@ namespace Ask.UI.Components.InputField
     {
       InitializeComponent();
 
-      SubscribeToValidationEvents();
-      PreviewKeyDown += HotkeyChecked;
+      Loaded += (sender, args) => SubscribeToValidationEvents();
       Unloaded += InputField_Unloaded;
 
       SetBaseData();
@@ -277,8 +276,6 @@ namespace Ask.UI.Components.InputField
       InputValidationEvents.OnInvalidElectricalParameter -= HighlightElectricalTextBox;
       InputValidationEvents.OnDuplicatePoints -= HighlightBothPoints;
       ActionExecutor.StartProcessing -= ActionExecutor_StartProcessing;
-      PreviewKeyDown -= HotkeyChecked;
-      Unloaded -= InputField_Unloaded;
     }
 
     /// <summary>
@@ -499,25 +496,5 @@ namespace Ask.UI.Components.InputField
       return Dispatcher.Invoke(func);
     }
 
-    private void HotkeyChecked(object sender, KeyEventArgs e)
-    {
-      switch (e.Key)
-      {
-        case Key.F5:
-          KeyboardManager.OnRunOrPausePressed?.Invoke();
-          e.Handled = true;
-          break;
-
-        case Key.F10:
-          ExecutionControlEventAdapter.Raise(ExecutionControlButton.StepOver);
-          e.Handled = true;
-          break;
-
-        case Key.F11:
-          ExecutionControlEventAdapter.Raise(ExecutionControlButton.StepInto);
-          e.Handled = true;
-          break;
-      }
-    }
   }
 }

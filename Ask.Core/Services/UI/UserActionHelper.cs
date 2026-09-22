@@ -2,6 +2,7 @@ using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Errors.Device.ModuleRelayControl;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using System.Runtime.ExceptionServices;
 using static Ask.LogLib.LoggerUtility;
@@ -164,6 +165,14 @@ namespace Ask.Core.Services.UI
 
       while (true)
       {
+        if (!EquipmentExecutionContext.IsMandatoryFinalization)
+        {
+          EquipmentExecutionContext.CancellationToken.ThrowIfCancellationRequested();
+          var token = messageService?.GetCancellationToken() ?? EquipmentExecutionContext.CancellationToken;
+          token.ThrowIfCancellationRequested();
+          if (messageService is IExecutionPauseGate pauseGate)
+            await pauseGate.WaitIfPausedAsync(token);
+        }
         attempt++;
         int outputLineBeforeAttempt = messageService?.GetLastLineNumber() ?? -1;
         T result = default!;
@@ -173,6 +182,11 @@ namespace Ask.Core.Services.UI
         try
         {
           result = await operation();
+          if (!EquipmentExecutionContext.IsMandatoryFinalization)
+          {
+            EquipmentExecutionContext.CancellationToken.ThrowIfCancellationRequested();
+            messageService?.GetCancellationToken().ThrowIfCancellationRequested();
+          }
           operationSucceeded = isSuccessful(result);
         }
         catch (OperationCanceledException)

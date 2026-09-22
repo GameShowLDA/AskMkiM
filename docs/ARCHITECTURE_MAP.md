@@ -940,6 +940,11 @@ menu command
   → SetupCommutation
   → ConfigureMeter
   → PerformMeasurement override
+    → MeasurementToleranceCalculator.TryCalculateAsync
+      → MeasurementErrorDefaults.CalculateToleranceRange
+      → при SystemExceptionBase: MetrologyMessages.PublishToleranceCalculationErrorAsync
+        → MetrologyMessageBuilder → MetrologyMessagePublisher → IMessageOutputService
+      → вызывающий режим прекращает текущий запуск при отсутствии диапазона
   → FinalizeMeasurement/result protocol
 ```
 
@@ -2375,8 +2380,9 @@ ErrorItem → translator/runner ErrorList
 | `MeasurementFailureMessageBuilder` | internal static builder | Ask.Protocol.Messages | формирует описания брака для точек и разрядов узлового и группового методов | [Protocols](#protocols-and-file-formats) |
 | `MeasurementLimitKind` | enum | Ask.Protocol.Messages | контракт из `Ask.Protocol.Messages/Models/`, задающий минимальный или максимальный предел при формировании описания брака | [Protocols](#protocols-and-file-formats) |
 | `MeasurementMessagePublisher` | internal static publisher | Ask.Protocol.Messages | централизованно применяет видимость успешных результатов: `Metrology` выводится всегда, остальные типы учитывают `DeviceDisplayConfig`; опубликованные измерения записывает в device log и передаёт `IMessageOutputService` | [Protocols](#protocols-and-file-formats) |
-| `MetrologyMessages` | static facade | Ask.Protocol.Messages | публикует сводку максимальной отрицательной и положительной погрешности метрологического режима | [Protocols](#protocols-and-file-formats) |
-| `MetrologyMessageBuilder` | internal static builder | Ask.Protocol.Messages | формирует заголовок сводки режима и сообщения о предельных погрешностях | [Protocols](#protocols-and-file-formats) |
+| `MeasurementToleranceCalculator` | internal static helper | Ask.Engine | безопасно вызывает `MeasurementErrorDefaults.CalculateToleranceRange`, перехватывает структурированные метрологические ошибки и публикует их через `MetrologyMessages`; все production-вызовы расчёта допуска проходят через helper | [Metrology](#metrology-flow) |
+| `MetrologyMessages` | static facade | Ask.Protocol.Messages | публикует сводку максимальной отрицательной и положительной погрешности режима и ошибки расчёта допустимого диапазона | [Protocols](#protocols-and-file-formats) |
+| `MetrologyMessageBuilder` | internal static builder | Ask.Protocol.Messages | формирует заголовок сводки режима, сообщения о предельных погрешностях и сообщение об ошибке расчёта допуска | [Protocols](#protocols-and-file-formats) |
 | `MetrologyMessagePublisher` | internal static publisher | Ask.Protocol.Messages | передаёт метрологические сводки в `IMessageOutputService` с метаданными исходного вызова | [Protocols](#protocols-and-file-formats) |
 | `MeasurementResultEvaluator` | internal static evaluator | Ask.Engine | применяет Idle-симуляцию и проверяет измеренное значение по границам либо ожидаемой перегрузке до передачи результата в `MeasurementMessages` | [Execution Engine](#execution-engine) |
 | `IMeasurementResultMessageExecutor` | internal interface | Ask.Engine | обязательный для измерительных command executor контракт проверки и публикации результата с возвратом логического вердикта алгоритму | [Execution Engine](#execution-engine) |

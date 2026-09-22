@@ -17,6 +17,7 @@ namespace Ask.UI.Features.ProtocolNew.Hotkeys
     /// Объект для управления задачей ожидания пользовательского действия.
     /// </summary>
     private static TaskCompletionSource<bool>? _tcs;
+    private static int _hookUsers;
 
     /// <summary>
     /// Делегат, вызываемый при нажатии клавиши Enter (запуск).
@@ -59,7 +60,7 @@ namespace Ask.UI.Features.ProtocolNew.Hotkeys
     /// </summary>
     public static void RegisterGlobalStepHooks()
     {
-      InputManager.Current.PreProcessInput += OnGlobalKeyPressed;
+      if (_hookUsers++ == 0) InputManager.Current.PreProcessInput += OnGlobalKeyPressed;
     }
 
     /// <summary>
@@ -67,7 +68,7 @@ namespace Ask.UI.Features.ProtocolNew.Hotkeys
     /// </summary>
     public static void UnregisterGlobalStepHooks()
     {
-      InputManager.Current.PreProcessInput -= OnGlobalKeyPressed;
+      if (_hookUsers > 0 && --_hookUsers == 0) InputManager.Current.PreProcessInput -= OnGlobalKeyPressed;
     }
 
     /// <summary>
@@ -80,7 +81,8 @@ namespace Ask.UI.Features.ProtocolNew.Hotkeys
     private static void OnGlobalKeyPressed(object sender, PreProcessInputEventArgs e)
     {
       var args = e.StagingItem.Input as KeyEventArgs;
-      if (args == null || args.RoutedEvent != Keyboard.KeyDownEvent) return;
+      if (args == null || args.RoutedEvent != Keyboard.PreviewKeyDownEvent || args.Handled
+        || args.IsRepeat || Keyboard.Modifiers != ModifierKeys.None) return;
 
       var key = args.Key == Key.System ? args.SystemKey : args.Key;
       if (DrawerHostService.Instance.ShouldBlockGlobalInput)
@@ -134,6 +136,7 @@ namespace Ask.UI.Features.ProtocolNew.Hotkeys
         case Key.F11:
           StepControlManager.SetStepIntoMode();
           _tcs.TrySetResult(true);
+          args.Handled = true;
           MessageEventAdapter.RaiseInfoMessage("Нажата клавиша: F11", true);
           break;
 
@@ -145,10 +148,6 @@ namespace Ask.UI.Features.ProtocolNew.Hotkeys
           }
           // Синхронизируем UI с действием "Продолжить":
           // убираем шаговые кнопки и возвращаем "Пауза / Завершить".
-          if (OnContinuePressed != null)
-          {
-            Application.Current.Dispatcher.Invoke(() => OnContinuePressed?.Invoke());
-          }
           args.Handled = true;
           MessageEventAdapter.RaiseInfoMessage("Нажата клавиша: F5", true);
           break;
@@ -162,7 +161,7 @@ namespace Ask.UI.Features.ProtocolNew.Hotkeys
     /// Обрабатывает F4 только для пошагового режима, включенного из BreakpointHandler.
     /// </summary>
     /// <returns><c>true</c>, если F4 был обработан.</returns>
-    private static bool TryHandleBreakpointF4()
+    internal static bool TryHandleBreakpointF4()
     {
       if (!StepControlManager.IsBreakpointStepModeActive || StepControlManager.BreakpointCommandInfo == null)
       {
@@ -190,13 +189,16 @@ namespace Ask.UI.Features.ProtocolNew.Hotkeys
     /// <param name="cancellationToken">Токен отмены ожидания.</param>
     public static async Task WaitForNextStepKeyAsync(CancellationToken cancellationToken)
     {
-      _tcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+      cancellationToken.ThrowIfCancellationRequested();
+      var completion = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+      _tcs = completion;
 
-      using (cancellationToken.Register(() => _tcs.TrySetCanceled(cancellationToken)))
+      using (cancellationToken.Register(() => completion.TrySetCanceled(cancellationToken)))
       {
         try
         {
-          await _tcs.Task;
+          await completion.Task;
+          cancellationToken.ThrowIfCancellationRequested();
         }
         catch (TaskCanceledException)
         {
@@ -204,7 +206,7 @@ namespace Ask.UI.Features.ProtocolNew.Hotkeys
         }
         finally
         {
-          _tcs = null;
+          Interlocked.CompareExchange(ref _tcs, null, completion);
         }
       }
     }

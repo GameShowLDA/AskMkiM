@@ -838,6 +838,7 @@ namespace Ask.Device.Application.FunctionAdapters.GPT
         }
 
         var answer = execution.Value;
+        answer.Value = Math.Round(answer.Value, 3);
 
         await DeviceMessages.PublishOperationResultAsync(
           _device,

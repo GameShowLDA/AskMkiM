@@ -121,7 +121,10 @@ namespace Ask.UI.Controls.ProtocolNew
     public void SetEventControls()
     {
       StartMeasureResistanceButtonPreviewMouseDown += async (sender, e) => await StartAsync();
-      PauseButtonPreviewMouseDown += async (sender, e) => await PauseAsync();
+      PauseButtonPreviewMouseDown += (sender, e) =>
+      {
+        if (ActionExecutor.RequestPause()) ShowButtonsOnPause();
+      };
 
       TopLayerButtonPreviewMouseDown += StepAround_PreviewMouseDown;
       BottomLayerButtonPreviewMouseDown += StepIn_PreviewMouseDown;
@@ -149,6 +152,7 @@ namespace Ask.UI.Controls.ProtocolNew
     /// <returns>Задача, представляющая асинхронную операцию измерения.</returns>
     public async Task StartAsync()
     {
+      if (ActionExecutor.IsActive) return;
       var actionSettings = _modeSettings.Current;
       bool simulatedPowerFailure = ExecutionConfig.GetIsIdleModeEnabled()
         && actionSettings.CheckType != CheckType.SelfTest
@@ -524,7 +528,10 @@ namespace Ask.UI.Controls.ProtocolNew
       bool deviceTask = false,
       bool canContinue = true)
     {
+      var cancellationToken = GetCancellationToken();
+      cancellationToken.ThrowIfCancellationRequested();
       bool stopOnError = await ExecutionConfig.GetIsStopOnErrorEnabled();
+      cancellationToken.ThrowIfCancellationRequested();
       if (ShouldWaitForUserAction(stopOnError, loop, deviceTask))
       {
         _userActionTcs = new TaskCompletionSource<UserAction>(
@@ -532,7 +539,7 @@ namespace Ask.UI.Controls.ProtocolNew
         SetNonVisibleAllButton();
         ShowInteractiveActionButtons(canContinue);
 
-        return await _userActionTcs.Task;
+        return await _userActionTcs.Task.WaitAsync(cancellationToken);
       }
 
       return UserAction.None;
@@ -575,6 +582,8 @@ namespace Ask.UI.Controls.ProtocolNew
     /// <inheritdoc />
     public async Task<UserAction> WaitRetryOrContinueAsync()
     {
+      var cancellationToken = GetCancellationToken();
+      cancellationToken.ThrowIfCancellationRequested();
       _userActionTcs = new TaskCompletionSource<UserAction>(
         TaskCreationOptions.RunContinuationsAsynchronously);
       _isRetryOrContinueInteraction = true;
@@ -583,7 +592,7 @@ namespace Ask.UI.Controls.ProtocolNew
 
       try
       {
-        return await _userActionTcs.Task;
+        return await _userActionTcs.Task.WaitAsync(cancellationToken);
       }
       finally
       {

@@ -1,5 +1,6 @@
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.DTO.Devices.Breakdown;
+using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
@@ -17,6 +18,7 @@ namespace Ask.Device.Runtime.Function.GPT.Helper
   {
     private const int PollIntervalMs = 100;
     private const int StopPollIntervalMs = 50;
+    internal static readonly TimeSpan CompletionTimeout = TimeSpan.FromSeconds(5);
 
     /// <summary>
     /// Выполняет измерение.
@@ -31,6 +33,10 @@ namespace Ask.Device.Runtime.Function.GPT.Helper
       bool waitFullTime = false,
       IUserInteractionService? userMessageService = null)
     {
+      using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(
+        EquipmentExecutionContext.CancellationToken, userMessageService?.GetCancellationToken() ?? CancellationToken.None);
+      using var executionScope = EquipmentExecutionContext.EnterExecution(cancellation.Token);
+      cancellation.Token.ThrowIfCancellationRequested();
       if (time == 60)
       {
         waitFullTime = true;
@@ -66,7 +72,7 @@ namespace Ask.Device.Runtime.Function.GPT.Helper
         if (!waitFullTime)
         {
           await breakDown.Time.SetTestTimeAsync(1);
-          var answer = await MeasureFullTimeAsync(breakDown, delayBeforeCall);
+          var answer = await MeasureFullTimeAsync(breakDown, delayBeforeCall, 1 + timeRamp);
           if (answer.Status == BreakdownMeasurementStatus.Pass)
           {
             return answer;
@@ -76,7 +82,7 @@ namespace Ask.Device.Runtime.Function.GPT.Helper
         }
 
         await breakDown.Time.SetTestTimeAsync(breakDown.Time.GetTargetTime());
-        return await MeasureFullTimeAsync(breakDown, delayBeforeCall);
+        return await MeasureFullTimeAsync(breakDown, delayBeforeCall, time + timeRamp);
       }
       finally
       {
@@ -94,7 +100,8 @@ namespace Ask.Device.Runtime.Function.GPT.Helper
     /// <returns>Результат измерения после завершения испытания.</returns>
     static private async Task<BreakdownMeasurementResponse> MeasureFullTimeAsync(
       IBreakdownTester breakDown,
-      int delayBeforeCall)
+      int delayBeforeCall,
+      double expectedSeconds)
     {
       var total = Stopwatch.StartNew();
       LogInformation($"[{nameof(MeasureFullTimeAsync)}] Запуск полного измерения", isDeviceLog: true);
@@ -109,7 +116,10 @@ namespace Ask.Device.Runtime.Function.GPT.Helper
       var poll = Stopwatch.StartNew();
       while (true)
       {
-        await Task.Delay(PollIntervalMs);
+        EquipmentExecutionContext.CancellationToken.ThrowIfCancellationRequested();
+        if (poll.Elapsed > TimeSpan.FromSeconds(Math.Max(0, expectedSeconds)) + CompletionTimeout)
+          throw new TimeoutException("Прибор не завершил испытание за установленное время.");
+        await Task.Delay(PollIntervalMs, EquipmentExecutionContext.CancellationToken);
 
         query = $"{FunctionCommandManager.GetCommandSyntax(FunctionCommand.MEASURE)} ?";
         answerDevice = await breakDown.DeviceProtocol.QueryAsync(query, timeout: 500, delayBeforeCall: delayBeforeCall);
@@ -149,8 +159,11 @@ namespace Ask.Device.Runtime.Function.GPT.Helper
 
       while (true)
       {
+        EquipmentExecutionContext.CancellationToken.ThrowIfCancellationRequested();
+        if (total.Elapsed > CompletionTimeout)
+          throw new TimeoutException("Прибор не подтвердил отключение испытательного напряжения.");
         await breakDown.DeviceProtocol.QueryAsync(stopCommand);
-        await Task.Delay(StopPollIntervalMs);
+        await Task.Delay(StopPollIntervalMs, EquipmentExecutionContext.CancellationToken);
 
         var answerDevice = await breakDown.DeviceProtocol.QueryAsync(statusCommand, responseDelay: StopPollIntervalMs, timeout: 1000);
 
@@ -161,7 +174,7 @@ namespace Ask.Device.Runtime.Function.GPT.Helper
           return;
         }
 
-        await Task.Delay(StopPollIntervalMs);
+        await Task.Delay(StopPollIntervalMs, EquipmentExecutionContext.CancellationToken);
       }
     }
   }

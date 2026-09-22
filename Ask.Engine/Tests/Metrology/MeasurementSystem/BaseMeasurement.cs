@@ -130,6 +130,10 @@ namespace Ask.Engine.Tests.Metrology.MeasurementSystem
       {
         await CollectDevices(point1, point2, mode);
       }
+      catch (OperationCanceledException)
+      {
+        throw;
+      }
       catch (Exception ex)
       {
         await ExecutionMessages.PublishErrorAsync(ex.Message, messageService);
@@ -175,6 +179,10 @@ namespace Ask.Engine.Tests.Metrology.MeasurementSystem
         await DeviceResetService.ResetDevicesAsync(
           connectedDevices.OfType<IDevice>(),
           messageService);
+      }
+      catch (OperationCanceledException)
+      {
+        throw;
       }
       catch (Exception ex)
       {

@@ -136,6 +136,10 @@ namespace Ask.Device.Communication.Ethernet.Tcp.Protocols
           LogException(socketEx, isDeviceLog: true);
           return string.Empty;
         }
+        catch (OperationCanceledException)
+        {
+          throw;
+        }
         catch (Exception ex)
         {
           LogException(ex, isDeviceLog: true);

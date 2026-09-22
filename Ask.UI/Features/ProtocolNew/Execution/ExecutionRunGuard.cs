@@ -22,12 +22,18 @@ internal sealed class ExecutionRunGuard : IExecutionRunGuard
   /// </summary>
   private static string _activeProcessName = string.Empty;
 
+  internal static bool CanHandleInput(object owner)
+  {
+    lock (SyncRoot)
+      return _activeOwner == null || ReferenceEquals(_activeOwner, owner);
+  }
+
   /// <inheritdoc />
   public bool TryAcquire(string processName, object owner, out string activeProcessName)
   {
     lock (SyncRoot)
     {
-      if (_activeOwner != null && !ReferenceEquals(_activeOwner, owner))
+      if (_activeOwner != null)
       {
         activeProcessName = _activeProcessName;
         return false;

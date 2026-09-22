@@ -29,7 +29,7 @@ namespace Ask.Device.Runtime.Function.ModuleVoltageCurrentSource.SelfCheck
       await SelfTestMessages.PublishInformationAsync("Настройка оборудования", messageService);
       await powerSourceModule.VoltageManager.SetSourceVoltageAsync(VoltageSources.Supply12V, messageService);
       await powerSourceModule.VoltageManager.SetVoltageLevelAsync(5, 0, messageService);
-      await Task.Delay(1000);
+      await Task.Delay(1000, cancellationToken);
 
       var busesA = System.Enum.GetValues(typeof(SwitchingBus))
                        .Cast<SwitchingBus>()
@@ -48,7 +48,7 @@ namespace Ask.Device.Runtime.Function.ModuleVoltageCurrentSource.SelfCheck
         cancellationToken.ThrowIfCancellationRequested();
         await powerSourceModule.BusManager.ConnectBusToNegativeAsync(item, messageService);
       }
-      await Task.Delay(1000);
+      await Task.Delay(1000, cancellationToken);
 
       foreach (var bus in busesA)
       {
@@ -70,7 +70,7 @@ namespace Ask.Device.Runtime.Function.ModuleVoltageCurrentSource.SelfCheck
         await Task.Delay(10);
         await powerSourceModule.BusManager.ConnectBusToPositiveAsync(item, messageService);
       }
-      await Task.Delay(1000);
+      await Task.Delay(1000, cancellationToken);
 
       foreach (var bus in busesB)
       {

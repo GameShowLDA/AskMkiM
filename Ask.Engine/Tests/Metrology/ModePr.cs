@@ -9,7 +9,6 @@ using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
-using Ask.Core.Shared.Metadata.Static;
 using Ask.Core.Shared.Metadata.Enums.UnitEnums;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies.Data;
 using Ask.Engine.Tests.Metrology.MeasurementSystem;
@@ -71,7 +70,12 @@ namespace Ask.Engine.Tests.Metrology
       await testMeasurement.SetupCommutation(_userInteractionService, data.FirstPoint, data.SecondPoint, metrologicalModeRole);
       await testMeasurement.ConfigureMeter(_userInteractionService, metrologicalModeRole);
 
-      var (firstNorm, lastNorm, delta) = MeasurementErrorDefaults.CalculateToleranceRange(MeasurementTypeCommand.PR, data.Param);
+      var tolerance = await MeasurementToleranceCalculator.TryCalculateAsync(
+        MeasurementTypeCommand.PR,
+        data.Param,
+        _userInteractionService);
+      if (tolerance == null)
+        return;
 
       await _userInteractionService.AppendEmptyLineAsync();
       var realyModule = testMeasurement.GetRelayModuleWithMaxNumber(metrologicalModeRole);
@@ -105,7 +109,14 @@ namespace Ask.Engine.Tests.Metrology
           MeasurementTypeCommand.PR,
           protocolUI,
           isBlockStart: true);
-        var (firstNorm, lastNorm, delta) = MeasurementErrorDefaults.CalculateToleranceRange(MeasurementTypeCommand.PR, param);
+        var tolerance = await MeasurementToleranceCalculator.TryCalculateAsync(
+          MeasurementTypeCommand.PR,
+          param,
+          protocolUI);
+        if (tolerance is not { } range)
+          return false;
+
+        var (firstNorm, lastNorm, delta) = range;
 
         MeasurementRange measurementRange = new MeasurementRange(param, firstNorm, lastNorm);
         var result = await fastMeter.ContinuityManager.CheckContinuityAsync(measurementRange, protocolUI);
