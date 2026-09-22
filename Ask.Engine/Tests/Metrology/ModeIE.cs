@@ -9,7 +9,6 @@ using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
-using Ask.Core.Shared.Metadata.Static;
 using Ask.Core.Shared.Metadata.Enums.UnitEnums;
 using Ask.Core.Shared.Metadata.Static.Messages;
 using Ask.Engine.Tests.Metrology.MeasurementSystem;
@@ -70,7 +69,12 @@ namespace Ask.Engine.Tests.Metrology
       await testMeasurement.SetupCommutation(_userInteractionService, data.FirstPoint, data.SecondPoint, metrologicalModeRole);
       await testMeasurement.ConfigureMeter(_userInteractionService, metrologicalModeRole);
 
-      var (LowerBound, UpperBound, delta) = MeasurementErrorDefaults.CalculateToleranceRange(MeasurementTypeCommand.IE, data.Param);
+      var tolerance = await MeasurementToleranceCalculator.TryCalculateAsync(
+        MeasurementTypeCommand.IE,
+        data.Param,
+        _userInteractionService);
+      if (tolerance == null)
+        return;
 
       await _userInteractionService.AppendEmptyLineAsync();
       var intrinsicCapacitance = testMeasurement.GetIntrinsicCapacitanceByPoints(data.FirstPoint, data.SecondPoint);
@@ -102,7 +106,14 @@ namespace Ask.Engine.Tests.Metrology
         await MeasurementMessages.PublishStartAsync(CheckType.Metrology,
           MeasurementTypeCommand.IE,
           protocolUI);
-        (LowerBound, UpperBound, var delta) = MeasurementErrorDefaults.CalculateToleranceRange(MeasurementTypeCommand.IE, param);
+        var tolerance = await MeasurementToleranceCalculator.TryCalculateAsync(
+          MeasurementTypeCommand.IE,
+          param,
+          protocolUI);
+        if (tolerance is not { } range)
+          return false;
+
+        (LowerBound, UpperBound, var delta) = range;
 
         MeasurementRange measurementRange = new MeasurementRange(param, LowerBound, UpperBound);
         double result = await fastMeter.CapacitanceManager.MeasureCapacitanceAsync(measurementRange, userMessageService: protocolUI);

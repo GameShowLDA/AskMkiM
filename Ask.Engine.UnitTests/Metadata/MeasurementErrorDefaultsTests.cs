@@ -1,3 +1,4 @@
+using Ask.Core.Services.Errors.Models;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Static;
@@ -83,7 +84,11 @@ public class MeasurementErrorDefaultsTests
   [Fact(DisplayName = "ЭТ: расчёт допуска ниже определённого диапазона погрешности запрещён")]
   public void CalculateToleranceRange_ForEhtBelowDefinedAccuracy_Throws()
   {
-    Assert.Throws<InvalidOperationException>(() =>
+    var exception = Assert.Throws<SystemExceptionBase>(() =>
       MeasurementErrorDefaults.CalculateToleranceRange(MeasurementTypeCommand.EHT, 0.05));
+
+    Assert.Equal(
+      ErrorCode.Metrology_MeasurementError_ToleranceRangeNotFound,
+      exception.Code);
   }
 }

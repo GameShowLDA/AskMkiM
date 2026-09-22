@@ -726,6 +726,18 @@ namespace Ask.Core.Services.Errors.Models
     /// </summary>
     [ErrorCodeTag("METROLOGY014")]
     Metrology_Validation_DeviceByRoleNotFound,
+
+    /// <summary>
+    /// Ошибка: для метрологической команды отсутствует эталонная конфигурация погрешностей.
+    /// </summary>
+    [ErrorCodeTag("METROLOGY015")]
+    Metrology_MeasurementError_DefaultsNotFound,
+
+    /// <summary>
+    /// Ошибка: для измеренного значения не найден диапазон погрешности метрологической команды.
+    /// </summary>
+    [ErrorCodeTag("METROLOGY016")]
+    Metrology_MeasurementError_ToleranceRangeNotFound,
     #endregion
 
     #endregion
