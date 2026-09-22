@@ -1,6 +1,6 @@
+using Ask.Core.Services.Extensions;
 using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.DTO.Protocol;
-using Ask.Core.Services.Extensions;
 using Ask.Core.Shared.Metadata.Atributes;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Static.Messages;
@@ -14,6 +14,12 @@ namespace Ask.Protocol.Messages.Builders;
 /// </summary>
 internal static class MeasurementMessageBuilder
 {
+  /// <summary>
+  /// Формирует сообщение об ошибке подключения точки.
+  /// </summary>
+  /// <param name="measurementTarget">Обозначение измеряемой точки или объекта.</param>
+  /// <param name="details">Описание ошибки.</param>
+  /// <returns>Модель сообщения об ошибке подключения точки.</returns>
   internal static ShowMessageModel BuildPointConnectionError(
     string measurementTarget,
     string details)
@@ -24,8 +30,13 @@ internal static class MeasurementMessageBuilder
       type: ShowMessageModel.MessageType.Error)
     {
       IndentLevel = 1,
+      IsMeasurement = true,
     };
   }
+
+  /// <summary>
+  /// Русская культура форматирования числовых значений для отображения в протоколе.
+  /// </summary>
   private static readonly CultureInfo RussianDisplayCulture = CultureInfo.GetCultureInfo("ru-RU");
 
   /// <summary>
@@ -80,7 +91,8 @@ internal static class MeasurementMessageBuilder
 
     return new ShowMessageModel(
       header,
-      message: isSuccessful ? "Результат" : "Результат: ПРОБОЙ");
+      message: isSuccessful ? "Результат" : "Результат: ПРОБОЙ")
+    { IsMeasurement = true };
   }
 
   /// <summary>
@@ -143,7 +155,8 @@ internal static class MeasurementMessageBuilder
     MeasurementTypeCommand measurementTypeCommand,
     MeasurementRange measurementRange,
     int dischargeNumber,
-    string dischargeView)
+    string dischargeView,
+    bool isMeasurement)
   {
     ShowMessageModel message = BuildResult(
       measurementTypeCommand,
@@ -151,14 +164,27 @@ internal static class MeasurementMessageBuilder
       $"Разряд {dischargeNumber} ({dischargeView})");
     message.Message = $"{message.Message}. Переход к методу полного узла";
     message.Status = ShowMessageModel.MessageType.Error;
+    message.IsMeasurement = isMeasurement;
     return message;
   }
 
+  /// <summary>
+  /// Формирует сообщение с результатом измерения.
+  /// </summary>
+  /// <param name="measurementTypeCommand">Тип измерения.</param>
+  /// <param name="measurementRange">Диапазон измерения.</param>
+  /// <param name="chains">Обозначение проверяемых цепей.</param>
+  /// <param name="comparisonSign">Знак сравнения.</param>
+  /// <param name="points">Обозначение проверяемых точек.</param>
+  /// <returns>Модель сообщения с результатом измерения.</returns>
+  /// <exception cref="ArgumentNullException">
+  /// Выбрасывается, если <paramref name="measurementRange"/> равен <see langword="null"/>.
+  /// </exception>
   internal static ShowMessageModel BuildResult(
     MeasurementTypeCommand measurementTypeCommand,
     MeasurementRange measurementRange,
     string? chains = null,
-    string comparisonSign = "=", 
+    string comparisonSign = "=",
     string points = null)
   {
     CommandDisplayInfoAttribute? displayInfo = typeof(MeasurementTypeCommand)
@@ -184,9 +210,22 @@ internal static class MeasurementMessageBuilder
       displayInfo,
       comparisonSign);
 
-    return new ShowMessageModel(header, message: measuredValue);
+    return new ShowMessageModel(header, message: measuredValue) { IsMeasurement = true }; ;
   }
 
+  /// <summary>
+  /// Формирует сообщение с целевым значением измерения.
+  /// </summary>
+  /// <param name="measurementUnit">Единица измерения.</param>
+  /// <param name="measurementRange">Диапазон измерения.</param>
+  /// <param name="measurementTarget">Обозначение измеряемой величины.</param>
+  /// <param name="comparisonSign">Знак сравнения.</param>
+  /// <param name="points">Обозначение проверяемых точек.</param>
+  /// <returns>Модель сообщения с параметрами целевого значения измерения.</returns>
+  /// <exception cref="ArgumentNullException">
+  /// Выбрасывается, если <paramref name="measurementUnit"/> или
+  /// <paramref name="measurementRange"/> равен <see langword="null"/>.
+  /// </exception>
   internal static ShowMessageModel BuildResult(
     Enum measurementUnit,
     MeasurementRange measurementRange,
@@ -200,10 +239,10 @@ internal static class MeasurementMessageBuilder
     string unit = measurementUnit.GetUnit();
     string symbol = measurementUnit.GetQuantitySymbol().ToString();
     string header = BuildMeasurementHeader(measurementTarget ?? string.Empty, measurementRange, unit, points);
-    string message = $"{symbol}изм{comparisonSign} " +
+    string message = $"{symbol}изм{comparisonSign}" +
       $"{MeasurementValueFormatter.Format(measurementRange.TargetValue)} {unit}";
 
-    return new ShowMessageModel(header, message: message);
+    return new ShowMessageModel(header, message: message) { IsMeasurement = true };
   }
 
   /// <summary>
@@ -238,6 +277,15 @@ internal static class MeasurementMessageBuilder
     return new ShowMessageModel(header, message: message);
   }
 
+  /// <summary>
+  /// Формирует строковое представление измеренного значения
+  /// с учётом допустимого диапазона и специальных результатов измерения.
+  /// </summary>
+  /// <param name="measurementTypeCommand">Тип измерения.</param>
+  /// <param name="measurementRange">Измеренное значение и допустимые границы диапазона.</param>
+  /// <param name="displayInfo">Параметры отображения типа измерения.</param>
+  /// <param name="comparisonSign">Знак сравнения.</param>
+  /// <returns>Строковое представление результата измерения.</returns>
   private static string BuildMeasuredValue(
     MeasurementTypeCommand measurementTypeCommand,
     MeasurementRange measurementRange,
@@ -261,6 +309,14 @@ internal static class MeasurementMessageBuilder
     return $"{prefix}{MeasurementValueFormatter.Format(measurementRange.TargetValue)} {displayInfo.Unit}";
   }
 
+  /// <summary>
+  /// Формирует заголовок с допустимым диапазоном измерения.
+  /// </summary>
+  /// <param name="chains">Обозначение проверяемых цепей.</param>
+  /// <param name="measurementRange">Допустимый диапазон измерения.</param>
+  /// <param name="unit">Единица измерения.</param>
+  /// <param name="points">Обозначение проверяемых точек.</param>
+  /// <returns>Строка с допустимым диапазоном и обозначением проверяемых объектов.</returns>
   private static string BuildMeasurementHeader(
     string chains,
     MeasurementRange measurementRange,
@@ -281,11 +337,25 @@ internal static class MeasurementMessageBuilder
       : $"{chains} д.б. {range}";
   }
 
+  /// <summary>
+  /// Форматирует границу диапазона измерения для отображения в протоколе.
+  /// </summary>
+  /// <param name="value">Числовое значение границы диапазона.</param>
+  /// <returns>Отформатированное значение границы диапазона.</returns>
   private static string FormatMeasurementLimit(double value)
   {
     return value.ToString("G", RussianDisplayCulture);
   }
 
+  /// <summary>
+  /// Возвращает обозначение режима проверки прочности изоляции.
+  /// </summary>
+  /// <param name="measurementTypeCommand">Тип измерения.</param>
+  /// <returns>Обозначение режима проверки: ACW или DCW.</returns>
+  /// <exception cref="ArgumentOutOfRangeException">
+  /// Выбрасывается, если <paramref name="measurementTypeCommand"/>
+  /// не относится к проверке прочности изоляции ACW или DCW.
+  /// </exception>
   private static string GetInsulationStrengthMode(MeasurementTypeCommand measurementTypeCommand)
   {
     return measurementTypeCommand switch

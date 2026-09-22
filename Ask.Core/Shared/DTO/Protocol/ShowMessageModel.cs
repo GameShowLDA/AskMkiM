@@ -48,12 +48,39 @@ namespace Ask.Core.Shared.DTO.Protocol
     /// <summary>
     /// Сообщение и цвет для успешного выполнения.
     /// </summary>
-    static public (string Title, Color TitleColor) SuccessMessage => ("НОРМА", ((SolidColorBrush)Application.Current.Resources["TestsProtocolMessageSuccesForeground"]).Color);
+    static public (string Title, Color TitleColor) SuccessMessage = ("НОРМА", ((SolidColorBrush)Application.Current.Resources["TestsProtocolMessageSuccesForeground"]).Color);
 
     /// <summary>
     /// Сообщение и цвет для ошибки.
     /// </summary>
-    static public (string Title, Color TitleColor) ErrorMessage => ("БРАК", ((SolidColorBrush)Application.Current.Resources["TestsProtocolMessageErrorForeground"]).Color);
+    static public (string Title, Color TitleColor) ErrorMessage = ("БРАК", ((SolidColorBrush)Application.Current.Resources["TestsProtocolMessageErrorForeground"]).Color);
+
+    /// <summary>
+    /// Признак режима измерения.
+    /// </summary>
+    private bool _isMeasurement = false;
+
+    /// <summary>
+    /// Возвращает или задаёт признак режима измерения.
+    /// </summary>
+    public bool IsMeasurement
+    {
+      get => _isMeasurement;
+      set
+      {
+        _isMeasurement = value;
+        if (!value)
+        {
+          SuccessMessage.Title = "ОК";
+          ErrorMessage.Title = "ERR";
+        }
+        else
+        {
+          SuccessMessage.Title = "НОРМА";
+          ErrorMessage.Title = "БРАК";
+        }
+      }
+    }
 
     private Color? _headerBackgroundColor;
     public Color? HeaderBackgroundColor
@@ -218,6 +245,7 @@ namespace Ask.Core.Shared.DTO.Protocol
       UseSuccessColorForEntireMessage = false;
       CommandExecutionHasErrors = null;
       IndentLevel = 0;
+      IsMeasurement = false;
 
       try
       {
@@ -324,7 +352,7 @@ namespace Ask.Core.Shared.DTO.Protocol
     /// <param name="headerColor">Цвет заголовка сообщения (по умолчанию null).</param>
     /// <param name="message">Основной текст сообщения (по умолчанию null).</param>
     /// <param name="messageColor">Цвет основного текста сообщения (по умолчанию null).</param>
-    public ShowMessageModel(string? header = null, Color? headerColor = null, string? message = null, string? debug = null, Color? messageColor = null, MessageType? type = MessageType.Info) : this()
+    public ShowMessageModel(string? header = null, Color? headerColor = null, string? message = null, string? debug = null, Color? messageColor = null, MessageType? type = MessageType.Info, bool measureResult = false) : this()
     {
       if (headerColor != null)
       {
@@ -345,6 +373,8 @@ namespace Ask.Core.Shared.DTO.Protocol
       {
         Message = message;
       }
+
+      IsMeasurement = measureResult;
 
       Status = type;
     }
