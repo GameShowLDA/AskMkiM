@@ -262,11 +262,11 @@
                         <MenuItem Header="{Binding Source={StaticResource LS_Menu_Open}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="OpenFile" Command="{Binding File.OpenFileCommand}" utilities:HelpProvider.HelpKey="FuncOpen"/>
                         <MenuItem Header="{Binding Source={StaticResource LS_Menu_Create}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="CreateNewFile" Command="{Binding File.CreateNewFileCommand}" utilities:HelpProvider.HelpKey="FuncCreate"/>
                         <Separator Style="{DynamicResource SeparatorMenuStyle}"/>
-                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_LegacyConversion}, Path=Value}" Style="{DynamicResource SideMenuItemStyle}">
-                            <MenuItem Header="{Binding Source={StaticResource LS_Menu_LegacyConversion_OpkToPkw}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="ConvertOpkToPk" Command="{Binding File.ConvertOpkToPkCommand}"/>
+                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_LegacyConversion}, Path=Value}" Style="{DynamicResource SideMenuItemStyle}" utilities:HelpProvider.HelpKey="FuncConvert">
+                            <MenuItem Header="{Binding Source={StaticResource LS_Menu_LegacyConversion_OpkToPkw}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="ConvertOpkToPk" Command="{Binding File.ConvertOpkToPkCommand}" utilities:HelpProvider.HelpKey="FuncConvert"/>
                             <!--<MenuItem Header="{Binding Source={StaticResource LS_Menu_LegacyConversion_OpkToOpkw}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="ConvertOpkToOpkw" Command="{Binding File.ConvertOpkToOpkwCommand}"/>-->
-                            <MenuItem Header="{Binding Source={StaticResource LS_Menu_LegacyConversion_ApkToApkw}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="ConvertApkToApkw" Command="{Binding File.ConvertApkToApkwCommand}"/>
-                            <MenuItem Header="{Binding Source={StaticResource LS_Menu_LegacyConversion_ApkwToApk}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="ConvertApkwToApk" Command="{Binding File.ConvertApkwToApkCommand}"/>
+                            <MenuItem Header="{Binding Source={StaticResource LS_Menu_LegacyConversion_ApkToApkw}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="ConvertApkToApkw" Command="{Binding File.ConvertApkToApkwCommand}" utilities:HelpProvider.HelpKey="FuncConvert"/>
+                            <MenuItem Header="{Binding Source={StaticResource LS_Menu_LegacyConversion_ApkwToApk}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="ConvertApkwToApk" Command="{Binding File.ConvertApkwToApkCommand}" utilities:HelpProvider.HelpKey="FuncConvert"/>
                         </MenuItem>
 
                         <Separator Style="{DynamicResource SeparatorMenuStyle}"/>

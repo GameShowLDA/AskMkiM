@@ -9,6 +9,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <None Remove="AppHelp\Content\MainMenuChapter\TabFileChapter\APKtoAPKWconversionMenuImage.png" />
+	  <None Remove="AppHelp\Content\MainMenuChapter\TabFileChapter\APKWtoAPKconversionMenuImage.png" />
 	  <None Remove="AppHelp\Content\MainMenuChapter\TabFileChapter\archiveButtonImage.png" />
 	  <None Remove="AppHelp\Content\MainMenuChapter\TabFileChapter\archiveContextMenuImage.png" />
 	  <None Remove="AppHelp\Content\MainMenuChapter\TabFileChapter\buttonCreateImage.png" />
@@ -26,6 +28,7 @@
 	  <None Remove="AppHelp\Content\MainMenuChapter\TabFileChapter\contextMenuArchiveImage.png" />
 	  <None Remove="AppHelp\Content\MainMenuChapter\TabFileChapter\contextMenuFileInArchiveImage.png" />
 	  <None Remove="AppHelp\Content\MainMenuChapter\TabFileChapter\contextMenuFilesInArchiveImage.png" />
+	  <None Remove="AppHelp\Content\MainMenuChapter\TabFileChapter\conversionSelectionButtonsImage.png" />
 	  <None Remove="AppHelp\Content\MainMenuChapter\TabFileChapter\createArchiveButtonImage.png" />
 	  <None Remove="AppHelp\Content\MainMenuChapter\TabFileChapter\createArchiveContextMenuImage.png" />
 	  <None Remove="AppHelp\Content\MainMenuChapter\TabFileChapter\createNewTextEditorImage.png" />
@@ -40,6 +43,7 @@
 	  <None Remove="AppHelp\Content\MainMenuChapter\TabFileChapter\notificationSuccessfulSavingImage.png" />
 	  <None Remove="AppHelp\Content\MainMenuChapter\TabFileChapter\openContentsArchiveImage.png" />
 	  <None Remove="AppHelp\Content\MainMenuChapter\TabFileChapter\openProgramControlInArchiveImage.png" />
+	  <None Remove="AppHelp\Content\MainMenuChapter\TabFileChapter\OPKtoPKconversionMenuImage.png" />
 	  <None Remove="AppHelp\Content\MainMenuChapter\TabFileChapter\replacePanelImage.png" />
 	  <None Remove="AppHelp\Content\MainMenuChapter\TabFileChapter\savingTranslatedFileToArchiveImage.png" />
 	  <None Remove="AppHelp\Content\MainMenuChapter\TabFileChapter\selectingArchiveToSaveImage.png" />
@@ -759,10 +763,13 @@
 	  <Content Include="AppHelp\Conservation\LanguageControlProgramsChapter\drex_part3.6_custom_2.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\LanguageControlProgramsChapter\IdleExecutionControlProgramsPart.html">
+	  <Content Include="AppHelp\Conservation\LanguageControlProgramsChapter\IdleExecutionControlProgramsPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\Content\LanguageControlProgramsChapter\LanguageControlProgramsBasicConceptsPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\Content\LanguageControlProgramsChapter\GroupAddressesPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\Content\LanguageControlProgramsChapter\LanguageControlProgramsElementsPart.html">
@@ -819,10 +826,19 @@
 	  <Content Include="AppHelp\Content\MainMenuChapter\TabExecutionChapter\TranslationPKPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabFileChapter\APKtoAPKWconversionMenuImage.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabFileChapter\APKWtoAPKconversionMenuImage.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
 	  <Content Include="AppHelp\Content\MainMenuChapter\TabFileChapter\archiveButtonImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\Content\MainMenuChapter\TabFileChapter\archiveContextMenuImage.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabFileChapter\buttonConvertationImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\Content\MainMenuChapter\TabFileChapter\buttonCreateImage.png">
@@ -868,6 +884,9 @@
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\Content\MainMenuChapter\TabFileChapter\contextMenuFilesInArchiveImage.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabFileChapter\conversionSelectionButtonsImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\Content\MainMenuChapter\TabFileChapter\createArchiveButtonImage.png">
@@ -942,6 +961,9 @@
 	  <Content Include="AppHelp\Conservation\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.9_custom.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabFileChapter\FuncConvertPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
 	  <Content Include="AppHelp\Content\MainMenuChapter\TabFileChapter\FuncReplacePart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
@@ -952,6 +974,9 @@
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\Content\MainMenuChapter\TabFileChapter\openProgramControlInArchiveImage.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabFileChapter\OPKtoPKconversionMenuImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\Content\MainMenuChapter\TabFileChapter\printManagerImage.png">
