@@ -251,7 +251,8 @@ namespace Ask.UI.Controls.TextEditorControl
         foreach (var line in document.Lines)
         {
           var lineText = document.GetText(line.Offset, line.Length);
-          if (lineText.Contains("БРАК", StringComparison.OrdinalIgnoreCase))
+          if (lineText.Contains("БРАК", StringComparison.OrdinalIgnoreCase) ||
+              lineText.Contains("[ERR]", StringComparison.OrdinalIgnoreCase))
           {
             AddMarker(
               markersByLine,

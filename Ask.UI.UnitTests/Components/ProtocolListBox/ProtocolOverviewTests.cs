@@ -20,8 +20,12 @@ public sealed class ProtocolOverviewTests
     ShowMessageModel.MessageType status, bool isCommandHeader, bool executionError,
     ErrorOverviewSeverity? expected)
   {
-    var message = new ShowMessageModel { Status = status,
-      IsControlProgramCommandHeader = isCommandHeader, ExecutionError = executionError };
+    var message = new ShowMessageModel
+    {
+      Status = status,
+      IsControlProgramCommandHeader = isCommandHeader,
+      ExecutionError = executionError
+    };
     Assert.Equal(expected, ProtocolListBoxUI.GetOverviewSeverity(message));
   }
 
@@ -45,6 +49,7 @@ public sealed class ProtocolOverviewTests
 
   [Theory]
   [InlineData(ShowMessageModel.MessageType.Info, false, "Количество брака: 0", false)]
+  [InlineData(ShowMessageModel.MessageType.Info, false, "[ERR] R = 20", true)]
   [InlineData(ShowMessageModel.MessageType.Info, false, "[БРАК] R = 20", true)]
   [InlineData(ShowMessageModel.MessageType.Error, false, "Нет связи", true)]
   [InlineData(ShowMessageModel.MessageType.Info, true, "Превышен предел", true)]
@@ -52,8 +57,13 @@ public sealed class ProtocolOverviewTests
   public void ClassifiesStructuredErrorsAndLegacyMarkers(
     ShowMessageModel.MessageType status, bool executionError, string text, bool expected)
   {
-    var message = new ShowMessageModel { MessageColor = Colors.Red, Status = status,
-      Header = text, ExecutionError = executionError };
+    var message = new ShowMessageModel
+    {
+      MessageColor = Colors.Red,
+      Status = status,
+      Header = text,
+      ExecutionError = executionError
+    };
     Assert.Equal(expected, ProtocolListBoxUI.IsOverviewError(message));
   }
 
@@ -212,12 +222,17 @@ public sealed class ProtocolOverviewTests
       const string log = "[ЛОГ ROOT] 2026-09-14 12:34:56.789 +04:00 [Warning] Ответ прибора";
       var box = new ProtocolServiceLogsBox
       {
-        LogText = log, Visibility = System.Windows.Visibility.Collapsed,
-        FontSize = 14, Foreground = Brushes.LightGray, Background = Brushes.Black
+        LogText = log,
+        Visibility = System.Windows.Visibility.Collapsed,
+        FontSize = 14,
+        Foreground = Brushes.LightGray,
+        Background = Brushes.Black
       };
       using var source = new System.Windows.Interop.HwndSource(new System.Windows.Interop.HwndSourceParameters("Protocol logs")
       {
-        Width = 900, Height = 150, WindowStyle = unchecked((int)0x80000000)
+        Width = 900,
+        Height = 150,
+        WindowStyle = unchecked((int)0x80000000)
       });
       source.RootVisual = box;
       Assert.DoesNotContain(log, new System.Windows.Documents.TextRange(
@@ -453,12 +468,12 @@ public sealed class ProtocolOverviewTests
       bool requested = false;
       bar.SetPositionPreviewFactory(_ => { requested = true; return null; });
       bar.RaiseEvent(new System.Windows.Input.MouseEventArgs(System.Windows.Input.Mouse.PrimaryDevice, 0)
-        { RoutedEvent = System.Windows.Input.Mouse.MouseMoveEvent });
+      { RoutedEvent = System.Windows.Input.Mouse.MouseMoveEvent });
       Assert.False(requested);
       Assert.False(((System.Windows.Controls.Primitives.Popup)bar.FindName("_previewPopup")).IsOpen);
       bar.AreToolTipsEnabled = true;
       bar.RaiseEvent(new System.Windows.Input.MouseEventArgs(System.Windows.Input.Mouse.PrimaryDevice, 0)
-        { RoutedEvent = System.Windows.Input.Mouse.MouseMoveEvent });
+      { RoutedEvent = System.Windows.Input.Mouse.MouseMoveEvent });
       Assert.True(requested);
     });
   }
@@ -525,8 +540,13 @@ public sealed class ProtocolOverviewTests
     RunInSta(() =>
     {
       var scroll = new System.Windows.Controls.Primitives.ScrollBar { Maximum = 100, ViewportSize = 20 };
-      var bar = new ErrorOverviewBar { Background = Brushes.Transparent,
-        IsViewportVisible = false, IsMarkerHitTestOnly = true, MarkerHeight = 8 };
+      var bar = new ErrorOverviewBar
+      {
+        Background = Brushes.Transparent,
+        IsViewportVisible = false,
+        IsMarkerHitTestOnly = true,
+        MarkerHeight = 8
+      };
       var host = new Border { Child = bar };
       var grid = new Grid();
       grid.Children.Add(scroll);
@@ -534,7 +554,9 @@ public sealed class ProtocolOverviewTests
       Panel.SetZIndex(host, 2);
       using var source = new System.Windows.Interop.HwndSource(new System.Windows.Interop.HwndSourceParameters("Marker hit testing")
       {
-        Width = 30, Height = 200, WindowStyle = unchecked((int)0x80000000),
+        Width = 30,
+        Height = 200,
+        WindowStyle = unchecked((int)0x80000000),
       });
       source.RootVisual = grid;
       grid.Measure(new System.Windows.Size(30, 200));

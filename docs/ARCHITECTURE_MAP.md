@@ -1050,6 +1050,14 @@ ActionExecutor finalization
   (видимая строка + скрытая структурированная диагностика каждой записи)
 ```
 
+`ProtocolEntryOutputService.ApplyStatusAndHighlighting → ShowMessageModel.GetQualityPrefix`
+добавляет качественный префикс по типу конкретной записи: неизмерительные операции получают
+`[ОК]`/`[ERR]`, а модели с `IsMeasurement = true` — `[НОРМА]`/`[БРАК]`.
+`MeasurementMessageBuilder` и `MeasurementMessages` устанавливают измерительный признак;
+equipment/self-test builders оставляют его выключенным. Префикс не хранится в общем static-состоянии,
+поэтому параллельные и последовательно созданные сообщения разных типов не влияют друг на друга.
+`ProtocolModel` при нормализации удаляет обе пары префиксов, чтобы не дублировать их в заключении.
+
 Форматы:
 
 - `.asktrace` — записи хода выполнения;
@@ -1283,7 +1291,7 @@ executor/strategy
     → ModuleRelayControlProtocolException(device, operation, localized error, firmware status)
     → UserActionHelper catches hardware exception
     → IUserInteractionService.ShowMessageAsync(MessageType.Error, skipPause: true)
-    → protocol line "МКР chassis.number: operation. Системная ошибка. reason [БРАК]"
+    → protocol line "МКР chassis.number: operation. Системная ошибка. reason [ERR]"
     → existing Retry / Continue / Abort equipment flow
 ```
 
@@ -1330,7 +1338,7 @@ Idle `ModuleRelayControlEmulatorProtocol` для команды `6.<point>` уч
 аппаратная симуляция выбранного МКР не перехватывает эту измерительную команду.
 После проверки processor напрямую вызывает
 `EquipmentMessages.PublishPointOperationResultAsync`. `EquipmentMessageBuilder` формирует
-device-строку вида `Модуль МКР-350(1.6) - Подключение точки 1 к шине [A] : [НОРМА]`;
+device-строку вида `Модуль МКР-350(1.6) - Подключение точки 1 к шине [A] : [ОК]`;
 решение об отображении принимает `Ask.Protocol.Messages` через общий `ShouldPublish`.
 `PointManagerAdapter` для четырёх одиночных операций не выполняет повторную проверку
 `DeviceDisplayConfig` и не публикует дублирующее сообщение; он передаёт
@@ -1773,8 +1781,9 @@ formatted editors; `RunControl` hosts ProtocolUI, translated source and error li
 Открытый `.asktrace` отображается через `SavedExecutionProtocolUI` и
 `ProtocolListBoxUI`; рядом с его штатной вертикальной прокруткой размещается
 `ErrorOverviewBar`. Полоса получает строки из существующей коллекции
-`ShowMessageModel`: `Status.Error` или `ExecutionError`; для старых строк `Info`/`null`
-сохраняется распознавание явной метки `[БРАК]`. `AppendLineAsync → AddOverviewDiagnostic`
+`ShowMessageModel`: `Status.Error` или `ExecutionError`; для строк `Info`/`null`
+распознаются новая метка оборудования `[ERR]` и legacy-метка `[БРАК]`.
+`AppendLineAsync → AddOverviewDiagnostic`
 индексирует только новое сообщение; `RefreshErrorOverview` пересоздаёт индекс после загрузки/удаления.
 `RequestOverviewUpdate` объединяет обновления через Dispatcher; прокрутка обновляет геометрию
 без повторной классификации сообщений. `RefreshErrorOverviewViewport` задаёт видимый диапазон через `VerticalOffset/ExtentHeight`
@@ -2131,7 +2140,7 @@ logging, protocol output and driver chain.
 контекст не создают и сохраняют прежнее поведение `UserActionHelper`.
 
 В самоконтроле УКШ `SelfTestRetryHelper.CheckRelayStateAsync` публикует результат
-проверки реле с `skipPause: true`: строка `[БРАК]` сохраняется, но общая
+проверки реле с `skipPause: true`: строка `[ERR]` сохраняется, но общая
 `ProtocolPostOutputController`-пауза не перехватывает управление до возврата
 результата. После этого `UserActionHelper` показывает штатные интерактивные
 действия согласно `StopOnError`, не подменяя их кнопками пошагового режима.
@@ -2363,6 +2372,7 @@ ErrorItem → translator/runner ErrorList
 | `MultiEditorControl` | workspace View | UI | editors/tabs/user controls | [UI Architecture](#ui-architecture) |
 | `FileManager` | service composer | UI | workspace services | [UI Architecture](#ui-architecture) |
 | `RunControl` | execution View | UI | launches control programs | [Execution Engine](#execution-engine) |
+| `ShowMessageModel` | shared protocol DTO | Ask.Core | хранит содержимое, статус и признаки записи; `IsMeasurement` выбирает `[НОРМА]/[БРАК]` вместо неизмерительных `[ОК]/[ERR]` без общего изменяемого состояния | [Protocols](#protocols-and-file-formats) |
 | `ProtocolUI` | View + adapter | Ask.UI | execution controller and protocol output | [Protocols](#protocols-and-file-formats) |
 | `CommandMessages` | static facade | Ask.Protocol.Messages | проверяет настройки видимости этапов, формирует и выводит начало программы контроля, сообщения команд, точек останова, блоков проверки, цепей, точек, подключения точек, направления диода и разрядов; модели наружу не возвращает | [Protocols](#protocols-and-file-formats) |
 | `CommandMessageBuilder` | internal static builder | Ask.Protocol.Messages | содержит перенесённую из `ExecutorMessageBuilder` логику начала программы контроля, сообщений команд, точек останова и блоков проверки | [Protocols](#protocols-and-file-formats) |

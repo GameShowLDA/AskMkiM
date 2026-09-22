@@ -48,12 +48,14 @@ namespace Ask.Core.Shared.DTO.Protocol
     /// <summary>
     /// Сообщение и цвет для успешного выполнения.
     /// </summary>
-    static public (string Title, Color TitleColor) SuccessMessage = ("НОРМА", ((SolidColorBrush)Application.Current.Resources["TestsProtocolMessageSuccesForeground"]).Color);
+    static public (string Title, Color TitleColor) SuccessMessage =>
+      ("НОРМА", GetResourceColor("TestsProtocolMessageSuccesForeground", Colors.Green));
 
     /// <summary>
     /// Сообщение и цвет для ошибки.
     /// </summary>
-    static public (string Title, Color TitleColor) ErrorMessage = ("БРАК", ((SolidColorBrush)Application.Current.Resources["TestsProtocolMessageErrorForeground"]).Color);
+    static public (string Title, Color TitleColor) ErrorMessage =>
+      ("БРАК", GetResourceColor("TestsProtocolMessageErrorForeground", Colors.Red));
 
     /// <summary>
     /// Признак режима измерения.
@@ -66,20 +68,7 @@ namespace Ask.Core.Shared.DTO.Protocol
     public bool IsMeasurement
     {
       get => _isMeasurement;
-      set
-      {
-        _isMeasurement = value;
-        if (!value)
-        {
-          SuccessMessage.Title = "ОК";
-          ErrorMessage.Title = "ERR";
-        }
-        else
-        {
-          SuccessMessage.Title = "НОРМА";
-          ErrorMessage.Title = "БРАК";
-        }
-      }
+      set => _isMeasurement = value;
     }
 
     private Color? _headerBackgroundColor;
@@ -293,11 +282,11 @@ namespace Ask.Core.Shared.DTO.Protocol
     {
       if (Status == MessageType.Success)
       {
-        return $"[{SuccessMessage.Title}]";
+        return IsMeasurement ? "[НОРМА]" : "[ОК]";
       }
       else if (Status == MessageType.Error)
       {
-        return $"[{ErrorMessage.Title}]";
+        return IsMeasurement ? "[БРАК]" : "[ERR]";
       }
       else
       {
@@ -343,6 +332,16 @@ namespace Ask.Core.Shared.DTO.Protocol
       }
 
       return null;
+    }
+
+    private static Color GetResourceColor(string resourceKey, Color fallbackColor)
+    {
+      if (Application.Current?.Resources[resourceKey] is SolidColorBrush brush)
+      {
+        return brush.Color;
+      }
+
+      return fallbackColor;
     }
 
     /// <summary>

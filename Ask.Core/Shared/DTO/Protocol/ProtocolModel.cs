@@ -260,6 +260,8 @@ namespace Ask.Core.Shared.DTO.Protocol
       text = text
           .Replace("[БРАК]", string.Empty, StringComparison.Ordinal)
           .Replace("[НОРМА]", string.Empty, StringComparison.Ordinal)
+          .Replace("[ERR]", string.Empty, StringComparison.Ordinal)
+          .Replace("[ОК]", string.Empty, StringComparison.Ordinal)
           .Trim();
 
       var qualityPrefix = message.GetQualityPrefix();
@@ -289,6 +291,8 @@ namespace Ask.Core.Shared.DTO.Protocol
       var normalized = value.Trim();
       normalized = normalized.Replace("[БРАК]", string.Empty, StringComparison.Ordinal);
       normalized = normalized.Replace("[НОРМА]", string.Empty, StringComparison.Ordinal);
+      normalized = normalized.Replace("[ERR]", string.Empty, StringComparison.Ordinal);
+      normalized = normalized.Replace("[ОК]", string.Empty, StringComparison.Ordinal);
       normalized = Regex.Replace(normalized, @"\s+\(", "(");
       normalized = Regex.Replace(normalized, @"\s+", " ");
       return normalized.Trim();
