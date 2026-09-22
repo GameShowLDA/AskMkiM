@@ -193,7 +193,7 @@ namespace Ask.Device.Application.FunctionAdapters.ModuleRelayControl
 
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
-        return await _pointManager.ConnectingPointToNewBus(bus, nubmerPoint);
+        return await _pointManager.ConnectingPointToNewBus(bus, nubmerPoint, userMessageService);
       }, userMessageService, deviceTask: true);
 
       if (!result)
