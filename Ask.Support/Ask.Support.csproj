@@ -70,52 +70,52 @@
 	  <Content Include="AppHelp\Conservation\ArchiveControlProgramsChapter\CompileMenu_BroadcastChapter\CompileBuildCommandCreatingNewPCArchivePart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\ArchiveControlProgramsChapter\CompileMenu_BroadcastChapter\drex_part6.2.2_custom.png">
+	  <Content Include="AppHelp\Conservation\ArchiveControlProgramsChapter\CompileMenu_BroadcastChapter\CompileArchiveCommandOpenExistingPCArchiveImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\ArchiveControlProgramsChapter\CompileMenu_BroadcastChapter\drex_part6.2_custom.png">
+	  <Content Include="AppHelp\Conservation\ArchiveControlProgramsChapter\CompileMenu_BroadcastChapter\CompileMenuBroadcast1Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\ArchiveControlProgramsChapter\drex_part6.3_custom.png">
+	  <Content Include="AppHelp\Conservation\ArchiveControlProgramsChapter\EditingArchiveControlPrograms1Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\ArchiveControlProgramsChapter\drex_part6.3_custom_2.png">
+	  <Content Include="AppHelp\Conservation\ArchiveControlProgramsChapter\EditingArchiveControlPrograms2Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\ArchiveControlProgramsChapter\drex_part6.3_custom_3.png">
+	  <Content Include="AppHelp\Conservation\ArchiveControlProgramsChapter\ArchiveControlPrograms1Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\ArchiveControlProgramsChapter\drex_part6.3_custom_4.png">
+	  <Content Include="AppHelp\Conservation\ArchiveControlProgramsChapter\EditingArchiveControlPrograms3Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\ArchiveControlProgramsChapter\drex_part6.3_custom_5.png">
+	  <Content Include="AppHelp\Conservation\ArchiveControlProgramsChapter\ArchiveControlPrograms2Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\ArchiveControlProgramsChapter\drex_part6.3_custom_6.png">
+	  <Content Include="AppHelp\Conservation\ArchiveControlProgramsChapter\EditingArchiveControlPrograms4Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\ArchiveControlProgramsChapter\drex_part6.3_custom_7.png">
+	  <Content Include="AppHelp\Conservation\ArchiveControlProgramsChapter\ArchiveControlPrograms3Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\ArchiveControlProgramsChapter\drex_part6.3_custom_8.png">
+	  <Content Include="AppHelp\Conservation\ArchiveControlProgramsChapter\EditingArchiveControlPrograms5Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\ArchiveControlProgramsChapter\drex_part6.4_custom.png">
+	  <Content Include="AppHelp\Conservation\ArchiveControlProgramsChapter\BlockMenuPCArchiveWindow1Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\ArchiveControlProgramsChapter\drex_part6.4_custom_2.png">
+	  <Content Include="AppHelp\Conservation\ArchiveControlProgramsChapter\BlockMenuPCArchiveWindow2Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\ArchiveControlProgramsChapter\drex_part6.4_custom_3.png">
+	  <Content Include="AppHelp\Conservation\ArchiveControlProgramsChapter\ArchiveControlPrograms4Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\ArchiveControlProgramsChapter\drex_part6.5_custom.png">
+	  <Content Include="AppHelp\Conservation\ArchiveControlProgramsChapter\SearchMenuPCArchiveWindow1Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\ArchiveControlProgramsChapter\drex_part6.5_custom_2.png">
+	  <Content Include="AppHelp\Conservation\ArchiveControlProgramsChapter\SearchMenuPCArchiveWindow2Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\ArchiveControlProgramsChapter\drex_part6.5_custom_3.png">
+	  <Content Include="AppHelp\Conservation\ArchiveControlProgramsChapter\ArchiveControlPrograms5Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\Conservation\ArchiveControlProgramsChapter\EditingArchiveControlProgramsPart.html">
@@ -133,25 +133,25 @@
 	  <Content Include="AppHelp\Conservation\BroadcastControlProgramsChapter\BroadcastControlProgramsChapter\CompileMenu_BroadcastPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\BroadcastControlProgramsChapter\BroadcastControlProgramsChapter\drex_part5.3.2_custom.png">
+	  <Content Include="AppHelp\Conservation\BroadcastControlProgramsChapter\BroadcastControlProgramsChapter\CompileMenuBroadcastImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\BroadcastControlProgramsChapter\BroadcastControlProgramsChapter\drex_part5.3.3_custom.png">
+	  <Content Include="AppHelp\Conservation\BroadcastControlProgramsChapter\BroadcastControlProgramsChapter\BroadcastControlPrograms1Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\BroadcastControlProgramsChapter\BroadcastControlProgramsChapter\drex_part5.3.3_custom_2.png">
+	  <Content Include="AppHelp\Conservation\BroadcastControlProgramsChapter\BroadcastControlProgramsChapter\CompileMakeCommandIPKBroadcastImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\BroadcastControlProgramsChapter\BroadcastControlProgramsChapter\drex_part5.3.4_custom.png">
+	  <Content Include="AppHelp\Conservation\BroadcastControlProgramsChapter\BroadcastControlProgramsChapter\BroadcastControlPrograms2Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\BroadcastControlProgramsChapter\BroadcastControlProgramsChapter\drex_part5.3.4_custom_2.png">
+	  <Content Include="AppHelp\Conservation\BroadcastControlProgramsChapter\BroadcastControlProgramsChapter\PCBroadcastProcess1Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\BroadcastControlProgramsChapter\BroadcastControlProgramsChapter\drex_part5.3.4_custom_3.png">
+	  <Content Include="AppHelp\Conservation\BroadcastControlProgramsChapter\BroadcastControlProgramsChapter\BroadcastControlPrograms3Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\BroadcastControlProgramsChapter\BroadcastControlProgramsChapter\drex_part5.3.4_custom_4.png">
+	  <Content Include="AppHelp\Conservation\BroadcastControlProgramsChapter\BroadcastControlProgramsChapter\PCBroadcastProcess2Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\Conservation\BroadcastControlProgramsChapter\BroadcastControlProgramsChapter\PCBroadcastProcessPart.html">
@@ -169,7 +169,7 @@
 	  <Content Include="AppHelp\Conservation\BroadcastControlProgramsChapter\DevelopmentSourceTextsControlProgramsPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\BroadcastControlProgramsChapter\drex_part5.5_custom.png">
+	  <Content Include="AppHelp\Conservation\BroadcastControlProgramsChapter\RenumberingLabelsInMonitoringProgramImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\Conservation\BroadcastControlProgramsChapter\RenumberingLabelsInMonitoringProgramPart.html">
@@ -208,16 +208,16 @@
 	  <Content Include="AppHelp\Conservation\DevelopmentControlProgramsChapter\CableInspectionProgramChapter\DiagramCableBeingTestedPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\DevelopmentControlProgramsChapter\CableInspectionProgramChapter\drex_part4.2.1_custom.png">
+	  <Content Include="AppHelp\Conservation\DevelopmentControlProgramsChapter\CableInspectionProgramChapter\DiagramCableBeingTestedImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\DevelopmentControlProgramsChapter\CableInspectionProgramChapter\drex_part4.2.2_custom.png">
+	  <Content Include="AppHelp\Conservation\DevelopmentControlProgramsChapter\CableInspectionProgramChapter\ConnectingDeviceImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\DevelopmentControlProgramsChapter\CableInspectionProgramChapter\drex_part4.2.5_custom.png">
+	  <Content Include="AppHelp\Conservation\DevelopmentControlProgramsChapter\CableInspectionProgramChapter\CommandVShImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\DevelopmentControlProgramsChapter\CableInspectionProgramChapter\drex_part4.2.6_custom.png">
+	  <Content Include="AppHelp\Conservation\DevelopmentControlProgramsChapter\CableInspectionProgramChapter\CommandTsUImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\Conservation\DevelopmentControlProgramsChapter\CheckingControlObjectAttachmentsChapter\CombinationFunctionalControlPart.html">
@@ -229,19 +229,19 @@
 	  <Content Include="AppHelp\Conservation\DevelopmentControlProgramsChapter\CheckingControlObjectAttachmentsChapter\ControlNon_LinearElementsCommandNEPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\DevelopmentControlProgramsChapter\CheckingControlObjectAttachmentsChapter\drex_part4.3.1_custom.png">
+	  <Content Include="AppHelp\Conservation\DevelopmentControlProgramsChapter\CheckingControlObjectAttachmentsChapter\OhmicResistanceControlCommandKCImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\DevelopmentControlProgramsChapter\CheckingControlObjectAttachmentsChapter\drex_part4.3.2_custom.png">
+	  <Content Include="AppHelp\Conservation\DevelopmentControlProgramsChapter\CheckingControlObjectAttachmentsChapter\ControlNonLinearElementsCommandNE1Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\DevelopmentControlProgramsChapter\CheckingControlObjectAttachmentsChapter\drex_part4.3.2_custom_2.png">
+	  <Content Include="AppHelp\Conservation\DevelopmentControlProgramsChapter\CheckingControlObjectAttachmentsChapter\ControlNonLinearElementsCommandNE2Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\DevelopmentControlProgramsChapter\CheckingControlObjectAttachmentsChapter\drex_part4.3.2_custom_3.png">
+	  <Content Include="AppHelp\Conservation\DevelopmentControlProgramsChapter\CheckingControlObjectAttachmentsChapter\ControlNonLinearElementsCommandNE3Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\DevelopmentControlProgramsChapter\CheckingControlObjectAttachmentsChapter\drex_part4.3.4_custom.png">
+	  <Content Include="AppHelp\Conservation\DevelopmentControlProgramsChapter\CheckingControlObjectAttachmentsChapter\CombinationFunctionalControlImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\Conservation\DevelopmentControlProgramsChapter\CheckingControlObjectAttachmentsChapter\OhmicResistanceControlCommandKCPart.html">
@@ -262,10 +262,10 @@
 	  <Content Include="AppHelp\Conservation\DevelopmentControlProgramsChapter\ControlFunctioningChapter\ControlSwitchingElementsOKPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\DevelopmentControlProgramsChapter\ControlFunctioningChapter\drex_part4.4.2_custom.png">
+	  <Content Include="AppHelp\Conservation\DevelopmentControlProgramsChapter\ControlFunctioningChapter\CombiningSwitchingBlocksByInputsImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\DevelopmentControlProgramsChapter\ControlFunctioningChapter\drex_part4.4.4_custom.png">
+	  <Content Include="AppHelp\Conservation\DevelopmentControlProgramsChapter\ControlFunctioningChapter\ControlSwitchingElementsOKImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\Conservation\DevelopmentControlProgramsChapter\ControlFunctioningChapter\GeneralInformationControlFunctioningPart.html">
@@ -274,13 +274,13 @@
 	  <Content Include="AppHelp\Conservation\DevelopmentControlProgramsChapter\ControlFunctioningChapter\MeasurementCommandsInPCWithFunctionControlPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\DevelopmentControlProgramsChapter\drex_part4.6_custom.png">
+	  <Content Include="AppHelp\Conservation\DevelopmentControlProgramsChapter\AutomatedDevelopmentControlPrograms1Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\DevelopmentControlProgramsChapter\drex_part4.6_custom_2.png">
+	  <Content Include="AppHelp\Conservation\DevelopmentControlProgramsChapter\AutomatedDevelopmentControlPrograms2Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\DevelopmentControlProgramsChapter\UsingPreprocessorInPCDevelopmentChapter\drex_part4.5.2_custom.png">
+	  <Content Include="AppHelp\Conservation\DevelopmentControlProgramsChapter\UsingPreprocessorInPCDevelopmentChapter\MACROMacroDevelopmentStandardVerificationAlgorithmsImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\Conservation\DevelopmentControlProgramsChapter\UsingPreprocessorInPCDevelopmentChapter\FORMacroAbbreviatedCommandWritingPart.html">
@@ -301,19 +301,19 @@
 	  <Content Include="AppHelp\Conservation\GeneralInformationChapter\ConfiguringPOASKPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\GeneralInformationChapter\drex_part1.4_custom.png">
+	  <Content Include="AppHelp\Conservation\GeneralInformationChapter\GeneralInformation1Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\GeneralInformationChapter\drex_part1.4_custom_2.png">
+	  <Content Include="AppHelp\Conservation\GeneralInformationChapter\GeneralInformation2Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\GeneralInformationChapter\drex_part1.5_custom.png">
+	  <Content Include="AppHelp\Conservation\GeneralInformationChapter\SoftwareLaunchImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\GeneralInformationChapter\drex_part1.8_custom.png">
+	  <Content Include="AppHelp\Conservation\GeneralInformationChapter\ConfiguringPOASKImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\GeneralInformationChapter\drex_part1.8_custom_2.png">
+	  <Content Include="AppHelp\Conservation\GeneralInformationChapter\GeneralInformation3Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\Conservation\GeneralInformationChapter\InformationAboutSoftwareDeliveryPart.html">
@@ -334,19 +334,19 @@
 	  <Content Include="AppHelp\Content\GeneralInformationPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\ImplementationMonitoringProgramsChapter\drex_part7.6_custom.png">
+	  <Content Include="AppHelp\Conservation\ImplementationMonitoringProgramsChapter\InfoMenuExecutionInformation1Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\ImplementationMonitoringProgramsChapter\drex_part7.6_custom_2.png">
+	  <Content Include="AppHelp\Conservation\ImplementationMonitoringProgramsChapter\ImplementationMonitoringPrograms1Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\ImplementationMonitoringProgramsChapter\drex_part7.6_custom_3.png">
+	  <Content Include="AppHelp\Conservation\ImplementationMonitoringProgramsChapter\InfoMenuExecutionInformation2Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\ImplementationMonitoringProgramsChapter\drex_part7.6_custom_4.png">
+	  <Content Include="AppHelp\Conservation\ImplementationMonitoringProgramsChapter\ImplementationMonitoringPrograms2Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\ImplementationMonitoringProgramsChapter\drex_part7.6_custom_5.png">
+	  <Content Include="AppHelp\Conservation\ImplementationMonitoringProgramsChapter\ImplementationMonitoringPrograms3Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\Conservation\ImplementationMonitoringProgramsChapter\ExecutionMessagesIssuedByYAPKCommandsChapter\ExecutionMessagesCommandsBPPart.html">
@@ -445,10 +445,10 @@
 	  <Content Include="AppHelp\Conservation\ImplementationMonitoringProgramsChapter\ExecutionProtocolChapter\CommandsForWorkingWithExecutionProtocolPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\ImplementationMonitoringProgramsChapter\ExecutionProtocolChapter\drex_part7.4.2_custom.png">
+	  <Content Include="AppHelp\Conservation\ImplementationMonitoringProgramsChapter\ExecutionProtocolChapter\ExecutionProtocol1Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\ImplementationMonitoringProgramsChapter\ExecutionProtocolChapter\drex_part7.4.2_custom_2.png">
+	  <Content Include="AppHelp\Conservation\ImplementationMonitoringProgramsChapter\ExecutionProtocolChapter\CommandsForWorkingWithExecutionProtocolImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\Conservation\ImplementationMonitoringProgramsChapter\ExecutionProtocolChapter\TypesMessagesOutputExecutionProtocolPart.html">
@@ -457,55 +457,55 @@
 	  <Content Include="AppHelp\Conservation\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\CompletionMonitoringProgramPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\drex_part7.2.3_custom.png">
+	  <Content Include="AppHelp\Conservation\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\StoppingExecutionMonitoringProgramImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\drex_part7.2.4_custom.png">
+	  <Content Include="AppHelp\Conservation\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\CompletionMonitoringProgram1Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\drex_part7.2.4_custom_2.png">
+	  <Content Include="AppHelp\Conservation\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\ImplementationMonitoringPrograms1Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\drex_part7.2.4_custom_3.png">
+	  <Content Include="AppHelp\Conservation\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\CompletionMonitoringProgram2Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\drex_part7.2.4_custom_4.png">
+	  <Content Include="AppHelp\Conservation\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\CompletionMonitoringProgram3Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\Conservation\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\ProcessExecutingControlProgramsPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\RunMenu_StartChapter\drex_part7.2.1.10_custom.png">
+	  <Content Include="AppHelp\Conservation\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\RunMenu_StartChapter\RunLoadCommandLoadingExecutionProtocolImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\RunMenu_StartChapter\drex_part7.2.1.11_custom.png">
+	  <Content Include="AppHelp\Conservation\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\RunMenu_StartChapter\RunEraseCommandRemovingOldExecutionProtocols1Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\RunMenu_StartChapter\drex_part7.2.1.11_custom_2.png">
+	  <Content Include="AppHelp\Conservation\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\RunMenu_StartChapter\RunEraseCommandRemovingOldExecutionProtocols2Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\RunMenu_StartChapter\drex_part7.2.1.9_custom.png">
+	  <Content Include="AppHelp\Conservation\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\RunMenu_StartChapter\RunPrintCommandPrintingExecutionProtocolImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\RunMenu_StartChapter\drex_part7.2.1_custom.png">
+	  <Content Include="AppHelp\Conservation\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\RunMenu_StartChapter\RunMenuStart1Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\RunMenu_StartChapter\drex_part7.2.1_custom_2.png">
+	  <Content Include="AppHelp\Conservation\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\RunMenu_StartChapter\RunMenuStart2Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\RunMenu_StartChapter\drex_part7.2.3_custom.png">
+	  <Content Include="AppHelp\Conservation\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\RunMenu_StartChapter\RunMenuStart3Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\RunMenu_StartChapter\drex_part7.2.4_custom.png">
+	  <Content Include="AppHelp\Conservation\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\RunMenu_StartChapter\RunMenuStart4Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\RunMenu_StartChapter\drex_part7.2.4_custom_2.png">
+	  <Content Include="AppHelp\Conservation\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\RunMenu_StartChapter\RunMenuStart5Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\RunMenu_StartChapter\drex_part7.2.4_custom_3.png">
+	  <Content Include="AppHelp\Conservation\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\RunMenu_StartChapter\RunMenuStart6Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\RunMenu_StartChapter\drex_part7.2.4_custom_4.png">
+	  <Content Include="AppHelp\Conservation\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\RunMenu_StartChapter\RunMenuStart7Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\Conservation\ImplementationMonitoringProgramsChapter\ImplementationMonitoringProgramsChapter\RunMenu_StartChapter\RunBreakCommandAbortExecutionPart.html">
@@ -547,28 +547,28 @@
 	  <Content Include="AppHelp\Conservation\ImplementationMonitoringProgramsChapter\InfoMenuExecutionInformationPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\ImplementationMonitoringProgramsChapter\OptionsMenu_POASKOptionsChapter\drex_part7.5.1_custom.png">
+	  <Content Include="AppHelp\Conservation\ImplementationMonitoringProgramsChapter\OptionsMenu_POASKOptionsChapter\OptionsExecuteMenuRunningProgramsAndTests1Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\ImplementationMonitoringProgramsChapter\OptionsMenu_POASKOptionsChapter\drex_part7.5.1_custom_2.png">
+	  <Content Include="AppHelp\Conservation\ImplementationMonitoringProgramsChapter\OptionsMenu_POASKOptionsChapter\OptionsMenuPOASKOptions1Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\ImplementationMonitoringProgramsChapter\OptionsMenu_POASKOptionsChapter\drex_part7.5.1_custom_3.png">
+	  <Content Include="AppHelp\Conservation\ImplementationMonitoringProgramsChapter\OptionsMenu_POASKOptionsChapter\OptionsExecuteMenuRunningProgramsAndTests2Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\ImplementationMonitoringProgramsChapter\OptionsMenu_POASKOptionsChapter\drex_part7.5.1_custom_4.png">
+	  <Content Include="AppHelp\Conservation\ImplementationMonitoringProgramsChapter\OptionsMenu_POASKOptionsChapter\OptionsMenuPOASKOptions2Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\ImplementationMonitoringProgramsChapter\OptionsMenu_POASKOptionsChapter\drex_part7.5.1_custom_5.png">
+	  <Content Include="AppHelp\Conservation\ImplementationMonitoringProgramsChapter\OptionsMenu_POASKOptionsChapter\OptionsExecuteMenuRunningProgramsAndTests3Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\ImplementationMonitoringProgramsChapter\OptionsMenu_POASKOptionsChapter\drex_part7.5.1_custom_6.png">
+	  <Content Include="AppHelp\Conservation\ImplementationMonitoringProgramsChapter\OptionsMenu_POASKOptionsChapter\OptionsMenuPOASKOptions3Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\ImplementationMonitoringProgramsChapter\OptionsMenu_POASKOptionsChapter\drex_part7.5.2_custom.png">
+	  <Content Include="AppHelp\Conservation\ImplementationMonitoringProgramsChapter\OptionsMenu_POASKOptionsChapter\OptionsReportMenuExecutionProtocolImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\ImplementationMonitoringProgramsChapter\OptionsMenu_POASKOptionsChapter\drex_part7.5.2_custom_2.png">
+	  <Content Include="AppHelp\Conservation\ImplementationMonitoringProgramsChapter\OptionsMenu_POASKOptionsChapter\OptionsMenuPOASKOptions4Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\Conservation\ImplementationMonitoringProgramsChapter\OptionsMenu_POASKOptionsChapter\OptionsExecuteMenuRunningProgramsAndTestsPart.html">
@@ -586,7 +586,7 @@
 	  <Content Include="AppHelp\Conservation\ImplementationMonitoringProgramsChapter\PreparationForImplementationControlProgramsChapter\BroadcastControlProgramsPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\ImplementationMonitoringProgramsChapter\PreparationForImplementationControlProgramsChapter\drex_part7.1.1_custom.png">
+	  <Content Include="AppHelp\Conservation\ImplementationMonitoringProgramsChapter\PreparationForImplementationControlProgramsChapter\BroadcastControlProgramsImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\Conservation\ImplementationMonitoringProgramsChapter\PreparationForImplementationControlProgramsChapter\OptionsForExecutingMonitoringProgramsPart.html">
@@ -622,7 +622,7 @@
 	  <Content Include="AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\ASCDeviceManagementCommandsChapter\CommandVSh_Part.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\ASCDeviceManagementCommandsChapter\drex_part3.5.3.7_custom.png">
+	  <Content Include="AppHelp\Conservation\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\ASCDeviceManagementCommandsChapter\ASCDeviceManagementCommands1Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\ASCDeviceManagementCommandsPart.html">
@@ -703,49 +703,49 @@
 	  <Content Include="AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\CommandTsG_Part.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\drex_part3.5.2.10_custom.png">
+	  <Content Include="AppHelp\Conservation\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\MeasurementCommands1Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\drex_part3.5.2.11_custom.png">
+	  <Content Include="AppHelp\Conservation\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\MeasurementCommands2Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\drex_part3.5.2.13_custom.png">
+	  <Content Include="AppHelp\Conservation\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\MeasurementCommands3Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\drex_part3.5.2.13_custom_2.png">
+	  <Content Include="AppHelp\Conservation\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\MeasurementCommands4Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\drex_part3.5.2.14_custom.png">
+	  <Content Include="AppHelp\Conservation\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\MeasurementCommands5Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\drex_part3.5.2.1_custom.png">
+	  <Content Include="AppHelp\Conservation\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\MeasurementCommands6Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\drex_part3.5.2.2_custom.png">
+	  <Content Include="AppHelp\Conservation\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\MeasurementCommands7Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\drex_part3.5.2.2_custom_2.png">
+	  <Content Include="AppHelp\Conservation\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\MeasurementCommands8Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\drex_part3.5.2.3_custom.png">
+	  <Content Include="AppHelp\Conservation\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\MeasurementCommands9Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\drex_part3.5.2.4_custom.png">
+	  <Content Include="AppHelp\Conservation\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\MeasurementCommands10Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\drex_part3.5.2.5_custom.png">
+	  <Content Include="AppHelp\Conservation\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\MeasurementCommands11Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\drex_part3.5.2.6_custom.png">
+	  <Content Include="AppHelp\Conservation\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\MeasurementCommands12Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\drex_part3.5.2.7_custom.png">
+	  <Content Include="AppHelp\Conservation\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\MeasurementCommands13Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\drex_part3.5.2.8_custom.png">
+	  <Content Include="AppHelp\Conservation\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\MeasurementCommands14Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\drex_part3.5.2.9_custom.png">
+	  <Content Include="AppHelp\Conservation\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsChapter\MeasurementCommands15Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\MeasurementCommandsPart.html">
@@ -754,13 +754,13 @@
 	  <Content Include="AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguagePart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\LanguageControlProgramsChapter\drex_part3.1_custom.png">
+	  <Content Include="AppHelp\Conservation\LanguageControlProgramsChapter\LanguageControlPrograms1Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\LanguageControlProgramsChapter\drex_part3.6_custom.png">
+	  <Content Include="AppHelp\Conservation\LanguageControlProgramsChapter\LanguageControlPrograms2Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\LanguageControlProgramsChapter\drex_part3.6_custom_2.png">
+	  <Content Include="AppHelp\Conservation\LanguageControlProgramsChapter\LanguageControlPrograms3Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\Conservation\LanguageControlProgramsChapter\IdleExecutionControlProgramsPart.html">
@@ -898,7 +898,7 @@
 	  <Content Include="AppHelp\Content\MainMenuChapter\TabFileChapter\createNewTextEditorImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.10_custom.png">
+	  <Content Include="AppHelp\Conservation\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\TabFile1Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\Content\MainMenuChapter\TabFileChapter\exampleArchiveCatalogImage.png">
@@ -910,55 +910,55 @@
 	  <Content Include="AppHelp\Content\MainMenuChapter\TabFileChapter\findPanelImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.1_custom.png">
+	  <Content Include="AppHelp\Conservation\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\TabFile2Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.1_custom_2.png">
+	  <Content Include="AppHelp\Conservation\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\TabFile3Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.1_custom_3.png">
+	  <Content Include="AppHelp\Conservation\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\TabFile4Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.1_custom_4.png">
+	  <Content Include="AppHelp\Conservation\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\TabFile5Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.2_custom.png">
+	  <Content Include="AppHelp\Conservation\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\TabFile6Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.2_custom_2.png">
+	  <Content Include="AppHelp\Conservation\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\TabFile7Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.2_custom_3.png">
+	  <Content Include="AppHelp\Conservation\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\TabFile8Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.2_custom_4.png">
+	  <Content Include="AppHelp\Conservation\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\TabFile9Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.3_custom.png">
+	  <Content Include="AppHelp\Conservation\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\TabFile10Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.3_custom_2.png">
+	  <Content Include="AppHelp\Conservation\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\TabFile11Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.5_custom.png">
+	  <Content Include="AppHelp\Conservation\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\TabFile12Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.6_custom.png">
+	  <Content Include="AppHelp\Conservation\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\TabFile13Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.7_custom.png">
+	  <Content Include="AppHelp\Conservation\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\TabFile14Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\Content\MainMenuChapter\TabFileChapter\fileManagerWriteModeImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.7_custom_3.png">
+	  <Content Include="AppHelp\Conservation\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\TabFile15Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.8_custom.png">
+	  <Content Include="AppHelp\Conservation\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\TabFile16Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.9_custom.png">
+	  <Content Include="AppHelp\Conservation\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\TabFile17Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\Content\MainMenuChapter\TabFileChapter\FuncConvertPart.html">
@@ -1042,19 +1042,19 @@
 	  <Content Include="AppHelp\Content\MainMenuChapter\TabFileChapter\windowAvailableArchivesImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\MainMenuChapter\TabSettingsChapter\drex_part14.6.1.1_custom.png">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabSettingsChapter\SettingsConfiguration1Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\MainMenuChapter\TabSettingsChapter\drex_part14.6.1.2_custom.png">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabSettingsChapter\SettingsConfiguration2Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\MainMenuChapter\TabSettingsChapter\drex_part14.6.1.3_custom.png">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabSettingsChapter\SettingsConfiguration3Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\MainMenuChapter\TabSettingsChapter\drex_part14.6.2_custom.png">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabSettingsChapter\TabSettings1Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\MainMenuChapter\TabSettingsChapter\drex_part14.6.3_custom.png">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabSettingsChapter\TabSettings2Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\Content\MainMenuChapter\TabSettingsChapter\part_executionSettings.png">
@@ -1078,25 +1078,25 @@
 	  <Content Include="AppHelp\Content\MainMenuChapter\TabSettingsChapter\SettingsProtocolPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\MainMenuChapter\TabTrialsChapter\TabMetrologyChapter\drex_part14.2.1_custom.png">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabTrialsChapter\TabMetrologyChapter\UtilityModeKCImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\MainMenuChapter\TabTrialsChapter\TabMetrologyChapter\drex_part14.2.2_custom.png">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabTrialsChapter\TabMetrologyChapter\UtilityModeIEImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\MainMenuChapter\TabTrialsChapter\TabMetrologyChapter\drex_part14.2.3_custom.png">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabTrialsChapter\TabMetrologyChapter\UtilityModeSIImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\MainMenuChapter\TabTrialsChapter\TabMetrologyChapter\drex_part14.2.4_custom.png">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabTrialsChapter\TabMetrologyChapter\UtilityModePRImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\MainMenuChapter\TabTrialsChapter\TabMetrologyChapter\drex_part14.2.5_custom.png">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabTrialsChapter\TabMetrologyChapter\UtilityModePI1Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\MainMenuChapter\TabTrialsChapter\TabMetrologyChapter\drex_part14.2.5_custom_2.png">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabTrialsChapter\TabMetrologyChapter\UtilityModePI2Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\MainMenuChapter\TabTrialsChapter\TabMetrologyChapter\drex_part14.2.6_custom.png">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabTrialsChapter\TabMetrologyChapter\UtilityModeKNImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\Content\MainMenuChapter\TabTrialsChapter\TabMetrologyChapter\ehtMetrologyPanelImage.png">
@@ -1138,16 +1138,16 @@
 	  <Content Include="AppHelp\Content\MainMenuChapter\TabTrialsChapter\TabTestsChapter\CrossTestMkrPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\MainMenuChapter\TabTrialsChapter\TabTestsChapter\drex_part14.4.3_custom.png">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabTrialsChapter\TabTestsChapter\CrossTestMkrImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\Content\MainMenuChapter\TabTrialsChapter\TabTestsChapter\rkommTestPanelImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\MainMenuChapter\TabTrialsChapter\TabTestsChapter\TabTestPIChapter\drex_part14.4.2.1_custom.png">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabTrialsChapter\TabTestsChapter\TabTestPIChapter\TestPINodeMethodImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\MainMenuChapter\TabTrialsChapter\TabTestsChapter\TabTestPIChapter\drex_part14.4.2.2_custom.png">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabTrialsChapter\TabTestsChapter\TabTestPIChapter\TestPIGroupMethodImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\Content\MainMenuChapter\TabTrialsChapter\TabTestsChapter\TabTestPIChapter\TestPIGroupMethodPart.html">
@@ -1156,10 +1156,10 @@
 	  <Content Include="AppHelp\Content\MainMenuChapter\TabTrialsChapter\TabTestsChapter\TabTestPIChapter\TestPINodeMethodPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\MainMenuChapter\TabTrialsChapter\TabTestsChapter\TabTestSIChapter\drex_part14.4.1.1_custom.png">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabTrialsChapter\TabTestsChapter\TabTestSIChapter\TestSINodeMethodImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\MainMenuChapter\TabTrialsChapter\TabTestsChapter\TabTestSIChapter\drex_part14.4.1.2_custom.png">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabTrialsChapter\TabTestsChapter\TabTestSIChapter\TestSIGroupMethodImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\Content\MainMenuChapter\TabTrialsChapter\TabTestsChapter\TabTestSIChapter\TestSIGroupMethodPart.html">
@@ -1180,40 +1180,40 @@
 	  <Content Include="AppHelp\Content\TextEditorChapter\DescriptionWorkTextEditorPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\TextEditorChapter\drex_part15.3_custom.png">
+	  <Content Include="AppHelp\Content\TextEditorChapter\SearchWindowTextEditor1Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\TextEditorChapter\drex_part15.3_custom_10.png">
+	  <Content Include="AppHelp\Content\TextEditorChapter\SearchWindowTextEditor12Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\TextEditorChapter\drex_part15.3_custom_11.png">
+	  <Content Include="AppHelp\Content\TextEditorChapter\SearchWindowTextEditor7Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\TextEditorChapter\drex_part15.3_custom_12.png">
+	  <Content Include="AppHelp\Content\TextEditorChapter\SearchWindowTextEditor8Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\TextEditorChapter\drex_part15.3_custom_2.png">
+	  <Content Include="AppHelp\Content\TextEditorChapter\SearchWindowTextEditor4Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\TextEditorChapter\drex_part15.3_custom_3.png">
+	  <Content Include="AppHelp\Content\TextEditorChapter\SearchWindowTextEditor5Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\TextEditorChapter\drex_part15.3_custom_4.png">
+	  <Content Include="AppHelp\Content\TextEditorChapter\SearchWindowTextEditor2Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\TextEditorChapter\drex_part15.3_custom_5.png">
+	  <Content Include="AppHelp\Content\TextEditorChapter\SearchWindowTextEditor3Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\TextEditorChapter\drex_part15.3_custom_6.png">
+	  <Content Include="AppHelp\Content\TextEditorChapter\SearchWindowTextEditor6Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\TextEditorChapter\drex_part15.3_custom_7.png">
+	  <Content Include="AppHelp\Content\TextEditorChapter\SearchWindowTextEditor9Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\TextEditorChapter\drex_part15.3_custom_8.png">
+	  <Content Include="AppHelp\Content\TextEditorChapter\SearchWindowTextEditor10Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\TextEditorChapter\drex_part15.3_custom_9.png">
+	  <Content Include="AppHelp\Content\TextEditorChapter\SearchWindowTextEditor11Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\Content\HotKeysPart.html">
@@ -1393,91 +1393,91 @@
 	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\ControlNonlinearElementsTSTNLNPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.10_custom.png">
+	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\RemovingStaticFromSwitchInputsSTATICAImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.10_custom_2.png">
+	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\AdditionalTestsAndUtilities1Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.11_custom.png">
+	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\SwitchInsulationResistanceCorrectionRIZCOMTImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.11_custom_2.png">
+	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\AdditionalTestsAndUtilities2Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.12_custom.png">
+	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\SwitchRelayResistanceControlRKOMMImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.12_custom_2.png">
+	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\AdditionalTestsAndUtilities3Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.13_custom.png">
+	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\SwitchboardCrossTestImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.13_custom_2.png">
+	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\AdditionalTestsAndUtilities4Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.14_custom.png">
+	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\SystemDevicesTests1Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.14_custom_2.png">
+	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\AdditionalTestsAndUtilities5Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.14_custom_3.png">
+	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\SystemDevicesTests2Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.14_custom_4.png">
+	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\AdditionalTestsAndUtilities6Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.1_custom.png">
+	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\OnOffSwitchingStandVKLSTImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.1_custom_2.png">
+	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\AdditionalTestsAndUtilities7Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.2_custom.png">
+	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\RegistersCheckPORTSImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.2_custom_2.png">
+	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\AdditionalTestsAndUtilities8Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.3_custom.png">
+	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\InsulationStrengthSwitchboardByGroupMethodPRKOMGImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.3_custom_2.png">
+	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\AdditionalTestsAndUtilities9Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.4_custom.png">
+	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\InsulationStrengthSwitchByNodeMethodPRKOMUImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.4_custom_2.png">
+	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\AdditionalTestsAndUtilities10Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.5_custom.png">
+	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\ConnectingPointToPKBusRK1TRImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.6_custom.png">
+	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\ConnectPointsToPKGroupMethodRKRGVRImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.6_custom_2.png">
+	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\AdditionalTestsAndUtilities11Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.7_custom.png">
+	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\IsolationResistanceSwitchByGroupMethodSIKOMGImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.7_custom_2.png">
+	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\AdditionalTestsAndUtilities12Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.8_custom.png">
+	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\IsolationResistanceSwitchByNodeMethodSIKOMGImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.8_custom_2.png">
+	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\AdditionalTestsAndUtilities13Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.9_custom.png">
+	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\ControlNonlinearElementsTSTNLNImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\drex_part9.3.9_custom_2.png">
+	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\AdditionalTestsAndUtilities14Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\InsulationStrengthSwitchboardByGroupMethodPRKOMGPart.html">
@@ -1513,22 +1513,22 @@
 	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\SystemDevicesTestsPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\DeviceTriggerTimeDetectionUtilitiesChapter\drex_part9.5.1_custom.png">
+	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\DeviceTriggerTimeDetectionUtilitiesChapter\PointToBusSwitchingTimeImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\DeviceTriggerTimeDetectionUtilitiesChapter\drex_part9.5.1_custom_2.png">
+	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\DeviceTriggerTimeDetectionUtilitiesChapter\DeviceTriggerTimeDetectionUtilities1Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\DeviceTriggerTimeDetectionUtilitiesChapter\drex_part9.5.3_custom.png">
+	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\DeviceTriggerTimeDetectionUtilitiesChapter\SwitchingTimeVoltmeterBusbarsImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\DeviceTriggerTimeDetectionUtilitiesChapter\drex_part9.5.3_custom_2.png">
+	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\DeviceTriggerTimeDetectionUtilitiesChapter\DeviceTriggerTimeDetectionUtilities2Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\DeviceTriggerTimeDetectionUtilitiesChapter\drex_part9.5_custom.png">
+	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\DeviceTriggerTimeDetectionUtilitiesChapter\DeviceTriggerTimeDetectionUtilities3Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\DeviceTriggerTimeDetectionUtilitiesChapter\drex_part9.5_custom_2.png">
+	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\DeviceTriggerTimeDetectionUtilitiesChapter\DeviceTriggerTimeDetectionUtilities4Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\DeviceTriggerTimeDetectionUtilitiesChapter\PointToBusSwitchingTimePart.html">
@@ -1543,22 +1543,22 @@
 	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\DeviceTriggerTimeDetectionUtilitiesChapter\SwitchingTimeVoltmeterBusbarsPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\drex_part9.1_custom.png">
+	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\TestTestsMenuImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\ExecutionTestsAndUtilitiesChapter\drex_part9.6.1_custom.png">
+	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\ExecutionTestsAndUtilitiesChapter\MenuReactionToEscButtonImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\ExecutionTestsAndUtilitiesChapter\drex_part9.6.2_custom.png">
+	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\ExecutionTestsAndUtilitiesChapter\MenuReactionOnErrorImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\ExecutionTestsAndUtilitiesChapter\drex_part9.6.2_custom_2.png">
+	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\ExecutionTestsAndUtilitiesChapter\ExecutionTestsAndUtilities1Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\ExecutionTestsAndUtilitiesChapter\drex_part9.6.3_custom.png">
+	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\ExecutionTestsAndUtilitiesChapter\TestContinuationMenuImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\ExecutionTestsAndUtilitiesChapter\drex_part9.6.3_custom_2.png">
+	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\ExecutionTestsAndUtilitiesChapter\ExecutionTestsAndUtilities2Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\ExecutionTestsAndUtilitiesChapter\Menu_ReactionOnErrorPart.html">
@@ -1570,103 +1570,103 @@
 	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\ExecutionTestsAndUtilitiesChapter\TestContinuationMenuPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.10_custom.png">
+	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\VV7PGRMeasurementACVoltageKNT1Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.10_custom_2.png">
+	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\MeasurementErrorDetectionUtilities1Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.10_custom_3.png">
+	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\VV7PGRMeasurementACVoltageKNT2Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.10_custom_4.png">
+	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\MeasurementErrorDetectionUtilities2Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.11_custom.png">
+	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\TIMEPGRMeasurementIntervalsCI1Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.11_custom_2.png">
+	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\MeasurementErrorDetectionUtilities3Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.11_custom_3.png">
+	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\TIMEPGRMeasurementIntervalsCI2Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.12_custom.png">
+	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\MeasurementLeakageCurrentUsingRCTKUPGR1Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.12_custom_2.png">
+	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\MeasurementErrorDetectionUtilities4Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.12_custom_3.png">
+	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\MeasurementLeakageCurrentUsingRCTKUPGR2Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.12_custom_4.png">
+	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\MeasurementErrorDetectionUtilities5Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.13_custom.png">
+	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\IEPGRCapacityMeasurementIEImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.13_custom_2.png">
+	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\MeasurementErrorDetectionUtilities6Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.14_custom.png">
+	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\UPKIPGRPKIVoltageMeasurementImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.14_custom_2.png">
+	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\MeasurementErrorDetectionUtilities7Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.1_custom.png">
+	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\R4TPGRMeasurementResistanceRelay4PointRTImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.1_custom_2.png">
+	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\MeasurementErrorDetectionUtilities8Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.2_custom.png">
+	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\R2TPGRMeasuringResistance2WireCircuitPRTImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.2_custom_2.png">
+	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\MeasurementErrorDetectionUtilities9Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.4_custom.png">
+	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\RV7PGRMeasuringResistanceInOhmmeterModeCSImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.4_custom_2.png">
+	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\MeasurementErrorDetectionUtilities10Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.5_custom.png">
+	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\PKIPGRMeasuringResistanceUsingRCTSIImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.5_custom_2.png">
+	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\MeasurementErrorDetectionUtilities11Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.6_custom.png">
+	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\UV7PGRMeasurementConstantVoltageKNT1Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.6_custom_2.png">
+	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\MeasurementErrorDetectionUtilities12Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.6_custom_3.png">
+	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\UV7PGRMeasurementConstantVoltageKNT2Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.6_custom_4.png">
+	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\MeasurementErrorDetectionUtilities13Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.9_custom.png">
+	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\UPPUPGRMeasurementUppuPI1Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.9_custom_2.png">
+	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\MeasurementErrorDetectionUtilities14Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.9_custom_3.png">
+	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\UPPUPGRMeasurementUppuPI2Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4.9_custom_4.png">
+	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\MeasurementErrorDetectionUtilities15Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4_custom.png">
+	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\MeasurementErrorDetectionUtilities16Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\drex_part9.4_custom_2.png">
+	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\MeasurementErrorDetectionUtilities17Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\IEPGRCapacityMeasurementIEPart.html">
@@ -1711,16 +1711,16 @@
 	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\MeasurementErrorDetectionUtilitiesChapter\VV7PGRMeasurementACVoltageKNTPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\SelfControlTestsChapter\drex_part9.2.5_custom.png">
+	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\SelfControlTestsChapter\SelfControlTestSwitchImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\SelfControlTestsChapter\drex_part9.2.5_custom_2.png">
+	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\SelfControlTestsChapter\SelfControlTests1Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\SelfControlTestsChapter\drex_part9.2.7_custom.png">
+	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\SelfControlTestsChapter\SelfControlTestPKIImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\SelfControlTestsChapter\drex_part9.2.7_custom_2.png">
+	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\SelfControlTestsChapter\SelfControlTests2Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\SelfControlTestsChapter\ExecutionSelfControlTestPart.html">
