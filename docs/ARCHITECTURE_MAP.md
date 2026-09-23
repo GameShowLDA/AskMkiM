@@ -1058,6 +1058,19 @@ equipment/self-test builders оставляют его выключенным. �
 поэтому параллельные и последовательно созданные сообщения разных типов не влияют друг на друга.
 `ProtocolModel` при нормализации удаляет обе пары префиксов, чтобы не дублировать их в заключении.
 
+Фиксированные задержки оборудования объявляются через `AppDelays` и `DelayModel` в
+`Ask.Core/Shared/Metadata/Static/Delays/`. Их вывод проходит единым путём:
+
+```text
+ExecutionMessages.PublishDelayAsync(DelayModel, IMessageOutputService)
+→ ExecutionMessageBuilder.BuildDelayMessage
+→ ExecutionMessagePublisher.PublishAsync
+→ MessagePublisher.PublishAsync
+→ IMessageOutputService.ShowMessageAsync
+```
+
+Сообщение формируется одной строкой в миллисекундах: `<DelayModel.Name> <DelayModel.Delay>мс`.
+
 Форматы:
 
 - `.asktrace` — записи хода выполнения;
@@ -2399,8 +2412,10 @@ ErrorItem → translator/runner ErrorList
 | `MeasurementResultMessageContext` | internal context | Ask.Engine | передаёт тип команды, диапазон, адресат измерения, режим сравнения, аппаратный override и хранит фактически опубликованное значение | [Execution Engine](#execution-engine) |
 | `AlgorithmExecutionResult` | result container | Ask.Protocol.Messages | контракт из `Ask.Protocol.Messages/Models/`, хранящий накопленные ошибки и информационные `ShowMessageModel` алгоритма | [Execution Engine](#execution-engine) |
 | `ProtocolModelExtensions` | static extensions | Ask.Protocol.Messages | расширение из namespace `Ask.Protocol.Messages.Extensions`, добавляющее единый `AlgorithmExecutionResult` в коллекции ошибок и информационных сообщений `ProtocolModel` | [Execution Engine](#execution-engine) |
-| `ExecutionMessages` | static facade | Ask.Protocol.Messages | проверяет видимость параметров выполнения и коммутации, публикует накопленные результаты проверки, ошибки, debug-сообщения, задержки, этапы анализа цепей и локализации, границы этапов, инициализацию, настройку оборудования и коммутацию; формирует только накапливаемую ошибку локализации | [Protocols](#protocols-and-file-formats) |
-| `ExecutionMessageBuilder` | internal static builder | Ask.Protocol.Messages | содержит заголовок накопленных результатов, ошибки и задержки выполнения, сообщения подготовки, настройки и коммутации устройств, подключения диапазонов, сброса точек, этапов и запуска теста | [Protocols](#protocols-and-file-formats) |
+| `DelayModel` | shared timing model | Ask.Core | хранит отображаемое наименование и продолжительность фиксированной задержки в миллисекундах; экземпляры группируются в `AppDelays` | [Protocols](#protocols-and-file-formats) |
+| `AppDelays` | static timing catalog | Ask.Core | предоставляет сгруппированные фиксированные задержки оборудования, включая задержки пробойной установки | [Protocols](#protocols-and-file-formats) |
+| `ExecutionMessages` | static facade | Ask.Protocol.Messages | проверяет видимость параметров выполнения и коммутации, публикует накопленные результаты проверки, ошибки, debug-сообщения, задержки из числовых параметров и `DelayModel`, этапы анализа цепей и локализации, границы этапов, инициализацию, настройку оборудования и коммутацию; формирует только накапливаемую ошибку локализации | [Protocols](#protocols-and-file-formats) |
+| `ExecutionMessageBuilder` | internal static builder | Ask.Protocol.Messages | содержит заголовок накопленных результатов, ошибки и задержки выполнения, включая формат `<имя> <значение>мс` для `DelayModel`, сообщения подготовки, настройки и коммутации устройств, подключения диапазонов, сброса точек, этапов и запуска теста | [Protocols](#protocols-and-file-formats) |
 | `ExecutionMessagePublisher` | internal static publisher | Ask.Protocol.Messages | передаёт сообщения этапов выполнения в `IMessageOutputService`, сохраняет признаки начала блока, обхода паузы/пошагового режима и метаданные исходного вызова | [Protocols](#protocols-and-file-formats) |
 | `ValidationMessages` | static facade | Ask.Protocol.Messages | публикует ошибки полей ввода, поиска и конфигурации оборудования, зависимости самоконтроля, а также заголовок запуска и введённые параметры проверки | [Protocols](#protocols-and-file-formats) |
 | `ValidationMessageBuilder` | internal static builder | Ask.Protocol.Messages | формирует ошибки данных, поиска и конфигурации оборудования, сообщения о зависимостях самоконтроля и представление введённых параметров запуска | [Protocols](#protocols-and-file-formats) |

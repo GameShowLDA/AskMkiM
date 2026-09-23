@@ -1,5 +1,6 @@
-using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
+using Ask.Core.Shared.DTO.Protocol;
+using Ask.Core.Shared.Metadata.Static.Delays;
 
 namespace Ask.Protocol.Messages.Builders;
 
@@ -79,6 +80,12 @@ internal static class ExecutionMessageBuilder
 
   internal static ShowMessageModel BuildGeneralPointsResetMessage()
     => new("\tОбщий сброс точек");
+
+  internal static ShowMessageModel BuildDelayMessage(DelayModel delay)
+  {
+    ArgumentNullException.ThrowIfNull(delay);
+    return new ShowMessageModel($"{delay.Name}", message: $"{delay.Delay}мс") { IndentLevel = 3 };
+  }
 
   internal static ShowMessageModel BuildDelayBeforeEnablingMessage(double? seconds)
   {
