@@ -503,7 +503,8 @@ public sealed class ProtocolOverviewTests
       try
       {
         Layout();
-        var viewer = FindDescendant<ScrollViewer>((ListBox)control.FindName("ProtocolListBox"))!;
+        var list = (ListBox)control.FindName("ProtocolListBox");
+        var viewer = FindDescendant<ScrollViewer>(list)!;
         var scroll = (System.Windows.Controls.Primitives.ScrollBar)control.FindName("ProtocolVerticalScrollBar");
         var overview = (Border)control.FindName("OverviewTrackHost");
         Assert.True(scroll.Maximum > 0);
@@ -516,10 +517,20 @@ public sealed class ProtocolOverviewTests
         Assert.True(Panel.GetZIndex(overview) > Panel.GetZIndex(scroll));
         Assert.True(overview.IsHitTestVisible);
         Assert.Null(overview.Background);
-        Assert.True(((ErrorOverviewBar)control.FindName("errorOverviewBar")).IsMarkerHitTestOnly);
+        var overviewBar = (ErrorOverviewBar)control.FindName("errorOverviewBar");
+        Assert.True(overviewBar.IsMarkerHitTestOnly);
+        Assert.False(overviewBar.AreToolTipsEnabled);
         viewer.ScrollToVerticalOffset(100);
         Layout();
         Assert.Equal(viewer.VerticalOffset, scroll.Value);
+        double offsetBeforeWheel = viewer.VerticalOffset;
+        list.RaiseEvent(new System.Windows.Input.MouseWheelEventArgs(
+          System.Windows.Input.Mouse.PrimaryDevice, 0, -120)
+        {
+          RoutedEvent = System.Windows.UIElement.PreviewMouseWheelEvent
+        });
+        Layout();
+        Assert.True(viewer.VerticalOffset > offsetBeforeWheel);
         Assert.Equal(viewer.ViewportHeight, scroll.ViewportSize);
         scroll.RaiseEvent(new System.Windows.Controls.Primitives.ScrollEventArgs(
           System.Windows.Controls.Primitives.ScrollEventType.ThumbTrack, 200));

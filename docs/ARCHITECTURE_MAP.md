@@ -1912,10 +1912,11 @@ Renderer выбирает индексированные диапазоны ви
 только ошибки для счётчика, стрелок и F8. Клик по команде раскрывает её и выделяет маркер.
 При объединении с ошибкой кластер становится красным, но сохраняет переходы ко всем его строкам.
 Клик по свободной области вызывает `ScrollToVerticalOffset` с центрированием выбранной позиции.
-При наведении `ErrorOverviewBar` вызывает `ProtocolListBoxUI.GetOverviewPreview` и показывает
-слева компактный фрагмент из ближайших команд/ошибок в отдельном WPF `Popup`,
-не зависящем от глобального шаблона `ToolTip`; для маркера сверху добавляется его описание.
-Позиция Popup следует за курсором по вертикали.
+`ErrorOverviewBar` поддерживает предпросмотр позиции через
+`ProtocolListBoxUI.GetOverviewPreview` и отдельный WPF `Popup`, но у экземпляра,
+наложенного на `ProtocolVerticalScrollBar`, задано `AreToolTipsEnabled=false`.
+Поэтому движение мыши, колесо и перетаскивание ползунка протокола не открывают
+карточку поверх текста; навигация по маркерам и штатный ScrollBar остаются активны.
 Близкие маркеры объединяются в ограниченные по высоте кластеры:
 повторные клики обходят их строки, Shift+клик меняет направление. Реализация:
 `Ask.UI/Controls/TextEditorControl/ErrorOverviewBar.cs`,
@@ -1936,7 +1937,8 @@ Renderer выбирает индексированные диапазоны ви
 `PreviewContentTemplate` принимает строку как DataContext и заменяет содержимое карточки.
 В текущем `ProtocolListBoxUI.xaml` оформление задано непосредственно на элементах:
 `OverviewTrackHost.Background` не задан, `errorOverviewBar.Background` — `Transparent`, рамки отключены,
-`IsViewportVisible=false`: на общем фоне протокола видны только маркеры.
+`IsViewportVisible=false` и `AreToolTipsEnabled=false`: на общем фоне протокола
+видны только маркеры без всплывающего предпросмотра.
 Свойства `OverviewBarStyle`, `OverviewHostStyle`, `OverviewVisibility` и
 `ProtocolVerticalScrollBarVisibility` объявлены в `ProtocolListBoxUI.OverviewProperties.cs`,
 но текущая разметка не привязывается к ним.
