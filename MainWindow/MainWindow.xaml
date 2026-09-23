@@ -262,11 +262,11 @@
                         <MenuItem Header="{Binding Source={StaticResource LS_Menu_Open}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="OpenFile" Command="{Binding File.OpenFileCommand}" utilities:HelpProvider.HelpKey="FuncOpen"/>
                         <MenuItem Header="{Binding Source={StaticResource LS_Menu_Create}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="CreateNewFile" Command="{Binding File.CreateNewFileCommand}" utilities:HelpProvider.HelpKey="FuncCreate"/>
                         <Separator Style="{DynamicResource SeparatorMenuStyle}"/>
-                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_LegacyConversion}, Path=Value}" Style="{DynamicResource SideMenuItemStyle}">
-                            <MenuItem Header="{Binding Source={StaticResource LS_Menu_LegacyConversion_OpkToPkw}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="ConvertOpkToPk" Command="{Binding File.ConvertOpkToPkCommand}"/>
+                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_LegacyConversion}, Path=Value}" Style="{DynamicResource SideMenuItemStyle}" utilities:HelpProvider.HelpKey="FuncConvert">
+                            <MenuItem Header="{Binding Source={StaticResource LS_Menu_LegacyConversion_OpkToPkw}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="ConvertOpkToPk" Command="{Binding File.ConvertOpkToPkCommand}" utilities:HelpProvider.HelpKey="FuncConvert"/>
                             <!--<MenuItem Header="{Binding Source={StaticResource LS_Menu_LegacyConversion_OpkToOpkw}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="ConvertOpkToOpkw" Command="{Binding File.ConvertOpkToOpkwCommand}"/>-->
-                            <MenuItem Header="{Binding Source={StaticResource LS_Menu_LegacyConversion_ApkToApkw}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="ConvertApkToApkw" Command="{Binding File.ConvertApkToApkwCommand}"/>
-                            <MenuItem Header="{Binding Source={StaticResource LS_Menu_LegacyConversion_ApkwToApk}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="ConvertApkwToApk" Command="{Binding File.ConvertApkwToApkCommand}"/>
+                            <MenuItem Header="{Binding Source={StaticResource LS_Menu_LegacyConversion_ApkToApkw}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="ConvertApkToApkw" Command="{Binding File.ConvertApkToApkwCommand}" utilities:HelpProvider.HelpKey="FuncConvert"/>
+                            <MenuItem Header="{Binding Source={StaticResource LS_Menu_LegacyConversion_ApkwToApk}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="ConvertApkwToApk" Command="{Binding File.ConvertApkwToApkCommand}" utilities:HelpProvider.HelpKey="FuncConvert"/>
                         </MenuItem>
 
                         <Separator Style="{DynamicResource SeparatorMenuStyle}"/>
@@ -341,8 +341,11 @@
 
                     <MenuItem Header="{Binding Source={StaticResource LS_Menu_Help}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Name="HelpText">
                         <MenuItem Header="{Binding Source={StaticResource LS_Menu_Help_GeneralInformation}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Name="HelpTextGeneralInformation" Command="{Binding Settings.HelpOpenGeneralInformationCommand}"/>
+                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_Help_MainMenu}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Name="HelpTextMainMenu" Command="{Binding Settings.HelpOpenMainMenuCommand}"/>
                         <MenuItem Header="{Binding Source={StaticResource LS_Menu_Help_LanguageControlPrograms}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Name="HelpTextLanguageControlPrograms" Command="{Binding Settings.HelpOpenLanguageControlProgramsCommand}"/>
-                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_Help_ProgramComposition}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Name="HelpTextProgramComposition" Command="{Binding Settings.HelpOpenProgramCompositionCommand}"/>
+                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_Help_Translator}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Name="HelpTextTranslator" Command="{Binding Settings.HelpOpenTranslatorCommand}"/>
+                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_Help_TextEditor}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Name="HelpTextTextEditor" Command="{Binding Settings.HelpOpenTextEditorCommand}"/>
+                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_Help_HotKeys}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Name="HelpTextHotKeys" Command="{Binding Settings.HelpOpenHotKeysCommand}"/>
                         <MenuItem Header="{Binding Source={StaticResource LS_Menu_Help_AboutProgram}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Name="HelpTextAboutProgram" Command="{Binding Settings.HelpOpenAboutProgramCommand}"/>
                         <Separator Background="{StaticResource ActiveBorderSolidColorBrush}"/>
                         <MenuItem Header="{Binding Source={StaticResource LS_Menu_Help_FastMenuCommand}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Name="FastMenuCommand" Command="{Binding Settings.HelpOpenFastMenuCommand}"/>

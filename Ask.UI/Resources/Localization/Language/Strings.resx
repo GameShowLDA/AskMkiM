@@ -216,11 +216,20 @@
   <data name="menu.help.generalInformation" xml:space="preserve">
     <value>Общие сведения</value>
   </data>
-  <data name="menu.help.languageControlPrograms" xml:space="preserve">
-    <value>Язык программ контроля</value>
+  <data name="menu.help.mainMenu" xml:space="preserve">
+    <value>Основное меню</value>
   </data>
-  <data name="menu.help.programComposition" xml:space="preserve">
-    <value>Состав программы</value>
+  <data name="menu.help.languageControlPrograms" xml:space="preserve">
+    <value>Язык АСК</value>
+  </data>
+  <data name="menu.help.translator" xml:space="preserve">
+    <value>Транслятор</value>
+  </data>
+  <data name="menu.help.textEditor" xml:space="preserve">
+    <value>Текстовый редактор</value>
+  </data>
+  <data name="menu.help.hotKeys" xml:space="preserve">
+    <value>Горячие клавиши</value>
   </data>
   <data name="menu.help.aboutProgram" xml:space="preserve">
     <value>О программе</value>

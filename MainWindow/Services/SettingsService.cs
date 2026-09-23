@@ -41,14 +41,29 @@ namespace MainWindowProgram.Services
     public void HelpOpenGeneralInformation() => HelpText("GeneralInformation");
 
     /// <summary>
-    /// Открывает раздел "Язык программ контроля" в справочнике
+    /// Открывает раздел "Основное меню" в справочнике
+    /// </summary>
+    public void HelpOpenMainMenu() => HelpText("MainMenu");
+
+    /// <summary>
+    /// Открывает раздел "Язык АСК" в справочнике
     /// </summary>
     public void HelpOpenLanguageControlPrograms() => HelpText("LanguageControlPrograms");
 
     /// <summary>
-    /// Открывает раздел "Состав программы" в справочнике
+    /// Открывает раздел "Транслятор" в справочнике
     /// </summary>
-    public void HelpOpenProgramComposition() => HelpText("ProgramComposition");
+    public void HelpOpenTranslator() => HelpText("Translator");
+
+    /// <summary>
+    /// Открывает раздел "Текстовый редактор" в справочнике
+    /// </summary>
+    public void HelpOpenTextEditor() => HelpText("TextEditor");
+
+    /// <summary>
+    /// Открывает раздел "Горячие клавиши" в справочнике
+    /// </summary>
+    public void HelpOpenHotKeys() => HelpText("HotKeys");
 
     /// <summary>
     /// Открывает страницу "О программе" в справочнике
