@@ -131,7 +131,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Rm
     {
       var modules = relaySwitchModuleInfoProvider().ToArray();
 
-      if (ExecutionConfig.GetIsLegacyCompatibilityModeEnabled())
+      if (ExecutionConfig.GetIsLegacyCompatibilityModeEnabled() && !CommandsModel.IsAnalysisScope)
         InitializeCompatibilityPointsMap(modules);
 
       if (modules.Length == 0)

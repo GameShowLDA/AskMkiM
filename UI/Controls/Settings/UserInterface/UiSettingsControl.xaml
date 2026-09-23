@@ -243,6 +243,15 @@
                                         VerticalAlignment="Top"
                                         x:Name="SyntaxHighlighting"/>
 
+                                <Components:SettingsCardSelect
+                                        Title="{Binding Source={StaticResource Settings_UserInterface_DiagnosticUnderlining_Title}, Path=Value}"
+                                        Description="{Binding Source={StaticResource Settings_UserInterface_DiagnosticUnderlining_Description}, Path=Value}"
+                                        DisplayMemberPath="Title"
+                                        SelectedValuePath="Mode"
+                                        Margin="0,6,10,0"
+                                        VerticalAlignment="Top"
+                                        x:Name="DiagnosticUnderliningSelect"/>
+
                                 <SharedComponents:SettingsCard
                                         Title="{Binding Source={StaticResource Settings_UserInterface_CommandBodyBackground_Title}, Path=Value}"
                                         Description="{Binding Source={StaticResource Settings_UserInterface_CommandBodyBackground_Description}, Path=Value}"

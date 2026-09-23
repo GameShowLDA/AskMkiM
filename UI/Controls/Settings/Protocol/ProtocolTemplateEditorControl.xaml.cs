@@ -65,6 +65,7 @@ namespace UI.Controls.Settings.Protocol
     public ProtocolTemplateEditorControl()
     {
       InitializeComponent();
+      ProtocolEditor.SetLiveDiagnosticsEnabled(false);
 
       _provider = new ProtectedReadOnlySectionProvider();
       ProtocolEditor.TextArea.ReadOnlySectionProvider = _provider;

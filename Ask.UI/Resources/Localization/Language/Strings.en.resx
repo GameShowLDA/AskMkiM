@@ -468,6 +468,21 @@
   <data name="settings.userinterface.syntaxHighlighting.title" xml:space="preserve">
     <value>Syntax highlighting</value>
   </data>
+  <data name="settings.userinterface.diagnosticUnderlining.title" xml:space="preserve">
+    <value>Underline diagnostics</value>
+  </data>
+  <data name="settings.userinterface.diagnosticUnderlining.description" xml:space="preserve">
+    <value>Controls which errors and stylistic warnings are underlined in control programs.</value>
+  </data>
+  <data name="settings.userinterface.diagnosticUnderlining.none" xml:space="preserve">
+    <value>None</value>
+  </data>
+  <data name="settings.userinterface.diagnosticUnderlining.all" xml:space="preserve">
+    <value>All</value>
+  </data>
+  <data name="settings.userinterface.diagnosticUnderlining.errorsOnly" xml:space="preserve">
+    <value>Errors only</value>
+  </data>
   <data name="settings.userinterface.syntaxHighlighting.description" xml:space="preserve">
     <value>Enables or disables syntax highlighting in the protocol editor.</value>
   </data>

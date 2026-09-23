@@ -1114,7 +1114,7 @@ namespace Ask.UI.Resources.Localization.Language {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на Имитирует ошибку выполнения не измерительной команды оборудования с вероятностью 50%..
+        ///   Ищет локализованную строку, похожую на Задаёт оборудование, для которого каждая неизмерительная команда завершается ошибкой..
         /// </summary>
         internal static string settings_execution_hardwareErrorSimulation_description {
             get {
@@ -1123,7 +1123,7 @@ namespace Ask.UI.Resources.Localization.Language {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на Симуляция ошибок оборудования.
+        ///   Ищет локализованную строку, похожую на Симуляция сбоев оборудования.
         /// </summary>
         internal static string settings_execution_hardwareErrorSimulation_title {
             get {
@@ -1150,11 +1150,47 @@ namespace Ask.UI.Resources.Localization.Language {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на Добавляет существующие случайные отклонения результатов измерений от заданных норм..
+        ///   Ищет локализованную строку, похожую на Задаёт направление ошибочного результата измерения относительно допустимого диапазона..
         /// </summary>
         internal static string settings_execution_measurementErrorSimulation_description {
             get {
                 return ResourceManager.GetString("settings.execution.measurementErrorSimulation.description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Выше нормы.
+        /// </summary>
+        internal static string settings_execution_measurementErrorSimulation_high {
+            get {
+                return ResourceManager.GetString("settings.execution.measurementErrorSimulation.high", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Ниже нормы.
+        /// </summary>
+        internal static string settings_execution_measurementErrorSimulation_low {
+            get {
+                return ResourceManager.GetString("settings.execution.measurementErrorSimulation.low", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Без ошибок.
+        /// </summary>
+        internal static string settings_execution_measurementErrorSimulation_none {
+            get {
+                return ResourceManager.GetString("settings.execution.measurementErrorSimulation.none", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Случайно.
+        /// </summary>
+        internal static string settings_execution_measurementErrorSimulation_rnd {
+            get {
+                return ResourceManager.GetString("settings.execution.measurementErrorSimulation.rnd", resourceCulture);
             }
         }
         
@@ -1587,6 +1623,51 @@ namespace Ask.UI.Resources.Localization.Language {
         internal static string settings_userinterface_commandBodyBackground_title {
             get {
                 return ResourceManager.GetString("settings.userinterface.commandBodyBackground.title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Всё.
+        /// </summary>
+        internal static string settings_userinterface_diagnosticUnderlining_all {
+            get {
+                return ResourceManager.GetString("settings.userinterface.diagnosticUnderlining.all", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Определяет, какие ошибки и стилистические предупреждения подчеркивать в тексте программы контроля..
+        /// </summary>
+        internal static string settings_userinterface_diagnosticUnderlining_description {
+            get {
+                return ResourceManager.GetString("settings.userinterface.diagnosticUnderlining.description", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Только ошибки.
+        /// </summary>
+        internal static string settings_userinterface_diagnosticUnderlining_errorsOnly {
+            get {
+                return ResourceManager.GetString("settings.userinterface.diagnosticUnderlining.errorsOnly", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Нет.
+        /// </summary>
+        internal static string settings_userinterface_diagnosticUnderlining_none {
+            get {
+                return ResourceManager.GetString("settings.userinterface.diagnosticUnderlining.none", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Подчеркивание ошибок.
+        /// </summary>
+        internal static string settings_userinterface_diagnosticUnderlining_title {
+            get {
+                return ResourceManager.GetString("settings.userinterface.diagnosticUnderlining.title", resourceCulture);
             }
         }
         

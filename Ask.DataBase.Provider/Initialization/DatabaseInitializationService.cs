@@ -74,6 +74,7 @@ public static class DatabaseInitializationService
     await EnsureDisablePowerCheckColumnAsync(databasePath, report, progress, cancellationToken);
     await EnsureRepeatMeasurementColumnAsync(databasePath, report, progress, cancellationToken);
     await EnsureSettingsProtocolPrintColumnsAsync(databasePath, report, progress, cancellationToken);
+    await EnsureDiagnosticUnderliningColumnsAsync(databasePath, report, progress, cancellationToken);
     await EnsureFastMeterPpuDividerCoefficientColumnAsync(databasePath, report, progress, cancellationToken);
     await EnsureBreakdownTesterVoltageColumnsAsync(databasePath, report, progress, cancellationToken);
     await EnsureBreakdownTesterSystemInsulationResistanceColumnAsync(databasePath, report, progress, cancellationToken);
@@ -601,8 +602,23 @@ public static class DatabaseInitializationService
   }
 
   /// <summary>
-  /// Добавляет колонку в таблицу, если она отсутствует.
+  /// Добавляет настройки подчёркиваний в принятую без истории миграций старую схему.
   /// </summary>
+  private static async Task EnsureDiagnosticUnderliningColumnsAsync(
+    string databasePath,
+    DatabaseInitializationReport report,
+    Action<string>? progress,
+    CancellationToken cancellationToken)
+  {
+    await using var connection = new SqliteConnection($"Data Source={databasePath}");
+    await connection.OpenAsync(cancellationToken);
+    if (!await TableExistsAsync(connection, "UserInterface", cancellationToken)) return;
+
+    await EnsureColumnAsync(connection, "UserInterface", "UseSyntaxErrorUnderlining", "INTEGER NOT NULL DEFAULT 1", report, progress, cancellationToken);
+    await EnsureColumnAsync(connection, "UserInterface", "UseStyleErrorUnderlining", "INTEGER NOT NULL DEFAULT 1", report, progress, cancellationToken);
+  }
+
+  /// <summary>Добавляет колонку в таблицу, если она отсутствует.</summary>
   private static async Task EnsureColumnAsync(
     System.Data.Common.DbConnection connection,
     string tableName,
