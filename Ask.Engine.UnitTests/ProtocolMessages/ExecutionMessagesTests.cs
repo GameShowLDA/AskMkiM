@@ -35,8 +35,8 @@ public sealed class ExecutionMessagesTests
     await ExecutionMessages.PublishDelayAsync(delay, outputService.Object);
 
     Assert.NotNull(publishedMessage);
-    Assert.Equal("Задержка после испытания напряжения 100мс", publishedMessage.Header);
-    Assert.True(string.IsNullOrEmpty(publishedMessage.Message));
+    Assert.Equal("Задержка после испытания напряжения", publishedMessage.Header);
+    Assert.Equal("100мс", publishedMessage.Message);
   }
 
   [Fact]
