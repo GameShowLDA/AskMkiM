@@ -9,6 +9,7 @@ using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Enums.UnitEnums;
+using Ask.Core.Shared.Metadata.Static.Delays;
 using static Ask.Engine.Tests.Base.UIValidationHelper;
 
 namespace Ask.Engine.Tests.NodeMethod.PI
@@ -129,6 +130,8 @@ namespace Ask.Engine.Tests.NodeMethod.PI
           {
             break;
           }
+
+          await ExecutionMessages.PublishDelayAsync(AppDelays.BreakdownTesterDelays.PostTestDelay, protocolUI);
         }
       }
       public override async Task FinalizeAsync(IUserInteractionService messageService)
