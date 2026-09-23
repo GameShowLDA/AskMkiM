@@ -9,7 +9,6 @@
     /// Задержки, используемые при работе с пробойной установкой.
     /// </summary>
     public readonly static BreakdownTesterDelays BreakdownTesterDelays;
-    public readonly static DeviceCommunicationDelays DeviceCommunicationDelays;
 
     /// <summary>
     /// Инициализирует статические задержки приложения.
@@ -17,7 +16,6 @@
     static AppDelays()
     {
       BreakdownTesterDelays = new BreakdownTesterDelays();
-      DeviceCommunicationDelays = new DeviceCommunicationDelays();
     }
   }
 }
