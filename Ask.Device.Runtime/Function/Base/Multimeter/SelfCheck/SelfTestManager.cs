@@ -44,7 +44,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
 
     private static readonly ObjectCheck[] CapacitanceChecks =
     {
-      new ObjectCheck(1, 3.6, 10),
+      new ObjectCheck(1, 3.9, 10),
       new ObjectCheck(2, 11, 10),
       new ObjectCheck(3, 135, 10),
       new ObjectCheck(4, 1_000, 10),
