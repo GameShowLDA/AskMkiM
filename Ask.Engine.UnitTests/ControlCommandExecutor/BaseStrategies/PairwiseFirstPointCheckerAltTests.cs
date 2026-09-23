@@ -1,6 +1,8 @@
 using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies;
 
 namespace Ask.Engine.UnitTests.ControlCommandExecutor.BaseStrategies;
@@ -62,6 +64,23 @@ public class PairwiseFirstPointCheckerAltTests
   public void IsPairMeasurementOverload_MultimeterOverloadValueIsOverload(double resistance)
   {
     Assert.True(PairwiseFirstPointCheckerAlt.IsPairMeasurementOverload(resistance));
+  }
+
+  [Theory(DisplayName = "ЭТ: перегрузка предварительного измерения пары направляется в локализацию")]
+  [InlineData(true, double.PositiveInfinity, true)]
+  [InlineData(true, 9.9E+37, true)]
+  [InlineData(true, 200, false)]
+  [InlineData(false, double.PositiveInfinity, false)]
+  public void ShouldLocalizeInitialPairMeasurement_UsesOverloadWhenValidationEnabled(
+    bool validatePointConnections,
+    double resistance,
+    bool expected)
+  {
+    Assert.Equal(
+      expected,
+      PairwiseFirstPointCheckerAlt.ShouldLocalizeInitialPairMeasurement(
+        validatePointConnections,
+        resistance));
   }
 
   [Theory(DisplayName = "ЭТ: локализация учитывает только превышение верхней границы")]
@@ -187,6 +206,84 @@ public class PairwiseFirstPointCheckerAltTests
     Assert.Equal(150, localization.FirstAboveUpperBound);
   }
 
+  [Fact(DisplayName = "ЭТ: перегрузка формирует одну агрегированную строку итогового протокола")]
+  public async Task OverloadLocalization_ProducesSingleAggregatedReportError()
+  {
+    bool originalMachineAddressVisibility = DeviceDisplayConfig.GetMachineAddressVisibility();
+    bool originalLegacyMode = ExecutionConfig.GetIsLegacyCompatibilityModeEnabled();
+
+    try
+    {
+      DeviceDisplayConfig.SetMachineAddressVisibility(true);
+      ExecutionConfig.SetLegacyCompatibilityMode(false);
+
+      var points = Enumerable.Range(71, 5)
+        .Concat(Enumerable.Range(81, 5))
+        .Select(CreateK1Point)
+        .ToArray();
+      var measurements = new Dictionary<(int First, int Second), double>
+      {
+        [(71, 72)] = 0.550,
+        [(71, 73)] = 0.567,
+        [(71, 74)] = 0.580,
+        [(71, 75)] = 0.578,
+        [(71, 81)] = double.PositiveInfinity,
+        [(71, 82)] = double.PositiveInfinity,
+        [(71, 83)] = double.PositiveInfinity,
+        [(71, 84)] = double.PositiveInfinity,
+        [(71, 85)] = double.PositiveInfinity,
+        [(81, 82)] = 0.524,
+        [(81, 83)] = 0.558,
+        [(81, 84)] = 0.552,
+        [(81, 85)] = 0.565,
+      };
+
+      var localization = await EhtHighResistanceLocalizationService.SplitIntoFragmentsAsync(
+        points,
+        40,
+        (left, right) => Task.FromResult(measurements[(left.PointNumber, right.PointNumber)]));
+      string display = await EhtHighResistanceLocalizationService.GetLocalizationDisplayAsync(
+        localization.Fragments);
+      var error = EhtHighResistanceLocalizationService.BuildLocalizationErrorMessage(
+        MeasurementTypeCommand.EHT,
+        display,
+        localization.FirstAboveUpperBound!.Value,
+        0.01,
+        40);
+
+      ProtocolModel.SetErrorsTemplate("$ПРОГРАММА");
+      var protocol = new ProtocolModel
+      {
+        Date = new DateTime(2026, 9, 21),
+        Designation = "СТ6737.000.000",
+        ControlObjectName = "ТЕСТ",
+        Number = "1",
+        Executor = string.Empty,
+        ProgramName = "ТЕСТ",
+        Agent = string.Empty,
+        Customer = string.Empty,
+        Mode = string.Empty,
+      };
+      protocol.Errors["160 ЭТ"] = [error];
+
+      string report = ProtocolModel.GetProtocolWithErrorsText(protocol);
+      string errorLine = Assert.Single(
+        report.Split(["\r\n", "\n"], StringSplitOptions.RemoveEmptyEntries),
+        line => line.StartsWith("ERR", StringComparison.Ordinal));
+
+      Assert.Equal(
+        "ERR1 160 ЭТ: *К1/71 [1.4.71],К1/72 [1.4.72],К1/73 [1.4.73],К1/74 [1.4.74],К1/75 [1.4.75]" +
+        "**К1/81 [1.4.81],К1/82 [1.4.82],К1/83 [1.4.83],К1/84 [1.4.84],К1/85 [1.4.85]* " +
+        "д.б. 0,01<Ом<40: Rизм= Overload [БРАК]",
+        errorLine);
+    }
+    finally
+    {
+      DeviceDisplayConfig.SetMachineAddressVisibility(originalMachineAddressVisibility);
+      ExecutionConfig.SetLegacyCompatibilityMode(originalLegacyMode);
+    }
+  }
+
   [Theory(DisplayName = "ЭТ: итоговое сопротивление компенсирует контакты и кабель в рабочем режиме")]
   [InlineData(150, 10, 20, 5, 130)]
   [InlineData(10, 20, 20, 5, 0)]
@@ -270,5 +367,13 @@ public class PairwiseFirstPointCheckerAltTests
   {
     PointNumber = pointNumber,
     Mnemonic = $"P{pointNumber}"
+  };
+
+  private static PointModel CreateK1Point(int pointNumber) => new()
+  {
+    DeviceNumber = 1,
+    ModuleNumber = 4,
+    PointNumber = pointNumber,
+    Mnemonic = $"К1/{pointNumber}",
   };
 }
