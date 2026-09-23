@@ -622,6 +622,25 @@ CommandExecutionManager.ExecuteAllCoreAsync loop
 `ICommandExecutor`. Текущие executors: `ОК`, `РМ`, `СП`, `СК`, `ВШ`, `ПТ`, `ОТ`,
 `ЦУ`, `УП`, `КЦ`, `КС`, `ИЕ`, `ЭТ`, `ПР`, `СИ`, `ПИ`, `НЕ`, `ОС`.
 
+Связка операторского вопроса `ЦУ` и условного перехода `УП`:
+
+```text
+CuCommandExecutor.ExecuteAsync
+→ CuCommandModel.CuType == Question
+→ CommandExecutionManager.GetNextCommand
+→ MessageBoxCustom.Show(YesNoCancel)
+  → Yes: LastRejectFlag = false, выполнение продолжается
+  → No + следующая модель UpCommandModel: LastRejectFlag = true без останова
+    → UpCommandExecutor.ExecuteAsync
+    → context.JumpToCommandNumber(TargetLabel)
+    → CommandExecutionManager.ResolveJumpIndex
+    → индекс основного execution loop заменяется индексом целевой команды
+  → No без следующей UpCommandModel или Cancel/Esc:
+    → IUserInteractionService.WaitUserActionAsync(deviceTask: true)
+    → Continue/Retry/None: временный останов завершается без условного перехода
+    → другое действие: OperationCanceledException и штатное аварийное завершение
+```
+
 #### Addressed reset of test equipment
 
 Широковещательный UDP-сброс удалён. Для каждого запуска `ActionExecutor`
