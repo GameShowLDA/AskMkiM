@@ -1,9 +1,10 @@
 using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
+using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
-using Ask.Core.Shared.Metadata.Enums.UnitEnums;
+using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Static.Messages;
 using Ask.Engine.ControlCommandAnalyser;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies.Data;
@@ -42,15 +43,13 @@ internal static class EhtHighResistanceLocalizationService
     var errorValue = localized
       ? localization.FirstAboveUpperBound!.Value
       : initialAboveUpperBound;
-    var display = await PointFormater.GetFormatDisconnectPoint(errorChains);
-    var error = MeasurementMessages.BuildMeasurementResultMessage(
-      ResistanceUnit.Ohm,
-      new MeasurementRange(
-        errorValue,
-        context.LowerLimit,
-        context.HigherLimit),
-      false,
-      display);
+    var display = await GetLocalizationDisplayAsync(errorChains);
+    var error = BuildLocalizationErrorMessage(
+      context.TypeCommand,
+      display,
+      errorValue,
+      context.LowerLimit,
+      context.HigherLimit);
 
     await MeasurementMessages.PublishBuiltMessageAsync(CheckType.ControlProgram, error, context.MessageService);
     result.Errors.Add(error);
@@ -64,6 +63,42 @@ internal static class EhtHighResistanceLocalizationService
 
     return result;
   }
+
+  /// <summary>
+  /// Формирует обозначение локализованных фрагментов ЭТ для итогового протокола.
+  /// </summary>
+  /// <param name="fragments">Найденные связные фрагменты цепи.</param>
+  /// <returns>Строка с точками через запятую и фрагментами через двойную звёздочку.</returns>
+  internal static async Task<string> GetLocalizationDisplayAsync(List<ChainModel> fragments)
+  {
+    string display = await PointFormater.GetFormatDisconnectPoint(fragments);
+    return display
+      .Replace("##", "**", StringComparison.Ordinal)
+      .Replace(",,", "**", StringComparison.Ordinal)
+      .Replace("#", ",", StringComparison.Ordinal);
+  }
+
+  /// <summary>
+  /// Формирует агрегированную ошибку локализации ЭТ.
+  /// </summary>
+  /// <param name="measurementType">Тип измерительной команды.</param>
+  /// <param name="display">Форматированное обозначение найденных фрагментов цепи.</param>
+  /// <param name="value">Измеренное сопротивление.</param>
+  /// <param name="lowerBound">Нижняя допустимая граница сопротивления.</param>
+  /// <param name="upperBound">Верхняя допустимая граница сопротивления.</param>
+  /// <returns>Сообщение об ошибке для итогового протокола.</returns>
+  internal static ShowMessageModel BuildLocalizationErrorMessage(
+    MeasurementTypeCommand measurementType,
+    string display,
+    double value,
+    double lowerBound,
+    double upperBound)
+    => MeasurementMessages.BuildMeasurementResultMessage(
+      measurementType,
+      new MeasurementRange(value, lowerBound, upperBound),
+      false,
+      display,
+      indentLevel: 0);
 
   /// <summary>
   /// Разбивает точки на связные фрагменты с использованием оборудования из контекста ЭТ.
