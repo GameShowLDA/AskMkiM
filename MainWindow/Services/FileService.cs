@@ -563,7 +563,10 @@ namespace MainWindowProgram.Services
         Message.MessageBoxCustom.Show("В данный момент идёт работа с аппаратурой! Пожалуйста завершите выполнение!", "Ошибка!", MessageBoxButton.OK);
         return;
       }
-
+      if (_multiWindow.GetActiveWorkspaceControl() is ArchiveControl archive == false)
+      {
+        OpenArchive();
+      }
       if (_multiWindow.GetActiveWorkspaceControl() is ArchiveControl archiveControl)
       {
         try
@@ -607,6 +610,10 @@ namespace MainWindowProgram.Services
     /// </remarks>
     public void UploadArchive()
     {
+      if (_multiWindow.GetActiveWorkspaceControl() is ArchiveControl archive == false)
+      {
+        OpenArchive();
+      }
       if (_isLockedProvider())
       {
         Message.MessageBoxCustom.Show("В данный момент идёт работа с аппаратурой! Пожалуйста завершите выполнение!", "Ошибка!", MessageBoxButton.OK);

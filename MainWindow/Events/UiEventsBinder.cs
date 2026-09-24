@@ -93,7 +93,6 @@ namespace MainWindowProgram.Events
       _mainWindow.searchMenuItem.Visibility = visibility;
       _mainWindow.searchReplaceMenuItem.Visibility = visibility;
       UpdateCompareMenuVisibility(isActive);
-      UpdateArchiveMenuVisibility();
     }
 
     public void OnTextEditorActivated(UserControl editor)
@@ -190,26 +189,11 @@ namespace MainWindowProgram.Events
           bool isActive = activeEditor != null;
 
           OnTextEditorActive(isActive);
-          UpdateArchiveMenuVisibility();
           if (activeEditor != null)
           {
             OnTextEditorActivated(activeEditor);
           }
         }));
-    }
-
-    private void UpdateArchiveMenuVisibility()
-    {
-      var isArchiveControlActive = _multiWindow.GetActiveWorkspaceControl() is ArchiveControl;
-      _mainWindow.createArchiveMenuItem.Visibility = isArchiveControlActive
-        ? Visibility.Visible
-        : Visibility.Collapsed;
-      _mainWindow.downloadArchivesMenuItem.Visibility = isArchiveControlActive
-        ? Visibility.Visible
-        : Visibility.Collapsed;
-      _mainWindow.uploadArchiveMenuItem.Visibility = isArchiveControlActive
-        ? Visibility.Visible
-        : Visibility.Collapsed;
     }
 
     private void UpdateCompareMenuVisibility(bool isTextEditorActive)
