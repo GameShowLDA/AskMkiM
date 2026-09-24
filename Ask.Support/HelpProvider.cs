@@ -170,8 +170,8 @@ namespace Ask.Support
       }
 
       string url = string.IsNullOrWhiteSpace(pageName)
-          ? "/index.html"
-          : $"/index.html?cmd={Uri.EscapeDataString(pageName)}";
+          ? "/ru/index.html"
+          : $"/ru/index.html?cmd={Uri.EscapeDataString(pageName)}";
 
       LogInformation($"Путь до старницы: {url}");
 

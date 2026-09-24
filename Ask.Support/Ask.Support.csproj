@@ -1756,7 +1756,7 @@
 	  <Content Include="AppHelp\favicon.ico">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\index.html">
+	  <Content Include="AppHelp\ru\index.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\internal-links.js">
