@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using Ask.Core.Services.Config.AppSettings;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -169,9 +170,11 @@ namespace Ask.Support
         return;
       }
 
+      string language = LanguageSettings.NormalizeLanguageCode(LanguageSettings.CurrentLanguage);
+      string indexUrl = $"/{language}/index.html";
       string url = string.IsNullOrWhiteSpace(pageName)
-          ? "/ru/index.html"
-          : $"/ru/index.html?cmd={Uri.EscapeDataString(pageName)}";
+          ? indexUrl
+          : $"{indexUrl}?cmd={Uri.EscapeDataString(pageName)}";
 
       LogInformation($"Путь до старницы: {url}");
 

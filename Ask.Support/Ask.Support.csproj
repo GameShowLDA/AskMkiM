@@ -1845,6 +1845,7 @@
 	</ItemGroup>
 	
 	<ItemGroup>
+	  <ProjectReference Include="..\Ask.Core\Ask.Core.csproj" />
 	  <ProjectReference Include="..\Ask.LogLib\Ask.LogLib.csproj" />
 	</ItemGroup>
 
