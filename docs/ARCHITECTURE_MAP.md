@@ -51,6 +51,7 @@ Size/Foreground и анимации общей кнопки; лицензия с
 | Конфигурация устройств | `UI/Controls/Settings/DeviceConfig/` | `Ask.DataBase.Engine/Static/Devices/`, `Ask.DataBase.Engine/Services/DeviceEngine.cs`, `Ask.DataBase.Provider/Services/Devices/` |
 | База данных | `Ask.DataBase.Provider/Context/AppDbContext*.cs` | `Ask.DataBase.Provider/Initialization/DatabaseInitializationService.cs`, `Ask.DataBase.Engine/Services/DeviceEngine.cs` |
 | Настройки выполнения/протокола/UI | `Ask.Core/Services/Config/` | `Ask.DataBase.Engine/Static/Settings/`, `Ask.DataBase.Provider/Services/Settings/`, `MainWindow/Init/DatabaseInitializer.cs` |
+| Фиксированные задержки оборудования | `Ask.Core/Services/Config/AppSettings/DelaySettingsFileService.cs`, `Ask.Core/Shared/DTO/Settings/DelaySettings.cs` | `Ask.Core/Shared/Metadata/Static/Delays/`, `Ask.Protocol.Messages/EntryPoints/ExecutionMessages.cs` |
 | Протокол выполнения | `Ask.UI/Controls/ProtocolNew/ProtocolUI*.cs` | `Ask.UI/Features/ProtocolNew/Protocol/`, `Ask.Core/Services/Protocols/ExecutionProtocolHistoryService.cs` |
 | Формирование унифицированных сообщений протокола | `Ask.Protocol.Messages/EntryPoints/` | `Ask.Protocol.Messages/Builders/`, `Ask.Protocol.Messages/Show/`; сообщения executor-команд, блоков проверки, оборудования, измерений, допустимых диапазонов и ошибок UI-валидации формируются централизованно |
 | Форматы `.asktrace/.askresult/.askreport` | `Ask.Core/Services/Protocols/ExecutionProtocolHistoryService.cs` | `Ask.Core/Shared/Metadata/Static/ProtocolFileExtensions.cs`, `Ask.UI/Features/ProtocolNew/Protocol/ProtocolStorageService.cs` |
@@ -63,7 +64,7 @@ Size/Foreground и анимации общей кнопки; лицензия с
 | Архивы APK/APKW | `Ask.UI/Features/Archive/` | `Ask.Core/Services/FileFormats/Apk/`, `MainWindow/Services/Conversion/` |
 | Рабочее пространство и вкладки | `UI/Components/MultiEditorControl.xaml.cs` | `UI/Components/MultiEditorMethods/FileManager.cs`, `UI/Services/`, `MainWindow/Services/MultiWindowService.cs` |
 | Роли и права | `MainWindow/Init/RoleApplicationConfigurator.cs` | `Ask.Core/Services/Config/AppSettings/RoleAuthorizationConfig.cs`, `Ask.UI/Features/RoleManagement/` |
-| Административные и сервисные утилиты | `MainWindow/MainWindow.xaml`, `MainWindow/ViewModels/AdminViewModel.cs`, `MainWindow/Services/AdminServices.cs` | `UI/Controls/AdminPanel/ServiceUtilitiesControl.xaml`, `UI/Controls/AdminPanel/SetCommand.xaml`, `Ask.UI/Features/ServiceTools/{Gpt,Chassis,SwitchingDevice}/`, `UI/Controls/AdminPanel/DataBaseView.xaml`, `UI/Controls/AdminPanel/CheckResistanceControl.xaml` |
+| Административные и сервисные утилиты | `MainWindow/MainWindow.xaml`, `MainWindow/ViewModels/AdminViewModel.cs`, `MainWindow/Services/AdminServices.cs` | `UI/Controls/AdminPanel/ServiceUtilitiesControl.xaml`, `UI/Controls/AdminPanel/SetCommand.xaml`, `Ask.UI/Features/ServiceTools/{Gpt,Chassis,SwitchingDevice}/`, `UI/Controls/AdminPanel/DataBaseView.xaml`, `UI/Controls/AdminPanel/DelaySettingsControl.xaml` |
 | Debug-доступ текущего пользователя | `Ask.Core/Services/Config/AppSettings/DebugAccessConfig.cs` | `RoleAuthorizationConfig.cs`, `SystemStateEvents.DebugRightsChanged`, оба `ErrorListControl.xaml.cs`, `ProtocolEntryOutputService.cs` |
 | События между подсистемами | `Ask.Core/Services/EventCore/Services/EventAggregator.cs` | `Ask.Core/Services/EventCore/Adapters/`, `Ask.Core/Services/EventCore/Events/`, `MainWindow/Events/` |
 | Встроенная справка | `Ask.Support/HelpServer.cs` | `Ask.Support/HelpProvider.cs`, `Ask.Support/HelpViewerWindow.cs`, `Ask.Support/AppHelp/` |
@@ -1117,10 +1118,18 @@ equipment/self-test builders оставляют его выключенным. �
 `ProtocolModel` при нормализации удаляет обе пары префиксов, чтобы не дублировать их в заключении.
 
 Фиксированные задержки оборудования объявляются через `AppDelays` и `DelayModel` в
-`Ask.Core/Shared/Metadata/Static/Delays/`. Их вывод проходит единым путём:
+`Ask.Core/Shared/Metadata/Static/Delays/`. При первой инициализации `AppDelays` сервис
+`DelaySettingsFileService` читает `Settings/delaySettings.yaml` через `YamlService<DelaySettings>`.
+Отсутствующий или пустой файл записывается с дефолтами: задержка ППУ после испытания — 100 мс,
+МКР перед командой — 20 мс, после команды — 20 мс. `ModuleRelayControlDelays` пока не подключён
+к runtime-пути МКР. Административный `DelaySettingsControl` сохраняет изменения через
+`AppDelays.SaveAndApply`: сначала перезаписывается YAML, затем обновляются существующие
+`DelayModel` текущего процесса без перезапуска приложения. Вывод применяемых задержек проходит
+единым путём:
 
 ```text
 ExecutionMessages.PublishDelayAsync(DelayModel, IMessageOutputService)
+→ DelayModel.Delay <= 0: выход без сообщения и ожидания
 → ExecutionMessageBuilder.BuildDelayMessage
 → ExecutionMessagePublisher.PublishAsync
 → MessagePublisher.PublishAsync
@@ -2014,9 +2023,12 @@ COM-секция делегирует создание настроек в
 - `AdminViewModel.DatabaseCommand`
   → `AdminServices.OpenDatabase()`
   → `IWorkspaceService.AddControl("База данных", new DataBaseView(), TypeWindow.Settings)`;
-- `AdminViewModel.ResistanceCommand`
-  → `AdminServices.OpenResistance()`
-  → `IWorkspaceService.AddControl("Сопротивление МКР", new CheckResistanceControl(), TypeWindow.Settings)`.
+- `AdminViewModel.DelaysCommand`
+  → `AdminServices.OpenDelays()`
+  → `IWorkspaceService.AddControl("Задержки оборудования", new DelaySettingsControl(), TypeWindow.Settings)`
+  → `AppDelays.GetSettings()` для заполнения полей
+  → `AppDelays.SaveAndApply(DelaySettings)` при сохранении
+  → `DelaySettingsFileService.Save()` + немедленное обновление текущих `DelayModel`.
 
 `ServiceUtilitiesControl` сохраняет экземпляры вложенных
   утилит при переключении;
@@ -2083,7 +2095,8 @@ COM-секция делегирует создание настроек в
     соответствующему capability manager с `MeasurementRange`, результаты и
     ошибки публикуются в постоянную консоль SetCommand;
 - `DataBaseView` — административный просмотр таблиц БД;
-- `CheckResistanceControl` — настройка сопротивления МКР.
+- `DelaySettingsControl` — редактирование задержек ППУ и МКР в миллисекундах; принимает только
+  целые неотрицательные значения, поддерживает сохранение и отмену несохранённых изменений.
 
 Файлы: `MainWindow/MainWindow.xaml`,
 `MainWindow/ViewModels/AdminViewModel.cs`, `MainWindow/Services/AdminServices.cs`,
@@ -2435,6 +2448,7 @@ provider error and cancellation; a later query builds a fresh runtime instance f
 | `RoleAuthorizationConfig` | role/credential files | login/configurator | current session role, menu/archive permissions and Debug derivation |
 | `DebugAccessConfig` | derived session state | `RoleAuthorizationConfig.CurrentRole` | protocol debug source and ErrorList DEBUG-column visibility |
 | `LegacyMkiConfig` | legacy hardware profile/config file + DB storage | LegacyMki services | compatibility execution |
+| `AppDelays` | `DelaySettings` / `Settings/delaySettings.yaml` | `DelaySettingsFileService`, `YamlService<DelaySettings>` | задержка после испытания ППУ; зарезервированные задержки до/после команды МКР |
 
 Config managers are static global state. Their save events are subscribed once in
 startup; changes from settings controls update the static model and asynchronously
@@ -2511,7 +2525,10 @@ ErrorItem → translator/runner ErrorList
 | `AlgorithmExecutionResult` | result container | Ask.Protocol.Messages | контракт из `Ask.Protocol.Messages/Models/`, хранящий накопленные ошибки и информационные `ShowMessageModel` алгоритма | [Execution Engine](#execution-engine) |
 | `ProtocolModelExtensions` | static extensions | Ask.Protocol.Messages | расширение из namespace `Ask.Protocol.Messages.Extensions`, добавляющее единый `AlgorithmExecutionResult` в коллекции ошибок и информационных сообщений `ProtocolModel` | [Execution Engine](#execution-engine) |
 | `DelayModel` | shared timing model | Ask.Core | хранит отображаемое наименование и продолжительность фиксированной задержки в миллисекундах; экземпляры группируются в `AppDelays` | [Protocols](#protocols-and-file-formats) |
-| `AppDelays` | static timing catalog | Ask.Core | предоставляет сгруппированные фиксированные задержки оборудования, включая задержки пробойной установки | [Protocols](#protocols-and-file-formats) |
+| `AppDelays` | static timing catalog | Ask.Core | при первом обращении загружает `Settings/delaySettings.yaml` и предоставляет сгруппированные задержки ППУ и МКР | [Protocols](#protocols-and-file-formats) |
+| `DelaySettingsFileService` | YAML configuration service | Ask.Core | читает `delaySettings.yaml`, а при отсутствии или пустом файле записывает дефолты 100/20/20 мс | [Configuration](#configuration) |
+| `ModuleRelayControlDelays` | timing catalog | Ask.Core | задаёт загруженные из YAML модели задержек перед отправкой и после отправки команды МКР; пока не вызывается runtime-кодом | [Protocols](#protocols-and-file-formats) |
+| `DelaySettingsControl` | administrative settings UI | UI | редактирует YAML-задержки и через `AppDelays.SaveAndApply` немедленно обновляет значения текущего процесса | [UI Architecture](#ui-architecture) |
 | `ExecutionMessages` | static facade | Ask.Protocol.Messages | проверяет видимость параметров выполнения и коммутации, публикует накопленные результаты проверки, ошибки, debug-сообщения, задержки из числовых параметров и `DelayModel`, этапы анализа цепей и локализации, границы этапов, инициализацию, настройку оборудования и коммутацию; формирует только накапливаемую ошибку локализации | [Protocols](#protocols-and-file-formats) |
 | `ExecutionMessageBuilder` | internal static builder | Ask.Protocol.Messages | содержит заголовок накопленных результатов, ошибки и задержки выполнения, включая формат `<имя> <значение>мс` для `DelayModel`, сообщения подготовки, настройки и коммутации устройств, подключения диапазонов, сброса точек, этапов и запуска теста | [Protocols](#protocols-and-file-formats) |
 | `ExecutionMessagePublisher` | internal static publisher | Ask.Protocol.Messages | передаёт сообщения этапов выполнения в `IMessageOutputService`, сохраняет признаки начала блока, обхода паузы/пошагового режима и метаданные исходного вызова | [Protocols](#protocols-and-file-formats) |

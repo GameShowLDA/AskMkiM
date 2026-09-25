@@ -37,10 +37,10 @@ namespace MainWindowProgram.ViewModels
     private void Database() => _service.OpenDatabase();
 
     /// <summary>
-    /// Открывает вкладку настройки сопротивления МКР.
+    /// Открывает вкладку настройки задержек оборудования.
     /// </summary>
     [RelayCommand]
-    private void Resistance() => _service.OpenResistance();
+    private void Delays() => _service.OpenDelays();
 
     [RelayCommand]
     private void Protocol() => _service.ProtocolTest();

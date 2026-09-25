@@ -45,4 +45,31 @@ public sealed class ExecutionMessagesTests
     await Assert.ThrowsAsync<ArgumentNullException>(
       () => ExecutionMessages.PublishDelayAsync(null!, outputService: null));
   }
+
+  [Theory]
+  [InlineData(0)]
+  [InlineData(-1)]
+  public async Task PublishDelayAsync_NonPositiveDelay_DoesNotPublishMessage(int milliseconds)
+  {
+    var outputService = new Mock<IMessageOutputService>();
+    var delay = new DelayModel
+    {
+      Name = "Задержка МКР",
+      Delay = milliseconds,
+    };
+
+    await ExecutionMessages.PublishDelayAsync(delay, outputService.Object);
+
+    outputService.Verify(
+      service => service.ShowMessageAsync(
+        It.IsAny<ShowMessageModel>(),
+        It.IsAny<bool>(),
+        It.IsAny<bool>(),
+        It.IsAny<bool>(),
+        It.IsAny<bool>(),
+        It.IsAny<string>(),
+        It.IsAny<string>(),
+        It.IsAny<int>()),
+      Times.Never);
+  }
 }

@@ -118,12 +118,12 @@ namespace MainWindowProgram.Services
         TypeWindow.Settings);
 
     /// <summary>
-    /// Открывает настройку сопротивления МКР в отдельной вкладке рабочего пространства.
+    /// Открывает настройку задержек оборудования в отдельной вкладке рабочего пространства.
     /// </summary>
-    public void OpenResistance() =>
+    public void OpenDelays() =>
       _multiWindow.WorkspaceService.AddControl(
-        "Сопротивление МКР",
-        new CheckResistanceControl(),
+        "Задержки оборудования",
+        new DelaySettingsControl(),
         TypeWindow.Settings);
 
     public void ProtocolTest() => _multiWindow.WorkspaceService.AddControl("Тест протокола", new TestProtocol(), TypeWindow.DeviceControl);
