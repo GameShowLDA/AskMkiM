@@ -6,6 +6,7 @@ using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Static.Delays;
 using Ask.Engine.ControlCommandAnalyser.Model;
@@ -46,28 +47,14 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         context.Range.LowerBound,
         context.Range.UpperBound);
 
-      if (context.IsIntermediate)
-      {
-        await MeasurementMessages.PublishIntermediateResultAsync(
-          context.CheckType,
-          context.MeasurementType,
-          range,
-          isSuccessful,
-          context.MeasurementTarget,
-          points: context.MeasurementPoints,
-          outputService: context.MessageService);
-      }
-      else
-      {
-        await MeasurementMessages.PublishResultAsync(
-          context.CheckType,
-          context.MeasurementType,
-          range,
-          isSuccessful,
-          context.MeasurementTarget,
-          points: context.MeasurementPoints,
-          outputService: context.MessageService);
-      }
+      await MeasurementMessages.PublishIntermediateResultAsync(
+        context.CheckType,
+        context.MeasurementType,
+        range,
+        isSuccessful,
+        context.MeasurementTarget,
+        points: context.MeasurementPoints,
+        outputService: context.MessageService);
 
       return isSuccessful;
     }
@@ -197,10 +184,15 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         measurement.Restart();
 
         measurementRange.TargetValue = answer.Value;
-        var resultContext = new MeasurementResultMessageContext(
-          MeasurementTypeCommand.SI, measurementRange, messageService);
-        bool isSuccessful = await PublishMeasurementResultAsync(resultContext);
-        return (isSuccessful, resultContext.PublishedValue);
+
+        var result = MeasurementResultEvaluator.Evaluate(measurementRange);
+        await MeasurementMessages.PublishIntermediateResultAsync(CheckType.ControlProgram,
+          MeasurementTypeCommand.SI,
+          new MeasurementRange(result.Value, measurementRange.LowerBound, measurementRange.UpperBound),
+          result.IsSuccessful,
+          outputService: messageService);
+
+        return (result.IsSuccessful, result.Value);
       }, messageService, measurementTask: true);
 
       await ExecutionMessages.PublishDelayAsync(AppDelays.BreakdownTesterDelays.PostTestDelay, messageService);
@@ -231,10 +223,14 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
         measurement.Restart();
         measurementRange.TargetValue = answer.Value;
-        var resultContext = new MeasurementResultMessageContext(
-          MeasurementTypeCommand.SI, measurementRange, messageService);
-        bool isSuccessful = await PublishMeasurementResultAsync(resultContext);
-        return (isSuccessful, resultContext.PublishedValue);
+
+        var result = MeasurementResultEvaluator.Evaluate(measurementRange);
+        await MeasurementMessages.PublishIntermediateResultAsync(CheckType.ControlProgram,
+          MeasurementTypeCommand.SI,
+          new MeasurementRange(result.Value, measurementRange.LowerBound, measurementRange.UpperBound),
+          result.IsSuccessful,
+          outputService: messageService);
+        return (result.IsSuccessful, result.Value);
 
       }, messageService, measurementTask: true);
 
