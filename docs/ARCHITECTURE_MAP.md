@@ -1421,6 +1421,18 @@ Idle-эмулятор должен возвращать подтверждени
 прежние строки `SelfTestMessages` (`Точка N`, детализацию подключения и отключения от шин),
 добавляет `ModuleRelayControlError.PointError` в итоговые ошибки и обрабатывает повреждённый
 ответ строкой `Ошибка данных!`; прежняя runtime-модель `SelfPointModel` удалена.
+`ISelfTestCheckerModuleRelayControl.CheckPointAsync` предоставляет отдельный одиночный путь
+самоконтроля точки для сервисного UI:
+`RelaySwitchModuleControl.CheckPointButton_Click`
+→ `SelfTestManager.CheckPointAsync`
+→ `IConnectable.InitializeAsync`
+→ `IPointManager.DisconnectingAllPoint`
+→ `IMeterManager.ConnectMeterAsync`
+→ `IPointManager.CheckPoint` (`6.<point>`)
+→ `ModuleRelayControlResponseProcessor.CheckPointSelfTestAsync`
+→ повторный `IPointManager.DisconnectingAllPoint` в `finally`.
+Метод проверяет диапазон `1..PointCount`, поддерживает отмену между аппаратными операциями
+и использует тот же Real/Idle-маршрут, что и полный самоконтроль точек.
 Idle `ModuleRelayControlEmulatorProtocol` для команды `6.<point>` учитывает настройку
 ошибки измерения: любой `ErroneousMeasurementType`, кроме `None`, детерминированно делает ложным один из этапов
 `ConnectPoint`/`DisconnectBusA`/`DisconnectBusB` (по номеру точки) и возвращает
@@ -2123,7 +2135,11 @@ SettingsViewModel.SettingsCommand
   - `Ask.UI.Features.ServiceTools.RelaySwitchModule.RelaySwitchModuleControl` —
     сервисное управление выбранным МКР первого шасси: одиночные точки,
     операции с аппаратной проверкой, диапазоны, перевод точки между шинами,
-    коммутация шин, измеритель и общее отключение точек. Provider
+    коммутация шин, измеритель, общее отключение точек и отдельный самоконтроль
+    выбранной точки. Список точек самоконтроля строится из диапазона
+    `1..IRelaySwitchModule.PointCount`; запуск проходит через
+    `ISelfTestCheckerModuleRelayControl.CheckPointAsync`, включая инициализацию,
+    подготовку измерительного тракта, проверку ответа и финальное снятие коммутации. Provider
     `AdminServices.GetRelaySwitchModulesAsync` получает список через
     `RelaySwitchModules.GetDevicesByNumberChassisAsync(1)`; UI вызывает
     `IPointManager`, `IBusManager` и `IMeterManager`, а текущие подключения

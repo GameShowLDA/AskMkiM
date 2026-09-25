@@ -19,6 +19,21 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule.Capabili
     Task StartSelfCheck(CancellationToken cancellationToken, System.Enum typeConnector, ActionSettings settings, IUserInteractionService? userMessageService = null, ISwitchingDevice device = null);
 
     /// <summary>
+    /// Выполняет самоконтроль одной точки модуля коммутации реле.
+    /// </summary>
+    /// <param name="pointNumber">Номер проверяемой точки.</param>
+    /// <param name="cancellationToken">Маркер отмены операции.</param>
+    /// <param name="userMessageService">Сервис отображения сообщений.</param>
+    /// <returns>
+    /// <see langword="true"/>, если все этапы самоконтроля точки выполнены успешно.
+    /// В противном случае — <see langword="false"/>.
+    /// </returns>
+    Task<bool> CheckPointAsync(
+      int pointNumber,
+      CancellationToken cancellationToken = default,
+      IUserInteractionService? userMessageService = null);
+
+    /// <summary>
     /// Возвращает тип перечисления, используемый как тип проверки.
     /// </summary>
     Type GetTestTypeEnum();
