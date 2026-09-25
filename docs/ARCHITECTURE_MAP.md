@@ -1375,7 +1375,17 @@ executor/strategy
 → ModuleRelayControlQueryExecutor.QueryAsync
 → IDeviceProtocol.QueryAsync
 → UdpProtocol.QueryAsync
-→ UdpClient.SendAsync/ReceiveAsync
+→ OperationLock.LockAsync
+→ ResolveIpAddress / GetLastOctet
+→ GetClient (reuse by endpoint/input port or bind a new UdpClient)
+→ DrainPendingResponsesAsync
+→ UdpClient.SendAsync
+  ├─ SocketError.NoBufferSpaceAvailable: CloseClient → 50 ms → one SendAsync retry
+  └─ other failure: CloseClient → DeviceTransportException
+→ UdpClient.ReceiveAsync with linked timeout
+  ├─ configured device IP: return payload
+  ├─ foreign IP: continue within the original timeout
+  └─ timeout/cancellation: CloseClient; timeout returns warning, cancellation propagates
 → ModuleRelayControlQueryExecutor.ThrowIfFirmwareRejectedCommand
   ├─ Status absent/success → ModuleRelayControlResponseProcessor validation
   → PointManagerAdapter возвращает результат или создаёт ошибку через RelayExceptionFactory
@@ -1788,7 +1798,18 @@ same path with gates enabled and performs real transport I/O.
 ### Transport details
 
 - UDP: ports `8888 + last IP octet` output and `8800 + last octet` input unless
-  explicit port; per-device semaphore; timeout returns warning text.
+  explicit port. `UdpProtocol` serializes requests with a per-device semaphore and
+  reuses one bound `UdpClient` while the endpoint is unchanged. Before each send it
+  drains already queued datagrams without waiting, and accepts a response only from
+  the configured device IP (the firmware may use a different source port). A receive
+  timeout returns warning text, closes the socket and does not resend the command.
+  Local send failure `SocketError.NoBufferSpaceAvailable` (`10055`) closes the socket
+  and performs exactly one retry after 50 ms; other transport failures and a failed
+  retry become `DeviceTransportException` with the original exception preserved.
+  There is no added delay on the normal successful path.
+- UDP lifetime: `DeviceWithUdpIp.Dispose` releases the protocol when `DeviceCache`
+  removes or replaces a runtime device. Changing `DeviceWithIP.ConnectionDetails`
+  also disposes the old UDP protocol; applying the same address preserves it.
 - TCP: persistent `TcpClient`/`NetworkStream`, reconnect on endpoint change or
   I/O failure; per-device semaphore.
 - COM: `SerialPortCustom` serialized in `ConnectionDetails`; `ComProtocol` opens
@@ -2252,6 +2273,7 @@ and are displayed in translator/runner error lists.
 ```text
 raw manager/protocol failure
 → false/empty response or exception
+→ UDP transport failure: UdpProtocol closes the client and throws DeviceTransportException
 → or IdleHardwareErrorSimulator failure with the same method contract
 → application adapter / MeasurementBase
 → UserActionHelper.GetRunWithUserRepeatAsync
@@ -2272,6 +2294,14 @@ for the operator regardless of `ExecutionConfig.StopOnError`; `Continue` is
 available only after the latest attempt produced a valid equipment response.
 Retries are unlimited, and each retry passes through the original adapter,
 logging, protocol output and driver chain.
+
+`DeviceTransportException` and `ModuleRelayControlProtocolException` are written
+to the execution protocol before the interaction if the failed attempt did not
+already produce output. This keeps the underlying socket/transport reason visible
+while preserving the same Repeat/Finish decision flow. UDP receive timeouts retain
+the legacy warning-string contract; automatic transport retry is intentionally
+limited to `10055` during send, because resending after an uncertain receive could
+execute an equipment command twice.
 
 Исключение составляет одна попытка команды программы контроля. Пока активен
 `ControlProgramCommandExecutionContext`, вложенные adapters/managers выполняются
@@ -2394,7 +2424,7 @@ and `StateEventsBinder`, then calls `ApplicationEventsBinder.BindAll`.
 | Host/diagnostic bridge | `AppHost.StartAsync` | connects static command history to service | host/process lifetime |
 | Initial chassis lookup | `PreStartupInitializer` fire-and-forget Task | warms first chassis/tester access | one-shot, exceptions caught |
 | Execution session | `ActionExecutor.ExecuteTaskAsync` | `Task.Run(StartDelegate)` with cancellation | `FinalizeAsync`/`StopAsync` cancels and disposes session |
-| Device protocol waits | Real `ModeSelectingDeviceProtocol` calls plus COM/TCP/UDP/USB queries | 5-second outer watchdog, semaphore-protected I/O and transport timeout polling | linked cancellation; caller resumes with `TimeoutException` |
+| Device protocol waits | Real `ModeSelectingDeviceProtocol` calls plus COM/TCP/UDP/USB queries | 5-second outer watchdog, semaphore-protected I/O and transport timeout polling; UDP keeps one socket per runtime device and recreates it after timeout, cancellation, endpoint change or I/O failure | linked cancellation; caller resumes with `TimeoutException`; UDP `10055` send gets one bounded retry |
 | Help server | `HelpServer.EnsureStarted` | Kestrel static-file host | `App.OnExit → HelpServer.Stop` |
 | Archive refresh | `ArchiveControl` DispatcherTimer | refresh archive lists plus background I/O | view lifetime |
 | Role keyboard layout | `RoleLoginWindow` DispatcherTimer | keyboard layout monitoring | window lifetime |
@@ -2570,6 +2600,9 @@ ErrorItem → translator/runner ErrorList
 | `EquipmentService` | static coordinator | Ask.Engine | equipment validation/runtime selection | [Equipment](#equipment-architecture) |
 | `BaseMeasurement` | template base | Ask.Engine | metrology lifecycle | [Metrology](#metrology-and-hardware-tests) |
 | `IDevice` | interface | Ask.Core | root device contract | [Equipment](#equipment-architecture) |
+| `UdpProtocol` | transport | Ask.Device.Communication | persistent per-device UDP exchange, bounded `10055` send recovery and socket lifetime | [Equipment](#transport-details) |
+| `HardwareWatchdogProtocol` | transport decorator | Ask.Device.Communication | 5-second outer hardware bound and disposal forwarding to the owned protocol | [Equipment](#transport-details) |
+| `DeviceTransportException` | typed exception | Ask.Core | preserves a UDP/transport root exception for equipment retry and protocol output | [Error Handling](#equipment-error-flow) |
 | `IUserInteractionService` | interface | Ask.Core | Engine↔UI interaction | [Shared Contracts](#shared-contracts-and-dto) |
 | `UserActionHelper` | static coordinator | Ask.Core | typed equipment retry/continue/finish loop | [Error Handling](#equipment-error-flow) |
 | `DeviceResetService` | static coordinator | Ask.Core | sequential addressed reset of devices used by a test | [Execution Engine](#addressed-reset-of-test-equipment) |
