@@ -759,6 +759,9 @@ namespace Ask.DataBase.Provider.Migrations
                     b.Property<bool>("ShowConnectionInfo")
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("ShowDelayMessages")
+                        .HasColumnType("INTEGER");
+
                     b.Property<bool>("ShowDeviceExecutionParameters")
                         .HasColumnType("INTEGER");
 

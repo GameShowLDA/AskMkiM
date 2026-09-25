@@ -40,4 +40,9 @@ public class DeviceDisplaySettingsDto
   /// Отображать промежуточные результаты измерений.
   /// </summary>
   public bool ShowIntermediateMeasurementResults { get; set; }
+
+  /// <summary>
+  /// Отображать сообщения о задержках оборудования.
+  /// </summary>
+  public bool ShowDelayMessages { get; set; } = true;
 }

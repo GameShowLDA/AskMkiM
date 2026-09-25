@@ -500,6 +500,11 @@ public static class ExecutionMessages
   /// <param name="callerFile">Путь к файлу, вызвавшему публикацию.</param>
   /// <param name="callerLine">Номер строки, вызвавшей публикацию.</param>
   /// <returns>Задача, представляющая публикацию сообщения.</returns>
+  /// <remarks>
+  /// Если продолжительность задержки меньше или равна нулю, сообщение не публикуется
+  /// и ожидание не выполняется.
+  /// При отключённом отображении сообщений о задержках ожидание выполняется без публикации.
+  /// </remarks>
   /// <exception cref="ArgumentNullException">
   /// Выбрасывается, если <paramref name="delay"/> равен <see langword="null"/>.
   /// </exception>
@@ -510,12 +515,21 @@ public static class ExecutionMessages
     [CallerFilePath] string callerFile = "",
     [CallerLineNumber] int callerLine = 0)
   {
-    await ExecutionMessagePublisher.PublishAsync(
-      ExecutionMessageBuilder.BuildDelayMessage(delay),
-      outputService,
-      callerName,
-      callerFile,
-      callerLine);
+    ArgumentNullException.ThrowIfNull(delay);
+    if (delay.Delay <= 0)
+    {
+      return;
+    }
+
+    if (DeviceDisplayConfig.GetDelayMessagesVisibility())
+    {
+      await ExecutionMessagePublisher.PublishAsync(
+        ExecutionMessageBuilder.BuildDelayMessage(delay),
+        outputService,
+        callerName,
+        callerFile,
+        callerLine);
+    }
 
     await Task.Delay(delay.Delay);
   }

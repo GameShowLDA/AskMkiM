@@ -5,7 +5,9 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
+using Ask.Core.Shared.Metadata.Static.Delays;
 using Ask.Device.Runtime.Function.ModuleRelayControl;
+using Ask.Protocol.Messages.EntryPoints;
 
 namespace Ask.Device.Application.FunctionAdapters.ModuleRelayControl
 {
@@ -30,6 +32,7 @@ namespace Ask.Device.Application.FunctionAdapters.ModuleRelayControl
     /// <inheritdoc />
     public async Task<bool> ConnectRelayAsync(BusPoint bus, int number, IUserInteractionService? userMessageService = null)
     {
+      await ExecutionMessages.PublishDelayAsync(AppDelays.ModuleRelayControlDelays.PreCommandDelay, userMessageService);
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(
         () => _pointManager.ConnectRelayAsync(bus, number, userMessageService),
         userMessageService,
@@ -40,12 +43,15 @@ namespace Ask.Device.Application.FunctionAdapters.ModuleRelayControl
         var description = $"{number} к шине [{bus}]";
         throw RelayExceptionFactory.ConnectPointFailed(description);
       }
+
+      await ExecutionMessages.PublishDelayAsync(AppDelays.ModuleRelayControlDelays.PostCommandDelay, userMessageService);
       return result;
     }
 
     /// <inheritdoc />
     public async Task<bool> DisconnectRelayAsync(BusPoint bus, int number, IUserInteractionService? userMessageService = null)
     {
+      await ExecutionMessages.PublishDelayAsync(AppDelays.ModuleRelayControlDelays.PreCommandDelay, userMessageService);
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(
         () => _pointManager.DisconnectRelayAsync(bus, number, userMessageService),
         userMessageService,
@@ -56,12 +62,15 @@ namespace Ask.Device.Application.FunctionAdapters.ModuleRelayControl
         var description = $"{number} от шины [{bus}]";
         throw RelayExceptionFactory.DisconnectPointFailed(description);
       }
+
+      await ExecutionMessages.PublishDelayAsync(AppDelays.ModuleRelayControlDelays.PostCommandDelay, userMessageService);
       return result;
     }
 
     /// <inheritdoc />
     public async Task<bool> ConnectRelayVerifiedAsync(BusPoint bus, int number, IUserInteractionService? userMessageService = null)
     {
+      await ExecutionMessages.PublishDelayAsync(AppDelays.ModuleRelayControlDelays.PreCommandDelay, userMessageService);
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(
         () => _pointManager.ConnectRelayVerifiedAsync(bus, number, userMessageService),
         userMessageService,
@@ -72,12 +81,15 @@ namespace Ask.Device.Application.FunctionAdapters.ModuleRelayControl
         var description = $"{number} к шине [{bus}]";
         throw RelayExceptionFactory.ConnectPointFailed(description);
       }
+
+      await ExecutionMessages.PublishDelayAsync(AppDelays.ModuleRelayControlDelays.PostCommandDelay, userMessageService);
       return result;
     }
 
     /// <inheritdoc />
     public async Task<bool> DisconnectRelayVerifiedAsync(BusPoint bus, int number, IUserInteractionService? userMessageService = null)
     {
+      await ExecutionMessages.PublishDelayAsync(AppDelays.ModuleRelayControlDelays.PreCommandDelay, userMessageService);
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(
         () => _pointManager.DisconnectRelayVerifiedAsync(bus, number, userMessageService),
         userMessageService,
@@ -88,17 +100,19 @@ namespace Ask.Device.Application.FunctionAdapters.ModuleRelayControl
         var description = $"{number} от шины [{bus}]";
         throw RelayExceptionFactory.DisconnectPointFailed(description);
       }
+
+      await ExecutionMessages.PublishDelayAsync(AppDelays.ModuleRelayControlDelays.PostCommandDelay, userMessageService);
       return result;
     }
 
     /// <inheritdoc />
     public async Task<bool> ConnectRelayGroupAsync(BusPoint bus, int firstPoint, int lastPoint, IUserInteractionService? userMessageService = null)
     {
-
+      await ExecutionMessages.PublishDelayAsync(AppDelays.ModuleRelayControlDelays.PreCommandDelay, userMessageService);
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
-      {
-        return await _pointManager.ConnectRelayGroupAsync(bus, firstPoint, lastPoint, userMessageService);
-      }, userMessageService, deviceTask: true);
+        {
+          return await _pointManager.ConnectRelayGroupAsync(bus, firstPoint, lastPoint, userMessageService);
+        }, userMessageService, deviceTask: true);
 
       if (!result)
       {
@@ -106,17 +120,18 @@ namespace Ask.Device.Application.FunctionAdapters.ModuleRelayControl
         throw RelayExceptionFactory.ConnectRangeFailed(description);
       }
 
+      await ExecutionMessages.PublishDelayAsync(AppDelays.ModuleRelayControlDelays.PostCommandDelay, userMessageService);
       return result;
     }
 
     /// <inheritdoc />
     public async Task<bool> DisconnectRelayGroupAsync(BusPoint bus, int firstPoint, int lastPoint, IUserInteractionService? userMessageService = null)
     {
-
+      await ExecutionMessages.PublishDelayAsync(AppDelays.ModuleRelayControlDelays.PreCommandDelay, userMessageService);
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
-      {
-        return await _pointManager.DisconnectRelayGroupAsync(bus, firstPoint, lastPoint, userMessageService);
-      }, userMessageService, deviceTask: true);
+        {
+          return await _pointManager.DisconnectRelayGroupAsync(bus, firstPoint, lastPoint, userMessageService);
+        }, userMessageService, deviceTask: true);
 
       if (!result)
       {
@@ -124,12 +139,14 @@ namespace Ask.Device.Application.FunctionAdapters.ModuleRelayControl
         throw RelayExceptionFactory.DisconnectRangeFailed(description);
       }
 
+      await ExecutionMessages.PublishDelayAsync(AppDelays.ModuleRelayControlDelays.PostCommandDelay, userMessageService);
       return result;
     }
 
     /// <inheritdoc />
     public async Task<bool> DisconnectingAllPoint(IUserInteractionService? userMessageService = null)
     {
+      await ExecutionMessages.PublishDelayAsync(AppDelays.ModuleRelayControlDelays.PreCommandDelay, userMessageService);
       var description = $"всех точек от всех шин";
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
@@ -140,11 +157,13 @@ namespace Ask.Device.Application.FunctionAdapters.ModuleRelayControl
       if (!result)
         throw RelayExceptionFactory.DisconnectRangeFailed(description);
 
+      await ExecutionMessages.PublishDelayAsync(AppDelays.ModuleRelayControlDelays.PostCommandDelay, userMessageService);
       return result;
     }
 
     public async Task<bool> DisconnectingAllPointFromBusA(IUserInteractionService? userMessageService = null)
     {
+      await ExecutionMessages.PublishDelayAsync(AppDelays.ModuleRelayControlDelays.PreCommandDelay, userMessageService);
       var description = $"всех точек от шины А";
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
@@ -158,11 +177,13 @@ namespace Ask.Device.Application.FunctionAdapters.ModuleRelayControl
       if (!result)
         throw RelayExceptionFactory.DisconnectRangeFailed(description);
 
+      await ExecutionMessages.PublishDelayAsync(AppDelays.ModuleRelayControlDelays.PostCommandDelay, userMessageService);
       return result;
     }
 
     public async Task<bool> DisconnectingAllPointFromBusB(IUserInteractionService? userMessageService = null)
     {
+      await ExecutionMessages.PublishDelayAsync(AppDelays.ModuleRelayControlDelays.PreCommandDelay, userMessageService);
       var description = $"всех точек от шины В";
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
@@ -176,6 +197,7 @@ namespace Ask.Device.Application.FunctionAdapters.ModuleRelayControl
       if (!result)
         throw RelayExceptionFactory.DisconnectRangeFailed(description);
 
+      await ExecutionMessages.PublishDelayAsync(AppDelays.ModuleRelayControlDelays.PostCommandDelay, userMessageService);
       return result;
     }
 
@@ -189,6 +211,7 @@ namespace Ask.Device.Application.FunctionAdapters.ModuleRelayControl
     /// <inheritdoc />
     public async Task<bool> ConnectingPointToNewBus(BusPoint bus, int nubmerPoint, IUserInteractionService? userMessageService = null)
     {
+      await ExecutionMessages.PublishDelayAsync(AppDelays.ModuleRelayControlDelays.PreCommandDelay, userMessageService);
       var description = $"{nubmerPoint} к шине [{bus}]";
 
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
@@ -201,6 +224,7 @@ namespace Ask.Device.Application.FunctionAdapters.ModuleRelayControl
         throw RelayExceptionFactory.ConnectingPointToNewBusFailed(description);
       }
 
+      await ExecutionMessages.PublishDelayAsync(AppDelays.ModuleRelayControlDelays.PostCommandDelay, userMessageService);
       return result;
     }
 

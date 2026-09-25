@@ -35,7 +35,8 @@ internal static class ExecutionProtocolEnvironmentSnapshotFactory
       ["Оборудование.Коммутация"] = State(display.ShowConnectionInfo),
       ["Оборудование.Параметры выполнения"] = State(display.ShowDeviceExecutionParameters),
       ["Оборудование.Результаты измерений"] = State(display.ShowMeasurementResults),
-      ["Оборудование.Промежуточные результаты"] = State(display.ShowIntermediateMeasurementResults)
+      ["Оборудование.Промежуточные результаты"] = State(display.ShowIntermediateMeasurementResults),
+      ["Оборудование.Сообщения о задержках"] = State(display.ShowDelayMessages)
     };
 
     return new ExecutionProtocolEnvironmentSnapshot(

@@ -52,6 +52,11 @@ namespace Ask.Core.Services.Config.AppSettings
     /// </summary>
     public static void SetIntermediateMeasurementResultsVisibility(bool isVisible) => _settingsModel.ShowIntermediateMeasurementResults = isVisible;
 
+    /// <summary>
+    /// Устанавливает значение отображения сообщений о задержках оборудования.
+    /// </summary>
+    public static void SetDelayMessagesVisibility(bool isVisible) => _settingsModel.ShowDelayMessages = isVisible;
+
     public static Task SetDeviceDisplaySettingsModel(DeviceDisplaySettingsDto model)
     {
       SetMachineAddressVisibility(model.ShowMachineAddresses);
@@ -59,6 +64,7 @@ namespace Ask.Core.Services.Config.AppSettings
       SetExecutionParametersVisibility(model.ShowDeviceExecutionParameters);
       SetMeasurementResultsVisibility(model.ShowMeasurementResults);
       SetIntermediateMeasurementResultsVisibility(model.ShowIntermediateMeasurementResults);
+      SetDelayMessagesVisibility(model.ShowDelayMessages);
 
       return Task.CompletedTask;
     }
@@ -100,6 +106,11 @@ namespace Ask.Core.Services.Config.AppSettings
     /// </summary>
     public static bool GetIntermediateMeasurementResultsVisibility() => _settingsModel.ShowIntermediateMeasurementResults;
 
+    /// <summary>
+    /// Возвращает признак отображения сообщений о задержках оборудования.
+    /// </summary>
+    public static bool GetDelayMessagesVisibility() => _settingsModel.ShowDelayMessages;
+
     public static DeviceDisplaySettingsDto GetDeviceDisplayModel()
     {
       DeviceDisplaySettingsDto protocolModel = new DeviceDisplaySettingsDto();
@@ -108,6 +119,7 @@ namespace Ask.Core.Services.Config.AppSettings
       protocolModel.ShowDeviceExecutionParameters = _settingsModel.ShowDeviceExecutionParameters;
       protocolModel.ShowMeasurementResults = _settingsModel.ShowMeasurementResults;
       protocolModel.ShowIntermediateMeasurementResults = _settingsModel.ShowIntermediateMeasurementResults;
+      protocolModel.ShowDelayMessages = _settingsModel.ShowDelayMessages;
       return protocolModel;
     }
     #endregion
@@ -124,6 +136,7 @@ namespace Ask.Core.Services.Config.AppSettings
       SetExecutionParametersVisibility(model.ShowDeviceExecutionParameters);
       SetMeasurementResultsVisibility(model.ShowMeasurementResults);
       SetIntermediateMeasurementResultsVisibility(model.ShowIntermediateMeasurementResults);
+      SetDelayMessagesVisibility(model.ShowDelayMessages);
 
       await InvokeSaveDeviceDisplayAsync(model);
     }
