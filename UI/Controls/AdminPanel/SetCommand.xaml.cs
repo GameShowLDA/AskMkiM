@@ -818,7 +818,9 @@ namespace UI.Controls.AdminPanel
         Foreground = color,
         FontFamily = new FontFamily("Consolas"),
         FontSize = 16,
-        Margin = new Thickness(0, 0, 0, 4)
+        Margin = new Thickness(0, 0, 0, 4),
+        HorizontalAlignment = HorizontalAlignment.Stretch,
+        TextWrapping = TextWrapping.Wrap
       };
 
       ConsolePanel.Children.Add(line);

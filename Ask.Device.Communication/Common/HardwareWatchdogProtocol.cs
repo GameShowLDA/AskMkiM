@@ -5,12 +5,22 @@ namespace Ask.Device.Communication.Common;
 /// <summary>
 /// Ограничивает время ожидания операций реального протокола оборудования.
 /// </summary>
-public sealed class HardwareWatchdogProtocol : IDeviceProtocol
+public sealed class HardwareWatchdogProtocol : IDeviceProtocol, IDisposable
 {
   private static readonly TimeSpan DefaultTimeout = TimeSpan.FromSeconds(5);
   private readonly IDeviceProtocol _innerProtocol;
   private readonly string _deviceName;
   private readonly TimeSpan _timeout;
+  private int _disposed;
+
+  /// <summary>
+  /// Освобождает принадлежащий оболочке транспорт.
+  /// </summary>
+  public void Dispose()
+  {
+    if (Interlocked.Exchange(ref _disposed, 1) == 0)
+      (_innerProtocol as IDisposable)?.Dispose();
+  }
 
   /// <summary>
   /// Инициализирует защитный протокол для указанного транспорта.
@@ -49,6 +59,7 @@ public sealed class HardwareWatchdogProtocol : IDeviceProtocol
     int delayBeforeCall = 0,
     CancellationToken cancellationToken = default)
   {
+    ObjectDisposedException.ThrowIf(Volatile.Read(ref _disposed) != 0, this);
     using var operationCancellation = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
     Task<string> operation = Task.Run(
       () => _innerProtocol.QueryAsync(
