@@ -7,7 +7,6 @@ using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
-using Ask.Core.Shared.Metadata.Static;
 using Ask.Core.Shared.Metadata.Enums.UnitEnums;
 using Ask.Engine.Tests.Metrology.MeasurementSystem;
 using static Ask.Engine.Tests.Base.UIValidationHelper;
@@ -100,7 +99,14 @@ namespace Ask.Engine.Tests.Metrology
         var fastMeter = Devices.TryGetValue(metrologicalModeRole, out var meter) ? meter.OfType<IMultimeter>().FirstOrDefault() : null;
 
         var resultReferenceMeterMeasured = await MeasuredReferenceMeter(protocolUI, param);
-        (LowerBound, UpperBound, var delta) = MeasurementErrorDefaults.CalculateToleranceRange(MeasurementTypeCommand.KN_ACW, resultReferenceMeterMeasured);
+        var tolerance = await MeasurementToleranceCalculator.TryCalculateAsync(
+          MeasurementTypeCommand.KN_ACW,
+          resultReferenceMeterMeasured,
+          protocolUI);
+        if (tolerance is not { } range)
+          return false;
+
+        (LowerBound, UpperBound, var delta) = range;
 
         MeasurementRange measurementRangeAc = new MeasurementRange(param, LowerBound, UpperBound);
         var resultFastMeterMeasured = await MeasuredFastMeter(fastMeter, protocolUI, measurementRangeAc);

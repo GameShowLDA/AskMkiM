@@ -18,7 +18,7 @@ internal static class ExecutionProtocolEnvironmentSnapshotFactory
     var settings = new SortedDictionary<string, string>
     {
       ["Выполнение.Холостой режим"] = State(execution.IdleModeExecution),
-      ["Выполнение.Симуляция брака"] = State(execution.IsErrorSimulationMode),
+      ["Выполнение.Симуляция брака"] = execution.ErroneousMeasurementType.ToString(),
       ["Выполнение.Симуляция аппаратных ошибок"] = State(execution.IsHardwareErrorSimulationMode),
       ["Выполнение.Пошаговый режим"] = State(execution.StepByStepMode),
       ["Выполнение.Остановка при ошибке"] = State(execution.StopOnError),
@@ -35,7 +35,8 @@ internal static class ExecutionProtocolEnvironmentSnapshotFactory
       ["Оборудование.Коммутация"] = State(display.ShowConnectionInfo),
       ["Оборудование.Параметры выполнения"] = State(display.ShowDeviceExecutionParameters),
       ["Оборудование.Результаты измерений"] = State(display.ShowMeasurementResults),
-      ["Оборудование.Промежуточные результаты"] = State(display.ShowIntermediateMeasurementResults)
+      ["Оборудование.Промежуточные результаты"] = State(display.ShowIntermediateMeasurementResults),
+      ["Оборудование.Сообщения о задержках"] = State(display.ShowDelayMessages)
     };
 
     return new ExecutionProtocolEnvironmentSnapshot(

@@ -70,9 +70,12 @@ public static class DatabaseInitializationService
     await ApplySchemaAsync(databasePath, report, progress, cancellationToken);
     await EnsureLegacyCompatibilityModeColumnAsync(databasePath, report, progress, cancellationToken);
     await EnsureHardwareErrorSimulationModeColumnAsync(databasePath, report, progress, cancellationToken);
+    await EnsureDeviceHardwareFailureSimulationColumnsAsync(databasePath, report, progress, cancellationToken);
     await EnsureDisablePowerCheckColumnAsync(databasePath, report, progress, cancellationToken);
     await EnsureRepeatMeasurementColumnAsync(databasePath, report, progress, cancellationToken);
     await EnsureSettingsProtocolPrintColumnsAsync(databasePath, report, progress, cancellationToken);
+    await EnsureDeviceDisplayDelayMessagesColumnAsync(databasePath, report, progress, cancellationToken);
+    await EnsureDiagnosticUnderliningColumnsAsync(databasePath, report, progress, cancellationToken);
     await EnsureFastMeterPpuDividerCoefficientColumnAsync(databasePath, report, progress, cancellationToken);
     await EnsureBreakdownTesterVoltageColumnsAsync(databasePath, report, progress, cancellationToken);
     await EnsureBreakdownTesterSystemInsulationResistanceColumnAsync(databasePath, report, progress, cancellationToken);
@@ -350,6 +353,33 @@ public static class DatabaseInitializationService
   }
 
   /// <summary>
+  /// Добавляет настройку отображения сообщений о задержках в совместимую старую схему.
+  /// </summary>
+  internal static async Task EnsureDeviceDisplayDelayMessagesColumnAsync(
+    string databasePath,
+    DatabaseInitializationReport report,
+    Action<string>? progress,
+    CancellationToken cancellationToken)
+  {
+    await using var connection = new SqliteConnection($"Data Source={databasePath}");
+    await connection.OpenAsync(cancellationToken);
+
+    if (!await TableExistsAsync(connection, "DeviceDisplaySettings", cancellationToken))
+    {
+      return;
+    }
+
+    await EnsureColumnAsync(
+      connection,
+      "DeviceDisplaySettings",
+      "ShowDelayMessages",
+      "INTEGER NOT NULL DEFAULT 1",
+      report,
+      progress,
+      cancellationToken);
+  }
+
+  /// <summary>
   /// Добавляет настройку симуляции аппаратных ошибок в совместимую старую схему.
   /// </summary>
   /// <param name="databasePath">Путь к файлу базы данных.</param>
@@ -456,6 +486,48 @@ public static class DatabaseInitializationService
       cancellationToken);
   }
 
+  /// <summary>
+  /// Добавляет признак симуляции аппаратных сбоев в таблицы устройств старой схемы.
+  /// </summary>
+  private static async Task EnsureDeviceHardwareFailureSimulationColumnsAsync(
+    string databasePath,
+    DatabaseInitializationReport report,
+    Action<string>? progress,
+    CancellationToken cancellationToken)
+  {
+    string[] deviceTables =
+    [
+      "BreakdownTesters",
+      "ChassisManagers",
+      "FastMeters",
+      "PowerSourceModules",
+      "Rack",
+      "RelaySwitchModules",
+      "SwitchingDevices",
+      "UninterruptiblePowerSupplies",
+    ];
+
+    await using var connection = new SqliteConnection($"Data Source={databasePath}");
+    await connection.OpenAsync(cancellationToken);
+
+    foreach (string tableName in deviceTables)
+    {
+      if (!await TableExistsAsync(connection, tableName, cancellationToken))
+      {
+        continue;
+      }
+
+      await EnsureColumnAsync(
+        connection,
+        tableName,
+        "IsHardwareFailureSimulationEnabled",
+        "INTEGER NOT NULL DEFAULT 0",
+        report,
+        progress,
+        cancellationToken);
+    }
+  }
+
   private static async Task EnsureFastMeterPpuDividerCoefficientColumnAsync(
     string databasePath,
     DatabaseInitializationReport report,
@@ -558,8 +630,23 @@ public static class DatabaseInitializationService
   }
 
   /// <summary>
-  /// Добавляет колонку в таблицу, если она отсутствует.
+  /// Добавляет настройки подчёркиваний в принятую без истории миграций старую схему.
   /// </summary>
+  private static async Task EnsureDiagnosticUnderliningColumnsAsync(
+    string databasePath,
+    DatabaseInitializationReport report,
+    Action<string>? progress,
+    CancellationToken cancellationToken)
+  {
+    await using var connection = new SqliteConnection($"Data Source={databasePath}");
+    await connection.OpenAsync(cancellationToken);
+    if (!await TableExistsAsync(connection, "UserInterface", cancellationToken)) return;
+
+    await EnsureColumnAsync(connection, "UserInterface", "UseSyntaxErrorUnderlining", "INTEGER NOT NULL DEFAULT 1", report, progress, cancellationToken);
+    await EnsureColumnAsync(connection, "UserInterface", "UseStyleErrorUnderlining", "INTEGER NOT NULL DEFAULT 1", report, progress, cancellationToken);
+  }
+
+  /// <summary>Добавляет колонку в таблицу, если она отсутствует.</summary>
   private static async Task EnsureColumnAsync(
     System.Data.Common.DbConnection connection,
     string tableName,

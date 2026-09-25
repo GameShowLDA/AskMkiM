@@ -7,6 +7,8 @@ using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
+using Ask.Core.Shared.Metadata.Enums.UnitEnums;
+using Ask.Core.Shared.Metadata.Static.Delays;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies;
 using Ask.Engine.ControlCommandExecutor.BaseStrategies.Data;
@@ -265,6 +267,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
       }, messageService, measurementTask: true);
 
+      await ExecutionMessages.PublishDelayAsync(AppDelays.BreakdownTesterDelays.PostTestDelay, messageService);
       return result;
     }
 
@@ -313,6 +316,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         }
       }, messageService, measurementTask: true);
 
+      await ExecutionMessages.PublishDelayAsync(AppDelays.BreakdownTesterDelays.PostTestDelay, messageService);
       return result;
     }
 

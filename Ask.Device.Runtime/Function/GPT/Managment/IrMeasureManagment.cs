@@ -1,5 +1,7 @@
 using Ask.Core.Shared.DTO.Devices.Breakdown;
 using Ask.Core.Shared.DTO.Devices.Measurements;
+using Ask.Core.Services.UI;
+using System.Diagnostics;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
@@ -15,7 +17,7 @@ namespace Ask.Device.Runtime.Function.GPT.Managment
 {
   /// <summary>
   /// Класс управления измерениями для режима IR (сопротивление изоляции).
-  /// Использует специальный алгоритм с таймером и парсингом результата.
+  /// Последовательно опрашивает прибор с поддержкой отмены выполнения.
   /// </summary>
   public class IrMeasureManagment : IMeasurable
   {
@@ -54,102 +56,63 @@ namespace Ask.Device.Runtime.Function.GPT.Managment
       bool waitFullTime = false,
       IUserInteractionService? userMessageService = null)
     {
+      using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(
+        EquipmentExecutionContext.CancellationToken, userMessageService?.GetCancellationToken() ?? CancellationToken.None);
+      using var executionScope = EquipmentExecutionContext.EnterExecution(cancellation.Token);
+      var token = cancellation.Token;
+      token.ThrowIfCancellationRequested();
       if (await _getIsIdleMode())
         return new BreakdownMeasurementResponse(BreakdownMeasurementStatus.Pass, MeasurementAdapterHelper.Round(measurementRange.TargetValue), string.Empty);
 
       await StopMeasure();
-      await Task.Delay(_delayBeforeCall);
+      await Task.Delay(_delayBeforeCall, token);
 
       var time = await _getTestTime();
       var timeRamp = await _getRampTime();
 
-      int totalTicks = (int)((time + timeRamp) * 1000 / 200) - 1;
-      var timer = new System.Timers.Timer
-      {
-        Interval = 200,
-        AutoReset = true
-      };
-
-      int tickCount = 0;
       string response = string.Empty;
       var testCommand = $"{GetCommandSyntax(FunctionCommand.FUNCTION_TEST)} ON";
-      BreakdownMeasurementResponse? model = null;
-
-      timer.Elapsed += async (s, a) =>
+      await _gptModel.DeviceProtocol.QueryAsync(testCommand, cancellationToken: token);
+      var elapsed = Stopwatch.StartNew();
+      var duration = TimeSpan.FromSeconds(Math.Max(0, time + timeRamp));
+      while (elapsed.Elapsed < duration)
       {
-        tickCount++;
-
-        await Task.Delay(300);
+        await Task.Delay(200, token);
         response = await _gptModel.DeviceProtocol.QueryAsync(
           $"{GetCommandSyntax(FunctionCommand.MEASURE)} ?",
           timeout: 500,
-          delayBeforeCall: _delayBeforeCall);
+          delayBeforeCall: _delayBeforeCall, cancellationToken: token);
 
-        try
-        {
-          model = ParseMeasurement(response);
-          if (model is null)
-          {
-            return;
-          }
-
+          var model = ParseMeasurement(response);
+          if (model is null) continue;
           if (model.Status == BreakdownMeasurementStatus.Fail)
           {
-            await _gptModel.DeviceProtocol.QueryAsync(testCommand);
+            await _gptModel.DeviceProtocol.QueryAsync(testCommand, cancellationToken: token);
           }
           else if (model.Status == BreakdownMeasurementStatus.Test && model.Value > 0 && model.Value > measurementRange.TargetValue)
           {
             await StopMeasure();
-            tickCount = totalTicks + 1;
-            timer.Stop();
-            return;
+            break;
           }
-        }
-        catch
-        {
-          model = null;
-        }
-      };
-
-      await _gptModel.DeviceProtocol.QueryAsync(testCommand);
-      timer.Start();
-
-      var task = Task.Run(async () =>
-      {
-        while (tickCount <= totalTicks)
-          await Task.Delay(1);
-      });
-
-      Task.WaitAny(task);
-
-      timer.Stop();
-      timer.Dispose();
-
-      while (true)
-      {
-        response = await _gptModel.DeviceProtocol.QueryAsync(
-          $"{GetCommandSyntax(FunctionCommand.MEASURE)} ?",
-          timeout: 500,
-          delayBeforeCall: _delayBeforeCall);
-
-        if (!BreakdownTesterResponseProcessor.IsTestInProgress(response))
-          break;
-
-        await Task.Delay(50);
       }
 
-      response = await _gptModel.DeviceProtocol.QueryAsync(
-        $"{GetCommandSyntax(FunctionCommand.MEASURE)} ?",
-        timeout: 500,
-        delayBeforeCall: _delayBeforeCall);
-
+      var completionWait = Stopwatch.StartNew();
       BreakdownMeasurementResponse measurement;
-      while (!BreakdownTesterResponseProcessor.TryParseMeasurement(response, out measurement))
+      while (true)
       {
+        token.ThrowIfCancellationRequested();
+        if (completionWait.Elapsed > MeasureHelper.CompletionTimeout)
+          throw new TimeoutException("Прибор не вернул итоговый результат измерения сопротивления изоляции.");
         response = await _gptModel.DeviceProtocol.QueryAsync(
           $"{GetCommandSyntax(FunctionCommand.MEASURE)} ?",
           timeout: 500,
-          delayBeforeCall: _delayBeforeCall);
+          delayBeforeCall: _delayBeforeCall, cancellationToken: token);
+
+        if (!BreakdownTesterResponseProcessor.IsTestInProgress(response)
+          && BreakdownTesterResponseProcessor.TryParseMeasurement(response, out measurement))
+          break;
+
+        await Task.Delay(50, token);
       }
 
       double multiplier = measurement.Unit.ToLowerInvariant() switch

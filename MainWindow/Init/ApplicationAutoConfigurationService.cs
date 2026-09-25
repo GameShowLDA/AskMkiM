@@ -165,7 +165,7 @@ internal sealed class ApplicationAutoConfigurationService
     var defaultSettings = new SettingsExecutionDto
     {
       IdleModeExecution = false,
-      IsErrorSimulationMode = false,
+      ErroneousMeasurementType = TypeErroneousMeasurement.None,
       IsHardwareErrorSimulationMode = false,
       StepByStepMode = false,
       StopOnError = false,
@@ -227,6 +227,7 @@ internal sealed class ApplicationAutoConfigurationService
     defaultDeviceDisplaySettings.ShowDeviceExecutionParameters = true;
     defaultDeviceDisplaySettings.ShowMeasurementResults = true;
     defaultDeviceDisplaySettings.ShowIntermediateMeasurementResults = true;
+    defaultDeviceDisplaySettings.ShowDelayMessages = true;
 
     await DeviceDisplayConfig.SaveSettingsAsync(defaultDeviceDisplaySettings);
 

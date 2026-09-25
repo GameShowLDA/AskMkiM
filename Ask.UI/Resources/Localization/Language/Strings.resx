@@ -216,11 +216,20 @@
   <data name="menu.help.generalInformation" xml:space="preserve">
     <value>Общие сведения</value>
   </data>
-  <data name="menu.help.languageControlPrograms" xml:space="preserve">
-    <value>Язык программ контроля</value>
+  <data name="menu.help.mainMenu" xml:space="preserve">
+    <value>Основное меню</value>
   </data>
-  <data name="menu.help.programComposition" xml:space="preserve">
-    <value>Состав программы</value>
+  <data name="menu.help.languageControlPrograms" xml:space="preserve">
+    <value>Язык АСК</value>
+  </data>
+  <data name="menu.help.translator" xml:space="preserve">
+    <value>Транслятор</value>
+  </data>
+  <data name="menu.help.textEditor" xml:space="preserve">
+    <value>Текстовый редактор</value>
+  </data>
+  <data name="menu.help.hotKeys" xml:space="preserve">
+    <value>Горячие клавиши</value>
   </data>
   <data name="menu.help.aboutProgram" xml:space="preserve">
     <value>О программе</value>
@@ -462,6 +471,21 @@
   <data name="settings.userinterface.syntaxHighlighting.title" xml:space="preserve">
     <value>Подсветка синтаксиса</value>
   </data>
+  <data name="settings.userinterface.diagnosticUnderlining.title" xml:space="preserve">
+    <value>Подчеркивание ошибок</value>
+  </data>
+  <data name="settings.userinterface.diagnosticUnderlining.description" xml:space="preserve">
+    <value>Определяет, какие ошибки и стилистические предупреждения подчеркивать в тексте программы контроля.</value>
+  </data>
+  <data name="settings.userinterface.diagnosticUnderlining.none" xml:space="preserve">
+    <value>Нет</value>
+  </data>
+  <data name="settings.userinterface.diagnosticUnderlining.all" xml:space="preserve">
+    <value>Всё</value>
+  </data>
+  <data name="settings.userinterface.diagnosticUnderlining.errorsOnly" xml:space="preserve">
+    <value>Только ошибки</value>
+  </data>
   <data name="settings.userinterface.syntaxHighlighting.description" xml:space="preserve">
     <value>Включает или отключает подсветку синтаксиса в редакторе протокола.</value>
   </data>
@@ -499,13 +523,25 @@
     <value>Симуляция ошибок измерений</value>
   </data>
   <data name="settings.execution.measurementErrorSimulation.description" xml:space="preserve">
-    <value>Добавляет существующие случайные отклонения результатов измерений от заданных норм.</value>
+    <value>Задаёт направление ошибочного результата измерения относительно допустимого диапазона.</value>
+  </data>
+  <data name="settings.execution.measurementErrorSimulation.none" xml:space="preserve">
+    <value>Без ошибок</value>
+  </data>
+  <data name="settings.execution.measurementErrorSimulation.rnd" xml:space="preserve">
+    <value>Случайно</value>
+  </data>
+  <data name="settings.execution.measurementErrorSimulation.low" xml:space="preserve">
+    <value>Ниже нормы</value>
+  </data>
+  <data name="settings.execution.measurementErrorSimulation.high" xml:space="preserve">
+    <value>Выше нормы</value>
   </data>
   <data name="settings.execution.hardwareErrorSimulation.title" xml:space="preserve">
-    <value>Симуляция ошибок оборудования</value>
+    <value>Симуляция сбоев оборудования</value>
   </data>
   <data name="settings.execution.hardwareErrorSimulation.description" xml:space="preserve">
-    <value>Имитирует ошибку выполнения не измерительной команды оборудования с вероятностью 50%.</value>
+    <value>Задаёт оборудование, для которого каждая неизмерительная команда завершается ошибкой.</value>
   </data>
   <data name="settings.protocol.operationTime.title" xml:space="preserve">
     <value>Вывод времени операции</value>
@@ -590,6 +626,12 @@
   </data>
   <data name="settings.protocol.deviceInfo.intermediateMeasurementResults.description" xml:space="preserve">
     <value>Отображает промежуточные результаты измерений, полученные в ходе выполнения программ контроля.</value>
+  </data>
+  <data name="settings.protocol.deviceInfo.delayMessages.title" xml:space="preserve">
+    <value>Сообщения о задержках</value>
+  </data>
+  <data name="settings.protocol.deviceInfo.delayMessages.description" xml:space="preserve">
+    <value>Отображает сообщения о задержках оборудования в ходе выполнения программ контроля.</value>
   </data>
   <data name="settings.main.title" xml:space="preserve">
     <value>Параметры</value>

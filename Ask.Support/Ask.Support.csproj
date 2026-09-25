@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<TargetFramework>net8.0-windows</TargetFramework>
@@ -9,32 +9,48 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <None Remove="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\buttonCreateImage.png" />
-	  <None Remove="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\buttonExitImage.png" />
-	  <None Remove="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\buttonOpenArchiveImage.png" />
-	  <None Remove="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\buttonOpenFolderInExplorerImage.png" />
-	  <None Remove="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\buttonOpenImage.png" />
-	  <None Remove="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\buttonPrintImage.png" />
-	  <None Remove="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\buttonReplaceImage.png" />
-	  <None Remove="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\buttonSaveAsImage.png" />
-	  <None Remove="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\buttonSaveImage.png" />
-	  <None Remove="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\buttonSearchAndReplaceImage.png" />
-	  <None Remove="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\contextMenuArchiveImage.png" />
-	  <None Remove="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\createArchiveImage.png" />
-	  <None Remove="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\createNewTextEditorImage.png" />
-	  <None Remove="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\enteringArchiveNameImage.png" />
-	  <None Remove="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\fileManagerReadModeImage.png" />
-	  <None Remove="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\listOfArchiveIfAvalibleImage.png" />
-	  <None Remove="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\listOfArchiveIfNotAvalibleImage.png" />
-	  <None Remove="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\notificationSuccessfulSavingImage.png" />
-	  <None Remove="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\openContentsArchiveImage.png" />
-	  <None Remove="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\replacePanelImage.png" />
-	  <None Remove="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\savingTranslatedFileToArchiveImage.png" />
-	  <None Remove="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\selectingArchiveToSaveImage.png" />
-	  <None Remove="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\startWorkingArchiveImage.png" />
-	  <None Remove="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\windowAvailableArchivesImage.png" />
-	  <None Remove="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabTrialsChapter\TabMetrologyChapter\ehtMetrologyPanelImage.png" />
-	  <None Remove="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabTrialsChapter\TabTestsChapter\rkommTestPanelImage.png" />
+	  <None Remove="AppHelp\Content\MainMenuChapter\TabFileChapter\APKtoAPKWconversionMenuImage.png" />
+	  <None Remove="AppHelp\Content\MainMenuChapter\TabFileChapter\APKWtoAPKconversionMenuImage.png" />
+	  <None Remove="AppHelp\Content\MainMenuChapter\TabFileChapter\archiveButtonImage.png" />
+	  <None Remove="AppHelp\Content\MainMenuChapter\TabFileChapter\archiveContextMenuImage.png" />
+	  <None Remove="AppHelp\Content\MainMenuChapter\TabFileChapter\buttonCreateImage.png" />
+	  <None Remove="AppHelp\Content\MainMenuChapter\TabFileChapter\buttonExitImage.png" />
+	  <None Remove="AppHelp\Content\MainMenuChapter\TabFileChapter\buttonOpenArchiveImage.png" />
+	  <None Remove="AppHelp\Content\MainMenuChapter\TabFileChapter\buttonOpenFolderInExplorerImage.png" />
+	  <None Remove="AppHelp\Content\MainMenuChapter\TabFileChapter\buttonOpenImage.png" />
+	  <None Remove="AppHelp\Content\MainMenuChapter\TabFileChapter\buttonPrintImage.png" />
+	  <None Remove="AppHelp\Content\MainMenuChapter\TabFileChapter\buttonReplaceImage.png" />
+	  <None Remove="AppHelp\Content\MainMenuChapter\TabFileChapter\buttonSaveAsImage.png" />
+	  <None Remove="AppHelp\Content\MainMenuChapter\TabFileChapter\buttonSaveImage.png" />
+	  <None Remove="AppHelp\Content\MainMenuChapter\TabFileChapter\buttonSearchAndReplaceImage.png" />
+	  <None Remove="AppHelp\Content\MainMenuChapter\TabFileChapter\buttonsImportAndExportImage.png" />
+	  <None Remove="AppHelp\Content\MainMenuChapter\TabFileChapter\choiceArchiveImage.png" />
+	  <None Remove="AppHelp\Content\MainMenuChapter\TabFileChapter\contextMenuArchiveImage.png" />
+	  <None Remove="AppHelp\Content\MainMenuChapter\TabFileChapter\contextMenuFileInArchiveImage.png" />
+	  <None Remove="AppHelp\Content\MainMenuChapter\TabFileChapter\contextMenuFilesInArchiveImage.png" />
+	  <None Remove="AppHelp\Content\MainMenuChapter\TabFileChapter\conversionSelectionButtonsImage.png" />
+	  <None Remove="AppHelp\Content\MainMenuChapter\TabFileChapter\createArchiveButtonImage.png" />
+	  <None Remove="AppHelp\Content\MainMenuChapter\TabFileChapter\createArchiveContextMenuImage.png" />
+	  <None Remove="AppHelp\Content\MainMenuChapter\TabFileChapter\createNewTextEditorImage.png" />
+	  <None Remove="AppHelp\Content\MainMenuChapter\TabFileChapter\enteringArchiveNameImage.png" />
+	  <None Remove="AppHelp\Content\MainMenuChapter\TabFileChapter\exampleArchiveCatalogImage.png" />
+	  <None Remove="AppHelp\Content\MainMenuChapter\TabFileChapter\fileManagementButtonsInArchiveImage.png" />
+	  <None Remove="AppHelp\Content\MainMenuChapter\TabFileChapter\fileManagerReadModeImage.png" />
+	  <None Remove="AppHelp\Content\MainMenuChapter\TabFileChapter\generalPlanOpenArchiveImage.png" />
+	  <None Remove="AppHelp\Content\MainMenuChapter\TabFileChapter\listOfArchiveIfAvalibleImage.png" />
+	  <None Remove="AppHelp\Content\MainMenuChapter\TabFileChapter\listOfArchiveIfNotAvalibleImage.png" />
+	  <None Remove="AppHelp\Content\MainMenuChapter\TabFileChapter\messageCreationArchiveImage.png" />
+	  <None Remove="AppHelp\Content\MainMenuChapter\TabFileChapter\notificationSuccessfulSavingImage.png" />
+	  <None Remove="AppHelp\Content\MainMenuChapter\TabFileChapter\openContentsArchiveImage.png" />
+	  <None Remove="AppHelp\Content\MainMenuChapter\TabFileChapter\openProgramControlInArchiveImage.png" />
+	  <None Remove="AppHelp\Content\MainMenuChapter\TabFileChapter\OPKtoPKconversionMenuImage.png" />
+	  <None Remove="AppHelp\Content\MainMenuChapter\TabFileChapter\replacePanelImage.png" />
+	  <None Remove="AppHelp\Content\MainMenuChapter\TabFileChapter\savingTranslatedFileToArchiveImage.png" />
+	  <None Remove="AppHelp\Content\MainMenuChapter\TabFileChapter\selectingArchiveToSaveImage.png" />
+	  <None Remove="AppHelp\Content\MainMenuChapter\TabFileChapter\startWorkingArchiveImage.png" />
+	  <None Remove="AppHelp\Content\MainMenuChapter\TabFileChapter\windowAvailableArchivesImage.png" />
+	  <None Remove="AppHelp\Content\MainMenuChapter\TabTrialsChapter\TabMetrologyChapter\ehtMetrologyPanelImage.png" />
+	  <None Remove="AppHelp\Content\MainMenuChapter\TabTrialsChapter\TabTestsChapter\rkommTestPanelImage.png" />
 	  <None Remove="AppHelp\favicon.ico" />
 	</ItemGroup>
 
@@ -576,13 +592,13 @@
 	  <Content Include="AppHelp\Conservation\ImplementationMonitoringProgramsChapter\PreparationForImplementationControlProgramsChapter\OptionsForExecutingMonitoringProgramsPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\LanguageControlProgramsChapter\AbbreviatedRecordSequenceIdentifiersChapter\AbbreviatedRecordEnumerationIdentifierPart.html">
+	  <Content Include="AppHelp\Conservation\LanguageControlProgramsChapter\AbbreviatedRecordSequenceIdentifiersChapter\AbbreviatedRecordEnumerationIdentifierPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\LanguageControlProgramsChapter\AbbreviatedRecordSequenceIdentifiersChapter\RangeRecordingSequenceIdentifiersPart.html">
+	  <Content Include="AppHelp\Conservation\LanguageControlProgramsChapter\AbbreviatedRecordSequenceIdentifiersChapter\RangeRecordingSequenceIdentifiersPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\LanguageControlProgramsChapter\AbbreviatedRecordSequenceIdentifiersPart.html">
+	  <Content Include="AppHelp\Conservation\LanguageControlProgramsChapter\AbbreviatedRecordSequenceIdentifiersPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\Content\LanguageControlProgramsChapter\ASK_MKIControlProgramLanguageChapter\ASCDeviceManagementCommandsChapter\CommandGI_Part.html">
@@ -747,10 +763,13 @@
 	  <Content Include="AppHelp\Conservation\LanguageControlProgramsChapter\drex_part3.6_custom_2.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\LanguageControlProgramsChapter\IdleExecutionControlProgramsPart.html">
+	  <Content Include="AppHelp\Conservation\LanguageControlProgramsChapter\IdleExecutionControlProgramsPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\Content\LanguageControlProgramsChapter\LanguageControlProgramsBasicConceptsPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\Content\LanguageControlProgramsChapter\GroupAddressesPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\Content\LanguageControlProgramsChapter\LanguageControlProgramsElementsPart.html">
@@ -795,61 +814,100 @@
 	  <Content Include="AppHelp\Content\LanguageControlProgramsPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabExecutionChapter\part_errorOpenEditor.png">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabExecutionChapter\part_errorOpenEditor.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabExecutionChapter\RunPKPart.html">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabExecutionChapter\RunPKPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabExecutionChapter\RunPK_StepByStepModePart.html">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabExecutionChapter\RunPK_StepByStepModePart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabExecutionChapter\TranslationPKPart.html">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabExecutionChapter\TranslationPKPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\buttonCreateImage.png">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabFileChapter\APKtoAPKWconversionMenuImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\buttonExitImage.png">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabFileChapter\APKWtoAPKconversionMenuImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\buttonOpenArchiveImage.png">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabFileChapter\archiveButtonImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\buttonOpenFolderInExplorerImage.png">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabFileChapter\archiveContextMenuImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\buttonOpenImage.png">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabFileChapter\buttonConvertationImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\buttonPrintImage.png">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabFileChapter\buttonCreateImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\buttonReplaceImage.png">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabFileChapter\buttonExitImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\buttonSaveAsImage.png">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabFileChapter\buttonOpenArchiveImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\buttonSaveImage.png">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabFileChapter\buttonOpenFolderInExplorerImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\buttonSearchAndReplaceImage.png">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabFileChapter\buttonOpenImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\contextMenuArchiveImage.png">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabFileChapter\buttonPrintImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\createArchiveImage.png">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabFileChapter\buttonReplaceImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\createNewTextEditorImage.png">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabFileChapter\buttonSaveAsImage.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabFileChapter\buttonSaveImage.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabFileChapter\buttonSearchAndReplaceImage.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabFileChapter\buttonsImportAndExportImage.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabFileChapter\choiceArchiveImage.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabFileChapter\contextMenuArchiveImage.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabFileChapter\contextMenuFileInArchiveImage.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabFileChapter\contextMenuFilesInArchiveImage.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabFileChapter\conversionSelectionButtonsImage.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabFileChapter\createArchiveButtonImage.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabFileChapter\createArchiveContextMenuImage.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabFileChapter\createNewTextEditorImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\Conservation\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.10_custom.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\findPanelImage.png">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabFileChapter\exampleArchiveCatalogImage.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabFileChapter\fileManagementButtonsInArchiveImage.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabFileChapter\findPanelImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\Conservation\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.1_custom.png">
@@ -891,7 +949,7 @@
 	  <Content Include="AppHelp\Conservation\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.7_custom.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\fileManagerWriteModeImage.png">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabFileChapter\fileManagerWriteModeImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\Conservation\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.7_custom_3.png">
@@ -903,418 +961,427 @@
 	  <Content Include="AppHelp\Conservation\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\drex_part14.1.9_custom.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\FuncReplacePart.html">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabFileChapter\FuncConvertPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\printManagerImage.png">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabFileChapter\FuncReplacePart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\enteringArchiveNameImage.png">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabFileChapter\generalPlanOpenArchiveImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\fileManagerReadModeImage.png">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabFileChapter\messageCreationArchiveImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\FuncArchivePart.html">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabFileChapter\openProgramControlInArchiveImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\FuncCreatePart.html">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabFileChapter\OPKtoPKconversionMenuImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\FuncExitPart.html">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabFileChapter\printManagerImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\FuncOpenFolderInExplorerPart.html">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabFileChapter\enteringArchiveNameImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\FuncOpenPart.html">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabFileChapter\fileManagerReadModeImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\FuncPrintPart.html">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabFileChapter\FuncArchivePart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\FuncSaveAsPart.html">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabFileChapter\FuncCreatePart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\FuncSavePart.html">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabFileChapter\FuncExitPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\FuncSearchAndReplacePart.html">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabFileChapter\FuncOpenFolderInExplorerPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\listOfArchiveIfAvalibleImage.png">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabFileChapter\FuncOpenPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\listOfArchiveIfNotAvalibleImage.png">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabFileChapter\FuncPrintPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\choiceArchiveImage.png">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabFileChapter\FuncSaveAsPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\notificationSuccessfulSavingImage.png">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabFileChapter\FuncSavePart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\openContentsArchiveImage.png">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabFileChapter\FuncSearchAndReplacePart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\replacePanelImage.png">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabFileChapter\listOfArchiveIfAvalibleImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\savingTranslatedFileToArchiveImage.png">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabFileChapter\listOfArchiveIfNotAvalibleImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\selectingArchiveToSaveImage.png">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabFileChapter\notificationSuccessfulSavingImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\startWorkingArchiveImage.png">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabFileChapter\openContentsArchiveImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\windowAvailableArchivesImage.png">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabFileChapter\replacePanelImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabSettingsChapter\drex_part14.6.1.1_custom.png">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabFileChapter\savingTranslatedFileToArchiveImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabSettingsChapter\drex_part14.6.1.2_custom.png">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabFileChapter\selectingArchiveToSaveImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabSettingsChapter\drex_part14.6.1.3_custom.png">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabFileChapter\startWorkingArchiveImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabSettingsChapter\drex_part14.6.2_custom.png">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabFileChapter\windowAvailableArchivesImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabSettingsChapter\drex_part14.6.3_custom.png">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabSettingsChapter\drex_part14.6.1.1_custom.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabSettingsChapter\part_executionSettings.png">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabSettingsChapter\drex_part14.6.1.2_custom.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabSettingsChapter\part_intrefaceSettings.png">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabSettingsChapter\drex_part14.6.1.3_custom.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabSettingsChapter\part_protocolSettings.png">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabSettingsChapter\drex_part14.6.2_custom.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabSettingsChapter\SettingsConfigurationPart.html">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabSettingsChapter\drex_part14.6.3_custom.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabSettingsChapter\SettingsExecutionPart.html">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabSettingsChapter\part_executionSettings.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabSettingsChapter\SettingsInterfacePart.html">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabSettingsChapter\part_intrefaceSettings.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabSettingsChapter\SettingsProtocolPart.html">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabSettingsChapter\part_protocolSettings.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabTrialsChapter\TabMetrologyChapter\drex_part14.2.1_custom.png">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabSettingsChapter\SettingsConfigurationPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabTrialsChapter\TabMetrologyChapter\drex_part14.2.2_custom.png">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabSettingsChapter\SettingsExecutionPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabTrialsChapter\TabMetrologyChapter\drex_part14.2.3_custom.png">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabSettingsChapter\SettingsInterfacePart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabTrialsChapter\TabMetrologyChapter\drex_part14.2.4_custom.png">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabSettingsChapter\SettingsProtocolPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabTrialsChapter\TabMetrologyChapter\drex_part14.2.5_custom.png">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabTrialsChapter\TabMetrologyChapter\drex_part14.2.1_custom.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabTrialsChapter\TabMetrologyChapter\drex_part14.2.5_custom_2.png">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabTrialsChapter\TabMetrologyChapter\drex_part14.2.2_custom.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabTrialsChapter\TabMetrologyChapter\drex_part14.2.6_custom.png">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabTrialsChapter\TabMetrologyChapter\drex_part14.2.3_custom.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabTrialsChapter\TabMetrologyChapter\ehtMetrologyPanelImage.png">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabTrialsChapter\TabMetrologyChapter\drex_part14.2.4_custom.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabTrialsChapter\TabMetrologyChapter\UtilityModeIEPart.html">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabTrialsChapter\TabMetrologyChapter\drex_part14.2.5_custom.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabTrialsChapter\TabMetrologyChapter\UtilityModeEHTPart.html">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabTrialsChapter\TabMetrologyChapter\drex_part14.2.5_custom_2.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabTrialsChapter\TabMetrologyChapter\UtilityModeKCPart.html">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabTrialsChapter\TabMetrologyChapter\drex_part14.2.6_custom.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabTrialsChapter\TabMetrologyChapter\UtilityModeKNPart.html">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabTrialsChapter\TabMetrologyChapter\ehtMetrologyPanelImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabTrialsChapter\TabMetrologyChapter\UtilityModePIPart.html">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabTrialsChapter\TabMetrologyChapter\UtilityModeIEPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabTrialsChapter\TabMetrologyChapter\UtilityModePRPart.html">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabTrialsChapter\TabMetrologyChapter\UtilityModeEHTPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabTrialsChapter\TabMetrologyChapter\UtilityModeSIPart.html">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabTrialsChapter\TabMetrologyChapter\UtilityModeKCPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabTrialsChapter\TabSelfControlChapter\part_selfControlModule.png">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabTrialsChapter\TabMetrologyChapter\UtilityModeKNPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabTrialsChapter\TabSelfControlChapter\SelfControlModulePart.html">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabTrialsChapter\TabMetrologyChapter\UtilityModePIPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabTrialsChapter\TabSelfControlChapter\SelfControlSystemPart.html">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabTrialsChapter\TabMetrologyChapter\UtilityModePRPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabTrialsChapter\TabTestsChapter\RkommTestMkrPart.html">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabTrialsChapter\TabMetrologyChapter\UtilityModeSIPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabTrialsChapter\TabTestsChapter\CrossTestMkrPart.html">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabTrialsChapter\TabSelfControlChapter\part_selfControlModule.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabTrialsChapter\TabTestsChapter\drex_part14.4.3_custom.png">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabTrialsChapter\TabSelfControlChapter\SelfControlModulePart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabTrialsChapter\TabTestsChapter\rkommTestPanelImage.png">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabTrialsChapter\TabSelfControlChapter\SelfControlSystemPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabTrialsChapter\TabTestsChapter\TabTestPIChapter\drex_part14.4.2.1_custom.png">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabTrialsChapter\TabTestsChapter\RkommTestMkrPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabTrialsChapter\TabTestsChapter\TabTestPIChapter\drex_part14.4.2.2_custom.png">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabTrialsChapter\TabTestsChapter\CrossTestMkrPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabTrialsChapter\TabTestsChapter\TabTestPIChapter\TestPIGroupMethodPart.html">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabTrialsChapter\TabTestsChapter\drex_part14.4.3_custom.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabTrialsChapter\TabTestsChapter\TabTestPIChapter\TestPINodeMethodPart.html">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabTrialsChapter\TabTestsChapter\rkommTestPanelImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabTrialsChapter\TabTestsChapter\TabTestSIChapter\drex_part14.4.1.1_custom.png">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabTrialsChapter\TabTestsChapter\TabTestPIChapter\drex_part14.4.2.1_custom.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabTrialsChapter\TabTestsChapter\TabTestSIChapter\drex_part14.4.1.2_custom.png">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabTrialsChapter\TabTestsChapter\TabTestPIChapter\drex_part14.4.2.2_custom.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabTrialsChapter\TabTestsChapter\TabTestSIChapter\TestSIGroupMethodPart.html">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabTrialsChapter\TabTestsChapter\TabTestPIChapter\TestPIGroupMethodPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabTrialsChapter\TabTestsChapter\TabTestSIChapter\TestSINodeMethodPart.html">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabTrialsChapter\TabTestsChapter\TabTestPIChapter\TestPINodeMethodPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\TranslatorPart.html">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabTrialsChapter\TabTestsChapter\TabTestSIChapter\drex_part14.4.1.1_custom.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\TextEditorPart.html">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabTrialsChapter\TabTestsChapter\TabTestSIChapter\drex_part14.4.1.2_custom.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\MainComponentsOfProgramPart.html">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabTrialsChapter\TabTestsChapter\TabTestSIChapter\TestSIGroupMethodPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\TextEditorChapter\DescriptionWorkTextEditorPart.html">
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabTrialsChapter\TabTestsChapter\TabTestSIChapter\TestSINodeMethodPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\TextEditorChapter\drex_part15.3_custom.png">
+	  <Content Include="AppHelp\Content\TranslatorPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\TextEditorChapter\drex_part15.3_custom_10.png">
+	  <Content Include="AppHelp\Content\TextEditorPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\TextEditorChapter\drex_part15.3_custom_11.png">
+	  <Content Include="AppHelp\Content\MainMenuPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\TextEditorChapter\drex_part15.3_custom_12.png">
+	  <Content Include="AppHelp\Content\TextEditorChapter\DescriptionWorkTextEditorPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\TextEditorChapter\drex_part15.3_custom_2.png">
+	  <Content Include="AppHelp\Content\TextEditorChapter\drex_part15.3_custom.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\TextEditorChapter\drex_part15.3_custom_3.png">
+	  <Content Include="AppHelp\Content\TextEditorChapter\drex_part15.3_custom_10.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\TextEditorChapter\drex_part15.3_custom_4.png">
+	  <Content Include="AppHelp\Content\TextEditorChapter\drex_part15.3_custom_11.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\TextEditorChapter\drex_part15.3_custom_5.png">
+	  <Content Include="AppHelp\Content\TextEditorChapter\drex_part15.3_custom_12.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\TextEditorChapter\drex_part15.3_custom_6.png">
+	  <Content Include="AppHelp\Content\TextEditorChapter\drex_part15.3_custom_2.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\TextEditorChapter\drex_part15.3_custom_7.png">
+	  <Content Include="AppHelp\Content\TextEditorChapter\drex_part15.3_custom_3.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\TextEditorChapter\drex_part15.3_custom_8.png">
+	  <Content Include="AppHelp\Content\TextEditorChapter\drex_part15.3_custom_4.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\TextEditorChapter\drex_part15.3_custom_9.png">
+	  <Content Include="AppHelp\Content\TextEditorChapter\drex_part15.3_custom_5.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\HotKeysPart.html">
+	  <Content Include="AppHelp\Content\TextEditorChapter\drex_part15.3_custom_6.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\TextEditorChapter\SearchWindowTextEditorPart.html">
+	  <Content Include="AppHelp\Content\TextEditorChapter\drex_part15.3_custom_7.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\DescriptionWorkTranslatorPart.html">
+	  <Content Include="AppHelp\Content\TextEditorChapter\drex_part15.3_custom_8.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsKSChapter\ErrorKS001_Part.html">
+	  <Content Include="AppHelp\Content\TextEditorChapter\drex_part15.3_custom_9.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsKSChapter\ErrorKS002_Part.html">
+	  <Content Include="AppHelp\Content\HotKeysPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsKSChapter\ErrorKS003_Part.html">
+	  <Content Include="AppHelp\Content\TextEditorChapter\SearchWindowTextEditorPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsKSChapter\ErrorKS004_Part.html">
+	  <Content Include="AppHelp\Content\TranslatorChapter\DescriptionWorkTranslatorPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsKSChapter\ErrorKS005_Part.html">
+	  <Content Include="AppHelp\Content\TranslatorChapter\ErrorListChapter\ErrorsKSChapter\ErrorKS001_Part.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsOKChapter\ErrorOK001_Part.html">
+	  <Content Include="AppHelp\Content\TranslatorChapter\ErrorListChapter\ErrorsKSChapter\ErrorKS002_Part.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsOKChapter\ErrorOK002_Part.html">
+	  <Content Include="AppHelp\Content\TranslatorChapter\ErrorListChapter\ErrorsKSChapter\ErrorKS003_Part.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsOKChapter\ErrorOK003_Part.html">
+	  <Content Include="AppHelp\Content\TranslatorChapter\ErrorListChapter\ErrorsKSChapter\ErrorKS004_Part.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsOKChapter\ErrorOK004_Part.html">
+	  <Content Include="AppHelp\Content\TranslatorChapter\ErrorListChapter\ErrorsKSChapter\ErrorKS005_Part.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsOKChapter\ErrorOK005_Part.html">
+	  <Content Include="AppHelp\Content\TranslatorChapter\ErrorListChapter\ErrorsOKChapter\ErrorOK001_Part.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsOKChapter\ErrorOK006_Part.html">
+	  <Content Include="AppHelp\Content\TranslatorChapter\ErrorListChapter\ErrorsOKChapter\ErrorOK002_Part.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsOKChapter\ErrorOK007_Part.html">
+	  <Content Include="AppHelp\Content\TranslatorChapter\ErrorListChapter\ErrorsOKChapter\ErrorOK003_Part.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsOKChapter\ErrorOK008_Part.html">
+	  <Content Include="AppHelp\Content\TranslatorChapter\ErrorListChapter\ErrorsOKChapter\ErrorOK004_Part.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsOKChapter\ErrorOK009_Part.html">
+	  <Content Include="AppHelp\Content\TranslatorChapter\ErrorListChapter\ErrorsOKChapter\ErrorOK005_Part.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsOKChapter\ErrorOK010_Part.html">
+	  <Content Include="AppHelp\Content\TranslatorChapter\ErrorListChapter\ErrorsOKChapter\ErrorOK006_Part.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsPIChapter\ErrorPI001_Part.html">
+	  <Content Include="AppHelp\Content\TranslatorChapter\ErrorListChapter\ErrorsOKChapter\ErrorOK007_Part.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsPIChapter\ErrorPI002_Part.html">
+	  <Content Include="AppHelp\Content\TranslatorChapter\ErrorListChapter\ErrorsOKChapter\ErrorOK008_Part.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsPIChapter\ErrorPI003_Part.html">
+	  <Content Include="AppHelp\Content\TranslatorChapter\ErrorListChapter\ErrorsOKChapter\ErrorOK009_Part.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsPIChapter\ErrorPI004_Part.html">
+	  <Content Include="AppHelp\Content\TranslatorChapter\ErrorListChapter\ErrorsOKChapter\ErrorOK010_Part.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsRMChapter\ErrorRM001_Part.html">
+	  <Content Include="AppHelp\Content\TranslatorChapter\ErrorListChapter\ErrorsPIChapter\ErrorPI001_Part.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsRMChapter\ErrorRM002_Part.html">
+	  <Content Include="AppHelp\Content\TranslatorChapter\ErrorListChapter\ErrorsPIChapter\ErrorPI002_Part.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsRMChapter\ErrorRM003_Part.html">
+	  <Content Include="AppHelp\Content\TranslatorChapter\ErrorListChapter\ErrorsPIChapter\ErrorPI003_Part.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsRMChapter\ErrorRM004_Part.html">
+	  <Content Include="AppHelp\Content\TranslatorChapter\ErrorListChapter\ErrorsPIChapter\ErrorPI004_Part.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsRMChapter\ErrorRM005_Part.html">
+	  <Content Include="AppHelp\Content\TranslatorChapter\ErrorListChapter\ErrorsRMChapter\ErrorRM001_Part.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsRMChapter\ErrorRM006_Part.html">
+	  <Content Include="AppHelp\Content\TranslatorChapter\ErrorListChapter\ErrorsRMChapter\ErrorRM002_Part.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsRMChapter\ErrorRM007_Part.html">
+	  <Content Include="AppHelp\Content\TranslatorChapter\ErrorListChapter\ErrorsRMChapter\ErrorRM003_Part.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsRMChapter\ErrorRM008_Part.html">
+	  <Content Include="AppHelp\Content\TranslatorChapter\ErrorListChapter\ErrorsRMChapter\ErrorRM004_Part.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsRMChapter\ErrorRM009_Part.html">
+	  <Content Include="AppHelp\Content\TranslatorChapter\ErrorListChapter\ErrorsRMChapter\ErrorRM005_Part.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsSIChapter\ErrorSI001_Part.html">
+	  <Content Include="AppHelp\Content\TranslatorChapter\ErrorListChapter\ErrorsRMChapter\ErrorRM006_Part.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsSIChapter\ErrorSI002_Part.html">
+	  <Content Include="AppHelp\Content\TranslatorChapter\ErrorListChapter\ErrorsRMChapter\ErrorRM007_Part.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsSIChapter\ErrorSI003_Part.html">
+	  <Content Include="AppHelp\Content\TranslatorChapter\ErrorListChapter\ErrorsRMChapter\ErrorRM008_Part.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsSIChapter\ErrorSI004_Part.html">
+	  <Content Include="AppHelp\Content\TranslatorChapter\ErrorListChapter\ErrorsRMChapter\ErrorRM009_Part.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsUPChapter\ErrorUP001_Part.html">
+	  <Content Include="AppHelp\Content\TranslatorChapter\ErrorListChapter\ErrorsSIChapter\ErrorSI001_Part.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\ErrorsUPChapter\ErrorUP002_Part.html">
+	  <Content Include="AppHelp\Content\TranslatorChapter\ErrorListChapter\ErrorsSIChapter\ErrorSI002_Part.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\GeneralErrorsChapter\ErrorGEN001_Part.html">
+	  <Content Include="AppHelp\Content\TranslatorChapter\ErrorListChapter\ErrorsSIChapter\ErrorSI003_Part.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\GeneralErrorsChapter\ErrorGEN002_Part.html">
+	  <Content Include="AppHelp\Content\TranslatorChapter\ErrorListChapter\ErrorsSIChapter\ErrorSI004_Part.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\GeneralErrorsChapter\ErrorGEN003_Part.html">
+	  <Content Include="AppHelp\Content\TranslatorChapter\ErrorListChapter\ErrorsUPChapter\ErrorUP001_Part.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\GeneralErrorsChapter\ErrorGEN004_Part.html">
+	  <Content Include="AppHelp\Content\TranslatorChapter\ErrorListChapter\ErrorsUPChapter\ErrorUP002_Part.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\GeneralErrorsChapter\ErrorGEN005_Part.html">
+	  <Content Include="AppHelp\Content\TranslatorChapter\ErrorListChapter\GeneralErrorsChapter\ErrorGEN001_Part.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\GeneralErrorsChapter\ErrorGEN006_Part.html">
+	  <Content Include="AppHelp\Content\TranslatorChapter\ErrorListChapter\GeneralErrorsChapter\ErrorGEN002_Part.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\GeneralErrorsChapter\ErrorGEN007_Part.html">
+	  <Content Include="AppHelp\Content\TranslatorChapter\ErrorListChapter\GeneralErrorsChapter\ErrorGEN003_Part.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\GeneralErrorsChapter\ErrorGEN008_Part.html">
+	  <Content Include="AppHelp\Content\TranslatorChapter\ErrorListChapter\GeneralErrorsChapter\ErrorGEN004_Part.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\GeneralErrorsChapter\ErrorGEN009_Part.html">
+	  <Content Include="AppHelp\Content\TranslatorChapter\ErrorListChapter\GeneralErrorsChapter\ErrorGEN005_Part.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\GeneralErrorsChapter\ErrorGEN010_Part.html">
+	  <Content Include="AppHelp\Content\TranslatorChapter\ErrorListChapter\GeneralErrorsChapter\ErrorGEN006_Part.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\GeneralErrorsChapter\ErrorGEN011_Part.html">
+	  <Content Include="AppHelp\Content\TranslatorChapter\ErrorListChapter\GeneralErrorsChapter\ErrorGEN007_Part.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\GeneralErrorsChapter\ErrorGEN012_Part.html">
+	  <Content Include="AppHelp\Content\TranslatorChapter\ErrorListChapter\GeneralErrorsChapter\ErrorGEN008_Part.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\GeneralErrorsChapter\ErrorGEN013_Part.html">
+	  <Content Include="AppHelp\Content\TranslatorChapter\ErrorListChapter\GeneralErrorsChapter\ErrorGEN009_Part.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\GeneralErrorsChapter\ErrorGEN014_Part.html">
+	  <Content Include="AppHelp\Content\TranslatorChapter\ErrorListChapter\GeneralErrorsChapter\ErrorGEN010_Part.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\KeyErrorsChapter\ErrorKEY001_Part.html">
+	  <Content Include="AppHelp\Content\TranslatorChapter\ErrorListChapter\GeneralErrorsChapter\ErrorGEN011_Part.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\KeyErrorsChapter\ErrorKEY002_Part.html">
+	  <Content Include="AppHelp\Content\TranslatorChapter\ErrorListChapter\GeneralErrorsChapter\ErrorGEN012_Part.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\KeyErrorsChapter\ErrorKEY003_Part.html">
+	  <Content Include="AppHelp\Content\TranslatorChapter\ErrorListChapter\GeneralErrorsChapter\ErrorGEN013_Part.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\ErrorListChapter\KeyErrorsChapter\ErrorKEY004_Part.html">
+	  <Content Include="AppHelp\Content\TranslatorChapter\ErrorListChapter\GeneralErrorsChapter\ErrorGEN014_Part.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionChapter\TranslatorChapter\image_TranslatorWindow.png">
+	  <Content Include="AppHelp\Content\TranslatorChapter\ErrorListChapter\KeyErrorsChapter\ErrorKEY001_Part.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\Content\ProgramCompositionPart.html">
+	  <Content Include="AppHelp\Content\TranslatorChapter\ErrorListChapter\KeyErrorsChapter\ErrorKEY002_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\Content\TranslatorChapter\ErrorListChapter\KeyErrorsChapter\ErrorKEY003_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\Content\TranslatorChapter\ErrorListChapter\KeyErrorsChapter\ErrorKEY004_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\Content\TranslatorChapter\image_TranslatorWindow.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\Conservation\TestsAndUtilitiesChapter\AdditionalTestsAndUtilitiesChapter\ConnectingPointToPKBusRK1TRPart.html">
@@ -1705,6 +1772,63 @@
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\style.css">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabFilePart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabTrialsPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabTrialsChapter\TabMetrologyPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabTrialsChapter\TabSelfControlPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabTrialsChapter\TabTestsPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabTrialsChapter\TabTestsChapter\TabTestSIPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabTrialsChapter\TabTestsChapter\TabTestPIPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabExecutionPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\Content\MainMenuChapter\TabSettingsPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\Content\TranslatorChapter\ErrorListPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\Content\TranslatorChapter\ErrorListChapter\GeneralErrorsPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\Content\TranslatorChapter\ErrorListChapter\ErrorsUPPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\Content\TranslatorChapter\ErrorListChapter\ErrorsOKPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\Content\TranslatorChapter\ErrorListChapter\ErrorsRMPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\Content\TranslatorChapter\ErrorListChapter\ErrorsSIPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\Content\TranslatorChapter\ErrorListChapter\ErrorsPIPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\Content\TranslatorChapter\ErrorListChapter\KeyErrorsPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\Content\TranslatorChapter\ErrorListChapter\ErrorsKSPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	</ItemGroup>

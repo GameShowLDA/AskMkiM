@@ -1,6 +1,7 @@
 using Ask.Core.Services.App;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Devices;
+using Ask.Core.Services.UI;
 using Ask.Core.Services.Errors.Models;
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
@@ -19,7 +20,6 @@ using Ask.UI.Features.ProtocolNew.Services;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
-using WindowsInput;
 using static Ask.Core.Shared.DTO.Protocol.ShowMessageModel;
 using static Ask.Core.Shared.Metadata.Static.DelegateManager;
 using static Ask.LogLib.LoggerUtility;
@@ -55,6 +55,11 @@ namespace Ask.UI.Features.ProtocolNew.Execution
     /// Признак необходимости завершения выполнения процесса.
     /// </summary>
     private bool isExit = false;
+    private TaskCompletionSource? _executionFinished;
+    private TaskCompletionSource? _finalizationFinished;
+
+    internal bool IsActive => _executionFinished != null;
+    internal bool IsStopping => IsActive && (isExit || CancellationTokenSource?.IsCancellationRequested == true);
 
     private ExecutionCompletionStatus _completionStatus = ExecutionCompletionStatus.Success;
 
@@ -188,13 +193,7 @@ namespace Ask.UI.Features.ProtocolNew.Execution
     /// <returns>Задача, представляющая асинхронную операцию запуска процесса.</returns>
     internal async Task StartAsync(ActionSettings actionSettings)
     {
-      isExit = false;
-      _completionStatus = ExecutionCompletionStatus.Success;
-      processName = actionSettings.Name;
-      Interlocked.Exchange(ref _commandJumpRequested, 0);
-      _pauseController.Reset();
-
-      if (IsProcessRunning(actionSettings.Name))
+      if (IsActive)
       {
         return;
       }
@@ -208,7 +207,15 @@ namespace Ask.UI.Features.ProtocolNew.Execution
 
       _session?.Dispose();
       _session = new ExecutionSession(actionSettings);
+      _executionFinished = new(TaskCreationOptions.RunContinuationsAsynchronously);
+      _finalizationFinished = new(TaskCreationOptions.RunContinuationsAsynchronously);
+      isExit = false;
+      _completionStatus = ExecutionCompletionStatus.Success;
+      processName = actionSettings.Name;
+      Interlocked.Exchange(ref _commandJumpRequested, 0);
+      _pauseController.Reset();
       _executionStartedAtUtc = DateTime.UtcNow;
+      using var executionScope = EquipmentExecutionContext.EnterExecution(_session.Cancellation.Token);
 
       try
       {
@@ -235,7 +242,8 @@ namespace Ask.UI.Features.ProtocolNew.Execution
 
         if (actionSettings.StartDelegate == null)
         {
-          await ProtocolSelfCheck.ShowMessageAsync(new ShowMessageModel("Системная ошибка выполнения, обратитесь к администратору", type: MessageType.Error));
+          await ProtocolSelfCheck.ShowMessageAsync(new ShowMessageModel("Системная ошибка выполнения, обратитесь к администратору", type: MessageType.Error), skipPause: true, SkipStepModeCheck: true);
+          _executionFinished.TrySetResult();
           await FinalizeAsync(actionSettings);
           LogError("Системная ошибка выполнения, обратитесь к администратору");
           return;
@@ -257,12 +265,20 @@ namespace Ask.UI.Features.ProtocolNew.Execution
           await _systemResetService.ResetAsync();
         }
 
+        _session.Cancellation.Token.ThrowIfCancellationRequested();
         await ExecuteTaskAsync(actionSettings);
+      }
+      catch (OperationCanceledException)
+      {
+        _completionStatus = ExecutionCompletionStatus.Interrupted;
+        _executionFinished?.TrySetResult();
+        await FinalizeAsync(actionSettings);
       }
       catch (Exception ex)
       {
+        _executionFinished?.TrySetResult();
         LogException($"Ошибка при запуске \"{actionSettings.Name}\"", ex);
-        await ProtocolSelfCheck.ShowMessageAsync(new ShowMessageModel("Системная ошибка запуска. Проверьте журнал и повторите попытку.", type: MessageType.Error), skipPause: true);
+        await ProtocolSelfCheck.ShowMessageAsync(new ShowMessageModel("Системная ошибка запуска. Проверьте журнал и повторите попытку.", type: MessageType.Error), skipPause: true, SkipStepModeCheck: true);
         try
         {
           await FinalizeAsync(actionSettings);
@@ -284,8 +300,19 @@ namespace Ask.UI.Features.ProtocolNew.Execution
     /// <returns>Задача, представляющая асинхронную операцию завершения процесса.</returns>
     internal async Task StopAsync(ActionSettings actionSettings, TaskCompletionSource<UserAction> _userActionTcs)
     {
+      if (!IsActive || isExit)
+      {
+        if (_finalizationFinished != null) await _finalizationFinished.Task;
+        return;
+      }
+
       _completionStatus = ExecutionCompletionStatus.Interrupted;
+      CancellationTokenSource?.Cancel();
+      _pauseController.Cancel();
+      StepControlManager.DisableStepMode();
+      KeyboardManager.TriggerStep();
       _userActionTcs?.TrySetResult(UserAction.Abort);
+      await _executionFinished!.Task;
       await FinalizeAsync(actionSettings);
     }
 
@@ -299,10 +326,14 @@ namespace Ask.UI.Features.ProtocolNew.Execution
     {
       if (isExit)
       {
+        if (_finalizationFinished != null) await _finalizationFinished.Task;
         return;
       }
 
       isExit = true;
+      var finalizationFinished = _finalizationFinished;
+      try
+      {
       if (actionSettings.ExecutionDuration == TimeSpan.Zero && _executionStartedAtUtc != default)
       {
         actionSettings.ExecutionDuration = DateTime.UtcNow - _executionStartedAtUtc;
@@ -325,6 +356,13 @@ namespace Ask.UI.Features.ProtocolNew.Execution
           ShouldShowTestCompletionHeader(actionSettings.CheckType)),
         ResetState,
         value => StartProcessing?.Invoke(value));
+      }
+      finally
+      {
+        _executionFinished = null;
+        _runGuard.Release(this);
+        finalizationFinished?.TrySetResult();
+      }
     }
 
     /// <summary>
@@ -375,6 +413,7 @@ namespace Ask.UI.Features.ProtocolNew.Execution
     /// </summary>
     internal bool RequestPause()
     {
+      if (IsStopping) return false;
       var requested = _pauseController.RequestPause();
       if (!requested)
       {
@@ -439,8 +478,8 @@ namespace Ask.UI.Features.ProtocolNew.Execution
     /// <param name="e">Аргументы события.</param>
     internal void StepIn_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
-      var inputSimulator = new InputSimulator();
-      inputSimulator.Keyboard.KeyDown(WindowsInput.Native.VirtualKeyCode.F11);
+      StepControlManager.SetStepIntoMode();
+      KeyboardManager.TriggerStep();
     }
 
     /// <summary>
@@ -450,8 +489,8 @@ namespace Ask.UI.Features.ProtocolNew.Execution
     /// <param name="e">Аргументы события.</param>
     public void StepAround_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
-      var inputSimulator = new InputSimulator();
-      inputSimulator.Keyboard.KeyDown(WindowsInput.Native.VirtualKeyCode.F10);
+      StepControlManager.RequestStepOverUntilNextControlCommand();
+      KeyboardManager.TriggerStep();
     }
 
     /// <summary>
@@ -482,6 +521,7 @@ namespace Ask.UI.Features.ProtocolNew.Execution
     /// <returns>Задача ожидания выхода из паузы или отмены.</returns>
     public async Task WaitWhilePausedAsync(CancellationToken cancellationToken, IMessageOutputService protocolSelfCheck = null)
     {
+      cancellationToken.ThrowIfCancellationRequested();
       if (IsPaused)
       {
         LogInformation("Срабатывание ожидания при самоконтроле");
@@ -497,7 +537,7 @@ namespace Ask.UI.Features.ProtocolNew.Execution
             CanBeDeleted = false,
           };
 
-          await protocolSelfCheck.ShowMessageAsync(showMessage);
+          await protocolSelfCheck.ShowMessageAsync(showMessage, skipPause: true, SkipStepModeCheck: true);
         }
 
         try
@@ -507,7 +547,7 @@ namespace Ask.UI.Features.ProtocolNew.Execution
         catch (OperationCanceledException)
         {
           LogInformation("Ожидание паузы прервано по отмене");
-          return;
+          throw;
         }
         finally
         {
@@ -530,7 +570,7 @@ namespace Ask.UI.Features.ProtocolNew.Execution
           CanBeDeleted = false,
         };
 
-        await protocolSelfCheck.ShowMessageAsync(showMessage);
+        await protocolSelfCheck.ShowMessageAsync(showMessage, skipPause: true, SkipStepModeCheck: true);
       }
     }
 
@@ -549,6 +589,7 @@ namespace Ask.UI.Features.ProtocolNew.Execution
       IMessageOutputService protocolSelfCheck,
       string checkpoint)
     {
+      cancellationToken.ThrowIfCancellationRequested();
       ThrowIfCommandJumpRequested();
 
       if (IsPaused)
@@ -567,6 +608,7 @@ namespace Ask.UI.Features.ProtocolNew.Execution
         }
 
         await WaitWhilePausedAsync(cancellationToken, protocolSelfCheck).ConfigureAwait(false);
+        cancellationToken.ThrowIfCancellationRequested();
 
         ThrowIfCommandJumpRequested();
 
@@ -744,11 +786,8 @@ namespace Ask.UI.Features.ProtocolNew.Execution
     /// <returns>Задача, представляющая асинхронную операцию выполнения.</returns>
     private async Task ExecuteTaskAsync(ActionSettings actionSettings)
     {
-      isExit = false;
-
       var session = _session
         ?? throw new InvalidOperationException("Сеанс выполнения не инициализирован.");
-      _pauseController.Reset();
 
       if (actionSettings.StartDelegate != null)
       {
@@ -779,14 +818,13 @@ namespace Ask.UI.Features.ProtocolNew.Execution
         {
           LogException($"Ошибка при запуске \"{actionSettings.Name}\"", ex);
           await ProtocolSelfCheck.AppendEmptyLineAsync();
-          await ProtocolSelfCheck.ShowMessageAsync(new ShowMessageModel("Системная ошибка программы АСК-МКИ-М", headerColor: ShowMessageModel.ErrorMessage.TitleColor, message: ex.Message) { IndentLevel = 1 });
+          await ProtocolSelfCheck.ShowMessageAsync(new ShowMessageModel("Системная ошибка программы АСК-МКИ-М", headerColor: ShowMessageModel.ErrorMessage.TitleColor, message: ex.Message) { IndentLevel = 1 }, SkipStepModeCheck: true, skipPause: true);
         }
         finally
         {
-          SystemStateManager.SetIsLocked(false);
-
           actionSettings.ExecutionDuration = SystemStateManager._stopwatch.Elapsed;
           SystemStateManager._stopwatch.Stop();
+          _executionFinished?.TrySetResult();
           await ProtocolSelfCheck.FinalizeAsync();
         }
       }
@@ -839,8 +877,7 @@ namespace Ask.UI.Features.ProtocolNew.Execution
       {
         try
         {
-          var token = CancellationTokenSource?.Token ?? CancellationToken.None;
-          await stopDelegate(token);
+          await stopDelegate(CancellationToken.None);
         }
         catch (Exception ex)
         {
@@ -866,7 +903,6 @@ namespace Ask.UI.Features.ProtocolNew.Execution
       StepMode = false;
       ShouldShowPauseMessage = true;
       ShouldShowResumeMessage = false;
-      _runGuard.Release(this);
 
       ProtocolSelfCheck.HideExecutionButtonsAfterReset();
     }

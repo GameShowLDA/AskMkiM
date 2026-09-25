@@ -22,12 +22,12 @@ internal static class MeasurementResultEvaluator
     ArgumentNullException.ThrowIfNull(measurementRange);
 
     double value = measurementRange.TargetValue;
-    if (ExecutionConfig.GetIsIdleModeEnabled() && ExecutionConfig.GetIsErrorSimulationEnabled())
+    if (IdleMeasurementErrorSimulator.TryGetValue(
+          measurementRange.LowerBound,
+          measurementRange.UpperBound,
+          out double erroneousValue))
     {
-      var random = new Random();
-      value = measurementRange.UpperBound != -1
-        ? random.NextDouble() * ((measurementRange.UpperBound + 1) * 2)
-        : random.NextDouble();
+      value = erroneousValue;
     }
 
     bool isOverload = MeasurementValueFormatter.IsOverloadValue(value);

@@ -41,15 +41,17 @@ namespace UI.Windows.WpfDocking.Windows.Docking.Primitives
     static NativeFloatingWindow()
     {
       DefaultStyleKeyProperty.OverrideMetadata(typeof(NativeFloatingWindow), new FrameworkPropertyMetadata(typeof(NativeFloatingWindow)));
-      ShowInTaskbarProperty.OverrideMetadata(typeof(NativeFloatingWindow), new FrameworkPropertyMetadata(BooleanBoxes.False));
+      ShowInTaskbarProperty.OverrideMetadata(typeof(NativeFloatingWindow), new FrameworkPropertyMetadata(BooleanBoxes.True));
       WindowStyleProperty.OverrideMetadata(typeof(NativeFloatingWindow), new FrameworkPropertyMetadata(WindowStyle.None));
-      ShowActivatedProperty.OverrideMetadata(typeof(NativeFloatingWindow), new FrameworkPropertyMetadata(BooleanBoxes.False));
+      ShowActivatedProperty.OverrideMetadata(typeof(NativeFloatingWindow), new FrameworkPropertyMetadata(BooleanBoxes.True));
 
       CommandBinding performCloseCommandBinding = new CommandBinding(DockCommands.PerformClose, new ExecutedRoutedEventHandler(OnPerformCloseExecuted));
       CommandBinding toggleFloatingCommandBinding = new CommandBinding(DockCommands.ToggleFloating, new ExecutedRoutedEventHandler(OnToggleFloatingExecuted));
+      CommandBinding minimizeWindowCommandBinding = new CommandBinding(DockCommands.MinimizeWindow, new ExecutedRoutedEventHandler(OnMinimizeWindowExecuted));
       CommandBinding toggleWindowStateCommandBinding = new CommandBinding(DockCommands.ToggleWindowState, new ExecutedRoutedEventHandler(OnToggleWindowStateExecuted));
       CommandManager.RegisterClassCommandBinding(typeof(NativeFloatingWindow), performCloseCommandBinding);
       CommandManager.RegisterClassCommandBinding(typeof(NativeFloatingWindow), toggleFloatingCommandBinding);
+      CommandManager.RegisterClassCommandBinding(typeof(NativeFloatingWindow), minimizeWindowCommandBinding);
       CommandManager.RegisterClassCommandBinding(typeof(NativeFloatingWindow), toggleWindowStateCommandBinding);
     }
 
@@ -73,6 +75,11 @@ namespace UI.Windows.WpfDocking.Windows.Docking.Primitives
       FloatingWindow.PerformClose();
     }
 
+    private static void OnMinimizeWindowExecuted(object sender, ExecutedRoutedEventArgs e)
+    {
+      ((NativeFloatingWindow)sender).WindowState = WindowState.Minimized;
+    }
+
     private static void OnToggleWindowStateExecuted(object sender, ExecutedRoutedEventArgs e)
     {
       ((NativeFloatingWindow)sender).OnToggleWindowStateExecuted();
@@ -85,16 +92,21 @@ namespace UI.Windows.WpfDocking.Windows.Docking.Primitives
 
     internal NativeFloatingWindow(FloatingWindow floatingWindow)
     {
-      // Call BeginInit/EndInit pair to make sure the default style applied.
-      //BeginInit();
+      BeginInit();
 
       Loaded += new RoutedEventHandler(OnLoaded);
       Unloaded += new RoutedEventHandler(OnUnloaded);
+      SourceInitialized += OnSourceInitialized;
 
-      Owner = Window.GetWindow(floatingWindow.DockControl);
       DataContext = floatingWindow;
 
-      //EndInit();
+      EndInit();
+    }
+
+    private void OnSourceInitialized(object? sender, EventArgs e)
+    {
+      SourceInitialized -= OnSourceInitialized;
+      WindowState = Application.Current.MainWindow?.WindowState ?? WindowState.Normal;
     }
 
     /// <summary>Gets or sets the double click command being invoked. This is a dependency property.</summary>

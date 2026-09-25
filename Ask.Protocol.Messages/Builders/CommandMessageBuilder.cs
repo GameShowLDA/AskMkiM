@@ -14,10 +14,16 @@ namespace Ask.Protocol.Messages.Builders;
 /// </summary>
 internal static class CommandMessageBuilder
 {
+  /// <summary>
+  /// Формирует заголовок блока проверки в соответствии с алгоритмом контроля.
+  /// </summary>
+  /// <param name="algorithm">Алгоритм проверки.</param>
+  /// <param name="inversion">Признак инверсии проверки.</param>
+  /// <returns>Модель сообщения с заголовком блока проверки.</returns>
   internal static ShowMessageModel BuildCheckBlockHeader(ControlCheckAlgorithm algorithm, bool inversion)
   {
     string header = algorithm.GetDescription();
-    if(string.Equals(header, ControlCheckAlgorithm.MessageRelativeToFirstPoint.GetDescription()))
+    if (string.Equals(header, ControlCheckAlgorithm.MessageRelativeToFirstPoint.GetDescription()))
     {
       header = string.Empty;
     }
@@ -33,6 +39,12 @@ internal static class CommandMessageBuilder
     };
   }
 
+  /// <summary>
+  /// Формирует сообщение о выполнении команды программы контроля.
+  /// </summary>
+  /// <param name="commandName">Имя выполняемой команды.</param>
+  /// <param name="message">Дополнительное сообщение команды.</param>
+  /// <returns>Модель сообщения о выполнении команды.</returns>
   internal static ShowMessageModel BuildCommandExecutionMessage(string commandName, string? message = null)
   {
     var model = new ShowMessageModel(
@@ -53,6 +65,11 @@ internal static class CommandMessageBuilder
     return model;
   }
 
+  /// <summary>
+  /// Формирует сообщение о проверке цепи.
+  /// </summary>
+  /// <param name="chains">Обозначение проверяемых цепей.</param>
+  /// <returns>Модель сообщения о проверке цепи.</returns>
   internal static ShowMessageModel BuildChainCheckBlock(string chains)
   {
     var model = new ShowMessageModel(
@@ -67,6 +84,13 @@ internal static class CommandMessageBuilder
     return model;
   }
 
+  /// <summary>
+  /// Формирует заголовок проверки соединения между двумя точками.
+  /// </summary>
+  /// <param name="firstPoint">Первая проверяемая точка.</param>
+  /// <param name="secondPoint">Вторая проверяемая точка.</param>
+  /// <param name="circuitFaultType">Тип неисправности цепи.</param>
+  /// <returns>Модель сообщения о проверке точек.</returns>
   internal static ShowMessageModel BuildPointsCheckHeader(
     PointModel firstPoint,
     PointModel secondPoint,
@@ -103,6 +127,12 @@ internal static class CommandMessageBuilder
     return model;
   }
 
+  /// <summary>
+  /// Формирует сообщение о проверке разряда.
+  /// </summary>
+  /// <param name="dischargeNumber">Номер проверяемого разряда.</param>
+  /// <param name="dischargeView">Представление проверяемого разряда.</param>
+  /// <returns>Модель сообщения о проверке разряда.</returns>
   internal static ShowMessageModel BuildDischargeCheckBlock(int dischargeNumber, string dischargeView)
   {
     return new ShowMessageModel(
@@ -114,6 +144,12 @@ internal static class CommandMessageBuilder
     };
   }
 
+  /// <summary>
+  /// Формирует сообщение об ошибке при проверке разряда.
+  /// </summary>
+  /// <param name="dischargeNumber">Номер проверяемого разряда.</param>
+  /// <param name="dischargeView">Представление проверяемого разряда.</param>
+  /// <returns>Модель сообщения об ошибке проверки разряда.</returns>
   internal static ShowMessageModel BuildDischargeCheckError(int dischargeNumber, string dischargeView)
   {
     return new ShowMessageModel(
@@ -125,6 +161,13 @@ internal static class CommandMessageBuilder
     };
   }
 
+  /// <summary>
+  /// Формирует сообщение о проверке диода в заданном направлении.
+  /// </summary>
+  /// <param name="isDirectDirection">
+  /// Признак проверки диода в прямом направлении.
+  /// </param>
+  /// <returns>Модель сообщения о направлении проверки диода.</returns>
   internal static ShowMessageModel BuildDiodeDirectionMessage(bool isDirectDirection)
   {
     return new ShowMessageModel(
@@ -136,9 +179,20 @@ internal static class CommandMessageBuilder
     };
   }
 
+  /// <summary>
+  /// Формирует сообщение о подключении точек.
+  /// </summary>
+  /// <param name="indentLevel">Уровень отступа сообщения.</param>
+  /// <returns>Модель сообщения о подключении точек.</returns>
   internal static ShowMessageModel BuildPointsConnectionMessage(int indentLevel)
     => new("Подключение точек") { IndentLevel = indentLevel };
 
+  /// <summary>
+  /// Формирует сообщение о срабатывании точки останова на команде.
+  /// </summary>
+  /// <param name="commandName">Имя команды, на которой сработала точка останова.</param>
+  /// <param name="commandBody">Тело команды.</param>
+  /// <returns>Модель сообщения о срабатывании точки останова.</returns>
   internal static ShowMessageModel BuildBreakpointHitMessage(
     string commandName,
     string commandBody)
@@ -153,6 +207,12 @@ internal static class CommandMessageBuilder
     };
   }
 
+  /// <summary>
+  /// Формирует сообщение о переходе к указанной команде.
+  /// </summary>
+  /// <param name="commandName">Имя команды, к которой выполняется переход.</param>
+  /// <param name="commandBody">Тело команды.</param>
+  /// <returns>Модель сообщения о переходе к команде.</returns>
   internal static ShowMessageModel BuildCommandJumpMessage(
     string commandName,
     string commandBody)
@@ -166,6 +226,12 @@ internal static class CommandMessageBuilder
     };
   }
 
+  /// <summary>
+  /// Формирует сообщение о начале выполнения программы контроля.
+  /// </summary>
+  /// <param name="objectName">Наименование контролируемого объекта.</param>
+  /// <param name="objectCode">Код контролируемого объекта.</param>
+  /// <returns>Модель сообщения о начале выполнения программы контроля.</returns>
   internal static ShowMessageModel BuildControlProgramStartMessage(
     string objectName,
     string objectCode)
@@ -178,6 +244,10 @@ internal static class CommandMessageBuilder
     };
   }
 
+  /// <summary>
+  /// Применяет фон блока команды к сообщению в соответствии с настройками интерфейса.
+  /// </summary>
+  /// <param name="model">Модель сообщения, для которой настраивается фон.</param>
   private static void ApplyCommandBlockBackground(ShowMessageModel model)
   {
     if (!UserInterfaceConfig.GetChainPointBodyBackgroundHighlighting())
@@ -193,12 +263,24 @@ internal static class CommandMessageBuilder
     }
   }
 
+  /// <summary>
+  /// Формирует полупрозрачный цвет фона на основе цвета текста.
+  /// </summary>
+  /// <param name="textColor">Исходный цвет текста.</param>
+  /// <returns>Цвет фона с уменьшенной прозрачностью.</returns>
   private static Color BuildPaleTextBackground(Color textColor)
   {
     const byte paleAlpha = 70;
     return Color.FromArgb(paleAlpha, textColor.R, textColor.G, textColor.B);
   }
 
+  /// <summary>
+  /// Получает цвет ресурса интерфейса по указанному ключу.
+  /// </summary>
+  /// <param name="resourceKey">Ключ ресурса интерфейса.</param>
+  /// <returns>
+  /// Цвет найденного ресурса или <see langword="null"/>, если ресурс не найден.
+  /// </returns>
   private static Color? TryGetResourceColor(string resourceKey)
   {
     Color? color = null;

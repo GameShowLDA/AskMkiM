@@ -88,10 +88,7 @@ namespace Ask.Engine.Tests.NodeMethod
 
       foreach (var module in relayModules)
       {
-        await ExecutionMessages.PublishModuleBusConnectionAsync(module.Name, module.Number, protocolUI);
-        await module.BusManager.ConnectBusAsync(SwitchingBus.A1, userMessageService: protocolUI);
-        await module.BusManager.ConnectBusAsync(SwitchingBus.B1, userMessageService: protocolUI);
-
+        await module.BusManager.ConnectBusAsync(SwitchingBus.AB1, userMessageService: protocolUI);
         int startPoint;
         int endPoint;
 

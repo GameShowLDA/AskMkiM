@@ -1,3 +1,4 @@
+using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Shared.DTO.Devices.Base;
 using Ask.Core.Shared.DTO.Devices.Breakdown;
 using Ask.Core.Shared.DTO.Devices.ChassisManager;
@@ -505,6 +506,7 @@ public class DeviceEngine : IDeviceEngine
     var created = await service.CreateAsync(dto, cancellationToken);
     _cache.Remove(typeof(TDevice), created.Id);
     InvalidateQueryCaches(typeof(TDevice));
+    SystemStateEventAdapter.RaiseDeviceConfigurationChanged();
     return Build<TDevice>(created);
   }
 
@@ -517,21 +519,33 @@ public class DeviceEngine : IDeviceEngine
     where TDto : DeviceDto
   {
     var result = new List<TDevice>();
+    bool configurationChanged = false;
 
-    foreach (var device in devices)
+    try
     {
-      ArgumentNullException.ThrowIfNull(device);
+      foreach (var device in devices)
+      {
+        ArgumentNullException.ThrowIfNull(device);
 
-      var dto = mapper(device);
-      dto.Id = 0;
+        var dto = mapper(device);
+        dto.Id = 0;
 
-      var created = await service.CreateAsync(dto, cancellationToken);
+        var created = await service.CreateAsync(dto, cancellationToken);
+        configurationChanged = true;
 
-      _cache.Remove(typeof(TDevice), created.Id);
-      InvalidateQueryCaches(typeof(TDevice));
+        _cache.Remove(typeof(TDevice), created.Id);
+        InvalidateQueryCaches(typeof(TDevice));
 
-      var built = Build<TDevice>(created);
-      result.Add(built);
+        var built = Build<TDevice>(created);
+        result.Add(built);
+      }
+    }
+    finally
+    {
+      if (configurationChanged)
+      {
+        SystemStateEventAdapter.RaiseDeviceConfigurationChanged();
+      }
     }
 
     return result;
@@ -549,6 +563,12 @@ public class DeviceEngine : IDeviceEngine
     try
     {
       var dto = mapper(device);
+      var storedDto = await service.GetByIdAsync(dto.Id, cancellationToken);
+      if (storedDto != null && storedDto.Number != dto.Number)
+      {
+        dto.IsHardwareFailureSimulationEnabled = false;
+      }
+
       updated = await service.UpdateAsync(dto, cancellationToken);
     }
     finally
@@ -559,6 +579,7 @@ public class DeviceEngine : IDeviceEngine
       InvalidateQueryCaches(typeof(TDevice));
     }
 
+    SystemStateEventAdapter.RaiseDeviceConfigurationChanged();
     return Build<TDevice>(updated);
   }
 
@@ -579,6 +600,7 @@ public class DeviceEngine : IDeviceEngine
     {
       _cache.Remove(typeof(TDevice), id);
       InvalidateQueryCaches(typeof(TDevice));
+      SystemStateEventAdapter.RaiseDeviceConfigurationChanged();
     }
 
     return deleted;
@@ -591,18 +613,32 @@ public class DeviceEngine : IDeviceEngine
     where TDto : DeviceDto
   {
     var all = await service.GetAllAsync(cancellationToken);
+    bool configurationChanged = false;
 
     if (all.Count == 0)
       return false;
 
-    foreach (var dto in all)
+    try
     {
-      await service.DeleteByIdAsync(dto.Id, cancellationToken);
-      _cache.Remove(typeof(TDevice), dto.Id);
+      foreach (var dto in all)
+      {
+        if (await service.DeleteByIdAsync(dto.Id, cancellationToken))
+        {
+          configurationChanged = true;
+          _cache.Remove(typeof(TDevice), dto.Id);
+        }
+      }
+    }
+    finally
+    {
+      if (configurationChanged)
+      {
+        InvalidateQueryCaches(typeof(TDevice));
+        SystemStateEventAdapter.RaiseDeviceConfigurationChanged();
+      }
     }
 
-    InvalidateQueryCaches(typeof(TDevice));
-    return true;
+    return configurationChanged;
   }
 
   private void ClearQueryCaches()

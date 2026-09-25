@@ -41,9 +41,11 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
       double responseDelay = 0,
       CancellationToken cancellationToken = default)
     {
+      double result = -1;
+
       if (profile.Unit is CapacitanceUnit)
       {
-        return await MeasureCapacitanceAsync(
+        result = await MeasureCapacitanceAsync(
           device,
           profile,
           measurementRange,
@@ -51,14 +53,18 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
           measurementCount,
           responseDelay);
       }
+      else
+      {
+        result = await MeasureOtherAsync(
+          device,
+          profile,
+          measurementRange,
+          userMessageService,
+          responseDelay,
+          cancellationToken);
+      }
 
-      return await MeasureOtherAsync(
-        device,
-        profile,
-        measurementRange,
-        userMessageService,
-        responseDelay,
-        cancellationToken);
+      return Math.Round(result, 3);
     }
 
     /// <summary>

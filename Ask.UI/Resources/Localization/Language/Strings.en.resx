@@ -213,11 +213,20 @@
   <data name="menu.help.generalInformation" xml:space="preserve">
     <value>General information</value>
   </data>
-  <data name="menu.help.languageControlPrograms" xml:space="preserve">
-    <value>Control program language</value>
+  <data name="menu.help.mainMenu" xml:space="preserve">
+    <value>Main menu</value>
   </data>
-  <data name="menu.help.programComposition" xml:space="preserve">
-    <value>Program structure</value>
+  <data name="menu.help.languageControlPrograms" xml:space="preserve">
+    <value>ASK language</value>
+  </data>
+  <data name="menu.help.translator" xml:space="preserve">
+    <value>Translator</value>
+  </data>
+  <data name="menu.help.textEditor" xml:space="preserve">
+    <value>Text editor</value>
+  </data>
+  <data name="menu.help.hotKeys" xml:space="preserve">
+    <value>Hotkeys</value>
   </data>
   <data name="menu.help.aboutProgram" xml:space="preserve">
     <value>About</value>
@@ -459,6 +468,21 @@
   <data name="settings.userinterface.syntaxHighlighting.title" xml:space="preserve">
     <value>Syntax highlighting</value>
   </data>
+  <data name="settings.userinterface.diagnosticUnderlining.title" xml:space="preserve">
+    <value>Underline diagnostics</value>
+  </data>
+  <data name="settings.userinterface.diagnosticUnderlining.description" xml:space="preserve">
+    <value>Controls which errors and stylistic warnings are underlined in control programs.</value>
+  </data>
+  <data name="settings.userinterface.diagnosticUnderlining.none" xml:space="preserve">
+    <value>None</value>
+  </data>
+  <data name="settings.userinterface.diagnosticUnderlining.all" xml:space="preserve">
+    <value>All</value>
+  </data>
+  <data name="settings.userinterface.diagnosticUnderlining.errorsOnly" xml:space="preserve">
+    <value>Errors only</value>
+  </data>
   <data name="settings.userinterface.syntaxHighlighting.description" xml:space="preserve">
     <value>Enables or disables syntax highlighting in the protocol editor.</value>
   </data>
@@ -496,13 +520,25 @@
     <value>Measurement error simulation</value>
   </data>
   <data name="settings.execution.measurementErrorSimulation.description" xml:space="preserve">
-    <value>Adds the existing random deviations of measurement results from their specified limits.</value>
+    <value>Sets the erroneous measurement direction relative to the allowed range.</value>
+  </data>
+  <data name="settings.execution.measurementErrorSimulation.none" xml:space="preserve">
+    <value>No errors</value>
+  </data>
+  <data name="settings.execution.measurementErrorSimulation.rnd" xml:space="preserve">
+    <value>Random</value>
+  </data>
+  <data name="settings.execution.measurementErrorSimulation.low" xml:space="preserve">
+    <value>Below range</value>
+  </data>
+  <data name="settings.execution.measurementErrorSimulation.high" xml:space="preserve">
+    <value>Above range</value>
   </data>
   <data name="settings.execution.hardwareErrorSimulation.title" xml:space="preserve">
-    <value>Hardware error simulation</value>
+    <value>Hardware failure simulation</value>
   </data>
   <data name="settings.execution.hardwareErrorSimulation.description" xml:space="preserve">
-    <value>Simulates a non-measurement hardware command failure with a 50% probability.</value>
+    <value>Specifies the equipment for which every non‑measurement command ends in an error.</value>
   </data>
   <data name="settings.protocol.operationTime.title" xml:space="preserve">
     <value>Operation time output</value>
@@ -587,6 +623,12 @@
   </data>
   <data name="settings.protocol.deviceInfo.intermediateMeasurementResults.description" xml:space="preserve">
     <value>Shows intermediate measurement results obtained during test program execution.</value>
+  </data>
+  <data name="settings.protocol.deviceInfo.delayMessages.title" xml:space="preserve">
+    <value>Delay messages</value>
+  </data>
+  <data name="settings.protocol.deviceInfo.delayMessages.description" xml:space="preserve">
+    <value>Shows equipment delay messages during test program execution.</value>
   </data>
   <data name="settings.main.title" xml:space="preserve">
     <value>Settings</value>

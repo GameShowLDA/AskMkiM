@@ -12,6 +12,7 @@ namespace UI.Windows.WpfDocking.Windows.Docking
     private static RoutedCommand s_show;
     private static RoutedCommand s_undo;
     private static RoutedCommand s_redo;
+    private static RoutedCommand s_minimizeWindow;
     private static RoutedCommand s_toggleWindowState;
     private static RoutedCommand s_makeFloating;
 
@@ -131,6 +132,17 @@ namespace UI.Windows.WpfDocking.Windows.Docking
         }
 
         return s_redo;
+      }
+    }
+
+    public static RoutedCommand MinimizeWindow
+    {
+      get
+      {
+        if (s_minimizeWindow == null)
+          s_minimizeWindow = new RoutedCommand("MinimizeWindow", typeof(DockCommands));
+
+        return s_minimizeWindow;
       }
     }
 

@@ -252,38 +252,24 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
             {
               Rt = await GetResistanceAsync(context.MessageService, context.Value, context.LowerLimit, context.HigherLimit);
 
-              if (context.ValidatePointConnections && IsPairMeasurementOverload(Rt))
+              if (ShouldLocalizeInitialPairMeasurement(context.ValidatePointConnections, Rt))
               {
-                var errorMessageModels = MeasurementMessages.BuildMeasurementResultMessage(
-                  context.TypeCommand,
-                  new MeasurementRange(Rt, context.LowerLimit, context.HigherLimit),
-                  false,
-                  $"{_basePoint.Mnemonic}{machineAdressFirst}, {point.Mnemonic}{machineAdressSecond}",
-                  indentLevel: 1);
                 currentPointError = true;
+                requiresHighResistanceLocalization = true;
+                firstAboveUpperBound ??= Rt;
 
                 await MeasurementMessages.PublishStartAsync(CheckType.ControlProgram,
                   MeasurementTypeCommand.KC,
                   context.MessageService);
-
-                await MeasurementMessages.PublishIntermediateResultAsync(CheckType.ControlProgram,
-                  context.TypeCommand,
-                  new MeasurementRange(Rt, context.LowerLimit, context.HigherLimit),
-                  false,
-                  $"{_basePoint.Mnemonic}{machineAdressFirst}, {point.Mnemonic}{machineAdressSecond}",
-                  outputService: context.MessageService);
-
-                context.CommandManager.AddErrorMethod(
-                  EhtErrors.CircuitOverload($"{baseCommandModel.CommandNumber} {baseCommandModel.Mnemonic}",
-                  $"{_basePoint.Mnemonic}{machineAdressFirst}",
-                  $"{point.Mnemonic}{machineAdressSecond}",
-                  context.MessageService.GetLastLineNumber(),
-                  baseCommandModel.FormattedStartLineNumber));
-
-                messages.Errors.Add(errorMessageModels);
-                await ExecutionMessages.PublishDebugAsync(
-                  $"Добавлена ошибка: {errorMessageModels}",
-                  context.MessageService);
+                await GetResultMessageExecutor(context).PublishMeasurementResultAsync(
+                  new MeasurementResultMessageContext(
+                    context.TypeCommand,
+                    new MeasurementRange(Rt, context.LowerLimit, context.HigherLimit),
+                    context.MessageService,
+                    $"{_basePoint.Mnemonic}{machineAdressFirst}, {point.Mnemonic}{machineAdressSecond}")
+                  {
+                    SuccessOverride = false,
+                  });
               }
               else
               {
@@ -425,15 +411,24 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
 
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
-        result = ExecutionConfig.GetIsErrorSimulationEnabled()
-          ? result
-          : (lowerBound + upperBound) / 2;
+        if (IdleMeasurementErrorSimulator.TryGetValue(
+              lowerBound,
+              upperBound,
+              out double erroneousValue))
+        {
+          result = erroneousValue;
+        }
+        else
+        {
+          result = (lowerBound / 2) + (upperBound / 2);
+        }
       }
       else
       {
         result -= cableResistance;
       }
 
+      result = Math.Round(result, 12, MidpointRounding.AwayFromZero);
       return Math.Max(0, result);
     }
 
@@ -456,6 +451,20 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
     /// </returns>
     internal static bool IsPairMeasurementOverload(double resistance)
       => MeasurementValueFormatter.IsOverloadValue(resistance);
+
+    /// <summary>
+    /// Проверяет, должна ли перегрузка предварительного измерения пары запускать локализацию ЭТ.
+    /// </summary>
+    /// <param name="validatePointConnections">Признак проверки физических подключений точек.</param>
+    /// <param name="resistance">Результат предварительного измерения сопротивления пары.</param>
+    /// <returns>
+    /// <see langword="true"/>, если измерение содержит признак перегрузки и требуется локализация.
+    /// В противном случае — <see langword="false"/>.
+    /// </returns>
+    internal static bool ShouldLocalizeInitialPairMeasurement(
+      bool validatePointConnections,
+      double resistance)
+      => validatePointConnections && IsPairMeasurementOverload(resistance);
 
     static private async Task ConnectToBusAAndBAsync(IUserInteractionService userMessageService, PointModel pointModel)
     {

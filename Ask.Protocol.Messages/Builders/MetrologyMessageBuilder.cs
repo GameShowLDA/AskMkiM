@@ -11,6 +11,19 @@ namespace Ask.Protocol.Messages.Builders;
 internal static class MetrologyMessageBuilder
 {
   /// <summary>
+  /// Формирует сообщение об ошибке расчёта допустимого диапазона измерения.
+  /// </summary>
+  /// <param name="details">Описание ошибки расчёта.</param>
+  /// <returns>Сообщение об ошибке расчёта метрологического допуска.</returns>
+  internal static ShowMessageModel BuildToleranceCalculationError(string details)
+  {
+    return new ShowMessageModel(
+      "Ошибка расчёта метрологического допуска",
+      message: details,
+      type: ShowMessageModel.MessageType.Error);
+  }
+
+  /// <summary>
   /// Формирует заголовок сводных результатов метрологического режима.
   /// </summary>
   /// <param name="command">Метрологический режим.</param>

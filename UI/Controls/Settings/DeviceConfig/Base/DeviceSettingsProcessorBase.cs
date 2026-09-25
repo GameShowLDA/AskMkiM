@@ -33,6 +33,7 @@ namespace UI.Controls.Settings.DeviceConfig.Base
 
       deviceModel.Number = BaseHandler<IDevice>.GetNumber(control);
       deviceModel.ConnectionDetails = connectString;
+      deviceModel.IsHardwareFailureSimulationEnabled = selectedDevice.IsHardwareFailureSimulationEnabled;
       SetChassisNumber(deviceModel, control);
       return deviceModel;
     }

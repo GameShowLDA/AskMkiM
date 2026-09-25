@@ -8,7 +8,6 @@ using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
-using Ask.Core.Shared.Metadata.Static;
 using Ask.Core.Shared.Metadata.Enums.UnitEnums;
 using Ask.Engine.Tests.Metrology.MeasurementSystem;
 using static Ask.Engine.Tests.Base.UIValidationHelper;
@@ -65,14 +64,19 @@ namespace Ask.Engine.Tests.Metrology
     /// </summary>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    private async Task ExecuteMeasurementProcess(ActionSettings settings, IUserInteractionService _messageService, IInputFieldProvider inputFieldProvider, IInputHighlightService inputHighlightService, CancellationToken cancellationToken)
+    private async Task ExecuteMeasurementProcess(ActionSettings settings, IUserInteractionService messageService, IInputFieldProvider inputFieldProvider, IInputHighlightService inputHighlightService, CancellationToken cancellationToken)
     {
       var data = await EnsureValidMetrologyInputAsync(inputFieldProvider, _userInteractionService, metrologyMode: metrologicalModeRole, timeCheck: true, timeRampCheck: true);
       await testMeasurement.ConnectToEquipment(data.FirstPoint, data.SecondPoint, metrologicalModeRole, _userInteractionService);
       await testMeasurement.SetupCommutation(_userInteractionService, data.FirstPoint, data.SecondPoint, metrologicalModeRole);
       await testMeasurement.ConfigureMeter(_userInteractionService, metrologicalModeRole, data);
 
-      var (LowerBound, UpperBound, delta) = MeasurementErrorDefaults.CalculateToleranceRange(MeasurementTypeCommand.PI_ACW, data.Param);
+      var tolerance = await MeasurementToleranceCalculator.TryCalculateAsync(
+        MeasurementTypeCommand.PI_ACW,
+        data.Param,
+        _userInteractionService);
+      if (tolerance == null)
+        return;
       await _userInteractionService.AppendEmptyLineAsync();
       await UserActionHelper.RunWithUserRepeatAsync(async () => await testMeasurement.PerformMeasurement(metrologicalModeRole, data.Param, _userInteractionService), _userInteractionService, true);
     }
@@ -114,7 +118,14 @@ namespace Ask.Engine.Tests.Metrology
       {
         var meterDevice = Devices.TryGetValue(metrologicalModeRole, out var meter) ? meter.OfType<IBreakdownTester>().FirstOrDefault() : null;
         await MeasurementMessages.PublishTestVoltageOutputAsync(CheckType.Metrology, MeasurementTypeCommand.PI_ACW, param, userMessageService);
-        (LowerBound, UpperBound, var delta) = MeasurementErrorDefaults.CalculateToleranceRange(MeasurementTypeCommand.PI_ACW, param);
+        var tolerance = await MeasurementToleranceCalculator.TryCalculateAsync(
+          MeasurementTypeCommand.PI_ACW,
+          param,
+          userMessageService);
+        if (tolerance is not { } range)
+          return false;
+
+        (LowerBound, UpperBound, var delta) = range;
 
         MeasurementRange measurementRange = new MeasurementRange(param, LowerBound, UpperBound);
         var answerBreakdown = await meterDevice.AcwManger.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandAC, measurementRange);

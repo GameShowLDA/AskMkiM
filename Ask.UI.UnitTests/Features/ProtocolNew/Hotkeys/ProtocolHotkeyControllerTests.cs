@@ -102,6 +102,32 @@ public sealed class ProtocolHotkeyControllerTests
       RoutedEvent = Keyboard.KeyDownEvent
     };
 
+  [Theory]
+  [InlineData(Key.F5)]
+  [InlineData(Key.F10)]
+  [InlineData(Key.F11)]
+  [InlineData(Key.Escape)]
+  [InlineData(Key.P)]
+  public void ExecutionKeysRemainAvailableInTextFields(Key key)
+  {
+    var context = new RecordingHotkeyContext { CanPause = true, CanExit = true };
+    var controller = new ProtocolHotkeyController(context);
+    Assert.True(controller.CanHandleWhileTextInputFocused(key, ModifierKeys.None));
+    Assert.False(controller.CanHandleWhileTextInputFocused(key, ModifierKeys.Control));
+  }
+
+  [Fact]
+  public Task HandledKeyIsNotDispatchedToSecondProtocol() => RunOnStaAsync(() =>
+  {
+    var first = new RecordingHotkeyContext();
+    var second = new RecordingHotkeyContext();
+    var args = CreateKeyEventArgs(Key.F5);
+    new ProtocolHotkeyController(first).HandleKeyDown(this, args);
+    new ProtocolHotkeyController(second).HandleKeyDown(this, args);
+    Assert.Equal(1, first.RunOrPauseCount);
+    Assert.Equal(0, second.RunOrPauseCount);
+  });
+
   private static async Task RunOnStaAsync(Action action)
   {
     var completion = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);

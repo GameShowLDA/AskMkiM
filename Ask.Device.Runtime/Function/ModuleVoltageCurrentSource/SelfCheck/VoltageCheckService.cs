@@ -109,7 +109,7 @@ namespace Ask.Device.Runtime.Function.ModuleVoltageCurrentSource.SelfCheck
     /// <returns>Результат измерения.</returns>
     static private async Task<double> GetMeasurementResult(IUserInteractionService messageService, MeasurementRange measurementRange, int delay, IMultimeter meter)
     {
-      await Task.Delay(delay);
+      await Task.Delay(delay, messageService.GetCancellationToken());
       double result = await meter.DcVoltageManager.MeasureDCVoltageAsync(measurementRange, messageService);
       LogInformation($"Измеренное напряжение: {result} В", isDeviceLog: true);
       return result;

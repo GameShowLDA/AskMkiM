@@ -32,7 +32,7 @@ namespace Ask.Engine.ControlCommandAnalyser
     /// </list>
     /// </returns>
     public static (Dictionary<int, string> CleanLines, List<(int LineIndex, string Text)> Comments)
-      PreprocessTextAndExtractComments(string text)
+      PreprocessTextAndExtractComments(string text, Action<int, int>? onUnclosedComment = null)
     {
       var lines = SplitLines(text);
       var cleanLines = new Dictionary<int, string>();
@@ -45,6 +45,7 @@ namespace Ask.Engine.ControlCommandAnalyser
         ProcessLine(lines[i], i, context, cleanLines, comments);
       }
 
+      if (context.InComment) onUnclosedComment?.Invoke(context.StartLine, context.StartColumn);
       FinalizeUnclosedComment(lines.Count, context, comments);
 
       return (cleanLines, comments);
@@ -55,7 +56,7 @@ namespace Ask.Engine.ControlCommandAnalyser
     /// с нормализацией переносов.
     /// </summary>
     private static List<string> SplitLines(string text) =>
-      text.Replace("\r\n", "\n").Split('\n').ToList();
+      text.Replace("\r\n", "\n").Replace('\r', '\n').Split('\n').ToList();
 
     /// <summary>
     /// Обрабатывает одну строку текста:
@@ -146,6 +147,7 @@ namespace Ask.Engine.ControlCommandAnalyser
         context.CurrentComment.Clear();
         context.CurrentComment.Append("/*");
         context.StartLine = lineIndex;
+        context.StartColumn = index;
 
         index += 2;
         return true;
@@ -159,6 +161,7 @@ namespace Ask.Engine.ControlCommandAnalyser
         context.CurrentComment.Clear();
         context.CurrentComment.Append('{');
         context.StartLine = lineIndex;
+        context.StartColumn = index;
 
         index++;
         return true;
@@ -283,6 +286,8 @@ namespace Ask.Engine.ControlCommandAnalyser
       /// в которой начался текущий комментарий.
       /// </summary>
       public int StartLine { get; set; } = -1;
+
+      public int StartColumn { get; set; }
 
       /// <summary>
       /// Возвращает <c>true</c>,

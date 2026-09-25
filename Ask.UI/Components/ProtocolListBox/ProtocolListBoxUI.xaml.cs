@@ -211,6 +211,12 @@ namespace Ask.UI.Components.ProtocolListBox
         return;
       }
 
+      if (Keyboard.FocusedElement is ProtocolServiceLogsBox &&
+          Keyboard.Modifiers == ModifierKeys.Control && (e.Key == Key.A || e.Key == Key.C))
+      {
+        return;
+      }
+
       if (e.OriginalSource is TextBox textBox)
       {
         if (Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.A)
@@ -940,8 +946,11 @@ namespace Ask.UI.Components.ProtocolListBox
     internal static bool IsOverviewError(ShowMessageModel message)
       => message.Status == ShowMessageModel.MessageType.Error || message.ExecutionError ||
         ((message.Status == null || message.Status == ShowMessageModel.MessageType.Info) &&
-         (message.Header?.Contains("[БРАК]", StringComparison.OrdinalIgnoreCase) == true ||
-          message.Message?.Contains("[БРАК]", StringComparison.OrdinalIgnoreCase) == true));
+         (ContainsErrorMarker(message.Header) || ContainsErrorMarker(message.Message)));
+
+    private static bool ContainsErrorMarker(string? text)
+      => text?.Contains("[ERR]", StringComparison.OrdinalIgnoreCase) == true ||
+         text?.Contains("[БРАК]", StringComparison.OrdinalIgnoreCase) == true;
 
     private void RequestOverviewUpdate(bool diagnosticsChanged = true)
     {

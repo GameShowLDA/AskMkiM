@@ -36,12 +36,6 @@ namespace MainWindowProgram.ViewModels
     [RelayCommand]
     private void Database() => _service.OpenDatabase();
 
-    /// <summary>
-    /// Открывает вкладку настройки сопротивления МКР.
-    /// </summary>
-    [RelayCommand]
-    private void Resistance() => _service.OpenResistance();
-
     [RelayCommand]
     private void Protocol() => _service.ProtocolTest();
 

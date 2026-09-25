@@ -253,20 +253,14 @@
                         <MenuItem Header="{Binding Source={StaticResource LS_Menu_Compare}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="CompareFile" x:Name="compareMenuItem" Visibility="Collapsed" Command="{Binding File.CompareFileCommand}"/>
 
                         <Separator Style="{DynamicResource SeparatorMenuStyle}"/>
-                        <MenuItem x:Name="openArchiveMenuItem" Header="{Binding Source={StaticResource LS_Menu_OpenArchive}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="Archive" Command="{Binding File.OpenArchiveCommand}" utilities:HelpProvider.HelpKey="FuncArchive"/>
-                        <MenuItem x:Name="createArchiveMenuItem" Header="{Binding Source={StaticResource LS_Menu_CreateArchive}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="CreateArchive" Visibility="Collapsed" Command="{Binding File.CreateArchiveCommand}"/>
-                        <MenuItem x:Name="downloadArchivesMenuItem" Header="{Binding Source={StaticResource LS_Menu_DownloadArchives}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="DownloadArchives" Visibility="Collapsed" Command="{Binding File.DownloadArchivesCommand}"/>
-                        <MenuItem x:Name="uploadArchiveMenuItem" Header="{Binding Source={StaticResource LS_Menu_UploadArchive}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="UploadArchive" Visibility="Collapsed" Command="{Binding File.UploadArchiveCommand}"/>
-
-                        <Separator Style="{DynamicResource SeparatorMenuStyle}"/>
                         <MenuItem Header="{Binding Source={StaticResource LS_Menu_Open}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="OpenFile" Command="{Binding File.OpenFileCommand}" utilities:HelpProvider.HelpKey="FuncOpen"/>
                         <MenuItem Header="{Binding Source={StaticResource LS_Menu_Create}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="CreateNewFile" Command="{Binding File.CreateNewFileCommand}" utilities:HelpProvider.HelpKey="FuncCreate"/>
                         <Separator Style="{DynamicResource SeparatorMenuStyle}"/>
-                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_LegacyConversion}, Path=Value}" Style="{DynamicResource SideMenuItemStyle}">
-                            <MenuItem Header="{Binding Source={StaticResource LS_Menu_LegacyConversion_OpkToPkw}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="ConvertOpkToPk" Command="{Binding File.ConvertOpkToPkCommand}"/>
+                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_LegacyConversion}, Path=Value}" Style="{DynamicResource SideMenuItemStyle}" utilities:HelpProvider.HelpKey="FuncConvert">
+                            <MenuItem Header="{Binding Source={StaticResource LS_Menu_LegacyConversion_OpkToPkw}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="ConvertOpkToPk" Command="{Binding File.ConvertOpkToPkCommand}" utilities:HelpProvider.HelpKey="FuncConvert"/>
                             <!--<MenuItem Header="{Binding Source={StaticResource LS_Menu_LegacyConversion_OpkToOpkw}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="ConvertOpkToOpkw" Command="{Binding File.ConvertOpkToOpkwCommand}"/>-->
-                            <MenuItem Header="{Binding Source={StaticResource LS_Menu_LegacyConversion_ApkToApkw}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="ConvertApkToApkw" Command="{Binding File.ConvertApkToApkwCommand}"/>
-                            <MenuItem Header="{Binding Source={StaticResource LS_Menu_LegacyConversion_ApkwToApk}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="ConvertApkwToApk" Command="{Binding File.ConvertApkwToApkCommand}"/>
+                            <MenuItem Header="{Binding Source={StaticResource LS_Menu_LegacyConversion_ApkToApkw}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="ConvertApkToApkw" Command="{Binding File.ConvertApkToApkwCommand}" utilities:HelpProvider.HelpKey="FuncConvert"/>
+                            <MenuItem Header="{Binding Source={StaticResource LS_Menu_LegacyConversion_ApkwToApk}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="ConvertApkwToApk" Command="{Binding File.ConvertApkwToApkCommand}" utilities:HelpProvider.HelpKey="FuncConvert"/>
                         </MenuItem>
 
                         <Separator Style="{DynamicResource SeparatorMenuStyle}"/>
@@ -274,7 +268,15 @@
 
                     </MenuItem>
 
-                    <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="menuHeader_2" Name="TestMenu">
+          <MenuItem Header="{Binding Source={StaticResource LS_Menu_Archive}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="menuHeader_5" Name="ArchiveMenu">
+            <Separator Style="{DynamicResource SeparatorMenuStyle}"/>
+            <MenuItem x:Name="openArchiveMenuItem" Header="{Binding Source={StaticResource LS_Menu_OpenArchive}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="Archive" Command="{Binding File.OpenArchiveCommand}" utilities:HelpProvider.HelpKey="FuncArchive"/>
+            <MenuItem x:Name="createArchiveMenuItem" Header="{Binding Source={StaticResource LS_Menu_CreateArchive}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="CreateArchive" Visibility="Collapsed" Command="{Binding File.CreateArchiveCommand}" utilities:HelpProvider.HelpKey="FuncArchive"/>
+            <MenuItem x:Name="downloadArchivesMenuItem" Header="{Binding Source={StaticResource LS_Menu_DownloadArchives}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="DownloadArchives" Visibility="Collapsed" Command="{Binding File.DownloadArchivesCommand}" utilities:HelpProvider.HelpKey="FuncArchive"/>
+            <MenuItem x:Name="uploadArchiveMenuItem" Header="{Binding Source={StaticResource LS_Menu_UploadArchive}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="UploadArchive" Visibility="Collapsed" Command="{Binding File.UploadArchiveCommand}" utilities:HelpProvider.HelpKey="FuncArchive"/>
+
+          </MenuItem>
+          <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="menuHeader_2" Name="TestMenu">
 
                         <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test_Metrology}, Path=Value}"  Name="Metrology" Style="{DynamicResource SideMenuItemStyle}">
 
@@ -341,8 +343,11 @@
 
                     <MenuItem Header="{Binding Source={StaticResource LS_Menu_Help}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Name="HelpText">
                         <MenuItem Header="{Binding Source={StaticResource LS_Menu_Help_GeneralInformation}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Name="HelpTextGeneralInformation" Command="{Binding Settings.HelpOpenGeneralInformationCommand}"/>
+                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_Help_MainMenu}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Name="HelpTextMainMenu" Command="{Binding Settings.HelpOpenMainMenuCommand}"/>
                         <MenuItem Header="{Binding Source={StaticResource LS_Menu_Help_LanguageControlPrograms}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Name="HelpTextLanguageControlPrograms" Command="{Binding Settings.HelpOpenLanguageControlProgramsCommand}"/>
-                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_Help_ProgramComposition}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Name="HelpTextProgramComposition" Command="{Binding Settings.HelpOpenProgramCompositionCommand}"/>
+                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_Help_Translator}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Name="HelpTextTranslator" Command="{Binding Settings.HelpOpenTranslatorCommand}"/>
+                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_Help_TextEditor}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Name="HelpTextTextEditor" Command="{Binding Settings.HelpOpenTextEditorCommand}"/>
+                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_Help_HotKeys}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Name="HelpTextHotKeys" Command="{Binding Settings.HelpOpenHotKeysCommand}"/>
                         <MenuItem Header="{Binding Source={StaticResource LS_Menu_Help_AboutProgram}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Name="HelpTextAboutProgram" Command="{Binding Settings.HelpOpenAboutProgramCommand}"/>
                         <Separator Background="{StaticResource ActiveBorderSolidColorBrush}"/>
                         <MenuItem Header="{Binding Source={StaticResource LS_Menu_Help_FastMenuCommand}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Name="FastMenuCommand" Command="{Binding Settings.HelpOpenFastMenuCommand}"/>
@@ -355,9 +360,6 @@
                         <MenuItem Header="База данных"
                                   Style="{DynamicResource StyleMenuItem}"
                                   Command="{Binding Admin.DatabaseCommand}"/>
-                        <MenuItem Header="Сопротивление МКР"
-                                  Style="{DynamicResource StyleMenuItem}"
-                                  Command="{Binding Admin.ResistanceCommand}"/>
                         <Separator Style="{DynamicResource SeparatorMenuStyle}"/>
                         <!--<MenuItem Header="{Binding Source={StaticResource LS_Menu_Admin_Management}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Name="DeviceManagment">
                         <MenuItem Header="GPT" Style="{DynamicResource StyleMenuItem}" Name="GptManagment" Command="{Binding Admin.GptCommand}"/>

@@ -2,6 +2,7 @@ using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Static.Delays;
 using Ask.Protocol.Messages.Builders;
 using Ask.Protocol.Messages.Show;
 using System.Runtime.CompilerServices;
@@ -489,6 +490,49 @@ public static class ExecutionMessages
     => ExecutionMessagePublisher.PublishAsync(
       ExecutionMessageBuilder.BuildGeneralPointsResetMessage(),
       outputService, callerName, callerFile, callerLine);
+
+  /// <summary>
+  /// Выводит наименование и продолжительность задержки в миллисекундах.
+  /// </summary>
+  /// <param name="delay">Задержка, выводимая в экранный протокол.</param>
+  /// <param name="outputService">Сервис вывода сообщений в экранный протокол.</param>
+  /// <param name="callerName">Имя метода, вызвавшего публикацию.</param>
+  /// <param name="callerFile">Путь к файлу, вызвавшему публикацию.</param>
+  /// <param name="callerLine">Номер строки, вызвавшей публикацию.</param>
+  /// <returns>Задача, представляющая публикацию сообщения.</returns>
+  /// <remarks>
+  /// Если продолжительность задержки меньше или равна нулю, сообщение не публикуется
+  /// и ожидание не выполняется.
+  /// При отключённом отображении сообщений о задержках ожидание выполняется без публикации.
+  /// </remarks>
+  /// <exception cref="ArgumentNullException">
+  /// Выбрасывается, если <paramref name="delay"/> равен <see langword="null"/>.
+  /// </exception>
+  public static async Task PublishDelayAsync(
+    DelayModel delay,
+    IMessageOutputService? outputService,
+    [CallerMemberName] string callerName = "",
+    [CallerFilePath] string callerFile = "",
+    [CallerLineNumber] int callerLine = 0)
+  {
+    ArgumentNullException.ThrowIfNull(delay);
+    if (delay.Delay <= 0)
+    {
+      return;
+    }
+
+    if (DeviceDisplayConfig.GetDelayMessagesVisibility())
+    {
+      await ExecutionMessagePublisher.PublishAsync(
+        ExecutionMessageBuilder.BuildDelayMessage(delay),
+        outputService,
+        callerName,
+        callerFile,
+        callerLine);
+    }
+
+    await Task.Delay(delay.Delay);
+  }
 
   /// <summary>
   /// Выводит продолжительность задержки перед включением оборудования.

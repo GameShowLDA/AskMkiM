@@ -23,13 +23,25 @@ namespace MainWindowProgram.ViewModels
     [RelayCommand]
     private void HelpOpenGeneralInformation() => _service.HelpOpenGeneralInformation();
 
-    /// <summary>Открыть раздел "Язык программ контроля" в справочнике.</summary>
+    /// <summary>Открыть раздел "Основное меню" в справочнике.</summary>
+    [RelayCommand]
+    private void HelpOpenMainMenu() => _service.HelpOpenMainMenu();
+
+    /// <summary>Открыть раздел "Язык АСК" в справочнике.</summary>
     [RelayCommand]
     private void HelpOpenLanguageControlPrograms() => _service.HelpOpenLanguageControlPrograms();
 
-    /// <summary>Открыть раздел "Состав программы" в справочнике.</summary>
+    /// <summary>Открыть раздел "Транслятор" в справочнике.</summary>
     [RelayCommand]
-    private void HelpOpenProgramComposition() => _service.HelpOpenProgramComposition();
+    private void HelpOpenTranslator() => _service.HelpOpenTranslator();
+
+    /// <summary>Открыть раздел "Текстовый редактор" в справочнике.</summary>
+    [RelayCommand]
+    private void HelpOpenTextEditor() => _service.HelpOpenTextEditor();
+
+    /// <summary>Открыть раздел "Горячие клавиши" в справочнике.</summary>
+    [RelayCommand]
+    private void HelpOpenHotKeys() => _service.HelpOpenHotKeys();
 
     /// <summary>Открыть раздел "О программе" в справочнике.</summary>
     [RelayCommand]
