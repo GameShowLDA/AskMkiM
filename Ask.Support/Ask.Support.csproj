@@ -1756,6 +1756,255 @@
 	  <Content Include="AppHelp\favicon.ico">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\ErrorsCKChapter\ErrorCK001_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\ErrorsCKPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\ErrorsEHTChapter\ErrorEHT001_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\ErrorsEHTChapter\ErrorEHT002_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\ErrorsEHTChapter\ErrorEHT003_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\ErrorsEHTChapter\ErrorEHT004_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\ErrorsEHTChapter\ErrorEHT005_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\ErrorsEHTChapter\ErrorEHT007_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\ErrorsEHTChapter\ErrorEHT008_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\ErrorsEHTPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\ErrorsIEChapter\ErrorIE001_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\ErrorsIEChapter\ErrorIE002_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\ErrorsIEChapter\ErrorIE003_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\ErrorsIEChapter\ErrorIE006_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\ErrorsIEChapter\ErrorIE007_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\ErrorsIEChapter\ErrorIE008_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\ErrorsIEChapter\ErrorIE009_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\ErrorsIEPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\ErrorsKSChapter\ErrorKS006_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\ErrorsKSChapter\ErrorKS007_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\ErrorsKSChapter\ErrorKS008_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\ErrorsKSChapter\ErrorKS009_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\ErrorsNEChapter\ErrorNE001_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\ErrorsNEChapter\ErrorNE002_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\ErrorsNEChapter\ErrorNE003_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\ErrorsNEChapter\ErrorNE004_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\ErrorsNEChapter\ErrorNE005_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\ErrorsNEChapter\ErrorNE006_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\ErrorsNEChapter\ErrorNE007_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\ErrorsNEChapter\ErrorNE008_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\ErrorsNEChapter\ErrorNE009_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\ErrorsNEChapter\ErrorNE010_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\ErrorsNEChapter\ErrorNE011_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\ErrorsNEPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\ErrorsOTChapter\ErrorOT001_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\ErrorsOTPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\ErrorsPIChapter\ErrorPI005_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\ErrorsPIChapter\ErrorPI006_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\ErrorsPIChapter\ErrorPI007_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\ErrorsPIChapter\ErrorPI008_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\ErrorsPIChapter\ErrorPI009_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\ErrorsPIChapter\ErrorPI010_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\ErrorsPRChapter\ErrorPR0010_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\ErrorsPRChapter\ErrorPR0011_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\ErrorsPRChapter\ErrorPR0012_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\ErrorsPRChapter\ErrorPR0013_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\ErrorsPRChapter\ErrorPR0014_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\ErrorsPRChapter\ErrorPR0015_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\ErrorsPRChapter\ErrorPR0016_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\ErrorsPRChapter\ErrorPR006_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\ErrorsPRChapter\ErrorPR007_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\ErrorsPRChapter\ErrorPR008_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\ErrorsPRChapter\ErrorPR009_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\ErrorsPRPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\ErrorsPTChapter\ErrorPT001_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\ErrorsPTChapter\ErrorPT002_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\ErrorsPTPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\ErrorsSIChapter\ErrorSI005_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\ErrorsSIChapter\ErrorSI006_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\ErrorsSIChapter\ErrorSI007_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\ErrorsSIChapter\ErrorSI008_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\ErrorsSIChapter\ErrorSI009_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\ErrorsSIChapter\ErrorSI010_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\ErrorsSIChapter\ErrorSI011_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\ErrorsUPChapter\ErrorUP003_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\ErrorsVSHChapter\ErrorVSH001_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\ErrorsVSHChapter\ErrorVSH002_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\ErrorsVSHChapter\ErrorVSH003_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\ErrorsVSHChapter\ErrorVSH004_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\ErrorsVSHPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\GeneralErrorsChapter\ErrorGEN015_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\GeneralErrorsChapter\ErrorGEN016_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\GeneralErrorsChapter\ErrorGEN017_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\GeneralErrorsChapter\ErrorGEN018_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\GeneralErrorsChapter\ErrorGEN019_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\GeneralErrorsChapter\ErrorGEN020_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\GeneralErrorsChapter\ErrorGEN021_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\GeneralErrorsChapter\ErrorGEN022_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\GeneralErrorsChapter\ErrorGEN023_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\GeneralErrorsChapter\ErrorGEN024_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\GeneralErrorsChapter\ErrorGEN025_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\GeneralErrorsChapter\ErrorGEN026_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\ErrorsEHTChapter\ErrorEHT006_Part.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
 	  <Content Include="AppHelp\ru\index.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
