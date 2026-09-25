@@ -227,6 +227,7 @@ internal sealed class ApplicationAutoConfigurationService
     defaultDeviceDisplaySettings.ShowDeviceExecutionParameters = true;
     defaultDeviceDisplaySettings.ShowMeasurementResults = true;
     defaultDeviceDisplaySettings.ShowIntermediateMeasurementResults = true;
+    defaultDeviceDisplaySettings.ShowDelayMessages = true;
 
     await DeviceDisplayConfig.SaveSettingsAsync(defaultDeviceDisplaySettings);
 

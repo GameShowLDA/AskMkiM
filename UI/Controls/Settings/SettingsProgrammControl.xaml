@@ -10,6 +10,7 @@
              xmlns:Procol="clr-namespace:UI.Controls.Settings.Protocol"
              xmlns:Config="clr-namespace:UI.Controls.Settings.DeviceConfig"
              xmlns:UiSetting="clr-namespace:UI.Controls.Settings.UserInterface"
+             xmlns:Delays="clr-namespace:UI.Controls.Settings.Delays"
              xmlns:AskMkiConfig="clr-namespace:UI.Controls.Settings.AskMkiConfig"
              xmlns:RoleManagement="clr-namespace:Ask.UI.Features.RoleManagement.Views;assembly=Ask.UI"
              xmlns:Icons="clr-namespace:UI.Icon"
@@ -198,6 +199,10 @@
                     </Border>
 
                     <!--<AskMkiConfig:AskMkiConfigControl Grid.Row="1" x:Name="AskMkiConfigManager"/>-->
+
+                    <Delays:DelaySettingsControl Grid.Row="1"
+                                                 x:Name="DelaySettingsManager"
+                                                 Visibility="Collapsed"/>
 
                     <Execution:ExecutionControl Grid.Row="2" x:Name="ExecutionManager"/>
 

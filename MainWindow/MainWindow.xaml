@@ -360,9 +360,6 @@
                         <MenuItem Header="База данных"
                                   Style="{DynamicResource StyleMenuItem}"
                                   Command="{Binding Admin.DatabaseCommand}"/>
-                        <MenuItem Header="Задержки оборудования"
-                                  Style="{DynamicResource StyleMenuItem}"
-                                  Command="{Binding Admin.DelaysCommand}"/>
                         <Separator Style="{DynamicResource SeparatorMenuStyle}"/>
                         <!--<MenuItem Header="{Binding Source={StaticResource LS_Menu_Admin_Management}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Name="DeviceManagment">
                         <MenuItem Header="GPT" Style="{DynamicResource StyleMenuItem}" Name="GptManagment" Command="{Binding Admin.GptCommand}"/>

@@ -117,15 +117,6 @@ namespace MainWindowProgram.Services
         new DataBaseView(),
         TypeWindow.Settings);
 
-    /// <summary>
-    /// Открывает настройку задержек оборудования в отдельной вкладке рабочего пространства.
-    /// </summary>
-    public void OpenDelays() =>
-      _multiWindow.WorkspaceService.AddControl(
-        "Задержки оборудования",
-        new DelaySettingsControl(),
-        TypeWindow.Settings);
-
     public void ProtocolTest() => _multiWindow.WorkspaceService.AddControl("Тест протокола", new TestProtocol(), TypeWindow.DeviceControl);
     public void ProtocolBaseTest() => _multiWindow.WorkspaceService.AddControl("Тест теста протокола", new ProtocolTemplateEditorControl(), TypeWindow.DeviceControl);
   }

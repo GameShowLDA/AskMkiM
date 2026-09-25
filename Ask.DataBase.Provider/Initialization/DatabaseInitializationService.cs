@@ -74,6 +74,7 @@ public static class DatabaseInitializationService
     await EnsureDisablePowerCheckColumnAsync(databasePath, report, progress, cancellationToken);
     await EnsureRepeatMeasurementColumnAsync(databasePath, report, progress, cancellationToken);
     await EnsureSettingsProtocolPrintColumnsAsync(databasePath, report, progress, cancellationToken);
+    await EnsureDeviceDisplayDelayMessagesColumnAsync(databasePath, report, progress, cancellationToken);
     await EnsureDiagnosticUnderliningColumnsAsync(databasePath, report, progress, cancellationToken);
     await EnsureFastMeterPpuDividerCoefficientColumnAsync(databasePath, report, progress, cancellationToken);
     await EnsureBreakdownTesterVoltageColumnsAsync(databasePath, report, progress, cancellationToken);
@@ -349,6 +350,33 @@ public static class DatabaseInitializationService
 
     await EnsureColumnAsync(connection, "SettingsProtocol", "PrintFontFamily", "TEXT NOT NULL DEFAULT 'Consolas'", report, progress, cancellationToken);
     await EnsureColumnAsync(connection, "SettingsProtocol", "PrintFontSize", "REAL NOT NULL DEFAULT 10.0", report, progress, cancellationToken);
+  }
+
+  /// <summary>
+  /// Добавляет настройку отображения сообщений о задержках в совместимую старую схему.
+  /// </summary>
+  internal static async Task EnsureDeviceDisplayDelayMessagesColumnAsync(
+    string databasePath,
+    DatabaseInitializationReport report,
+    Action<string>? progress,
+    CancellationToken cancellationToken)
+  {
+    await using var connection = new SqliteConnection($"Data Source={databasePath}");
+    await connection.OpenAsync(cancellationToken);
+
+    if (!await TableExistsAsync(connection, "DeviceDisplaySettings", cancellationToken))
+    {
+      return;
+    }
+
+    await EnsureColumnAsync(
+      connection,
+      "DeviceDisplaySettings",
+      "ShowDelayMessages",
+      "INTEGER NOT NULL DEFAULT 1",
+      report,
+      progress,
+      cancellationToken);
   }
 
   /// <summary>

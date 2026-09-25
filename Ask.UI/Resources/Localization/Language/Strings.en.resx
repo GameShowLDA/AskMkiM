@@ -624,6 +624,12 @@
   <data name="settings.protocol.deviceInfo.intermediateMeasurementResults.description" xml:space="preserve">
     <value>Shows intermediate measurement results obtained during test program execution.</value>
   </data>
+  <data name="settings.protocol.deviceInfo.delayMessages.title" xml:space="preserve">
+    <value>Delay messages</value>
+  </data>
+  <data name="settings.protocol.deviceInfo.delayMessages.description" xml:space="preserve">
+    <value>Shows equipment delay messages during test program execution.</value>
+  </data>
   <data name="settings.main.title" xml:space="preserve">
     <value>Settings</value>
   </data>

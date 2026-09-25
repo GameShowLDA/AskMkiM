@@ -503,6 +503,7 @@ public static class ExecutionMessages
   /// <remarks>
   /// Если продолжительность задержки меньше или равна нулю, сообщение не публикуется
   /// и ожидание не выполняется.
+  /// При отключённом отображении сообщений о задержках ожидание выполняется без публикации.
   /// </remarks>
   /// <exception cref="ArgumentNullException">
   /// Выбрасывается, если <paramref name="delay"/> равен <see langword="null"/>.
@@ -520,12 +521,15 @@ public static class ExecutionMessages
       return;
     }
 
-    await ExecutionMessagePublisher.PublishAsync(
-      ExecutionMessageBuilder.BuildDelayMessage(delay),
-      outputService,
-      callerName,
-      callerFile,
-      callerLine);
+    if (DeviceDisplayConfig.GetDelayMessagesVisibility())
+    {
+      await ExecutionMessagePublisher.PublishAsync(
+        ExecutionMessageBuilder.BuildDelayMessage(delay),
+        outputService,
+        callerName,
+        callerFile,
+        callerLine);
+    }
 
     await Task.Delay(delay.Delay);
   }

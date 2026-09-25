@@ -627,6 +627,12 @@
   <data name="settings.protocol.deviceInfo.intermediateMeasurementResults.description" xml:space="preserve">
     <value>Отображает промежуточные результаты измерений, полученные в ходе выполнения программ контроля.</value>
   </data>
+  <data name="settings.protocol.deviceInfo.delayMessages.title" xml:space="preserve">
+    <value>Сообщения о задержках</value>
+  </data>
+  <data name="settings.protocol.deviceInfo.delayMessages.description" xml:space="preserve">
+    <value>Отображает сообщения о задержках оборудования в ходе выполнения программ контроля.</value>
+  </data>
   <data name="settings.main.title" xml:space="preserve">
     <value>Параметры</value>
   </data>

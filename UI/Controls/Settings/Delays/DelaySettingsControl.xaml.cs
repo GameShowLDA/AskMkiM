@@ -1,4 +1,6 @@
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.DTO.Settings;
+using Ask.Core.Shared.Metadata.Enums.RoleEnums;
 using Ask.Core.Shared.Metadata.Static.Delays;
 using Message;
 using System.Globalization;
@@ -6,7 +8,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
-namespace UI.Controls.AdminPanel
+namespace UI.Controls.Settings.Delays
 {
   /// <summary>
   /// Редактирует фиксированные задержки оборудования.
@@ -33,6 +35,16 @@ namespace UI.Controls.AdminPanel
 
     private void SaveIcon_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
+      if (!CanEditDelaySettings())
+      {
+        MessageBoxCustom.Show(
+          "Изменять задержки оборудования могут только root и администратор.",
+          "Недостаточно прав",
+          MessageBoxButton.OK,
+          MessageBoxImage.Warning);
+        return;
+      }
+
       if (!TryReadSettings(out DelaySettings settings))
       {
         MessageBoxCustom.Show(
@@ -147,5 +159,8 @@ namespace UI.Controls.AdminPanel
       SaveIcon.Visibility = visibility;
       CancelIcon.Visibility = visibility;
     }
+
+    private static bool CanEditDelaySettings()
+      => RoleAuthorizationConfig.CurrentRole is RoleType.Root or RoleType.Administrator;
   }
 }
