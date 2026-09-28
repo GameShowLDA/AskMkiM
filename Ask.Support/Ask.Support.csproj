@@ -11,11 +11,11 @@
 	<ItemGroup>
 	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\APKtoAPKWconversionMenuImage.png" />
 	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\APKWtoAPKconversionMenuImage.png" />
-	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\archiveButtonImage.png" />
-	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\archiveContextMenuImage.png" />
+	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabArchiveChapter\archiveButtonImage.png" />
+	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabArchiveChapter\archiveContextMenuImage.png" />
 	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\buttonCreateImage.png" />
 	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\buttonExitImage.png" />
-	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\buttonOpenArchiveImage.png" />
+	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabArchiveChapter\buttonOpenArchiveImage.png" />
 	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\buttonOpenFolderInExplorerImage.png" />
 	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\buttonOpenImage.png" />
 	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\buttonPrintImage.png" />
@@ -23,32 +23,32 @@
 	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\buttonSaveAsImage.png" />
 	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\buttonSaveImage.png" />
 	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\buttonSearchAndReplaceImage.png" />
-	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\buttonsImportAndExportImage.png" />
-	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\choiceArchiveImage.png" />
-	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\contextMenuArchiveImage.png" />
+	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabArchiveChapter\buttonsImportAndExportImage.png" />
+	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabArchiveChapter\choiceArchiveImage.png" />
+	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabArchiveChapter\contextMenuArchiveImage.png" />
 	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\contextMenuFileInArchiveImage.png" />
-	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\contextMenuFilesInArchiveImage.png" />
+	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabArchiveChapter\contextMenuFilesInArchiveImage.png" />
 	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\conversionSelectionButtonsImage.png" />
-	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\createArchiveButtonImage.png" />
-	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\createArchiveContextMenuImage.png" />
+	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabArchiveChapter\createArchiveButtonImage.png" />
+	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabArchiveChapter\createArchiveContextMenuImage.png" />
 	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\createNewTextEditorImage.png" />
 	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\enteringArchiveNameImage.png" />
-	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\exampleArchiveCatalogImage.png" />
-	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\fileManagementButtonsInArchiveImage.png" />
+	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabArchiveChapter\exampleArchiveCatalogImage.png" />
+	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabArchiveChapter\fileManagementButtonsInArchiveImage.png" />
 	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\fileManagerReadModeImage.png" />
-	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\generalPlanOpenArchiveImage.png" />
-	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\listOfArchiveIfAvalibleImage.png" />
-	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\listOfArchiveIfNotAvalibleImage.png" />
-	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\messageCreationArchiveImage.png" />
+	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabArchiveChapter\generalPlanOpenArchiveImage.png" />
+	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabArchiveChapter\listOfArchiveIfAvalibleImage.png" />
+	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabArchiveChapter\listOfArchiveIfNotAvalibleImage.png" />
+	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabArchiveChapter\messageCreationArchiveImage.png" />
 	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\notificationSuccessfulSavingImage.png" />
 	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\openContentsArchiveImage.png" />
-	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\openProgramControlInArchiveImage.png" />
+	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabArchiveChapter\openProgramControlInArchiveImage.png" />
 	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\OPKtoPKconversionMenuImage.png" />
 	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\replacePanelImage.png" />
 	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\savingTranslatedFileToArchiveImage.png" />
 	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\selectingArchiveToSaveImage.png" />
-	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\startWorkingArchiveImage.png" />
-	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\windowAvailableArchivesImage.png" />
+	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabArchiveChapter\startWorkingArchiveImage.png" />
+	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabArchiveChapter\windowAvailableArchivesImage.png" />
 	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabMetrologyChapter\ehtMetrologyPanelImage.png" />
 	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabTestsChapter\rkommTestPanelImage.png" />
 	  <None Remove="AppHelp\favicon.ico" />
@@ -832,10 +832,10 @@
 	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\APKWtoAPKconversionMenuImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\archiveButtonImage.png">
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabArchiveChapter\archiveButtonImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\archiveContextMenuImage.png">
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabArchiveChapter\archiveContextMenuImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\buttonConvertationImage.png">
@@ -847,7 +847,7 @@
 	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\buttonExitImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\buttonOpenArchiveImage.png">
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabArchiveChapter\buttonOpenArchiveImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\buttonOpenFolderInExplorerImage.png">
@@ -871,28 +871,28 @@
 	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\buttonSearchAndReplaceImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\buttonsImportAndExportImage.png">
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabArchiveChapter\buttonsImportAndExportImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\choiceArchiveImage.png">
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabArchiveChapter\choiceArchiveImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\contextMenuArchiveImage.png">
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabArchiveChapter\contextMenuArchiveImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\contextMenuFileInArchiveImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\contextMenuFilesInArchiveImage.png">
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabArchiveChapter\contextMenuFilesInArchiveImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\conversionSelectionButtonsImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\createArchiveButtonImage.png">
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabArchiveChapter\createArchiveButtonImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\createArchiveContextMenuImage.png">
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabArchiveChapter\createArchiveContextMenuImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\createNewTextEditorImage.png">
@@ -901,10 +901,10 @@
 	  <Content Include="AppHelp\ru\Conservation\ProgramCompositionChapter\MainComponentsOfProgramChapter\TabFileChapter\TabFile1Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\exampleArchiveCatalogImage.png">
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabArchiveChapter\exampleArchiveCatalogImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\fileManagementButtonsInArchiveImage.png">
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabArchiveChapter\fileManagementButtonsInArchiveImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\findPanelImage.png">
@@ -967,13 +967,13 @@
 	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\FuncReplacePart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\generalPlanOpenArchiveImage.png">
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabArchiveChapter\generalPlanOpenArchiveImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\messageCreationArchiveImage.png">
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabArchiveChapter\messageCreationArchiveImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\openProgramControlInArchiveImage.png">
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabArchiveChapter\openProgramControlInArchiveImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\OPKtoPKconversionMenuImage.png">
@@ -988,7 +988,25 @@
 	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\fileManagerReadModeImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\FuncArchivePart.html">
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabArchivePart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabArchiveChapter\FuncOpenArchivePart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabArchiveChapter\FuncCreateArchivePart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabArchiveChapter\FuncExportArchivesPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabArchiveChapter\FuncImportArchivePart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabArchiveChapter\ArchiveActionsPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabArchiveChapter\ArchiveFileActionsPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\FuncCreatePart.html">
@@ -1015,10 +1033,10 @@
 	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\FuncSearchAndReplacePart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\listOfArchiveIfAvalibleImage.png">
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabArchiveChapter\listOfArchiveIfAvalibleImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\listOfArchiveIfNotAvalibleImage.png">
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabArchiveChapter\listOfArchiveIfNotAvalibleImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\notificationSuccessfulSavingImage.png">
@@ -1036,10 +1054,10 @@
 	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\selectingArchiveToSaveImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\startWorkingArchiveImage.png">
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabArchiveChapter\startWorkingArchiveImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\windowAvailableArchivesImage.png">
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabArchiveChapter\windowAvailableArchivesImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabSettingsChapter\SettingsConfiguration1Image.png">
