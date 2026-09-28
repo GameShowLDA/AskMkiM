@@ -271,9 +271,9 @@
           <MenuItem Header="{Binding Source={StaticResource LS_Menu_Archive}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="menuHeader_5" Name="ArchiveMenu">
             <Separator Style="{DynamicResource SeparatorMenuStyle}"/>
             <MenuItem x:Name="openArchiveMenuItem" Header="{Binding Source={StaticResource LS_Menu_OpenArchive}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="Archive" Command="{Binding File.OpenArchiveCommand}" utilities:HelpProvider.HelpKey="FuncArchive"/>
-            <MenuItem x:Name="createArchiveMenuItem" Header="{Binding Source={StaticResource LS_Menu_CreateArchive}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="CreateArchive" Visibility="Collapsed" Command="{Binding File.CreateArchiveCommand}" utilities:HelpProvider.HelpKey="FuncArchive"/>
-            <MenuItem x:Name="downloadArchivesMenuItem" Header="{Binding Source={StaticResource LS_Menu_DownloadArchives}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="DownloadArchives" Visibility="Collapsed" Command="{Binding File.DownloadArchivesCommand}" utilities:HelpProvider.HelpKey="FuncArchive"/>
-            <MenuItem x:Name="uploadArchiveMenuItem" Header="{Binding Source={StaticResource LS_Menu_UploadArchive}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="UploadArchive" Visibility="Collapsed" Command="{Binding File.UploadArchiveCommand}" utilities:HelpProvider.HelpKey="FuncArchive"/>
+            <MenuItem x:Name="createArchiveMenuItem" Header="{Binding Source={StaticResource LS_Menu_CreateArchive}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="CreateArchive" Visibility="Visible" Command="{Binding File.CreateArchiveCommand}" utilities:HelpProvider.HelpKey="FuncArchive"/>
+            <MenuItem x:Name="downloadArchivesMenuItem" Header="{Binding Source={StaticResource LS_Menu_DownloadArchives}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="DownloadArchives" Visibility="Visible" Command="{Binding File.DownloadArchivesCommand}" utilities:HelpProvider.HelpKey="FuncArchive"/>
+            <MenuItem x:Name="uploadArchiveMenuItem" Header="{Binding Source={StaticResource LS_Menu_UploadArchive}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="UploadArchive" Visibility="Visible" Command="{Binding File.UploadArchiveCommand}" utilities:HelpProvider.HelpKey="FuncArchive"/>
 
           </MenuItem>
           <MenuItem Header="{Binding Source={StaticResource LS_Menu_Test}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Tag="menuHeader_2" Name="TestMenu">
