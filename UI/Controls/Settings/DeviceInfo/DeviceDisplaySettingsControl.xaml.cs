@@ -41,6 +41,7 @@ namespace UI.Controls.Settings.DeviceInfo
         DeviceExecutionParameters.CheckedChanged += CheckedChanged;
         MeasurementResults.CheckedChanged += CheckedChanged;
         IntermediateMeasurementResults.CheckedChanged += CheckedChanged;
+        DelayMessages.CheckedChanged += CheckedChanged;
         _isInitialized = true;
       }
     }
@@ -73,6 +74,7 @@ namespace UI.Controls.Settings.DeviceInfo
         ShowDeviceExecutionParameters = DeviceExecutionParameters.IsChecked,
         ShowMeasurementResults = MeasurementResults.IsChecked,
         ShowIntermediateMeasurementResults = IntermediateMeasurementResults.IsChecked,
+        ShowDelayMessages = DelayMessages.IsChecked,
       };
 
       return model;
@@ -93,6 +95,7 @@ namespace UI.Controls.Settings.DeviceInfo
       DeviceExecutionParameters.IsChecked = _baseModel.ShowDeviceExecutionParameters;
       MeasurementResults.IsChecked = _baseModel.ShowMeasurementResults;
       IntermediateMeasurementResults.IsChecked = _baseModel.ShowIntermediateMeasurementResults;
+      DelayMessages.IsChecked = _baseModel.ShowDelayMessages;
     }
 
     /// <summary>
@@ -103,6 +106,7 @@ namespace UI.Controls.Settings.DeviceInfo
       a.ShowConnectionInfo == b.ShowConnectionInfo &&
       a.ShowDeviceExecutionParameters == b.ShowDeviceExecutionParameters &&
       a.ShowMeasurementResults == b.ShowMeasurementResults &&
-      a.ShowIntermediateMeasurementResults == b.ShowIntermediateMeasurementResults;
+      a.ShowIntermediateMeasurementResults == b.ShowIntermediateMeasurementResults &&
+      a.ShowDelayMessages == b.ShowDelayMessages;
   }
 }

@@ -1,17 +1,12 @@
-using Ask.Protocol.Messages.EntryPoints;
-
-using Ask.Core.Services.Config.AppSettings;
-using Ask.Core.Services.Errors.Device.ModuleRelayControl;
-using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
-using Ask.Device.Runtime.Base.Device;
-using Ask.Device.Runtime.Function.Helpers;
+using Ask.Core.Shared.Metadata.Static.Delays;
 using Ask.Device.Runtime.Function.ModuleRelayControl;
+using Ask.Protocol.Messages.EntryPoints;
 
 namespace Ask.Device.Application.FunctionAdapters.ModuleRelayControl
 {
@@ -38,20 +33,24 @@ namespace Ask.Device.Application.FunctionAdapters.ModuleRelayControl
     {
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
+        await ExecutionMessages.PublishDelayAsync(AppDelays.ModuleRelayControlDelays.PreCommandDelay, userMessageService);
         return await _busManager.ConnectBusAsync(bus, userMessageService);
       }, userMessageService, deviceTask: true);
 
+      await ExecutionMessages.PublishDelayAsync(AppDelays.ModuleRelayControlDelays.PostCommandDelay, userMessageService);
       return result;
     }
 
     /// <inheritdoc />
     public async Task<bool> DisconnectBusAsync(SwitchingBus bus, IUserInteractionService? userMessageService = null)
     {
-      var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () => 
+      var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
+        await ExecutionMessages.PublishDelayAsync(AppDelays.ModuleRelayControlDelays.PreCommandDelay, userMessageService);
         return await _busManager.DisconnectBusAsync(bus, userMessageService);
       }, userMessageService, deviceTask: true);
 
+      await ExecutionMessages.PublishDelayAsync(AppDelays.ModuleRelayControlDelays.PostCommandDelay, userMessageService);
       return result;
     }
 

@@ -9,6 +9,9 @@ namespace Ask.Core.Services.EventCore.Events
   /// </summary>
   public static class EditorEvents
   {
+    /// <summary>Изменены настройки отображения ошибок и предупреждений в редакторах.</summary>
+    public sealed class DiagnosticUnderliningChanged : IEvent { }
+
     /// <summary>
     /// Событие, обозначающее активацию или деактивацию окна текстового редактора.
     /// </summary>

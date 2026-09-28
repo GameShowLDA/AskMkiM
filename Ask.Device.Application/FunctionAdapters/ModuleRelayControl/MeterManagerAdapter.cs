@@ -3,7 +3,9 @@ using Ask.Core.Services.UI;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Static.Delays;
 using Ask.Device.Runtime.Function.ModuleRelayControl;
+using Ask.Protocol.Messages.EntryPoints;
 
 namespace Ask.Device.Application.FunctionAdapters.ModuleRelayControl
 {
@@ -36,6 +38,7 @@ namespace Ask.Device.Application.FunctionAdapters.ModuleRelayControl
 
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
+        await ExecutionMessages.PublishDelayAsync(AppDelays.ModuleRelayControlDelays.PreCommandDelay, userMessageService);
         return await _meterManager.ConnectMeterAsync(userMessageService);
       }, userMessageService, deviceTask: true);
 
@@ -48,7 +51,7 @@ namespace Ask.Device.Application.FunctionAdapters.ModuleRelayControl
       {
         IsConnectMeter = true;
       }
-
+      await ExecutionMessages.PublishDelayAsync(AppDelays.ModuleRelayControlDelays.PostCommandDelay, userMessageService);
       return result;
     }
 
@@ -62,6 +65,7 @@ namespace Ask.Device.Application.FunctionAdapters.ModuleRelayControl
 
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
+        await ExecutionMessages.PublishDelayAsync(AppDelays.ModuleRelayControlDelays.PreCommandDelay, userMessageService);
         return await _meterManager.DisconnectMeterAsync(userMessageService);
       }, userMessageService, deviceTask: true);
 
@@ -74,6 +78,7 @@ namespace Ask.Device.Application.FunctionAdapters.ModuleRelayControl
         IsConnectMeter = false;
       }
 
+      await ExecutionMessages.PublishDelayAsync(AppDelays.ModuleRelayControlDelays.PostCommandDelay, userMessageService);
       return result;
     }
 

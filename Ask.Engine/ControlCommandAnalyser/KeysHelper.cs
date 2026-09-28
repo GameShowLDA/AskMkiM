@@ -15,7 +15,7 @@ namespace Ask.Engine.ControlCommandAnalyser
   /// </remarks>
   public static class KeysHelper
   {
-    private static readonly Dictionary<Type, AlgorithmKey[]> Cache = new();
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<Type, AlgorithmKey[]> Cache = new();
 
     /// <summary>
     /// Возвращает список допустимых ключей алгоритма для указанной модели команды.

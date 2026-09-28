@@ -59,8 +59,10 @@
                     <ScrollViewer x:Name="ConsoleScroll"
                                   Padding="24,20"
                                   VerticalScrollBarVisibility="Auto"
-                                  HorizontalScrollBarVisibility="Disabled">
-                        <StackPanel x:Name="ConsolePanel"/>
+                                  HorizontalScrollBarVisibility="Disabled"
+                                  HorizontalContentAlignment="Stretch">
+                        <StackPanel x:Name="ConsolePanel"
+                                    HorizontalAlignment="Stretch"/>
                     </ScrollViewer>
                 </Grid>
 

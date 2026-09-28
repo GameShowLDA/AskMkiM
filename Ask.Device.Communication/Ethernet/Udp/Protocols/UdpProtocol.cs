@@ -1,3 +1,4 @@
+using Ask.Core.Services.Errors.Device;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Device.Communication.Common.Threading;
 using Ask.Diagnostics.Services;
@@ -11,7 +12,7 @@ namespace Ask.Device.Communication.Ethernet.Udp.Protocols
   /// <summary>
   /// Реализует универсальный транспортный протокол обмена с устройствами по UDP.
   /// </summary>
-  public class UdpProtocol : IDeviceProtocol
+  public class UdpProtocol : IDeviceProtocol, IDisposable
   {
     /// <summary>
     /// Базовый порт отправки команд.
@@ -27,6 +28,13 @@ namespace Ask.Device.Communication.Ethernet.Udp.Protocols
     /// Устройство, для которого выполняется обмен.
     /// </summary>
     private readonly IDevice _device;
+    private readonly object _socketGate = new ();
+    private readonly Func<int, UdpClient> _createClient;
+    private readonly Func<UdpClient, ReadOnlyMemory<byte>, IPEndPoint, CancellationToken, ValueTask<int>> _send;
+    private UdpClient? _client;
+    private IPEndPoint? _endpoint;
+    private int _inputPort;
+    private bool _disposed;
 
     /// <summary>
     /// Получает или задаёт семафор, запрещающий параллельную отправку команд в одно устройство.
@@ -38,8 +46,20 @@ namespace Ask.Device.Communication.Ethernet.Udp.Protocols
     /// </summary>
     /// <param name="device">Устройство, использующее протокол.</param>
     public UdpProtocol(IDevice device)
+      : this(device,
+          port => new UdpClient(new IPEndPoint(IPAddress.Any, port)),
+          static (client, buffer, endpoint, token) => client.SendAsync(buffer, endpoint, token))
+    {
+    }
+
+    internal UdpProtocol(
+      IDevice device,
+      Func<int, UdpClient> createClient,
+      Func<UdpClient, ReadOnlyMemory<byte>, IPEndPoint, CancellationToken, ValueTask<int>> send)
     {
       _device = device ?? throw new ArgumentNullException(nameof(device));
+      _createClient = createClient;
+      _send = send;
       OperationLock = new SemaphoreSlim(1, 1);
     }
 
@@ -76,10 +96,23 @@ namespace Ask.Device.Communication.Ethernet.Udp.Protocols
           int outputPort = port == 0 ? BaseOutputPort + lastOctet : port;
 
           var deviceEndpoint = new IPEndPoint(ipAddress, outputPort);
-          using var udpClient = new UdpClient(new IPEndPoint(IPAddress.Any, inputPort));
+          var udpClient = GetClient(deviceEndpoint, inputPort);
           byte[] buffer = Encoding.UTF8.GetBytes(command);
 
-          await udpClient.SendAsync(buffer, buffer.Length, deviceEndpoint).ConfigureAwait(false);
+          await DrainPendingResponsesAsync(udpClient, cancellationToken).ConfigureAwait(false);
+          try
+          {
+            await _send(udpClient, buffer, deviceEndpoint, cancellationToken).ConfigureAwait(false);
+          }
+          catch (SocketException ex) when (ex.SocketErrorCode == SocketError.NoBufferSpaceAvailable)
+          {
+            // Повторяем только локально отклонённую отправку, а не запрос после тайм-аута ответа.
+            CloseClient();
+            LogWarning($"[{_device.Name}] UDP: недостаточно ресурсов отправки (10055). Повтор через 50 мс.", isDeviceLog: true);
+            await Task.Delay(50, cancellationToken).ConfigureAwait(false);
+            udpClient = GetClient(deviceEndpoint, inputPort);
+            await _send(udpClient, buffer, deviceEndpoint, cancellationToken).ConfigureAwait(false);
+          }
           DiagnosticCommandHistory.RecordCommand(_device.Name, command);
           LogInformation($"[{_device.Name}] Отправка команды: \"{command}\" на {deviceEndpoint}", isDeviceLog: true);
 
@@ -90,13 +123,20 @@ namespace Ask.Device.Communication.Ethernet.Udp.Protocols
 
           if (timeout <= 0)
           {
+            CloseClient();
             return string.Empty;
           }
 
           using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
           timeoutCts.CancelAfter(timeout);
 
-          UdpReceiveResult result = await udpClient.ReceiveAsync(timeoutCts.Token).ConfigureAwait(false);
+          UdpReceiveResult result;
+          do
+          {
+            result = await udpClient.ReceiveAsync(timeoutCts.Token).ConfigureAwait(false);
+            // Прошивка может отвечать с другого порта; проверяем IP, сохраняя совместимость.
+          }
+          while (!result.RemoteEndPoint.Address.Equals(ipAddress));
           string response = Encoding.UTF8.GetString(result.Buffer);
           DiagnosticCommandHistory.RecordResponse(_device.Name, response);
           LogInformation($"[{_device.Name}] Ответ от устройства: {response}", isDeviceLog: true);
@@ -104,13 +144,68 @@ namespace Ask.Device.Communication.Ethernet.Udp.Protocols
         }
         catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
         {
+          CloseClient();
           return LogWarning($"[{_device.Name}] Устройство не ответило в течение {timeout / 1000.0} секунд(ы).", isDeviceLog: true);
+        }
+        catch (OperationCanceledException)
+        {
+          CloseClient();
+          throw;
         }
         catch (Exception ex)
         {
+          CloseClient();
           LogException($"[{_device.Name}] Ошибка UDP QueryAsync", ex, isDeviceLog: true);
-          return $"[{_device.Name}] Ошибка UDP QueryAsync: {ex.Message}";
+          throw new DeviceTransportException($"[{_device.Name}] Ошибка UDP-транспорта: {ex.Message}", ex);
         }
+      }
+    }
+
+    private UdpClient GetClient(IPEndPoint endpoint, int inputPort)
+    {
+      lock (_socketGate)
+      {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        if (_client != null && endpoint.Equals(_endpoint) && inputPort == _inputPort)
+          return _client;
+
+        CloseClient();
+        _client = _createClient(inputPort);
+        _endpoint = endpoint;
+        _inputPort = inputPort;
+        return _client;
+      }
+    }
+
+    private async Task DrainPendingResponsesAsync(UdpClient client, CancellationToken token)
+    {
+      // Poll обнаруживает и пустые датаграммы. Ожидания на успешном пути нет.
+      while (client.Client.Poll(0, SelectMode.SelectRead))
+      {
+        token.ThrowIfCancellationRequested();
+        await client.ReceiveAsync(token).ConfigureAwait(false);
+      }
+    }
+
+    private void CloseClient()
+    {
+      lock (_socketGate)
+      {
+        _client?.Dispose();
+        _client = null;
+        _endpoint = null;
+      }
+    }
+
+    /// <summary>
+    /// Закрывает UDP-сокет, в том числе при незавершённом обмене.
+    /// </summary>
+    public void Dispose()
+    {
+      lock (_socketGate)
+      {
+        _disposed = true;
+        CloseClient();
       }
     }
 

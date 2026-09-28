@@ -43,6 +43,7 @@ namespace UI.Controls.Settings
       LocalizationService.RefreshCurrentLanguage();
       _canEditDeviceConfiguration = CanEditDeviceConfiguration();
       UpdateConfigurationEditingAccess(_canEditDeviceConfiguration);
+      UpdateDelaySettingsAccess();
 
       if (_isAdminRightsSubscribed)
       {
@@ -79,10 +80,15 @@ namespace UI.Controls.Settings
       if (Dispatcher.CheckAccess())
       {
         UpdateConfigurationEditingAccess(_canEditDeviceConfiguration);
+        UpdateDelaySettingsAccess();
       }
       else
       {
-        Dispatcher.Invoke(() => UpdateConfigurationEditingAccess(_canEditDeviceConfiguration));
+        Dispatcher.Invoke(() =>
+        {
+          UpdateConfigurationEditingAccess(_canEditDeviceConfiguration);
+          UpdateDelaySettingsAccess();
+        });
       }
     }
 
@@ -270,5 +276,15 @@ namespace UI.Controls.Settings
     {
       return RoleAuthorizationConfig.CurrentRole is RoleType.Administrator or RoleType.Root;
     }
+
+    private void UpdateDelaySettingsAccess()
+    {
+      DelaySettingsManager.Visibility = CanEditDelaySettings()
+        ? Visibility.Visible
+        : Visibility.Collapsed;
+    }
+
+    private static bool CanEditDelaySettings()
+      => RoleAuthorizationConfig.CurrentRole is RoleType.Administrator or RoleType.Root;
   }
 }

@@ -25,6 +25,7 @@ namespace UI.Controls.Settings.UserInterface
     private bool _isInitialized;
     private record LangOption(string Key, string Title);
     private record ThemeOption(string Key, string Title);
+    private record DiagnosticUnderliningOption(DiagnosticUnderliningMode Mode, string Title);
 
     /// <summary>
     /// Глобальный флаг наличия несохранённых изменений в разделе.
@@ -106,6 +107,7 @@ namespace UI.Controls.Settings.UserInterface
         LanguageSelect.ValueChanged += ValueChanged;
         ThemeSelect.ValueChanged += ValueChanged;
         SyntaxHighlighting.CheckedChanged += SettingsCard_CheckedChanged;
+        DiagnosticUnderliningSelect.ValueChanged += ValueChanged;
         CommandBodyBackgroundHighlighting.CheckedChanged += SettingsCard_CheckedChanged;
         ChainPointBodyBackgroundHighlighting.CheckedChanged += SettingsCard_CheckedChanged;
         TopMenuIcons.CheckedChanged += SettingsCard_CheckedChanged;
@@ -187,11 +189,34 @@ namespace UI.Controls.Settings.UserInterface
       ThemeSelect.SelectedValue = currentTheme;
 
       SyntaxHighlighting.IsChecked = _baseParameterModel.UseSyntaxHighlighting;
+      LoadDiagnosticUnderliningOptions();
       CommandAutoCollapsing.IsChecked = _baseParameterModel.UseCommandAutoCollapse;
       CommandBodyBackgroundHighlighting.IsChecked = _baseParameterModel.UseCommandBodyBackgroundHighlighting;
       ChainPointBodyBackgroundHighlighting.IsChecked = _baseParameterModel.UseChainPointBodyBackgroundHighlighting;
       TopMenuIcons.IsChecked = _baseParameterModel.UseTopMenuIcons;
       FillPrintFontControls();
+    }
+
+    private void LoadDiagnosticUnderliningOptions()
+    {
+      DiagnosticUnderliningSelect.ItemsSource = new[]
+      {
+        new DiagnosticUnderliningOption(
+          DiagnosticUnderliningMode.None,
+          LocalizationService.Get("settings.userinterface.diagnosticUnderlining.none")),
+        new DiagnosticUnderliningOption(
+          DiagnosticUnderliningMode.All,
+          LocalizationService.Get("settings.userinterface.diagnosticUnderlining.all")),
+        new DiagnosticUnderliningOption(
+          DiagnosticUnderliningMode.ErrorsOnly,
+          LocalizationService.Get("settings.userinterface.diagnosticUnderlining.errorsOnly")),
+      };
+
+      var currentMode = DiagnosticUnderliningModeExtensions.FromVisibility(
+        _baseParameterModel.UseSyntaxErrorUnderlining,
+        _baseParameterModel.UseStyleErrorUnderlining);
+      DiagnosticUnderliningSelect.DefaultValue = currentMode;
+      DiagnosticUnderliningSelect.SelectedValue = currentMode;
     }
 
     private void FillPrintFontControls()
@@ -244,12 +269,19 @@ namespace UI.Controls.Settings.UserInterface
 
       var themeValue = ThemeSelect.SelectedValue as string ?? "Dark";
       var parsedTheme = Enum.TryParse<ThemeMode>(themeValue, out var theme) ? theme : ThemeMode.Dark;
+      var diagnosticMode = DiagnosticUnderliningSelect.SelectedValue is DiagnosticUnderliningMode selectedMode
+        ? selectedMode
+        : DiagnosticUnderliningModeExtensions.FromVisibility(
+          _baseParameterModel.UseSyntaxErrorUnderlining,
+          _baseParameterModel.UseStyleErrorUnderlining);
 
       return new UserInterfaceDto
       {
         Language = languageCode,
         Theme = parsedTheme,
         UseSyntaxHighlighting = SyntaxHighlighting.IsChecked,
+        UseSyntaxErrorUnderlining = diagnosticMode.ShowsErrors(),
+        UseStyleErrorUnderlining = diagnosticMode.ShowsWarnings(),
         UseCommandBodyBackgroundHighlighting = CommandBodyBackgroundHighlighting.IsChecked,
         UseChainPointBodyBackgroundHighlighting = ChainPointBodyBackgroundHighlighting.IsChecked,
         UseTopMenuIcons = TopMenuIcons.IsChecked,
@@ -274,6 +306,10 @@ namespace UI.Controls.Settings.UserInterface
     private static bool UserInterfaceEquals(UserInterfaceDto a, UserInterfaceDto b) =>
       a.Language == b.Language &&
       a.UseSyntaxHighlighting == b.UseSyntaxHighlighting &&
+      DiagnosticUnderliningModeExtensions.FromVisibility(
+        a.UseSyntaxErrorUnderlining, a.UseStyleErrorUnderlining) ==
+        DiagnosticUnderliningModeExtensions.FromVisibility(
+          b.UseSyntaxErrorUnderlining, b.UseStyleErrorUnderlining) &&
       a.UseCommandBodyBackgroundHighlighting == b.UseCommandBodyBackgroundHighlighting &&
       a.UseChainPointBodyBackgroundHighlighting == b.UseChainPointBodyBackgroundHighlighting &&
       a.UseTopMenuIcons == b.UseTopMenuIcons &&

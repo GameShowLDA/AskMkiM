@@ -475,6 +475,7 @@
                                           Background="Transparent"
                                           BorderThickness="0"
                                           IsMarkerHitTestOnly="True"
+                                          AreToolTipsEnabled="False"
                                           IsViewportVisible="False"/>
             </Border>
             <ScrollBar x:Name="ProtocolVerticalScrollBar"

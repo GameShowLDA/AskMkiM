@@ -33,6 +33,7 @@ Size/Foreground и анимации общей кнопки; лицензия с
 | Версия, история коммитов и идентификация сборки | `Directory.Build.targets`, `Ask.Core/Services/App/ApplicationBuildInfo.cs` | `Ask.UI/Features/BuildDiagnostics/Views/BuildHistoryWindow.xaml`, `UI/Controls/EmptyWorkspace/EmptyWorkspaceView.xaml.cs`, `MainWindow/Init/PreStartupInitializer.cs`, `Ask.Diagnostics/Collectors/SystemInfoCollector.cs`, `Ask.Core/Services/Protocols/ExecutionProtocolHistoryService.cs` |
 | DI и composition root | `MainWindow/Init/PreStartupInitializer.cs` | `Ask.Diagnostics/Extensions/ServiceCollectionExtensions.cs`, `Ask.Core/Services/App/ServiceLocator.cs`, `MainWindow/Engine/AppServices.cs` |
 | Трансляция программы контроля | `MainWindow/Services/TranslationServices.cs` | `Ask.Engine/ControlCommandAnalyser/CommandTranslationManager.cs`, `Ask.Engine/ControlCommandAnalyser/Parser/`, `Ask.Engine/ControlCommandAnalyser/Formatter/`, `Ask.Engine/ControlCommandAnalyser/Validation/` |
+| Диагностика текста при вводе | `Ask.UI/Controls/TextEditorControl/Diagnostics/LiveDiagnosticsController.cs` | `Ask.Engine/ControlCommandAnalyser/CommandTranslationManager.Diagnostics.cs`, `SourceDiagnostic.cs`, `Ask.UI/Controls/TextEditorControl/Diagnostics/DiagnosticUnderlineRenderer.cs`, оба `TextEditorUI.xaml.cs` |
 | Исполнение программы контроля | `UI/Controls/Runner/RunControl.xaml.cs` | `Ask.UI/Features/ProtocolNew/Execution/ActionExecutor.cs`, `Ask.Engine/ControlCommandExecutor/Execution/CommandExecutionManager.cs` |
 | Алгоритм конкретной команды | `Ask.Engine/ControlCommandExecutor/Executors/` | `Ask.Engine/ControlCommandExecutor/BaseStrategies/`, `Ask.Engine/ControlCommandExecutor/Execution/EquipmentService.cs` |
 | Пауза, шаг, остановка, переход к команде | `Ask.UI/Features/ProtocolNew/Execution/ActionExecutor.cs` | `Ask.Core/Services/App/StepControlManager.cs`, `Ask.Engine/ControlCommandExecutor/Execution/CommandExecutionManager.cs`, `Ask.Engine/ControlCommandExecutor/Execution/BreakpointHandler.cs`, `Ask.Engine/ControlCommandExecutor/Execution/CommandJumpService.cs` |
@@ -50,6 +51,7 @@ Size/Foreground и анимации общей кнопки; лицензия с
 | Конфигурация устройств | `UI/Controls/Settings/DeviceConfig/` | `Ask.DataBase.Engine/Static/Devices/`, `Ask.DataBase.Engine/Services/DeviceEngine.cs`, `Ask.DataBase.Provider/Services/Devices/` |
 | База данных | `Ask.DataBase.Provider/Context/AppDbContext*.cs` | `Ask.DataBase.Provider/Initialization/DatabaseInitializationService.cs`, `Ask.DataBase.Engine/Services/DeviceEngine.cs` |
 | Настройки выполнения/протокола/UI | `Ask.Core/Services/Config/` | `Ask.DataBase.Engine/Static/Settings/`, `Ask.DataBase.Provider/Services/Settings/`, `MainWindow/Init/DatabaseInitializer.cs` |
+| Фиксированные задержки оборудования | `UI/Controls/Settings/Delays/DelaySettingsControl.xaml`, `Ask.Core/Services/Config/AppSettings/DelaySettingsFileService.cs` | `Ask.Core/Shared/DTO/Settings/DelaySettings.cs`, `Ask.Core/Shared/Metadata/Static/Delays/`, `Ask.Protocol.Messages/EntryPoints/ExecutionMessages.cs` |
 | Протокол выполнения | `Ask.UI/Controls/ProtocolNew/ProtocolUI*.cs` | `Ask.UI/Features/ProtocolNew/Protocol/`, `Ask.Core/Services/Protocols/ExecutionProtocolHistoryService.cs` |
 | Формирование унифицированных сообщений протокола | `Ask.Protocol.Messages/EntryPoints/` | `Ask.Protocol.Messages/Builders/`, `Ask.Protocol.Messages/Show/`; сообщения executor-команд, блоков проверки, оборудования, измерений, допустимых диапазонов и ошибок UI-валидации формируются централизованно |
 | Форматы `.asktrace/.askresult/.askreport` | `Ask.Core/Services/Protocols/ExecutionProtocolHistoryService.cs` | `Ask.Core/Shared/Metadata/Static/ProtocolFileExtensions.cs`, `Ask.UI/Features/ProtocolNew/Protocol/ProtocolStorageService.cs` |
@@ -62,7 +64,7 @@ Size/Foreground и анимации общей кнопки; лицензия с
 | Архивы APK/APKW | `Ask.UI/Features/Archive/` | `Ask.Core/Services/FileFormats/Apk/`, `MainWindow/Services/Conversion/` |
 | Рабочее пространство и вкладки | `UI/Components/MultiEditorControl.xaml.cs` | `UI/Components/MultiEditorMethods/FileManager.cs`, `UI/Services/`, `MainWindow/Services/MultiWindowService.cs` |
 | Роли и права | `MainWindow/Init/RoleApplicationConfigurator.cs` | `Ask.Core/Services/Config/AppSettings/RoleAuthorizationConfig.cs`, `Ask.UI/Features/RoleManagement/` |
-| Административные и сервисные утилиты | `MainWindow/MainWindow.xaml`, `MainWindow/ViewModels/AdminViewModel.cs`, `MainWindow/Services/AdminServices.cs` | `UI/Controls/AdminPanel/ServiceUtilitiesControl.xaml`, `UI/Controls/AdminPanel/SetCommand.xaml`, `Ask.UI/Features/ServiceTools/{Gpt,Chassis,SwitchingDevice}/`, `UI/Controls/AdminPanel/DataBaseView.xaml`, `UI/Controls/AdminPanel/CheckResistanceControl.xaml` |
+| Административные и сервисные утилиты | `MainWindow/MainWindow.xaml`, `MainWindow/ViewModels/AdminViewModel.cs`, `MainWindow/Services/AdminServices.cs` | `UI/Controls/AdminPanel/ServiceUtilitiesControl.xaml`, `UI/Controls/AdminPanel/SetCommand.xaml`, `Ask.UI/Features/ServiceTools/{Gpt,Chassis,SwitchingDevice}/`, `UI/Controls/AdminPanel/DataBaseView.xaml` |
 | Debug-доступ текущего пользователя | `Ask.Core/Services/Config/AppSettings/DebugAccessConfig.cs` | `RoleAuthorizationConfig.cs`, `SystemStateEvents.DebugRightsChanged`, оба `ErrorListControl.xaml.cs`, `ProtocolEntryOutputService.cs` |
 | События между подсистемами | `Ask.Core/Services/EventCore/Services/EventAggregator.cs` | `Ask.Core/Services/EventCore/Adapters/`, `Ask.Core/Services/EventCore/Events/`, `MainWindow/Events/` |
 | Встроенная справка | `Ask.Support/HelpServer.cs` | `Ask.Support/HelpProvider.cs`, `Ask.Support/HelpViewerWindow.cs`, `Ask.Support/AppHelp/` |
@@ -501,6 +503,41 @@ TranslationViewModel command
 → ErrorList + left/right AvalonEdit editors
 ```
 
+Диагностика исходника при вводе использует те же `ICommandParser`,
+`CkCommandValidator` и `CommandPostAnalyzer` через `CommandTranslationManager.AnalyzeSource`:
+
+```text
+TextEditorUI (UI / Ask.UI), новый документ или PK/PKW
+→ LiveDiagnosticsController: Loaded / TextChanged / DocumentChanged
+→ 400 мс debounce → immutable CreateSnapshot на UI-потоке → Task.Run + общий SemaphoreSlim
+→ материализация snapshot.Text на worker
+→ AnalyzeSource → CommandsModel.BeginAnalysisScope (AsyncLocal)
+→ ParseAll без progress-событий, проверка неявной ВШ и связей команд
+→ SourceDiagnostic[] с UTF-16 offset/length в исходном снимке
+→ DiagnosticSnapshot.Create на worker: индекс сообщений + объединённые диапазоны ошибок/предупреждений
+→ актуальность документа/запроса → DiagnosticUnderlineRenderer + DiagnosticHoverPopup
+```
+
+Фоновый анализ не форматирует текст и не заменяет модели обычной трансляции.
+`CommandsModel` перенаправляет обращения старых парсеров в локальную коллекцию
+только внутри analysis scope; вне scope сохраняется общая коллекция трансляции.
+`RmCommandParser` в этом scope читает конфигурацию, но не публикует
+`LegacyCompatibilityMapper`; кэш `KeysHelper` допускает конкурентные обращения.
+Неявная ВШ для проверки содержит тип шин без материализации устройств;
+её предупреждение привязывается к исходной РМ. Явные команды проверяются штатными
+парсерами с чтением конфигурации оборудования. При ошибке отдельного парсера
+анализ помечает проверку команды как незавершённую и продолжает последующие команды.
+Обычная трансляция сохраняет остановку при критической структурной ошибке.
+
+`ParseSourceCommand` восстанавливает физические номера строк после удаления
+пустых строк и комментариев. Текст до первого корректного заголовка теперь
+возвращается как ошибка, односимвольная неизвестная мнемоника не теряется,
+последняя команда также проверяется на дублирование номера/мнемоники.
+`MapDiagnostics` уточняет диапазон через `IssueSelectionHintResolver` в пределах
+команды, маскирует комментарии с сохранением колонок, иначе отмечает строку команды.
+Незакрытый комментарий получает предупреждение у открывающего разделителя:
+оставшийся текст транслятор считает комментарием.
+
 #### Error flow
 
 Parser/validators add `ErrorItem`/`WarningItem` from
@@ -585,6 +622,25 @@ CommandExecutionManager.ExecuteAllCoreAsync loop
 `CommandExecutorRegistry` reflection-сканирует `Ask.Engine` и создаёт все concrete
 `ICommandExecutor`. Текущие executors: `ОК`, `РМ`, `СП`, `СК`, `ВШ`, `ПТ`, `ОТ`,
 `ЦУ`, `УП`, `КЦ`, `КС`, `ИЕ`, `ЭТ`, `ПР`, `СИ`, `ПИ`, `НЕ`, `ОС`.
+
+Связка операторского вопроса `ЦУ` и условного перехода `УП`:
+
+```text
+CuCommandExecutor.ExecuteAsync
+→ CuCommandModel.CuType == Question
+→ CommandExecutionManager.GetNextCommand
+→ MessageBoxCustom.Show(YesNoCancel)
+  → Yes: LastRejectFlag = false, выполнение продолжается
+  → No + следующая модель UpCommandModel: LastRejectFlag = true без останова
+    → UpCommandExecutor.ExecuteAsync
+    → context.JumpToCommandNumber(TargetLabel)
+    → CommandExecutionManager.ResolveJumpIndex
+    → индекс основного execution loop заменяется индексом целевой команды
+  → No без следующей UpCommandModel или Cancel/Esc:
+    → IUserInteractionService.WaitUserActionAsync(deviceTask: true)
+    → Continue/Retry/None: временный останов завершается без условного перехода
+    → другое действие: OperationCanceledException и штатное аварийное завершение
+```
 
 #### Addressed reset of test equipment
 
@@ -724,10 +780,13 @@ executor throws
   сохраняя брак каждой текущей точки независимо (ошибка текущей точки не блокирует следующую
   точку той же цепи); порог `100 Ом` применяется только к предварительному контролю физического
   подключения отдельных точек, а перегрузка при измерении пары определяется через
-  `MeasurementValueFormatter.IsOverloadValue` по фактическому признаку `Overload`;
-  `EhtHighResistanceLocalizationService` запускается только после принятого результата выше
-  верхней границы, повторно измеряет такие точки и рекурсивно разбивает цепь на связные фрагменты
-  аналогично локализации ПР; если повтор не подтверждает точное разбиение, исходный верхний брак
+  `MeasurementValueFormatter.IsOverloadValue` по фактическому признаку `Overload`; такая
+  перегрузка не регистрируется как отдельная ошибка каждой пары, а откладывается до локализации,
+  которая формирует одну агрегированную ошибку по найденным фрагментам цепи;
+  `EhtHighResistanceLocalizationService` запускается после принятого результата выше верхней
+  границы либо после `Overload` предварительного измерения пары, повторно измеряет такие точки и
+  рекурсивно разбивает цепь на связные фрагменты аналогично локализации ПР; если повтор не
+  подтверждает точное разбиение, исходный верхний брак
   сохраняется для всей проверяемой цепи; результаты ниже нижней границы остаются обычными ошибками
   пары и не участвуют в разбиении; возвращает
   `AlgorithmExecutionResult`, а создание и публикацию измерений, ошибок подключения точек и
@@ -1059,17 +1118,37 @@ equipment/self-test builders оставляют его выключенным. �
 `ProtocolModel` при нормализации удаляет обе пары префиксов, чтобы не дублировать их в заключении.
 
 Фиксированные задержки оборудования объявляются через `AppDelays` и `DelayModel` в
-`Ask.Core/Shared/Metadata/Static/Delays/`. Их вывод проходит единым путём:
+`Ask.Core/Shared/Metadata/Static/Delays/`. При первой инициализации `AppDelays` сервис
+`DelaySettingsFileService` читает `Settings/delaySettings.yaml` через `YamlService<DelaySettings>`.
+Отсутствующий или пустой файл записывается с дефолтами: задержка ППУ после испытания — 100 мс,
+МКР перед командой — 20 мс, после команды — 20 мс. `ModuleRelayControlDelays` пока не подключён
+к runtime-пути МКР. Административный `DelaySettingsControl` сохраняет изменения через
+`AppDelays.SaveAndApply`: сначала перезаписывается YAML, затем обновляются существующие
+`DelayModel` текущего процесса без перезапуска приложения. Вывод применяемых задержек проходит
+единым путём:
 
 ```text
 ExecutionMessages.PublishDelayAsync(DelayModel, IMessageOutputService)
-→ ExecutionMessageBuilder.BuildDelayMessage
-→ ExecutionMessagePublisher.PublishAsync
-→ MessagePublisher.PublishAsync
-→ IMessageOutputService.ShowMessageAsync
+→ DelayModel.Delay <= 0: выход без сообщения и ожидания
+→ DeviceDisplayConfig.GetDelayMessagesVisibility()
+  → true: ExecutionMessageBuilder.BuildDelayMessage
+    → ExecutionMessagePublisher.PublishAsync
+    → MessagePublisher.PublishAsync
+    → IMessageOutputService.ShowMessageAsync
+  → false: публикация пропускается
+→ Task.Delay(DelayModel.Delay) выполняется независимо от видимости сообщения
 ```
 
 Сообщение формируется одной строкой в миллисекундах: `<DelayModel.Name> <DelayModel.Delay>мс`.
+Флаг `DeviceDisplaySettingsDto.ShowDelayMessages` хранится в SQLite, изменяется карточкой
+`Сообщения о задержках` в `DeviceDisplaySettingsControl` и применяется к static-модели
+`DeviceDisplayConfig` сразу при сохранении настроек. Миграция `AddShowDelayMessages` задаёт
+`true` для существующих баз, сохраняя прежнее поведение. Значение также попадает в
+`ExecutionProtocolEnvironmentSnapshot` как `Оборудование.Сообщения о задержках`.
+Startup-инициализатор дополнительно вызывает
+`DatabaseInitializationService.EnsureDeviceDisplayDelayMessagesColumnAsync` до `EnsureDefaultDataAsync`:
+это восстанавливает колонку с `DEFAULT 1`, если миграция отсутствует в частичной сборке
+или уже отмечена применённой при неполной схеме.
 
 Форматы:
 
@@ -1302,7 +1381,17 @@ executor/strategy
 → ModuleRelayControlQueryExecutor.QueryAsync
 → IDeviceProtocol.QueryAsync
 → UdpProtocol.QueryAsync
-→ UdpClient.SendAsync/ReceiveAsync
+→ OperationLock.LockAsync
+→ ResolveIpAddress / GetLastOctet
+→ GetClient (reuse by endpoint/input port or bind a new UdpClient)
+→ DrainPendingResponsesAsync
+→ UdpClient.SendAsync
+  ├─ SocketError.NoBufferSpaceAvailable: CloseClient → 50 ms → one SendAsync retry
+  └─ other failure: CloseClient → DeviceTransportException
+→ UdpClient.ReceiveAsync with linked timeout
+  ├─ configured device IP: return payload
+  ├─ foreign IP: continue within the original timeout
+  └─ timeout/cancellation: CloseClient; timeout returns warning, cancellation propagates
 → ModuleRelayControlQueryExecutor.ThrowIfFirmwareRejectedCommand
   ├─ Status absent/success → ModuleRelayControlResponseProcessor validation
   → PointManagerAdapter возвращает результат или создаёт ошибку через RelayExceptionFactory
@@ -1338,6 +1427,18 @@ Idle-эмулятор должен возвращать подтверждени
 прежние строки `SelfTestMessages` (`Точка N`, детализацию подключения и отключения от шин),
 добавляет `ModuleRelayControlError.PointError` в итоговые ошибки и обрабатывает повреждённый
 ответ строкой `Ошибка данных!`; прежняя runtime-модель `SelfPointModel` удалена.
+`ISelfTestCheckerModuleRelayControl.CheckPointAsync` предоставляет отдельный одиночный путь
+самоконтроля точки для сервисного UI:
+`RelaySwitchModuleControl.CheckPointButton_Click`
+→ `SelfTestManager.CheckPointAsync`
+→ `IConnectable.InitializeAsync`
+→ `IPointManager.DisconnectingAllPoint`
+→ `IMeterManager.ConnectMeterAsync`
+→ `IPointManager.CheckPoint` (`6.<point>`)
+→ `ModuleRelayControlResponseProcessor.CheckPointSelfTestAsync`
+→ повторный `IPointManager.DisconnectingAllPoint` в `finally`.
+Метод проверяет диапазон `1..PointCount`, поддерживает отмену между аппаратными операциями
+и использует тот же Real/Idle-маршрут, что и полный самоконтроль точек.
 Idle `ModuleRelayControlEmulatorProtocol` для команды `6.<point>` учитывает настройку
 ошибки измерения: любой `ErroneousMeasurementType`, кроме `None`, детерминированно делает ложным один из этапов
 `ConnectPoint`/`DisconnectBusA`/`DisconnectBusB` (по номеру точки) и возвращает
@@ -1715,7 +1816,18 @@ same path with gates enabled and performs real transport I/O.
 ### Transport details
 
 - UDP: ports `8888 + last IP octet` output and `8800 + last octet` input unless
-  explicit port; per-device semaphore; timeout returns warning text.
+  explicit port. `UdpProtocol` serializes requests with a per-device semaphore and
+  reuses one bound `UdpClient` while the endpoint is unchanged. Before each send it
+  drains already queued datagrams without waiting, and accepts a response only from
+  the configured device IP (the firmware may use a different source port). A receive
+  timeout returns warning text, closes the socket and does not resend the command.
+  Local send failure `SocketError.NoBufferSpaceAvailable` (`10055`) closes the socket
+  and performs exactly one retry after 50 ms; other transport failures and a failed
+  retry become `DeviceTransportException` with the original exception preserved.
+  There is no added delay on the normal successful path.
+- UDP lifetime: `DeviceWithUdpIp.Dispose` releases the protocol when `DeviceCache`
+  removes or replaces a runtime device. Changing `DeviceWithIP.ConnectionDetails`
+  also disposes the old UDP protocol; applying the same address preserves it.
 - TCP: persistent `TcpClient`/`NetworkStream`, reconnect on endpoint change or
   I/O failure; per-device semaphore.
 - COM: `SerialPortCustom` serialized in `ConnectionDetails`; `ComProtocol` opens
@@ -1789,6 +1901,43 @@ Their services generally route operations into `MultiWindowService`.
 `FileManager` and `EditorWorkspaceModel` own containers, dock items, open paths and
 user controls. `TextEditorUI` wraps AvalonEdit; `TranslatorItem` holds source and
 formatted editors; `RunControl` hosts ProtocolUI, translated source and error list.
+Оба `TextEditorUI` подключают общий `LiveDiagnosticsController` из `Ask.UI`.
+В редактируемых исходниках он рисует красные волнистые подчёркивания ошибок
+и жёлтые (`Gold`) предупреждений с описаниями при наведении. Отдельный renderer
+не использует коллекцию маркеров поиска/исполнения. При изменении текста или
+документа и при `Unloaded` старые диапазоны сразу очищаются и запрос отменяется;
+устаревший результат не применяется. При повторной загрузке проверяется новый снимок.
+Read-only документы, OPK/OPKW и протоколы не анализируются. Ошибка фоновой проверки
+показывается предупреждением о незавершённом анализе; следующий edit запускает проверку заново.
+`Diagnostics/DiagnosticSnapshot.cs` строит индексы диапазонов в фоне с проверками отмены:
+совпадающие диапазоны хранят сообщения вместе, перекрывающиеся/смежные диапазоны
+объединяются отдельно для отрисовки ошибок и предупреждений. Сообщения не обрезаются.
+Снимок также хранит отсортированные позиции для навигации: `F8` выбирает и прокручивает
+к следующей видимой диагностике, `Shift+F8` — к предыдущей; на границах списка переход
+циклический. Режим «Всё» включает в обход ошибки и предупреждения, «Только ошибки» — ошибки.
+UI публикует готовый снимок заменой ссылки; переключение видимости ошибок/предупреждений
+не фильтрует и не перестраивает весь индекс. При отключении обоих видов подчёркивания
+анализ отменяется и новые проверки не запускаются до включения настройки.
+Renderer выбирает индексированные диапазоны видимой области и кэширует две frozen
+`StreamGeometry` (по одной на severity); при наложении красная линия рисуется последней.
+`VisualLinesChanged`, прокрутка, resize, смена снимка/видимости сбрасывают геометрию.
+При `MouseHover` контроллер проверяет реальные прямоугольники подчёркнутых
+фрагментов через `DiagnosticUnderlineRenderer.GetDiagnosticsAt(Point, out Rect)`:
+это учитывает последний символ, переносы строк и прокрутку без округления к позиции каретки.
+Поиск ограничен visual line под указателем, прямоугольники фрагментов кэшируются до
+изменения layout; над теми же группами возвращается прежний список сообщений.
+`Diagnostics/DiagnosticHoverPopup.cs` показывает рядом с фрагментом отдельный WPF `Popup`
+с заголовком «Ошибка»/«Предупреждение», цветной полосой и полным описанием;
+пересекающиеся сообщения отображаются вместе, ошибки первыми. Карточка использует
+`ToolTipBackgroundBrush/ToolTipForegroundBrush/ToolTipBorderBrush` текущей темы,
+перенос текста и виртуализированный `ListBox` с recycling: WPF создаёт элементы только
+для видимой части списка, все сообщения доступны при прокрутке. Шаблон сообщения —
+`Diagnostics/DiagnosticHoverResources.xaml`; карточка не зависит от глобального шаблона `ToolTip`.
+`MouseMove` сохраняет карточку над тем же фрагментом; задержка закрытия 180 мс
+позволяет перевести курсор на саму карточку. Она закрывается при уходе с обеих областей,
+редактировании, смене документа, прокрутке/изменении размера редактора, клике в редакторе/нажатии клавиши,
+деактивации/перемещении окна и `Unloaded`. Подписки на окно снимаются при `Unloaded`.
+`VisualLinesChanged` не закрывает карточку: создание Popup само может вызывать перерасчёт layout.
 `FileCompareService` сравнивает текст исходного редактора с `SavedTextSnapshot`.
 `DockItemService` подписывает редактируемые вкладки на `TextChanged` и добавляет `*`
 только в визуальный `DockItem.TabText`; чистый `DockItem.Title` остаётся ключом пути.
@@ -1826,10 +1975,11 @@ formatted editors; `RunControl` hosts ProtocolUI, translated source and error li
 только ошибки для счётчика, стрелок и F8. Клик по команде раскрывает её и выделяет маркер.
 При объединении с ошибкой кластер становится красным, но сохраняет переходы ко всем его строкам.
 Клик по свободной области вызывает `ScrollToVerticalOffset` с центрированием выбранной позиции.
-При наведении `ErrorOverviewBar` вызывает `ProtocolListBoxUI.GetOverviewPreview` и показывает
-слева компактный фрагмент из ближайших команд/ошибок в отдельном WPF `Popup`,
-не зависящем от глобального шаблона `ToolTip`; для маркера сверху добавляется его описание.
-Позиция Popup следует за курсором по вертикали.
+`ErrorOverviewBar` поддерживает предпросмотр позиции через
+`ProtocolListBoxUI.GetOverviewPreview` и отдельный WPF `Popup`, но у экземпляра,
+наложенного на `ProtocolVerticalScrollBar`, задано `AreToolTipsEnabled=false`.
+Поэтому движение мыши, колесо и перетаскивание ползунка протокола не открывают
+карточку поверх текста; навигация по маркерам и штатный ScrollBar остаются активны.
 Близкие маркеры объединяются в ограниченные по высоте кластеры:
 повторные клики обходят их строки, Shift+клик меняет направление. Реализация:
 `Ask.UI/Controls/TextEditorControl/ErrorOverviewBar.cs`,
@@ -1850,7 +2000,8 @@ formatted editors; `RunControl` hosts ProtocolUI, translated source and error li
 `PreviewContentTemplate` принимает строку как DataContext и заменяет содержимое карточки.
 В текущем `ProtocolListBoxUI.xaml` оформление задано непосредственно на элементах:
 `OverviewTrackHost.Background` не задан, `errorOverviewBar.Background` — `Transparent`, рамки отключены,
-`IsViewportVisible=false`: на общем фоне протокола видны только маркеры.
+`IsViewportVisible=false` и `AreToolTipsEnabled=false`: на общем фоне протокола
+видны только маркеры без всплывающего предпросмотра.
 Свойства `OverviewBarStyle`, `OverviewHostStyle`, `OverviewVisibility` и
 `ProtocolVerticalScrollBarVisibility` объявлены в `ProtocolListBoxUI.OverviewProperties.cs`,
 но текущая разметка не привязывается к ним.
@@ -1912,6 +2063,24 @@ COM-секция делегирует создание настроек в
 `UI/Controls/Settings/DeviceConfig/DeviceConfigNotifications.cs`,
 `Ask.UI/Components/ComSettingsComponent.xaml.cs`.
 
+### Задержки оборудования в настройках
+
+```text
+SettingsViewModel.SettingsCommand
+→ SettingsService.OpenSettings()
+→ SettingsProgrammControl
+→ RoleAuthorizationConfig.CurrentRole
+  → Root / Administrator: DelaySettingsControl видим
+  → остальные роли: DelaySettingsControl скрыт
+→ AppDelays.GetSettings() для трёх числовых карточек
+→ проверка Root / Administrator в SaveIcon_PreviewMouseDown
+→ AppDelays.SaveAndApply(DelaySettings)
+→ DelaySettingsFileService.Save() + немедленное обновление текущих DelayModel
+```
+
+`SettingsProgrammControl` пересчитывает видимость секции при загрузке и по
+`SystemStateEvents.AdminRightsChanged`; сам `DelaySettingsControl` повторно проверяет роль перед записью.
+
 ### Административные утилиты
 
 Меню `MainWindow.xaml:Admin` содержит отдельные команды, каждая из которых открывает
@@ -1922,10 +2091,7 @@ COM-секция делегирует создание настроек в
   → `IWorkspaceService.AddControl("Сервисные утилиты", new ServiceUtilitiesControl(GetGptAsync, GetSwitchingDeviceAsync, GetRelaySwitchModulesAsync, GetMultimetersAsync, GetChassisAsync), TypeWindow.Settings)`;
 - `AdminViewModel.DatabaseCommand`
   → `AdminServices.OpenDatabase()`
-  → `IWorkspaceService.AddControl("База данных", new DataBaseView(), TypeWindow.Settings)`;
-- `AdminViewModel.ResistanceCommand`
-  → `AdminServices.OpenResistance()`
-  → `IWorkspaceService.AddControl("Сопротивление МКР", new CheckResistanceControl(), TypeWindow.Settings)`.
+  → `IWorkspaceService.AddControl("База данных", new DataBaseView(), TypeWindow.Settings)`.
 
 `ServiceUtilitiesControl` сохраняет экземпляры вложенных
   утилит при переключении;
@@ -1975,7 +2141,11 @@ COM-секция делегирует создание настроек в
   - `Ask.UI.Features.ServiceTools.RelaySwitchModule.RelaySwitchModuleControl` —
     сервисное управление выбранным МКР первого шасси: одиночные точки,
     операции с аппаратной проверкой, диапазоны, перевод точки между шинами,
-    коммутация шин, измеритель и общее отключение точек. Provider
+    коммутация шин, измеритель, общее отключение точек и отдельный самоконтроль
+    выбранной точки. Список точек самоконтроля строится из диапазона
+    `1..IRelaySwitchModule.PointCount`; запуск проходит через
+    `ISelfTestCheckerModuleRelayControl.CheckPointAsync`, включая инициализацию,
+    подготовку измерительного тракта, проверку ответа и финальное снятие коммутации. Provider
     `AdminServices.GetRelaySwitchModulesAsync` получает список через
     `RelaySwitchModules.GetDevicesByNumberChassisAsync(1)`; UI вызывает
     `IPointManager`, `IBusManager` и `IMeterManager`, а текущие подключения
@@ -1991,8 +2161,7 @@ COM-секция делегирует создание настроек в
     `FastMeters.GetDevicesByNumberChassisAsync(1)`; измерения передаются
     соответствующему capability manager с `MeasurementRange`, результаты и
     ошибки публикуются в постоянную консоль SetCommand;
-- `DataBaseView` — административный просмотр таблиц БД;
-- `CheckResistanceControl` — настройка сопротивления МКР.
+- `DataBaseView` — административный просмотр таблиц БД.
 
 Файлы: `MainWindow/MainWindow.xaml`,
 `MainWindow/ViewModels/AdminViewModel.cs`, `MainWindow/Services/AdminServices.cs`,
@@ -2126,6 +2295,7 @@ and are displayed in translator/runner error lists.
 ```text
 raw manager/protocol failure
 → false/empty response or exception
+→ UDP transport failure: UdpProtocol closes the client and throws DeviceTransportException
 → or IdleHardwareErrorSimulator failure with the same method contract
 → application adapter / MeasurementBase
 → UserActionHelper.GetRunWithUserRepeatAsync
@@ -2146,6 +2316,46 @@ for the operator regardless of `ExecutionConfig.StopOnError`; `Continue` is
 available only after the latest attempt produced a valid equipment response.
 Retries are unlimited, and each retry passes through the original adapter,
 logging, protocol output and driver chain.
+
+`DeviceTransportException` and `ModuleRelayControlProtocolException` are written
+to the execution protocol before the interaction if the failed attempt did not
+already produce output. This keeps the underlying socket/transport reason visible
+while preserving the same Repeat/Finish decision flow. UDP receive timeouts retain
+the legacy warning-string contract; automatic transport retry is intentionally
+limited to `10055` during send, because resending after an uncertain receive could
+execute an equipment command twice.
+
+Вне execution-протокола верхняя кнопка питания использует отдельную локальную границу ошибок:
+
+```text
+PowerButton.{PowerButtonClick,StartPowerAsync,StopPowerAsync}
+→ StartPowerSequenceAsync
+  → EnsureConfiguredUpsPowerAsync
+  → TryInitializeChassisAsync
+    → IChassisManager.ConnectableManager.InitializeAsync
+    → failure: ShowChassisConnectionError and return before module access
+  → PowerManager.VerifyPowerAsync
+  → absent power: PowerManager.StartPowerAsync → countdown → TryConnectAsync
+  → absent confirmation: HandleConnectionErrorAsync (up to three retries)
+  → confirmed power only: ResetConfiguredDevicesAfterPowerStartAsync
+    → configured modules InitializeAsync → ResetAsync
+→ StopPowerSequenceAsync
+→ ManagerChassis.PowerManager.{VerifyPowerAsync,StartPowerAsync,StopPowerAsync}
+→ ChassisQueryExecutor.QueryAsync
+→ ModeSelectingDeviceProtocol → HardwareWatchdogProtocol → UdpProtocol
+→ DeviceTransportException
+→ PowerButton.HandleTransportError
+→ восстановление прежнего connected/disconnected состояния кнопки
+→ MessageBoxCustom: имя шасси и рекомендация проверить сеть/кабель
+```
+
+Здесь `PowerManager` в рабочем режиме вызывает `UserActionHelper` без
+`IUserInteractionService`, поэтому интерактивный Repeat/Finish не создаётся и typed
+transport exception намеренно доходит до `PowerButton`. UI перехватывает его до
+глобального `DispatcherUnhandledException`; прочие типы исключений не маскируются.
+При включении `PowerButton` не инициализирует и не сбрасывает дочерние модули, пока
+шасси не подтвердило собственную инициализацию и наличие питания. Отрицательная
+инициализация и отсутствие питания после трёх повторов завершают sequence локально.
 
 Исключение составляет одна попытка команды программы контроля. Пока активен
 `ControlProgramCommandExecutionContext`, вложенные adapters/managers выполняются
@@ -2268,11 +2478,12 @@ and `StateEventsBinder`, then calls `ApplicationEventsBinder.BindAll`.
 | Host/diagnostic bridge | `AppHost.StartAsync` | connects static command history to service | host/process lifetime |
 | Initial chassis lookup | `PreStartupInitializer` fire-and-forget Task | warms first chassis/tester access | one-shot, exceptions caught |
 | Execution session | `ActionExecutor.ExecuteTaskAsync` | `Task.Run(StartDelegate)` with cancellation | `FinalizeAsync`/`StopAsync` cancels and disposes session |
-| Device protocol waits | Real `ModeSelectingDeviceProtocol` calls plus COM/TCP/UDP/USB queries | 5-second outer watchdog, semaphore-protected I/O and transport timeout polling | linked cancellation; caller resumes with `TimeoutException` |
+| Device protocol waits | Real `ModeSelectingDeviceProtocol` calls plus COM/TCP/UDP/USB queries | 5-second outer watchdog, semaphore-protected I/O and transport timeout polling; UDP keeps one socket per runtime device and recreates it after timeout, cancellation, endpoint change or I/O failure | linked cancellation; caller resumes with `TimeoutException`; UDP `10055` send gets one bounded retry |
 | Help server | `HelpServer.EnsureStarted` | Kestrel static-file host | `App.OnExit → HelpServer.Stop` |
 | Archive refresh | `ArchiveControl` DispatcherTimer | refresh archive lists plus background I/O | view lifetime |
 | Role keyboard layout | `RoleLoginWindow` DispatcherTimer | keyboard layout monitoring | window lifetime |
 | Workspace click timer | `MultiEditorControl` DispatcherTimer | double-click discrimination | control lifetime |
+| Live source diagnostics | оба `TextEditorUI` → `LiveDiagnosticsController`, отменяемая задержка 400 мс + Task.Run | immutable текстовый снимок; один анализ и построение `DiagnosticSnapshot` через SemaphoreSlim; UI меняет ссылку, кэширует геометрию viewport и виртуализирует hover | edit/document replacement/Unloaded и отключение обоих подчёркиваний отменяют запрос; Loaded/включение настройки перезапускают; cancellation между командами, этапами и при индексации |
 | Logged exception reporter | `ExceptionDiagnosticReporter` bounded Task.Run | asynchronous crash package | throttled/timeout-limited |
 
 `MeasureHelper.MeasureAsync` выполняет фактический GPT-поток через
@@ -2337,12 +2548,13 @@ provider error and cancellation; a later query builds a fresh runtime instance f
 | `ExecutionConfig` | `SettingsExecutionDto` / `Execution` | `ExecutionSettings`, `MainWindow.Init.DatabaseInitializer` | ActionExecutor, Engine and Idle mode; measurement-error mode; `RepeatMeasurement` enables retry of explicitly marked equipment measurements. Hardware-error selection is persisted per device row by `ExecutionControl` |
 | `ProtocolConfig` | `SettingsProtocolDto` / `SettingsProtocol` | `ProtocolSettings` | protocol templates, output visibility, print |
 | `UserInterfaceConfig` | `UserInterfaceDto` / `UserInterface` | `UserInterfaceSettings` | MainWindow, theme/menu UI |
-| `DeviceDisplayConfig` | `DeviceDisplaySettingsDto` | `DeviceDisplaySettings` | adapters and device messages |
+| `DeviceDisplayConfig` | `DeviceDisplaySettingsDto` | `DeviceDisplaySettings` | adapters and device messages, including persisted visibility of delay messages |
 | `ThemeSettings` | value inside UI config | startup/UI save flow | resources and shell |
 | `LanguageSettings` | application settings/resources | startup | localization |
 | `RoleAuthorizationConfig` | role/credential files | login/configurator | current session role, menu/archive permissions and Debug derivation |
 | `DebugAccessConfig` | derived session state | `RoleAuthorizationConfig.CurrentRole` | protocol debug source and ErrorList DEBUG-column visibility |
 | `LegacyMkiConfig` | legacy hardware profile/config file + DB storage | LegacyMki services | compatibility execution |
+| `AppDelays` | `DelaySettings` / `Settings/delaySettings.yaml` | `DelaySettingsFileService`, `YamlService<DelaySettings>` | задержка после испытания ППУ; зарезервированные задержки до/после команды МКР |
 
 Config managers are static global state. Their save events are subscribed once in
 startup; changes from settings controls update the static model and asynchronously
@@ -2419,8 +2631,11 @@ ErrorItem → translator/runner ErrorList
 | `AlgorithmExecutionResult` | result container | Ask.Protocol.Messages | контракт из `Ask.Protocol.Messages/Models/`, хранящий накопленные ошибки и информационные `ShowMessageModel` алгоритма | [Execution Engine](#execution-engine) |
 | `ProtocolModelExtensions` | static extensions | Ask.Protocol.Messages | расширение из namespace `Ask.Protocol.Messages.Extensions`, добавляющее единый `AlgorithmExecutionResult` в коллекции ошибок и информационных сообщений `ProtocolModel` | [Execution Engine](#execution-engine) |
 | `DelayModel` | shared timing model | Ask.Core | хранит отображаемое наименование и продолжительность фиксированной задержки в миллисекундах; экземпляры группируются в `AppDelays` | [Protocols](#protocols-and-file-formats) |
-| `AppDelays` | static timing catalog | Ask.Core | предоставляет сгруппированные фиксированные задержки оборудования, включая задержки пробойной установки | [Protocols](#protocols-and-file-formats) |
-| `ExecutionMessages` | static facade | Ask.Protocol.Messages | проверяет видимость параметров выполнения и коммутации, публикует накопленные результаты проверки, ошибки, debug-сообщения, задержки из числовых параметров и `DelayModel`, этапы анализа цепей и локализации, границы этапов, инициализацию, настройку оборудования и коммутацию; формирует только накапливаемую ошибку локализации | [Protocols](#protocols-and-file-formats) |
+| `AppDelays` | static timing catalog | Ask.Core | при первом обращении загружает `Settings/delaySettings.yaml` и предоставляет сгруппированные задержки ППУ и МКР | [Protocols](#protocols-and-file-formats) |
+| `DelaySettingsFileService` | YAML configuration service | Ask.Core | читает `delaySettings.yaml`, а при отсутствии или пустом файле записывает дефолты 100/20/20 мс | [Configuration](#configuration) |
+| `ModuleRelayControlDelays` | timing catalog | Ask.Core | задаёт загруженные из YAML модели задержек перед отправкой и после отправки команды МКР; пока не вызывается runtime-кодом | [Protocols](#protocols-and-file-formats) |
+| `DelaySettingsControl` | privileged settings UI | UI | встроен в `SettingsProgrammControl`, показывает три отдельные числовые карточки и доступен только `Root`/`Administrator`; через `AppDelays.SaveAndApply` сохраняет YAML и немедленно обновляет значения текущего процесса | [UI Architecture](#ui-architecture) |
+| `ExecutionMessages` | static facade | Ask.Protocol.Messages | проверяет видимость параметров выполнения и коммутации, публикует накопленные результаты проверки, ошибки, debug-сообщения, задержки из числовых параметров и `DelayModel`, этапы анализа цепей и локализации, границы этапов, инициализацию, настройку оборудования и коммутацию; сообщения `DelayModel` фильтруются `DeviceDisplayConfig.ShowDelayMessages`, но само ожидание сохраняется; формирует только накапливаемую ошибку локализации | [Protocols](#protocols-and-file-formats) |
 | `ExecutionMessageBuilder` | internal static builder | Ask.Protocol.Messages | содержит заголовок накопленных результатов, ошибки и задержки выполнения, включая формат `<имя> <значение>мс` для `DelayModel`, сообщения подготовки, настройки и коммутации устройств, подключения диапазонов, сброса точек, этапов и запуска теста | [Protocols](#protocols-and-file-formats) |
 | `ExecutionMessagePublisher` | internal static publisher | Ask.Protocol.Messages | передаёт сообщения этапов выполнения в `IMessageOutputService`, сохраняет признаки начала блока, обхода паузы/пошагового режима и метаданные исходного вызова | [Protocols](#protocols-and-file-formats) |
 | `ValidationMessages` | static facade | Ask.Protocol.Messages | публикует ошибки полей ввода, поиска и конфигурации оборудования, зависимости самоконтроля, а также заголовок запуска и введённые параметры проверки | [Protocols](#protocols-and-file-formats) |
@@ -2439,6 +2654,9 @@ ErrorItem → translator/runner ErrorList
 | `EquipmentService` | static coordinator | Ask.Engine | equipment validation/runtime selection | [Equipment](#equipment-architecture) |
 | `BaseMeasurement` | template base | Ask.Engine | metrology lifecycle | [Metrology](#metrology-and-hardware-tests) |
 | `IDevice` | interface | Ask.Core | root device contract | [Equipment](#equipment-architecture) |
+| `UdpProtocol` | transport | Ask.Device.Communication | persistent per-device UDP exchange, bounded `10055` send recovery and socket lifetime | [Equipment](#transport-details) |
+| `HardwareWatchdogProtocol` | transport decorator | Ask.Device.Communication | 5-second outer hardware bound and disposal forwarding to the owned protocol | [Equipment](#transport-details) |
+| `DeviceTransportException` | typed exception | Ask.Core | preserves a UDP/transport root exception for equipment retry and protocol output | [Error Handling](#equipment-error-flow) |
 | `IUserInteractionService` | interface | Ask.Core | Engine↔UI interaction | [Shared Contracts](#shared-contracts-and-dto) |
 | `UserActionHelper` | static coordinator | Ask.Core | typed equipment retry/continue/finish loop | [Error Handling](#equipment-error-flow) |
 | `DeviceResetService` | static coordinator | Ask.Core | sequential addressed reset of devices used by a test | [Execution Engine](#addressed-reset-of-test-equipment) |

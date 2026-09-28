@@ -1,3 +1,4 @@
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Static.Delays;
@@ -11,6 +12,7 @@ public sealed class ExecutionMessagesTests
   [Fact]
   public async Task PublishDelayAsync_FormatsNameAndMilliseconds()
   {
+    bool originalVisibility = DeviceDisplayConfig.GetDelayMessagesVisibility();
     ShowMessageModel? publishedMessage = null;
     var outputService = new Mock<IMessageOutputService>();
     outputService
@@ -32,11 +34,20 @@ public sealed class ExecutionMessagesTests
       Delay = 100,
     };
 
-    await ExecutionMessages.PublishDelayAsync(delay, outputService.Object);
+    try
+    {
+      DeviceDisplayConfig.SetDelayMessagesVisibility(true);
 
-    Assert.NotNull(publishedMessage);
-    Assert.Equal("Задержка после испытания напряжения", publishedMessage.Header);
-    Assert.Equal("100мс", publishedMessage.Message);
+      await ExecutionMessages.PublishDelayAsync(delay, outputService.Object);
+
+      Assert.NotNull(publishedMessage);
+      Assert.Equal("Задержка после испытания напряжения", publishedMessage.Header);
+      Assert.Equal("100мс", publishedMessage.Message);
+    }
+    finally
+    {
+      DeviceDisplayConfig.SetDelayMessagesVisibility(originalVisibility);
+    }
   }
 
   [Fact]
@@ -44,5 +55,67 @@ public sealed class ExecutionMessagesTests
   {
     await Assert.ThrowsAsync<ArgumentNullException>(
       () => ExecutionMessages.PublishDelayAsync(null!, outputService: null));
+  }
+
+  [Theory]
+  [InlineData(0)]
+  [InlineData(-1)]
+  public async Task PublishDelayAsync_NonPositiveDelay_DoesNotPublishMessage(int milliseconds)
+  {
+    var outputService = new Mock<IMessageOutputService>();
+    var delay = new DelayModel
+    {
+      Name = "Задержка МКР",
+      Delay = milliseconds,
+    };
+
+    await ExecutionMessages.PublishDelayAsync(delay, outputService.Object);
+
+    outputService.Verify(
+      service => service.ShowMessageAsync(
+        It.IsAny<ShowMessageModel>(),
+        It.IsAny<bool>(),
+        It.IsAny<bool>(),
+        It.IsAny<bool>(),
+        It.IsAny<bool>(),
+        It.IsAny<string>(),
+        It.IsAny<string>(),
+        It.IsAny<int>()),
+      Times.Never);
+  }
+
+  [Fact]
+  public async Task PublishDelayAsync_DelayMessagesDisabled_DoesNotPublishMessage()
+  {
+    bool originalVisibility = DeviceDisplayConfig.GetDelayMessagesVisibility();
+    var outputService = new Mock<IMessageOutputService>();
+    var delay = new DelayModel
+    {
+      Name = "Задержка МКР",
+      Delay = 1,
+    };
+
+    try
+    {
+      DeviceDisplayConfig.SetDelayMessagesVisibility(false);
+
+      await ExecutionMessages.PublishDelayAsync(delay, outputService.Object);
+
+      outputService.Verify(
+        service => service.ShowMessageAsync(
+          It.IsAny<ShowMessageModel>(),
+          It.IsAny<bool>(),
+          It.IsAny<bool>(),
+          It.IsAny<bool>(),
+          It.IsAny<bool>(),
+          It.IsAny<string>(),
+          It.IsAny<string>(),
+          It.IsAny<int>()),
+        Times.Never);
+    }
+    finally
+    {
+      DeviceDisplayConfig.SetDelayMessagesVisibility(originalVisibility);
+    }
   }
 }

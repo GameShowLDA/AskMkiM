@@ -21,6 +21,8 @@
         <LocalizeStrings:LocalizedString x:Key="Settings_Protocol_DeviceInfo_MeasurementResults_Description" Key="settings.protocol.deviceInfo.measurementResults.description" />
         <LocalizeStrings:LocalizedString x:Key="Settings_Protocol_DeviceInfo_IntermediateMeasurementResults_Title" Key="settings.protocol.deviceInfo.intermediateMeasurementResults.title" />
         <LocalizeStrings:LocalizedString x:Key="Settings_Protocol_DeviceInfo_IntermediateMeasurementResults_Description" Key="settings.protocol.deviceInfo.intermediateMeasurementResults.description" />
+        <LocalizeStrings:LocalizedString x:Key="Settings_Protocol_DeviceInfo_DelayMessages_Title" Key="settings.protocol.deviceInfo.delayMessages.title" />
+        <LocalizeStrings:LocalizedString x:Key="Settings_Protocol_DeviceInfo_DelayMessages_Description" Key="settings.protocol.deviceInfo.delayMessages.description" />
     </UserControl.Resources>
 
     <WrapPanel Orientation="Horizontal" Margin="15,10">
@@ -56,8 +58,15 @@
                                 <SharedComponents:SettingsCard
                                     Title="{Binding Source={StaticResource Settings_Protocol_DeviceInfo_IntermediateMeasurementResults_Title}, Path=Value}"
                                     Description="{Binding Source={StaticResource Settings_Protocol_DeviceInfo_IntermediateMeasurementResults_Description}, Path=Value}"
-                                    Margin="0,6,0,0"
+                                    Margin="0,6,10,0"
                                     VerticalAlignment="Top"
                                     x:Name="IntermediateMeasurementResults"/>
+
+                                <SharedComponents:SettingsCard
+                                    Title="{Binding Source={StaticResource Settings_Protocol_DeviceInfo_DelayMessages_Title}, Path=Value}"
+                                    Description="{Binding Source={StaticResource Settings_Protocol_DeviceInfo_DelayMessages_Description}, Path=Value}"
+                                    Margin="0,6,0,0"
+                                    VerticalAlignment="Top"
+                                    x:Name="DelayMessages"/>
     </WrapPanel>
 </UserControl>

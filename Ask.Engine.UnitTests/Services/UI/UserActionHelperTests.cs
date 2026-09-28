@@ -1,11 +1,13 @@
-using Ask.Core.Services.Errors.Device.ModuleRelayControl;
 using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Errors.Device;
+using Ask.Core.Services.Errors.Device.ModuleRelayControl;
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Ask.Engine.UnitTests.TestInfrastructure;
 using Moq;
+using System.Net.Sockets;
 
 namespace Ask.Engine.UnitTests.Services.UI;
 
@@ -443,6 +445,40 @@ public sealed class UserActionHelperTests
     Assert.Equal(ShowMessageModel.MessageType.Error, message.Status);
     Assert.Equal("МКР 1.6: Подключение точки", message.Header);
     Assert.Equal("Системная ошибка. Неизвестная команда программы.", message.Message);
+  }
+
+  [Fact]
+  public async Task DeviceTransportErrorIsAlwaysWrittenToProtocol()
+  {
+    await WpfTestHost.RunAsync(() => Task.CompletedTask);
+    var messages = new List<ShowMessageModel>();
+    var interaction = CreateInteractionService(requests: null, UserAction.None);
+    interaction
+      .Setup(service => service.ShowMessageAsync(
+        It.IsAny<ShowMessageModel>(),
+        It.IsAny<bool>(),
+        It.IsAny<bool>(),
+        It.IsAny<bool>(),
+        It.IsAny<bool>(),
+        It.IsAny<string>(),
+        It.IsAny<string>(),
+        It.IsAny<int>()))
+      .Callback<ShowMessageModel, bool, bool, bool, bool, string, string, int>(
+        (message, _, _, _, _, _, _, _) => messages.Add(message))
+      .Returns(Task.CompletedTask);
+
+    await Assert.ThrowsAsync<DeviceTransportException>(
+      () => UserActionHelper.GetRunWithUserRepeatAsync(
+        () => Task.FromException<bool>(
+          new DeviceTransportException(
+            "[МКР 1.9] Ошибка UDP-транспорта: Недостаточно места в буфере.",
+            new SocketException(10055))),
+        interaction.Object,
+        deviceTask: true));
+
+    ShowMessageModel message = Assert.Single(messages);
+    Assert.Equal(ShowMessageModel.MessageType.Error, message.Status);
+    Assert.Contains("Ошибка UDP-транспорта", message.Message);
   }
 
   private static Mock<IUserInteractionService> CreateInteractionService(

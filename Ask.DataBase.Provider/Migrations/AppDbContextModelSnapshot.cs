@@ -759,6 +759,9 @@ namespace Ask.DataBase.Provider.Migrations
                     b.Property<bool>("ShowConnectionInfo")
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("ShowDelayMessages")
+                        .HasColumnType("INTEGER");
+
                     b.Property<bool>("ShowDeviceExecutionParameters")
                         .HasColumnType("INTEGER");
 
@@ -916,6 +919,12 @@ namespace Ask.DataBase.Provider.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<bool>("UseSyntaxHighlighting")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("UseSyntaxErrorUnderlining")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("UseStyleErrorUnderlining")
                         .HasColumnType("INTEGER");
 
                     b.Property<bool>("UseTopMenuIcons")

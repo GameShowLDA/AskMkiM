@@ -36,11 +36,14 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       }
 
       var nextCommand = context.CommandExecutionManager.GetNextCommand(command);
-      var questionResult = await AskQuestionWithSingleDialogAsync(context.Console, command.MessageText);
+      var questionResult = ShowQuestionDialog(command.MessageText);
+      var hasConditionalJump = nextCommand is UpCommandModel;
 
       CommandExecutionState.LastCuResult = questionResult;
-      CommandExecutionState.LastRejectFlag = nextCommand is UpCommandModel &&
-                                             questionResult == MessageBoxResult.No;
+      CommandExecutionState.LastRejectFlag = await ProcessQuestionResultAsync(
+        context.Console,
+        questionResult,
+        hasConditionalJump);
     }
 
     private static MessageBoxResult ShowInformation(string message)
@@ -49,25 +52,32 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       return MessageBoxResult.OK;
     }
 
-    private static async Task<MessageBoxResult> AskQuestionWithSingleDialogAsync(IUserInteractionService userInteractionService, string message)
+    private static MessageBoxResult ShowQuestionDialog(string message)
     {
-      var result = MessageBoxCustom.Show(
+      return MessageBoxCustom.Show(
         $"{message}\r\n\r\nКоманда ЦУ: Yes-Да No-Нет Esc-Временный останов ПК",
         "Запрос оператору",
         MessageBoxButton.YesNoCancel,
         MessageBoxImage.Question);
+    }
 
-      if (result != MessageBoxResult.Cancel)
+    internal static async Task<bool> ProcessQuestionResultAsync(
+      IUserInteractionService userInteractionService,
+      MessageBoxResult result,
+      bool hasConditionalJump)
+    {
+      if (result == MessageBoxResult.No && hasConditionalJump)
       {
-        return result;
+        return true;
       }
 
-      if (!await WaitForTemporaryResumeAsync(userInteractionService))
+      if ((result is MessageBoxResult.No or MessageBoxResult.Cancel) &&
+          !await WaitForTemporaryResumeAsync(userInteractionService))
       {
         throw new OperationCanceledException("Выполнение остановлено оператором на команде ЦУ.");
       }
 
-      return MessageBoxResult.Cancel;
+      return false;
     }
 
     private static async Task<bool> WaitForTemporaryResumeAsync(IUserInteractionService userInteractionService)

@@ -10,7 +10,26 @@ namespace Ask.Engine.ControlCommandAnalyser.Model
 {
   public class CommandsModel
   {
-    public static List<BaseCommandModel> CommandModels = new();
+    private static readonly AsyncLocal<List<BaseCommandModel>?> AnalysisModels = new();
+    private static readonly List<BaseCommandModel> TranslationModels = new();
+
+    public static List<BaseCommandModel> CommandModels => AnalysisModels.Value ?? TranslationModels;
+
+    internal static bool IsAnalysisScope => AnalysisModels.Value != null;
+
+    // Existing parsers resolve references through this facade. A live analysis must
+    // never clear or modify the commands belonging to translation/execution.
+    internal static IDisposable BeginAnalysisScope()
+    {
+      var previous = AnalysisModels.Value;
+      AnalysisModels.Value = new List<BaseCommandModel>();
+      return new AnalysisScope(previous);
+    }
+
+    private sealed class AnalysisScope(List<BaseCommandModel>? previous) : IDisposable
+    {
+      public void Dispose() => AnalysisModels.Value = previous;
+    }
 
     // TODO : Сделать рефлекией вытаскивание всех мнемоник команд, которые могут быть проверочными
     public static List<string> CheckCommandMnemonic = new List<string> { "ПР", "ПИ", "СИ", "ПЭ", "ЭТ" };

@@ -1,0 +1,18 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <DataTemplate x:Key="DiagnosticMessageTemplate">
+    <Border x:Name="Entry" BorderThickness="3,0,0,0" BorderBrush="Red"
+            Padding="10,0,0,0" Margin="0,0,0,12">
+      <StackPanel>
+        <TextBlock x:Name="Heading" Text="Ошибка" FontWeight="SemiBold" Margin="0,0,0,4" />
+        <TextBlock Text="{Binding Description}" TextWrapping="Wrap" />
+      </StackPanel>
+    </Border>
+    <DataTemplate.Triggers>
+      <DataTrigger Binding="{Binding IsWarning}" Value="True">
+        <Setter TargetName="Entry" Property="BorderBrush" Value="Gold" />
+        <Setter TargetName="Heading" Property="Text" Value="Предупреждение" />
+      </DataTrigger>
+    </DataTemplate.Triggers>
+  </DataTemplate>
+</ResourceDictionary>
