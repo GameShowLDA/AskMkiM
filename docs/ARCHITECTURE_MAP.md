@@ -2319,6 +2319,38 @@ the legacy warning-string contract; automatic transport retry is intentionally
 limited to `10055` during send, because resending after an uncertain receive could
 execute an equipment command twice.
 
+Вне execution-протокола верхняя кнопка питания использует отдельную локальную границу ошибок:
+
+```text
+PowerButton.{PowerButtonClick,StartPowerAsync,StopPowerAsync}
+→ StartPowerSequenceAsync
+  → EnsureConfiguredUpsPowerAsync
+  → TryInitializeChassisAsync
+    → IChassisManager.ConnectableManager.InitializeAsync
+    → failure: ShowChassisConnectionError and return before module access
+  → PowerManager.VerifyPowerAsync
+  → absent power: PowerManager.StartPowerAsync → countdown → TryConnectAsync
+  → absent confirmation: HandleConnectionErrorAsync (up to three retries)
+  → confirmed power only: ResetConfiguredDevicesAfterPowerStartAsync
+    → configured modules InitializeAsync → ResetAsync
+→ StopPowerSequenceAsync
+→ ManagerChassis.PowerManager.{VerifyPowerAsync,StartPowerAsync,StopPowerAsync}
+→ ChassisQueryExecutor.QueryAsync
+→ ModeSelectingDeviceProtocol → HardwareWatchdogProtocol → UdpProtocol
+→ DeviceTransportException
+→ PowerButton.HandleTransportError
+→ восстановление прежнего connected/disconnected состояния кнопки
+→ MessageBoxCustom: имя шасси и рекомендация проверить сеть/кабель
+```
+
+Здесь `PowerManager` в рабочем режиме вызывает `UserActionHelper` без
+`IUserInteractionService`, поэтому интерактивный Repeat/Finish не создаётся и typed
+transport exception намеренно доходит до `PowerButton`. UI перехватывает его до
+глобального `DispatcherUnhandledException`; прочие типы исключений не маскируются.
+При включении `PowerButton` не инициализирует и не сбрасывает дочерние модули, пока
+шасси не подтвердило собственную инициализацию и наличие питания. Отрицательная
+инициализация и отсутствие питания после трёх повторов завершают sequence локально.
+
 Исключение составляет одна попытка команды программы контроля. Пока активен
 `ControlProgramCommandExecutionContext`, вложенные adapters/managers выполняются
 один раз и возвращают результат без собственного интерактивного цикла, а
