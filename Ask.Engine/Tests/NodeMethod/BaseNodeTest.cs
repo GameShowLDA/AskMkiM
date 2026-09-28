@@ -144,7 +144,8 @@ namespace Ask.Engine.Tests.NodeMethod
 
         await UserActionHelper.RunWithUserRepeatAsync(async () =>
         {
-          return await moduleForOldPoint.PointManager.ConnectingPointToNewBus(OppositeBus, oldPoint.PointNumber, protocolUI);
+          await moduleForOldPoint.PointManager.DisconnectRelayAsync(AssignedBus, oldPoint.PointNumber, protocolUI);
+          return await moduleForOldPoint.PointManager.ConnectRelayAsync(OppositeBus, oldPoint.PointNumber, protocolUI);
         }, protocolUI);
       }
 
@@ -153,7 +154,8 @@ namespace Ask.Engine.Tests.NodeMethod
         var moduleForNewPoint = relayModules.FirstOrDefault(module => module.NumberChassis == newPoint.DeviceNumber && module.Number == newPoint.ModuleNumber);
         await UserActionHelper.RunWithUserRepeatAsync(async () =>
         {
-          return await moduleForNewPoint.PointManager.ConnectingPointToNewBus(AssignedBus, newPoint.PointNumber, protocolUI);
+          await moduleForNewPoint.PointManager.DisconnectRelayAsync(OppositeBus, newPoint.PointNumber, protocolUI);
+          return await moduleForNewPoint.PointManager.ConnectRelayAsync(AssignedBus, newPoint.PointNumber, protocolUI);
         }, protocolUI);
       }
     }
