@@ -60,6 +60,56 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
       await _moduleRelay.PointManager.DisconnectingAllPoint(userMessageService);
     }
 
+    /// <inheritdoc />
+    public async Task<bool> CheckPointAsync(
+      int pointNumber,
+      CancellationToken cancellationToken = default,
+      IUserInteractionService? userMessageService = null)
+    {
+      if (pointNumber < 1 || pointNumber > _moduleRelay.PointCount)
+      {
+        throw new ArgumentOutOfRangeException(
+          nameof(pointNumber),
+          pointNumber,
+          $"Номер точки должен находиться в диапазоне от 1 до {_moduleRelay.PointCount}.");
+      }
+
+      cancellationToken.ThrowIfCancellationRequested();
+      await ModuleRelayControlResponseProcessor.PublishSelfTestTitleAsync(
+        _moduleRelay,
+        userMessageService);
+      await ModuleRelayControlResponseProcessor.PublishSelfTestInformationAsync(
+        $"Самоконтроль точки {pointNumber}",
+        userMessageService);
+
+      if (!(await _moduleRelay.ConnectableManager.InitializeAsync(userMessageService)).Connect)
+      {
+        return false;
+      }
+
+      try
+      {
+        cancellationToken.ThrowIfCancellationRequested();
+        await _moduleRelay.PointManager.DisconnectingAllPoint(userMessageService);
+        await _moduleRelay.MeterManager.ConnectMeterAsync(
+          ExecutionConfig.GetIsIdleModeEnabled() ? userMessageService : null);
+
+        cancellationToken.ThrowIfCancellationRequested();
+        string answer = await _moduleRelay.PointManager.CheckPoint(
+          pointNumber,
+          userMessageService);
+        return await ModuleRelayControlResponseProcessor.CheckPointSelfTestAsync(
+          answer,
+          _moduleRelay,
+          pointNumber,
+          userMessageService);
+      }
+      finally
+      {
+        await _moduleRelay.PointManager.DisconnectingAllPoint(userMessageService);
+      }
+    }
+
     /// <summary>
     /// Выполняет цикл замыканий точек и проверяет их состояние.
     /// Для каждой точки отправляется запрос, затем в зависимости от режима получаются данные 

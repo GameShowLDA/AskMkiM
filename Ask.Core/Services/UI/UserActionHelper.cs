@@ -1,4 +1,5 @@
 using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Errors.Device;
 using Ask.Core.Services.Errors.Device.ModuleRelayControl;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
@@ -216,7 +217,7 @@ namespace Ask.Core.Services.UI
         bool attemptProducedOutput = messageService != null &&
           messageService.GetLastLineNumber() != outputLineBeforeAttempt;
 
-        if (hardwareException is ModuleRelayControlProtocolException &&
+        if (hardwareException is ModuleRelayControlProtocolException or DeviceTransportException &&
             messageService != null &&
             !attemptProducedOutput)
         {

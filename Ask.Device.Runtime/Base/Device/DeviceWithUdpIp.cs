@@ -7,7 +7,7 @@ namespace Ask.Device.Runtime.Base.Device
   /// <summary>
   /// Базовый класс устройств с подключением по протоколу UDP/IP.
   /// </summary>
-  public abstract class DeviceWithUdpIp : DeviceWithIP, IDevice
+  public abstract class DeviceWithUdpIp : DeviceWithIP, IDevice, IDisposable
   {
     /// <summary>
     /// Инициализирует устройство с подключением по UDP/IP.
@@ -16,5 +16,10 @@ namespace Ask.Device.Runtime.Base.Device
     {
       ConnectionInfo = new ConnectionInfoBase(this, ConnectionType.IP_UDP);
     }
+
+    /// <summary>
+    /// Освобождает UDP-протокол при удалении runtime-устройства из кэша.
+    /// </summary>
+    public void Dispose() => (DeviceProtocol as IDisposable)?.Dispose();
   }
 }
