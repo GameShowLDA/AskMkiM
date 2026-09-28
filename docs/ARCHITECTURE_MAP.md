@@ -1281,6 +1281,12 @@ PreStartupInitializer.InitializeHelpServer
 F1 → HelpProvider → HelpViewerWindow (Photino)
 ```
 
+Дерево `AppHelp/ru/index.html` отражает верхний уровень меню из
+`MainWindow/MainWindow.xaml`: `TabFile` и `TabArchive` представлены отдельными
+темами. Команды меню `ArchiveMenu` маршрутизируются по своим `HelpProvider.HelpKey`
+на страницы открытия, создания, экспорта и импорта архивов; значение ключа
+совпадает с `id` соответствующего узла дерева.
+
 Crash diagnostics:
 
 #### Crash diagnostics flow
