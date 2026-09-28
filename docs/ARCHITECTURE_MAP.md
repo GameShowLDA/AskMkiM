@@ -1436,9 +1436,15 @@ Idle-эмулятор должен возвращать подтверждени
 → `IMeterManager.ConnectMeterAsync`
 → `IPointManager.CheckPoint` (`6.<point>`)
 → `ModuleRelayControlResponseProcessor.CheckPointSelfTestAsync`
+→ `IMeterManager.DisconnectMeterAsync`
 → повторный `IPointManager.DisconnectingAllPoint` в `finally`.
 Метод проверяет диапазон `1..PointCount`, поддерживает отмену между аппаратными операциями
 и использует тот же Real/Idle-маршрут, что и полный самоконтроль точек.
+Полный и одиночный самоконтроль точек всегда отправляют физическую команду подключения
+внутреннего измерительного тракта МКР перед проверкой. Завершение, отмена и ошибка проходят
+через `finally`, который отключает измеритель и затем освобождает все точки. Адаптер не
+пропускает повторный `ConnectMeterAsync` по локальному флагу, поскольку аппаратное состояние
+может измениться после прерванного запуска независимо от состояния runtime-кэша.
 Idle `ModuleRelayControlEmulatorProtocol` для команды `6.<point>` учитывает настройку
 ошибки измерения: любой `ErroneousMeasurementType`, кроме `None`, детерминированно делает ложным один из этапов
 `ConnectPoint`/`DisconnectBusA`/`DisconnectBusB` (по номеру точки) и возвращает

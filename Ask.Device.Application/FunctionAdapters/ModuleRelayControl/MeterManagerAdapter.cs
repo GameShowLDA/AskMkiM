@@ -33,9 +33,6 @@ namespace Ask.Device.Application.FunctionAdapters.ModuleRelayControl
     /// <inheritdoc />
     public async Task<bool> ConnectMeterAsync(IUserInteractionService? userMessageService = null)
     {
-      if (IsConnectMeter)
-        return true;
-
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
         await ExecutionMessages.PublishDelayAsync(AppDelays.ModuleRelayControlDelays.PreCommandDelay, userMessageService);

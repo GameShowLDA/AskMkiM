@@ -106,7 +106,14 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
       }
       finally
       {
-        await _moduleRelay.PointManager.DisconnectingAllPoint(userMessageService);
+        try
+        {
+          await _moduleRelay.MeterManager.DisconnectMeterAsync(userMessageService);
+        }
+        finally
+        {
+          await _moduleRelay.PointManager.DisconnectingAllPoint(userMessageService);
+        }
       }
     }
 
@@ -124,23 +131,37 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
         return;
       }
 
-      await _moduleRelay.PointManager.DisconnectingAllPoint(userMessageService);
-      await _moduleRelay.MeterManager.ConnectMeterAsync(
-        ExecutionConfig.GetIsIdleModeEnabled() ? userMessageService : null);
-      var testName = "Тест подключения точек";
-      settings.DeviceResults.LastOrDefault()?.Tests.Add(new TestExecutionResult
+      try
       {
-        TestName = testName,
-      });
-      if (!string.IsNullOrEmpty(testNumber))
-      {
-        testName = $"{testNumber}. {testName}";
-      }
+        await _moduleRelay.PointManager.DisconnectingAllPoint(userMessageService);
+        await _moduleRelay.MeterManager.ConnectMeterAsync(
+          ExecutionConfig.GetIsIdleModeEnabled() ? userMessageService : null);
+        var testName = "Тест подключения точек";
+        settings.DeviceResults.LastOrDefault()?.Tests.Add(new TestExecutionResult
+        {
+          TestName = testName,
+        });
+        if (!string.IsNullOrEmpty(testNumber))
+        {
+          testName = $"{testNumber}. {testName}";
+        }
 
-      await ModuleRelayControlResponseProcessor.PublishSelfTestInformationAsync(testName, userMessageService);
-      for (int point = 1; point <= _moduleRelay.PointCount; point++)
+        await ModuleRelayControlResponseProcessor.PublishSelfTestInformationAsync(testName, userMessageService);
+        for (int point = 1; point <= _moduleRelay.PointCount; point++)
+        {
+          await UserActionHelper.RunWithUserRepeatAsync(() => CheckPoint(token, relaySwitchModule, point, settings, userMessageService), userMessageService);
+        }
+      }
+      finally
       {
-        await UserActionHelper.RunWithUserRepeatAsync(() => CheckPoint(token, relaySwitchModule, point, settings, userMessageService), userMessageService);
+        try
+        {
+          await _moduleRelay.MeterManager.DisconnectMeterAsync(userMessageService);
+        }
+        finally
+        {
+          await _moduleRelay.PointManager.DisconnectingAllPoint(userMessageService);
+        }
       }
     }
 
