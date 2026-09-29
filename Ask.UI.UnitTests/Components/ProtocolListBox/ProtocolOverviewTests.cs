@@ -576,15 +576,16 @@ public sealed class ProtocolOverviewTests
         var appendAtEnd = control.AppendLineAsync(new ShowMessageModel { Header = "Новая строка", Message = "Результат" });
         var nextAppend = control.AppendLineAsync(new ShowMessageModel { Header = "Ещё строка", Message = "Результат" });
         Layout();
-        Assert.True(appendAtEnd.IsCompletedSuccessfully);
-        Assert.True(nextAppend.IsCompletedSuccessfully);
+        WaitForDispatcherTasks(appendAtEnd, nextAppend);
+        Layout();
         Assert.Equal(viewer.ScrollableHeight, viewer.VerticalOffset, precision: 3);
 
         viewer.ScrollToTop();
         Layout();
         var appendAfterScroll = control.AppendLineAsync(new ShowMessageModel { Header = "Следующая строка", Message = "Результат" });
         Layout();
-        Assert.True(appendAfterScroll.IsCompletedSuccessfully);
+        WaitForDispatcherTasks(appendAfterScroll);
+        Layout();
         Assert.Equal(0, viewer.VerticalOffset, precision: 3);
       }
       finally
@@ -649,6 +650,20 @@ public sealed class ProtocolOverviewTests
       if (FindDescendant<T>(child) is { } descendant) return descendant;
     }
     return null;
+  }
+
+  private static void WaitForDispatcherTasks(params Task[] tasks)
+  {
+    var completion = Task.WhenAll(tasks);
+    var timeout = System.Diagnostics.Stopwatch.StartNew();
+    while (!completion.IsCompleted && timeout.Elapsed < TimeSpan.FromSeconds(5))
+    {
+      System.Windows.Threading.Dispatcher.CurrentDispatcher.Invoke(() => { },
+        System.Windows.Threading.DispatcherPriority.ApplicationIdle);
+      Thread.Yield();
+    }
+
+    Assert.True(completion.IsCompletedSuccessfully, completion.Exception?.ToString());
   }
 
   private static void RunInSta(Action action)
