@@ -1281,6 +1281,12 @@ PreStartupInitializer.InitializeHelpServer
 F1 → HelpProvider → HelpViewerWindow (Photino)
 ```
 
+Дерево `AppHelp/ru/index.html` отражает верхний уровень меню из
+`MainWindow/MainWindow.xaml`: `TabFile` и `TabArchive` представлены отдельными
+темами. Команды меню `ArchiveMenu` маршрутизируются по своим `HelpProvider.HelpKey`
+на страницы открытия, создания, экспорта и импорта архивов; значение ключа
+совпадает с `id` соответствующего узла дерева.
+
 Crash diagnostics:
 
 #### Crash diagnostics flow
@@ -1430,9 +1436,15 @@ Idle-эмулятор должен возвращать подтверждени
 → `IMeterManager.ConnectMeterAsync`
 → `IPointManager.CheckPoint` (`6.<point>`)
 → `ModuleRelayControlResponseProcessor.CheckPointSelfTestAsync`
+→ `IMeterManager.DisconnectMeterAsync`
 → повторный `IPointManager.DisconnectingAllPoint` в `finally`.
 Метод проверяет диапазон `1..PointCount`, поддерживает отмену между аппаратными операциями
 и использует тот же Real/Idle-маршрут, что и полный самоконтроль точек.
+Полный и одиночный самоконтроль точек всегда отправляют физическую команду подключения
+внутреннего измерительного тракта МКР перед проверкой. Завершение, отмена и ошибка проходят
+через `finally`, который отключает измеритель и затем освобождает все точки. Адаптер не
+пропускает повторный `ConnectMeterAsync` по локальному флагу, поскольку аппаратное состояние
+может измениться после прерванного запуска независимо от состояния runtime-кэша.
 Idle `ModuleRelayControlEmulatorProtocol` для команды `6.<point>` учитывает настройку
 ошибки измерения: любой `ErroneousMeasurementType`, кроме `None`, детерминированно делает ложным один из этапов
 `ConnectPoint`/`DisconnectBusA`/`DisconnectBusB` (по номеру точки) и возвращает
@@ -1947,9 +1959,16 @@ Renderer выбирает индексированные диапазоны ви
 распознаются новая метка оборудования `[ERR]` и legacy-метка `[БРАК]`.
 `AppendLineAsync → AddOverviewDiagnostic`
 индексирует только новое сообщение; `RefreshErrorOverview` пересоздаёт индекс после загрузки/удаления.
-`RequestOverviewUpdate` объединяет обновления через Dispatcher; прокрутка обновляет геометрию
-без повторной классификации сообщений. `RefreshErrorOverviewViewport` задаёт видимый диапазон через `VerticalOffset/ExtentHeight`
+`RequestOverviewUpdate` откладывает обновление полосы для обычных записей на один цикл
+`DispatcherTimer` (100 мс); ошибка и команда обновляют её сразу. После загрузки, удаления
+и очистки `RefreshErrorOverview` также выполняет обновление сразу. Прокрутка обновляет
+только видимую область, без повторной классификации сообщений.
+`RefreshErrorOverviewViewport` задаёт видимый диапазон через `VerticalOffset/ExtentHeight`
 и `(VerticalOffset + ViewportHeight)/ExtentHeight`; от наличия штатного ScrollBar/Thumb он не зависит.
+Автопрокрутка `AppendLineAsync → RequestScrollToEnd` следует за хвостом, пока пользователь
+не прокрутил список вверх. `ProtocolScrollViewer_ScrollChanged` отличает пользовательское
+смещение от изменения `ExtentHeight`; при росте содержимого удерживает хвост, не делая
+принудительный `InvalidateMeasure` на каждую запись. `ClearAsync` возобновляет слежение.
 Кнопки и счётчик находятся в общей верхней строке над списком и полосой.
 `RefreshOverviewPositions → ProjectOverviewOffset → ErrorOverviewBar.SetLinePositions`
 проецирует маркеры в пиксельную шкалу: реализованные контейнеры дают измеренные границы,
@@ -2318,6 +2337,38 @@ while preserving the same Repeat/Finish decision flow. UDP receive timeouts reta
 the legacy warning-string contract; automatic transport retry is intentionally
 limited to `10055` during send, because resending after an uncertain receive could
 execute an equipment command twice.
+
+Вне execution-протокола верхняя кнопка питания использует отдельную локальную границу ошибок:
+
+```text
+PowerButton.{PowerButtonClick,StartPowerAsync,StopPowerAsync}
+→ StartPowerSequenceAsync
+  → EnsureConfiguredUpsPowerAsync
+  → TryInitializeChassisAsync
+    → IChassisManager.ConnectableManager.InitializeAsync
+    → failure: ShowChassisConnectionError and return before module access
+  → PowerManager.VerifyPowerAsync
+  → absent power: PowerManager.StartPowerAsync → countdown → TryConnectAsync
+  → absent confirmation: HandleConnectionErrorAsync (up to three retries)
+  → confirmed power only: ResetConfiguredDevicesAfterPowerStartAsync
+    → configured modules InitializeAsync → ResetAsync
+→ StopPowerSequenceAsync
+→ ManagerChassis.PowerManager.{VerifyPowerAsync,StartPowerAsync,StopPowerAsync}
+→ ChassisQueryExecutor.QueryAsync
+→ ModeSelectingDeviceProtocol → HardwareWatchdogProtocol → UdpProtocol
+→ DeviceTransportException
+→ PowerButton.HandleTransportError
+→ восстановление прежнего connected/disconnected состояния кнопки
+→ MessageBoxCustom: имя шасси и рекомендация проверить сеть/кабель
+```
+
+Здесь `PowerManager` в рабочем режиме вызывает `UserActionHelper` без
+`IUserInteractionService`, поэтому интерактивный Repeat/Finish не создаётся и typed
+transport exception намеренно доходит до `PowerButton`. UI перехватывает его до
+глобального `DispatcherUnhandledException`; прочие типы исключений не маскируются.
+При включении `PowerButton` не инициализирует и не сбрасывает дочерние модули, пока
+шасси не подтвердило собственную инициализацию и наличие питания. Отрицательная
+инициализация и отсутствие питания после трёх повторов завершают sequence локально.
 
 Исключение составляет одна попытка команды программы контроля. Пока активен
 `ControlProgramCommandExecutionContext`, вложенные adapters/managers выполняются

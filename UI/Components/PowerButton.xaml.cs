@@ -1,5 +1,6 @@
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Devices;
+using Ask.Core.Services.Errors.Device;
 using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
@@ -139,6 +140,10 @@ namespace UI.Components
           await StopPowerSequenceAsync();
         }
       }
+      catch (DeviceTransportException exception)
+      {
+        HandleTransportError(exception);
+      }
       finally
       {
         taskInProgress = false;
@@ -172,6 +177,10 @@ namespace UI.Components
         {
           SetConnectedState("Отключить систему");
         }
+      }
+      catch (DeviceTransportException exception)
+      {
+        HandleTransportError(exception);
       }
       finally
       {
@@ -208,6 +217,10 @@ namespace UI.Components
           SetDisconnectedState("Подключить систему");
         }
       }
+      catch (DeviceTransportException exception)
+      {
+        HandleTransportError(exception);
+      }
       finally
       {
         taskInProgress = false;
@@ -222,18 +235,47 @@ namespace UI.Components
     {
       await EnsureConfiguredUpsPowerAsync();
 
-      if (!await model.PowerManager.VerifyPowerAsync(null))
+      if (!await TryInitializeChassisAsync())
+      {
+        return;
+      }
+
+      if (await model.PowerManager.VerifyPowerAsync(null))
+      {
+        SetConnectedState("Отключить систему");
+      }
+      else
       {
         await model.PowerManager.StartPowerAsync();
         await ShowCountdownMessageAsync(5, "Питание включено. Ожидание загрузки системы перед инициализацией и сбросом устройств");
+
+        if (!await TryConnectAsync() && !await HandleConnectionErrorAsync())
+        {
+          return;
+        }
       }
 
       await ResetConfiguredDevicesAfterPowerStartAsync();
+    }
 
-      if (!await TryConnectAsync())
+    /// <summary>
+    /// Инициализирует шасси до обращения к подключённым модулям.
+    /// </summary>
+    /// <returns>
+    /// <see langword="true"/>, если шасси подтвердило инициализацию.
+    /// В противном случае — <see langword="false"/>.
+    /// </returns>
+    private async Task<bool> TryInitializeChassisAsync()
+    {
+      var initialization = await model.ConnectableManager.InitializeAsync();
+      if (initialization.Connect)
       {
-        await HandleConnectionErrorAsync();
+        return true;
       }
+
+      SetDisconnectedState("Подключить систему");
+      ShowChassisConnectionError(initialization.Answer);
+      return false;
     }
 
     private async Task ResetConfiguredDevicesAfterPowerStartAsync()
@@ -320,6 +362,45 @@ namespace UI.Components
     }
 
     /// <summary>
+    /// Восстанавливает состояние кнопки и показывает ошибку связи с шасси.
+    /// </summary>
+    /// <param name="exception">Ошибка транспорта оборудования.</param>
+    private void HandleTransportError(DeviceTransportException exception)
+    {
+      if (active)
+      {
+        SetConnectedState("Отключить систему");
+      }
+      else
+      {
+        SetDisconnectedState("Подключить систему");
+      }
+
+      ShowChassisConnectionError(exception.Message);
+    }
+
+    /// <summary>
+    /// Показывает ошибку связи с шасси.
+    /// </summary>
+    /// <param name="details">Дополнительные сведения об ошибке.</param>
+    private void ShowChassisConnectionError(string? details)
+    {
+      string deviceName = string.IsNullOrWhiteSpace(model.Name)
+        ? "оборудованием"
+        : $"устройством «{model.Name}»";
+      string message = $"Нет соединения с {deviceName}.{Environment.NewLine}{Environment.NewLine}" +
+        "Проверьте сетевое подключение компьютера и кабельное подключение устройства, " +
+        "затем повторите попытку.";
+
+      if (!string.IsNullOrWhiteSpace(details))
+      {
+        message += $"{Environment.NewLine}{Environment.NewLine}{details}";
+      }
+
+      MessageBoxCustom.Show(message, "Ошибка подключения", MessageBoxButton.OK, MessageBoxImage.Error);
+    }
+
+    /// <summary>
     /// Процесс отключения системы, включая сброс и остановку питания.
     /// </summary>
     private async Task StopPowerSequenceAsync()
@@ -396,41 +477,35 @@ namespace UI.Components
     /// <summary>
     /// Обработка ошибки подключения с повторными попытками и возможностью отмены.
     /// </summary>
-    private async Task HandleConnectionErrorAsync()
+    /// <returns>
+    /// <see langword="true"/>, если шасси подтвердило питание после повторной попытки.
+    /// В противном случае — <see langword="false"/>.
+    /// </returns>
+    private async Task<bool> HandleConnectionErrorAsync()
     {
       hasError = true;
       SetLoadingState("Отменить подключение", (Color)FindResource("YellowColor"));
 
-      bool exitLoop = false;
-      int i = 0;
-      do
+      for (int attempt = 0; attempt < 3; attempt++)
       {
         if (cancellationToken.Token.IsCancellationRequested)
         {
-          exitLoop = true;
+          SetDisconnectedState("Подключить систему");
+          return false;
         }
-        else
+
+        await model.PowerManager.StartPowerAsync();
+        await ShowCountdownMessageAsync(3, "Повторная попытка через");
+
+        if (await TryConnectAsync())
         {
-          await model.PowerManager.StartPowerAsync();
-          await ShowCountdownMessageAsync(3, "Повторная попытка через");
+          return true;
         }
-
-        if (exitLoop)
-        {
-          break;
-        }
-
-        i++;
       }
-      while (!await TryConnectAsync() && i < 3);
 
-      if (!exitLoop)
-      {
-        NotificationHostService.Instance.Show(
-               "Включение системы",
-               "Не удалось выполнить включение питания системы. Проверьте подключение системы к компьютеру и повторите попытку.",
-               type: NotificationType.Error);
-      }
+      SetDisconnectedState("Подключить систему");
+      ShowChassisConnectionError("Шасси не подтвердило включение питания.");
+      return false;
     }
 
     /// <summary>
