@@ -13,12 +13,10 @@ using Ask.UI.Features.ProtocolNew.Controls;
 using Ask.UI.Features.ProtocolNew.Execution;
 using Ask.UI.Features.ProtocolNew.Protocol;
 using Message;
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.UI.Controls.ProtocolNew
 {
@@ -282,9 +280,6 @@ namespace Ask.UI.Controls.ProtocolNew
       [CallerFilePath] string callerFile = "",
       [CallerLineNumber] int callerLine = 0)
     {
-      var outputStarted = Stopwatch.GetTimestamp();
-      var messageId = RuntimeHelpers.GetHashCode(showMessageModel);
-
       await CheckBlockStart(IsBlockStart);
       var wasDisplayed = await _entryOutputService.WriteAsync(
         showMessageModel,
@@ -302,21 +297,12 @@ namespace Ask.UI.Controls.ProtocolNew
         return;
       }
 
-      var displayedAt = Stopwatch.GetTimestamp();
       LastMessage = false;
       await _postOutputController.ProcessAsync(
         showMessageModel,
         IsBlockStart,
         SkipStepModeCheck,
         skipPause);
-
-      var completedAt = Stopwatch.GetTimestamp();
-      LogDebug(
-        $"[ProtocolOutputTiming] Output completed: message={messageId}, " +
-        $"dispatcherAndWriteMs={Stopwatch.GetElapsedTime(outputStarted, displayedAt).TotalMilliseconds:F1}, " +
-        $"postOutputMs={Stopwatch.GetElapsedTime(displayedAt, completedAt).TotalMilliseconds:F1}, " +
-        $"totalMs={Stopwatch.GetElapsedTime(outputStarted, completedAt).TotalMilliseconds:F1}, " +
-        $"thread={Environment.CurrentManagedThreadId}");
     }
 
     /// <summary>

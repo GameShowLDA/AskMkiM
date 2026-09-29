@@ -1959,9 +1959,16 @@ Renderer выбирает индексированные диапазоны ви
 распознаются новая метка оборудования `[ERR]` и legacy-метка `[БРАК]`.
 `AppendLineAsync → AddOverviewDiagnostic`
 индексирует только новое сообщение; `RefreshErrorOverview` пересоздаёт индекс после загрузки/удаления.
-`RequestOverviewUpdate` объединяет обновления через Dispatcher; прокрутка обновляет геометрию
-без повторной классификации сообщений. `RefreshErrorOverviewViewport` задаёт видимый диапазон через `VerticalOffset/ExtentHeight`
+`RequestOverviewUpdate` откладывает обновление полосы для обычных записей на один цикл
+`DispatcherTimer` (100 мс); ошибка и команда обновляют её сразу. После загрузки, удаления
+и очистки `RefreshErrorOverview` также выполняет обновление сразу. Прокрутка обновляет
+только видимую область, без повторной классификации сообщений.
+`RefreshErrorOverviewViewport` задаёт видимый диапазон через `VerticalOffset/ExtentHeight`
 и `(VerticalOffset + ViewportHeight)/ExtentHeight`; от наличия штатного ScrollBar/Thumb он не зависит.
+Автопрокрутка `AppendLineAsync → RequestScrollToEnd` следует за хвостом, пока пользователь
+не прокрутил список вверх. `ProtocolScrollViewer_ScrollChanged` отличает пользовательское
+смещение от изменения `ExtentHeight`; при росте содержимого удерживает хвост, не делая
+принудительный `InvalidateMeasure` на каждую запись. `ClearAsync` возобновляет слежение.
 Кнопки и счётчик находятся в общей верхней строке над списком и полосой.
 `RefreshOverviewPositions → ProjectOverviewOffset → ErrorOverviewBar.SetLinePositions`
 проецирует маркеры в пиксельную шкалу: реализованные контейнеры дают измеренные границы,

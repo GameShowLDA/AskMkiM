@@ -8,7 +8,6 @@ using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Ask.UI.Controls.TextEditorControl;
 using Ask.UI.Services.Notifications;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
@@ -42,7 +41,7 @@ namespace Ask.UI.Components.ProtocolListBox
     private int _errorOverviewIndex = -1;
     private ShowMessageModel? _activeErrorMessage;
     private readonly Dictionary<ShowMessageModel, int> _messageIndices = new();
-    private bool _overviewUpdatePending;
+    private readonly DispatcherTimer _overviewUpdateTimer;
     private bool _overviewDiagnosticsDirty;
     private bool _visibleIndicesDirty = true;
     private readonly Dictionary<ProtocolDisplayItem, int> _visibleIndices = new();
@@ -50,27 +49,9 @@ namespace Ask.UI.Components.ProtocolListBox
     private readonly Dictionary<ProtocolDisplayItem, ProtocolCommandGroup> _itemGroups = new();
     private ProtocolDisplayItem? _lastMessageItem;
     private bool _scrollToEndRequested;
+    private bool _followTail = true;
     private bool _settingsSubscribed;
     private bool _themeSubscribed;
-    /// <summary>
-    /// Признак запланированного замера задержки отрисовки.
-    /// </summary>
-    private bool _renderProbePending;
-
-    /// <summary>
-    /// Количество записей, ожидающих ближайшего цикла отрисовки.
-    /// </summary>
-    private int _pendingRenderEntries;
-
-    /// <summary>
-    /// Метка времени добавления последней записи протокола.
-    /// </summary>
-    private long _lastAppendTimestamp;
-
-    /// <summary>
-    /// Идентификатор последней записи протокола, ожидающей отрисовки.
-    /// </summary>
-    private int _lastRenderedMessageId;
 
     public static readonly DependencyProperty ProtocolFontSizeProperty =
       DependencyProperty.Register(
@@ -112,6 +93,11 @@ namespace Ask.UI.Components.ProtocolListBox
     public ProtocolListBoxUI()
     {
       InitializeComponent();
+      _overviewUpdateTimer = new DispatcherTimer(DispatcherPriority.Background, Dispatcher)
+      {
+        Interval = TimeSpan.FromMilliseconds(100)
+      };
+      _overviewUpdateTimer.Tick += (_, _) => FlushOverviewUpdate();
       errorOverviewBar.SetPositionPreviewFactory(GetOverviewPreview);
       DisplayItems.CollectionChanged += (_, _) =>
       {
@@ -315,8 +301,16 @@ namespace Ask.UI.Components.ProtocolListBox
 
     private void ProtocolScrollViewer_ScrollChanged(object sender, ScrollChangedEventArgs e)
     {
+      if (e.VerticalChange != 0 && e.ExtentHeightChange == 0)
+      {
+        _followTail = IsScrolledToEnd();
+      }
+      else if (e.ExtentHeightChange > 0 && _followTail)
+      {
+        _protocolScrollViewer?.ScrollToEnd();
+      }
       RefreshVerticalScrollBar();
-      RequestOverviewUpdate(diagnosticsChanged: false);
+      RefreshErrorOverviewViewport();
     }
 
     private void RefreshVerticalScrollBar()
@@ -608,6 +602,7 @@ namespace Ask.UI.Components.ProtocolListBox
         _pendingGroup = null;
         _lastMessageItem = null;
         _activeErrorMessage = null;
+        _followTail = true;
         _messageItems.Clear();
         _itemGroups.Clear();
         RefreshErrorOverview();
@@ -646,74 +641,24 @@ namespace Ask.UI.Components.ProtocolListBox
 
     public async Task AppendLineAsync(ShowMessageModel showMessageModel, bool lastMessage = false)
     {
-      var queuedAt = Stopwatch.GetTimestamp();
-      var messageId = RuntimeHelpers.GetHashCode(showMessageModel);
-      var dispatcherQueueMs = 0d;
-      var uiWorkMs = 0d;
-
-      await Application.Current.Dispatcher.InvokeAsync(() =>
+      await Dispatcher.InvokeAsync(() =>
       {
-        var uiWorkStarted = Stopwatch.GetTimestamp();
-        dispatcherQueueMs = Stopwatch.GetElapsedTime(queuedAt, uiWorkStarted).TotalMilliseconds;
-        var shouldScrollToEnd = IsScrolledToEnd();
-
         _historyMessages.Add(showMessageModel);
         AppendVisibleMessage(showMessageModel);
         _messageIndices[showMessageModel] = _historyMessages.Count - 1;
         AddOverviewDiagnostic(showMessageModel, _historyMessages.Count);
-        RequestOverviewUpdate();
+        RequestOverviewUpdate(immediate: GetOverviewSeverity(showMessageModel) != null);
 
         if (lastMessage)
         {
           FinalizeLatestCommandGroup();
         }
 
-        if (shouldScrollToEnd)
+        if (_followTail)
         {
           RequestScrollToEnd();
         }
-        RequestRenderTimingProbe(messageId);
-
-        uiWorkMs = Stopwatch.GetElapsedTime(uiWorkStarted).TotalMilliseconds;
-      }, DispatcherPriority.Background);
-
-      LogDebug(
-        $"[ProtocolOutputTiming] UI append completed: message={messageId}, " +
-        $"dispatcherQueueMs={dispatcherQueueMs:F1}, uiWorkMs={uiWorkMs:F1}, " +
-        $"totalMs={Stopwatch.GetElapsedTime(queuedAt).TotalMilliseconds:F1}, " +
-        $"thread={Environment.CurrentManagedThreadId}");
-    }
-
-    /// <summary>
-    /// Регистрирует задержку до ближайшего цикла отрисовки протокола.
-    /// </summary>
-    /// <param name="messageId">Идентификатор записи протокола.</param>
-    private void RequestRenderTimingProbe(int messageId)
-    {
-      _pendingRenderEntries++;
-      _lastAppendTimestamp = Stopwatch.GetTimestamp();
-      _lastRenderedMessageId = messageId;
-
-      if (_renderProbePending)
-      {
-        return;
-      }
-
-      _renderProbePending = true;
-      Dispatcher.BeginInvoke(() =>
-      {
-        var entries = _pendingRenderEntries;
-        var lastMessageId = _lastRenderedMessageId;
-        var renderLatencyMs = Stopwatch.GetElapsedTime(_lastAppendTimestamp).TotalMilliseconds;
-
-        _pendingRenderEntries = 0;
-        _renderProbePending = false;
-
-        LogDebug(
-          $"[ProtocolOutputTiming] UI render turn reached: message={lastMessageId}, " +
-          $"batchedEntries={entries}, renderLatencyMs={renderLatencyMs:F1}, " +
-          $"thread={Environment.CurrentManagedThreadId}");
-      }, DispatcherPriority.Render);
+      }, DispatcherPriority.DataBind);
     }
 
     private void AppendVisibleMessage(ShowMessageModel model)
@@ -926,7 +871,7 @@ namespace Ask.UI.Components.ProtocolListBox
         _messageIndices[_historyMessages[i]] = i;
         AddOverviewDiagnostic(_historyMessages[i], i + 1);
       }
-      RequestOverviewUpdate();
+      RequestOverviewUpdate(immediate: true);
     }
 
     private void AddOverviewDiagnostic(ShowMessageModel message, int lineNumber)
@@ -952,24 +897,31 @@ namespace Ask.UI.Components.ProtocolListBox
       => text?.Contains("[ERR]", StringComparison.OrdinalIgnoreCase) == true ||
          text?.Contains("[БРАК]", StringComparison.OrdinalIgnoreCase) == true;
 
-    private void RequestOverviewUpdate(bool diagnosticsChanged = true)
+    private void RequestOverviewUpdate(bool diagnosticsChanged = true, bool immediate = false)
     {
       _overviewDiagnosticsDirty |= diagnosticsChanged;
-      if (_overviewUpdatePending) return;
-      _overviewUpdatePending = true;
-      Dispatcher.BeginInvoke(() =>
+      if (immediate)
       {
-        _overviewUpdatePending = false;
-        if (_overviewDiagnosticsDirty)
-        {
-          _overviewDiagnosticsDirty = false;
-          errorOverviewBar.SetLineDiagnostics(_historyMessages.Count,
-            _overviewDiagnostics, NavigateToErrorOverviewLine);
-          RefreshOverviewPositions(_protocolScrollViewer?.ExtentHeight ?? 0);
-        }
-        UpdateOverviewSelection();
-        RefreshErrorOverviewViewport();
-      }, DispatcherPriority.Loaded);
+        FlushOverviewUpdate();
+      }
+      else if (!_overviewUpdateTimer.IsEnabled)
+      {
+        _overviewUpdateTimer.Start();
+      }
+    }
+
+    private void FlushOverviewUpdate()
+    {
+      _overviewUpdateTimer.Stop();
+      if (_overviewDiagnosticsDirty)
+      {
+        _overviewDiagnosticsDirty = false;
+        errorOverviewBar.SetLineDiagnostics(_historyMessages.Count,
+          _overviewDiagnostics, NavigateToErrorOverviewLine);
+        RefreshOverviewPositions(_protocolScrollViewer?.ExtentHeight ?? 0);
+      }
+      UpdateOverviewSelection();
+      RefreshErrorOverviewViewport();
     }
 
     private void UpdateOverviewSelection()
@@ -1093,6 +1045,7 @@ namespace Ask.UI.Components.ProtocolListBox
     private void RefreshVisibleState()
     {
       RestoreVisibleItems();
+      _followTail = true;
       RequestScrollToEnd();
     }
 
@@ -1198,6 +1151,11 @@ namespace Ask.UI.Components.ProtocolListBox
         ProtocolListBox.LayoutUpdated -= HandleLayoutUpdated;
         _scrollToEndRequested = false;
 
+        if (!_followTail)
+        {
+          return;
+        }
+
         _protocolScrollViewer ??= FindVisualChild<ScrollViewer>(ProtocolListBox);
         if (_protocolScrollViewer == null)
         {
@@ -1208,12 +1166,6 @@ namespace Ask.UI.Components.ProtocolListBox
       }
 
       ProtocolListBox.LayoutUpdated += HandleLayoutUpdated;
-
-      Dispatcher.BeginInvoke(() =>
-      {
-        ProtocolListBox.InvalidateMeasure();
-        ProtocolListBox.InvalidateArrange();
-      }, DispatcherPriority.Loaded);
     }
 
     /// <summary>

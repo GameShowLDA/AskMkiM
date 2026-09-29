@@ -546,6 +546,55 @@ public sealed class ProtocolOverviewTests
   }
 
   [Fact]
+  public void AutoScrollFollowsNewLinesUntilUserScrollsAway()
+  {
+    RunInSta(() =>
+    {
+      var control = new ProtocolListBoxUI();
+      control.LoadMessages(Enumerable.Range(1, 100).Select(index =>
+        new ShowMessageModel { Header = $"Строка {index}", Message = "Результат",
+          Status = ShowMessageModel.MessageType.Info }));
+
+      void Layout()
+      {
+        control.Measure(new System.Windows.Size(800, 400));
+        control.Arrange(new System.Windows.Rect(0, 0, 800, 400));
+        control.UpdateLayout();
+        System.Windows.Threading.Dispatcher.CurrentDispatcher.Invoke(() => { },
+          System.Windows.Threading.DispatcherPriority.ApplicationIdle);
+      }
+
+      Layout();
+      control.RaiseEvent(new System.Windows.RoutedEventArgs(System.Windows.FrameworkElement.LoadedEvent));
+      try
+      {
+        Layout();
+        var viewer = FindDescendant<ScrollViewer>((ListBox)control.FindName("ProtocolListBox"))!;
+        viewer.ScrollToEnd();
+        Layout();
+
+        var appendAtEnd = control.AppendLineAsync(new ShowMessageModel { Header = "Новая строка", Message = "Результат" });
+        var nextAppend = control.AppendLineAsync(new ShowMessageModel { Header = "Ещё строка", Message = "Результат" });
+        Layout();
+        Assert.True(appendAtEnd.IsCompletedSuccessfully);
+        Assert.True(nextAppend.IsCompletedSuccessfully);
+        Assert.Equal(viewer.ScrollableHeight, viewer.VerticalOffset, precision: 3);
+
+        viewer.ScrollToTop();
+        Layout();
+        var appendAfterScroll = control.AppendLineAsync(new ShowMessageModel { Header = "Следующая строка", Message = "Результат" });
+        Layout();
+        Assert.True(appendAfterScroll.IsCompletedSuccessfully);
+        Assert.Equal(0, viewer.VerticalOffset, precision: 3);
+      }
+      finally
+      {
+        control.RaiseEvent(new System.Windows.RoutedEventArgs(System.Windows.FrameworkElement.UnloadedEvent));
+      }
+    });
+  }
+
+  [Fact]
   public void MarkerOverlayReceivesMarkerHitsAndPassesEmptyTrackToScrollBar()
   {
     RunInSta(() =>
