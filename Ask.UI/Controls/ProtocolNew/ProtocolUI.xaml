@@ -40,18 +40,43 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border x:Name="ButtonChrome"
-                                Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="4"
-                                SnapsToDevicePixels="True">
+                        <Grid SnapsToDevicePixels="True">
+                            <Border x:Name="ButtonChrome"
+                                    Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="6"/>
+                            <Border x:Name="HoverOverlay"
+                                    Background="{DynamicResource TestsInteractivePressedSolidColorBrush}"
+                                    CornerRadius="6"
+                                    Opacity="0"
+                                    IsHitTestVisible="False"/>
                             <ContentPresenter Margin="{TemplateBinding Padding}"
                                               HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
                                               VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
-                        </Border>
+                        </Grid>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
+                                <Trigger.EnterActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="HoverOverlay"
+                                                             Storyboard.TargetProperty="Opacity"
+                                                             To="0.12"
+                                                             Duration="0:0:0.12"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.EnterActions>
+                                <Trigger.ExitActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="HoverOverlay"
+                                                             Storyboard.TargetProperty="Opacity"
+                                                             To="0"
+                                                             Duration="0:0:0.18"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.ExitActions>
                                 <Setter TargetName="ButtonChrome" Property="Background" Value="{DynamicResource TestsInteractiveBackgroundSolidColorBrush}"/>
                                 <Setter TargetName="ButtonChrome" Property="BorderBrush" Value="{DynamicResource TestsInteractiveBorderSolidColorBrush}"/>
                             </Trigger>
@@ -85,7 +110,7 @@
 
     </UserControl.Resources>
 
-    <Grid>
+    <Grid Background="{DynamicResource TestsProtocolBackgroundBrush}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -95,7 +120,7 @@
         <Grid Grid.Row="0"
               Height="40"
               MaxHeight="40"
-              Margin="5"
+              Margin="8,4,8,6"
               Name="ProtocolManager"
               Visibility="Collapsed">
             <Grid.ColumnDefinitions>
@@ -220,7 +245,7 @@
             </Border>
         </Grid>
 
-        <Grid Grid.Row="1" Background="{DynamicResource IsCheckedColorSolidColorBrush}" Name="TopMenuButton" MinHeight="40" Visibility="{Binding IsTopMenuVisible, Converter={StaticResource BoolToVis}}">
+        <Grid Grid.Row="1" Background="Transparent" Name="TopMenuButton" MinHeight="40" Margin="8,4,8,6" Visibility="{Binding IsTopMenuVisible, Converter={StaticResource BoolToVis}}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
@@ -231,6 +256,14 @@
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
+
+            <Border Grid.ColumnSpan="8"
+                    Background="{DynamicResource SettingsNestedGroupBackgroundSolidColorBrush}"
+                    BorderBrush="{DynamicResource TopPanelHoverBackgroundBrush}"
+                    BorderThickness="1"
+                    CornerRadius="12"
+                    Opacity="0.85"
+                    IsHitTestVisible="False"/>
 
             <Button x:Name="ContinueButtonTop" Grid.Column="0" Style="{StaticResource TopMenuButtonStyle}" ToolTip="{Binding Source={StaticResource LS_Protocol_Tooltip_Continue}, Path=Value}">
                 <Icons:ContinueIcon Size="18" IsHitTestVisible="False"/>
@@ -281,15 +314,17 @@
 
         </Grid>
 
-        <Border  Name="ButtonPanels" CornerRadius="0,0,0,0" Grid.Row="2" Background="{DynamicResource TestsProtocolBackgroundBrush}">
+        <Border Name="ButtonPanels" Grid.Row="2" Background="{DynamicResource TestsProtocolBackgroundBrush}">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition x:Name="MenuButtonColumn" Width="Auto" MaxWidth="400"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <Border  Padding="0,0" Margin="5" CornerRadius="20" Name="MenuButton" Height="Auto" Width="Auto" Visibility="{Binding IsTopMenuVisible, Converter={StaticResource InverseBoolToVis}}" 
-                         Background="{DynamicResource TestsMainPanelBackgroundBrush}">
+                <Border Padding="0" Margin="8,2,6,8" CornerRadius="14" Name="MenuButton" Height="Auto" Width="Auto" Visibility="{Binding IsTopMenuVisible, Converter={StaticResource InverseBoolToVis}}"
+                        Background="{DynamicResource TestsMainPanelBackgroundBrush}"
+                        BorderBrush="{DynamicResource TopPanelHoverBackgroundBrush}"
+                        BorderThickness="1">
 
                     <Grid Height="Auto">
                         <Grid.RowDefinitions>
@@ -297,7 +332,7 @@
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
 
-                        <Border Background="{DynamicResource TestsInputBackgroundHeaderPanelBrush}" CornerRadius="20,20,0,0">
+                        <Border Background="{DynamicResource TestsInputBackgroundHeaderPanelBrush}" CornerRadius="13,13,0,0">
                             <Grid >
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto"/>
@@ -406,7 +441,7 @@
                     </Grid>
                 </Border>
 
-                <Grid Grid.Column="1" Margin="5">
+                <Grid Grid.Column="1" Margin="6,2,8,8">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition x:Name="ExecutionProtocolColumn" Width="*" MinWidth="100"/>
                         <ColumnDefinition x:Name="InspectionProtocolSplitterColumn" Width="Auto"/>

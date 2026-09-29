@@ -21,6 +21,7 @@
         Title="ASK MKI M" 
         Height="600" Width="800"
         WindowStyle="None"
+        Background="{DynamicResource EmptyBackgroundBrush}"
         Padding="3"
         MinWidth="800"
         MinHeight="600"
@@ -46,7 +47,7 @@
                         <Border Background="{TemplateBinding Background}"
                                 BorderBrush="{TemplateBinding BorderBrush}"
                                 BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="4">
+                                CornerRadius="8">
                             <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
                                               VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
                         </Border>
@@ -182,7 +183,7 @@
         </i:EventTrigger>
     </i:Interaction.Triggers>
 
-    <Grid>
+    <Grid Background="Transparent">
         <Grid x:Name="MainContentLayer">
             <Grid.Style>
                 <Style TargetType="Grid">
@@ -223,7 +224,8 @@
             </Grid.RowDefinitions>
 
             <Grid 
-            x:Name="TopPanel" Background="{DynamicResource BackgroundBrushes}" Cursor="SizeAll"
+            x:Name="TopPanel" Background="Transparent" Cursor="SizeAll"
+            Margin="8,8,8,6"
             PreviewMouseLeftButtonDown="TopPanel_PreviewMouseLeftButtonDown">
 
                 <Grid.ColumnDefinitions>
@@ -232,7 +234,13 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
-                <Menu Name="mainMenu" VerticalAlignment="Center" VerticalContentAlignment="Center" FontSize="16" Background="Transparent" 
+                <Border Grid.ColumnSpan="3"
+                        BorderBrush="{DynamicResource TopPanelHoverBackgroundBrush}"
+                        BorderThickness="1"
+                        CornerRadius="10"
+                        IsHitTestVisible="False"/>
+
+                <Menu Name="mainMenu" VerticalAlignment="Center" VerticalContentAlignment="Center" FontSize="16" Background="Transparent" Margin="6,2,0,2"
                 Foreground="{DynamicResource MainTitleSolidColorBrush}" Grid.Column="0" BorderThickness="0">
                     <Menu.ItemsPanel>
                         <ItemsPanelTemplate>
@@ -392,6 +400,7 @@
                     VerticalAlignment="Top"
                     Grid.Column="2" 
                     Background="Transparent"
+                    Margin="0,2,6,2"
                     >
 
                     <Button x:Name="DailyReportButton" Style="{StaticResource CurrentUserButtonStyle}"
@@ -524,14 +533,15 @@
 
             <Components:MultiWindowControl 
             x:Name="MultiWindow" 
-            Grid.Row="1" Background="{DynamicResource TestsProtocolBackgroundBrush}"
+            Grid.Row="1" Margin="8,0,8,0" Background="Transparent"
             />
 
             <Grid 
             Name="BottomPanel"
             Grid.Row="2" 
             Height="38" 
-            Background="{DynamicResource BackgroundBrushes}"
+            Margin="8,6,8,8"
+            Background="Transparent"
             >
 
                 <Grid.ColumnDefinitions>
@@ -543,6 +553,12 @@
                     <ColumnDefinition Width="Auto"></ColumnDefinition>
                     <ColumnDefinition Width="Auto"></ColumnDefinition>
                 </Grid.ColumnDefinitions>
+
+                <Border Grid.ColumnSpan="7"
+                        BorderBrush="{DynamicResource TopPanelHoverBackgroundBrush}"
+                        BorderThickness="1"
+                        CornerRadius="10"
+                        IsHitTestVisible="False"/>
 
                 <Button x:Name="TerminalButton"
                     Grid.Column="0"

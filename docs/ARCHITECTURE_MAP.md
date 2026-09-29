@@ -64,6 +64,7 @@ Size/Foreground и анимации общей кнопки; лицензия с
 | Архивы APK/APKW | `Ask.UI/Features/Archive/` | `Ask.Core/Services/FileFormats/Apk/`, `MainWindow/Services/Conversion/` |
 | Рабочее пространство и вкладки | `UI/Components/MultiEditorControl.xaml.cs` | `UI/Components/MultiEditorMethods/FileManager.cs`, `UI/Services/`, `MainWindow/Services/MultiWindowService.cs` |
 | Роли и права | `MainWindow/Init/RoleApplicationConfigurator.cs` | `Ask.Core/Services/Config/AppSettings/RoleAuthorizationConfig.cs`, `Ask.UI/Features/RoleManagement/` |
+| Фон главного окна и выделение меню | `MainWindow/MainWindow.xaml`, `UI/Controls/EmptyWorkspace/EmptyWorkspaceView.xaml` | `UI/Resources/Theme/{dark,light}.xaml`, `UI/Resources/Theme/{dark,light}.custom.xaml`, `UI/Components/MultiWindowControl.xaml` |
 | Административные и сервисные утилиты | `MainWindow/MainWindow.xaml`, `MainWindow/ViewModels/AdminViewModel.cs`, `MainWindow/Services/AdminServices.cs` | `UI/Controls/AdminPanel/ServiceUtilitiesControl.xaml`, `UI/Controls/AdminPanel/SetCommand.xaml`, `Ask.UI/Features/ServiceTools/{Gpt,Chassis,SwitchingDevice}/`, `UI/Controls/AdminPanel/DataBaseView.xaml` |
 | Debug-доступ текущего пользователя | `Ask.Core/Services/Config/AppSettings/DebugAccessConfig.cs` | `RoleAuthorizationConfig.cs`, `SystemStateEvents.DebugRightsChanged`, оба `ErrorListControl.xaml.cs`, `ProtocolEntryOutputService.cs` |
 | События между подсистемами | `Ask.Core/Services/EventCore/Services/EventAggregator.cs` | `Ask.Core/Services/EventCore/Adapters/`, `Ask.Core/Services/EventCore/Events/`, `MainWindow/Events/` |
@@ -1869,6 +1870,13 @@ same path with gates enabled and performs real transport I/O.
 `MainWindow` is shell and menu host. `MainWindowViewModel` exposes File,
 Translation, Run, Metrology, Test, SelfTest, Settings, Admin and Window ViewModels.
 Their services generally route operations into `MultiWindowService`.
+
+`MainWindow` рисует общий фон окна через тематический `EmptyBackgroundBrush`.
+Корневой `Grid`, верхняя/нижняя панели и фон полосы вкладок `MultiWindowControl` поверх него прозрачны;
+верхняя и нижняя панели имеют только тонкую тематическую обводку со скруглением.
+`EmptyWorkspaceView` отображает содержимое без собственного фонового градиента и
+декоративных оверлеев. Скругление подсветки пунктов меню задают `StyleMenuItem`
+в `UI/Resources/Theme/dark.xaml` и `light.xaml`; custom-темы наследуют эти стили.
 
 ### Главное меню и адаптивная верхняя панель
 

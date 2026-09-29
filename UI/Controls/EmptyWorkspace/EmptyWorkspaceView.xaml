@@ -19,17 +19,7 @@
 
 
     <!-- ===== КОРНЕВОЙ GRID ===== -->
-    <Grid Background="{DynamicResource EmptyBackgroundBrush}">
-
-        <!-- центральное свечение -->
-        <Rectangle IsHitTestVisible="False" Fill="{DynamicResource CenterGlowBrush}">
-            <Rectangle.Effect>
-                <BlurEffect Radius="4"/>
-            </Rectangle.Effect>
-        </Rectangle>
-
-        <!-- виньетка -->
-        <Rectangle IsHitTestVisible="False" Fill="{DynamicResource VignetteBrush}"/>
+    <Grid Background="Transparent">
 
         <!-- ===== ЦЕНТРАЛЬНЫЙ БЛОК ===== -->
         <Border x:Name="CenterBlock"

@@ -181,7 +181,7 @@
                     <Border Background="{TemplateBinding Background}"
                             BorderBrush="{TemplateBinding BorderBrush}"
                             BorderThickness="{TemplateBinding BorderThickness}"
-                            CornerRadius="4">
+                            CornerRadius="8">
                         <ContentPresenter HorizontalAlignment="Center"
                                           VerticalAlignment="Center"/>
                     </Border>
@@ -221,7 +221,7 @@
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type MenuItem}">
                     <Grid SnapsToDevicePixels="True">
-                        <Border x:Name="ItemBg" Background="Transparent">
+                        <Border x:Name="ItemBg" Background="Transparent" CornerRadius="8">
                             <Grid Margin="6,2,6,2">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto" SharedSizeGroup="IconCol"/>
