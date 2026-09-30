@@ -47,6 +47,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <None Update="Shared\Components\Icons\Semi.Avalonia.LICENSE.txt">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	    <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+	  </None>
 	  <None Remove="Resources\Assets\Fonts\**\*.ttf" />
 	  <Resource Include="Resources\Assets\Fonts\**\*.ttf" />
 	  <None Update="Resources\Assets\Fonts\Manrope\OFL.txt">

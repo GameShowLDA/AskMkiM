@@ -330,7 +330,7 @@ namespace MainWindowProgram
         var authorizedRole = await _roleCredentialService.AuthorizeAsync(selectedRole.Role, enteredPassword);
         if (authorizedRole == null)
         {
-          SetStatus("Неверный пароль.");
+          SetStatus("Неверный пароль.", isPasswordError: true);
           SelectAllPassword();
           FocusPasswordInput();
           UpdateLoginButtonState();
@@ -495,7 +495,7 @@ namespace MainWindowProgram
         var authorizedRole = await _roleCredentialService.AuthorizeAsync(RoleType.Root, enteredPassword);
         if (authorizedRole == null)
         {
-          SetStatus("Неверный пароль.");
+          SetStatus("Неверный пароль.", isPasswordError: true);
           SelectAllPassword();
           FocusPasswordInput();
           UpdateLoginButtonState();
@@ -515,9 +515,12 @@ namespace MainWindowProgram
       }
     }
 
-    private void SetStatus(string message)
+    private void SetStatus(string message, bool isPasswordError = false)
     {
       StatusTextBlock.Text = message;
+      StatusTextBlock.Foreground = (System.Windows.Media.Brush)FindResource(
+        isPasswordError ? "PasswordErrorBrush" : "PasswordSecondaryBrush");
+      PasswordFieldContainer.Tag = isPasswordError;
     }
 
     private void UpdatePasswordPlaceholderVisibility()
@@ -535,17 +538,21 @@ namespace MainWindowProgram
       {
         VisiblePasswordTextBox.Visibility = Visibility.Visible;
         PasswordBox.Visibility = Visibility.Collapsed;
-        TogglePasswordVisibilityButton.Content = "\uE8F5";
+        PasswordShowIcon.Visibility = Visibility.Collapsed;
+        PasswordHideIcon.Visibility = Visibility.Visible;
         TogglePasswordVisibilityButton.ToolTip = "Скрыть пароль";
       }
       else
       {
         VisiblePasswordTextBox.Visibility = Visibility.Collapsed;
         PasswordBox.Visibility = Visibility.Visible;
-        TogglePasswordVisibilityButton.Content = "\uE890";
+        PasswordShowIcon.Visibility = Visibility.Visible;
+        PasswordHideIcon.Visibility = Visibility.Collapsed;
         TogglePasswordVisibilityButton.ToolTip = "Показать пароль";
       }
 
+      System.Windows.Automation.AutomationProperties.SetName(
+        TogglePasswordVisibilityButton, (string)TogglePasswordVisibilityButton.ToolTip);
       UpdatePasswordPlaceholderVisibility();
       UpdateCapsLockWarning();
     }

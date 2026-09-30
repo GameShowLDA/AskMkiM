@@ -307,6 +307,16 @@ App.OnStartup()
 `WindowChrome` задаёт радиус углов 12, `GlassFrameThickness=0`, `CaptionHeight=0`
 и `ResizeBorderThickness=0`; окно сохраняет непрозрачный фон без `AllowsTransparency`.
 `RolesComboBox` объединяет выбор роли и прежнее поле логина; ввод логина удалён.
+Локальный `LoginRoleComboBoxStyle` содержит `PART_EditableTextBox` (readonly для root)
+и `PART_Popup`; `TextSearch.TextPath=DisplayText` сохраняет подписи ролей вместе
+с `ItemTemplate`, `LoginRoleItemStyle` выделяет выбранный пункт и показывает галочку.
+Поле пароля объединяет `PasswordBox`/`VisiblePasswordTextBox` и кнопку раскрытия
+в `PasswordFieldContainer`; скрытый/открытый ввод синхронизируется прежними обработчиками.
+`UpdatePasswordVisibility` переключает `EyeOpenedIcon`/`EyeClosedIcon` и доступное имя кнопки.
+`EyeClosedIcon` адаптирует Semi.Avalonia `SemiIconEyeClosedSolid`; MIT-лицензия в
+`Ask.UI/Shared/Components/Icons/Semi.Avalonia.LICENSE.txt` копируется в output/publish.
+`SetStatus(message, isPasswordError)` задаёт цвет сообщения и `PasswordFieldContainer.Tag`;
+неверный пароль обычной роли и root включает контур ошибки, редактирование очищает его.
 Скрытый root по Alt+R отображается в этом же поле, не входит в обычный список ролей.
 `RoleCredentialModel.Login` и файловая модель `RoleCredentialFileService.RoleCredentialFileModel`
 сохраняют логин в `Resources/role-auth.json` относительно каталога приложения.
