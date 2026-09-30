@@ -317,6 +317,10 @@ App.OnStartup()
 `Ask.UI/Shared/Components/Icons/Semi.Avalonia.LICENSE.txt` копируется в output/publish.
 `SetStatus(message, isPasswordError)` задаёт цвет сообщения и `PasswordFieldContainer.Tag`;
 неверный пароль обычной роли и root включает контур ошибки, редактирование очищает его.
+`UpdateCapsLockWarning` показывает `CapsLockWarningBorder` рядом с подписью пароля
+по `Keyboard.IsKeyToggled(Key.CapsLock)` независимо от фокуса; выключенное состояние
+использует `Visibility.Hidden`, чтобы форма не смещалась. Состояние обновляется
+при открытии, работе с паролем и через существующий `_keyboardLayoutTimer` (250 мс).
 Скрытый root по Alt+R отображается в этом же поле, не входит в обычный список ролей.
 `RoleCredentialModel.Login` и файловая модель `RoleCredentialFileService.RoleCredentialFileModel`
 сохраняют логин в `Resources/role-auth.json` относительно каталога приложения.

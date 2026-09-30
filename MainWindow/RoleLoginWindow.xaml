@@ -408,7 +408,23 @@
                               VerticalContentAlignment="Center" TextSearch.TextPath="DisplayText"
                               IsEditable="True" IsReadOnly="True"
                               SelectionChanged="RolesComboBox_SelectionChanged"/>
-                    <TextBlock Text="Пароль" Margin="0,16,0,8" FontFamily="{StaticResource Manrope}" FontSize="16"/>
+                    <Grid Margin="0,16,0,8" Height="26">
+                        <TextBlock Text="Пароль" FontFamily="{StaticResource Manrope}" FontSize="16" VerticalAlignment="Center"/>
+                        <Border x:Name="CapsLockWarningBorder" Visibility="Hidden" HorizontalAlignment="Right"
+                                CornerRadius="8" Background="#F2E6CC" Padding="8,3"
+                                ToolTip="Caps Lock включён. Проверьте регистр букв при вводе пароля."
+                                AutomationProperties.Name="Caps Lock включён">
+                            <StackPanel Orientation="Horizontal">
+                                <Path Data="M0 8 L6 2 L12 8 M6 2 L6 13 M1 17 L11 17"
+                                      Stroke="#8B6428" StrokeThickness="1.5" StrokeStartLineCap="Round"
+                                      StrokeEndLineCap="Round" Width="12" Height="16" Stretch="Uniform"
+                                      Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                <TextBlock x:Name="CapsLockWarningTextBlock" Text="Caps Lock включён"
+                                           FontFamily="{StaticResource Manrope}" FontSize="12"
+                                           Foreground="#8B6428" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
                     <Grid Height="48">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/><ColumnDefinition Width="60"/>
@@ -490,9 +506,6 @@
                             <TextBlock x:Name="KeyboardLayoutTextBlock"/>
                         </Button>
                     </Grid>
-                    <TextBlock x:Name="CapsLockWarningTextBlock" Text="Включён Caps Lock"
-                               Visibility="Collapsed" Margin="0,6,0,0" FontFamily="{StaticResource Manrope}"
-                               Foreground="{StaticResource PasswordSecondaryBrush}"/>
                     <Button x:Name="LoginButton" Content="Войти" Height="48" Margin="0,20,0,0"
                             Style="{StaticResource LoginButtonStyle}"
                             IsEnabled="False" IsDefault="True" Click="LoginButton_Click"/>

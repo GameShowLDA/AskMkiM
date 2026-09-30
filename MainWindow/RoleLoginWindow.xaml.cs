@@ -559,11 +559,9 @@ namespace MainWindowProgram
 
     private void UpdateCapsLockWarning()
     {
-      bool hasPasswordFocus = PasswordBox.IsKeyboardFocused || VisiblePasswordTextBox.IsKeyboardFocused;
-      CapsLockWarningTextBlock.Visibility =
-        hasPasswordFocus && Keyboard.IsKeyToggled(Key.CapsLock)
-          ? Visibility.Visible
-          : Visibility.Collapsed;
+      CapsLockWarningBorder.Visibility = Keyboard.IsKeyToggled(Key.CapsLock)
+        ? Visibility.Visible
+        : Visibility.Hidden;
     }
 
     private void UpdateKeyboardLayoutIndicator()
