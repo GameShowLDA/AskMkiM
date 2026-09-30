@@ -12,7 +12,6 @@
 		<Folder Include="Infrastructure\State\" />
 		<Folder Include="Infrastructure\Messaging\" />
 		<Folder Include="Resources\Assets\Image\" />
-		<Folder Include="Resources\Assets\Fonts\" />
 		<Folder Include="Resources\Assets\SyntaxHighlighting\Light\" />
 		<Folder Include="Resources\Theme\" />
 		<Folder Include="Shared\Validation\" />
@@ -48,6 +47,12 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <None Remove="Resources\Assets\Fonts\**\*.ttf" />
+	  <Resource Include="Resources\Assets\Fonts\**\*.ttf" />
+	  <None Update="Resources\Assets\Fonts\Manrope\OFL.txt">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	    <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+	  </None>
 	  <Resource Include="Resources\Assets\Image\Authorization\*.*" />
 	  <Resource Include="Resources\Assets\SyntaxHighlighting\Dark\*.xshd" />
 	  <Resource Include="Resources\Assets\SyntaxHighlighting\Light\*.xshd" />

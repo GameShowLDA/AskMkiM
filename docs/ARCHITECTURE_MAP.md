@@ -293,6 +293,29 @@ App.OnStartup()
 
 ### Authentication and Debug access flow
 
+`MainWindow/RoleLoginWindow.xaml` — окно 800×600 по центру экрана: приветствие слева,
+выпадающий выбор роли и пароль справа; при открытии выбран Администратор.
+Левая панель использует встроенную гарнитуру Manrope (Regular/SemiBold) из
+`Ask.UI/Resources/Assets/Fonts/Manrope/`, ресурс `Manrope` в
+`Ask.UI/Resources/Assets/Fonts/Font.xaml`; там же определены ключи Winston для остальных UI.
+`Ask.UI/Ask.UI.csproj` включает все TTF из `Resources/Assets/Fonts/` как WPF Resource
+и копирует `Manrope/OFL.txt` в output/publish. `UI/Style.xaml` и окно входа
+подключают общий словарь из сборки `Ask.UI`.
+`WindowStyle=None`: собственная верхняя область
+перемещения вызывает `TitleBar_MouseLeftButtonDown → DragMove`; кнопка с `WindowCloseIcon`
+использует прежний `CancelButton_Click` и отключается во время загрузки приложения.
+`WindowChrome` задаёт радиус углов 12, `GlassFrameThickness=0`, `CaptionHeight=0`
+и `ResizeBorderThickness=0`; окно сохраняет непрозрачный фон без `AllowsTransparency`.
+`RolesComboBox` объединяет выбор роли и прежнее поле логина; ввод логина удалён.
+Скрытый root по Alt+R отображается в этом же поле, не входит в обычный список ролей.
+`RoleCredentialModel.Login` и файловая модель `RoleCredentialFileService.RoleCredentialFileModel`
+сохраняют логин в `Resources/role-auth.json` относительно каталога приложения.
+`RoleCredentialFileService.AuthorizeAsync(RoleType, string password)` проверяет пароль выбранной
+роли через PBKDF2; сохранённое поле `Login` оставлено для совместимости JSON и не участвует во входе.
+Нормализация старого JSON без `Login` добавляет `admin`/`adjuster`/`developer`/`root`,
+сохраняя существующие хэши и соли паролей. После входа то же окно показывает загрузку,
+а `RoleLoginWindowManager` сохраняет прежний жизненный цикл окна на отдельном STA-потоке.
+
 Debug-доступ не является параметром запуска или независимо изменяемым состоянием.
 Единственный источник истины — фактически авторизованная текущая роль:
 
@@ -309,6 +332,17 @@ RoleLoginWindow authenticates RoleCredentialModel successfully
 → уже открытые UI.Controls.ErrorList.ErrorListControl /
    Ask.UI.Controls.ErrorList.ErrorListControl обновляют видимость DEBUG-колонки
 ```
+
+При смене пользователя главное окно передаётся в `RoleLoginWindowManager.ShowAsync` как owner.
+Ожидание открытия асинхронно, чтобы основной Dispatcher продолжал обрабатывать системные сообщения.
+Manager получает native handle через `WindowInteropHelper` и блокирует окно
+владельца через `EnableWindow(false)` до закрытия окна входа; исходно отключённый owner
+не включается. `MainWindow.SwitchCurrentUserAsync` также временно отключает WPF `IsEnabled`
+и восстанавливает прежнее значение в `finally`. `InputManager_PreProcessInput` отменяет ввод
+основного Dispatcher во время смены пользователя, включая глобальные горячие клавиши.
+`SwitchCurrentUserAsync` сохраняет исходный `Window.Effect`, применяет `BlurEffect` с радиусом 8
+перед открытием окна входа и восстанавливает исходный эффект в `finally`. Окно входа
+на отдельном Dispatcher не размывается. Первичный запуск без owner сохраняет прежний маршрут.
 
 Смена пользователя без перезапуска проходит через
 `MainWindow.SwitchCurrentUserAsync → RoleLoginWindowManager → успешная аутентификация
