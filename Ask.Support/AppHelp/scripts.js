@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     const $ = (selector, root = document) => root.querySelector(selector);
     const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
-    const textOf = el => el?.innerText.trim() || '';
+    const textOf = el => el?.textContent.trim() || '';
     const normalize = text => text.replace(/\s+/g, ' ').trim().toLowerCase();
 
     const tabs = $$('.tab');
@@ -50,6 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let activeItem = null;
     let isResizing = false;
     let searchToken = 0;
+    let searchTimer = null;
     const bookmarks = new Set(readBookmarks());
     const contentIndex = new Map();
     let contentIndexPromise = null;
@@ -219,6 +220,7 @@ document.addEventListener('DOMContentLoaded', () => {
         panes.forEach(pane => pane.classList.toggle('active', pane.id === `${name}-content`));
 
         if (name !== 'search') {
+            clearTimeout(searchTimer);
             searchToken++;
             searchBox.value = '';
             searchResults.innerHTML = '';
@@ -333,7 +335,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function stripDocToText(doc) {
         if (!doc) return '';
         doc.querySelectorAll('script,style,noscript').forEach(node => node.remove());
-        return (doc.body?.innerText || doc.body?.textContent || doc.documentElement?.textContent || '')
+        return (doc.body?.textContent || doc.documentElement?.textContent || '')
             .replace(/\s+/g, ' ')
             .trim();
     }
@@ -351,6 +353,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         searchFrame = document.createElement('iframe');
         searchFrame.setAttribute('aria-hidden', 'true');
+        searchFrame.setAttribute('sandbox', 'allow-same-origin');
         searchFrame.tabIndex = -1;
         searchFrame.style.cssText = 'position:absolute;width:0;height:0;border:0;opacity:0;pointer-events:none;';
         document.body.append(searchFrame);
@@ -361,18 +364,21 @@ document.addEventListener('DOMContentLoaded', () => {
         const frame = getSearchFrame();
 
         return new Promise(resolve => {
-            const finish = () => {
+            const finish = text => {
+                clearTimeout(timeout);
                 frame.onload = null;
                 frame.onerror = null;
-                resolve(stripDocToText(frame.contentDocument));
+                resolve(text);
             };
-
-            frame.onload = finish;
-            frame.onerror = () => {
-                frame.onload = null;
-                frame.onerror = null;
-                resolve('');
+            const timeout = setTimeout(() => finish(null), 5000);
+            frame.onload = () => {
+                try {
+                    finish(frame.contentDocument ? stripDocToText(frame.contentDocument) : null);
+                } catch {
+                    finish(null);
+                }
             };
+            frame.onerror = () => finish(null);
             frame.src = src;
         });
     }
@@ -385,22 +391,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
         contentIndexPromise = (async () => {
             try {
-                await loadContentTextByFetch(missingPages[0].src);
-
-                const loaded = await Promise.all(missingPages.map(async page => ([
-                    page.id,
-                    await loadContentTextByFetch(page.src)
-                ])));
-
-                loaded.forEach(([id, text]) => {
-                    contentIndex.set(id, { text, search: normalize(text) });
-                });
-                return;
-            } catch {
-                for (const page of missingPages) {
-                    const text = await loadContentTextByFrame(page.src);
-                    contentIndex.set(page.id, { text, search: normalize(text) });
+                // file:// не везде разрешает fetch; только для него нужен запасной iframe.
+                if (location.protocol === 'file:') {
+                    for (const page of missingPages) {
+                        const text = await loadContentTextByFrame(page.src);
+                        if (text !== null) contentIndex.set(page.id, text);
+                    }
+                    return;
                 }
+
+                let next = 0;
+                const worker = async () => {
+                    while (next < missingPages.length) {
+                        const page = missingPages[next++];
+                        try {
+                            // Сразу сохраняем текст и освобождаем DOM каждой статьи.
+                            contentIndex.set(page.id, await loadContentTextByFetch(page.src));
+                        } catch {
+                            // Повторим только эту статью при следующем поиске.
+                        }
+                    }
+                };
+                await Promise.all(Array.from({ length: Math.min(4, missingPages.length) }, worker));
+            } finally {
+                searchFrame?.remove();
+                searchFrame = null;
             }
         })().finally(() => {
             contentIndexPromise = null;
@@ -433,7 +448,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         searchResults.innerHTML = items.map(page => {
-            const snippet = mode === 'content' ? buildSnippet(contentIndex.get(page.id)?.text, query) : '';
+            const snippet = mode === 'content' ? buildSnippet(contentIndex.get(page.id), query) : '';
             return `
                 <div class="result-item" data-id="${page.id}">
                     <div class="result-title">${page.title}</div>
@@ -464,81 +479,60 @@ document.addEventListener('DOMContentLoaded', () => {
         if (token !== searchToken) return;
 
         renderSearchResults(
-            pages.filter(page => contentIndex.get(page.id)?.search.includes(query)),
+            pages.filter(page => contentIndex.get(page.id)?.toLowerCase().includes(query)),
             mode,
             query
         );
     }
 
-    function createNormalizedTextMap(root) {
-        const walker = document.createTreeWalker(
-            root,
-            NodeFilter.SHOW_TEXT,
-            {
-                acceptNode(node) {
-                    const parent = node.parentElement;
-                    if (!parent) return NodeFilter.FILTER_REJECT;
+    function findTextRange(doc, query) {
+        if (!doc?.body) return null;
+        const pattern = normalize(query || '');
+        if (!pattern) return null;
 
-                    const tag = parent.tagName?.toLowerCase();
-                    if (tag === 'script' || tag === 'style' || tag === 'noscript') {
-                        return NodeFilter.FILTER_REJECT;
-                    }
-
-                    if (!node.nodeValue.trim()) {
-                        return NodeFilter.FILTER_REJECT;
-                    }
-
-                    return NodeFilter.FILTER_ACCEPT;
-                }
-            }
-        );
-
-        let normalized = '';
-        const map = [];
+        // KMP walks text nodes until the first match. Only query-sized buffers are
+        // retained, instead of allocating a mapping object for every page character.
+        const prefix = new Uint32Array(pattern.length);
+        for (let i = 1, j = 0; i < pattern.length; i++) {
+            while (j && pattern[i] !== pattern[j]) j = prefix[j - 1];
+            if (pattern[i] === pattern[j]) j++;
+            prefix[i] = j;
+        }
+        const nodes = new Array(pattern.length);
+        const offsets = new Uint32Array(pattern.length);
+        const walker = doc.createTreeWalker(doc.body, NodeFilter.SHOW_TEXT, {
+            acceptNode: node => node.parentElement?.closest('script,style,noscript')
+                ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT
+        });
+        let count = 0;
+        let matched = 0;
+        let whitespace = true;
         let node;
-
         while ((node = walker.nextNode())) {
             const text = node.nodeValue;
-
-            for (let i = 0; i < text.length; i++) {
-                const ch = text[i];
-
-                if (/\s/.test(ch)) {
-                    if (normalized && !normalized.endsWith(' ')) {
-                        normalized += ' ';
-                        map.push({ node, offset: i });
+            for (let offset = 0; offset < text.length; offset++) {
+                const isSpace = /\s/.test(text[offset]);
+                if (isSpace && whitespace) continue;
+                whitespace = isSpace;
+                const chars = isSpace ? ' ' : text[offset].toLowerCase();
+                for (let i = 0; i < chars.length; i++) {
+                    const ch = chars[i];
+                    const slot = count++ % pattern.length;
+                    nodes[slot] = node;
+                    offsets[slot] = offset;
+                    while (matched && ch !== pattern[matched]) matched = prefix[matched - 1];
+                    if (ch === pattern[matched]) matched++;
+                    if (matched === pattern.length) {
+                        const start = count % pattern.length;
+                        const range = doc.createRange();
+                        range.setStart(nodes[start], offsets[start]);
+                        range.setEnd(node, offset + 1);
+                        return range;
                     }
-                } else {
-                    normalized += ch.toLowerCase();
-                    map.push({ node, offset: i });
                 }
             }
         }
-
-        return { normalized: normalized.trim(), map };
-    }
-
-    function findTextRange(doc, query) {
-        if (!doc?.body || !query) return null;
-
-        const normalizedQuery = normalize(query);
-        if (!normalizedQuery) return null;
-
-        const { normalized, map } = createNormalizedTextMap(doc.body);
-        const index = normalized.indexOf(normalizedQuery);
-
-        if (index < 0) return null;
-
-        const start = map[index];
-        const end = map[index + normalizedQuery.length - 1];
-
-        if (!start || !end) return null;
-
-        const range = doc.createRange();
-        range.setStart(start.node, start.offset);
-        range.setEnd(end.node, end.offset + 1);
-
-        return range;
+        return null;
     }
 
     function scrollFrameSelectionIntoView(range) {
@@ -655,13 +649,20 @@ document.addEventListener('DOMContentLoaded', () => {
         if (hasPage) loadPage(item.id);
     });
 
-    searchBox.addEventListener('input', runSearch);
+    searchBox.addEventListener('input', () => {
+        clearTimeout(searchTimer);
+        searchToken++;
+        setClearVisible(Boolean(searchBox.value));
+        searchTimer = setTimeout(runSearch, 150);
+    });
     searchModes.forEach(mode => mode.addEventListener('change', () => {
+        clearTimeout(searchTimer);
         updateSearchPlaceholder();
         runSearch();
     }));
 
     clearBtn.addEventListener('click', () => {
+        clearTimeout(searchTimer);
         searchToken++;
         searchBox.value = '';
         searchResults.innerHTML = '';

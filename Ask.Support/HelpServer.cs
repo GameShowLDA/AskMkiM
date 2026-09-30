@@ -11,113 +11,112 @@ using static Ask.LogLib.LoggerUtility;
 namespace Ask.Support
 {
   /// <summary>
-  /// Локальный HTTP-сервер.
+  /// Локальный HTTP-сервер, запускаемый при первом открытии справки.
   /// </summary>
   public static class HelpServer
   {
-    /// <summary>
-    /// Интерфейс для управления жизненным циклом сервера.
-    /// </summary>
+    private static readonly object SyncRoot = new();
     private static IHost? _host;
+    private static PhysicalFileProvider? _files;
+    private static Uri? _baseUrl;
 
     /// <summary>
-    /// Порт, на котором запущен сервер.
+    /// Адрес готового сервера, либо null до запуска/после остановки.
     /// </summary>
-    private static int _port;
+    public static Uri? BaseUrl
+    {
+      get { lock (SyncRoot) return _baseUrl; }
+    }
 
     /// <summary>
-    /// Базовая URL-адрес сервера.
-    /// </summary>
-    public static Uri? BaseUrl => _port > 0 ? new Uri($"http://localhost:{_port}/") : null;
-
-    /// <summary>
-    /// Запускает сервер, если он ещё не запущен. Повторные вызовы безопасны.
+    /// Запускает сервер, если он ещё не запущен. Повторные и параллельные вызовы безопасны.
     /// </summary>
     public static void EnsureStarted()
     {
-      if (_host != null)
-        return;
-
-      var helpDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "AppHelp");
-      var fullHelpDir = Path.GetFullPath(helpDir);
-
-      if (!Directory.Exists(fullHelpDir))
+      lock (SyncRoot)
       {
-        LogError($"Каталог справки не найден: {fullHelpDir}");
-        return;
-      }
+        if (_host != null) return;
 
-      int port = GetFreeTcpPort();
-      _port = port;
-
-      _host = Host.CreateDefaultBuilder()
-        .ConfigureWebHostDefaults(webBuilder =>
+        var helpDir = Path.Combine(AppContext.BaseDirectory, "AppHelp");
+        if (!Directory.Exists(helpDir))
         {
-          webBuilder.UseKestrel(options =>
+          LogError($"Каталог справки не найден: {helpDir}");
+          return;
+        }
+
+        // Для локальных файлов не нужны JSON-конфигурация, watchers, console logging и HTTPS.
+        var builder = WebApplication.CreateEmptyBuilder(new WebApplicationOptions
+        {
+          ApplicationName = typeof(HelpServer).Assembly.GetName().Name,
+          ContentRootPath = helpDir,
+          EnvironmentName = Environments.Production
+        });
+        // Kestrel резервирует порт сам, без гонки между поиском порта и запуском.
+        builder.WebHost.UseKestrelCore().ConfigureKestrel(options => options.Listen(IPAddress.Loopback, 0));
+
+        var files = new PhysicalFileProvider(helpDir);
+        IHost? host = null;
+        try
+        {
+          var app = builder.Build();
+          host = app;
+          var contentTypes = new FileExtensionContentTypeProvider();
+          contentTypes.Mappings[".woff"] = "font/woff";
+          contentTypes.Mappings[".woff2"] = "font/woff2";
+          contentTypes.Mappings[".ttf"] = "font/ttf";
+          contentTypes.Mappings[".webp"] = "image/webp";
+
+          app.UseDefaultFiles(new DefaultFilesOptions { FileProvider = files });
+          app.UseStaticFiles(new StaticFileOptions
           {
-            options.Listen(IPAddress.Loopback, port);
+            FileProvider = files,
+            ContentTypeProvider = contentTypes,
+            ServeUnknownFileTypes = false
+          });
+          app.Run(async context =>
+          {
+            context.Response.StatusCode = StatusCodes.Status404NotFound;
+            context.Response.ContentType = "text/plain; charset=utf-8";
+            await context.Response.WriteAsync("404 Not Found");
           });
 
-          webBuilder.Configure(app =>
-          {
-            var provider = new PhysicalFileProvider(fullHelpDir);
+          host.Start();
+          var address = new Uri(app.Urls.Single());
+          // Сохраняем localhost как origin для существующих cookies/закладок.
+          _baseUrl = new Uri($"http://localhost:{address.Port}/");
+          _files = files;
+          _host = host;
+        }
+        catch
+        {
+          host?.Dispose();
+          files.Dispose();
+          throw;
+        }
 
-            var contentTypeProvider = new FileExtensionContentTypeProvider();
-            contentTypeProvider.Mappings[".woff"] = "font/woff";
-            contentTypeProvider.Mappings[".woff2"] = "font/woff2";
-            contentTypeProvider.Mappings[".ttf"] = "font/ttf";
-            contentTypeProvider.Mappings[".webp"] = "image/webp";
-
-            app.UseStaticFiles(new StaticFileOptions
-            {
-              FileProvider = provider,
-              RequestPath = "",
-              ContentTypeProvider = contentTypeProvider,
-              ServeUnknownFileTypes = false
-            });
-
-            app.UseDefaultFiles(new DefaultFilesOptions
-            {
-              FileProvider = provider,
-              RequestPath = ""
-            });
-
-            app.Run(async ctx =>
-            {
-              ctx.Response.StatusCode = StatusCodes.Status404NotFound;
-              ctx.Response.ContentType = "text/plain; charset=utf-8";
-              await ctx.Response.WriteAsync("404 Not Found");
-            });
-          });
-        })
-        .Build();
-
-      _host.Start();
-
-      LogInformation($"HelpServer (Kestrel) запущен: http://localhost:{_port}/  Root={fullHelpDir}");
+        LogInformation($"HelpServer (Kestrel) запущен: {_baseUrl} Root={helpDir}");
+      }
     }
 
     /// <summary>
-    /// Останавливает сервер. Штатная остановка происходит без исключений.
+    /// Останавливает сервер и освобождает файловый провайдер. Допускает повторный запуск.
     /// </summary>
     public static void Stop()
     {
-      _host?.Dispose();
-      _host = null;
-      LogInformation($"HelpServer (Kestrel) остановлен.");
-    }
-
-    /// <summary>
-    /// Ищет и отдаёт первый попавшийся свободный порт.
-    /// </summary>
-    /// <returns>Номер свободного порта.</returns>
-    private static int GetFreeTcpPort()
-    {
-      var l = new System.Net.Sockets.TcpListener(IPAddress.Loopback, 0);
-      l.Start();
-      int port = ((IPEndPoint)l.LocalEndpoint).Port;
-      l.Stop();
-      return port;
+      lock (SyncRoot)
+      {
+        try
+        {
+          _host?.Dispose();
+        }
+        finally
+        {
+          _host = null;
+          _baseUrl = null;
+          _files?.Dispose();
+          _files = null;
+        }
+      }
     }
   }
 }

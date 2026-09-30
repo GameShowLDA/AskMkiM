@@ -34,7 +34,9 @@ namespace Ask.Support
     /// </remarks>
     public static void Load(string page) 
     { 
-      _helpWindow?.Load(HelpServer.BaseUrl + page);
+      var baseUrl = HelpServer.BaseUrl;
+      if (baseUrl == null) return;
+      _helpWindow?.Load(new Uri(baseUrl, page).AbsoluteUri);
       _helpWindow?.SetTopMost(true);
       _helpWindow?.SetTopMost(false);
     }
@@ -99,6 +101,17 @@ namespace Ask.Support
     /// </remarks>
     public static void LoadAndShow(string page)
     {
+      try
+      {
+        HelpServer.EnsureStarted();
+        if (HelpServer.BaseUrl == null) return;
+      }
+      catch (Exception ex)
+      {
+        LogException(ex: ex, customMessage: "Не удалось запустить Help-сервер.");
+        return;
+      }
+
       if (_helpWindow == null)
       {
         _helpWindow = new PhotinoWindow();
