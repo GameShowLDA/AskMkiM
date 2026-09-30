@@ -19,7 +19,7 @@
         <Grid 
             x:Name="ContentPanel" 
             Grid.Row="1" 
-            Background="{DynamicResource SettingsMainBackground}"
+            Background="Transparent"
             >
         </Grid>
     </Grid>
