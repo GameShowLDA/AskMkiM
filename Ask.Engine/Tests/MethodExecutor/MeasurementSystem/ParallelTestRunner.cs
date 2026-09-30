@@ -92,7 +92,7 @@ namespace Ask.Engine.Tests.MethodExecutor.MeasurementSystem
         await Task.WhenAll(tasks);
 
         await _measurementAction(_protocolUI, dataModel);
-        await ExecutionMessages.PublishPointsDisconnectionAsync(_protocolUI);
+        await ExecutionMessages.PublishGeneralPointsResetAsync(_protocolUI);
         // задержка для теста ПИ групповым методом
         await _protocolUI.DelayWithPauseAsync(TimeSpan.FromSeconds(1));
         await ResetAllPointsAsync(groupedPoints, cancellationToken);
@@ -162,7 +162,7 @@ namespace Ask.Engine.Tests.MethodExecutor.MeasurementSystem
     }
 
     /// <summary>
-    /// Выполняет отключение всех точек после завершения шага.
+    /// Сбрасывает модули после завершения шага и восстанавливает подключение шин A1 и B1.
     /// </summary>
     /// <param name="groups">Группы точек по модулям.</param>
     private async Task ResetAllPointsAsync(
@@ -172,7 +172,7 @@ namespace Ask.Engine.Tests.MethodExecutor.MeasurementSystem
       foreach (var (module, points, _) in groups)
       {
         cancellationToken.ThrowIfCancellationRequested();
-        await module.PointManager.DisconnectingAllPoint(_protocolUI);
+        await module.ConnectableManager.ResetAsync(_protocolUI);
         await module.BusManager.ConnectBusAsync(SwitchingBus.A1, userMessageService: _protocolUI);
         await module.BusManager.ConnectBusAsync(SwitchingBus.B1, userMessageService: _protocolUI);
       }

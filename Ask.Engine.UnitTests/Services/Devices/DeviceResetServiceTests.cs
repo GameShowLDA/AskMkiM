@@ -247,30 +247,37 @@ public sealed class DeviceResetServiceTests
     second.Connectable.Verify(x => x.ResetAsync(null), Times.Once);
   }
 
-  [Fact(DisplayName = "Сброс МКР: отключает все точки пакетной командой")]
-  public async Task ResetDevicesAsync_ForRelayModule_DisconnectsAllPointsBeforeReset()
+  [Fact(DisplayName = "Сброс МКР: выполняет общий сброс без отдельного отключения точек и шин")]
+  public async Task ResetDevicesAsync_ForRelayModule_UsesHardwareReset()
   {
     var module = CreateRelayModule(1, disconnectAllResult: true, resetResult: true);
+    var buses = new Mock<IBusManager>(MockBehavior.Strict);
+    module.Device.SetupProperty(x => x.BusManager, buses.Object);
+    var interaction = CreateInteractionService();
 
-    await DeviceResetService.ResetDevicesAsync([module.Device.Object]);
+    await DeviceResetService.ResetDevicesAsync([module.Device.Object], interaction.Object);
 
-    Assert.Equal(
-      ["disconnect-all"],
-      module.CallOrder);
-    module.PointManager.Verify(x => x.DisconnectingAllPoint(null), Times.Once);
-    module.Connectable.Verify(x => x.ResetAsync(null), Times.Never);
+    Assert.Equal(["reset"], module.CallOrder);
+    module.PointManager.Verify(x => x.DisconnectingAllPoint(It.IsAny<IUserInteractionService?>()), Times.Never);
+    module.Connectable.Verify(x => x.ResetAsync(null), Times.Once);
+    buses.VerifyNoOtherCalls();
+    interaction.Verify(x => x.ShowMessageAsync(
+      It.Is<ShowMessageModel>(message => message.Message == "Сброс устройства"
+        && message.Status == ShowMessageModel.MessageType.Success),
+      false, false, true, false, It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>()), Times.Once);
   }
 
-  [Fact(DisplayName = "Сброс МКР: не выполняет сброс при ошибке отключения точек")]
-  public async Task ResetDevicesAsync_ForRelayModule_DoesNotResetWhenPointDisconnectFailed()
+  [Fact(DisplayName = "Сброс МКР: предлагает продолжение при ошибке общего сброса")]
+  public async Task ResetDevicesAsync_ForRelayModule_HandlesHardwareResetFailure()
   {
-    var module = CreateRelayModule(1, disconnectAllResult: false, resetResult: true);
+    var module = CreateRelayModule(1, disconnectAllResult: true, resetResult: false);
     var interaction = CreateInteractionService(UserAction.Continue);
 
     await DeviceResetService.ResetDevicesAsync([module.Device.Object], interaction.Object);
 
-    module.PointManager.Verify(x => x.DisconnectingAllPoint(interaction.Object), Times.Once);
-    module.Connectable.Verify(x => x.ResetAsync(null), Times.Never);
+    module.PointManager.Verify(x => x.DisconnectingAllPoint(It.IsAny<IUserInteractionService?>()), Times.Never);
+    module.Connectable.Verify(x => x.ResetAsync(null), Times.Once);
+    interaction.Verify(x => x.WaitRetryOrContinueAsync(), Times.Once);
   }
 
   private static (
