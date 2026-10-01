@@ -132,6 +132,10 @@ namespace MainWindowProgram.Events
         ? "NotificationSuccessIconBrush"
         : "NotificationErrorIconBrush";
 
+      _mainWindow.UploadErrorIndicator.ToolTip = isIdleMode
+        ? "Выполнение в холостом режиме. Оборудование не используется."
+        : "Выполнение с оборудованием. Идёт проверка.";
+
       _mainWindow.UploadErrorIndicator.SetResourceReference(
         System.Windows.Controls.Control.ForegroundProperty,
         brushKey);

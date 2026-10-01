@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:UI.Components"
+             FontFamily="{DynamicResource WinstonMedium}"
              mc:Ignorable="d" 
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
              
@@ -12,7 +13,7 @@
         <TextBlock
             x:Name="Date"
             Text="00.00.0000"
-            FontFamily="{DynamicResource WinstonMedium}"
+            FontFamily="{Binding FontFamily, RelativeSource={RelativeSource AncestorType=UserControl}}"
             VerticalAlignment="Center"
             HorizontalAlignment="Center"
         />

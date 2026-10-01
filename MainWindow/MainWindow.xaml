@@ -206,7 +206,7 @@
 
             <Grid 
             x:Name="TopPanel" Background="Transparent" Cursor="SizeAll"
-            Margin="8,8,8,6"
+            Margin="0"
             PreviewMouseLeftButtonDown="TopPanel_PreviewMouseLeftButtonDown">
 
                 <Grid.ColumnDefinitions>
@@ -214,12 +214,6 @@
                     <ColumnDefinition Width="0"/>
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
-
-                <Border Grid.ColumnSpan="3"
-                        BorderBrush="{DynamicResource TopPanelHoverBackgroundBrush}"
-                        BorderThickness="1"
-                        CornerRadius="10"
-                        IsHitTestVisible="False"/>
 
                 <Menu Name="mainMenu" VerticalAlignment="Center" VerticalContentAlignment="Center" FontSize="16" Background="Transparent" Margin="6,2,0,2"
                 Foreground="{DynamicResource MainTitleSolidColorBrush}" Grid.Column="0" BorderThickness="0">
@@ -521,25 +515,19 @@
             Name="BottomPanel"
             Grid.Row="2" 
             Height="46"
-            Margin="8,6,8,8"
+            Margin="0"
             Background="Transparent"
             >
 
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"></ColumnDefinition>
                     <ColumnDefinition Width="Auto"></ColumnDefinition>
                     <ColumnDefinition Width="*"></ColumnDefinition>
                     <ColumnDefinition Width="Auto"></ColumnDefinition>
                     <ColumnDefinition Width="Auto"></ColumnDefinition>
                     <ColumnDefinition Width="Auto"></ColumnDefinition>
                     <ColumnDefinition Width="Auto"></ColumnDefinition>
+                    <ColumnDefinition Width="Auto"></ColumnDefinition>
                 </Grid.ColumnDefinitions>
-
-                <Border Grid.ColumnSpan="7"
-                        BorderBrush="{DynamicResource TopPanelHoverBackgroundBrush}"
-                        BorderThickness="1"
-                        CornerRadius="10"
-                        IsHitTestVisible="False"/>
 
                 <Button x:Name="TerminalButton"
                     Grid.Column="0"
@@ -557,15 +545,44 @@
                                          Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" />
                 </Button>
 
-                <TextBlock 
-                Grid.Column="1"
-                x:Name="InfoBlock" 
-                VerticalAlignment="Center" 
-                Padding="6,0,0,0" 
-                FontSize="14" 
-                Foreground="{DynamicResource MainTitleSolidColorBrush}" 
-				/>
-
+                <Border x:Name="InfoBadge" Grid.Column="1"
+                        Height="32" Margin="6,0,8,0" Padding="10,0"
+                        HorizontalAlignment="Left" VerticalAlignment="Center"
+                        Background="{DynamicResource TopPanelHoverBackgroundBrush}" CornerRadius="8">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Text, ElementName=InfoBlock}" Value="">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Text, ElementName=InfoBlock}" Value="{x:Null}">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Ellipse x:Name="InfoStatusDot" Width="5" Height="5" Margin="0,0,8,0"
+                                 VerticalAlignment="Center" IsHitTestVisible="False"
+                                 Fill="{Binding Foreground, ElementName=InfoBlock}"
+                                 Opacity="{Binding Opacity, ElementName=InfoBlock}"/>
+                        <TextBlock x:Name="InfoBlock" Grid.Column="1"
+                                   VerticalAlignment="Center"
+                                   FontFamily="{DynamicResource Manrope}" FontSize="13"
+                                   Foreground="{DynamicResource MainTitleSolidColorBrush}"
+                                   TextWrapping="NoWrap" TextTrimming="CharacterEllipsis">
+                            <TextBlock.ToolTip>
+                                <ToolTip DataContext="{Binding PlacementTarget, RelativeSource={RelativeSource Self}}">
+                                    <TextBlock Text="{Binding Text}" MaxWidth="480" TextWrapping="Wrap"/>
+                                </ToolTip>
+                            </TextBlock.ToolTip>
+                        </TextBlock>
+                    </Grid>
+                </Border>
 
                 <Controls:StatusBarControl
                 Grid.Column="2" 
@@ -575,8 +592,9 @@
                 />
 
 
-                <Controls:DateTimeControl Opacity="0.7"
-                x:Name="TimeBlock" 
+                <Controls:DateTimeControl
+                x:Name="TimeBlock"
+                VerticalAlignment="Center"
                 Margin="0,0,10,0" 
                 FontSize="13" 
                 Foreground="{DynamicResource ForegrounfBrushes}"
@@ -584,24 +602,29 @@
                 Cursor="Hand"
 				/>
 
-                <Components:KeyboardLayoutComponent 
-                Opacity="0.7"
-                x:Name="LanguageBlock" 
-                VerticalAlignment="Center" 
-                FontSize="15" 
-                Foreground="{DynamicResource ForegrounfBrushes}"
-                Grid.Column="3" 
-				/>
+                <Components:KeyboardLayoutComponent
+                    x:Name="LanguageBlock"
+                    VerticalAlignment="Center"
+                    Margin="0,0,10,0"
+                    Foreground="{DynamicResource ForegrounfBrushes}"
+                    Grid.Column="3"/>
 
-                <askUiIcons:UploadErrorIcon x:Name="UploadErrorIndicator"
-                                        Visibility="Collapsed"
-                                        Grid.Column="5"
-                                        Size="22"
-                                        Margin="0,0,10,0"
-                                        VerticalAlignment="Center"
-                                        HorizontalAlignment="Right"
-                                        Foreground="{DynamicResource NotificationErrorIconBrush}"
-                                        ToolTip="Работа оборудования!" />
+                <Border x:Name="ExecutionIndicatorSurface" Grid.Column="5"
+                        Width="32" Height="32" Margin="0,0,10,0"
+                        VerticalAlignment="Center" CornerRadius="8"
+                        Background="{DynamicResource BackgroundBrushes}"
+                        BorderBrush="{DynamicResource TopPanelButtonBevelBrush}" BorderThickness="1"
+                        Visibility="{Binding Visibility, ElementName=UploadErrorIndicator}"
+                        ToolTip="{Binding ToolTip, ElementName=UploadErrorIndicator}">
+                    <Border.Effect>
+                        <DropShadowEffect Color="Black" BlurRadius="8" ShadowDepth="2" Opacity="0.25"/>
+                    </Border.Effect>
+                    <askUiIcons:UploadErrorIcon x:Name="UploadErrorIndicator"
+                                               Visibility="Collapsed" Size="18"
+                                               VerticalAlignment="Center" HorizontalAlignment="Center"
+                                               Foreground="{DynamicResource NotificationErrorIconBrush}"
+                                               ToolTip="Выполнение с оборудованием"/>
+                </Border>
 
                 <DefaultGUI:PowerButton
                 Grid.Column="6" 

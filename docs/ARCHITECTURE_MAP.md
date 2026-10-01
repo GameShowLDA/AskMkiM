@@ -1931,7 +1931,9 @@ Their services generally route operations into `MultiWindowService`.
 
 `MainWindow` рисует общий фон окна через тематический `EmptyBackgroundBrush`.
 Корневой `Grid`, верхняя/нижняя панели и фон полосы вкладок `MultiWindowControl` поверх него прозрачны;
-верхняя и нижняя панели имеют только тонкую тематическую обводку со скруглением.
+верхняя и нижняя панели прилегают к краям рабочей области: Margin=0,
+без внешней обводки и скруглений. Внутренние отступы меню/кнопок и перетаскивание
+через `TopPanel_PreviewMouseLeftButtonDown` сохранены.
 `EmptyWorkspaceView` отображает содержимое без собственного фонового градиента и
 декоративных оверлеев. Скругление подсветки пунктов меню задают `StyleMenuItem`
 в `UI/Resources/Theme/dark.xaml` и `light.xaml`; custom-темы наследуют эти стили.
@@ -1955,10 +1957,67 @@ VSM-состояния Normal/MouseOver/Pressed/Disabled, масштаб нав�
 `UI/Resources/Theme/dark.xaml`/`light.xaml` усиливают блик и тонкую обводку только в тёмных
 темах; custom-темы наследуют параметры. При наведении обводка усиливается, при нажатии исчезает.
 `CurrentUserButtonStyle` наследует этот шаблон и задаёт размеры/отступы профиля и отчёта.
-Нижняя `BottomPanel` имеет высоту 46; кнопка терминала 32×32 с иконкой 18 использует
+Нижняя `BottomPanel` имеет высоту 46, Margin=0, без внешней рамки и скругления;
+фон по-прежнему задаёт `StateEventsBinder.ApplyMainPanelBackground`, включая индикацию питания.
+Кнопка терминала 32×32 с иконкой 18 использует
 тот же `WindowActionButtonStyle` и вертикально центрируется. Её маршрут:
 `Button.Click → MainWindow.TerminalButton_Click → ConsoleVisibilityController.ToggleConsole`;
 DrawerHost блокирует действие, а StateEventsBinder показывает кнопку только при console access.
+`InfoBadge` оформляет сообщения слева как плашку высотой 32, Manrope 13 и цветную
+точку с Fill/Opacity, связанными с `InfoBlock.Foreground/Opacity`. Плашка скрывается
+при пустом тексте. Столбец сообщений имеет ширину `*`, сведения редактора — `Auto`:
+длинный текст сокращается через CharacterEllipsis, полный текст доступен в ToolTip.
+Маршрут сохранён: `MessageEventAdapter → EventAggregator →
+ApplicationInitializer.SubscribeToMessageEvents → MessageHandler.SetErrorMessage /
+SetWarningMessage / SetInfoMessage / ClearMessage → SetMessage → Dispatcher →
+ApplyMessage → InfoBlock.Text/Foreground`. `GuiInitializer.Apply` связывает
+`MainWindow._infoBlock` с именованным TextBlock; автоматическое исчезновение выполняет
+прежний `MessageHandler.Timer_Elapsed`. Цвета ошибок/предупреждений не изменены.
+Сведения редактора отображает `UI/Controls/StatusBarControl.xaml`: строка, столбец и число
+строк разделены тонкими линиями, подписи приглушены, значения выделены. DataContext —
+`MainWindowProgram.ViewModels.TextEditorStatusViewModel`; `UiEventsBinder.OnTextEditorActivated`
+инициализирует показатели, Caret.PositionChanged/TextChanged обновляют их. Кнопка кодировки
+привязана к EncodingName и ToggleEncodingCommand (ЛКМ UTF-8/DOS); ПКМ проходит через
+`StatusBarControl.EncodingButton_MouseRightButtonUp → ChangeEncodingCommand` и открывает
+существующий список. `ChangeEncodingMouseCommand.Execute` подключает к ContextMenu
+`MainWindow/Resources/MainMenuStyles.xaml` и применяет `ShellContextMenuStyle`: скруглённая
+панель с тенью, ограничение высоты и MenuScrollViewer; строки используют существующий
+`StyleMenuItem` с компактными отступами. Состав списка и обработчики выбора кодировки
+сохранены. Видимость блока сохраняет `EditorEvents.TranslatorActive`.
+Индикатор раскладки `UI/Components/KeyboardLayoutComponent.xaml` — кнопка 44×32 с
+`WindowActionButtonStyle`, шрифтом Manrope и общими состояниями наведения/нажатия.
+`LayoutButton.Click → LayoutButton_Click → SwitchToNextInputLanguage → ActivateLanguage`
+перебирает `InputLanguageManager.Current.AvailableInputLanguages` и вызывает Win32
+`LoadKeyboardLayout/ActivateKeyboardLayout`. `InputLanguageChanged → UpdateLayoutDisplay`
+обновляет двухбуквенный код языка. Размещается как `LanguageBlock` в нижней панели.
+`UI/Controls/DateTimeControl.xaml` размещает часы и дату в общей кнопке 106×32 с
+`WindowActionButtonStyle`: время Manrope 13 SemiBold, дата 11 с приглушённым цветом.
+`DateTimeButton.Click → DateTimeButton_Click → CalendarPopup.IsOpen` открывает календарь
+над кнопкой; деактивация приложения закрывает его. `TimeControl.Loaded → UpdateClock /
+SubscribeToClock → ApplicationClockService.TimeChanged → OnClockTimeChanged → Dispatcher /
+UpdateClock` обновляет время и анимирует смену текста. `TimeControl.ChangeDate →
+DateTimeControl.Time_ChangeDate → Date.Text` обновляет дату; `TimeControl.Unloaded`
+отписывается от часов. `TimeControl`/`DateControl` связывают шрифт текста с FontFamily
+своего UserControl, сохраняя WinstonMedium по умолчанию для других размещений.
+Общий `UI/Controls/Calendar/CalendarControl.xaml` использует Manrope, тематическую
+скруглённую поверхность и локальный `CalendarActionButtonStyle` с тем же объёмным
+шаблоном/VSM, что кнопки shell; локальный стиль доступен также в DailyReportDateWindow.
+Сетка `DaysList` содержит 42 дня: текущий день отмечен контуром/точкой, выбранный —
+тематической заливкой, соседний месяц приглушён; hover/press анимируют масштаб.
+`CalendarViewModel` и `CalendarDayAvailability` объявлены в `CalendarDay.cs`:
+PrevMonthCommand/NextMonthCommand → ChangeMonth → BuildCalendar; TodayCommand →
+GoToToday; SelectDateCommand → SelectDate → BuildCalendar/NotifyHeaderChanged →
+SelectedDateChanged → CalendarControl.SelectedDateChanged. AvailabilityProvider
+используется при BuildCalendar и сохраняет индикаторы None/Partial/Complete в экспорте.
+`ExecutionIndicatorSurface` — некликабельная плашка 32×32 с иконкой
+`Ask.UI/Shared/Components/Icons/UploadErrorIcon` размером 18 и рабочей подсказкой на Border.
+Несмотря на историческое имя UploadErrorIndicator, это индикатор выполнения:
+`SystemStateEvents.LockedChanged → StateEventsBinder.OnLockedChanged` показывает/скрывает
+иконку; Visibility плашки связана с Visibility иконки. `ApplyExecutionIndicatorColor`
+назначает NotificationSuccessIconBrush для Idle и NotificationErrorIconBrush для Real,
+а также поясняющую подсказку; OnIdleModeChange обновляет режим. Пульсация 1↔0.55
+с SineEase запускается через IsVisibleChanged → Storyboard.Begin и удаляется при скрытии /
+Unloaded → Storyboard.Remove; анимация скрытого индикатора не продолжает работать.
 Переключение темы вызывается через `Button.Click → MainWindow.ThemeToggleButton_Click`
 после отпускания, чтобы состояние Pressed было видно до смены темы.
 Пункты напрямую связываются с дочерними ViewModel из `MainWindowViewModel`;

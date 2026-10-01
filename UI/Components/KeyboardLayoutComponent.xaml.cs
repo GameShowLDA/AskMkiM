@@ -19,7 +19,6 @@ namespace UI.Components
       {
         UpdateLayoutDisplay();
       };
-      this.MouseLeftButtonUp += (s, e) => SwitchToNextInputLanguage();
     }
 
     public new System.Windows.Media.Brush Foreground
@@ -32,6 +31,11 @@ namespace UI.Components
       {
         LayoutText.Foreground = value;
       }
+    }
+
+    private void LayoutButton_Click(object sender, System.Windows.RoutedEventArgs e)
+    {
+      SwitchToNextInputLanguage();
     }
 
     private void UpdateLayoutDisplay()

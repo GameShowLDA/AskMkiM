@@ -132,4 +132,41 @@
             </Setter.Value>
         </Setter>
     </Style>
+    <Style x:Key="ShellContextMenuStyle" TargetType="ContextMenu">
+        <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
+        <Setter Property="Background" Value="{DynamicResource MenuBackgroundBrushes}"/>
+        <Setter Property="FontFamily" Value="{DynamicResource Manrope}"/>
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="MinWidth" Value="260"/>
+        <Setter Property="MaxHeight" Value="420"/>
+        <Setter Property="OverridesDefaultStyle" Value="True"/>
+        <Setter Property="SnapsToDevicePixels" Value="True"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ContextMenu">
+                    <Border Margin="10" Padding="6" CornerRadius="12"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{DynamicResource TopPanelHoverBackgroundBrush}" BorderThickness="1">
+                        <Border.Effect>
+                            <DropShadowEffect Color="Black" BlurRadius="16" ShadowDepth="4" Opacity="0.3"/>
+                        </Border.Effect>
+                        <ScrollViewer CanContentScroll="True"
+                                      Style="{DynamicResource {ComponentResourceKey ResourceId=MenuScrollViewer, TypeInTargetAssembly={x:Type FrameworkElement}}}">
+                            <ItemsPresenter Grid.IsSharedSizeScope="True"
+                                            KeyboardNavigation.DirectionalNavigation="Cycle"
+                                            KeyboardNavigation.TabNavigation="Cycle"/>
+                        </ScrollViewer>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="ItemContainerStyle">
+            <Setter.Value>
+                <Style TargetType="MenuItem" BasedOn="{StaticResource StyleMenuItem}">
+                    <Setter Property="FontFamily" Value="{DynamicResource Manrope}"/>
+                    <Setter Property="Padding" Value="12,8"/>
+                </Style>
+            </Setter.Value>
+        </Setter>
+    </Style>
 </ResourceDictionary>

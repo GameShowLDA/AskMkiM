@@ -107,6 +107,11 @@ namespace MainWindowProgram.ViewModels
       public void Execute(object? parameter)
       {
         var menu = new ContextMenu();
+        menu.Resources.MergedDictionaries.Add(new ResourceDictionary
+        {
+          Source = new Uri("/MainWindowProgram;component/Resources/MainMenuStyles.xaml", UriKind.Relative)
+        });
+        menu.SetResourceReference(FrameworkElement.StyleProperty, "ShellContextMenuStyle");
         var encodings = new[]
         {
         Encoding.UTF8,
