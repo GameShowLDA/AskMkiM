@@ -78,7 +78,7 @@ namespace UI.Controls.EmptyWorkspace
       UpdateCurrentDateTime(ApplicationClockService.CurrentDateTime);
       var buildInfo = ApplicationBuildInfo.Current;
       BuildDate = buildInfo.BuildDate;
-      AppVersion = $"Версия {buildInfo.BuildIdentifier} • Сборка {BuildDate}";
+      AppVersion = $"Версия {buildInfo.Version} • Сборка {BuildDate}";
 
       IsVisibleChanged += (_, _) =>
       {
