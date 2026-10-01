@@ -59,6 +59,7 @@ namespace Ask.UI.Controls.ProtocolNew
 
     private TaskCompletionSource<UserAction> _userActionTcs;
     private bool _isRetryOrContinueInteraction;
+    private bool _isStartPending;
 
     public ErrorManager Errors;
 
@@ -150,41 +151,50 @@ namespace Ask.UI.Controls.ProtocolNew
     /// <returns>Задача, представляющая асинхронную операцию измерения.</returns>
     public async Task StartAsync()
     {
-      if (ActionExecutor.IsActive) return;
-      var actionSettings = _modeSettings.Current;
-      bool simulatedPowerFailure = ExecutionConfig.GetIsIdleModeEnabled()
-        && actionSettings.CheckType != CheckType.SelfTest
-        && (await ChassisManagers.GetAllAsync()).Any(IdleHardwareErrorSimulator.ShouldSimulateHardwareError);
-
-      if (simulatedPowerFailure || ShouldBlockStartForMissingPower(
-        ExecutionConfig.GetIsIdleModeEnabled(),
-        SystemStateManager.GetIsActivePower(),
-        actionSettings.CheckPower,
-        ExecutionConfig.GetIsPowerCheckDisabled()))
+      if (_isStartPending || ActionExecutor.IsActive) return;
+      _isStartPending = true;
+      try
       {
-        await ShowMessageAsync(
-          new ShowMessageModel(
-            simulatedPowerFailure
-              ? "Не удалось выполнить включение питания системы. Проверьте подключение системы к компьютеру и повторите попытку."
-              : "Нет связи с системой. Пожалуйста, подключитесь к системе и повторите попытку.",
-            type: ShowMessageModel.MessageType.Error),
-          skipPause: true);
-        ShowOnlyStartButton();
-        return;
-      }
+        var actionSettings = _modeSettings.Current;
+        bool simulatedPowerFailure = ExecutionConfig.GetIsIdleModeEnabled()
+          && actionSettings.CheckType != CheckType.SelfTest
+          && (await ChassisManagers.GetAllAsync()).Any(IdleHardwareErrorSimulator.ShouldSimulateHardwareError);
 
-      _modeSettings.Current.Mode = ExecutionConfig.GetIsIdleModeEnabled() ? "Холостой режим" : "Рабочий режим";
-      _modeSettings.Current.StartTime = TimeOnly.FromDateTime(DateTime.Now);
-      _modeSettings.Current.ExecutionDuration = TimeSpan.Zero;
-      _modeSettings.Current.DeviceResults.Clear();
-      var executionName = actionSettings.NameProvider?.Invoke();
-      if (!string.IsNullOrWhiteSpace(executionName))
+        if (simulatedPowerFailure || ShouldBlockStartForMissingPower(
+          ExecutionConfig.GetIsIdleModeEnabled(),
+          SystemStateManager.GetIsActivePower(),
+          actionSettings.CheckPower,
+          ExecutionConfig.GetIsPowerCheckDisabled()))
+        {
+          await ShowMessageAsync(
+            new ShowMessageModel(
+              simulatedPowerFailure
+                ? "Не удалось выполнить включение питания системы. Проверьте подключение системы к компьютеру и повторите попытку."
+                : "Нет связи с системой. Пожалуйста, подключитесь к системе и повторите попытку.",
+              type: ShowMessageModel.MessageType.Error),
+            skipPause: true,
+            SkipStepModeCheck: true);
+          ShowOnlyStartButton();
+          return;
+        }
+
+        _modeSettings.Current.Mode = ExecutionConfig.GetIsIdleModeEnabled() ? "Холостой режим" : "Рабочий режим";
+        _modeSettings.Current.StartTime = TimeOnly.FromDateTime(DateTime.Now);
+        _modeSettings.Current.ExecutionDuration = TimeSpan.Zero;
+        _modeSettings.Current.DeviceResults.Clear();
+        var executionName = actionSettings.NameProvider?.Invoke();
+        if (!string.IsNullOrWhiteSpace(executionName))
+        {
+          Header = executionName;
+          actionSettings.Name = executionName;
+        }
+
+        await ActionExecutor.StartAsync(actionSettings);
+      }
+      finally
       {
-        Header = executionName;
-        actionSettings.Name = executionName;
+        _isStartPending = false;
       }
-
-      await ActionExecutor.StartAsync(actionSettings);
     }
 
     /// <summary>

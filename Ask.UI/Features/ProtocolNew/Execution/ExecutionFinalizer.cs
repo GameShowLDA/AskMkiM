@@ -64,7 +64,6 @@ internal sealed class ExecutionFinalizer
       ("печать протокола", AsAsync(
         () => _protocolCompletionService.PrintIfRequired(settings, protocol))),
       ("снятие блокировки системы", AsAsync(() => SystemStateManager.SetIsLocked(false))),
-      ("восстановление кнопки запуска", AsAsync(protocol.ShowOnlyStartButton)),
       ("отображение результата выполнения",
         () => _protocolCompletionService.DisplayCompletionAsync(settings, protocol, completionStatus)),
       ("уведомление о завершении выполнения",
