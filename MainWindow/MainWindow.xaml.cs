@@ -525,7 +525,7 @@ namespace MainWindowProgram
 
     }
 
-    private void TerminalButton_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+    private void TerminalButton_Click(object sender, RoutedEventArgs e)
     {
       if (DrawerHostService.Instance.ShouldBlockGlobalInput)
       {

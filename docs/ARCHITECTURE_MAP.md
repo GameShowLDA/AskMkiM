@@ -1955,6 +1955,10 @@ VSM-состояния Normal/MouseOver/Pressed/Disabled, масштаб нав�
 `UI/Resources/Theme/dark.xaml`/`light.xaml` усиливают блик и тонкую обводку только в тёмных
 темах; custom-темы наследуют параметры. При наведении обводка усиливается, при нажатии исчезает.
 `CurrentUserButtonStyle` наследует этот шаблон и задаёт размеры/отступы профиля и отчёта.
+Нижняя `BottomPanel` имеет высоту 46; кнопка терминала 32×32 с иконкой 18 использует
+тот же `WindowActionButtonStyle` и вертикально центрируется. Её маршрут:
+`Button.Click → MainWindow.TerminalButton_Click → ConsoleVisibilityController.ToggleConsole`;
+DrawerHost блокирует действие, а StateEventsBinder показывает кнопку только при console access.
 Переключение темы вызывается через `Button.Click → MainWindow.ThemeToggleButton_Click`
 после отпускания, чтобы состояние Pressed было видно до смены темы.
 Пункты напрямую связываются с дочерними ViewModel из `MainWindowViewModel`;
@@ -2422,7 +2426,16 @@ the legacy warning-string contract; automatic transport retry is intentionally
 limited to `10055` during send, because resending after an uncertain receive could
 execute an equipment command twice.
 
-Вне execution-протокола верхняя кнопка питания использует отдельную локальную границу ошибок:
+`UI/Components/PowerButton.xaml` отображает четыре визуальных состояния через Tag внутренней
+`PowerActionButton`: Disconnected (нейтральная поверхность), Connected (красная поверхность и
+иконка питания), Loading (вращающееся кольцо) и Cancel (крестик при повторных попытках).
+`SetDisconnectedState`/`SetConnectedState` задают прежнее active-состояние и новый Tag;
+`SetLoadingState` выбирает Loading/Cancel по существующему hasError. VSM отвечает за
+наведение/утопленное нажатие/недоступность. Storyboard кольца работает только при Loading
+и IsVisible, снимается при скрытии/смене состояния. Кнопка сохраняет прежний Click-маршрут,
+подсказки, cancellationToken и выбор реального оборудования; размеры 32×32.
+
+Вне execution-протокола нижняя кнопка питания использует отдельную локальную границу ошибок:
 
 ```text
 PowerButton.{PowerButtonClick,StartPowerAsync,StopPowerAsync}

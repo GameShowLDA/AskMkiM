@@ -520,7 +520,7 @@
             <Grid 
             Name="BottomPanel"
             Grid.Row="2" 
-            Height="38" 
+            Height="46"
             Margin="8,6,8,8"
             Background="Transparent"
             >
@@ -543,32 +543,16 @@
 
                 <Button x:Name="TerminalButton"
                     Grid.Column="0"
-                    Width="20"
-                    Height="20"
-                    Margin="8,0,4,0"
+                    Style="{StaticResource WindowActionButtonStyle}"
+                    Width="32"
+                    Height="32"
+                    Margin="8,0,8,0"
                     VerticalAlignment="Center"
                     HorizontalAlignment="Left"
-                    Cursor="Hand"
-                    Opacity="0.32"
-                    BorderBrush="Transparent"
-                    Background="Transparent"
-                    Foreground="{DynamicResource MainTitleSolidColorBrush}"
                     ToolTip="Терминал (Ctrl + ~)"
-                    PreviewMouseDown="TerminalButton_PreviewMouseDown">
-                    <Button.Style>
-                        <Style TargetType="Button">
-                            <Setter Property="Opacity" Value="0.32" />
-                            <Style.Triggers>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter Property="Opacity" Value="0.75" />
-                                </Trigger>
-                                <Trigger Property="IsPressed" Value="True">
-                                    <Setter Property="Opacity" Value="0.95" />
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Button.Style>
-                    <askUiIcons:TerminalIcon Size="14"
+                    AutomationProperties.Name="Открыть терминал"
+                    Click="TerminalButton_Click">
+                    <askUiIcons:TerminalIcon Size="18"
                                          IsHovering="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=IsMouseOver}"
                                          Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" />
                 </Button>

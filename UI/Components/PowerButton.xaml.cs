@@ -531,8 +531,7 @@ namespace UI.Components
       {
         _ = color;
         SetButtonToolTip(text);
-        SetIconForegroundResource("PowerButtonOnForegroundBrush");
-        SetIconsState(true);
+        PowerActionButton.Tag = hasError ? "Cancel" : "Loading";
         PowerActionButton.Opacity = 1;
       });
     }
@@ -545,9 +544,8 @@ namespace UI.Components
       Application.Current.Dispatcher.Invoke(() =>
       {
         SetButtonToolTip(text);
-        SetIconForegroundResource("PowerButtonOnForegroundBrush");
-        SetIconsState(true);
-        PowerActionButton.Opacity = 0.92;
+        PowerActionButton.Tag = "Connected";
+        PowerActionButton.Opacity = 1;
         active = true;
       });
     }
@@ -560,43 +558,10 @@ namespace UI.Components
       Application.Current.Dispatcher.Invoke(() =>
       {
         SetButtonToolTip(text);
-        SetIconForegroundResource("PowerButtonOffForegroundBrush");
-        SetIconsState(false);
-        PowerActionButton.Opacity = 0.86;
+        PowerActionButton.Tag = "Disconnected";
+        PowerActionButton.Opacity = 1;
         active = false;
       });
-    }
-
-    /// <summary>
-    /// Переключает видимость иконок питания в зависимости от состояния.
-    /// </summary>
-    private void SetIconsState(bool isPowerOn)
-    {
-      if (FindButtonTemplateElement("PowerOnStateIcon") is UIElement powerOnIcon)
-      {
-        powerOnIcon.Visibility = isPowerOn ? Visibility.Visible : Visibility.Collapsed;
-      }
-
-      if (FindButtonTemplateElement("PowerOffStateIcon") is UIElement powerOffIcon)
-      {
-        powerOffIcon.Visibility = isPowerOn ? Visibility.Collapsed : Visibility.Visible;
-      }
-    }
-
-    /// <summary>
-    /// Устанавливает цвет иконки через ресурс темы.
-    /// </summary>
-    private void SetIconForegroundResource(string resourceKey)
-    {
-      if (FindButtonTemplateElement("PowerOnStateIcon") is FrameworkElement powerOnIcon)
-      {
-        powerOnIcon.SetResourceReference(ForegroundProperty, resourceKey);
-      }
-
-      if (FindButtonTemplateElement("PowerOffStateIcon") is FrameworkElement powerOffIcon)
-      {
-        powerOffIcon.SetResourceReference(ForegroundProperty, resourceKey);
-      }
     }
 
     /// <summary>
@@ -634,15 +599,6 @@ namespace UI.Components
 
       MessageBoxCustom.Show("Отключите холостой режим для включения питания!", "Ошибка!", MessageBoxButton.OK, image: MessageBoxImage.Error);
       return false;
-    }
-
-    /// <summary>
-    /// Возвращает элемент шаблона кнопки по имени.
-    /// </summary>
-    private FrameworkElement FindButtonTemplateElement(string elementName)
-    {
-      PowerActionButton.ApplyTemplate();
-      return PowerActionButton.Template?.FindName(elementName, PowerActionButton) as FrameworkElement;
     }
   }
 }
