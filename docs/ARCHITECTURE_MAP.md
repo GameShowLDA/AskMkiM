@@ -330,6 +330,16 @@ App.OnStartup()
 сохраняя существующие хэши и соли паролей. После входа то же окно показывает загрузку,
 а `RoleLoginWindowManager` сохраняет прежний жизненный цикл окна на отдельном STA-потоке.
 
+Загрузка оформлена локальным `LoadingCircuitAnimation` в `MainWindow/RoleLoginWindow.xaml`:
+циклический импульс проходит через три узла. Это индикатор ожидания, а фактический этап
+приходит через `UpdateLoadingStatus`; при `FailStartupLoading` возвращается форма входа.
+
+Завершение успешного входа проходит через:
+`App.OnStartup → MainWindow.InitializeAsync → MainWindow.Visibility = Visible
+→ RoleLoginWindowManager.CloseAsync → Dispatcher.InvokeAsync(CompleteStartupLoading)
+→ RoleLoginWindow.Close`. Окно входа закрывается после готовности главного окна.
+Storyboard загрузки снимается при возврате формы после ошибки и при закрытии окна.
+
 Debug-доступ не является параметром запуска или независимо изменяемым состоянием.
 Единственный источник истины — фактически авторизованная текущая роль:
 

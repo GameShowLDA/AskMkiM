@@ -348,6 +348,33 @@
                     </Setter.Value>
                 </Setter>
             </Style>
+            <Storyboard x:Key="LoadingCircuitAnimation" RepeatBehavior="Forever">
+                <DoubleAnimation Storyboard.TargetName="LoadingPulse" Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.X)"
+                                 From="0" To="248" Duration="0:0:1.8"/>
+                <DoubleAnimationUsingKeyFrames Storyboard.TargetName="LoadingPulse" Storyboard.TargetProperty="Opacity" Duration="0:0:1.8">
+                    <LinearDoubleKeyFrame Value="0" KeyTime="0:0:0"/>
+                    <LinearDoubleKeyFrame Value="1" KeyTime="0:0:0.2"/>
+                    <LinearDoubleKeyFrame Value="1" KeyTime="0:0:1.5"/>
+                    <LinearDoubleKeyFrame Value="0" KeyTime="0:0:1.8"/>
+                </DoubleAnimationUsingKeyFrames>
+                <DoubleAnimationUsingKeyFrames Storyboard.TargetName="LoadingNode1" Storyboard.TargetProperty="Opacity" Duration="0:0:1.8">
+                    <LinearDoubleKeyFrame Value="0.3" KeyTime="0:0:0"/>
+                    <LinearDoubleKeyFrame Value="1" KeyTime="0:0:0.15"/>
+                    <LinearDoubleKeyFrame Value="0.3" KeyTime="0:0:0.4"/>
+                    <LinearDoubleKeyFrame Value="0.3" KeyTime="0:0:1.8"/>
+                </DoubleAnimationUsingKeyFrames>
+                <DoubleAnimationUsingKeyFrames Storyboard.TargetName="LoadingNode2" Storyboard.TargetProperty="Opacity" Duration="0:0:1.8">
+                    <LinearDoubleKeyFrame Value="0.3" KeyTime="0:0:0"/>
+                    <LinearDoubleKeyFrame Value="1" KeyTime="0:0:0.9"/>
+                    <LinearDoubleKeyFrame Value="0.3" KeyTime="0:0:1.15"/>
+                    <LinearDoubleKeyFrame Value="0.3" KeyTime="0:0:1.8"/>
+                </DoubleAnimationUsingKeyFrames>
+                <DoubleAnimationUsingKeyFrames Storyboard.TargetName="LoadingNode3" Storyboard.TargetProperty="Opacity" Duration="0:0:1.8">
+                    <LinearDoubleKeyFrame Value="0.3" KeyTime="0:0:0"/>
+                    <LinearDoubleKeyFrame Value="1" KeyTime="0:0:1.55"/>
+                    <LinearDoubleKeyFrame Value="0.3" KeyTime="0:0:1.8"/>
+                </DoubleAnimationUsingKeyFrames>
+            </Storyboard>
         </ResourceDictionary>
     </Window.Resources>
     <WindowChrome.WindowChrome>
@@ -375,7 +402,7 @@
                 <StackPanel VerticalAlignment="Center">
                     <TextBlock Text="Добро пожаловать!" FontFamily="{StaticResource Manrope}" FontWeight="SemiBold" FontSize="28"
                                Foreground="White" TextAlignment="Center"/>
-                    <TextBlock Text="Выберите роль и войдите в систему, чтобы начать работу с АСК-МКИ-М."
+                    <TextBlock x:Name="WelcomeDescriptionTextBlock" Text="Выберите роль и войдите в систему, чтобы начать работу с АСК-МКИ-М."
                                Margin="0,18,0,0" FontFamily="{StaticResource Manrope}" FontSize="16"
                                Foreground="#ADB4C0" TextAlignment="Center"
                                TextWrapping="Wrap" LineHeight="24" LineStackingStrategy="BlockLineHeight"/>
@@ -513,9 +540,42 @@
                                FontFamily="{StaticResource Manrope}" FontSize="14" Foreground="{StaticResource PasswordSecondaryBrush}"/>
                 </StackPanel>
                 <StackPanel x:Name="LoadingPanel" Visibility="Collapsed" VerticalAlignment="Center">
-                    <TextBlock Text="Загрузка приложения" FontSize="22" Margin="0,0,0,20"/>
-                    <ProgressBar Height="12" IsIndeterminate="True"/>
-                    <TextBlock x:Name="LoadingStatusTextBlock" Margin="0,16,0,0" TextWrapping="Wrap"/>
+                    <TextBlock Text="Подготавливаем приложение" FontFamily="{StaticResource Manrope}" FontWeight="SemiBold"
+                               FontSize="20" TextAlignment="Center" TextWrapping="Wrap"/>
+                    <Canvas Width="280" Height="72" HorizontalAlignment="Center" Margin="0,28,0,0"
+                            AutomationProperties.Name="Подготовка приложения" IsHitTestVisible="False">
+                        <Line X1="16" Y1="20" X2="264" Y2="20" Stroke="#D5CFC4" StrokeThickness="1.5"/>
+                        <Border Canvas.Left="0" Canvas.Top="4" Width="32" Height="32" CornerRadius="16" Background="#F5F2EB">
+                            <Border.Effect>
+                                <DropShadowEffect Color="#C9C2B6" BlurRadius="8" ShadowDepth="2" Opacity="0.4"/>
+                            </Border.Effect>
+                            <Ellipse x:Name="LoadingNode1" Width="14" Height="14" Fill="#29243F" Opacity="0.3"/>
+                        </Border>
+                        <TextBlock Canvas.Left="-24" Canvas.Top="46" Width="80" Text="Подготовка" TextAlignment="Center"
+                                   FontFamily="{StaticResource Manrope}" FontSize="12" Foreground="#827C73"/>
+                        <Border Canvas.Left="124" Canvas.Top="4" Width="32" Height="32" CornerRadius="16" Background="#F5F2EB">
+                            <Border.Effect>
+                                <DropShadowEffect Color="#C9C2B6" BlurRadius="8" ShadowDepth="2" Opacity="0.4"/>
+                            </Border.Effect>
+                            <Ellipse x:Name="LoadingNode2" Width="14" Height="14" Fill="#29243F" Opacity="0.3"/>
+                        </Border>
+                        <TextBlock Canvas.Left="100" Canvas.Top="46" Width="80" Text="Настройка" TextAlignment="Center"
+                                   FontFamily="{StaticResource Manrope}" FontSize="12" Foreground="#827C73"/>
+                        <Border Canvas.Left="248" Canvas.Top="4" Width="32" Height="32" CornerRadius="16" Background="#F5F2EB">
+                            <Border.Effect>
+                                <DropShadowEffect Color="#C9C2B6" BlurRadius="8" ShadowDepth="2" Opacity="0.4"/>
+                            </Border.Effect>
+                            <Ellipse x:Name="LoadingNode3" Width="14" Height="14" Fill="#29243F" Opacity="0.3"/>
+                        </Border>
+                        <TextBlock Canvas.Left="224" Canvas.Top="46" Width="80" Text="Запуск" TextAlignment="Center"
+                                   FontFamily="{StaticResource Manrope}" FontSize="12" Foreground="#827C73"/>
+                        <Ellipse x:Name="LoadingPulse" Canvas.Left="13" Canvas.Top="17" Width="6" Height="6" Fill="#6E5AD3">
+                            <Ellipse.RenderTransform><TranslateTransform/></Ellipse.RenderTransform>
+                        </Ellipse>
+                    </Canvas>
+                    <TextBlock x:Name="LoadingStatusTextBlock" Margin="0,18,0,0" MinHeight="42" TextWrapping="Wrap"
+                               TextAlignment="Center" FontFamily="{StaticResource Manrope}" FontSize="14"
+                               LineHeight="21" Foreground="#827C73"/>
                 </StackPanel>
             </Grid>
         </Grid>

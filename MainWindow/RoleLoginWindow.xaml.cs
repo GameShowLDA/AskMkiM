@@ -64,6 +64,8 @@ namespace MainWindowProgram
     private bool _isPasswordVisible;
     private bool _isSyncingPasswordText;
     private bool _isRootLoginSelected;
+    private readonly string _welcomeDescription;
+    private System.Windows.Media.Animation.Storyboard? _loadingStoryboard;
 
     /// <summary>
     /// Успешно авторизованная роль.
@@ -73,6 +75,7 @@ namespace MainWindowProgram
     public RoleLoginWindow(IReadOnlySet<RoleType>? rolesWithSavedSessions = null)
     {
       InitializeComponent();
+      _welcomeDescription = WelcomeDescriptionTextBlock.Text;
       _rolesWithSavedSessions = rolesWithSavedSessions ?? new HashSet<RoleType>();
       _keyboardHookProc = LowLevelKeyboardProc;
 
@@ -106,6 +109,8 @@ namespace MainWindowProgram
     public void UpdateLoadingStatus(string message)
     {
       LoadingStatusTextBlock.Text = message;
+      LoadingStatusTextBlock.BeginAnimation(OpacityProperty,
+        new System.Windows.Media.Animation.DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(180)));
     }
 
     public void CompleteStartupLoading()
@@ -153,6 +158,7 @@ namespace MainWindowProgram
         return;
       }
 
+      _loadingStoryboard?.Remove(LoadingPanel);
       _keyboardLayoutTimer.Stop();
       InputLanguageManager.Current.InputLanguageChanged -= Current_InputLanguageChanged;
       UninstallKeyboardHook();
@@ -642,6 +648,18 @@ namespace MainWindowProgram
       LoginPanel.Visibility = isLoading ? Visibility.Collapsed : Visibility.Visible;
       LoadingPanel.Visibility = isLoading ? Visibility.Visible : Visibility.Collapsed;
       LoadingStatusTextBlock.Text = message;
+      WelcomeDescriptionTextBlock.Text = isLoading
+        ? "Вход выполнен.\nПодготавливаем АСК-МКИ-М к работе."
+        : _welcomeDescription;
+      if (isLoading)
+      {
+        _loadingStoryboard ??= ((System.Windows.Media.Animation.Storyboard)FindResource("LoadingCircuitAnimation")).Clone();
+        _loadingStoryboard.Begin(LoadingPanel, true);
+      }
+      else
+      {
+        _loadingStoryboard?.Remove(LoadingPanel);
+      }
 
       RolesComboBox.IsEnabled = !isLoading;
       PasswordBox.IsEnabled = !isLoading;
