@@ -1939,6 +1939,15 @@ Their services generally route operations into `MultiWindowService`.
 ### Главное меню и адаптивная верхняя панель
 
 Единственное дерево главного меню объявлено в `MainWindow/MainWindow.xaml`.
+Локальный словарь `MainWindow/Resources/MainMenuStyles.xaml`, подключённый в
+`Window.Resources`, переопределяет только меню shell: `StyleMenuItem` выбирает шаблон
+по `MenuItem.Role`, `SideMenuItemStyle` наследует его, `SeparatorMenuStyle` оформляет линии.
+TopLevelHeader/TopLevelItem в обычном состоянии прозрачны, без теней и обводки;
+`IsHighlighted`/`IsSubmenuOpen` добавляют мягкую тематическую заливку. Режим иконок с пустым
+Header сохраняется через отдельный ContentPresenter для Icon. Выпадающие панели используют
+`PART_Popup`, Fade, скругление 12, тень и MenuScrollViewer; верхние открываются снизу,
+SubmenuHeader — справа. Строки выделяются через IsHighlighted/IsSubmenuOpen, горячие
+клавиши приглушены; маршрутизация команд и горячих клавиш остаётся у MenuItem/MenuHotkeyBinder.
 Правый блок панели использует локальный `WindowActionButtonStyle`: объёмные тени,
 VSM-состояния Normal/MouseOver/Pressed/Disabled, масштаб наведения и утопленное нажатие.
 Цвет поверхности/иконок берётся из существующих `BackgroundBrushes`/`ForegrounfBrushes`.
