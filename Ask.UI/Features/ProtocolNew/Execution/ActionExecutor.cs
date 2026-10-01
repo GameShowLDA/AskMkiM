@@ -279,7 +279,12 @@ namespace Ask.UI.Features.ProtocolNew.Execution
       {
         _executionFinished?.TrySetResult();
         LogException($"Ошибка при запуске \"{actionSettings.Name}\"", ex);
-        await ProtocolSelfCheck.ShowMessageAsync(new ShowMessageModel("Системная ошибка запуска. Проверьте журнал и повторите попытку.", type: MessageType.Error), skipPause: true, SkipStepModeCheck: true);
+        var message = ex is Ask.Core.Services.Errors.Device.DeviceNoResponseException noResponse
+          ? noResponse.ToMessage()
+          : new ShowMessageModel("Системная ошибка запуска. Проверьте журнал и повторите попытку.", type: MessageType.Error);
+        if (ex is Ask.Core.Services.Errors.Device.DeviceNoResponseException)
+          _completionStatus = ExecutionCompletionStatus.Interrupted;
+        await ProtocolSelfCheck.ShowMessageAsync(message, skipPause: true, SkipStepModeCheck: true);
         try
         {
           await FinalizeAsync(actionSettings);
@@ -744,7 +749,8 @@ namespace Ask.UI.Features.ProtocolNew.Execution
     /// Добавляет текст ошибки в результаты текущего запуска.
     /// </summary>
     /// <param name="error">Текст ошибки без итогового маркера качества.</param>
-    internal void AddError(string error)
+    /// <param name="status">Тип записи, сформировавшей ошибку.</param>
+    internal void AddError(string error, MessageType? status = null)
     {
       if (string.IsNullOrWhiteSpace(error))
       {
@@ -754,7 +760,11 @@ namespace Ask.UI.Features.ProtocolNew.Execution
       lock (_errorSync)
       {
         _actionSettings?.ExecutionErrors.Add(error);
-        _actionSettings?.DeviceResults.LastOrDefault()?.Tests.LastOrDefault()?.Errors.Add(new TestError { Message = error });
+        _actionSettings?.DeviceResults.LastOrDefault()?.Tests.LastOrDefault()?.Errors.Add(new TestError
+        {
+          Message = error,
+          IsNoResponse = status == MessageType.NoResponse
+        });
       }
     }
 
@@ -814,6 +824,11 @@ namespace Ask.UI.Features.ProtocolNew.Execution
         {
           _completionStatus = ExecutionCompletionStatus.Interrupted;
           // Отмена ожидаема при остановке выполнения.
+        }
+        catch (Ask.Core.Services.Errors.Device.DeviceNoResponseException ex)
+        {
+          _completionStatus = ExecutionCompletionStatus.Interrupted;
+          await ProtocolSelfCheck.ShowMessageAsync(ex.ToMessage(), SkipStepModeCheck: true, skipPause: true);
         }
         catch (InputValidationException)
         {

@@ -300,7 +300,8 @@ namespace Ask.UI.Controls.ProtocolNew
         AddError,
         callerName,
         callerFile,
-        callerLine);
+        callerLine,
+        (error, status) => ActionExecutor.AddError(error, status));
 
       if (!wasDisplayed)
       {

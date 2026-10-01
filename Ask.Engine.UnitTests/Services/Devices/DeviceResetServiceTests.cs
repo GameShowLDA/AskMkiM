@@ -14,6 +14,26 @@ namespace Ask.Engine.UnitTests.Services.Devices;
 
 public sealed class DeviceResetServiceTests
 {
+  [Fact]
+  public async Task MandatoryReset_NoResponseKeepsItsKindWithoutOperatorWait()
+  {
+    var device = CreateDevice(1, true);
+    device.Connectable.Setup(x => x.ResetAsync(null)).ThrowsAsync(
+      new Ask.Core.Services.Errors.Device.DeviceNoResponseException(device.Device.Object, "RESET", 1000));
+    var interaction = CreateInteractionService();
+
+    using (EquipmentExecutionContext.EnterMandatoryFinalization())
+      await DeviceResetService.ResetDevicesAsync([device.Device.Object], interaction.Object);
+
+    var message = Assert.Single(interaction.Invocations
+      .Where(i => i.Method.Name == nameof(IUserInteractionService.ShowMessageAsync))
+      .Select(i => (ShowMessageModel)i.Arguments[0]));
+    Assert.Equal(ShowMessageModel.MessageType.NoResponse, message.Status);
+    Assert.Equal("[НЕТ СВЯЗИ]", message.GetQualityPrefix());
+    interaction.Verify(x => x.WaitRetryOrContinueAsync(), Times.Never);
+    interaction.Verify(x => x.WaitUserActionAsync(It.IsAny<bool>(), It.IsAny<bool>(), It.IsAny<bool>()), Times.Never);
+  }
+
   [Fact(DisplayName = "Сброс устройств: успешно сбрасывает все устройства и показывает результат")]
   public async Task ResetDevicesAsync_ResetsEveryDeviceAndShowsSuccess()
   {

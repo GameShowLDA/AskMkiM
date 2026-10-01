@@ -1,3 +1,4 @@
+using Ask.Core.Services.Errors.Device;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Device.Communication.Common.Threading;
 using Ask.Diagnostics.Services;
@@ -69,7 +70,8 @@ namespace Ask.Device.Communication.Ethernet.Tcp.Protocols
     /// <param name="port">Пользовательский порт подключения. Если равен нулю, используется порт по умолчанию.</param>
     /// <param name="delayBeforeCall">Задержка перед отправкой команды в миллисекундах.</param>
     /// <param name="cancellationToken">Токен отмены операции.</param>
-    /// <returns>Ответ устройства или пустая строка, если ответ не был получен.</returns>
+    /// <returns>Ответ устройства или пустая строка для команды без ожидания ответа.</returns>
+    /// <exception cref="DeviceNoResponseException">Ожидаемый ответ не получен.</exception>
     public async Task<string> QueryAsync(
       string command,
       double responseDelay = 0,
@@ -114,6 +116,10 @@ namespace Ask.Device.Communication.Ethernet.Tcp.Protocols
 
           int bytesRead = await _stream.ReadAsync(buffer, timeoutCts.Token).ConfigureAwait(false);
           string answer = Encoding.ASCII.GetString(buffer, 0, bytesRead).Trim();
+          if (string.IsNullOrWhiteSpace(answer))
+          {
+            throw new DeviceNoResponseException(_device, command, timeout);
+          }
           DiagnosticCommandHistory.RecordResponse(_device.Name, answer);
           LogInformation($"[{_device.Name}] Получен ответ ({command}) - {answer}", isDeviceLog: true);
           return answer;
@@ -122,22 +128,29 @@ namespace Ask.Device.Communication.Ethernet.Tcp.Protocols
         {
           CloseConnection();
           LogException(new TimeoutException("Read operation timed out.", ex), isDeviceLog: true);
-          return string.Empty;
+          throw new DeviceNoResponseException(_device, command, timeout, ex);
         }
         catch (IOException ioEx)
         {
           CloseConnection();
           LogException(ioEx, isDeviceLog: true);
+          if (timeout > 0) throw new DeviceNoResponseException(_device, command, timeout, ioEx);
           return string.Empty;
         }
         catch (SocketException socketEx)
         {
           CloseConnection();
           LogException(socketEx, isDeviceLog: true);
+          if (timeout > 0) throw new DeviceNoResponseException(_device, command, timeout, socketEx);
           return string.Empty;
         }
         catch (OperationCanceledException)
         {
+          throw;
+        }
+        catch (DeviceNoResponseException)
+        {
+          CloseConnection();
           throw;
         }
         catch (Exception ex)

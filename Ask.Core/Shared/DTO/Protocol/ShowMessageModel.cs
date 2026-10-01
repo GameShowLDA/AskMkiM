@@ -42,7 +42,12 @@ namespace Ask.Core.Shared.DTO.Protocol
       /// Сообщение об ошибке, возникшей в процессе выполнения.
       /// Используется для информирования пользователя о возникновении проблем или некорректных действий.
       /// </summary>
-      Error
+      Error,
+
+      /// <summary>
+      /// Ожидаемый ответ устройства не получен; результат проверки не определён.
+      /// </summary>
+      NoResponse
     }
 
     /// <summary>
@@ -280,6 +285,10 @@ namespace Ask.Core.Shared.DTO.Protocol
 
     public string GetQualityPrefix()
     {
+      if (Status == MessageType.NoResponse)
+      {
+        return "[НЕТ СВЯЗИ]";
+      }
       if (Status == MessageType.Success)
       {
         return IsMeasurement ? "[НОРМА]" : "[ОК]";
@@ -296,6 +305,10 @@ namespace Ask.Core.Shared.DTO.Protocol
 
     public Color? GetColorMessage()
     {
+      if (Status == MessageType.NoResponse)
+      {
+        return Color.FromRgb(255, 51, 51);
+      }
       if (Status == MessageType.Success)
       {
         return SuccessMessage.TitleColor;

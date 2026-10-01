@@ -1,5 +1,6 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
+using Ask.Core.Services.Errors.Device;
 using Ask.Core.Services.UI;
 
 namespace Ask.Device.Emulator.Protocols
@@ -13,22 +14,27 @@ namespace Ask.Device.Emulator.Protocols
     private readonly Func<IDeviceProtocol?> _realProtocolProvider;
     private readonly IDeviceProtocol _emulatorProtocol;
     private readonly TimeSpan _hardwareOperationTimeout;
+    private readonly IDevice? _device;
 
     /// <summary>
     /// Инициализирует переключатель реального и эмулируемого протоколов.
     /// </summary>
     /// <param name="realProtocolProvider">Функция получения текущего реального протокола устройства.</param>
     /// <param name="emulatorProtocol">Протокол эмулятора устройства.</param>
+    /// <param name="hardwareOperationTimeout">Максимальное время аппаратной операции.</param>
+    /// <param name="device">Устройство для классификации отсутствующего ответа.</param>
     public ModeSelectingDeviceProtocol(
       Func<IDeviceProtocol?> realProtocolProvider,
       IDeviceProtocol emulatorProtocol,
-      TimeSpan? hardwareOperationTimeout = null)
+      TimeSpan? hardwareOperationTimeout = null,
+      IDevice? device = null)
     {
       _realProtocolProvider = realProtocolProvider
         ?? throw new ArgumentNullException(nameof(realProtocolProvider));
       _emulatorProtocol = emulatorProtocol
         ?? throw new ArgumentNullException(nameof(emulatorProtocol));
       _hardwareOperationTimeout = hardwareOperationTimeout ?? DefaultHardwareOperationTimeout;
+      _device = device;
 
       if (_hardwareOperationTimeout <= TimeSpan.Zero)
       {
@@ -86,6 +92,7 @@ namespace Ask.Device.Emulator.Protocols
       return await WaitForHardwareResponseAsync(
         queryTask,
         command,
+        timeout,
         operationCancellation,
         cancellationToken);
     }
@@ -93,6 +100,7 @@ namespace Ask.Device.Emulator.Protocols
     private async Task<string> WaitForHardwareResponseAsync(
       Task<string> queryTask,
       string command,
+      int responseTimeout,
       CancellationTokenSource operationCancellation,
       CancellationToken cancellationToken)
     {
@@ -105,6 +113,8 @@ namespace Ask.Device.Emulator.Protocols
       catch (TimeoutException ex)
       {
         await operationCancellation.CancelAsync().ConfigureAwait(false);
+        if (_device != null && responseTimeout > 0)
+          throw new DeviceNoResponseException(_device, command, (int)_hardwareOperationTimeout.TotalMilliseconds, ex);
         throw new TimeoutException(
           $"Оборудование не завершило команду \"{command}\" за {_hardwareOperationTimeout.TotalSeconds:0.###} с.",
           ex);

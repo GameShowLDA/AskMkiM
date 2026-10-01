@@ -1,3 +1,4 @@
+using Ask.Core.Services.Errors.Device;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Device.Communication.Com.Extensions;
 using Ask.Device.Communication.Common.Threading;
@@ -50,7 +51,8 @@ namespace Ask.Device.Communication.Com.Protocols
     /// <param name="port">Параметр интерфейса, не используемый COM-протоколом.</param>
     /// <param name="delayBeforeCall">Задержка перед отправкой команды в миллисекундах.</param>
     /// <param name="cancellationToken">Токен отмены операции.</param>
-    /// <returns>Строка ответа устройства или пустая строка при ошибке либо отсутствии ответа.</returns>
+    /// <returns>Ответ устройства или пустая строка для команды без ожидания ответа либо ошибки порта.</returns>
+    /// <exception cref="DeviceNoResponseException">Ожидаемый ответ не получен.</exception>
     public async Task<string> QueryAsync(
       string command,
       double responseDelay = 0,
@@ -75,7 +77,16 @@ namespace Ask.Device.Communication.Com.Protocols
             await WaitAsync((int)Math.Ceiling(responseDelay), cancellationToken);
             cancellationToken.ThrowIfCancellationRequested();
 
-            return await ReadResponseAsync(timeout, cancellationToken);
+            string response = await ReadResponseAsync(timeout, cancellationToken);
+            if (timeout > 0 && string.IsNullOrWhiteSpace(response))
+            {
+              throw new DeviceNoResponseException(_device, command, timeout);
+            }
+            return response;
+          }
+          catch (DeviceNoResponseException)
+          {
+            throw;
           }
           catch (Exception ex)
           {
@@ -86,6 +97,10 @@ namespace Ask.Device.Communication.Com.Protocols
 
             RecoverPortAfterFailure(ex);
             LogException(ex, $"[{_device.Name}] Ошибка при работе с COM-портом", isDeviceLog: true);
+            if (timeout > 0 && ex is TimeoutException or System.IO.IOException)
+            {
+              throw new DeviceNoResponseException(_device, command, timeout, ex);
+            }
             return string.Empty;
           }
         }

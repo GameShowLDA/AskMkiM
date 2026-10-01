@@ -6,6 +6,28 @@ namespace Ask.UI.UnitTests.Features.ProtocolNew.Protocol;
 
 public sealed class InspectionProtocolBuilderTests
 {
+  [Fact]
+  public void Build_NoResponseIsNotReportedAsDefect()
+  {
+    var settings = new ActionSettings
+    {
+      StartDelegate = (_, _, _, _, _) => Task.CompletedTask,
+      Name = "Самоконтроль"
+    };
+    var device = new DeviceExecutionResult("МКР", 1, 4);
+    var test = new TestExecutionResult { TestName = "Проверка точки" };
+    test.Errors.Add(new TestError { Message = "Нет ответа от МКР(1.4)", IsNoResponse = true });
+    device.Tests.Add(test);
+    settings.DeviceResults.Add(device);
+    settings.ExecutionErrors.Add("Нет ответа от МКР(1.4)");
+
+    var result = new InspectionProtocolBuilder().Build(settings, ExecutionCompletionStatus.Interrupted);
+
+    Assert.Contains("Нет ответа от МКР(1.4) [НЕТ СВЯЗИ]", result);
+    Assert.DoesNotContain("[БРАК]", result);
+    Assert.DoesNotContain("[НОРМА]", result);
+  }
+
   [Fact(DisplayName = "Каждая ошибка выводится отдельной строкой заключения")]
   public void Build_WhenSeveralErrorsExist_WritesEachErrorSeparately()
   {

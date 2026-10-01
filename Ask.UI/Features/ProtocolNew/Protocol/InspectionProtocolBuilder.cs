@@ -95,7 +95,8 @@ internal sealed class InspectionProtocolBuilder : IInspectionProtocolBuilder
     message.AppendLine($"\t\t{i}. {testResult.TestName}:");
     for (var index = 0; index < testResult.Errors.Count; index++)
     {
-      message.AppendLine($"\t\t\t{i}.{index + 1}. {testResult.Errors[index].Message} [БРАК]");
+      string result = testResult.Errors[index].IsNoResponse ? "НЕТ СВЯЗИ" : "БРАК";
+      message.AppendLine($"\t\t\t{i}.{index + 1}. {testResult.Errors[index].Message} [{result}]");
     }
   }
 }

@@ -76,7 +76,9 @@ public sealed class UdpProtocolTests(ITestOutputHelper output)
     using var fixture = new ExchangeFixture();
     var pending = fixture.QueryAsync("lost", timeout: 100);
     await fixture.ReceiveAsync();
-    Assert.Contains("не ответило", await pending);
+    var error = await Assert.ThrowsAsync<DeviceNoResponseException>(() => pending);
+    Assert.Contains("UDP test", error.Message);
+    Assert.Contains("lost", error.Message);
     Assert.True(fixture.Handles[0].IsClosed);
     Assert.False(fixture.Server.Client.Poll(0, SelectMode.SelectRead));
     Assert.Equal("reply:next", await fixture.ExchangeAsync("next"));
@@ -95,6 +97,34 @@ public sealed class UdpProtocolTests(ITestOutputHelper output)
     await Assert.ThrowsAnyAsync<OperationCanceledException>(() => pending);
     Assert.True(fixture.Handles[0].IsClosed);
     Assert.Equal("reply:next", await fixture.ExchangeAsync("next"));
+  }
+
+  [Fact]
+  public async Task EmptyReply_IsNoResponseAndClosesSocket()
+  {
+    using var fixture = new ExchangeFixture();
+    var pending = fixture.QueryAsync("empty");
+    var request = await fixture.ReceiveAsync();
+    await fixture.ReplyAsync(request, "");
+    await Assert.ThrowsAsync<DeviceNoResponseException>(() => pending);
+    Assert.True(fixture.Handles[0].IsClosed);
+  }
+
+  [Fact]
+  public async Task CommandWithoutExpectedReply_IsNotNoResponse()
+  {
+    using var fixture = new ExchangeFixture();
+    Assert.Equal(string.Empty, await fixture.QueryAsync("send-only", timeout: 0));
+    await fixture.ReceiveAsync();
+  }
+
+  [Fact]
+  public async Task MintTimeout_KeepsLegacyResponseContract()
+  {
+    using var fixture = new ExchangeFixture(trackResponseTimeouts: false);
+    var pending = fixture.QueryAsync("mint", timeout: 100);
+    await fixture.ReceiveAsync();
+    Assert.Contains("не ответило", await pending);
   }
 
   [Fact]
@@ -229,9 +259,14 @@ public sealed class UdpProtocolTests(ITestOutputHelper output)
     private readonly CancellationTokenSource _deadline = new(TimeSpan.FromSeconds(30));
 
     public ExchangeFixture(
-      Func<UdpClient, ReadOnlyMemory<byte>, IPEndPoint, CancellationToken, ValueTask<int>>? send = null)
+      Func<UdpClient, ReadOnlyMemory<byte>, IPEndPoint, CancellationToken, ValueTask<int>>? send = null,
+      bool trackResponseTimeouts = true)
     {
       var device = new Mock<IDevice>();
+      if (trackResponseTimeouts)
+        device.As<Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis.IChassisManager>();
+      else
+        device.As<Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule.IPowerSourceModule>();
       device.SetupGet(x => x.Name).Returns("UDP test");
       device.SetupGet(x => x.ConnectionDetails).Returns("127.0.0.1");
       Protocol = new UdpProtocol(device.Object, _ =>

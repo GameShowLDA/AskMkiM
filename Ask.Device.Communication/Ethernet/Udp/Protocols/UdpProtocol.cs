@@ -138,6 +138,10 @@ namespace Ask.Device.Communication.Ethernet.Udp.Protocols
           }
           while (!result.RemoteEndPoint.Address.Equals(ipAddress));
           string response = Encoding.UTF8.GetString(result.Buffer);
+          if (string.IsNullOrWhiteSpace(response) && ExpectsDeviceResponse())
+          {
+            throw new DeviceNoResponseException(_device, command, timeout);
+          }
           DiagnosticCommandHistory.RecordResponse(_device.Name, response);
           LogInformation($"[{_device.Name}] Ответ от устройства: {response}", isDeviceLog: true);
           return response;
@@ -145,7 +149,16 @@ namespace Ask.Device.Communication.Ethernet.Udp.Protocols
         catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
         {
           CloseClient();
+          if (ExpectsDeviceResponse())
+          {
+            throw new DeviceNoResponseException(_device, command, timeout);
+          }
           return LogWarning($"[{_device.Name}] Устройство не ответило в течение {timeout / 1000.0} секунд(ы).", isDeviceLog: true);
+        }
+        catch (DeviceNoResponseException)
+        {
+          CloseClient();
+          throw;
         }
         catch (OperationCanceledException)
         {
@@ -160,6 +173,11 @@ namespace Ask.Device.Communication.Ethernet.Udp.Protocols
         }
       }
     }
+
+    private bool ExpectsDeviceResponse() => _device is
+      Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule.IRelaySwitchModule or
+      Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice.ISwitchingDevice or
+      Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis.IChassisManager;
 
     private UdpClient GetClient(IPEndPoint endpoint, int inputPort)
     {
