@@ -64,6 +64,7 @@ Size/Foreground и анимации общей кнопки; лицензия с
 | Архивы APK/APKW | `Ask.UI/Features/Archive/` | `Ask.Core/Services/FileFormats/Apk/`, `MainWindow/Services/Conversion/` |
 | Рабочее пространство и вкладки | `UI/Components/MultiEditorControl.xaml.cs` | `UI/Components/MultiEditorMethods/FileManager.cs`, `UI/Services/`, `MainWindow/Services/MultiWindowService.cs` |
 | Роли и права | `MainWindow/Init/RoleApplicationConfigurator.cs` | `Ask.Core/Services/Config/AppSettings/RoleAuthorizationConfig.cs`, `Ask.UI/Features/RoleManagement/` |
+| Фон главного окна и выделение меню | `MainWindow/MainWindow.xaml`, `UI/Controls/EmptyWorkspace/EmptyWorkspaceView.xaml` | `UI/Resources/Theme/{dark,light}.xaml`, `UI/Resources/Theme/{dark,light}.custom.xaml`, `UI/Components/MultiWindowControl.xaml` |
 | Административные и сервисные утилиты | `MainWindow/MainWindow.xaml`, `MainWindow/ViewModels/AdminViewModel.cs`, `MainWindow/Services/AdminServices.cs` | `UI/Controls/AdminPanel/ServiceUtilitiesControl.xaml`, `UI/Controls/AdminPanel/SetCommand.xaml`, `Ask.UI/Features/ServiceTools/{Gpt,Chassis,SwitchingDevice}/`, `UI/Controls/AdminPanel/DataBaseView.xaml` |
 | Debug-доступ текущего пользователя | `Ask.Core/Services/Config/AppSettings/DebugAccessConfig.cs` | `RoleAuthorizationConfig.cs`, `SystemStateEvents.DebugRightsChanged`, оба `ErrorListControl.xaml.cs`, `ProtocolEntryOutputService.cs` |
 | События между подсистемами | `Ask.Core/Services/EventCore/Services/EventAggregator.cs` | `Ask.Core/Services/EventCore/Adapters/`, `Ask.Core/Services/EventCore/Events/`, `MainWindow/Events/` |
@@ -1928,9 +1929,124 @@ same path with gates enabled and performs real transport I/O.
 Translation, Run, Metrology, Test, SelfTest, Settings, Admin and Window ViewModels.
 Their services generally route operations into `MultiWindowService`.
 
+`MainWindow` рисует общий фон окна через тематический `EmptyBackgroundBrush`.
+Корневой `Grid`, верхняя/нижняя панели и фон полосы вкладок `MultiWindowControl` поверх него прозрачны;
+верхняя и нижняя панели прилегают к краям рабочей области: Margin=0,
+без внешней обводки и скруглений. Внутренние отступы меню/кнопок и перетаскивание
+через `TopPanel_PreviewMouseLeftButtonDown` сохранены.
+`EmptyWorkspaceView` отображает содержимое без собственного фонового градиента и
+декоративных оверлеев. Центральный блок — текст без плашки и DropShadowEffect:
+часы Manrope 72 SemiBold с табличными цифрами, дата 20 и подсказка 16. Текст использует
+ForegrounfBrushes/ForegrounfBrushes85 текущей темы для читаемости на светлом и тёмном фоне.
+Существующий `ApplicationClockService.TimeChanged → EmptyWorkspaceView.OnClockTimeChanged
+→ Dispatcher / UpdateCurrentDateTime → CurrentDateTime → DateTimeToStringConverter`
+обновляет часы/дату; AnimateMainClock сохраняет плавную смену текста через TimeGhostText,
+без свечения. Подписка включается на Loaded и удаляется на Unloaded.
+`EmptyWorkspaceView.OpenFileButton` наследует WindowActionButtonStyle и привязан к
+`File.OpenFileCommand` из DataContext shell через MultiWindowControl (DataContext не заменяется).
+Маршрут совпадает с меню/Ctrl+O: `FileViewModel.OpenFile → FileService.OpenFileAsync →
+проверка _isLockedProvider → OpenFileDialog (Multiselect) → OpenFileWithLegacyConversion →
+MultiWindowService.EditorDocumentService.OpenFile`.
+Последние три файла хранит `FileDialogSettings.RecentFiles` в прежнем
+`Settings/fileDialogSettings.yaml`: `LastDirectoryService.RememberFile/GetRecentFiles`
+сохраняют порядок MRU, исключают повторы без учёта регистра и отсутствующие файлы;
+SaveLastDirectory сохраняет историю. Успешные ветки `UI.Services.FileManager.FileOpenService.OpenFile`
+(новый/уже открытый редактор и сохранённый протокол) записывают фактический путь документа,
+а `MainWindowProgram.Services.FileService.OpenLinkedResultProtocol` — путь итогового протокола.
+Для OPK-конверсии история содержит открытый OPKW. Ошибки записи истории логируются и не
+превращают успешное открытие в ошибку. EmptyWorkspaceView.RefreshRecentFiles на Loaded /
+IsVisibleChanged загружает FileInfo[] для RecentFilesList; пустой список скрывает панель.
+Клик → FileViewModel.OpenRecentFileCommand → FileService.OpenFileAsync(string) → прежний
+pipeline открытия с проверкой блокировки, конверсиями и обработкой ошибок.
+Скругление подсветки пунктов меню задают `StyleMenuItem`
+в `UI/Resources/Theme/dark.xaml` и `light.xaml`; custom-темы наследуют эти стили.
+
 ### Главное меню и адаптивная верхняя панель
 
 Единственное дерево главного меню объявлено в `MainWindow/MainWindow.xaml`.
+Локальный словарь `MainWindow/Resources/MainMenuStyles.xaml`, подключённый в
+`Window.Resources`, переопределяет только меню shell: `StyleMenuItem` выбирает шаблон
+по `MenuItem.Role`, `SideMenuItemStyle` наследует его, `SeparatorMenuStyle` оформляет линии.
+TopLevelHeader/TopLevelItem в обычном состоянии прозрачны, без теней и обводки;
+`IsHighlighted`/`IsSubmenuOpen` добавляют мягкую тематическую заливку. Режим иконок с пустым
+Header сохраняется через отдельный ContentPresenter для Icon. Выпадающие панели используют
+`PART_Popup`, Fade, скругление 12, тень и MenuScrollViewer; верхние открываются снизу,
+SubmenuHeader — справа. Строки выделяются через IsHighlighted/IsSubmenuOpen, горячие
+клавиши приглушены; маршрутизация команд и горячих клавиш остаётся у MenuItem/MenuHotkeyBinder.
+Правый блок панели использует локальный `WindowActionButtonStyle`: объёмные тени,
+VSM-состояния Normal/MouseOver/Pressed/Disabled, масштаб наведения и утопленное нажатие.
+Цвет поверхности/иконок берётся из существующих `BackgroundBrushes`/`ForegrounfBrushes`.
+Тематические `TopPanelButtonHighlightOpacity` и `TopPanelButtonBevelBrush` в базовых
+`UI/Resources/Theme/dark.xaml`/`light.xaml` усиливают блик и тонкую обводку только в тёмных
+темах; custom-темы наследуют параметры. При наведении обводка усиливается, при нажатии исчезает.
+`CurrentUserButtonStyle` наследует этот шаблон и задаёт размеры/отступы профиля и отчёта.
+Нижняя `BottomPanel` имеет высоту 46, Margin=0, без внешней рамки и скругления;
+фон по-прежнему задаёт `StateEventsBinder.ApplyMainPanelBackground`, включая индикацию питания.
+Кнопка терминала 32×32 с иконкой 18 использует
+тот же `WindowActionButtonStyle` и вертикально центрируется. Её маршрут:
+`Button.Click → MainWindow.TerminalButton_Click → ConsoleVisibilityController.ToggleConsole`;
+DrawerHost блокирует действие, а StateEventsBinder показывает кнопку только при console access.
+`InfoBadge` оформляет сообщения слева как плашку высотой 32, Manrope 13 и цветную
+точку с Fill/Opacity, связанными с `InfoBlock.Foreground/Opacity`. Плашка скрывается
+при пустом тексте. Столбец сообщений имеет ширину `*`, сведения редактора — `Auto`:
+длинный текст сокращается через CharacterEllipsis, полный текст доступен в ToolTip.
+Маршрут сохранён: `MessageEventAdapter → EventAggregator →
+ApplicationInitializer.SubscribeToMessageEvents → MessageHandler.SetErrorMessage /
+SetWarningMessage / SetInfoMessage / ClearMessage → SetMessage → Dispatcher →
+ApplyMessage → InfoBlock.Text/Foreground`. `GuiInitializer.Apply` связывает
+`MainWindow._infoBlock` с именованным TextBlock; автоматическое исчезновение выполняет
+прежний `MessageHandler.Timer_Elapsed`. Цвета ошибок/предупреждений не изменены.
+Сведения редактора отображает `UI/Controls/StatusBarControl.xaml`: строка, столбец и число
+строк разделены тонкими линиями, подписи приглушены, значения выделены. DataContext —
+`MainWindowProgram.ViewModels.TextEditorStatusViewModel`; `UiEventsBinder.OnTextEditorActivated`
+инициализирует показатели, Caret.PositionChanged/TextChanged обновляют их. Кнопка кодировки
+привязана к EncodingName и ToggleEncodingCommand (ЛКМ UTF-8/DOS); ПКМ проходит через
+`StatusBarControl.EncodingButton_MouseRightButtonUp → ChangeEncodingCommand` и открывает
+существующий список. `ChangeEncodingMouseCommand.Execute` подключает к ContextMenu
+`MainWindow/Resources/MainMenuStyles.xaml` и применяет `ShellContextMenuStyle`: скруглённая
+панель с тенью, ограничение высоты и MenuScrollViewer; строки используют существующий
+`StyleMenuItem` с компактными отступами. Состав списка и обработчики выбора кодировки
+сохранены. Видимость блока сохраняет `EditorEvents.TranslatorActive`.
+Индикатор раскладки `UI/Components/KeyboardLayoutComponent.xaml` — кнопка 44×32 с
+`WindowActionButtonStyle`, шрифтом Manrope и общими состояниями наведения/нажатия.
+`LayoutButton.Click → LayoutButton_Click → SwitchToNextInputLanguage → ActivateLanguage`
+перебирает `InputLanguageManager.Current.AvailableInputLanguages` и вызывает Win32
+`LoadKeyboardLayout/ActivateKeyboardLayout`. `InputLanguageChanged → UpdateLayoutDisplay`
+обновляет двухбуквенный код языка. Размещается как `LanguageBlock` в нижней панели.
+Слева от RU/EN `CapsLockBadge` показывает CAPS только при `Keyboard.IsKeyToggled(Key.CapsLock)`.
+`KeyboardLayoutComponent.Loaded` обновляет состояние, подписывается на InputLanguageChanged
+и запускает DispatcherTimer 250 мс → UpdateCapsLockIndicator; Unloaded останавливает таймер
+и удаляет подписку. Ширина компонента Auto: выключенный CAPS не занимает места.
+`UI/Controls/DateTimeControl.xaml` размещает часы и дату в общей кнопке 106×32 с
+`WindowActionButtonStyle`: время Manrope 13 SemiBold, дата 11 с приглушённым цветом.
+`DateTimeButton.Click → DateTimeButton_Click → CalendarPopup.IsOpen` открывает календарь
+над кнопкой; деактивация приложения закрывает его. `TimeControl.Loaded → UpdateClock /
+SubscribeToClock → ApplicationClockService.TimeChanged → OnClockTimeChanged → Dispatcher /
+UpdateClock` обновляет время и анимирует смену текста. `TimeControl.ChangeDate →
+DateTimeControl.Time_ChangeDate → Date.Text` обновляет дату; `TimeControl.Unloaded`
+отписывается от часов. `TimeControl`/`DateControl` связывают шрифт текста с FontFamily
+своего UserControl, сохраняя WinstonMedium по умолчанию для других размещений.
+Общий `UI/Controls/Calendar/CalendarControl.xaml` использует Manrope, тематическую
+скруглённую поверхность и локальный `CalendarActionButtonStyle` с тем же объёмным
+шаблоном/VSM, что кнопки shell; локальный стиль доступен также в DailyReportDateWindow.
+Сетка `DaysList` содержит 42 дня: текущий день отмечен контуром/точкой, выбранный —
+тематической заливкой, соседний месяц приглушён; hover/press анимируют масштаб.
+`CalendarViewModel` и `CalendarDayAvailability` объявлены в `CalendarDay.cs`:
+PrevMonthCommand/NextMonthCommand → ChangeMonth → BuildCalendar; TodayCommand →
+GoToToday; SelectDateCommand → SelectDate → BuildCalendar/NotifyHeaderChanged →
+SelectedDateChanged → CalendarControl.SelectedDateChanged. AvailabilityProvider
+используется при BuildCalendar и сохраняет индикаторы None/Partial/Complete в экспорте.
+`ExecutionIndicatorSurface` — некликабельная плашка 32×32 с иконкой
+`Ask.UI/Shared/Components/Icons/UploadErrorIcon` размером 18 и рабочей подсказкой на Border.
+Несмотря на историческое имя UploadErrorIndicator, это индикатор выполнения:
+`SystemStateEvents.LockedChanged → StateEventsBinder.OnLockedChanged` показывает/скрывает
+иконку; Visibility плашки связана с Visibility иконки. `ApplyExecutionIndicatorColor`
+назначает NotificationSuccessIconBrush для Idle и NotificationErrorIconBrush для Real,
+а также поясняющую подсказку; OnIdleModeChange обновляет режим. Пульсация 1↔0.55
+с SineEase запускается через IsVisibleChanged → Storyboard.Begin и удаляется при скрытии /
+Unloaded → Storyboard.Remove; анимация скрытого индикатора не продолжает работать.
+Переключение темы вызывается через `Button.Click → MainWindow.ThemeToggleButton_Click`
+после отпускания, чтобы состояние Pressed было видно до смены темы.
 Пункты напрямую связываются с дочерними ViewModel из `MainWindowViewModel`;
 `UiEventsBinder` изменяет видимость контекстных файловых команд и передаёт меню
 в `MenuHotkeyBinder.BindAutoRenumbering`.
@@ -2396,7 +2512,16 @@ the legacy warning-string contract; automatic transport retry is intentionally
 limited to `10055` during send, because resending after an uncertain receive could
 execute an equipment command twice.
 
-Вне execution-протокола верхняя кнопка питания использует отдельную локальную границу ошибок:
+`UI/Components/PowerButton.xaml` отображает четыре визуальных состояния через Tag внутренней
+`PowerActionButton`: Disconnected (нейтральная поверхность), Connected (красная поверхность и
+иконка питания), Loading (вращающееся кольцо) и Cancel (крестик при повторных попытках).
+`SetDisconnectedState`/`SetConnectedState` задают прежнее active-состояние и новый Tag;
+`SetLoadingState` выбирает Loading/Cancel по существующему hasError. VSM отвечает за
+наведение/утопленное нажатие/недоступность. Storyboard кольца работает только при Loading
+и IsVisible, снимается при скрытии/смене состояния. Кнопка сохраняет прежний Click-маршрут,
+подсказки, cancellationToken и выбор реального оборудования; размеры 32×32.
+
+Вне execution-протокола нижняя кнопка питания использует отдельную локальную границу ошибок:
 
 ```text
 PowerButton.{PowerButtonClick,StartPowerAsync,StopPowerAsync}

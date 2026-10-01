@@ -334,12 +334,26 @@
 
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsChecked" Value="True">
-                                <Setter TargetName="Chevron"
-                                        Property="RenderTransform">
-                                    <Setter.Value>
-                                        <RotateTransform Angle="0"/>
-                                    </Setter.Value>
-                                </Setter>
+                                <Trigger.EnterActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="Chevron"
+                                                             Storyboard.TargetProperty="(UIElement.RenderTransform).(RotateTransform.Angle)"
+                                                             To="0"
+                                                             Duration="0:0:0.16"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.EnterActions>
+                                <Trigger.ExitActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="Chevron"
+                                                             Storyboard.TargetProperty="(UIElement.RenderTransform).(RotateTransform.Angle)"
+                                                             To="-90"
+                                                             Duration="0:0:0.16"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.ExitActions>
                                 <Setter TargetName="TreeLine" Property="Visibility" Value="Visible"/>
                             </Trigger>
 
@@ -370,7 +384,10 @@
         </DataTemplate>
     </UserControl.Resources>
 
-    <Border CornerRadius="20,20,0,0" Background="{DynamicResource TestsProtocolBackgroundBrush}">
+    <Border CornerRadius="14"
+            Background="{DynamicResource TestsProtocolBackgroundBrush}"
+            BorderBrush="{DynamicResource TopPanelHoverBackgroundBrush}"
+            BorderThickness="1">
 
         <Grid>
             <Grid.RowDefinitions>
@@ -441,7 +458,7 @@
                             <Setter Property="BorderThickness" Value="0"/>
                             <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
                             <Setter Property="Background" Value="Transparent"/>
-                            <Setter Property="Padding" Value="0"/>
+                            <Setter Property="Padding" Value="5,0,0,0"/>
                             <Setter Property="Margin" Value="0"/>
                             <Setter Property="Template">
                                 <Setter.Value>

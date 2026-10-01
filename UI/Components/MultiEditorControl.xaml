@@ -14,12 +14,12 @@
         </Grid.RowDefinitions>
         <StackPanel x:Name="TopPanel" 
                     Grid.Row="0" 
-                    Background="{DynamicResource TopPanelTabsHostBackgroundBrush}"  
+                    Background="Transparent"
                     Orientation="Horizontal"/>
         <Grid 
             x:Name="ContentPanel" 
             Grid.Row="1" 
-            Background="{DynamicResource SettingsMainBackground}"
+            Background="Transparent"
             >
         </Grid>
     </Grid>

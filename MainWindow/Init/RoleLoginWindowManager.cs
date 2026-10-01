@@ -1,9 +1,9 @@
 using Ask.Core.Shared.Entity.Settings;
 using Ask.Core.Shared.Metadata.Enums.RoleEnums;
-using System.Windows.Threading;
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Interop;
-using System.Runtime.InteropServices;
+using System.Windows.Threading;
 
 namespace MainWindowProgram.Init
 {

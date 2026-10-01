@@ -16,16 +16,15 @@
       <DoubleAnimation Storyboard.TargetName="IconRoot"
                        Storyboard.TargetProperty="Opacity"
                        From="1"
-                       To="0.25"
-                       Duration="0:0:0.55" />
+                       To="0.55"
+                       Duration="0:0:1.2">
+        <DoubleAnimation.EasingFunction>
+          <SineEase EasingMode="EaseInOut"/>
+        </DoubleAnimation.EasingFunction>
+      </DoubleAnimation>
     </Storyboard>
   </UserControl.Resources>
 
-  <UserControl.Triggers>
-    <EventTrigger RoutedEvent="Loaded">
-      <BeginStoryboard Storyboard="{StaticResource BlinkStoryboard}" />
-    </EventTrigger>
-  </UserControl.Triggers>
 
   <Viewbox Stretch="Uniform">
     <Grid x:Name="IconRoot"

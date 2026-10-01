@@ -10,35 +10,113 @@
              Width="352">
     <UserControl.Resources>
         <Style x:Key="CalendarActionButtonStyle" TargetType="Button">
-            <Setter Property="Foreground" Value="{DynamicResource MainTitleSolidColorBrush}"/>
-            <Setter Property="Background" Value="{DynamicResource SettingsNestedGroupBackgroundSolidColorBrush}"/>
-            <Setter Property="BorderBrush" Value="{DynamicResource SettingsInteractiveBorderSolidColorBrush}"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Padding" Value="12,6"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="FontFamily" Value="{DynamicResource WinstonMedium}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
+            <Setter Property="Background" Value="{DynamicResource BackgroundBrushes}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Focusable" Value="False"/>
+            <Setter Property="Padding" Value="12,0"/>
+            <Setter Property="Margin" Value="0"/>
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="FontFamily" Value="{DynamicResource Manrope}"/>
             <Setter Property="FontSize" Value="13"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border x:Name="ButtonBorder"
-                                Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="10">
-                            <ContentPresenter HorizontalAlignment="Center"
-                                              VerticalAlignment="Center"/>
-                        </Border>
+                        <Grid x:Name="ButtonRoot" RenderTransformOrigin="0.5,0.5">
+                            <Grid.RenderTransform>
+                                <ScaleTransform ScaleX="1" ScaleY="1"/>
+                            </Grid.RenderTransform>
+                            <VisualStateManager.VisualStateGroups>
+                                <VisualStateGroup x:Name="CommonStates">
+                                    <VisualStateGroup.Transitions>
+                                        <VisualTransition GeneratedDuration="0:0:0.16"/>
+                                        <VisualTransition To="Pressed" GeneratedDuration="0:0:0.08"/>
+                                        <VisualTransition From="Pressed" GeneratedDuration="0:0:0.22"/>
+                                        <VisualTransition To="Disabled" GeneratedDuration="0"/>
+                                    </VisualStateGroup.Transitions>
+                                    <VisualState x:Name="Normal"/>
+                                    <VisualState x:Name="MouseOver">
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="ButtonRoot"
+                                                             Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)"
+                                                             To="1.025" Duration="0"/>
+                                            <DoubleAnimation Storyboard.TargetName="ButtonRoot"
+                                                             Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)"
+                                                             To="1.025" Duration="0"/>
+                                            <DoubleAnimation Storyboard.TargetName="ButtonBevel"
+                                                             Storyboard.TargetProperty="Opacity" To="1" Duration="0"/>
+                                        </Storyboard>
+                                    </VisualState>
+                                    <VisualState x:Name="Pressed">
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="RaisedShadows"
+                                                             Storyboard.TargetProperty="Opacity" To="0" Duration="0"/>
+                                            <DoubleAnimation Storyboard.TargetName="InsetShading"
+                                                             Storyboard.TargetProperty="Opacity" To="1" Duration="0"/>
+                                            <DoubleAnimation Storyboard.TargetName="ButtonBevel"
+                                                             Storyboard.TargetProperty="Opacity" To="0" Duration="0"/>
+                                        </Storyboard>
+                                    </VisualState>
+                                    <VisualState x:Name="Disabled">
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="RaisedShadows"
+                                                             Storyboard.TargetProperty="Opacity" To="0.2" Duration="0"/>
+                                        </Storyboard>
+                                    </VisualState>
+                                </VisualStateGroup>
+                            </VisualStateManager.VisualStateGroups>
+                            <Grid x:Name="RaisedShadows" IsHitTestVisible="False">
+                                <Border CornerRadius="8" Background="{TemplateBinding Background}">
+                                    <Border.Effect>
+                                        <DropShadowEffect Color="{Binding Foreground.Color, RelativeSource={RelativeSource TemplatedParent}}" Direction="135" BlurRadius="8"
+                                                          ShadowDepth="2" Opacity="{DynamicResource TopPanelButtonHighlightOpacity}"/>
+                                    </Border.Effect>
+                                </Border>
+                                <Border CornerRadius="8" Background="{TemplateBinding Background}">
+                                    <Border.Effect>
+                                        <DropShadowEffect Color="Black" Direction="315" BlurRadius="8"
+                                                          ShadowDepth="2" Opacity="0.4"/>
+                                    </Border.Effect>
+                                </Border>
+                            </Grid>
+                            <Border x:Name="ButtonSurface" CornerRadius="8"
+                                    Background="{TemplateBinding Background}"/>
+                            <Border x:Name="ButtonBevel" CornerRadius="8" BorderThickness="1"
+                                    BorderBrush="{DynamicResource TopPanelButtonBevelBrush}"
+                                    Opacity="0.65" IsHitTestVisible="False"/>
+                            <Grid x:Name="InsetShading" Opacity="0" IsHitTestVisible="False">
+                                <Border CornerRadius="8">
+                                    <Border.Background>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                            <GradientStop Color="#80000000" Offset="0"/>
+                                            <GradientStop Color="#00000000" Offset="0.32"/>
+                                            <GradientStop Color="#00FFFFFF" Offset="0.68"/>
+                                            <GradientStop Color="#20FFFFFF" Offset="1"/>
+                                        </LinearGradientBrush>
+                                    </Border.Background>
+                                </Border>
+                                <Border CornerRadius="8">
+                                    <Border.Background>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                            <GradientStop Color="#50000000" Offset="0"/>
+                                            <GradientStop Color="#00000000" Offset="0.06"/>
+                                            <GradientStop Color="#00FFFFFF" Offset="0.94"/>
+                                            <GradientStop Color="#16FFFFFF" Offset="1"/>
+                                        </LinearGradientBrush>
+                                    </Border.Background>
+                                </Border>
+                            </Grid>
+                            <ContentPresenter Margin="{TemplateBinding Padding}" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                              RecognizesAccessKey="True"/>
+                        </Grid>
                         <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="ButtonBorder" Property="Background" Value="{DynamicResource SettingsInteractiveHoverSolidColorBrush}"/>
-                                <Setter TargetName="ButtonBorder" Property="BorderBrush" Value="{DynamicResource SettingsInteractiveHoverSolidColorBrush}"/>
-                                <Setter Property="Foreground" Value="#F7FAFF"/>
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="ButtonBorder" Property="Background" Value="{DynamicResource SettingsInteractivePressedSolidColorBrush}"/>
-                                <Setter TargetName="ButtonBorder" Property="BorderBrush" Value="{DynamicResource SettingsInteractivePressedSolidColorBrush}"/>
-                                <Setter Property="Foreground" Value="#F7FAFF"/>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.55"/>
+                                <Setter Property="Cursor" Value="Arrow"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -49,23 +127,23 @@
         <Style x:Key="CalendarNavButtonStyle"
                TargetType="Button"
                BasedOn="{StaticResource CalendarActionButtonStyle}">
-            <Setter Property="Width" Value="34"/>
-            <Setter Property="Height" Value="34"/>
+            <Setter Property="Width" Value="32"/>
+            <Setter Property="Height" Value="32"/>
             <Setter Property="Padding" Value="0"/>
             <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes85}"/>
         </Style>
 
         <Style x:Key="CalendarWeekdayTextStyle" TargetType="TextBlock">
-            <Setter Property="FontFamily" Value="{DynamicResource WinstonMedium}"/>
+            <Setter Property="FontFamily" Value="{DynamicResource Manrope}"/>
             <Setter Property="FontSize" Value="11"/>
-            <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes35}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes45}"/>
             <Setter Property="HorizontalAlignment" Value="Center"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
         </Style>
 
         <Style x:Key="CalendarDayButtonStyle" TargetType="Button">
-            <Setter Property="Width" Value="40"/>
-            <Setter Property="Height" Value="40"/>
+            <Setter Property="Width" Value="36"/>
+            <Setter Property="Height" Value="36"/>
             <Setter Property="Margin" Value="2"/>
             <Setter Property="Padding" Value="0"/>
             <Setter Property="Background" Value="Transparent"/>
@@ -73,48 +151,74 @@
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes85}"/>
             <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="FontFamily" Value="{DynamicResource WinstonMedium}"/>
+            <Setter Property="FontFamily" Value="{DynamicResource Manrope}"/>
             <Setter Property="FontSize" Value="14"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border x:Name="DaySurface"
-                                Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="12"
-                                SnapsToDevicePixels="True">
-                            <Grid>
-                                <ContentPresenter HorizontalAlignment="Center"
-                                                  VerticalAlignment="Center"/>
-                                <Ellipse x:Name="TodayDot"
-                                         Width="4"
-                                         Height="4"
-                                         Fill="{DynamicResource SettingsSelectorSelectedSolidColorBrush}"
-                                         VerticalAlignment="Bottom"
-                                         Margin="0,0,0,6"
-                                         Visibility="Collapsed"/>
-                                <Ellipse x:Name="AvailabilityDot"
-                                         Width="6"
-                                         Height="6"
-                                         Fill="{DynamicResource ForegrounfBrushes35}"
-                                         VerticalAlignment="Top"
-                                         HorizontalAlignment="Right"
-                                         Margin="0,5,5,0"
-                                         Visibility="Collapsed"/>
-                            </Grid>
-                        </Border>
+                        <Grid x:Name="DayRoot" RenderTransformOrigin="0.5,0.5">
+                            <Grid.RenderTransform>
+                                <ScaleTransform/>
+                            </Grid.RenderTransform>
+                            <VisualStateManager.VisualStateGroups>
+                                <VisualStateGroup x:Name="CommonStates">
+                                    <VisualStateGroup.Transitions>
+                                        <VisualTransition GeneratedDuration="0:0:0.16"/>
+                                        <VisualTransition To="Pressed" GeneratedDuration="0:0:0.08"/>
+                                        <VisualTransition From="Pressed" GeneratedDuration="0:0:0.22"/>
+                                    </VisualStateGroup.Transitions>
+                                    <VisualState x:Name="Normal"/>
+                                    <VisualState x:Name="MouseOver">
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="DayRoot" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" To="1.06" Duration="0"/>
+                                            <DoubleAnimation Storyboard.TargetName="DayRoot" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" To="1.06" Duration="0"/>
+                                        </Storyboard>
+                                    </VisualState>
+                                    <VisualState x:Name="Pressed">
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="DayRoot" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)" To="0.97" Duration="0"/>
+                                            <DoubleAnimation Storyboard.TargetName="DayRoot" Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)" To="0.97" Duration="0"/>
+                                            <DoubleAnimation Storyboard.TargetName="DayPressOverlay" Storyboard.TargetProperty="Opacity" To="0.15" Duration="0"/>
+                                        </Storyboard>
+                                    </VisualState>
+                                    <VisualState x:Name="Disabled"/>
+                                </VisualStateGroup>
+                            </VisualStateManager.VisualStateGroups>
+                            <Border x:Name="DaySurface"
+                                    Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="9"
+                                    SnapsToDevicePixels="True">
+                                <Grid>
+                                    <ContentPresenter HorizontalAlignment="Center"
+                                                      VerticalAlignment="Center"/>
+                                    <Ellipse x:Name="TodayDot"
+                                             Width="4"
+                                             Height="4"
+                                             Fill="{DynamicResource SettingsSelectorSelectedSolidColorBrush}"
+                                             VerticalAlignment="Bottom"
+                                             Margin="0,0,0,6"
+                                             Visibility="Collapsed"/>
+                                    <Ellipse x:Name="AvailabilityDot"
+                                             Width="6"
+                                             Height="6"
+                                             Fill="{DynamicResource ForegrounfBrushes35}"
+                                             VerticalAlignment="Top"
+                                             HorizontalAlignment="Right"
+                                             Margin="0,5,5,0"
+                                             Visibility="Collapsed"/>
+                                </Grid>
+                            </Border>
+
+                            <Border x:Name="DayPressOverlay" CornerRadius="9" Background="Black" Opacity="0" IsHitTestVisible="False"/>
+                        </Grid>
 
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
                                 <Setter TargetName="DaySurface" Property="Background" Value="{DynamicResource SettingsNestedGroupBackgroundSolidColorBrush}"/>
                                 <Setter TargetName="DaySurface" Property="BorderBrush" Value="{DynamicResource SettingsInteractiveBorderSolidColorBrush}"/>
                                 <Setter Property="Foreground" Value="{DynamicResource MainTitleSolidColorBrush}"/>
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="DaySurface" Property="Background" Value="{DynamicResource SettingsInteractivePressedSolidColorBrush}"/>
-                                <Setter TargetName="DaySurface" Property="BorderBrush" Value="{DynamicResource SettingsInteractivePressedSolidColorBrush}"/>
-                                <Setter Property="Foreground" Value="#F7FAFF"/>
                             </Trigger>
 
                             <DataTrigger Binding="{Binding IsCurrentMonth}" Value="False">
@@ -129,7 +233,7 @@
                                 <Setter TargetName="DaySurface" Property="Background" Value="{DynamicResource SettingsSelectorSelectedSolidColorBrush}"/>
                                 <Setter TargetName="DaySurface" Property="BorderBrush" Value="{DynamicResource SettingsSelectorSelectedSolidColorBrush}"/>
                                 <Setter TargetName="TodayDot" Property="Visibility" Value="Collapsed"/>
-                                <Setter Property="Foreground" Value="#F7FAFF"/>
+                                <Setter Property="Foreground" Value="{DynamicResource MainTitleSolidColorBrush}"/>
                             </DataTrigger>
                             <DataTrigger Binding="{Binding Availability}" Value="Partial">
                                 <Setter TargetName="AvailabilityDot" Property="Visibility" Value="Visible"/>
@@ -149,17 +253,17 @@
         </Style>
     </UserControl.Resources>
 
-    <Border Margin="8"
-            Padding="18"
-            Background="{DynamicResource SettingsPanelBackgroundSolidColorBrush}"
-            BorderBrush="{DynamicResource SettingsPanelBorderSolidColorBrush}"
+    <Border Margin="10"
+            Padding="16"
+            Background="{DynamicResource MenuBackgroundBrushes}"
+            BorderBrush="{DynamicResource TopPanelHoverBackgroundBrush}"
             BorderThickness="1"
-            CornerRadius="22"
+            CornerRadius="16"
             SnapsToDevicePixels="True">
         <Border.Effect>
-            <DropShadowEffect BlurRadius="26"
-                              ShadowDepth="0"
-                              Opacity="0.24"
+            <DropShadowEffect BlurRadius="18"
+                              ShadowDepth="4"
+                              Opacity="0.3"
                               Color="#B3000000"/>
         </Border.Effect>
 
@@ -179,21 +283,22 @@
 
                 <StackPanel>
                     <TextBlock Text="Календарь"
-                               FontFamily="{DynamicResource WinstonLight}"
+                               FontFamily="{DynamicResource Manrope}"
                                FontSize="12"
                                Foreground="{DynamicResource ForegrounfBrushes35}"/>
-                    <Clock:TimeControl FontSize="30"
+                    <Clock:TimeControl FontFamily="{DynamicResource Manrope}" FontSize="28" FontWeight="SemiBold"
                                        Foreground="{DynamicResource ForegrounfBrushes}"
                                        Margin="0,4,0,0"
                                        FullTime="True"/>
                     <TextBlock Text="{Binding SelectionCaption}"
                                Margin="0,4,0,0"
-                               FontFamily="{DynamicResource WinstonMedium}"
+                               FontFamily="{DynamicResource Manrope}"
                                FontSize="14"
                                Foreground="{DynamicResource ForegrounfBrushes85}"/>
                 </StackPanel>
 
                 <Button Grid.Column="1"
+                        x:Name="TodayButton"
                         Style="{StaticResource CalendarActionButtonStyle}"
                         VerticalAlignment="Top"
                         Command="{Binding TodayCommand}"
@@ -201,12 +306,7 @@
             </Grid>
 
             <Border Grid.Row="1"
-                    Margin="0,18,0,14"
-                    Padding="10"
-                    Background="{DynamicResource SettingsNestedGroupBackgroundSolidColorBrush}"
-                    BorderBrush="{DynamicResource SettingsInteractiveBorderSolidColorBrush}"
-                    BorderThickness="1"
-                    CornerRadius="16">
+                    Margin="0,18,0,14">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
@@ -214,7 +314,8 @@
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
-                    <Button Grid.Column="0"
+                    <Button x:Name="PreviousMonthButton" Grid.Column="0"
+                            ToolTip="Предыдущий месяц"
                             Style="{StaticResource CalendarNavButtonStyle}"
                             Command="{Binding PrevMonthCommand}">
                         <Path Data="M 15 5 L 8 12 L 15 19"
@@ -231,11 +332,12 @@
                                HorizontalAlignment="Center"
                                VerticalAlignment="Center"
                                Text="{Binding MonthYear}"
-                               FontFamily="{DynamicResource WinstonBold}"
-                               FontSize="18"
+                               FontFamily="{DynamicResource Manrope}"
+                               FontSize="16" FontWeight="SemiBold"
                                Foreground="{DynamicResource MainTitleSolidColorBrush}"/>
 
-                    <Button Grid.Column="2"
+                    <Button x:Name="NextMonthButton" Grid.Column="2"
+                            ToolTip="Следующий месяц"
                             Style="{StaticResource CalendarNavButtonStyle}"
                             Command="{Binding NextMonthCommand}">
                         <Path Data="M 9 5 L 16 12 L 9 19"
@@ -263,7 +365,7 @@
                 <TextBlock Text="Вс" Style="{StaticResource CalendarWeekdayTextStyle}"/>
             </UniformGrid>
 
-            <ItemsControl Grid.Row="3"
+            <ItemsControl x:Name="DaysList" Grid.Row="3"
                           ItemsSource="{Binding Days}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
