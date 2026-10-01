@@ -27,16 +27,11 @@
             VerticalAlignment="Center"
             Background="#00000000"
             Padding="0">
-            <Border.Effect>
-                <!-- деликатная подсветка блока -->
-                <DropShadowEffect BlurRadius="12"
-                                  ShadowDepth="0"
-                                  Opacity="0.18"
-                                  Color="{DynamicResource EmptyWorkspaceBlockShadowColor}"/>
-            </Border.Effect>
 
             <Grid TextOptions.TextFormattingMode="Display" SnapsToDevicePixels="True">
                 <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
@@ -50,16 +45,12 @@
                        Opacity="0"
                        IsHitTestVisible="False"
                        Foreground="{DynamicResource ForegrounfBrushes}"
-                       FontFamily="{DynamicResource WinstonBold}"
-                       FontSize="60"
+                       FontFamily="{DynamicResource Manrope}"
+                       FontSize="72"
+                       FontWeight="SemiBold"
+                       Typography.NumeralAlignment="Tabular"
                        TextAlignment="Center"
                        HorizontalAlignment="Center">
-                        <TextBlock.Effect>
-                            <DropShadowEffect BlurRadius="18"
-                                              ShadowDepth="0"
-                                              Opacity="0.55"
-                                              Color="{DynamicResource EmptyWorkspaceTimeGlowColor}"/>
-                        </TextBlock.Effect>
                     </TextBlock>
 
                     <TextBlock x:Name="TimeText"
@@ -68,26 +59,22 @@
                                       Converter={StaticResource DateTimeToString},
                                       ConverterParameter=HH:mm:ss}"
                        Foreground="{DynamicResource ForegrounfBrushes}"
-                       FontFamily="{DynamicResource WinstonBold}"
-                       FontSize="60"
+                       FontFamily="{DynamicResource Manrope}"
+                       FontSize="72"
+                       FontWeight="SemiBold"
+                       Typography.NumeralAlignment="Tabular"
                        TextAlignment="Center"
                        HorizontalAlignment="Center">
-                        <TextBlock.Effect>
-                            <DropShadowEffect BlurRadius="18"
-                                              ShadowDepth="0"
-                                              Opacity="0.75"
-                                              Color="{DynamicResource EmptyWorkspaceTimeGlowColor}"/>
-                        </TextBlock.Effect>
                     </TextBlock>
                 </Grid>
 
                 <!-- День недели | Дата -->
                 <TextBlock x:Name="DateText"
                    Grid.Row="1"
-                   Margin="0,8,0,0"
+                   Margin="0,14,0,0"
                    TextAlignment="Center"
                    HorizontalAlignment="Center"
-                   FontFamily="{DynamicResource WinstonLight}"
+                   FontFamily="{DynamicResource Manrope}"
                    Foreground="{DynamicResource ForegrounfBrushes}" 
                    FontSize="20"
                    >
@@ -100,7 +87,7 @@
                    Foreground="{DynamicResource ForegrounfBrushes85}"/>
 
           <!-- Разделитель -->
-          <Run Text="  |  " Foreground="{DynamicResource ForegrounfBrushes35}" />
+          <Run Text="  •  " Foreground="{DynamicResource ForegrounfBrushes35}" />
 
           <!-- Дата -->
           <Run Text="{Binding CurrentDateTime,
@@ -108,7 +95,7 @@
                               Converter={StaticResource DateTimeToString},
                               ConverterParameter=d MMMM yyyy}"
                Foreground="{DynamicResource ForegrounfBrushes85}"
-               FontSize="22">
+               FontSize="20">
 
           </Run>
                 </TextBlock>
@@ -116,13 +103,76 @@
                 <!-- Подсказка под датой -->
                 <TextBlock x:Name="HintText"
                    Grid.Row="2"
-                   Margin="0,15,0,0"
+                   Margin="0,18,0,0"
                    Text="Откройте файл, чтобы начать работу"
-                   Foreground="{DynamicResource ForegrounfBrushes}"
-                   FontFamily="{DynamicResource WinstonLight}"
+                   Foreground="{DynamicResource ForegrounfBrushes85}"
+                   Opacity="0.8"
+                   FontFamily="{DynamicResource Manrope}"
                    FontSize="16"
                    TextAlignment="Center"
                    HorizontalAlignment="Center"/>
+                <Button x:Name="OpenFileButton" Grid.Row="3"
+                        Style="{DynamicResource WindowActionButtonStyle}"
+                        Command="{Binding File.OpenFileCommand}"
+                        Width="220" Height="42" Margin="0,24,0,0" Padding="16,0"
+                        FontFamily="{DynamicResource Manrope}" FontSize="14"
+                        HorizontalAlignment="Center" ToolTip="Открыть файл (Ctrl+O)"
+                        AutomationProperties.Name="Открыть файл">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="Открыть файл" VerticalAlignment="Center"/>
+                        <TextBlock Text="Ctrl+O" FontSize="11" Margin="18,0,0,0"
+                                   Foreground="{DynamicResource ForegrounfBrushes85}"
+                                   VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+                <StackPanel x:Name="RecentFilesPanel" Grid.Row="4" Width="420" Margin="0,24,0,0">
+                    <StackPanel.Style>
+                        <Style TargetType="StackPanel">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding RecentFiles.Count, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="0">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </StackPanel.Style>
+                    <TextBlock Text="Последние файлы" FontFamily="{DynamicResource Manrope}" FontSize="12"
+                               Foreground="{DynamicResource ForegrounfBrushes85}" Margin="12,0,0,8"/>
+                    <ItemsControl x:Name="RecentFilesList" ItemsSource="{Binding RecentFiles, RelativeSource={RelativeSource AncestorType=UserControl}}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Button Command="{Binding DataContext.File.OpenRecentFileCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                        CommandParameter="{Binding FullName}" ToolTip="{Binding FullName}"
+                                        Height="52" Margin="0,2" Padding="12,6"
+                                        HorizontalContentAlignment="Stretch" Cursor="Hand"
+                                        Foreground="{DynamicResource ForegrounfBrushes}">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border x:Name="RecentRow" CornerRadius="8" Background="Transparent" Padding="{TemplateBinding Padding}">
+                                                <ContentPresenter/>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="RecentRow" Property="Background" Value="{DynamicResource TopPanelHoverBackgroundBrush}"/>
+                                                </Trigger>
+                                                <Trigger Property="IsPressed" Value="True">
+                                                    <Setter TargetName="RecentRow" Property="Background" Value="{DynamicResource TopPanelPressedBackgroundBrush}"/>
+                                                </Trigger>
+                                                <Trigger Property="IsEnabled" Value="False">
+                                                    <Setter Property="Opacity" Value="0.5"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding Name}" FontFamily="{DynamicResource Manrope}" FontSize="13" TextTrimming="CharacterEllipsis"/>
+                                        <TextBlock Text="{Binding FullName}" FontFamily="{DynamicResource Manrope}" FontSize="11"
+                                                   Foreground="{DynamicResource ForegrounfBrushes85}" TextTrimming="CharacterEllipsis"/>
+                                    </StackPanel>
+                                </Button>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
             </Grid>
         </Border>
 

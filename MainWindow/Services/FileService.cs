@@ -297,6 +297,7 @@ namespace MainWindowProgram.Services
           viewer,
           TypeWindow.Files,
           fullResultPath);
+        LastDirectoryService.RememberFile(fullResultPath);
         await Dispatcher.Yield(DispatcherPriority.ContextIdle);
       }
       catch (Exception ex)

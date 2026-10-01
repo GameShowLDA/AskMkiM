@@ -94,6 +94,7 @@ namespace UI.Services.FileManager
             await Application.Current.Dispatcher.InvokeAsync(
               () => { },
               System.Windows.Threading.DispatcherPriority.ContextIdle);
+            LastDirectoryService.RememberFile(path);
             return;
           }
 
@@ -101,9 +102,13 @@ namespace UI.Services.FileManager
           var container = EnsureTextEditorContainer();
 
           if (TryActivateAlreadyOpenedFile(container, fileName, path, fileType))
+          {
+            LastDirectoryService.RememberFile(path);
             return;
+          }
 
           OpenNewFile(path, fileName, fileContent, encoding, fileType, container);
+          LastDirectoryService.RememberFile(path);
         }
         catch (Exception ex)
         {

@@ -1,16 +1,26 @@
 ﻿<UserControl x:Class="UI.Components.KeyboardLayoutComponent"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             Height="32" Width="44">
-    <Button x:Name="LayoutButton"
-            Style="{DynamicResource WindowActionButtonStyle}"
-            Height="32" Width="44" Margin="0"
-            FontFamily="{DynamicResource Manrope}" FontSize="13" FontWeight="SemiBold"
-            ToolTip="Раскладка клавиатуры. Нажмите, чтобы переключить язык."
-            AutomationProperties.Name="Переключить раскладку клавиатуры"
-            Click="LayoutButton_Click">
-        <TextBlock x:Name="LayoutText"
-                   VerticalAlignment="Center"
-                   HorizontalAlignment="Center"/>
-    </Button>
+             Height="32">
+    <StackPanel Orientation="Horizontal">
+        <Border x:Name="CapsLockBadge" Height="32" Margin="0,0,8,0" Padding="8,0"
+                Visibility="Collapsed" VerticalAlignment="Center" CornerRadius="8"
+                Background="{DynamicResource BackgroundBrushes}"
+                BorderBrush="{DynamicResource TopPanelButtonBevelBrush}" BorderThickness="1"
+                ToolTip="Caps Lock включён" AutomationProperties.Name="Caps Lock включён">
+            <TextBlock Text="CAPS" FontFamily="{DynamicResource Manrope}" FontSize="11" FontWeight="SemiBold"
+                       Foreground="{DynamicResource NotificationWarningIconBrush}" VerticalAlignment="Center"/>
+        </Border>
+        <Button x:Name="LayoutButton"
+                Style="{DynamicResource WindowActionButtonStyle}"
+                Height="32" Width="44" Margin="0"
+                FontFamily="{DynamicResource Manrope}" FontSize="13" FontWeight="SemiBold"
+                ToolTip="Раскладка клавиатуры. Нажмите, чтобы переключить язык."
+                AutomationProperties.Name="Переключить раскладку клавиатуры"
+                Click="LayoutButton_Click">
+            <TextBlock x:Name="LayoutText"
+                       VerticalAlignment="Center"
+                       HorizontalAlignment="Center"/>
+        </Button>
+    </StackPanel>
 </UserControl>

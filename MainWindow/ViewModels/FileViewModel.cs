@@ -23,6 +23,10 @@ namespace MainWindowProgram.ViewModels
     [RelayCommand]
     private void OpenFile() => _fileService.OpenFileAsync();
 
+    /// <summary>Команда открытия файла из истории.</summary>
+    [RelayCommand]
+    private void OpenRecentFile(string filePath) => _fileService.OpenFileAsync(filePath);
+
     /// <summary>Команда сохранения файла.</summary>
     [RelayCommand]
     private void SaveFile() => _fileService.SaveFileAsync();

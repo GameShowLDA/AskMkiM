@@ -1935,7 +1935,30 @@ Their services generally route operations into `MultiWindowService`.
 без внешней обводки и скруглений. Внутренние отступы меню/кнопок и перетаскивание
 через `TopPanel_PreviewMouseLeftButtonDown` сохранены.
 `EmptyWorkspaceView` отображает содержимое без собственного фонового градиента и
-декоративных оверлеев. Скругление подсветки пунктов меню задают `StyleMenuItem`
+декоративных оверлеев. Центральный блок — текст без плашки и DropShadowEffect:
+часы Manrope 72 SemiBold с табличными цифрами, дата 20 и подсказка 16. Текст использует
+ForegrounfBrushes/ForegrounfBrushes85 текущей темы для читаемости на светлом и тёмном фоне.
+Существующий `ApplicationClockService.TimeChanged → EmptyWorkspaceView.OnClockTimeChanged
+→ Dispatcher / UpdateCurrentDateTime → CurrentDateTime → DateTimeToStringConverter`
+обновляет часы/дату; AnimateMainClock сохраняет плавную смену текста через TimeGhostText,
+без свечения. Подписка включается на Loaded и удаляется на Unloaded.
+`EmptyWorkspaceView.OpenFileButton` наследует WindowActionButtonStyle и привязан к
+`File.OpenFileCommand` из DataContext shell через MultiWindowControl (DataContext не заменяется).
+Маршрут совпадает с меню/Ctrl+O: `FileViewModel.OpenFile → FileService.OpenFileAsync →
+проверка _isLockedProvider → OpenFileDialog (Multiselect) → OpenFileWithLegacyConversion →
+MultiWindowService.EditorDocumentService.OpenFile`.
+Последние три файла хранит `FileDialogSettings.RecentFiles` в прежнем
+`Settings/fileDialogSettings.yaml`: `LastDirectoryService.RememberFile/GetRecentFiles`
+сохраняют порядок MRU, исключают повторы без учёта регистра и отсутствующие файлы;
+SaveLastDirectory сохраняет историю. Успешные ветки `UI.Services.FileManager.FileOpenService.OpenFile`
+(новый/уже открытый редактор и сохранённый протокол) записывают фактический путь документа,
+а `MainWindowProgram.Services.FileService.OpenLinkedResultProtocol` — путь итогового протокола.
+Для OPK-конверсии история содержит открытый OPKW. Ошибки записи истории логируются и не
+превращают успешное открытие в ошибку. EmptyWorkspaceView.RefreshRecentFiles на Loaded /
+IsVisibleChanged загружает FileInfo[] для RecentFilesList; пустой список скрывает панель.
+Клик → FileViewModel.OpenRecentFileCommand → FileService.OpenFileAsync(string) → прежний
+pipeline открытия с проверкой блокировки, конверсиями и обработкой ошибок.
+Скругление подсветки пунктов меню задают `StyleMenuItem`
 в `UI/Resources/Theme/dark.xaml` и `light.xaml`; custom-темы наследуют эти стили.
 
 ### Главное меню и адаптивная верхняя панель
@@ -1990,6 +2013,10 @@ ApplyMessage → InfoBlock.Text/Foreground`. `GuiInitializer.Apply` связыв
 перебирает `InputLanguageManager.Current.AvailableInputLanguages` и вызывает Win32
 `LoadKeyboardLayout/ActivateKeyboardLayout`. `InputLanguageChanged → UpdateLayoutDisplay`
 обновляет двухбуквенный код языка. Размещается как `LanguageBlock` в нижней панели.
+Слева от RU/EN `CapsLockBadge` показывает CAPS только при `Keyboard.IsKeyToggled(Key.CapsLock)`.
+`KeyboardLayoutComponent.Loaded` обновляет состояние, подписывается на InputLanguageChanged
+и запускает DispatcherTimer 250 мс → UpdateCapsLockIndicator; Unloaded останавливает таймер
+и удаляет подписку. Ширина компонента Auto: выключенный CAPS не занимает места.
 `UI/Controls/DateTimeControl.xaml` размещает часы и дату в общей кнопке 106×32 с
 `WindowActionButtonStyle`: время Manrope 13 SemiBold, дата 11 с приглушённым цветом.
 `DateTimeButton.Click → DateTimeButton_Click → CalendarPopup.IsOpen` открывает календарь

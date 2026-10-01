@@ -60,12 +60,53 @@ public static class LastDirectoryService
       return;
     }
 
-    FileDialogSettings settings = new()
-    {
-      LastDirectoryPath = path
-    };
+    FileDialogSettings settings = YamlService.Load();
+    settings.LastDirectoryPath = path;
 
     YamlService.Save(settings);
+  }
+
+  /// <summary>
+  /// Возвращает до трёх последних существующих файлов без повторов.
+  /// </summary>
+  /// <returns>Пути файлов, от последнего открытого к более старым.</returns>
+  public static IReadOnlyList<string> GetRecentFiles() =>
+    (YamlService.Load().RecentFiles ?? new List<string>())
+      .Where(File.Exists)
+      .Distinct(StringComparer.OrdinalIgnoreCase)
+      .Take(3)
+      .ToArray();
+
+  /// <summary>
+  /// Сохраняет успешно открытый файл в начале истории.
+  /// </summary>
+  /// <param name="path">Путь открытого файла.</param>
+  public static void RememberFile(string path)
+  {
+    if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
+    {
+      return;
+    }
+
+    FileDialogSettings settings = YamlService.Load();
+    settings.RecentFiles = new[] { Path.GetFullPath(path) }
+      .Concat(settings.RecentFiles ?? new List<string>())
+      .Where(File.Exists)
+      .Distinct(StringComparer.OrdinalIgnoreCase)
+      .Take(3)
+      .ToList();
+    try
+    {
+      YamlService.Save(settings);
+    }
+    catch (IOException ex)
+    {
+      Ask.LogLib.LoggerUtility.LogException("Не удалось сохранить историю открытых файлов", ex);
+    }
+    catch (UnauthorizedAccessException ex)
+    {
+      Ask.LogLib.LoggerUtility.LogException("Нет доступа к истории открытых файлов", ex);
+    }
   }
 
   /// <summary>

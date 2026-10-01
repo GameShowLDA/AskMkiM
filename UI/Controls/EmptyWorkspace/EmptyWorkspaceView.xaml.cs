@@ -1,5 +1,7 @@
 using Ask.Core.Services.App;
 using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.FilesUtility;
+using System.IO;
 using Ask.UI.Features.BuildDiagnostics.Views;
 using System;
 using System.ComponentModel;
@@ -65,6 +67,8 @@ namespace UI.Controls.EmptyWorkspace
       }
     }
 
+    public IReadOnlyList<FileInfo> RecentFiles { get; private set; } = Array.Empty<FileInfo>();
+
     public event PropertyChangedEventHandler? PropertyChanged;
 
     public EmptyWorkspaceView()
@@ -76,6 +80,13 @@ namespace UI.Controls.EmptyWorkspace
       BuildDate = buildInfo.BuildDate;
       AppVersion = $"Версия {buildInfo.BuildIdentifier} • Сборка {BuildDate}";
 
+      IsVisibleChanged += (_, _) =>
+      {
+        if (IsVisible)
+        {
+          RefreshRecentFiles();
+        }
+      };
       Loaded += EmptyWorkspaceView_Loaded;
       Unloaded += EmptyWorkspaceView_Unloaded;
     }
@@ -86,7 +97,14 @@ namespace UI.Controls.EmptyWorkspace
     private void EmptyWorkspaceView_Loaded(object sender, RoutedEventArgs e)
     {
       UpdateCurrentDateTime(ApplicationClockService.CurrentDateTime);
+      RefreshRecentFiles();
       SubscribeToClock();
+    }
+
+    private void RefreshRecentFiles()
+    {
+      RecentFiles = LastDirectoryService.GetRecentFiles().Select(path => new FileInfo(path)).ToArray();
+      OnPropertyChanged(nameof(RecentFiles));
     }
 
     private void EmptyWorkspaceView_Unloaded(object sender, RoutedEventArgs e)
