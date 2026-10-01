@@ -201,7 +201,7 @@ namespace Ask.UI.Features.ProtocolNew.Execution
       if (!_runGuard.TryAcquire(actionSettings.Name, this, out var activeProcessName))
       {
         LogWarning($"Попытка запустить \"{actionSettings.Name}\", пока выполняется \"{activeProcessName}\".");
-        await ProtocolSelfCheck.ShowMessageAsync(new ShowMessageModel($"Уже выполняется \"{activeProcessName}\". Дождитесь завершения текущей задачи.", type: MessageType.Error), skipPause: true);
+        await ProtocolSelfCheck.ShowMessageAsync(new ShowMessageModel($"Уже выполняется \"{activeProcessName}\". Дождитесь завершения текущей задачи.", type: MessageType.Error), skipPause: true, SkipStepModeCheck: true);
         return;
       }
 
@@ -221,6 +221,7 @@ namespace Ask.UI.Features.ProtocolNew.Execution
       {
         _actionSettings = actionSettings;
         ClearErrors();
+        ProtocolSelfCheck.ShowOnlyStopAndFinishButtons();
         ProtocolSelfCheck.HideProtocolManager();
         ProtocolSelfCheck.ClearInspectionProtocol();
 
@@ -359,9 +360,13 @@ namespace Ask.UI.Features.ProtocolNew.Execution
       }
       finally
       {
-        _executionFinished = null;
-        _runGuard.Release(this);
-        finalizationFinished?.TrySetResult();
+        ProtocolSelfCheck.Dispatcher.Invoke(() =>
+        {
+          _executionFinished = null;
+          _runGuard.Release(this);
+          finalizationFinished?.TrySetResult();
+          ProtocolSelfCheck.ShowOnlyStartButton();
+        });
       }
     }
 

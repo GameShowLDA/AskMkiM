@@ -221,13 +221,17 @@ namespace Ask.UI.Controls.ProtocolNew
     {
       LogInformation($"Сработан обработчик события для кнопки \"Запустить\"");
 
+      if (_isStartPending || ActionExecutor.IsActive)
+      {
+        _startRequestedInStepMode = false;
+        return;
+      }
+
       var startInStepMode = _startRequestedInStepMode ||
         ExecutionConfig.GetIsStepByStepModeEnabled();
       _startRequestedInStepMode = false;
       ExecutionConfig.SetStepByStepMode(startInStepMode);
 
-      SetNonVisibleAllButton();
-      ShowOnlyStopAndFinishButtons(startInStepMode);
       StartMeasureResistanceButtonPreviewMouseDown?.Invoke(this, e);
     }
 
@@ -288,6 +292,7 @@ namespace Ask.UI.Controls.ProtocolNew
       KeyboardManager.OnStartPressedByStepMode = () =>
         Application.Current.Dispatcher.Invoke(() =>
         {
+          if (_isStartPending || ActionExecutor.IsActive) return;
           _startRequestedInStepMode = true;
           ExecutionConfig.SetStepByStepMode(true);
           StartMeasureResistanceButton_PreviewMouseDown(StartButtonElement, CreateMouseArgs());
