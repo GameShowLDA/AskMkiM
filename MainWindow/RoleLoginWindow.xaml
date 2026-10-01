@@ -1,576 +1,582 @@
-<Window x:Class="MainWindowProgram.RoleLoginWindow"
+﻿<Window x:Class="MainWindowProgram.RoleLoginWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:icons="clr-namespace:Ask.UI.Shared.Components.Icons;assembly=Ask.UI"
         Title="Вход в АСК-МКИ-М"
+        Width="800" Height="600"
         ShowActivated="True"
         WindowStyle="None"
         ResizeMode="NoResize"
-        WindowState="Maximized"
         WindowStartupLocation="CenterScreen"
-        Background="#0E141B">
-
+        Background="#F5F2EB" Foreground="#29243F">
     <Window.Resources>
-        <SolidColorBrush x:Key="LoginForegroundBrush" Color="#F3F5F8"/>
-        <SolidColorBrush x:Key="LoginMutedForegroundBrush" Color="#ADB4C0"/>
-        <SolidColorBrush x:Key="LoginWeakForegroundBrush" Color="#7A8492"/>
-        <SolidColorBrush x:Key="LoginAccentBrush" Color="#3F86FF"/>
-        <SolidColorBrush x:Key="LoginInputBackgroundBrush" Color="#180A1322"/>
-        <SolidColorBrush x:Key="LoginInputForegroundBrush" Color="#F0F2F7"/>
-        <SolidColorBrush x:Key="LoginInputHintBrush" Color="#8D98AA"/>
-        <SolidColorBrush x:Key="LoginInputBorderBrush" Color="#8A6FA6FF"/>
-        <SolidColorBrush x:Key="LoginButtonBackgroundBrush" Color="#26305278"/>
-        <SolidColorBrush x:Key="LoginButtonForegroundBrush" Color="#EEF4FF"/>
-        <SolidColorBrush x:Key="LoginButtonHoverBrush" Color="#263A78C8"/>
-        <SolidColorBrush x:Key="LoginButtonDisabledBrush" Color="#18213444"/>
-        <SolidColorBrush x:Key="LoginStatusErrorBrush" Color="#F28F8F"/>
-        <SolidColorBrush x:Key="LoginOverlayBrush" Color="#C00B1016"/>
-        <SolidColorBrush x:Key="LoginSpinnerTrackBrush" Color="#4F596B"/>
-        <SolidColorBrush x:Key="LoginSpinnerAccentBrush" Color="#D7DEE9"/>
-
-        <Style x:Key="GhostCloseButtonStyle" TargetType="Button">
-            <Setter Property="Foreground" Value="{StaticResource LoginMutedForegroundBrush}"/>
-            <Setter Property="Background" Value="#10081320"/>
-            <Setter Property="BorderBrush" Value="#38586C92"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Padding" Value="0"/>
-            <Setter Property="Width" Value="46"/>
-            <Setter Property="Height" Value="46"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="FontSize" Value="18"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="23">
-                            <ContentPresenter HorizontalAlignment="Center"
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Ask.UI;component/Resources/Assets/Fonts/Font.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+            <Style x:Key="LoginButtonStyle" TargetType="Button">
+                <Setter Property="FontFamily" Value="{StaticResource Manrope}"/>
+                <Setter Property="FontSize" Value="16"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+                <Setter Property="Foreground" Value="#29243F"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Grid x:Name="ButtonRoot" RenderTransformOrigin="0.5,0.5">
+                                <Grid.RenderTransform>
+                                    <ScaleTransform ScaleX="1" ScaleY="1"/>
+                                </Grid.RenderTransform>
+                                <VisualStateManager.VisualStateGroups>
+                                    <VisualStateGroup x:Name="CommonStates">
+                                        <VisualStateGroup.Transitions>
+                                            <VisualTransition GeneratedDuration="0:0:0.16"/>
+                                            <VisualTransition To="Pressed" GeneratedDuration="0:0:0.08"/>
+                                            <VisualTransition From="Pressed" GeneratedDuration="0:0:0.22"/>
+                                            <VisualTransition To="Disabled" GeneratedDuration="0"/>
+                                        </VisualStateGroup.Transitions>
+                                        <VisualState x:Name="Normal"/>
+                                        <VisualState x:Name="MouseOver">
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetName="ButtonRoot"
+                                                                 Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)"
+                                                                 To="1.025" Duration="0"/>
+                                                <DoubleAnimation Storyboard.TargetName="ButtonRoot"
+                                                                 Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)"
+                                                                 To="1.025" Duration="0"/>
+                                            </Storyboard>
+                                        </VisualState>
+                                        <VisualState x:Name="Pressed">
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetName="RaisedShadows"
+                                                                 Storyboard.TargetProperty="Opacity" To="0" Duration="0"/>
+                                                <DoubleAnimation Storyboard.TargetName="InsetShading"
+                                                                 Storyboard.TargetProperty="Opacity" To="1" Duration="0"/>
+                                            </Storyboard>
+                                        </VisualState>
+                                        <VisualState x:Name="Disabled">
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetName="RaisedShadows"
+                                                                 Storyboard.TargetProperty="Opacity" To="0.2" Duration="0"/>
+                                            </Storyboard>
+                                        </VisualState>
+                                    </VisualStateGroup>
+                                </VisualStateManager.VisualStateGroups>
+                                <Grid x:Name="RaisedShadows" IsHitTestVisible="False">
+                                    <Border CornerRadius="12" Background="{Binding Background, RelativeSource={RelativeSource AncestorType=Window}}">
+                                        <Border.Effect>
+                                            <DropShadowEffect Color="White" Direction="135" BlurRadius="16"
+                                                              ShadowDepth="5" Opacity="0.9"/>
+                                        </Border.Effect>
+                                    </Border>
+                                    <Border CornerRadius="12" Background="{Binding Background, RelativeSource={RelativeSource AncestorType=Window}}">
+                                        <Border.Effect>
+                                            <DropShadowEffect Color="#C9C2B6" Direction="315" BlurRadius="16"
+                                                              ShadowDepth="5" Opacity="0.55"/>
+                                        </Border.Effect>
+                                    </Border>
+                                </Grid>
+                                <Border x:Name="ButtonSurface" CornerRadius="12"
+                                        Background="{Binding Background, RelativeSource={RelativeSource AncestorType=Window}}"/>
+                                <Grid x:Name="InsetShading" Opacity="0" IsHitTestVisible="False">
+                                    <Border CornerRadius="12">
+                                        <Border.Background>
+                                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                                <GradientStop Color="#60BDB4A7" Offset="0"/>
+                                                <GradientStop Color="#00BDB4A7" Offset="0.32"/>
+                                                <GradientStop Color="#00FFFFFF" Offset="0.68"/>
+                                                <GradientStop Color="#B0FFFFFF" Offset="1"/>
+                                            </LinearGradientBrush>
+                                        </Border.Background>
+                                    </Border>
+                                    <Border CornerRadius="12">
+                                        <Border.Background>
+                                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                                <GradientStop Color="#38BDB4A7" Offset="0"/>
+                                                <GradientStop Color="#00BDB4A7" Offset="0.06"/>
+                                                <GradientStop Color="#00FFFFFF" Offset="0.94"/>
+                                                <GradientStop Color="#80FFFFFF" Offset="1"/>
+                                            </LinearGradientBrush>
+                                        </Border.Background>
+                                    </Border>
+                                </Grid>
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                  RecognizesAccessKey="True"/>
+                            </Grid>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter Property="Foreground" Value="#827C73"/>
+                                    <Setter Property="Cursor" Value="Arrow"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+            <SolidColorBrush x:Key="PasswordSecondaryBrush" Color="#827C73"/>
+            <SolidColorBrush x:Key="PasswordErrorBrush" Color="#A8493F"/>
+            <LinearGradientBrush x:Key="PasswordInsetVerticalBrush" StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Color="#45BDB4A7" Offset="0"/>
+                <GradientStop Color="#00BDB4A7" Offset="0.32"/>
+                <GradientStop Color="#00FFFFFF" Offset="0.68"/>
+                <GradientStop Color="#90FFFFFF" Offset="1"/>
+            </LinearGradientBrush>
+            <LinearGradientBrush x:Key="PasswordInsetHorizontalBrush" StartPoint="0,0" EndPoint="1,0">
+                <GradientStop Color="#30BDB4A7" Offset="0"/>
+                <GradientStop Color="#00BDB4A7" Offset="0.06"/>
+                <GradientStop Color="#00FFFFFF" Offset="0.94"/>
+                <GradientStop Color="#60FFFFFF" Offset="1"/>
+            </LinearGradientBrush>
+            <Style x:Key="PasswordInputStyle" TargetType="PasswordBox">
+                <Setter Property="FontFamily" Value="{StaticResource Manrope}"/>
+                <Setter Property="FontSize" Value="16"/>
+                <Setter Property="Foreground" Value="#29243F"/>
+                <Setter Property="CaretBrush" Value="#29243F"/>
+                <Setter Property="Padding" Value="16,0,8,0"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="PasswordBox">
+                            <Border Background="Transparent">
+                                <ScrollViewer x:Name="PART_ContentHost" Margin="{TemplateBinding Padding}"
                                               VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#183F86FF"/>
-                                <Setter Property="Foreground" Value="{StaticResource LoginForegroundBrush}"/>
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter Property="Background" Value="#2AFFFFFF"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <Style x:Key="RoleListStyle" TargetType="ListBox">
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Foreground" Value="{StaticResource LoginForegroundBrush}"/>
-            <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Disabled"/>
-            <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="ListBox">
-                        <ItemsPresenter/>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <Style x:Key="RoleListItemStyle" TargetType="ListBoxItem">
-            <Setter Property="Padding" Value="0"/>
-            <Setter Property="Margin" Value="0,0,0,12"/>
-            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="ListBoxItem">
-                        <Border x:Name="ItemRoot"
-                                Background="Transparent"
-                                CornerRadius="16"
-                                Padding="4,2">
-                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                            </Border>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+            <Style x:Key="VisiblePasswordInputStyle" TargetType="TextBox">
+                <Setter Property="FontFamily" Value="{StaticResource Manrope}"/>
+                <Setter Property="FontSize" Value="16"/>
+                <Setter Property="Foreground" Value="#29243F"/>
+                <Setter Property="CaretBrush" Value="#29243F"/>
+                <Setter Property="Padding" Value="16,0,8,0"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="TextBox">
+                            <Border Background="Transparent">
+                                <ScrollViewer x:Name="PART_ContentHost" Margin="{TemplateBinding Padding}"
                                               VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="ItemRoot" Property="Opacity" Value="0.85"/>
-                            </Trigger>
-                            <Trigger Property="IsSelected" Value="True">
-                                <Setter TargetName="ItemRoot" Property="Opacity" Value="1"/>
-                            </Trigger>
-                            <Trigger Property="IsEnabled" Value="False">
-                                <Setter TargetName="ItemRoot" Property="Opacity" Value="0.45"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <Style x:Key="LoginPasswordBoxStyle" TargetType="PasswordBox">
-            <Setter Property="OverridesDefaultStyle" Value="True"/>
-            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
-            <Setter Property="Foreground" Value="{StaticResource LoginInputForegroundBrush}"/>
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="CaretBrush" Value="#FFFFFF"/>
-            <Setter Property="FontSize" Value="22"/>
-            <Setter Property="PasswordChar" Value="●"/>
-            <Setter Property="VerticalContentAlignment" Value="Center"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="PasswordBox">
-                        <ScrollViewer x:Name="PART_ContentHost"
-                                      Margin="0"
-                                      Background="Transparent"/>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <Style x:Key="LoginVisiblePasswordTextBoxStyle" TargetType="TextBox">
-            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
-            <Setter Property="Foreground" Value="{StaticResource LoginInputForegroundBrush}"/>
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="FontSize" Value="16"/>
-            <Setter Property="CaretBrush" Value="#FFFFFF"/>
-            <Setter Property="VerticalContentAlignment" Value="Center"/>
-        </Style>
-
-        <Style x:Key="PasswordAuxButtonStyle" TargetType="Button">
-            <Setter Property="Foreground" Value="{StaticResource LoginForegroundBrush}"/>
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="BorderBrush" Value="Transparent"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Padding" Value="0"/>
-            <Setter Property="Width" Value="26"/>
-            <Setter Property="Height" Value="26"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="FontFamily" Value="Segoe MDL2 Assets"/>
-            <Setter Property="FontSize" Value="14"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="14">
-                            <ContentPresenter HorizontalAlignment="Center"
-                                              VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#143F86FF"/>
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter Property="Background" Value="#243F86FF"/>
-                            </Trigger>
-                            <Trigger Property="IsEnabled" Value="False">
-                                <Setter Property="Opacity" Value="0.45"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <Style x:Key="KeyboardLayoutButtonStyle"
-               TargetType="Button"
-               BasedOn="{StaticResource PasswordAuxButtonStyle}">
-            <Setter Property="Width" Value="42"/>
-            <Setter Property="Height" Value="26"/>
-            <Setter Property="FontSize" Value="11"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-        </Style>
-
-        <Style x:Key="LoginButtonStyle" TargetType="Button">
-            <Setter Property="Foreground" Value="{StaticResource LoginButtonForegroundBrush}"/>
-            <Setter Property="Background" Value="{StaticResource LoginButtonBackgroundBrush}"/>
-            <Setter Property="BorderBrush" Value="#7A4B86FF"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Width" Value="50"/>
-            <Setter Property="Height" Value="50"/>
-            <Setter Property="FontSize" Value="24"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="25">
-                            <Border.Effect>
-                                <DropShadowEffect Color="#3F86FF"
-                                                  BlurRadius="14"
-                                                  ShadowDepth="0"
-                                                  Opacity="0.42"/>
-                            </Border.Effect>
-                            <ContentPresenter HorizontalAlignment="Center"
-                                              VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="{StaticResource LoginButtonHoverBrush}"/>
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter Property="Opacity" Value="0.92"/>
-                                <Setter Property="Background" Value="#304B86FF"/>
-                            </Trigger>
-                            <Trigger Property="IsEnabled" Value="False">
-                                <Setter Property="Foreground" Value="#647086"/>
-                                <Setter Property="Background" Value="{StaticResource LoginButtonDisabledBrush}"/>
-                                <Setter Property="BorderBrush" Value="#22344C66"/>
-                                <Setter Property="Opacity" Value="0.52"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-    </Window.Resources>
-
-    <Grid>
-        <Grid.Background>
-            <RadialGradientBrush Center="0.62,0.48"
-                                 GradientOrigin="0.62,0.48"
-                                 RadiusX="0.74"
-                                 RadiusY="0.86">
-                <GradientStop Color="#16213A" Offset="0"/>
-                <GradientStop Color="#0B1224" Offset="0.42"/>
-                <GradientStop Color="#050914" Offset="0.78"/>
-                <GradientStop Color="#03060D" Offset="1"/>
-            </RadialGradientBrush>
-        </Grid.Background>
-
-        <Image Source="pack://application:,,,/Ask.UI;component/Resources/Assets/Image/Authorization/login_background.png"
-               Stretch="UniformToFill"
-               IsHitTestVisible="False"/>
-
-        <Rectangle Fill="#4A03060D"
-                   IsHitTestVisible="False"/>
-
-        <Button x:Name="CancelButton"
-                HorizontalAlignment="Right"
-                VerticalAlignment="Top"
-                Margin="0,28,28,0"
-                Style="{StaticResource GhostCloseButtonStyle}"
-                Content="✕"
-                IsCancel="True"
-                Click="CancelButton_Click"/>
-
-        <Grid Margin="48,40,72,56">
-            <Grid Width="320"
-                  HorizontalAlignment="Left"
-                  VerticalAlignment="Bottom"
-                  Margin="0,0,0,28">
-                <Border Padding="20,18,20,10"
-                        Background="#24081322"
-                        BorderBrush="#6A6FA6FF"
-                        BorderThickness="1.2"
-                        CornerRadius="24">
-                    <Border.Effect>
-                        <DropShadowEffect Color="#3F86FF"
-                                          BlurRadius="22"
-                                          ShadowDepth="0"
-                                          Opacity="0.28"/>
-                    </Border.Effect>
-
-                <StackPanel>
-                    <TextBlock Text="Выбор учётной записи"
-                               Margin="0,0,0,16"
-                               FontSize="16"
-                               FontWeight="SemiBold"
-                               Foreground="{StaticResource LoginMutedForegroundBrush}"/>
-
-                    <ListBox x:Name="RolesListBox"
-                             Style="{StaticResource RoleListStyle}"
-                             ItemContainerStyle="{StaticResource RoleListItemStyle}"
-                             SelectionChanged="RolesListBox_SelectionChanged">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
+                            </Border>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+            <Style x:Key="PasswordRevealButtonStyle" TargetType="Button">
+                <Setter Property="Foreground" Value="{StaticResource PasswordSecondaryBrush}"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Grid Background="Transparent">
+                                <VisualStateManager.VisualStateGroups>
+                                    <VisualStateGroup x:Name="CommonStates">
+                                        <VisualStateGroup.Transitions>
+                                            <VisualTransition GeneratedDuration="0:0:0.12"/>
+                                        </VisualStateGroup.Transitions>
+                                        <VisualState x:Name="Normal"/>
+                                        <VisualState x:Name="MouseOver">
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetName="RevealHover"
+                                                                 Storyboard.TargetProperty="Opacity" To="0.7" Duration="0"/>
+                                            </Storyboard>
+                                        </VisualState>
+                                        <VisualState x:Name="Pressed">
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetName="RevealHover"
+                                                                 Storyboard.TargetProperty="Opacity" To="1" Duration="0"/>
+                                            </Storyboard>
+                                        </VisualState>
+                                        <VisualState x:Name="Disabled"/>
+                                    </VisualStateGroup>
+                                </VisualStateManager.VisualStateGroups>
+                                <Border x:Name="RevealHover" Background="#E7E1D6" CornerRadius="10" Opacity="0"/>
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Grid>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsKeyboardFocused" Value="True">
+                                    <Setter TargetName="RevealHover" Property="Opacity" Value="0.7"/>
+                                </Trigger>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter Property="Opacity" Value="0.45"/>
+                                    <Setter Property="Cursor" Value="Arrow"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+            <Style x:Key="PasswordLanguageButtonStyle" TargetType="Button" BasedOn="{StaticResource LoginButtonStyle}">
+                <Setter Property="FontSize" Value="14"/>
+                <Setter Property="FontWeight" Value="Medium"/>
+            </Style>
+            <Style x:Key="LoginRoleItemStyle" TargetType="ComboBoxItem">
+                <Setter Property="FontFamily" Value="{StaticResource Manrope}"/>
+                <Setter Property="FontSize" Value="16"/>
+                <Setter Property="Foreground" Value="#29243F"/>
+                <Setter Property="Padding" Value="12,10"/>
+                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="ComboBoxItem">
+                            <Border x:Name="RoleItemSurface" Background="Transparent" CornerRadius="8"
+                                    Margin="0,2" Padding="{TemplateBinding Padding}">
                                 <Grid>
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="28"/>
-                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/><ColumnDefinition Width="24"/>
                                     </Grid.ColumnDefinitions>
-
-                                    <Border Width="22"
-                                            Height="22"
-                                            VerticalAlignment="Center"
-                                            Background="Transparent">
-                                        <TextBlock x:Name="RoleGlyph"
-                                                   FontFamily="Segoe MDL2 Assets"
-                                                   FontSize="16"
-                                                   Text="&#xE77B;"
-                                                   HorizontalAlignment="Center"
-                                                   VerticalAlignment="Center"
-                                                   Foreground="{StaticResource LoginForegroundBrush}"/>
-                                    </Border>
-
-                                    <TextBlock x:Name="RoleText"
-                                               Grid.Column="1"
-                                               VerticalAlignment="Center"
-                                               FontSize="16"
-                                               Text="{Binding DisplayText}"
-                                               Foreground="{StaticResource LoginForegroundBrush}"/>
+                                    <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
+                                    <Path x:Name="SelectedMark" Grid.Column="1" Visibility="Collapsed"
+                                          Data="M0 4 L3 7 L9 0" Stroke="{TemplateBinding Foreground}" StrokeThickness="1.6"
+                                          StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                                          HorizontalAlignment="Right" VerticalAlignment="Center"/>
                                 </Grid>
-                                <DataTemplate.Triggers>
-                                    <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
-                                        <Setter TargetName="RoleGlyph" Property="Foreground" Value="{StaticResource LoginAccentBrush}"/>
-                                        <Setter TargetName="RoleText" Property="Foreground" Value="{StaticResource LoginAccentBrush}"/>
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="False">
-                                        <Setter TargetName="RoleText" Property="Opacity" Value="0.94"/>
-                                    </DataTrigger>
-                                </DataTemplate.Triggers>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
-                </StackPanel>
-                </Border>
-            </Grid>
-
-            <Grid>
-                <Grid x:Name="LoginPanel"
-                      Width="620"
-                      HorizontalAlignment="Center"
-                      VerticalAlignment="Center">
-                    <Border Width="580"
-                            Padding="30,34,30,32"
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center"
-                            Background="#30081322"
-                            BorderBrush="#A66FA6FF"
-                            BorderThickness="1.6"
-                            CornerRadius="34">
-                        <Border.Effect>
-                            <DropShadowEffect Color="#4B86FF"
-                                              BlurRadius="32"
-                                              ShadowDepth="0"
-                                              Opacity="0.42"/>
-                        </Border.Effect>
-
-                    <StackPanel>
-                        <Border Width="94"
-                                Height="94"
-                                Margin="0,0,0,18"
-                                HorizontalAlignment="Center"
-                                Background="#0EFFFFFF"
-                                BorderBrush="#586A89"
-                                BorderThickness="1"
-                                CornerRadius="47">
-                            <Border.Effect>
-                                <DropShadowEffect Color="#1F335B"
-                                                  BlurRadius="18"
-                                                  ShadowDepth="0"
-                                                  Opacity="0.45"/>
-                            </Border.Effect>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsHighlighted" Value="True">
+                                    <Setter TargetName="RoleItemSurface" Property="Background" Value="#ECE7DE"/>
+                                </Trigger>
+                                <Trigger Property="IsSelected" Value="True">
+                                    <Setter TargetName="RoleItemSurface" Property="Background" Value="#E7E1D6"/>
+                                    <Setter TargetName="SelectedMark" Property="Visibility" Value="Visible"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+            <Style x:Key="LoginRoleComboBoxStyle" TargetType="ComboBox">
+                <Setter Property="FontFamily" Value="{StaticResource Manrope}"/>
+                <Setter Property="FontSize" Value="16"/>
+                <Setter Property="Foreground" Value="#29243F"/>
+                <Setter Property="Padding" Value="16,0,44,0"/>
+                <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                <Setter Property="MaxDropDownHeight" Value="260"/>
+                <Setter Property="ItemContainerStyle" Value="{StaticResource LoginRoleItemStyle}"/>
+                <Setter Property="ItemTemplate">
+                    <Setter.Value>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding DisplayText}" TextWrapping="Wrap"/>
+                        </DataTemplate>
+                    </Setter.Value>
+                </Setter>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="ComboBox">
                             <Grid>
-                                <TextBlock FontFamily="Segoe MDL2 Assets"
-                                           FontSize="46"
-                                           Text="&#xE77B;"
-                                           Foreground="#EEF4FF"
-                                           HorizontalAlignment="Center"
-                                           VerticalAlignment="Center"/>
-                            </Grid>
-                        </Border>
-
-                        <TextBlock x:Name="SelectedRoleNameTextBlock"
-                                   Margin="0,0,0,30"
-                                   HorizontalAlignment="Center"
-                                   FontSize="20"
-                                   FontWeight="SemiBold"
-                                   Foreground="{StaticResource LoginForegroundBrush}"
-                                   Text="Выберите роль"/>
-
-                        <Grid Width="520"
-                              HorizontalAlignment="Center">
-
-                            <Border Width="380"
-                                    Height="52"
-                                    HorizontalAlignment="Center"
-                                    Background="{StaticResource LoginInputBackgroundBrush}"
-                                    BorderBrush="{StaticResource LoginInputBorderBrush}"
-                                    BorderThickness="1"
-                                    CornerRadius="26">
-                                <Border.Effect>
-                                    <DropShadowEffect Color="#163F86FF"
-                                                      BlurRadius="12"
-                                                      ShadowDepth="0"
-                                                      Opacity="0.35"/>
-                                </Border.Effect>
-                            <Grid Margin="16,0,16,0">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="36"/>
-                                    <ColumnDefinition Width="1"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="42"/>
-                                    <ColumnDefinition Width="1"/>
-                                    <ColumnDefinition Width="54"/>
-                                </Grid.ColumnDefinitions>
-
-                                <TextBlock Grid.Column="0"
-                                           FontFamily="Segoe MDL2 Assets"
-                                           FontSize="22"
-                                           Text="&#xE72E;"
-                                           Foreground="#E4ECFF"
-                                           HorizontalAlignment="Center"
-                                           VerticalAlignment="Center"/>
-
-                                <Border Grid.Column="1"
-                                        Width="1"
-                                        Height="26"
-                                        VerticalAlignment="Center"
-                                        Background="#28415466"/>
-
-                                <PasswordBox x:Name="PasswordBox"
-                                             Grid.Column="2"
-                                             Margin="18,0,0,0"
-                                             VerticalContentAlignment="Center"
-                                             Style="{StaticResource LoginPasswordBoxStyle}"
-                                             GotFocus="PasswordBox_GotFocus"
-                                             LostFocus="PasswordBox_LostFocus"
-                                             PasswordChanged="PasswordBox_PasswordChanged"/>
-
-                                <TextBox x:Name="VisiblePasswordTextBox"
-                                         Grid.Column="2"
-                                         Margin="18,0,0,0"
-                                         Visibility="Collapsed"
-                                         Style="{StaticResource LoginVisiblePasswordTextBoxStyle}"
-                                         GotFocus="VisiblePasswordTextBox_GotFocus"
-                                         LostFocus="VisiblePasswordTextBox_LostFocus"
-                                         TextChanged="VisiblePasswordTextBox_TextChanged"/>
-
-                                <TextBlock x:Name="PasswordPlaceholderTextBlock"
-                                           Grid.Column="2"
-                                           Margin="18,0,0,0"
-                                           VerticalAlignment="Center"
-                                           FontSize="16"
-                                           Foreground="{StaticResource LoginInputHintBrush}"
-                                           Text="Пароль"
-                                           IsHitTestVisible="False"/>
-
-                                <Button x:Name="TogglePasswordVisibilityButton"
-                                        Grid.Column="3"
-                                        Style="{StaticResource PasswordAuxButtonStyle}"
-                                        ToolTip="Показать пароль"
-                                        Click="TogglePasswordVisibilityButton_Click"
-                                        Content="&#xE890;"/>
-
-                                <Border Grid.Column="4"
-                                        Width="1"
-                                        Height="26"
-                                        VerticalAlignment="Center"
-                                        Background="#28415466"/>
-
-                                <Button x:Name="KeyboardLayoutButton"
-                                        Grid.Column="5"
-                                        Margin="6,0,0,0"
-                                        VerticalAlignment="Center"
-                                        Style="{StaticResource KeyboardLayoutButtonStyle}"
-                                        Click="KeyboardLayoutButton_Click">
-                                    <TextBlock x:Name="KeyboardLayoutTextBlock"
-                                               HorizontalAlignment="Center"
-                                               VerticalAlignment="Center"
-                                               FontFamily="Segoe UI"
-                                               FontSize="16"
-                                               FontWeight="Normal"
-                                               Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
-                                               Text="RU"/>
-                                </Button>
-                            </Grid>
-                        </Border>
-
-                        <Button x:Name="LoginButton"
-                                HorizontalAlignment="Right"
-                                VerticalAlignment="Center"
-                                Style="{StaticResource LoginButtonStyle}"
-                                Content="&#x2192;"
-                                IsDefault="True"
-                                Click="LoginButton_Click"/>
-                        </Grid>
-
-                        <TextBlock x:Name="CapsLockWarningTextBlock"
-                                   Margin="0,12,0,0"
-                                   TextWrapping="Wrap"
-                                   TextAlignment="Center"
-                                   FontSize="12"
-                                   Foreground="#F4D568"
-                                   Visibility="Collapsed"
-                                   Text="Caps Lock включён"/>
-
-                        <TextBlock x:Name="StatusTextBlock"
-                                   Margin="0,8,0,0"
-                                   TextWrapping="Wrap"
-                                   TextAlignment="Center"
-                                   FontSize="13"
-                                   Foreground="{StaticResource LoginStatusErrorBrush}"/>
-                    </StackPanel>
-                    </Border>
-                </Grid>
-
-                <Grid x:Name="LoadingPanel"
-                      Visibility="Collapsed">
-                    <Border Background="{StaticResource LoginOverlayBrush}"
-                            CornerRadius="28"
-                            Width="400"
-                            Height="260"
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center">
-                        <StackPanel HorizontalAlignment="Center"
-                                    VerticalAlignment="Center">
-                            <Grid Width="92"
-                                  Height="92"
-                                  Margin="0,12,0,22"
-                                  HorizontalAlignment="Center">
-                                <Ellipse Stroke="{StaticResource LoginSpinnerTrackBrush}"
-                                         StrokeThickness="7"
-                                         Opacity="0.35"/>
-
-                                <Path Stroke="{StaticResource LoginSpinnerAccentBrush}"
-                                      StrokeThickness="7"
-                                      StrokeStartLineCap="Round"
-                                      StrokeEndLineCap="Round"
-                                      Data="M 46,8 A 38,38 0 0 1 84,46">
+                                <Border CornerRadius="12" Background="{Binding Background, RelativeSource={RelativeSource AncestorType=Window}}"/>
+                                <Border CornerRadius="12" Background="{StaticResource PasswordInsetVerticalBrush}" IsHitTestVisible="False"/>
+                                <Border CornerRadius="12" Background="{StaticResource PasswordInsetHorizontalBrush}" IsHitTestVisible="False"/>
+                                <ContentPresenter x:Name="RoleSelection" Margin="{TemplateBinding Padding}"
+                                                  Content="{TemplateBinding SelectionBoxItem}"
+                                                  ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                                  ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"
+                                                  IsHitTestVisible="False" VerticalAlignment="Center"/>
+                                <TextBox x:Name="PART_EditableTextBox" Visibility="Collapsed" Margin="{TemplateBinding Padding}"
+                                         Style="{StaticResource VisiblePasswordInputStyle}" Padding="0"
+                                         Foreground="{TemplateBinding Foreground}" VerticalContentAlignment="Center"
+                                         IsReadOnly="{TemplateBinding IsReadOnly}" IsHitTestVisible="False" Focusable="False"/>
+                                <Path x:Name="RoleArrow" Data="M0 0 L5 5 L10 0" Stroke="#827C73" StrokeThickness="1.6"
+                                      StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                                      HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,17,0"
+                                      RenderTransformOrigin="0.5,0.5" IsHitTestVisible="False">
                                     <Path.RenderTransform>
-                                        <RotateTransform x:Name="SpinnerRotateTransform"
-                                                         CenterX="46"
-                                                         CenterY="46"/>
+                                        <RotateTransform/>
                                     </Path.RenderTransform>
-                                    <Path.Triggers>
-                                        <EventTrigger RoutedEvent="Loaded">
-                                            <BeginStoryboard>
-                                                <Storyboard RepeatBehavior="Forever">
-                                                    <DoubleAnimation Storyboard.TargetName="SpinnerRotateTransform"
-                                                                     Storyboard.TargetProperty="Angle"
-                                                                     From="0"
-                                                                     To="360"
-                                                                     Duration="0:0:1"/>
-                                                </Storyboard>
-                                            </BeginStoryboard>
-                                        </EventTrigger>
-                                    </Path.Triggers>
                                 </Path>
+                                <Border x:Name="RoleFocusOutline" CornerRadius="12" BorderBrush="#9E9486"
+                                        BorderThickness="1" Opacity="0" IsHitTestVisible="False"/>
+                                <ToggleButton Focusable="False" ClickMode="Press"
+                                              IsChecked="{Binding IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}">
+                                    <ToggleButton.Template>
+                                        <ControlTemplate TargetType="ToggleButton">
+                                            <Border Background="Transparent" CornerRadius="12"/>
+                                        </ControlTemplate>
+                                    </ToggleButton.Template>
+                                </ToggleButton>
+                                <Popup x:Name="PART_Popup" Placement="Bottom" HorizontalOffset="-8" VerticalOffset="-4"
+                                       AllowsTransparency="True" Focusable="False" PopupAnimation="Fade"
+                                       IsOpen="{TemplateBinding IsDropDownOpen}">
+                                    <Border Margin="8" Padding="6" CornerRadius="12" Background="#F5F2EB"
+                                            BorderBrush="#DED8CE" BorderThickness="1" MinWidth="{TemplateBinding ActualWidth}">
+                                        <Border.Effect>
+                                            <DropShadowEffect Color="#C9C2B6" BlurRadius="14" ShadowDepth="3" Opacity="0.35"/>
+                                        </Border.Effect>
+                                        <ScrollViewer MaxHeight="{TemplateBinding MaxDropDownHeight}" CanContentScroll="True"
+                                                      HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+                                            <ItemsPresenter KeyboardNavigation.DirectionalNavigation="Contained"/>
+                                        </ScrollViewer>
+                                    </Border>
+                                </Popup>
                             </Grid>
-
-                            <TextBlock Text="Подготовка рабочего места"
-                                       FontSize="24"
-                                       FontWeight="SemiBold"
-                                       Foreground="{StaticResource LoginForegroundBrush}"
-                                       HorizontalAlignment="Center"/>
-
-                            <TextBlock x:Name="LoadingStatusTextBlock"
-                                       Margin="0,14,0,0"
-                                       Width="280"
-                                       TextAlignment="Center"
-                                       TextWrapping="Wrap"
-                                       FontSize="14"
-                                       Foreground="{StaticResource LoginMutedForegroundBrush}"
-                                       Text="Загрузка модулей приложения..."/>
-                        </StackPanel>
-                    </Border>
-                </Grid>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsEditable" Value="True">
+                                    <Setter TargetName="PART_EditableTextBox" Property="Visibility" Value="Visible"/>
+                                    <Setter TargetName="RoleSelection" Property="Visibility" Value="Collapsed"/>
+                                </Trigger>
+                                <Trigger Property="IsKeyboardFocusWithin" Value="True">
+                                    <Setter TargetName="RoleFocusOutline" Property="Opacity" Value="1"/>
+                                </Trigger>
+                                <Trigger Property="IsDropDownOpen" Value="True">
+                                    <Setter TargetName="RoleFocusOutline" Property="Opacity" Value="1"/>
+                                    <Trigger.EnterActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetName="RoleArrow"
+                                                                 Storyboard.TargetProperty="(UIElement.RenderTransform).(RotateTransform.Angle)"
+                                                                 To="180" Duration="0:0:0.16"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </Trigger.EnterActions>
+                                    <Trigger.ExitActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetName="RoleArrow"
+                                                                 Storyboard.TargetProperty="(UIElement.RenderTransform).(RotateTransform.Angle)"
+                                                                 To="0" Duration="0:0:0.16"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </Trigger.ExitActions>
+                                </Trigger>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter Property="Opacity" Value="0.45"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+            <Storyboard x:Key="LoadingCircuitAnimation" RepeatBehavior="Forever">
+                <DoubleAnimation Storyboard.TargetName="LoadingPulse" Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.X)"
+                                 From="0" To="248" Duration="0:0:1.8"/>
+                <DoubleAnimationUsingKeyFrames Storyboard.TargetName="LoadingPulse" Storyboard.TargetProperty="Opacity" Duration="0:0:1.8">
+                    <LinearDoubleKeyFrame Value="0" KeyTime="0:0:0"/>
+                    <LinearDoubleKeyFrame Value="1" KeyTime="0:0:0.2"/>
+                    <LinearDoubleKeyFrame Value="1" KeyTime="0:0:1.5"/>
+                    <LinearDoubleKeyFrame Value="0" KeyTime="0:0:1.8"/>
+                </DoubleAnimationUsingKeyFrames>
+                <DoubleAnimationUsingKeyFrames Storyboard.TargetName="LoadingNode1" Storyboard.TargetProperty="Opacity" Duration="0:0:1.8">
+                    <LinearDoubleKeyFrame Value="0.3" KeyTime="0:0:0"/>
+                    <LinearDoubleKeyFrame Value="1" KeyTime="0:0:0.15"/>
+                    <LinearDoubleKeyFrame Value="0.3" KeyTime="0:0:0.4"/>
+                    <LinearDoubleKeyFrame Value="0.3" KeyTime="0:0:1.8"/>
+                </DoubleAnimationUsingKeyFrames>
+                <DoubleAnimationUsingKeyFrames Storyboard.TargetName="LoadingNode2" Storyboard.TargetProperty="Opacity" Duration="0:0:1.8">
+                    <LinearDoubleKeyFrame Value="0.3" KeyTime="0:0:0"/>
+                    <LinearDoubleKeyFrame Value="1" KeyTime="0:0:0.9"/>
+                    <LinearDoubleKeyFrame Value="0.3" KeyTime="0:0:1.15"/>
+                    <LinearDoubleKeyFrame Value="0.3" KeyTime="0:0:1.8"/>
+                </DoubleAnimationUsingKeyFrames>
+                <DoubleAnimationUsingKeyFrames Storyboard.TargetName="LoadingNode3" Storyboard.TargetProperty="Opacity" Duration="0:0:1.8">
+                    <LinearDoubleKeyFrame Value="0.3" KeyTime="0:0:0"/>
+                    <LinearDoubleKeyFrame Value="1" KeyTime="0:0:1.55"/>
+                    <LinearDoubleKeyFrame Value="0.3" KeyTime="0:0:1.8"/>
+                </DoubleAnimationUsingKeyFrames>
+            </Storyboard>
+        </ResourceDictionary>
+    </Window.Resources>
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="0" ResizeBorderThickness="0"
+                      GlassFrameThickness="0" CornerRadius="12"
+                      UseAeroCaptionButtons="False"/>
+    </WindowChrome.WindowChrome>
+    <Grid Background="{Binding Background, RelativeSource={RelativeSource AncestorType=Window}}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="52"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid Grid.RowSpan="2" IsHitTestVisible="False">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Border Margin="0" CornerRadius="0,150,150,0" Padding="20">
+                <Border.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                        <GradientStop Color="#211D36" Offset="0"/>
+                        <GradientStop Color="#171B2A" Offset="1"/>
+                    </LinearGradientBrush>
+                </Border.Background>
+                <StackPanel VerticalAlignment="Center">
+                    <TextBlock Text="Добро пожаловать!" FontFamily="{StaticResource Manrope}" FontWeight="SemiBold" FontSize="28"
+                               Foreground="White" TextAlignment="Center"/>
+                    <TextBlock x:Name="WelcomeDescriptionTextBlock" Text="Выберите роль и войдите в систему, чтобы начать работу с АСК-МКИ-М."
+                               Margin="0,18,0,0" FontFamily="{StaticResource Manrope}" FontSize="16"
+                               Foreground="#ADB4C0" TextAlignment="Center"
+                               TextWrapping="Wrap" LineHeight="24" LineStackingStrategy="BlockLineHeight"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="52"/>
+            </Grid.ColumnDefinitions>
+            <Border Background="Transparent" MouseLeftButtonDown="TitleBar_MouseLeftButtonDown"/>
+            <Button x:Name="CancelButton" Grid.Column="1" Width="36" Height="36" Margin="8"
+                    Style="{StaticResource LoginButtonStyle}" Focusable="False"
+                    ToolTip="Закрыть" AutomationProperties.Name="Закрыть окно входа"
+                    Click="CancelButton_Click">
+                <icons:WindowCloseIcon Size="14" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/>
+            </Button>
+        </Grid>
+        <Grid Grid.Row="1" Margin="24">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Grid Grid.Column="1" Margin="32,0,8,0">
+                <StackPanel x:Name="LoginPanel" VerticalAlignment="Center">
+                    <TextBlock Text="Роль" Margin="0,0,0,8" FontFamily="{StaticResource Manrope}" FontSize="16"/>
+                    <ComboBox x:Name="RolesComboBox" Height="48" Style="{StaticResource LoginRoleComboBoxStyle}"
+                              AutomationProperties.Name="Роль"
+                              VerticalContentAlignment="Center" TextSearch.TextPath="DisplayText"
+                              IsEditable="True" IsReadOnly="True"
+                              SelectionChanged="RolesComboBox_SelectionChanged"/>
+                    <Grid Margin="0,16,0,8" Height="26">
+                        <TextBlock Text="Пароль" FontFamily="{StaticResource Manrope}" FontSize="16" VerticalAlignment="Center"/>
+                        <Border x:Name="CapsLockWarningBorder" Visibility="Hidden" HorizontalAlignment="Right"
+                                CornerRadius="8" Background="#F2E6CC" Padding="8,3"
+                                ToolTip="Caps Lock включён. Проверьте регистр букв при вводе пароля."
+                                AutomationProperties.Name="Caps Lock включён">
+                            <StackPanel Orientation="Horizontal">
+                                <Path Data="M0 8 L6 2 L12 8 M6 2 L6 13 M1 17 L11 17"
+                                      Stroke="#8B6428" StrokeThickness="1.5" StrokeStartLineCap="Round"
+                                      StrokeEndLineCap="Round" Width="12" Height="16" Stretch="Uniform"
+                                      Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                <TextBlock x:Name="CapsLockWarningTextBlock" Text="Caps Lock включён"
+                                           FontFamily="{StaticResource Manrope}" FontSize="12"
+                                           Foreground="#8B6428" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                    <Grid Height="48">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/><ColumnDefinition Width="60"/>
+                        </Grid.ColumnDefinitions>
+                        <Border x:Name="PasswordFieldContainer" CornerRadius="12" Background="{Binding Background, RelativeSource={RelativeSource AncestorType=Window}}">
+                            <Grid>
+                                <Border CornerRadius="12" Background="{StaticResource PasswordInsetVerticalBrush}" IsHitTestVisible="False"/>
+                                <Border CornerRadius="12" Background="{StaticResource PasswordInsetHorizontalBrush}" IsHitTestVisible="False"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/><ColumnDefinition Width="44"/>
+                                    </Grid.ColumnDefinitions>
+                                    <PasswordBox x:Name="PasswordBox" Style="{StaticResource PasswordInputStyle}"
+                                                 VerticalContentAlignment="Center" AutomationProperties.Name="Пароль"
+                                                 GotFocus="PasswordBox_GotFocus" LostFocus="PasswordBox_LostFocus"
+                                                 PasswordChanged="PasswordBox_PasswordChanged"/>
+                                    <TextBox x:Name="VisiblePasswordTextBox" Style="{StaticResource VisiblePasswordInputStyle}"
+                                             Visibility="Collapsed" VerticalContentAlignment="Center" AutomationProperties.Name="Пароль"
+                                             GotFocus="VisiblePasswordTextBox_GotFocus" LostFocus="VisiblePasswordTextBox_LostFocus"
+                                             TextChanged="VisiblePasswordTextBox_TextChanged"/>
+                                    <TextBlock x:Name="PasswordPlaceholderTextBlock" Text="Введите пароль" Margin="16,0,8,0"
+                                               FontFamily="{StaticResource Manrope}" FontSize="16" VerticalAlignment="Center"
+                                               IsHitTestVisible="False" Foreground="{StaticResource PasswordSecondaryBrush}"/>
+                                    <Button x:Name="TogglePasswordVisibilityButton" Grid.Column="1" Width="40" Height="40" Margin="0,0,4,0"
+                                            Style="{StaticResource PasswordRevealButtonStyle}" Click="TogglePasswordVisibilityButton_Click"
+                                            AutomationProperties.Name="Показать пароль">
+                                        <Grid>
+                                            <icons:EyeOpenedIcon x:Name="PasswordShowIcon" Size="20"
+                                                                Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/>
+                                            <icons:EyeClosedIcon x:Name="PasswordHideIcon" Size="20" Visibility="Collapsed"
+                                                                Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/>
+                                        </Grid>
+                                    </Button>
+                                </Grid>
+                                <Border x:Name="PasswordFocusOutline" CornerRadius="12" BorderThickness="1" BorderBrush="#9E9486"
+                                        IsHitTestVisible="False">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Setter Property="Opacity" Value="0"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsKeyboardFocusWithin, ElementName=PasswordFieldContainer}" Value="True">
+                                                    <DataTrigger.EnterActions>
+                                                        <BeginStoryboard>
+                                                            <Storyboard>
+                                                                <DoubleAnimation Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.16"/>
+                                                            </Storyboard>
+                                                        </BeginStoryboard>
+                                                    </DataTrigger.EnterActions>
+                                                    <DataTrigger.ExitActions>
+                                                        <BeginStoryboard>
+                                                            <Storyboard>
+                                                                <DoubleAnimation Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.16"/>
+                                                            </Storyboard>
+                                                        </BeginStoryboard>
+                                                    </DataTrigger.ExitActions>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                </Border>
+                                <Border x:Name="PasswordErrorOutline" CornerRadius="12" BorderThickness="1"
+                                        BorderBrush="{StaticResource PasswordErrorBrush}" IsHitTestVisible="False">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Setter Property="Opacity" Value="0"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Tag, ElementName=PasswordFieldContainer}" Value="True">
+                                                    <Setter Property="Opacity" Value="1"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                </Border>
+                            </Grid>
+                        </Border>
+                        <Button x:Name="KeyboardLayoutButton" Grid.Column="1" Margin="12,0,0,0"
+                                Style="{StaticResource PasswordLanguageButtonStyle}" AutomationProperties.Name="Переключить раскладку клавиатуры"
+                                Click="KeyboardLayoutButton_Click">
+                            <TextBlock x:Name="KeyboardLayoutTextBlock"/>
+                        </Button>
+                    </Grid>
+                    <Button x:Name="LoginButton" Content="Войти" Height="48" Margin="0,20,0,0"
+                            Style="{StaticResource LoginButtonStyle}"
+                            IsEnabled="False" IsDefault="True" Click="LoginButton_Click"/>
+                    <TextBlock x:Name="StatusTextBlock" Margin="0,12,0,0" MinHeight="36" TextWrapping="Wrap"
+                               FontFamily="{StaticResource Manrope}" FontSize="14" Foreground="{StaticResource PasswordSecondaryBrush}"/>
+                </StackPanel>
+                <StackPanel x:Name="LoadingPanel" Visibility="Collapsed" VerticalAlignment="Center">
+                    <TextBlock Text="Подготавливаем приложение" FontFamily="{StaticResource Manrope}" FontWeight="SemiBold"
+                               FontSize="20" TextAlignment="Center" TextWrapping="Wrap"/>
+                    <Canvas Width="280" Height="72" HorizontalAlignment="Center" Margin="0,28,0,0"
+                            AutomationProperties.Name="Подготовка приложения" IsHitTestVisible="False">
+                        <Line X1="16" Y1="20" X2="264" Y2="20" Stroke="#D5CFC4" StrokeThickness="1.5"/>
+                        <Border Canvas.Left="0" Canvas.Top="4" Width="32" Height="32" CornerRadius="16" Background="#F5F2EB">
+                            <Border.Effect>
+                                <DropShadowEffect Color="#C9C2B6" BlurRadius="8" ShadowDepth="2" Opacity="0.4"/>
+                            </Border.Effect>
+                            <Ellipse x:Name="LoadingNode1" Width="14" Height="14" Fill="#29243F" Opacity="0.3"/>
+                        </Border>
+                        <TextBlock Canvas.Left="-24" Canvas.Top="46" Width="80" Text="Подготовка" TextAlignment="Center"
+                                   FontFamily="{StaticResource Manrope}" FontSize="12" Foreground="#827C73"/>
+                        <Border Canvas.Left="124" Canvas.Top="4" Width="32" Height="32" CornerRadius="16" Background="#F5F2EB">
+                            <Border.Effect>
+                                <DropShadowEffect Color="#C9C2B6" BlurRadius="8" ShadowDepth="2" Opacity="0.4"/>
+                            </Border.Effect>
+                            <Ellipse x:Name="LoadingNode2" Width="14" Height="14" Fill="#29243F" Opacity="0.3"/>
+                        </Border>
+                        <TextBlock Canvas.Left="100" Canvas.Top="46" Width="80" Text="Настройка" TextAlignment="Center"
+                                   FontFamily="{StaticResource Manrope}" FontSize="12" Foreground="#827C73"/>
+                        <Border Canvas.Left="248" Canvas.Top="4" Width="32" Height="32" CornerRadius="16" Background="#F5F2EB">
+                            <Border.Effect>
+                                <DropShadowEffect Color="#C9C2B6" BlurRadius="8" ShadowDepth="2" Opacity="0.4"/>
+                            </Border.Effect>
+                            <Ellipse x:Name="LoadingNode3" Width="14" Height="14" Fill="#29243F" Opacity="0.3"/>
+                        </Border>
+                        <TextBlock Canvas.Left="224" Canvas.Top="46" Width="80" Text="Запуск" TextAlignment="Center"
+                                   FontFamily="{StaticResource Manrope}" FontSize="12" Foreground="#827C73"/>
+                        <Ellipse x:Name="LoadingPulse" Canvas.Left="13" Canvas.Top="17" Width="6" Height="6" Fill="#6E5AD3">
+                            <Ellipse.RenderTransform><TranslateTransform/></Ellipse.RenderTransform>
+                        </Ellipse>
+                    </Canvas>
+                    <TextBlock x:Name="LoadingStatusTextBlock" Margin="0,18,0,0" MinHeight="42" TextWrapping="Wrap"
+                               TextAlignment="Center" FontFamily="{StaticResource Manrope}" FontSize="14"
+                               LineHeight="21" Foreground="#827C73"/>
+                </StackPanel>
             </Grid>
         </Grid>
     </Grid>

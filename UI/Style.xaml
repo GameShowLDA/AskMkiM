@@ -15,7 +15,7 @@
         <ResourceDictionary Source="/UI;component/Resources/Theme/light.xaml"/>
         <ResourceDictionary Source="/UI;component/Resources/Theme/Colors.Dark.xaml"/>
 
-        <ResourceDictionary Source="/UI;component/Resources/Font/Font.xaml"/>
+        <ResourceDictionary Source="/Ask.UI;component/Resources/Assets/Fonts/Font.xaml"/>
         <ResourceDictionary Source="/UI;component/Resources/AppColors.xaml"/>
         <ResourceDictionary Source="/UI;component/Resources/StyleApp/DeviceConfigStyle.xaml"/>
         <ResourceDictionary Source="/UI;component/Resources/StyleApp/MetrologyStyle.xaml"/>

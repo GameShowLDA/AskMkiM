@@ -1,11 +1,22 @@
 using Ask.Core.Shared.Entity.Settings;
 using Ask.Core.Shared.Metadata.Enums.RoleEnums;
 using System.Windows.Threading;
+using System.Windows;
+using System.Windows.Interop;
+using System.Runtime.InteropServices;
 
 namespace MainWindowProgram.Init
 {
   internal sealed class RoleLoginWindowManager
   {
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool EnableWindow(IntPtr windowHandle, [MarshalAs(UnmanagedType.Bool)] bool enable);
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool IsWindowEnabled(IntPtr windowHandle);
+
     private Thread? _windowThread;
     private RoleLoginWindow? _window;
     private readonly TaskCompletionSource<RoleCredentialModel?> _authenticationSource =
@@ -15,12 +26,28 @@ namespace MainWindowProgram.Init
 
     public void Show(IReadOnlySet<RoleType>? rolesWithSavedSessions = null)
     {
+      StartWindow(rolesWithSavedSessions, null).GetAwaiter().GetResult();
+    }
+
+    public Task ShowAsync(IReadOnlySet<RoleType>? rolesWithSavedSessions, Window owner)
+    {
+      return StartWindow(rolesWithSavedSessions, owner);
+    }
+
+    private Task StartWindow(IReadOnlySet<RoleType>? rolesWithSavedSessions, Window? owner)
+    {
       if (_windowThread != null)
       {
-        return;
+        return Task.CompletedTask;
       }
 
-      var windowStarted = new ManualResetEvent(false);
+      var ownerHandle = owner == null ? IntPtr.Zero : new WindowInteropHelper(owner).Handle;
+      bool ownerWasEnabled = ownerHandle != IntPtr.Zero && IsWindowEnabled(ownerHandle);
+      if (ownerWasEnabled)
+      {
+        EnableWindow(ownerHandle, false);
+      }
+      var windowStarted = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
 
       _windowThread = new Thread(() =>
       {
@@ -28,10 +55,14 @@ namespace MainWindowProgram.Init
         var loginWindow = new RoleLoginWindow(rolesWithSavedSessions);
         _window = loginWindow;
 
-        loginWindow.Loaded += (_, _) => windowStarted.Set();
+        loginWindow.Loaded += (_, _) => windowStarted.TrySetResult();
         loginWindow.Closed += (_, _) =>
         {
           _window = null;
+          if (ownerWasEnabled)
+          {
+            EnableWindow(ownerHandle, true);
+          }
           _windowClosedSource.TrySetResult(true);
           dispatcher.BeginInvokeShutdown(DispatcherPriority.Background);
         };
@@ -48,7 +79,7 @@ namespace MainWindowProgram.Init
       _windowThread.IsBackground = true;
       _windowThread.Start();
 
-      windowStarted.WaitOne();
+      return windowStarted.Task;
     }
 
     public Task<RoleCredentialModel?> WaitForAuthenticationAsync()

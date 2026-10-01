@@ -61,7 +61,7 @@ namespace Ask.Core.Services.Config.AppSettings
     }
 
     /// <summary>
-    /// Verifies the password for the selected role and stores it as the last selected role.
+    /// Проверяет пароль выбранной роли и сохраняет её как последнюю выбранную роль.
     /// </summary>
     public async Task<RoleCredentialModel?> AuthorizeAsync(RoleType role, string password)
     {
@@ -70,7 +70,8 @@ namespace Ask.Core.Services.Config.AppSettings
       {
         var store = await LoadStoreInternalAsync();
         var roleCredential = store.Roles.FirstOrDefault(x => x.Role == role);
-        if (roleCredential == null || !VerifyPassword(password, roleCredential))
+        if (roleCredential == null
+            || !VerifyPassword(password, roleCredential))
         {
           return null;
         }
@@ -241,6 +242,7 @@ namespace Ask.Core.Services.Config.AppSettings
       {
         Role = role,
         DisplayName = string.IsNullOrWhiteSpace(persistedRole.DisplayName) ? displayName : persistedRole.DisplayName,
+        Login = string.IsNullOrWhiteSpace(persistedRole.Login) ? GetDefaultLogin(role) : persistedRole.Login.Trim(),
         PasswordHash = persistedRole.PasswordHash,
         PasswordSalt = persistedRole.PasswordSalt,
       };
@@ -286,12 +288,22 @@ namespace Ask.Core.Services.Config.AppSettings
           {
             Role = GetRoleName(x.Role),
             DisplayName = x.DisplayName,
+            Login = x.Login,
             PasswordHash = x.PasswordHash,
             PasswordSalt = x.PasswordSalt,
           })
           .ToList(),
       };
     }
+
+    private static string GetDefaultLogin(RoleType role) => role switch
+    {
+      RoleType.Administrator => "admin",
+      RoleType.Adjuster => "adjuster",
+      RoleType.Developer => "developer",
+      RoleType.Root => "root",
+      _ => throw new ArgumentOutOfRangeException(nameof(role), role, null),
+    };
 
     private static string GetRoleName(RoleType role) => role switch
     {
@@ -308,6 +320,7 @@ namespace Ask.Core.Services.Config.AppSettings
       {
         Role = role,
         DisplayName = displayName,
+        Login = GetDefaultLogin(role),
       };
 
       UpdatePassword(credential, password);
@@ -369,6 +382,8 @@ namespace Ask.Core.Services.Config.AppSettings
       public string Role { get; set; } = string.Empty;
 
       public string DisplayName { get; set; } = string.Empty;
+
+      public string Login { get; set; } = string.Empty;
 
       public string PasswordHash { get; set; } = string.Empty;
 
