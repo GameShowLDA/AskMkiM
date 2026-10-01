@@ -64,6 +64,8 @@ namespace MainWindowProgram
     private bool _isPasswordVisible;
     private bool _isSyncingPasswordText;
     private bool _isRootLoginSelected;
+    private readonly string _welcomeDescription;
+    private System.Windows.Media.Animation.Storyboard? _loadingStoryboard;
 
     /// <summary>
     /// Успешно авторизованная роль.
@@ -73,6 +75,7 @@ namespace MainWindowProgram
     public RoleLoginWindow(IReadOnlySet<RoleType>? rolesWithSavedSessions = null)
     {
       InitializeComponent();
+      _welcomeDescription = WelcomeDescriptionTextBlock.Text;
       _rolesWithSavedSessions = rolesWithSavedSessions ?? new HashSet<RoleType>();
       _keyboardHookProc = LowLevelKeyboardProc;
 
@@ -106,6 +109,8 @@ namespace MainWindowProgram
     public void UpdateLoadingStatus(string message)
     {
       LoadingStatusTextBlock.Text = message;
+      LoadingStatusTextBlock.BeginAnimation(OpacityProperty,
+        new System.Windows.Media.Animation.DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(180)));
     }
 
     public void CompleteStartupLoading()
@@ -153,6 +158,7 @@ namespace MainWindowProgram
         return;
       }
 
+      _loadingStoryboard?.Remove(LoadingPanel);
       _keyboardLayoutTimer.Stop();
       InputLanguageManager.Current.InputLanguageChanged -= Current_InputLanguageChanged;
       UninstallKeyboardHook();
@@ -169,14 +175,7 @@ namespace MainWindowProgram
         return;
       }
 
-      if (e.Key != Key.Tab || _isStartupLoading || RolesListBox.Items.Count == 0)
-      {
-        return;
-      }
 
-      int direction = Keyboard.Modifiers.HasFlag(ModifierKeys.Shift) ? -1 : 1;
-      MoveRoleSelection(direction);
-      e.Handled = true;
     }
 
     private void InstallKeyboardHook()
@@ -247,34 +246,32 @@ namespace MainWindowProgram
         LoginButton.IsEnabled = false;
 
         var roles = await _roleCredentialService.GetRolesAsync();
-        var lastSelectedRole = await _roleCredentialService.GetLastSelectedRoleAsync();
 
         var roleItems = roles
           .Select(role => new RoleLoginItem(role, _rolesWithSavedSessions.Contains(role.Role)))
           .ToList();
 
-        RolesListBox.ItemsSource = roleItems;
-        RolesListBox.SelectedItem = roleItems.FirstOrDefault(x => x.Role == lastSelectedRole);
+        RolesComboBox.ItemsSource = roleItems;
+        RolesComboBox.SelectedItem = roleItems.FirstOrDefault(x => x.Role == RoleType.Administrator);
 
-        if (RolesListBox.SelectedItem == null)
+        if (RolesComboBox.SelectedItem == null)
         {
-          RolesListBox.SelectedIndex = roles.Count > 0 ? 0 : -1;
+          RolesComboBox.SelectedIndex = roles.Count > 0 ? 0 : -1;
         }
 
         if (roles.Count == 0)
         {
-          SetSelectedRoleName(null);
+
           SetStatus("Роли для входа не найдены.");
           return;
         }
 
-        SetSelectedRoleName((RolesListBox.SelectedItem as RoleLoginItem)?.Credential);
         UpdateLoginButtonState();
         FocusPasswordInput();
       }
       catch (Exception ex)
       {
-        SetSelectedRoleName(null);
+
         SetStatus("Не удалось загрузить роли для входа.");
         MessageBoxCustom.Show($"Ошибка загрузки ролей: {ex.Message}", image: MessageBoxImage.Error);
       }
@@ -283,6 +280,24 @@ namespace MainWindowProgram
     private async void LoginButton_Click(object sender, RoutedEventArgs e)
     {
       await AuthorizeAsync();
+    }
+
+    private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+      if (e.ButtonState != MouseButtonState.Pressed || e.ClickCount != 1)
+      {
+        return;
+      }
+
+      try
+      {
+        DragMove();
+        e.Handled = true;
+      }
+      catch (InvalidOperationException)
+      {
+        // Мышь может быть отпущена до начала системного перетаскивания.
+      }
     }
 
     private void CancelButton_Click(object sender, RoutedEventArgs e)
@@ -299,7 +314,7 @@ namespace MainWindowProgram
         return;
       }
 
-      if (RolesListBox.SelectedItem is not RoleLoginItem selectedRoleItem)
+      if (RolesComboBox.SelectedItem is not RoleLoginItem selectedRoleItem)
       {
         SetStatus("Выберите роль.");
         return;
@@ -316,12 +331,12 @@ namespace MainWindowProgram
       try
       {
         LoginButton.IsEnabled = false;
-        SetStatus("Проверка пароля...");
+        SetStatus("Проверка учётных данных...");
 
         var authorizedRole = await _roleCredentialService.AuthorizeAsync(selectedRole.Role, enteredPassword);
         if (authorizedRole == null)
         {
-          SetStatus("Неверный пароль.");
+          SetStatus("Неверный пароль.", isPasswordError: true);
           SelectAllPassword();
           FocusPasswordInput();
           UpdateLoginButtonState();
@@ -340,7 +355,7 @@ namespace MainWindowProgram
       }
     }
 
-    private void RolesListBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+    private void RolesComboBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
     {
       if (_isStartupLoading)
       {
@@ -348,7 +363,7 @@ namespace MainWindowProgram
       }
 
       _isRootLoginSelected = false;
-      SetSelectedRoleName((RolesListBox.SelectedItem as RoleLoginItem)?.Credential);
+
       SetStatus(string.Empty);
       UpdateLoginButtonState();
     }
@@ -455,15 +470,15 @@ namespace MainWindowProgram
       }
 
       LoginButton.IsEnabled =
-        (RolesListBox.SelectedItem != null || _isRootLoginSelected) &&
+        (RolesComboBox.SelectedItem != null || _isRootLoginSelected) &&
         !string.IsNullOrWhiteSpace(GetCurrentPassword());
     }
 
     private void SelectRootLogin()
     {
-      RolesListBox.SelectedItem = null;
+      RolesComboBox.SelectedItem = null;
       _isRootLoginSelected = true;
-      SelectedRoleNameTextBlock.Text = "root";
+      RolesComboBox.Text = "root";
       SetStatus(string.Empty);
       UpdateLoginButtonState();
       FocusPasswordInput();
@@ -481,12 +496,12 @@ namespace MainWindowProgram
       try
       {
         LoginButton.IsEnabled = false;
-        SetStatus("Проверка пароля...");
+        SetStatus("Проверка учётных данных...");
 
         var authorizedRole = await _roleCredentialService.AuthorizeAsync(RoleType.Root, enteredPassword);
         if (authorizedRole == null)
         {
-          SetStatus("Неверный пароль.");
+          SetStatus("Неверный пароль.", isPasswordError: true);
           SelectAllPassword();
           FocusPasswordInput();
           UpdateLoginButtonState();
@@ -506,14 +521,12 @@ namespace MainWindowProgram
       }
     }
 
-    private void SetStatus(string message)
+    private void SetStatus(string message, bool isPasswordError = false)
     {
       StatusTextBlock.Text = message;
-    }
-
-    private void SetSelectedRoleName(RoleCredentialModel? role)
-    {
-      SelectedRoleNameTextBlock.Text = role?.DisplayName ?? "Выберите роль";
+      StatusTextBlock.Foreground = (System.Windows.Media.Brush)FindResource(
+        isPasswordError ? "PasswordErrorBrush" : "PasswordSecondaryBrush");
+      PasswordFieldContainer.Tag = isPasswordError;
     }
 
     private void UpdatePasswordPlaceholderVisibility()
@@ -531,28 +544,30 @@ namespace MainWindowProgram
       {
         VisiblePasswordTextBox.Visibility = Visibility.Visible;
         PasswordBox.Visibility = Visibility.Collapsed;
-        TogglePasswordVisibilityButton.Content = "\uE8F5";
+        PasswordShowIcon.Visibility = Visibility.Collapsed;
+        PasswordHideIcon.Visibility = Visibility.Visible;
         TogglePasswordVisibilityButton.ToolTip = "Скрыть пароль";
       }
       else
       {
         VisiblePasswordTextBox.Visibility = Visibility.Collapsed;
         PasswordBox.Visibility = Visibility.Visible;
-        TogglePasswordVisibilityButton.Content = "\uE890";
+        PasswordShowIcon.Visibility = Visibility.Visible;
+        PasswordHideIcon.Visibility = Visibility.Collapsed;
         TogglePasswordVisibilityButton.ToolTip = "Показать пароль";
       }
 
+      System.Windows.Automation.AutomationProperties.SetName(
+        TogglePasswordVisibilityButton, (string)TogglePasswordVisibilityButton.ToolTip);
       UpdatePasswordPlaceholderVisibility();
       UpdateCapsLockWarning();
     }
 
     private void UpdateCapsLockWarning()
     {
-      bool hasPasswordFocus = PasswordBox.IsKeyboardFocused || VisiblePasswordTextBox.IsKeyboardFocused;
-      CapsLockWarningTextBlock.Visibility =
-        hasPasswordFocus && Keyboard.IsKeyToggled(Key.CapsLock)
-          ? Visibility.Visible
-          : Visibility.Collapsed;
+      CapsLockWarningBorder.Visibility = Keyboard.IsKeyToggled(Key.CapsLock)
+        ? Visibility.Visible
+        : Visibility.Hidden;
     }
 
     private void UpdateKeyboardLayoutIndicator()
@@ -598,25 +613,6 @@ namespace MainWindowProgram
       }
     }
 
-    private void MoveRoleSelection(int direction)
-    {
-      if (RolesListBox.Items.Count == 0)
-      {
-        return;
-      }
-
-      int currentIndex = RolesListBox.SelectedIndex;
-      if (currentIndex < 0)
-      {
-        currentIndex = 0;
-      }
-
-      int nextIndex = (currentIndex + direction + RolesListBox.Items.Count) % RolesListBox.Items.Count;
-      RolesListBox.SelectedIndex = nextIndex;
-      RolesListBox.ScrollIntoView(RolesListBox.SelectedItem);
-      FocusPasswordInput();
-    }
-
     private string GetCurrentPassword()
     {
       return _isPasswordVisible ? VisiblePasswordTextBox.Text : PasswordBox.Password;
@@ -652,8 +648,20 @@ namespace MainWindowProgram
       LoginPanel.Visibility = isLoading ? Visibility.Collapsed : Visibility.Visible;
       LoadingPanel.Visibility = isLoading ? Visibility.Visible : Visibility.Collapsed;
       LoadingStatusTextBlock.Text = message;
+      WelcomeDescriptionTextBlock.Text = isLoading
+        ? "Вход выполнен.\nПодготавливаем АСК-МКИ-М к работе."
+        : _welcomeDescription;
+      if (isLoading)
+      {
+        _loadingStoryboard ??= ((System.Windows.Media.Animation.Storyboard)FindResource("LoadingCircuitAnimation")).Clone();
+        _loadingStoryboard.Begin(LoadingPanel, true);
+      }
+      else
+      {
+        _loadingStoryboard?.Remove(LoadingPanel);
+      }
 
-      RolesListBox.IsEnabled = !isLoading;
+      RolesComboBox.IsEnabled = !isLoading;
       PasswordBox.IsEnabled = !isLoading;
       VisiblePasswordTextBox.IsEnabled = !isLoading;
       TogglePasswordVisibilityButton.IsEnabled = !isLoading;

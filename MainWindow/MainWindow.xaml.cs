@@ -21,6 +21,7 @@ using System.Windows.Documents;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Effects;
 using System.Windows.Threading;
 using UI.Components;
 using UI.Controls.Search;
@@ -609,6 +610,9 @@ namespace MainWindowProgram
       }
 
       var loginWindowManager = new RoleLoginWindowManager();
+      var previousEffect = Effect;
+      bool wasEnabled = IsEnabled;
+      bool loginWindowShown = false;
 
       try
       {
@@ -621,8 +625,11 @@ namespace MainWindowProgram
         }
 
         SaveCurrentWorkspaceSession();
+        Effect = new BlurEffect { Radius = 8 };
 
-        loginWindowManager.Show(GetRolesWithSavedWorkspaceSessions());
+        await loginWindowManager.ShowAsync(GetRolesWithSavedWorkspaceSessions(), owner: this);
+        loginWindowShown = true;
+        IsEnabled = false;
 
         var authenticatedRole = await loginWindowManager.WaitForAuthenticationAsync();
         if (authenticatedRole == null)
@@ -641,12 +648,23 @@ namespace MainWindowProgram
       }
       catch (Exception exception)
       {
+        if (loginWindowShown)
+        {
+          await loginWindowManager.CloseAsync();
+        }
+
         LogException("Ошибка смены пользователя.", exception);
         MessageBoxCustom.Show($"Ошибка смены пользователя: {exception.Message}", image: MessageBoxImage.Error);
       }
       finally
       {
+        Effect = previousEffect;
+        IsEnabled = wasEnabled;
         _isUserSwitchInProgress = false;
+        if (IsVisible && wasEnabled)
+        {
+          Activate();
+        }
         if (CurrentUserButton != null)
         {
           CurrentUserButton.IsEnabled = true;
@@ -823,6 +841,12 @@ namespace MainWindowProgram
     /// </summary>
     private void InputManager_PreProcessInput(object? sender, PreProcessInputEventArgs e)
     {
+      if (_isUserSwitchInProgress)
+      {
+        e.Cancel();
+        return;
+      }
+
       if (TryHandleSwitchUserHotkey(e))
       {
         return;

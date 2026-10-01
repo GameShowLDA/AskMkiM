@@ -1,0 +1,23 @@
+﻿<UserControl x:Class="Ask.UI.Shared.Components.Icons.EyeClosedIcon"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Name="Root"
+             Width="{Binding Size, ElementName=Root}"
+             Height="{Binding Size, ElementName=Root}"
+             IsHitTestVisible="False">
+  <!-- Semi.Avalonia SemiIconEyeClosedSolid; лицензия: Semi.Avalonia.LICENSE.txt. -->
+  <UserControl.Resources>
+    <StreamGeometry x:Key="EyeClosed">
+      M21.7 3.7a1 1 0 0 0-1.4-1.4L17.3 5.26A11.59 11.59 0 0 0 12 4C5 4 1 10 1 12c0 1.18 1.38 3.73 3.94 5.64L2.3 20.3a1 1 0 1 0 1.42 1.42l18-18ZM7.84 14.77l1.46-1.47a3 3 0 0 1 4-4l1.47-1.46a5 5 0 0 0-6.93 6.93Z
+        M12 20c-1.22 0-2.35-.18-3.38-.5l2.57-2.57a5 5 0 0 0 5.75-5.75l3.56-3.56C22.13 9.27 23 11.07 23 12c0 2-4 8-11 8Z
+    </StreamGeometry>
+  </UserControl.Resources>
+
+  <Viewbox Stretch="Uniform">
+    <Grid Width="24"
+          Height="24">
+      <Path Fill="{Binding Foreground, ElementName=Root}"
+            Data="{StaticResource EyeClosed}" />
+    </Grid>
+  </Viewbox>
+</UserControl>
