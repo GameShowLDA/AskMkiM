@@ -52,6 +52,14 @@
 	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabMetrologyChapter\ehtMetrologyPanelImage.png" />
 	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabTestsChapter\rkommTestPanelImage.png" />
 	  <None Remove="AppHelp\favicon.ico" />
+	  <None Remove="AppHelp\ru\Content\TextEditorChapter\exampleTextEditorImage.png" />
+	  <None Remove="AppHelp\ru\Content\TextEditorChapter\fileLocationCrossImage.png" />
+	  <None Remove="AppHelp\ru\Content\TextEditorChapter\parallelFileViewingImage.png" />
+	  <None Remove="AppHelp\ru\Content\TextEditorChapter\redUnderlineImage.png" />
+	  <None Remove="AppHelp\ru\Content\TextEditorChapter\severalEditorTabsImage.png" />
+	  <None Remove="AppHelp\ru\Content\TextEditorChapter\syntaxHighlightingAndUnderliningImage.png" />
+	  <None Remove="AppHelp\ru\Content\TextEditorChapter\windowSizeAdjustmentImage.png" />
+	  <None Remove="AppHelp\ru\Content\TextEditorChapter\yellowUnderlineImage.png" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -1184,6 +1192,30 @@
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabTestsChapter\TabTestSIChapter\TestSINodeMethodPart.html">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TextEditorChapter\exampleTextEditorImage.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TextEditorChapter\fileLocationCrossImage.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TextEditorChapter\parallelFileViewingImage.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TextEditorChapter\redUnderlineImage.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TextEditorChapter\severalEditorTabsImage.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TextEditorChapter\syntaxHighlightingAndUnderliningImage.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TextEditorChapter\windowSizeAdjustmentImage.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\TextEditorChapter\yellowUnderlineImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\ru\Content\TranslatorPart.html">
