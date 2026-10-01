@@ -1939,6 +1939,15 @@ Their services generally route operations into `MultiWindowService`.
 ### Главное меню и адаптивная верхняя панель
 
 Единственное дерево главного меню объявлено в `MainWindow/MainWindow.xaml`.
+Правый блок панели использует локальный `WindowActionButtonStyle`: объёмные тени,
+VSM-состояния Normal/MouseOver/Pressed/Disabled, масштаб наведения и утопленное нажатие.
+Цвет поверхности/иконок берётся из существующих `BackgroundBrushes`/`ForegrounfBrushes`.
+Тематические `TopPanelButtonHighlightOpacity` и `TopPanelButtonBevelBrush` в базовых
+`UI/Resources/Theme/dark.xaml`/`light.xaml` усиливают блик и тонкую обводку только в тёмных
+темах; custom-темы наследуют параметры. При наведении обводка усиливается, при нажатии исчезает.
+`CurrentUserButtonStyle` наследует этот шаблон и задаёт размеры/отступы профиля и отчёта.
+Переключение темы вызывается через `Button.Click → MainWindow.ThemeToggleButton_Click`
+после отпускания, чтобы состояние Pressed было видно до смены темы.
 Пункты напрямую связываются с дочерними ViewModel из `MainWindowViewModel`;
 `UiEventsBinder` изменяет видимость контекстных файловых команд и передаёт меню
 в `MenuHotkeyBinder.BindAutoRenumbering`.

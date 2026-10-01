@@ -1,4 +1,4 @@
-﻿<Window x:Class="MainWindowProgram.MainWindow"
+<Window x:Class="MainWindowProgram.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -32,146 +32,122 @@
 
     <Window.Resources>
         <Style x:Key="WindowActionButtonStyle" TargetType="Button">
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="BorderBrush" Value="Transparent"/>
-            <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
-            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Background" Value="{DynamicResource BackgroundBrushes}"/>
+            <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Focusable" Value="False"/>
             <Setter Property="Padding" Value="0"/>
+            <Setter Property="Margin" Value="4,3"/>
             <Setter Property="HorizontalContentAlignment" Value="Center"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="8">
-                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
-                        </Border>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <Style x:Key="DarkThemeToggleButtonStyle"
-               TargetType="Button"
-               BasedOn="{StaticResource WindowActionButtonStyle}">
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Foreground" Value="{DynamicResource TopPanelHoverForegroundBrush}"/>
-                    <Setter Property="Background" Value="{DynamicResource TopPanelHoverBackgroundBrush}"/>
-                </Trigger>
-                <Trigger Property="IsPressed" Value="True">
-                    <Setter Property="Foreground" Value="{DynamicResource TopPanelPressedForegroundBrush}"/>
-                    <Setter Property="Background" Value="{DynamicResource TopPanelPressedBackgroundBrush}"/>
-                </Trigger>
-            </Style.Triggers>
-        </Style>
-
-        <Style x:Key="LightThemeToggleButtonStyle"
-               TargetType="Button"
-               BasedOn="{StaticResource WindowActionButtonStyle}">
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Foreground" Value="{DynamicResource TopPanelHoverForegroundBrush}"/>
-                    <Setter Property="Background" Value="{DynamicResource TopPanelHoverBackgroundBrush}"/>
-                </Trigger>
-                <Trigger Property="IsPressed" Value="True">
-                    <Setter Property="Foreground" Value="{DynamicResource TopPanelPressedForegroundBrush}"/>
-                    <Setter Property="Background" Value="{DynamicResource TopPanelPressedBackgroundBrush}"/>
-                </Trigger>
-            </Style.Triggers>
-        </Style>
-
-        <Style x:Key="CurrentUserButtonStyle"
-               TargetType="Button"
-               BasedOn="{StaticResource WindowActionButtonStyle}">
-            <Setter Property="Padding" Value="10,0,12,0"/>
-            <Setter Property="Margin" Value="0,0,10,0"/>
-            <Setter Property="MinWidth" Value="0"/>
-            <Setter Property="MaxWidth" Value="260"/>
-            <Setter Property="Height" Value="{Binding ActualHeight, ElementName=File}"/>
-            <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
-            <Setter Property="Background" Value="#12000000"/>
-            <Setter Property="BorderBrush" Value="#16000000"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="HorizontalContentAlignment" Value="Center"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="ProfileRoot"
-                                Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="10"
-                                Padding="{TemplateBinding Padding}">
-                            <Border.RenderTransform>
-                                <TransformGroup>
-                                    <ScaleTransform x:Name="ProfileScaleTransform"
-                                                    ScaleX="1"
-                                                    ScaleY="1"/>
-                                    <TranslateTransform x:Name="ProfileTranslateTransform"
-                                                        Y="0"/>
-                                </TransformGroup>
-                            </Border.RenderTransform>
-                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
-                        </Border>
+                        <Grid x:Name="ButtonRoot" RenderTransformOrigin="0.5,0.5">
+                            <Grid.RenderTransform>
+                                <ScaleTransform ScaleX="1" ScaleY="1"/>
+                            </Grid.RenderTransform>
+                            <VisualStateManager.VisualStateGroups>
+                                <VisualStateGroup x:Name="CommonStates">
+                                    <VisualStateGroup.Transitions>
+                                        <VisualTransition GeneratedDuration="0:0:0.16"/>
+                                        <VisualTransition To="Pressed" GeneratedDuration="0:0:0.08"/>
+                                        <VisualTransition From="Pressed" GeneratedDuration="0:0:0.22"/>
+                                        <VisualTransition To="Disabled" GeneratedDuration="0"/>
+                                    </VisualStateGroup.Transitions>
+                                    <VisualState x:Name="Normal"/>
+                                    <VisualState x:Name="MouseOver">
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="ButtonRoot"
+                                                             Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)"
+                                                             To="1.025" Duration="0"/>
+                                            <DoubleAnimation Storyboard.TargetName="ButtonRoot"
+                                                             Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)"
+                                                             To="1.025" Duration="0"/>
+                                            <DoubleAnimation Storyboard.TargetName="ButtonBevel"
+                                                             Storyboard.TargetProperty="Opacity" To="1" Duration="0"/>
+                                        </Storyboard>
+                                    </VisualState>
+                                    <VisualState x:Name="Pressed">
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="RaisedShadows"
+                                                             Storyboard.TargetProperty="Opacity" To="0" Duration="0"/>
+                                            <DoubleAnimation Storyboard.TargetName="InsetShading"
+                                                             Storyboard.TargetProperty="Opacity" To="1" Duration="0"/>
+                                            <DoubleAnimation Storyboard.TargetName="ButtonBevel"
+                                                             Storyboard.TargetProperty="Opacity" To="0" Duration="0"/>
+                                        </Storyboard>
+                                    </VisualState>
+                                    <VisualState x:Name="Disabled">
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="RaisedShadows"
+                                                             Storyboard.TargetProperty="Opacity" To="0.2" Duration="0"/>
+                                        </Storyboard>
+                                    </VisualState>
+                                </VisualStateGroup>
+                            </VisualStateManager.VisualStateGroups>
+                            <Grid x:Name="RaisedShadows" IsHitTestVisible="False">
+                                <Border CornerRadius="10" Background="{TemplateBinding Background}">
+                                    <Border.Effect>
+                                        <DropShadowEffect Color="{Binding Foreground.Color, RelativeSource={RelativeSource TemplatedParent}}" Direction="135" BlurRadius="8"
+                                                          ShadowDepth="2" Opacity="{DynamicResource TopPanelButtonHighlightOpacity}"/>
+                                    </Border.Effect>
+                                </Border>
+                                <Border CornerRadius="10" Background="{TemplateBinding Background}">
+                                    <Border.Effect>
+                                        <DropShadowEffect Color="Black" Direction="315" BlurRadius="8"
+                                                          ShadowDepth="2" Opacity="0.4"/>
+                                    </Border.Effect>
+                                </Border>
+                            </Grid>
+                            <Border x:Name="ButtonSurface" CornerRadius="10"
+                                    Background="{TemplateBinding Background}"/>
+                            <Border x:Name="ButtonBevel" CornerRadius="10" BorderThickness="1"
+                                    BorderBrush="{DynamicResource TopPanelButtonBevelBrush}"
+                                    Opacity="0.65" IsHitTestVisible="False"/>
+                            <Grid x:Name="InsetShading" Opacity="0" IsHitTestVisible="False">
+                                <Border CornerRadius="10">
+                                    <Border.Background>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                            <GradientStop Color="#80000000" Offset="0"/>
+                                            <GradientStop Color="#00000000" Offset="0.32"/>
+                                            <GradientStop Color="#00FFFFFF" Offset="0.68"/>
+                                            <GradientStop Color="#20FFFFFF" Offset="1"/>
+                                        </LinearGradientBrush>
+                                    </Border.Background>
+                                </Border>
+                                <Border CornerRadius="10">
+                                    <Border.Background>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                            <GradientStop Color="#50000000" Offset="0"/>
+                                            <GradientStop Color="#00000000" Offset="0.06"/>
+                                            <GradientStop Color="#00FFFFFF" Offset="0.94"/>
+                                            <GradientStop Color="#16FFFFFF" Offset="1"/>
+                                        </LinearGradientBrush>
+                                    </Border.Background>
+                                </Border>
+                            </Grid>
+                            <ContentPresenter Margin="{TemplateBinding Padding}" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                              RecognizesAccessKey="True"/>
+                        </Grid>
                         <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Trigger.EnterActions>
-                                    <BeginStoryboard>
-                                        <Storyboard FillBehavior="HoldEnd">
-                                            <DoubleAnimation Storyboard.TargetName="ProfileScaleTransform"
-                                                             Storyboard.TargetProperty="ScaleX"
-                                                             To="1.03"
-                                                             Duration="0:0:0.18"/>
-                                            <DoubleAnimation Storyboard.TargetName="ProfileScaleTransform"
-                                                             Storyboard.TargetProperty="ScaleY"
-                                                             To="1.03"
-                                                             Duration="0:0:0.18"/>
-                                            <DoubleAnimation Storyboard.TargetName="ProfileTranslateTransform"
-                                                             Storyboard.TargetProperty="Y"
-                                                             To="-1"
-                                                             Duration="0:0:0.18"/>
-                                        </Storyboard>
-                                    </BeginStoryboard>
-                                </Trigger.EnterActions>
-                                <Trigger.ExitActions>
-                                    <BeginStoryboard>
-                                        <Storyboard FillBehavior="Stop">
-                                            <DoubleAnimation Storyboard.TargetName="ProfileScaleTransform"
-                                                             Storyboard.TargetProperty="ScaleX"
-                                                             To="1"
-                                                             Duration="0:0:0.18"/>
-                                            <DoubleAnimation Storyboard.TargetName="ProfileScaleTransform"
-                                                             Storyboard.TargetProperty="ScaleY"
-                                                             To="1"
-                                                             Duration="0:0:0.18"/>
-                                            <DoubleAnimation Storyboard.TargetName="ProfileTranslateTransform"
-                                                             Storyboard.TargetProperty="Y"
-                                                             To="0"
-                                                             Duration="0:0:0.18"/>
-                                        </Storyboard>
-                                    </BeginStoryboard>
-                            </Trigger.ExitActions>
-                                <Setter Property="Foreground" Value="{DynamicResource TopPanelHoverForegroundBrush}"/>
-                                <Setter Property="Background" Value="{DynamicResource TopPanelHoverBackgroundBrush}"/>
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter Property="Foreground" Value="{DynamicResource TopPanelPressedForegroundBrush}"/>
-                                <Setter Property="Background" Value="{DynamicResource TopPanelPressedBackgroundBrush}"/>
-                            </Trigger>
                             <Trigger Property="IsEnabled" Value="False">
                                 <Setter Property="Opacity" Value="0.55"/>
+                                <Setter Property="Cursor" Value="Arrow"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
+        </Style>
+        <Style x:Key="CurrentUserButtonStyle" TargetType="Button"
+               BasedOn="{StaticResource WindowActionButtonStyle}">
+            <Setter Property="Padding" Value="10,0,12,0"/>
+            <Setter Property="MinWidth" Value="0"/>
+            <Setter Property="MaxWidth" Value="260"/>
+            <Setter Property="Height" Value="{Binding ActualHeight, ElementName=File}"/>
         </Style>
     </Window.Resources>
 
@@ -449,31 +425,31 @@
                     </Button>
 
                     <Button x:Name="DarkThemeButton"
-                        Style="{StaticResource DarkThemeToggleButtonStyle}"
+                        Style="{StaticResource WindowActionButtonStyle}"
                         Width="{Binding ActualHeight, ElementName=File}"
                         Height="{Binding ActualHeight, ElementName=File}"
                         Visibility="Collapsed"
                         ToolTip="Тёмная тема"
-                        PreviewMouseDown="ThemeToggleButton_PreviewMouseDown">
+                        Click="ThemeToggleButton_Click">
                         <askUiIcons:MoonThemeIcon Size="15"
                                               IsHovering="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=IsMouseOver}"
                                               Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" />
                     </Button>
 
                     <Button x:Name="LightThemeButton"
-                        Style="{StaticResource LightThemeToggleButtonStyle}"
+                        Style="{StaticResource WindowActionButtonStyle}"
                         Width="{Binding ActualHeight, ElementName=File}"
                         Height="{Binding ActualHeight, ElementName=File}"
                         Visibility="Collapsed"
                         ToolTip="Светлая тема"
-                        PreviewMouseDown="ThemeToggleButton_PreviewMouseDown">
+                        Click="ThemeToggleButton_Click">
                         <askUiIcons:SunThemeIcon Size="15"
                                              IsHovering="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=IsMouseOver}"
                                              Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" />
                     </Button>
 
                     <Button x:Name="minimizeButton"
-                        Style="{DynamicResource StyleWindowsButtons}"
+                        Style="{StaticResource WindowActionButtonStyle}"
                         Width="{Binding ActualHeight, ElementName=File}"
                         Height="{Binding ActualHeight, ElementName=File}"
                         Command="{Binding Window.MinimizeCommand}">
@@ -483,7 +459,7 @@
                     </Button>
 
                     <Button x:Name="maximizeButton"
-                        Style="{DynamicResource StyleWindowsButtons}"
+                        Style="{StaticResource WindowActionButtonStyle}"
                         Width="{Binding ActualHeight, ElementName=File}"
                         Height="{Binding ActualHeight, ElementName=File}"
                         Command="{Binding Window.MaximizeCommand}">
@@ -520,7 +496,7 @@
                     </Button>
 
                     <Button x:Name="exitButton"
-                        Style="{DynamicResource StyleWindowsButtons}"
+                        Style="{StaticResource WindowActionButtonStyle}"
                         Width="{Binding ActualHeight, ElementName=File}"
                         Height="{Binding ActualHeight, ElementName=File}"
                         Command="{Binding Window.CloseCommand}">

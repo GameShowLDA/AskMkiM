@@ -726,7 +726,7 @@ namespace MainWindowProgram
         : Visibility.Collapsed;
     }
 
-    private async void ThemeToggleButton_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+    private async void ThemeToggleButton_Click(object sender, RoutedEventArgs e)
     {
       e.Handled = true;
 

@@ -1,11 +1,19 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib"
                     xmlns:Controls ="clr-namespace:UI.Controls"
                     xmlns:avalonEdit="clr-namespace:ICSharpCode.AvalonEdit;assembly=ICSharpCode.AvalonEdit"
                     xmlns:Components="clr-namespace:UI.Components">
     <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="/Ask.UI;component/Resources/Styles/DataGridStyle.xaml" />
     </ResourceDictionary.MergedDictionaries>
+
+    <sys:Double x:Key="TopPanelButtonHighlightOpacity">0.24</sys:Double>
+    <LinearGradientBrush x:Key="TopPanelButtonBevelBrush" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="#60B4C3D7" Offset="0"/>
+        <GradientStop Color="#24B4C3D7" Offset="0.4"/>
+        <GradientStop Color="#10B4C3D7" Offset="1"/>
+    </LinearGradientBrush>
 
     <Color x:Key="ModernDataGridBackgroundColor">#1A2029</Color>
     <Color x:Key="ModernDataGridSurfaceColor">#141B24</Color>

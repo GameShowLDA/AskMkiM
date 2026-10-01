@@ -1,11 +1,15 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib"
                     xmlns:Controls ="clr-namespace:UI.Controls"
                     xmlns:avalonEdit="clr-namespace:ICSharpCode.AvalonEdit;assembly=ICSharpCode.AvalonEdit"
                     xmlns:Components="clr-namespace:UI.Components">
     <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="/Ask.UI;component/Resources/Styles/DataGridStyle.xaml" />
     </ResourceDictionary.MergedDictionaries>
+
+    <sys:Double x:Key="TopPanelButtonHighlightOpacity">0.12</sys:Double>
+    <SolidColorBrush x:Key="TopPanelButtonBevelBrush" Color="Transparent"/>
 
     <Color x:Key="ModernDataGridBackgroundColor">#FBFCFD</Color>
     <Color x:Key="ModernDataGridSurfaceColor">#F4F7FA</Color>
