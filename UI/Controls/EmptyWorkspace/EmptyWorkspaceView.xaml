@@ -34,7 +34,6 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
                 <!-- Время -->
@@ -100,32 +99,51 @@
           </Run>
                 </TextBlock>
 
-                <!-- Подсказка под датой -->
-                <TextBlock x:Name="HintText"
-                   Grid.Row="2"
-                   Margin="0,18,0,0"
-                   Text="Откройте файл, чтобы начать работу"
-                   Foreground="{DynamicResource ForegrounfBrushes85}"
-                   Opacity="0.8"
-                   FontFamily="{DynamicResource Manrope}"
-                   FontSize="16"
-                   TextAlignment="Center"
-                   HorizontalAlignment="Center"/>
-                <Button x:Name="OpenFileButton" Grid.Row="3"
-                        Style="{DynamicResource WindowActionButtonStyle}"
+                <Button x:Name="OpenFileButton" Grid.Row="2"
                         Command="{Binding File.OpenFileCommand}"
-                        Width="220" Height="42" Margin="0,24,0,0" Padding="16,0"
-                        FontFamily="{DynamicResource Manrope}" FontSize="14"
+                        Height="42" Margin="0,10,0,0" Padding="16,0"
+                        FontFamily="{DynamicResource Manrope}" FontSize="16"
                         HorizontalAlignment="Center" ToolTip="Открыть файл (Ctrl+O)"
                         AutomationProperties.Name="Открыть файл">
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <TextBlock Text="Открыть файл" VerticalAlignment="Center"/>
-                        <TextBlock Text="Ctrl+O" FontSize="11" Margin="18,0,0,0"
-                                   Foreground="{DynamicResource ForegrounfBrushes85}"
-                                   VerticalAlignment="Center"/>
-                    </StackPanel>
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes85}"/>
+                            <Setter Property="Background" Value="Transparent"/>
+                            <Setter Property="Cursor" Value="Hand"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="Button">
+                                        <Grid>
+                                            <Border x:Name="HoverSurface" CornerRadius="8"
+                                                    Background="{DynamicResource ForegrounfBrushes}" Opacity="0"/>
+                                            <Border x:Name="FocusOutline" CornerRadius="8" BorderThickness="1"
+                                                    BorderBrush="Transparent" Padding="{TemplateBinding Padding}">
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                        </Grid>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="HoverSurface" Property="Opacity" Value="0.06"/>
+                                                <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
+                                            </Trigger>
+                                            <Trigger Property="IsPressed" Value="True">
+                                                <Setter TargetName="HoverSurface" Property="Opacity" Value="0.12"/>
+                                            </Trigger>
+                                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                                <Setter TargetName="FocusOutline" Property="BorderBrush" Value="{DynamicResource ForegrounfBrushes35}"/>
+                                            </Trigger>
+                                            <Trigger Property="IsEnabled" Value="False">
+                                                <Setter Property="Opacity" Value="0.5"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </Button.Style>
+                    <TextBlock Text="Откройте файл, чтобы начать работу" VerticalAlignment="Center"/>
                 </Button>
-                <StackPanel x:Name="RecentFilesPanel" Grid.Row="4" Width="420" Margin="0,24,0,0">
+                <StackPanel x:Name="RecentFilesPanel" Grid.Row="3" Width="420" Margin="0,24,0,0">
                     <StackPanel.Style>
                         <Style TargetType="StackPanel">
                             <Style.Triggers>

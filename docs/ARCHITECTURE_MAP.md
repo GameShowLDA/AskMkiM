@@ -1942,7 +1942,10 @@ ForegrounfBrushes/ForegrounfBrushes85 текущей темы для читае�
 → Dispatcher / UpdateCurrentDateTime → CurrentDateTime → DateTimeToStringConverter`
 обновляет часы/дату; AnimateMainClock сохраняет плавную смену текста через TimeGhostText,
 без свечения. Подписка включается на Loaded и удаляется на Unloaded.
-`EmptyWorkspaceView.OpenFileButton` наследует WindowActionButtonStyle и привязан к
+`EmptyWorkspaceView.OpenFileButton` — кликабельная надпись «Откройте файл, чтобы начать работу»
+под датой, без отдельной дублирующей кнопки. Использует локальный плоский шаблон без теней:
+прозрачное обычное состояние, мягкая тематическая подложка при наведении/нажатии
+и контур при клавиатурном фокусе. Кнопка привязана к
 `File.OpenFileCommand` из DataContext shell через MultiWindowControl (DataContext не заменяется).
 Маршрут совпадает с меню/Ctrl+O: `FileViewModel.OpenFile → FileService.OpenFileAsync →
 проверка _isLockedProvider → OpenFileDialog (Multiselect) → OpenFileWithLegacyConversion →
