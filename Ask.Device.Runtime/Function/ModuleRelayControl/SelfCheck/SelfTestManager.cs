@@ -57,7 +57,7 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
           await CheckBusesConnection(cancellationToken, _moduleRelay, device, settings, userMessageService, 2.ToString());
           break;
       }
-      await _moduleRelay.PointManager.DisconnectingAllPoint(userMessageService);
+      await _moduleRelay.ConnectableManager.ResetAsync(userMessageService);
     }
 
     /// <inheritdoc />
@@ -90,7 +90,7 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
       try
       {
         cancellationToken.ThrowIfCancellationRequested();
-        await _moduleRelay.PointManager.DisconnectingAllPoint(userMessageService);
+        await _moduleRelay.ConnectableManager.ResetAsync(userMessageService);
         await _moduleRelay.MeterManager.ConnectMeterAsync(
           ExecutionConfig.GetIsIdleModeEnabled() ? userMessageService : null);
 
@@ -112,7 +112,7 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
         }
         finally
         {
-          await _moduleRelay.PointManager.DisconnectingAllPoint(userMessageService);
+          await _moduleRelay.ConnectableManager.ResetAsync(userMessageService);
         }
       }
     }
@@ -133,7 +133,7 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
 
       try
       {
-        await _moduleRelay.PointManager.DisconnectingAllPoint(userMessageService);
+        await _moduleRelay.ConnectableManager.ResetAsync(userMessageService);
         await _moduleRelay.MeterManager.ConnectMeterAsync(
           ExecutionConfig.GetIsIdleModeEnabled() ? userMessageService : null);
         var testName = "Тест подключения точек";
@@ -160,7 +160,7 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
         }
         finally
         {
-          await _moduleRelay.PointManager.DisconnectingAllPoint(userMessageService);
+          await _moduleRelay.ConnectableManager.ResetAsync(userMessageService);
         }
       }
     }
@@ -185,7 +185,7 @@ namespace Ask.Device.Runtime.Function.ModuleRelayControl.SelfCheck
         return;
       }
 
-      await _moduleRelay.PointManager.DisconnectingAllPoint(userMessageService);
+      await _moduleRelay.ConnectableManager.ResetAsync(userMessageService);
 
       await switchingDevice.ConnectableManager.ResetAsync(userMessageService);
       if (!await switchingDevice.ConnectorManager.ConnectAllBuses(userMessageService))

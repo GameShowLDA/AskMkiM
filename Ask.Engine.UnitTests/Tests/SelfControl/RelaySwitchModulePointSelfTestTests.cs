@@ -18,10 +18,11 @@ public sealed class RelaySwitchModulePointSelfTestTests
       .Setup(manager => manager.InitializeAsync(null))
       .ReturnsAsync((true, string.Empty));
 
-    var pointManager = new Mock<IPointManager>();
-    pointManager
-      .Setup(manager => manager.DisconnectingAllPoint(null))
+    connectable
+      .Setup(manager => manager.ResetAsync(null))
       .ReturnsAsync(true);
+
+    var pointManager = new Mock<IPointManager>();
     pointManager
       .Setup(manager => manager.CheckPoint(1, null))
       .ReturnsAsync(
@@ -57,7 +58,8 @@ public sealed class RelaySwitchModulePointSelfTestTests
     meterManager.Verify(device => device.ConnectMeterAsync(null), Times.Once);
     meterManager.Verify(device => device.DisconnectMeterAsync(null), Times.Once);
     pointManager.Verify(device => device.CheckPoint(1, null), Times.Once);
-    pointManager.Verify(device => device.DisconnectingAllPoint(null), Times.Exactly(3));
+    connectable.Verify(device => device.ResetAsync(null), Times.Exactly(3));
+    pointManager.Verify(device => device.DisconnectingAllPoint(null), Times.Never);
   }
 
   [Fact]
@@ -68,10 +70,11 @@ public sealed class RelaySwitchModulePointSelfTestTests
       .Setup(manager => manager.InitializeAsync(null))
       .ReturnsAsync((true, string.Empty));
 
-    var pointManager = new Mock<IPointManager>();
-    pointManager
-      .Setup(manager => manager.DisconnectingAllPoint(null))
+    connectable
+      .Setup(manager => manager.ResetAsync(null))
       .ReturnsAsync(true);
+
+    var pointManager = new Mock<IPointManager>();
     pointManager
       .Setup(manager => manager.CheckPoint(3, null))
       .ReturnsAsync(
@@ -105,7 +108,8 @@ public sealed class RelaySwitchModulePointSelfTestTests
     meterManager.Verify(device => device.ConnectMeterAsync(null), Times.Once);
     meterManager.Verify(device => device.DisconnectMeterAsync(null), Times.Once);
     pointManager.Verify(device => device.CheckPoint(3, null), Times.Once);
-    pointManager.Verify(device => device.DisconnectingAllPoint(null), Times.Exactly(2));
+    connectable.Verify(device => device.ResetAsync(null), Times.Exactly(2));
+    pointManager.Verify(device => device.DisconnectingAllPoint(null), Times.Never);
   }
 
   [Fact]
@@ -116,10 +120,11 @@ public sealed class RelaySwitchModulePointSelfTestTests
       .Setup(manager => manager.InitializeAsync(null))
       .ReturnsAsync((true, string.Empty));
 
-    var pointManager = new Mock<IPointManager>();
-    pointManager
-      .Setup(manager => manager.DisconnectingAllPoint(null))
+    connectable
+      .Setup(manager => manager.ResetAsync(null))
       .ReturnsAsync(true);
+
+    var pointManager = new Mock<IPointManager>();
     pointManager
       .Setup(manager => manager.CheckPoint(3, null))
       .ThrowsAsync(new InvalidOperationException("Ошибка проверки точки."));
@@ -147,6 +152,7 @@ public sealed class RelaySwitchModulePointSelfTestTests
 
     meterManager.Verify(device => device.ConnectMeterAsync(null), Times.Once);
     meterManager.Verify(device => device.DisconnectMeterAsync(null), Times.Once);
-    pointManager.Verify(device => device.DisconnectingAllPoint(null), Times.Exactly(2));
+    connectable.Verify(device => device.ResetAsync(null), Times.Exactly(2));
+    pointManager.Verify(device => device.DisconnectingAllPoint(null), Times.Never);
   }
 }

@@ -771,11 +771,11 @@ Every execution terminal path
 EquipmentUsageSession.GetUsedDevices
 → DeviceResetService.ResetDevicesAsync
 → последовательно для каждого уникального устройства
-  → для `IRelaySwitchModule` сначала `PointManager.DisconnectingAllPoint`
-  → затем `DisconnectActiveBusesAsync`
-    → `BusManager.GetConnectedBuses`
-    → `BusManager.DisconnectBusAsync` для каждой активной шины
-  → для остальных устройств `IConnectable.ResetAsync`
+  → для всех устройств, включая `IRelaySwitchModule`, `IConnectable.ResetAsync`
+  → МКР: общий аппаратный сброс из `ConnectedProfile.Reset` (`2.1.0.0.`)
+    → `Transport.ResetAsync` → выбранный transport → `ModuleRelayControlQueryExecutor.QueryAsync`
+    → проверка ответа → `IsReset` → очистка локального состояния точек и шин
+  → `DeviceResetService` не вызывает отдельное отключение точек и активных шин
   → Transport → адресный UDP/TCP/COM/USB driver
   → bool/exception проверяется отдельно для устройства
   → результат записывается в лог и протокол
@@ -873,11 +873,10 @@ executor throws
   `AlgorithmExecutionResult` в `ProtocolModelExtensions.AddResult`; расширение находится
   в `Ask.Protocol.Messages/Extensions/ProtocolModelExtensions.cs` и внутри раскладывает
   ошибки и информационные сообщения по коллекциям `ProtocolModel`;
-- `ParallelTestRunner` публикует этап отключения точек через `ExecutionMessages`, затем для
-  каждого `IRelaySwitchModule` вызывает `PointManager.DisconnectingAllPoint`; прямой
-  `ConnectableManager.ResetAsync` для МКР здесь не используется, поэтому команда
-  `2.1.0.0.` не отправляется. Результат фактической групповой команды публикуется один раз
-  как сообщение диапазона точек, а
+- `ParallelTestRunner` публикует этап общего сброса через
+  `ExecutionMessages.PublishGeneralPointsResetAsync`, затем для каждого `IRelaySwitchModule`
+  вызывает `ConnectableManager.ResetAsync` (`2.1.0.0.`) и повторно подключает шины `A1`/`B1`
+  через `BusManager.ConnectBusAsync` для следующего шага группового измерения;
   `CiGroupMethodExecutor` передаёт ошибки подключения и результаты измерения в
   `ExecutionMessages`/`MeasurementMessages` и использует логический признак успеха;
 - `MeasurementMessages` формирует тексты брака узлового и группового методов через
@@ -1485,23 +1484,27 @@ Idle-эмулятор должен возвращать подтверждени
 прежние строки `SelfTestMessages` (`Точка N`, детализацию подключения и отключения от шин),
 добавляет `ModuleRelayControlError.PointError` в итоговые ошибки и обрабатывает повреждённый
 ответ строкой `Ошибка данных!`; прежняя runtime-модель `SelfPointModel` удалена.
+`SelfTestManager.StartSelfCheck`, подготовка `PerformClosureCycle`/`CheckBusesConnection`
+и освобождение в `finally` используют общий `ConnectableManager.ResetAsync`.
+`CrossConnectionTests` при `needRestartModuleAfter` сбрасывает оба МКР через
+`ConnectableManager.ResetAsync`, включая `ResetModulesAfterPointTestAsync`.
 `ISelfTestCheckerModuleRelayControl.CheckPointAsync` предоставляет отдельный одиночный путь
 самоконтроля точки для сервисного UI:
 `RelaySwitchModuleControl.CheckPointButton_Click`
 → `SelfTestManager.CheckPointAsync`
 → `IConnectable.InitializeAsync`
-→ `IPointManager.DisconnectingAllPoint`
+→ `IConnectable.ResetAsync`
 → `IMeterManager.ConnectMeterAsync`
 → `IPointManager.CheckPoint` (`6.<point>`)
 → `ModuleRelayControlResponseProcessor.CheckPointSelfTestAsync`
 → `IMeterManager.DisconnectMeterAsync`
-→ повторный `IPointManager.DisconnectingAllPoint` в `finally`.
+→ повторный `IConnectable.ResetAsync` в `finally`.
 Метод проверяет диапазон `1..PointCount`, поддерживает отмену между аппаратными операциями
 и использует тот же Real/Idle-маршрут, что и полный самоконтроль точек.
 Полный и одиночный самоконтроль точек всегда отправляют физическую команду подключения
 внутреннего измерительного тракта МКР перед проверкой. Завершение, отмена и ошибка проходят
-через `finally`, который отключает измеритель и затем освобождает все точки. Адаптер не
-пропускает повторный `ConnectMeterAsync` по локальному флагу, поскольку аппаратное состояние
+через `finally`, который отключает измеритель и затем выполняет общий аппаратный сброс МКР.
+Адаптер не пропускает повторный `ConnectMeterAsync` по локальному флагу, поскольку аппаратное состояние
 может измениться после прерванного запуска независимо от состояния runtime-кэша.
 Idle `ModuleRelayControlEmulatorProtocol` для команды `6.<point>` учитывает настройку
 ошибки измерения: любой `ErroneousMeasurementType`, кроме `None`, детерминированно делает ложным один из этапов
@@ -1854,10 +1857,10 @@ Transport / target runtime manager
 ```
 
 The emulator handles initialization (`1.0.0.0`), legacy device reset (`2.1.0.0`),
-point group operations (`11.*`) and power-state queries. For МКР point cleanup,
-runtime flows use `PointManager.DisconnectingAllPoint`, which sends the group
-disconnect command and publishes «Отключение всех точек»; direct
-`ConnectableManager.ResetAsync` is not used by those flows. Hardware-error
+point group operations (`11.*`) and power-state queries. Self-check preparation and cleanup,
+cross-connection test reset, group measurement step reset (`ParallelTestRunner`) and device finalization (`DeviceResetService`) use the common
+`ConnectableManager.ResetAsync` hardware reset. Group measurement then reconnects A1/B1.
+Targeted point disconnection inside commutation algorithms still uses `PointManager`. Hardware-error
 simulation returns an empty response and enters the existing retry/error contract.
 The МКР emulator returns firmware-compatible JSON envelopes for bus, point,
 verified point, group, meter and self-check commands. Runtime connection stores
