@@ -515,7 +515,7 @@ public sealed class UserActionHelperTests
     Assert.Contains("МКР", message.Header);
     Assert.Equal("Обмен с устройством", message.Message);
     Assert.DoesNotContain("1000", message.ToString());
-    Assert.Equal("[НЕТ СВЯЗИ]", message.GetQualityPrefix());
+    Assert.Equal("[СБОЙ ОБМЕНА]", message.GetQualityPrefix());
   }
 
   [Theory]

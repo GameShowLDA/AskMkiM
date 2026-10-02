@@ -29,7 +29,7 @@ public sealed class DeviceResetServiceTests
       .Where(i => i.Method.Name == nameof(IUserInteractionService.ShowMessageAsync))
       .Select(i => (ShowMessageModel)i.Arguments[0]));
     Assert.Equal(ShowMessageModel.MessageType.NoResponse, message.Status);
-    Assert.Equal("[НЕТ СВЯЗИ]", message.GetQualityPrefix());
+    Assert.Equal("[СБОЙ ОБМЕНА]", message.GetQualityPrefix());
     interaction.Verify(x => x.WaitRetryOrContinueAsync(), Times.Never);
     interaction.Verify(x => x.WaitUserActionAsync(It.IsAny<bool>(), It.IsAny<bool>(), It.IsAny<bool>()), Times.Never);
   }

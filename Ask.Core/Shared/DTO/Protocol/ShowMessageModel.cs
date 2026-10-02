@@ -287,7 +287,7 @@ namespace Ask.Core.Shared.DTO.Protocol
     {
       if (Status == MessageType.NoResponse)
       {
-        return "[НЕТ СВЯЗИ]";
+        return "[СБОЙ ОБМЕНА]";
       }
       if (Status == MessageType.Success)
       {

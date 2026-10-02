@@ -40,7 +40,7 @@ public sealed class NoResponseOperationTests
       var message = error.ToMessage();
       Assert.Equal("Модуль МКР-300(1.9)", message.Header);
       Assert.Equal(operation, message.Message);
-      Assert.Equal("[НЕТ СВЯЗИ]", message.GetQualityPrefix());
+      Assert.Equal("[СБОЙ ОБМЕНА]", message.GetQualityPrefix());
       Assert.Equal(System.Windows.Media.Color.FromRgb(255, 51, 51), message.GetColorMessage());
       Assert.DoesNotContain("1000", message.ToString());
       Assert.DoesNotContain("Отсутствие ответа", message.ToString());

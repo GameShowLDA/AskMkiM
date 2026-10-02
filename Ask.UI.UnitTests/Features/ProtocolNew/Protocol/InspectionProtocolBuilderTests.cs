@@ -23,7 +23,7 @@ public sealed class InspectionProtocolBuilderTests
 
     var result = new InspectionProtocolBuilder().Build(settings, ExecutionCompletionStatus.Interrupted);
 
-    Assert.Contains("Нет ответа от МКР(1.4) [НЕТ СВЯЗИ]", result);
+    Assert.Contains("Нет ответа от МКР(1.4) [СБОЙ ОБМЕНА]", result);
     Assert.DoesNotContain("[БРАК]", result);
     Assert.DoesNotContain("[НОРМА]", result);
   }

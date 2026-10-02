@@ -11,7 +11,7 @@ public class ExecutionProtocolLineFormatterTests
     var source = new ShowMessageModel
     {
       Header = "Отсутствие ответа устройства",
-      Message = "Нет ответа от МКР(1.4) [НЕТ СВЯЗИ]",
+      Message = "Нет ответа от МКР(1.4) [СБОЙ ОБМЕНА]",
       Status = ShowMessageModel.MessageType.NoResponse,
       IsDeviceMessage = true
     };
@@ -20,7 +20,7 @@ public class ExecutionProtocolLineFormatterTests
     Assert.True(ExecutionProtocolDiagnosticFormatter.TryRestoreMessages(stored, false, out var restored));
     var message = Assert.Single(restored);
     Assert.Equal(ShowMessageModel.MessageType.NoResponse, message.Status);
-    Assert.Equal("[НЕТ СВЯЗИ]", message.GetQualityPrefix());
+    Assert.Equal("[СБОЙ ОБМЕНА]", message.GetQualityPrefix());
     Assert.DoesNotContain("БРАК", message.Message);
   }
 

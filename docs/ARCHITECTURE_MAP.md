@@ -2532,7 +2532,7 @@ and are displayed in translator/runner error lists.
 executor оборачивает аппаратный вызов в `UserActionHelper` для интерактивного повтора
 при отсутствии ответа. Обычный неуспешный результат возвращается прежнему обработчику.
 `DeviceNoResponseException.ToMessage()` формирует обычную строку
-`DeviceDisplayName : Operation [НЕТ СВЯЗИ]` без технического текста исключения.
+`DeviceDisplayName : Operation [СБОЙ ОБМЕНА]` без технического текста исключения.
 `Transport.ExecuteOperationAsync` сохраняет названия подключения/инициализации/сброса;
 `ModuleRelayControlQueryExecutor.QueryAsync` берёт название из
 `ModuleRelayControlResponseProcessor.GetOperationName`; измерительные executors
@@ -2553,7 +2553,7 @@ executor оборачивает аппаратный вызов в `UserActionHe
 оператора; вне неё отдельный выбор не разрешает Continue при отсутствии ответа.
 
 `NoResponse` добавлен в конец `MessageType` с сохранением прежних числовых значений.
-Экранный маркер — `[НЕТ СВЯЗИ]` (яркий красный `#FF3333`), в том числе для измерительных записей;
+Экранный маркер — `[СБОЙ ОБМЕНА]` (яркий красный `#FF3333`), в том числе для измерительных записей;
 форматы snapshot сохраняют статус штатной сериализацией. `ProtocolEntryOutputService`
 накапливает отсутствие ответа независимо от опции накопления обычных ошибок и
 передаёт тип в `ActionExecutor.AddError` → `TestError.IsNoResponse`.
