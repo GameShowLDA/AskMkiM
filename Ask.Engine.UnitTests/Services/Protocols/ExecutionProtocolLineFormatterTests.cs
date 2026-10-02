@@ -6,6 +6,25 @@ namespace Ask.Engine.UnitTests.Services.Protocols;
 public class ExecutionProtocolLineFormatterTests
 {
   [Fact]
+  public void NoResponseStatusSurvivesProtocolStorage()
+  {
+    var source = new ShowMessageModel
+    {
+      Header = "Отсутствие ответа устройства",
+      Message = "Нет ответа от МКР(1.4) [СБОЙ ОБМЕНА]",
+      Status = ShowMessageModel.MessageType.NoResponse,
+      IsDeviceMessage = true
+    };
+    string stored = string.Join("\n", ExecutionProtocolDiagnosticFormatter.FormatForStorage(source));
+
+    Assert.True(ExecutionProtocolDiagnosticFormatter.TryRestoreMessages(stored, false, out var restored));
+    var message = Assert.Single(restored);
+    Assert.Equal(ShowMessageModel.MessageType.NoResponse, message.Status);
+    Assert.Equal("[СБОЙ ОБМЕНА]", message.GetQualityPrefix());
+    Assert.DoesNotContain("БРАК", message.Message);
+  }
+
+  [Fact]
   public void CompressedLogs_AreShownAfterFollowingMessageOnlyForRoot()
   {
     var messages = new[] { new ShowMessageModel("Первое"), new ShowMessageModel("Второе") };

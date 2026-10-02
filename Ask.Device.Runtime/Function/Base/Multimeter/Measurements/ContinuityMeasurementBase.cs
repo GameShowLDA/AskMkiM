@@ -45,7 +45,8 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements
         "Прозвонка",
         () => CheckContinuityCoreAsync(expectedOutcome, responseDelay: responseDelay),
         value => !value,
-        maxAttempts: 2);
+        maxAttempts: 2,
+        messageService: userMessageService);
 
       if (!execution.Success)
       {

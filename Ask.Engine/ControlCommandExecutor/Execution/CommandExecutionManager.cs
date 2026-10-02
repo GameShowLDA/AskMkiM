@@ -351,7 +351,8 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
         catch (Exception ex)
         {
           FlushAttemptErrors();
-          await _console.CompleteCommandAsync(true);
+          if (ex is not Ask.Core.Services.Errors.Device.DeviceNoResponseException)
+            await _console.CompleteCommandAsync(true);
           await ExecuteKscOnExceptionAsync(command, ex);
           throw;
         }

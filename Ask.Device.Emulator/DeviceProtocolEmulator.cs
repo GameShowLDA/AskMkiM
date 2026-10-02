@@ -59,7 +59,7 @@ namespace Ask.Device.Emulator
         () => device.DeviceProtocol,
         new MultimeterEmulatorProtocol(
           idleResponse,
-          () => IdleHardwareErrorSimulator.ShouldSimulateHardwareError(device)));
+          () => IdleHardwareErrorSimulator.ShouldSimulateHardwareError(device)), device: device);
       bool expectsResponse = command.Contains('?');
       string response = await protocol.QueryAsync(
         command,
@@ -89,7 +89,7 @@ namespace Ask.Device.Emulator
             () => item.NumberChassis,
             () => IdleHardwareErrorSimulator.ShouldSimulateHardwareError(item),
             ExecutionConfig.GetIsErrorSimulationEnabled,
-            () => Random.Shared.Next(4) == 0 ? Random.Shared.Next(1, 256) : 0)));
+            () => Random.Shared.Next(4) == 0 ? Random.Shared.Next(1, 256) : 0), device: item));
     }
 
     /// <summary>
@@ -124,7 +124,7 @@ namespace Ask.Device.Emulator
           moduleNumberProvider,
           chassisNumberProvider,
           () => IdleHardwareErrorSimulator.ShouldSimulateHardwareError(module),
-          ExecutionConfig.GetIsErrorSimulationEnabled));
+          ExecutionConfig.GetIsErrorSimulationEnabled), device: module);
     }
 
     /// <summary>
@@ -138,7 +138,7 @@ namespace Ask.Device.Emulator
         device => new ModeSelectingDeviceProtocol(
           () => device.DeviceProtocol,
           new ChassisEmulatorProtocol(
-            () => IdleHardwareErrorSimulator.ShouldSimulateHardwareError(device))));
+            () => IdleHardwareErrorSimulator.ShouldSimulateHardwareError(device)), device: device));
     }
   }
 }

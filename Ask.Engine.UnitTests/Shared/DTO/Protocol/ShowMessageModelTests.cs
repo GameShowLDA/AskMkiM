@@ -9,6 +9,8 @@ public sealed class ShowMessageModelTests
   [InlineData(ShowMessageModel.MessageType.Error, false, "[ERR]")]
   [InlineData(ShowMessageModel.MessageType.Success, true, "[НОРМА]")]
   [InlineData(ShowMessageModel.MessageType.Error, true, "[БРАК]")]
+  [InlineData(ShowMessageModel.MessageType.NoResponse, false, "[СБОЙ ОБМЕНА]")]
+  [InlineData(ShowMessageModel.MessageType.NoResponse, true, "[СБОЙ ОБМЕНА]")]
   public void GetQualityPrefix_UsesResultKindOfCurrentMessage(
     ShowMessageModel.MessageType status,
     bool isMeasurement,

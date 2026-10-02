@@ -5,6 +5,33 @@ namespace Ask.Device.Emulator.UnitTests.Protocols;
 
 public sealed class ModeSelectingDeviceProtocolTests
 {
+  [Fact]
+  public async Task RealWatchdogDeadline_HasDeviceIdentityAndNoResponseKind()
+  {
+    using var mode = new TestExecutionMode(idleMode: false);
+    var device = new Ask.Device.Runtime.Device.KeysightDevice { NumberChassis = 1, Number = 16 };
+    var protocol = new ModeSelectingDeviceProtocol(() => new HangingProtocol(),
+      new StubProtocol("IDLE"), TimeSpan.FromMilliseconds(50), device);
+
+    var error = await Assert.ThrowsAsync<Ask.Core.Services.Errors.Device.DeviceNoResponseException>(
+      () => protocol.QueryAsync("READ?", timeout: 1000));
+
+    Assert.Contains("1.16", error.Message);
+    Assert.Contains("READ?", error.Message);
+  }
+
+  private sealed class HangingProtocol : IDeviceProtocol
+  {
+    public SemaphoreSlim OperationLock { get; set; } = new(1, 1);
+
+    public async Task<string> QueryAsync(string command, double responseDelay = 0, int timeout = 0,
+      int port = 0, int delayBeforeCall = 0, CancellationToken cancellationToken = default)
+    {
+      await Task.Delay(Timeout.Infinite, cancellationToken);
+      return string.Empty;
+    }
+  }
+
   [Fact(DisplayName = "Выбор протокола: рабочий режим вызывает реальное устройство")]
   public async Task RealMode_UsesRealProtocol()
   {

@@ -11,6 +11,7 @@ public sealed class HardwareWatchdogProtocol : IDeviceProtocol, IDisposable
   private readonly IDeviceProtocol _innerProtocol;
   private readonly string _deviceName;
   private readonly TimeSpan _timeout;
+  private readonly IDevice? _device;
   private int _disposed;
 
   /// <summary>
@@ -28,14 +29,17 @@ public sealed class HardwareWatchdogProtocol : IDeviceProtocol, IDisposable
   /// <param name="innerProtocol">Реальный транспортный протокол.</param>
   /// <param name="deviceName">Наименование оборудования.</param>
   /// <param name="timeout">Максимальное время выполнения одной операции.</param>
+  /// <param name="device">Устройство для классификации отсутствующего ответа.</param>
   public HardwareWatchdogProtocol(
     IDeviceProtocol innerProtocol,
     string deviceName,
-    TimeSpan? timeout = null)
+    TimeSpan? timeout = null,
+    IDevice? device = null)
   {
     _innerProtocol = innerProtocol ?? throw new ArgumentNullException(nameof(innerProtocol));
     _deviceName = string.IsNullOrWhiteSpace(deviceName) ? "Оборудование" : deviceName;
     _timeout = timeout ?? DefaultTimeout;
+    _device = device;
 
     if (_timeout <= TimeSpan.Zero)
     {
@@ -78,6 +82,9 @@ public sealed class HardwareWatchdogProtocol : IDeviceProtocol, IDisposable
     catch (TimeoutException ex)
     {
       await operationCancellation.CancelAsync().ConfigureAwait(false);
+      if (_device != null && timeout > 0)
+        throw new Ask.Core.Services.Errors.Device.DeviceNoResponseException(
+          _device, command, (int)_timeout.TotalMilliseconds, ex);
       throw new TimeoutException(
         $"{_deviceName} не завершило команду \"{command}\" за {_timeout.TotalSeconds:0.###} с.",
         ex);

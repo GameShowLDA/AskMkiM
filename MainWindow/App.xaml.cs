@@ -2,6 +2,7 @@ using Ask.Core.Services.App;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.DataBase.Engine.Static.Devices;
 using Ask.Diagnostics.Abstractions;
+using Ask.Diagnostics.Services;
 using Ask.Support;
 using ConsoleUI.ConsoleLogic;
 using MainWindowProgram.Init;
@@ -201,6 +202,11 @@ namespace MainWindowProgram
 
     private static void CreateCrashPackage(Exception ex, string source)
     {
+      if (!CrashReportPolicy.ShouldReport(ex))
+      {
+        return;
+      }
+
       try
       {
         ex.Data["CrashSource"] = source;

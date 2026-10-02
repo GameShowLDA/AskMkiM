@@ -116,7 +116,8 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
             userMessageService: userMessageService,
             responseDelay: responseDelay,
             cancellationToken: cancellationToken),
-          maxAttempts: userMessageService == null ? 2 : 1);
+          maxAttempts: userMessageService == null ? 2 : 1,
+          messageService: userMessageService);
 
         if (!execution.Success)
         {
@@ -211,7 +212,8 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
             measurementRange.UpperBound,
             userMessageService: userMessageService,
             responseDelay: responseDelay),
-          maxAttempts: 1);
+          maxAttempts: 1,
+          messageService: userMessageService);
 
         if (!execution.Success)
         {

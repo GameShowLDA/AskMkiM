@@ -200,6 +200,12 @@ namespace Ask.Core.Services.UI
           LogException($"Аппаратная операция завершилась ошибкой на попытке {attempt}.", ex, isDeviceLog: true);
         }
 
+        if (hardwareException is DeviceNoResponseException noResponse && messageService != null)
+        {
+          await messageService.ShowMessageAsync(noResponse.ToMessage(),
+            SkipStepModeCheck: true, skipPause: true);
+        }
+
         if (EquipmentExecutionContext.IsMandatoryFinalization)
         {
           return ResolveWithoutInteraction(result, hardwareException, exceptionFallback);
@@ -208,14 +214,16 @@ namespace Ask.Core.Services.UI
         bool repeatMeasurement = measurementTask
           && ExecutionConfig.GetIsRepeatMeasurementEnabled();
 
-        if (ControlProgramCommandExecutionContext.IsActive && !repeatMeasurement)
+        if (ControlProgramCommandExecutionContext.IsActive && !repeatMeasurement
+          && hardwareException is not DeviceNoResponseException)
         {
           return ResolveWithoutInteraction(result, hardwareException, exceptionFallback);
         }
 
         bool hardwareSucceeded = hardwareException == null && (!deviceTask || operationSucceeded);
         bool attemptProducedOutput = messageService != null &&
-          messageService.GetLastLineNumber() != outputLineBeforeAttempt;
+          (hardwareException is DeviceNoResponseException ||
+           messageService.GetLastLineNumber() != outputLineBeforeAttempt);
 
         if (hardwareException is ModuleRelayControlProtocolException or DeviceTransportException &&
             messageService != null &&
@@ -247,7 +255,7 @@ namespace Ask.Core.Services.UI
 
         bool forceInteraction = interactiveMode;
         interactiveMode = true;
-        UserAction action = repeatMeasurement && !operationSucceeded
+        UserAction action = repeatMeasurement && !operationSucceeded && hardwareException is not DeviceNoResponseException
           ? await messageService.WaitRetryOrContinueAsync()
           : await messageService.WaitUserActionAsync(
             loop: loop || forceInteraction,

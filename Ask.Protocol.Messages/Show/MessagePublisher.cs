@@ -53,7 +53,7 @@ internal static class MessagePublisher
 
   private static void LogToDeviceJournal(ShowMessageModel message)
   {
-    if (message.Status == ShowMessageModel.MessageType.Error)
+    if (message.Status is ShowMessageModel.MessageType.Error or ShowMessageModel.MessageType.NoResponse)
     {
       LogError(message.ToString(), isDeviceLog: true);
       return;

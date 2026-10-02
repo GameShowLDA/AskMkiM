@@ -889,7 +889,7 @@ namespace Ask.UI.Components.ProtocolListBox
           ? ErrorOverviewSeverity.Information : null;
 
     internal static bool IsOverviewError(ShowMessageModel message)
-      => message.Status == ShowMessageModel.MessageType.Error || message.ExecutionError ||
+      => message.Status is ShowMessageModel.MessageType.Error or ShowMessageModel.MessageType.NoResponse || message.ExecutionError ||
         ((message.Status == null || message.Status == ShowMessageModel.MessageType.Info) &&
          (ContainsErrorMarker(message.Header) || ContainsErrorMarker(message.Message)));
 

@@ -1,4 +1,5 @@
 using Ask.Core.Services.UI;
+using Ask.Core.Services.Errors.Device;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
@@ -70,6 +71,7 @@ public static class DeviceResetService
 
         bool reset;
         string? error = null;
+        DeviceNoResponseException? noResponse = null;
         try
         {
           reset = await ResetDeviceAsync(device, messageService);
@@ -81,6 +83,13 @@ public static class DeviceResetService
         catch (OperationCanceledException) when (!mandatoryFinalization)
         {
           throw;
+        }
+        catch (DeviceNoResponseException ex)
+        {
+          reset = false;
+          error = ex.Message;
+          noResponse = ex;
+          LogException($"Нет ответа при адресном сбросе {GetDeviceLabel(device)}.", ex, isDeviceLog: true);
         }
         catch (Exception ex)
         {
@@ -97,7 +106,13 @@ public static class DeviceResetService
           }
           else
           {
-            await ShowResultAsync(device, reset, error, messageService);
+            if (noResponse != null && messageService != null)
+            {
+              noResponse.Operation = "Сброс устройства";
+              await messageService.ShowMessageAsync(noResponse.ToMessage(), SkipStepModeCheck: true, skipPause: true);
+            }
+            else
+              await ShowResultAsync(device, reset, error, messageService);
           }
         }
         catch (Exception ex)
@@ -118,7 +133,9 @@ public static class DeviceResetService
           continue;
         }
 
-        var action = await messageService.WaitRetryOrContinueAsync();
+        var action = noResponse != null
+          ? await messageService.WaitUserActionAsync(deviceTask: true, canContinue: false)
+          : await messageService.WaitRetryOrContinueAsync();
         if (action == UserAction.Abort)
           throw new OperationCanceledException(messageService.GetCancellationToken());
         retry = action == UserAction.Retry;

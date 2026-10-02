@@ -140,7 +140,7 @@ namespace UI.Components
           await StopPowerSequenceAsync();
         }
       }
-      catch (DeviceTransportException exception)
+      catch (DeviceException exception) when (exception is DeviceTransportException or DeviceNoResponseException)
       {
         HandleTransportError(exception);
       }
@@ -178,7 +178,7 @@ namespace UI.Components
           SetConnectedState("Отключить систему");
         }
       }
-      catch (DeviceTransportException exception)
+      catch (DeviceException exception) when (exception is DeviceTransportException or DeviceNoResponseException)
       {
         HandleTransportError(exception);
       }
@@ -217,7 +217,7 @@ namespace UI.Components
           SetDisconnectedState("Подключить систему");
         }
       }
-      catch (DeviceTransportException exception)
+      catch (DeviceException exception) when (exception is DeviceTransportException or DeviceNoResponseException)
       {
         HandleTransportError(exception);
       }
@@ -365,7 +365,7 @@ namespace UI.Components
     /// Восстанавливает состояние кнопки и показывает ошибку связи с шасси.
     /// </summary>
     /// <param name="exception">Ошибка транспорта оборудования.</param>
-    private void HandleTransportError(DeviceTransportException exception)
+    private void HandleTransportError(DeviceException exception)
     {
       if (active)
       {
@@ -376,7 +376,10 @@ namespace UI.Components
         SetDisconnectedState("Подключить систему");
       }
 
-      ShowChassisConnectionError(exception.Message);
+      if (exception is DeviceNoResponseException)
+        MessageBoxCustom.Show(exception.Message, "Нет ответа устройства", MessageBoxButton.OK, MessageBoxImage.Warning);
+      else
+        ShowChassisConnectionError(exception.Message);
     }
 
     /// <summary>

@@ -817,7 +817,8 @@ namespace Ask.Device.Application.FunctionAdapters.GPT
           _device,
           "Измерение тока DCW",
           () => _dcwMode.Measure.MeasureAsync(ElectricalTestFunction.DielectricWithstandDC, measurementRange),
-          maxAttempts: userMessageService == null ? 2 : 1);
+          maxAttempts: userMessageService == null ? 2 : 1,
+          messageService: userMessageService);
 
         if (!execution.Success)
         {

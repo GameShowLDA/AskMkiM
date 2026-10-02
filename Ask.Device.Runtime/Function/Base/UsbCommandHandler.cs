@@ -1,3 +1,4 @@
+using Ask.Core.Services.Errors.Device;
 using System.Text;
 using System.Text.Json;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
@@ -106,7 +107,7 @@ namespace Ask.Device.Runtime.Function.Base
         ? await ExecuteViewPowerCommandAsync(device, command, found, descriptor, responseDelay, effectiveTimeout, port, cancellationToken)
           .ConfigureAwait(false)
         : await Task.Run(
-          () => ExecuteVisaCommand(command, pattern, profile, effectiveTimeout, responseDelay),
+          () => ExecuteVisaDeviceCommand(device, command, pattern, profile, effectiveTimeout, responseDelay),
           cancellationToken).ConfigureAwait(false);
 
       LogInformation($"[{device.Name}] USB Query: {command} -> {response}", isDeviceLog: true);
@@ -116,6 +117,7 @@ namespace Ask.Device.Runtime.Function.Base
     /// <summary>
     /// Выполняет SCPI-команду через интерфейс VISA.
     /// </summary>
+    /// <param name="device">Устройство, от которого ожидается ответ.</param>
     /// <param name="command">SCPI-команда для отправки устройству.</param>
     /// <param name="pattern">Шаблон поиска USB-ресурса VISA.</param>
     /// <param name="profile">Профиль параметров USB-подключения.</param>
@@ -129,9 +131,30 @@ namespace Ask.Device.Runtime.Function.Base
     /// Выбрасывается, если ресурс VISA не поддерживает обмен сообщениями
     /// либо произошла ошибка библиотеки VISA.
     /// </exception>
-    /// <exception cref="TimeoutException">
+    /// <exception cref="DeviceNoResponseException">
     /// Выбрасывается при превышении времени ожидания ответа устройства.
     /// </exception>
+    private static string ExecuteVisaDeviceCommand(
+      IDevice device,
+      string command,
+      string pattern,
+      UsbConnectedProfile profile,
+      int timeout,
+      double responseDelay)
+    {
+      try
+      {
+        string response = ExecuteVisaCommand(command, pattern, profile, timeout, responseDelay);
+        if (command.Contains('?') && string.IsNullOrWhiteSpace(response))
+          throw new DeviceNoResponseException(device, command, timeout);
+        return response;
+      }
+      catch (TimeoutException ex)
+      {
+        throw new DeviceNoResponseException(device, command, timeout, ex);
+      }
+    }
+
     private static string ExecuteVisaCommand(
       string command,
       string pattern,

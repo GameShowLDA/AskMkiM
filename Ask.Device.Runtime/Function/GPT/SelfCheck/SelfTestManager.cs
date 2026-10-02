@@ -1,3 +1,4 @@
+using Ask.Core.Services.Errors.Device;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.DTO.Executor;
@@ -174,7 +175,7 @@ namespace Ask.Device.Runtime.Function.GPT.SelfCheck
       {
         throw;
       }
-      catch (Exception)
+      catch (Exception ex) when (ex is not DeviceNoResponseException)
       {
       }
     }
@@ -280,7 +281,7 @@ namespace Ask.Device.Runtime.Function.GPT.SelfCheck
       {
         throw;
       }
-      catch (Exception)
+      catch (Exception ex) when (ex is not DeviceNoResponseException)
       {
       }
     }
@@ -385,7 +386,7 @@ namespace Ask.Device.Runtime.Function.GPT.SelfCheck
       {
         throw;
       }
-      catch (Exception)
+      catch (Exception ex) when (ex is not DeviceNoResponseException)
       {
       }
     }

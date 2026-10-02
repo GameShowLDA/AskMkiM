@@ -39,6 +39,7 @@ Size/Foreground и анимации общей кнопки; лицензия с
 | Пауза, шаг, остановка, переход к команде | `Ask.UI/Features/ProtocolNew/Execution/ActionExecutor.cs` | `Ask.Core/Services/App/StepControlManager.cs`, `Ask.Engine/ControlCommandExecutor/Execution/CommandExecutionManager.cs`, `Ask.Engine/ControlCommandExecutor/Execution/BreakpointHandler.cs`, `Ask.Engine/ControlCommandExecutor/Execution/CommandJumpService.cs` |
 | Холостой режим и симуляция ошибок | `Ask.Core/Services/Config/AppSettings/ExecutionConfig.cs`, `IdleMeasurementErrorSimulator.cs`, `IdleHardwareErrorSimulator.cs` | `UI/Controls/Settings/Execution/ExecutionControl.xaml`, целевой manager/adapter в `Ask.Device.*`, конкретный executor/strategy |
 | Ошибка оборудования и интерактивный повтор | `Ask.Core/Services/UI/UserActionHelper.cs` | `Ask.Core/Services/UI/EquipmentExecutionContext.cs`, `Ask.UI/Controls/ProtocolNew/ProtocolUI.cs`, целевой adapter/manager/transport |
+| Нет ответа устройства вместо брака | `Ask.Core/Services/Errors/Device/DeviceNoResponseException.cs`, `Ask.Core/Services/UI/UserActionHelper.cs` | UDP/TCP/COM/VISA transports, `AdapterMeasurementResult.cs`, `ProtocolEntryOutputService.cs`, `TestError.IsNoResponse`, `InspectionProtocolBuilder.cs`; [путь отсутствия ответа](#отсутствие-ответа-устройства) |
 | МКР и точки | `Ask.Core/Shared/Interfaces/DeviceInterfaces/RelaySwitchModule/` | `Ask.Device.Application/FunctionAdapters/ModuleRelayControl/`, `Ask.Device.Runtime/Function/ModuleRelayControl/`, `Ask.Device.Emulator/ModuleRelayControl/` |
 | Устройство коммутации | `Ask.Core/Shared/Interfaces/DeviceInterfaces/SwitchingDevice/` | `Ask.Device.Application/FunctionAdapters/DeviceBusCommutation/`, `Ask.Device.Runtime/Function/DeviceBusCommutation/` |
 | Быстрый мультиметр | `Ask.Core/Shared/Interfaces/DeviceInterfaces/Multimeter/` | `Ask.Device.Runtime/Device/KeysightDevice.cs`, `Ask.Device.Runtime/Device/MultimeterB7783.cs`, `Ask.Device.Runtime/Function/Base/Multimeter/` |
@@ -1367,6 +1368,15 @@ Crash diagnostics:
 
 #### Crash diagnostics flow
 
+`Ask.Diagnostics/Services/CrashReportPolicy.cs` фильтрует ожидаемые
+`DeviceNoResponseException` до постановки auto-report в очередь, в
+`ExceptionDiagnosticReporter.ReportAsync` и в `App.CreateCrashPackage` (включая
+fallback `SaveFatalInfo`). Для них не создаётся crash package и не вызывается
+уведомление о сохранении отчёта; обычные логи и сообщения протокола сохраняются.
+Вложенные `AggregateException`, состоящие только из отсутствия ответа, также
+пропускаются. Смешанная группа с непредвиденной ошибкой требует отчёта; другие
+типы исключений не исключаются по наличию `InnerException`.
+
 ```text
 DispatcherUnhandledException / AppDomain.UnhandledException /
 TaskScheduler.UnobservedTaskException / LoggerUtility.ExceptionLogged
@@ -1467,7 +1477,8 @@ executor/strategy
 → UdpClient.ReceiveAsync with linked timeout
   ├─ configured device IP: return payload
   ├─ foreign IP: continue within the original timeout
-  └─ timeout/cancellation: CloseClient; timeout returns warning, cancellation propagates
+  └─ timeout/cancellation: CloseClient; timeout for MKR/UKSh/chassis throws DeviceNoResponseException,
+     cancellation propagates; MINT retains the legacy warning response
 → ModuleRelayControlQueryExecutor.ThrowIfFirmwareRejectedCommand
   ├─ Status absent/success → ModuleRelayControlResponseProcessor validation
   → PointManagerAdapter возвращает результат или создаёт ошибку через RelayExceptionFactory
@@ -1902,7 +1913,8 @@ same path with gates enabled and performs real transport I/O.
   reuses one bound `UdpClient` while the endpoint is unchanged. Before each send it
   drains already queued datagrams without waiting, and accepts a response only from
   the configured device IP (the firmware may use a different source port). A receive
-  timeout returns warning text, closes the socket and does not resend the command.
+  timeout throws `DeviceNoResponseException` for MKR/UKSh/chassis, closes the socket
+  and does not resend the command; MINT retains the legacy warning text.
   Local send failure `SocketError.NoBufferSpaceAvailable` (`10055`) closes the socket
   and performs exactly one retry after 50 ms; other transport failures and a failed
   retry become `DeviceTransportException` with the original exception preserved.
@@ -2499,6 +2511,57 @@ and are displayed in translator/runner error lists.
 
 ### Equipment error flow
 
+#### Отсутствие ответа устройства
+
+`Ask.Core/Services/Errors/Device/DeviceNoResponseException.cs` сохраняет имя/адрес
+устройства, команду и время ожидания. UDP для МКР/УКШ/шасси, TCP и COM при ожидании
+ответа, USB/VISA при таймауте запроса выбрасывают этот тип вместо строки/пустого
+результата. Команды с `timeout <= 0` на UDP/TCP/COM не требуют ответа и не считаются
+таймаутом. ViewPower/ИБП и МИНТ сохраняют прежний путь.
+
+Внешние пятисекундные защиты `HardwareWatchdogProtocol` и `ModeSelectingDeviceProtocol`
+также формируют `DeviceNoResponseException` для ожидаемого ответа, если им передан
+`device`. Фабрики эмуляторов передают МКР/УКШ/шасси/мультиметр/GPT; runtime watchdog
+передаёт Keysight/В7-78/3 и GPT. Существующие вызовы без `device` и команды без ожидания
+ответа сохраняют `TimeoutException` как превышение длительности операции.
+
+Оба `AdapterMeasurementExecutor` (`Ask.Device.Runtime/Function/Base/Multimeter/Measurements/Common/AdapterMeasurementResult.cs`
+и `Ask.Device.Application/Execution/AdapterMeasurementResult.cs`) пропускают исключение без превращения в `-1` или
+неуспешное измерение, сохраняя установленное число автоматических попыток.
+`MeasurementBase`, прозвонка и GPT ACW/DCW/IR adapters передают ему `messageService`;
+executor оборачивает аппаратный вызов в `UserActionHelper` для интерактивного повтора
+при отсутствии ответа. Обычный неуспешный результат возвращается прежнему обработчику.
+`DeviceNoResponseException.ToMessage()` формирует обычную строку
+`DeviceDisplayName : Operation [СБОЙ ОБМЕНА]` без технического текста исключения.
+`Transport.ExecuteOperationAsync` сохраняет названия подключения/инициализации/сброса;
+`ModuleRelayControlQueryExecutor.QueryAsync` берёт название из
+`ModuleRelayControlResponseProcessor.GetOperationName`; измерительные executors
+сохраняют свой `operationName`, `DeviceResetService` — «Сброс устройства».
+Если контекст ещё не задан, используется «Обмен с устройством».
+Команда, timeout и inner exception сохраняются в исключении и логах.
+`UserActionHelper` публикует `exception.ToMessage()` со статусом
+`ShowMessageModel.MessageType.NoResponse` и запрашивает Repeat/Finish без Continue,
+включая выполнение внутри команды программы контроля. В обязательной финализации
+ожидание оператора не добавляется. Команда получает результат только после ответа
+на повторную попытку. Прямое необработанное исключение ловит `ActionExecutor`,
+показывает строку устройства/операции и помечает выполнение прерванным. Кнопка питания
+обрабатывает тип локально вместе с транспортными ошибками.
+
+`Ask.Core/Services/Devices/DeviceResetService.cs` сохраняет классификацию и при
+адресном финальном сбросе: отсутствие ответа не преобразуется в обычный неуспешный
+результат с `[БРАК]`. В mandatory finalization сообщение выводится без ожидания
+оператора; вне неё отдельный выбор не разрешает Continue при отсутствии ответа.
+
+`NoResponse` добавлен в конец `MessageType` с сохранением прежних числовых значений.
+Экранный маркер — `[СБОЙ ОБМЕНА]` (яркий красный `#FF3333`), в том числе для измерительных записей;
+форматы snapshot сохраняют статус штатной сериализацией. `ProtocolEntryOutputService`
+накапливает отсутствие ответа независимо от опции накопления обычных ошибок и
+передаёт тип в `ActionExecutor.AddError` → `TestError.IsNoResponse`.
+`InspectionProtocolBuilder` выводит этот тип без `[БРАК]`. Группа команды, завершённая
+с отсутствием ответа и без обычных ошибок, сохраняет неопределённый результат
+`CommandExecutionHasErrors = null`. МКР/УКШ response checkers разбирают только
+полученные ответы; неисправность по корректному ответу сохраняет прежний статус.
+
 ```text
 raw manager/protocol failure
 → false/empty response or exception
@@ -2527,8 +2590,9 @@ logging, protocol output and driver chain.
 `DeviceTransportException` and `ModuleRelayControlProtocolException` are written
 to the execution protocol before the interaction if the failed attempt did not
 already produce output. This keeps the underlying socket/transport reason visible
-while preserving the same Repeat/Finish decision flow. UDP receive timeouts retain
-the legacy warning-string contract; automatic transport retry is intentionally
+while preserving the same Repeat/Finish decision flow. UDP receive timeouts for
+MKR/UKSh/chassis use the separate NoResponse path above; MINT retains the
+legacy warning-string contract. Automatic transport retry is intentionally
 limited to `10055` during send, because resending after an uncertain receive could
 execute an equipment command twice.
 
@@ -2873,6 +2937,7 @@ ErrorItem → translator/runner ErrorList
 | `UdpProtocol` | transport | Ask.Device.Communication | persistent per-device UDP exchange, bounded `10055` send recovery and socket lifetime | [Equipment](#transport-details) |
 | `HardwareWatchdogProtocol` | transport decorator | Ask.Device.Communication | 5-second outer hardware bound and disposal forwarding to the owned protocol | [Equipment](#transport-details) |
 | `DeviceTransportException` | typed exception | Ask.Core | preserves a UDP/transport root exception for equipment retry and protocol output | [Error Handling](#equipment-error-flow) |
+| `DeviceNoResponseException` | typed exception | Ask.Core | separates missing replies from defects, retains device identity/command/timeout; `MessageType.NoResponse` and `TestError.IsNoResponse` preserve the distinction in UI and storage | [No response](#отсутствие-ответа-устройства) |
 | `IUserInteractionService` | interface | Ask.Core | Engine↔UI interaction | [Shared Contracts](#shared-contracts-and-dto) |
 | `UserActionHelper` | static coordinator | Ask.Core | typed equipment retry/continue/finish loop | [Error Handling](#equipment-error-flow) |
 | `DeviceResetService` | static coordinator | Ask.Core | sequential addressed reset of devices used by a test | [Execution Engine](#addressed-reset-of-test-equipment) |

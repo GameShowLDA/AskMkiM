@@ -1,4 +1,7 @@
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
+using Ask.Core.Services.Errors.Device;
+using Ask.Core.Services.UI;
+using Ask.Core.Shared.Interfaces.UiInterfaces;
 using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.Device.Application.Execution
@@ -91,16 +94,27 @@ namespace Ask.Device.Application.Execution
     /// <param name="operation">Операция измерения.</param>
     /// <param name="shouldRetryOnResult">Проверка результата на необходимость повторного измерения.</param>
     /// <param name="maxAttempts">Максимальное количество попыток.</param>
+    /// <param name="messageService">Сервис выбора повтора при отсутствии ответа устройства.</param>
     /// <returns>Результат выполнения измерительной операции.</returns>
     public static async Task<AdapterMeasurementResult<T>> ExecuteAsync<T>(
       IAttachableDevice device,
       string operationName,
       Func<Task<T>> operation,
       Func<T, bool>? shouldRetryOnResult = null,
-      int maxAttempts = 2)
+      int maxAttempts = 2,
+      IUserInteractionService? messageService = null)
     {
       ArgumentNullException.ThrowIfNull(device);
       ArgumentNullException.ThrowIfNull(operation);
+
+      if (messageService != null)
+      {
+        return await UserActionHelper.GetRunWithUserRepeatAsync(
+          () => ExecuteAsync(device, operationName, operation, shouldRetryOnResult, maxAttempts),
+          static _ => true,
+          messageService,
+          deviceTask: true);
+      }
 
       if (maxAttempts < 1)
       {
@@ -141,6 +155,16 @@ namespace Ask.Device.Application.Execution
         }
         catch (OperationCanceledException)
         {
+          throw;
+        }
+        catch (DeviceNoResponseException ex)
+        {
+          ex.Operation = operationName;
+          if (attempt < maxAttempts)
+          {
+            LogWarning($"[{deviceLabel}] {operationName}: {ex.Message} Повтор {attempt + 1}/{maxAttempts}.", isDeviceLog: true);
+            continue;
+          }
           throw;
         }
         catch (Exception ex)

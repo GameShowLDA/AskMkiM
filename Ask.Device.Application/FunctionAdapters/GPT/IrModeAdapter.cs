@@ -700,7 +700,8 @@ namespace Ask.Device.Application.FunctionAdapters.GPT
           _device,
           "Измерение сопротивления изоляции",
           () => _irMode.Measure.MeasureAsync(ElectricalTestFunction.InsulationResistance, measurementRange),
-          maxAttempts: userMessageService == null ? 2 : 1);
+          maxAttempts: userMessageService == null ? 2 : 1,
+          messageService: userMessageService);
 
         if (!execution.Success)
         {
