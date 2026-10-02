@@ -2,6 +2,8 @@
 
 	<PropertyGroup>
 		<OutputType>WinExe</OutputType>
+		<AssemblyName>AskMkiM</AssemblyName>
+		<RootNamespace>MainWindowProgram</RootNamespace>
 		<TargetFramework>net8.0-windows</TargetFramework>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>

@@ -194,6 +194,14 @@ Ask.Device.ResponseProcessor
 `Bin/<MSBuildProjectName>/`; `MainWindow/MainWindowProgram.csproj` переопределяет output path
 на `D:\AskMkiM\Bin\` и содержит publish/copy targets.
 
+`MainWindowProgram.csproj` задаёт `AssemblyName=AskMkiM`: основной исполняемый
+файл — `AskMkiM.exe`, сборка — `AskMkiM.dll`. `RootNamespace=MainWindowProgram`
+сохраняет существующие namespaces и имена WPF-типов. Абсолютные component URI
+ресурсов основной сборки используют `/AskMkiM;component/...`; ярлыки и запуск
+в `Installer/Setup.iss` указывают на `AskMkiM.exe`. Имя проекта остаётся
+`MainWindowProgram`, поэтому условия build identity в `Directory.Build.targets`
+и пути, основанные на `MSBuildProjectName`, сохраняются.
+
 ## Repository Structure
 
 ```text

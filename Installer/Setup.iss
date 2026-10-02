@@ -23,14 +23,14 @@ Source: "D:\NewGit\AskMkiM\MainWindow\Bin\MainWindowProgram\win-x64\publish\*"; 
 
 [Icons]
 
-Name: "{group}\АСКМKIM"; Filename: "{app}\Bin\MainWindowProgram.exe"
+Name: "{group}\АСКМKIM"; Filename: "{app}\Bin\AskMkiM.exe"
 
-Name: "{commondesktop}\АСКМKIM"; Filename: "{app}\Bin\MainWindowProgram.exe"
+Name: "{commondesktop}\АСКМKIM"; Filename: "{app}\Bin\AskMkiM.exe"
 
 
 [Run]
 
-Filename: "{app}\Bin\MainWindowProgram.exe"; Description: "Запустить АСК-МКИ-М"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\Bin\AskMkiM.exe"; Description: "Запустить АСК-МКИ-М"; Flags: nowait postinstall skipifsilent
 
 
 [Code]
