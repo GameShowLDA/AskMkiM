@@ -29,6 +29,7 @@ Size/Foreground и анимации общей кнопки; лицензия с
 
 | Нужно изменить | Сначала смотреть | Затем смотреть |
 | --- | --- | --- |
+| Заметки календаря | `UI/Controls/Calendar/CalendarControl.xaml.cs`, `CalendarControl.xaml` | `Ask.Core/Services/Calendar/CalendarNoteService.cs`, `CalendarNote.cs`; [заметки](#calendar-notes) |
 | Запуск приложения | `MainWindow/App.xaml.cs`, `MainWindow/Init/PreStartupInitializer.cs` | `MainWindow/Init/DatabaseInitializer.cs`, `MainWindow/Engine/AppServices.cs`, `MainWindow/MainWindow.xaml.cs` |
 | Версия, история коммитов и идентификация сборки | `Directory.Build.targets`, `Ask.Core/Services/App/ApplicationBuildInfo.cs` | `Ask.UI/Features/BuildDiagnostics/Views/BuildHistoryWindow.xaml`, `UI/Controls/EmptyWorkspace/EmptyWorkspaceView.xaml.cs`, `MainWindow/Init/PreStartupInitializer.cs`, `Ask.Diagnostics/Collectors/SystemInfoCollector.cs`, `Ask.Core/Services/Protocols/ExecutionProtocolHistoryService.cs` |
 | DI и composition root | `MainWindow/Init/PreStartupInitializer.cs` | `Ask.Diagnostics/Extensions/ServiceCollectionExtensions.cs`, `Ask.Core/Services/App/ServiceLocator.cs`, `MainWindow/Engine/AppServices.cs` |
@@ -73,6 +74,7 @@ Size/Foreground и анимации общей кнопки; лицензия с
 
 ## Runtime Flow Index
 
+- [Calendar notes CRUD](#calendar-notes)
 - [Application startup](#application-startup-flow)
 - [Database initialization](#database-startup-flow)
 - [Translation](#translation-flow)
@@ -2076,6 +2078,50 @@ PrevMonthCommand/NextMonthCommand → ChangeMonth → BuildCalendar; TodayComman
 GoToToday; SelectDateCommand → SelectDate → BuildCalendar/NotifyHeaderChanged →
 SelectedDateChanged → CalendarControl.SelectedDateChanged. AvailabilityProvider
 используется при BuildCalendar и сохраняет индикаторы None/Partial/Complete в экспорте.
+
+<a id="calendar-notes"></a>
+#### Общие заметки календаря
+
+`DateTimeControl.xaml` включает `CalendarControl.NotesEnabled=True`; по умолчанию
+свойство выключено, поэтому `DailyReportDateWindow` остаётся только выбором даты.
+Заметки общие для всех ролей установки: роли не фильтруют чтение и CRUD.
+`CalendarNote` (`Ask.Core/Services/Calendar/CalendarNote.cs`) содержит Guid Id,
+локальную календарную Date, необязательный Title и обязательный Text.
+
+Потоки (`UI/Controls/Calendar/CalendarControl.xaml.cs`):
+
+- IsVisibleChanged (при открытии) → ReloadAsync → RunStorageAsync → Task.Run →
+  CalendarNoteService.Load → WithLock → Read → JSON deserialize/validation →
+  RefreshNotes → NotesProvider/BuildCalendar (HasNotes) + UpdateNotesList.
+- SelectDateCommand → CalendarViewModel.SelectDate → SelectedDateChanged →
+  UpdateNotesList; просмотр закрывается, открытый редактор сохраняет черновик и свою дату.
+- AddNote_Click / EditNote_Click → BeginEdit → встроенные поля даты, заголовка и текста;
+  OpenNote_Click показывает полный текст в прокручиваемой области.
+- SaveNote_Click → проверка даты/текста → CalendarNoteService.Save → WithLock →
+  Read текущих записей → обновление по Id → Write временного JSON → File.Move(overwrite)
+  → Load → EndEdit/RefreshNotes. CancelEdit_Click отменяет черновик.
+- DeleteNote_Click → встроенное подтверждение → ConfirmDelete_Click →
+  CalendarNoteService.Delete → Read/RemoveAll/Write → Load → CloseDetails/RefreshNotes.
+
+Хранилище `Settings/calendarNotes.json` относительно `AppContext.BaseDirectory`;
+`CalendarNoteService` создаётся непосредственно календарём, без DI. Именованный Mutex
+по полному пути сериализует read-modify-write между экземплярами приложения
+(таймаут 5 с). File I/O и ожидание mutex выполняются вне UI thread; календарь на время
+операции отключает ввод. Повреждённый/некорректный JSON не заменяется пустым списком.
+IOException/InvalidDataException/UnauthorizedAccessException/JsonException → NotesStatus + повторная
+загрузка; редактор при ошибке сохраняет введённый текст. Новая запись сохраняет Id
+между повторными попытками. Заголовок до 200, текст до 20000 символов в UI.
+При закрытии popup черновик остаётся в его экземпляре до отмены/сохранения;
+перезапуск приложения несохранённый черновик не восстанавливает.
+
+Отметка заметок отдельна от TodayDot и AvailabilityDot. Все новые поверхности и
+кнопки используют DynamicResource текущей темы; общий фон календаря —
+SettingsPanelBackgroundSolidColorBrush (есть во всех четырёх темах). CalendarActionButtonStyle общий
+для навигации и CRUD. ScrollViewer ограничивает высоту календаря и длинных текстов.
+Хранилище проверяется `Ask.UI.UnitTests/Services/Calendar/CalendarNoteServiceTests.cs`:
+CRUD/перенос даты, сохранение между экземплярами, валидация, повреждённый файл и
+параллельные записи.
+
 `ExecutionIndicatorSurface` — некликабельная плашка 32×32 с иконкой
 `Ask.UI/Shared/Components/Icons/UploadErrorIcon` размером 18 и рабочей подсказкой на Border.
 Несмотря на историческое имя UploadErrorIndicator, это индикатор выполнения:
@@ -2884,6 +2930,8 @@ ErrorItem → translator/runner ErrorList
 
 | Type | Kind | Project | Responsibility | Section |
 | --- | --- | --- | --- | --- |
+| `CalendarNoteService` | file storage service | Ask.Core | общие заметки календаря, атомарный JSON и межпроцессная синхронизация | [Calendar notes](#calendar-notes) |
+| `CalendarControl` / `CalendarViewModel` | WPF control / view model | UI | выбор даты, отметки заметок и опциональный CRUD общих записей | [Calendar notes](#calendar-notes) |
 | `App` | WPF application | MainWindowProgram | process startup/global failure handling | [Entry Points](#entry-points) |
 | `PreStartupInitializer` | bootstrapper | MainWindowProgram | DB, host, DI, help startup | [Dependency Injection](#dependency-injection) |
 | `AppServices` | manual composition | MainWindowProgram | shell services/ViewModels | [Dependency Injection](#manual-composition) |

@@ -9,6 +9,32 @@
              d:DesignWidth="352"
              Width="352">
     <UserControl.Resources>
+        <Style x:Key="NoteInputStyle" TargetType="TextBox">
+            <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
+            <Setter Property="Background" Value="{DynamicResource SettingsInteractiveBackgroundSolidColorBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource SettingsInteractiveBorderSolidColorBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="10,8"/>
+            <Setter Property="FontFamily" Value="{DynamicResource Manrope}"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border x:Name="Surface" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="10">
+                            <Grid>
+                                <Border Margin="1" CornerRadius="9" IsHitTestVisible="False" BorderThickness="1,2,0,0" BorderBrush="{DynamicResource TopPanelHoverBackgroundBrush}"/>
+                                <ScrollViewer x:Name="PART_ContentHost" Margin="{TemplateBinding Padding}"/>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsKeyboardFocusWithin" Value="True">
+                                <Setter TargetName="Surface" Property="BorderBrush" Value="{DynamicResource SettingsInteractiveActiveSolidColorBrush}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
         <Style x:Key="CalendarActionButtonStyle" TargetType="Button">
             <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
             <Setter Property="Background" Value="{DynamicResource BackgroundBrushes}"/>
@@ -193,6 +219,10 @@
                                 <Grid>
                                     <ContentPresenter HorizontalAlignment="Center"
                                                       VerticalAlignment="Center"/>
+                                    <Ellipse x:Name="NoteDot" Width="5" Height="5"
+                                             Fill="{DynamicResource ForegrounfBrushes85}"
+                                             HorizontalAlignment="Left" VerticalAlignment="Top"
+                                             Margin="5" Visibility="Collapsed"/>
                                     <Ellipse x:Name="TodayDot"
                                              Width="4"
                                              Height="4"
@@ -221,6 +251,9 @@
                                 <Setter Property="Foreground" Value="{DynamicResource MainTitleSolidColorBrush}"/>
                             </Trigger>
 
+                            <DataTrigger Binding="{Binding HasNotes}" Value="True">
+                                <Setter TargetName="NoteDot" Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
                             <DataTrigger Binding="{Binding IsCurrentMonth}" Value="False">
                                 <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes35}"/>
                             </DataTrigger>
@@ -255,7 +288,7 @@
 
     <Border Margin="10"
             Padding="16"
-            Background="{DynamicResource MenuBackgroundBrushes}"
+            Background="{DynamicResource SettingsPanelBackgroundSolidColorBrush}"
             BorderBrush="{DynamicResource TopPanelHoverBackgroundBrush}"
             BorderThickness="1"
             CornerRadius="16"
@@ -267,8 +300,10 @@
                               Color="#B3000000"/>
         </Border.Effect>
 
+        <ScrollViewer MaxHeight="650" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
         <Grid>
             <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
@@ -381,6 +416,79 @@
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
+
+            <StackPanel x:Name="NotesPanel" Grid.Row="4" Margin="0,16,0,0" Visibility="Collapsed" TextElement.FontFamily="{DynamicResource Manrope}">
+                <Border Height="1" Background="{DynamicResource TopPanelHoverBackgroundBrush}" Margin="0,0,0,12"/>
+                <Grid>
+                    <TextBlock x:Name="NotesHeading" Text="Заметки дня" FontSize="15" FontWeight="SemiBold" Foreground="{DynamicResource ForegrounfBrushes}" VerticalAlignment="Center"/>
+                    <Button x:Name="AddNoteButton" HorizontalAlignment="Right" Style="{StaticResource CalendarActionButtonStyle}" Content="+ Добавить" Click="AddNote_Click"/>
+                </Grid>
+                <TextBlock x:Name="NotesStatus" Margin="0,8,0,0" TextWrapping="Wrap" Foreground="{DynamicResource ForegrounfBrushes85}" FontSize="12"/>
+                <Button x:Name="ReloadNotesButton" Content="Повторить загрузку" Margin="0,8,0,0" Visibility="Collapsed" Style="{StaticResource CalendarActionButtonStyle}" Click="ReloadNotes_Click"/>
+                <TextBlock x:Name="EmptyNotesText" Text="На этот день заметок нет" Margin="0,14,0,0" Foreground="{DynamicResource ForegrounfBrushes45}" FontSize="13"/>
+                <ScrollViewer x:Name="NotesListScroll" MaxHeight="150" VerticalScrollBarVisibility="Auto" Margin="0,8,0,0">
+                    <ItemsControl x:Name="NotesList">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Button Click="OpenNote_Click" Tag="{Binding}" HorizontalContentAlignment="Stretch" Margin="0,0,0,6" Padding="10" Background="Transparent" BorderThickness="0">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border x:Name="NoteSurface" CornerRadius="10" Padding="{TemplateBinding Padding}" Background="{TemplateBinding Background}" BorderBrush="{DynamicResource SettingsInteractiveBorderSolidColorBrush}" BorderThickness="1">
+                                                <ContentPresenter/>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="NoteSurface" Property="Background" Value="{DynamicResource SettingsInteractiveBackgroundSolidColorBrush}"/></Trigger>
+                                                <Trigger Property="IsKeyboardFocused" Value="True"><Setter TargetName="NoteSurface" Property="BorderBrush" Value="{DynamicResource SettingsInteractiveActiveSolidColorBrush}"/></Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding Caption}" FontSize="13" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource ForegrounfBrushes}"/>
+                                        <TextBlock Text="{Binding Text}" FontSize="12" MaxHeight="34" Margin="0,4,0,0" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource ForegrounfBrushes85}"/>
+                                    </StackPanel>
+                                </Button>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+                <StackPanel x:Name="NoteDetails" Visibility="Collapsed" Margin="0,12,0,0">
+                    <TextBlock x:Name="DetailTitle" FontSize="15" FontWeight="SemiBold" TextWrapping="Wrap" Foreground="{DynamicResource ForegrounfBrushes}"/>
+                    <ScrollViewer MaxHeight="150" VerticalScrollBarVisibility="Auto" Margin="0,8,0,10">
+                        <TextBlock x:Name="DetailText" TextWrapping="Wrap" FontSize="13" Foreground="{DynamicResource ForegrounfBrushes85}"/>
+                    </ScrollViewer>
+                    <WrapPanel>
+                        <Button Content="Редактировать" Style="{StaticResource CalendarActionButtonStyle}" Click="EditNote_Click" Margin="0,0,6,0"/>
+                        <Button Content="Удалить" Style="{StaticResource CalendarActionButtonStyle}" Click="DeleteNote_Click" Margin="0,0,6,0"/>
+                        <Button Content="×" ToolTip="Закрыть заметку" Style="{StaticResource CalendarNavButtonStyle}" Click="CloseNote_Click"/>
+                    </WrapPanel>
+                </StackPanel>
+                <StackPanel x:Name="NoteEditor" Visibility="Collapsed" Margin="0,12,0,0">
+                    <TextBlock x:Name="EditorHeading" FontSize="15" FontWeight="SemiBold" Foreground="{DynamicResource ForegrounfBrushes}"/>
+                    <TextBlock Text="Дата" Margin="0,10,0,4" FontSize="12" Foreground="{DynamicResource ForegrounfBrushes85}"/>
+                    <DatePicker x:Name="NoteDate" FontSize="13" Foreground="{DynamicResource ForegrounfBrushes}" Background="Transparent" BorderThickness="0">
+                        <DatePicker.Resources>
+                            <Style TargetType="DatePickerTextBox" BasedOn="{StaticResource NoteInputStyle}"/>
+                        </DatePicker.Resources>
+                    </DatePicker>
+                    <TextBlock Text="Заголовок (необязательно)" Margin="0,10,0,4" FontSize="12" Foreground="{DynamicResource ForegrounfBrushes85}"/>
+                    <TextBox x:Name="NoteTitle" MaxLength="200" Style="{StaticResource NoteInputStyle}"/>
+                    <TextBlock Text="Текст заметки" Margin="0,10,0,4" FontSize="12" Foreground="{DynamicResource ForegrounfBrushes85}"/>
+                    <TextBox x:Name="NoteText" Height="100" MaxLength="20000" AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" Style="{StaticResource NoteInputStyle}"/>
+                    <TextBlock x:Name="EditorError" TextWrapping="Wrap" Margin="0,6,0,0" FontSize="12" Foreground="{DynamicResource ForegrounfBrushes85}"/>
+                    <WrapPanel Margin="0,8,0,0">
+                        <Button Content="Сохранить" Style="{StaticResource CalendarActionButtonStyle}" Click="SaveNote_Click" Margin="0,0,8,0"/>
+                        <Button Content="Отмена" Style="{StaticResource CalendarActionButtonStyle}" Click="CancelEdit_Click"/>
+                    </WrapPanel>
+                </StackPanel>
+                <StackPanel x:Name="DeleteConfirmation" Visibility="Collapsed" Margin="0,12,0,0">
+                    <TextBlock Text="Удалить выбранную заметку?" TextWrapping="Wrap" FontSize="13" Foreground="{DynamicResource ForegrounfBrushes}"/>
+                    <WrapPanel Margin="0,8,0,0">
+                        <Button Content="Удалить" Style="{StaticResource CalendarActionButtonStyle}" Click="ConfirmDelete_Click" Margin="0,0,8,0"/>
+                        <Button Content="Отмена" Style="{StaticResource CalendarActionButtonStyle}" Click="CancelDelete_Click"/>
+                    </WrapPanel>
+                </StackPanel>
+            </StackPanel>
         </Grid>
+        </ScrollViewer>
     </Border>
 </UserControl>

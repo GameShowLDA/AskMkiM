@@ -26,7 +26,7 @@
                VerticalOffset="-8" PopupAnimation="Fade"
                StaysOpen="False" AllowsTransparency="True">
             <Border Background="Transparent">
-                <Calendar:CalendarControl x:Name="CalendarControl"/>
+                <Calendar:CalendarControl x:Name="CalendarControl" NotesEnabled="True"/>
             </Border>
         </Popup>
     </Grid>

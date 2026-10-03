@@ -28,6 +28,8 @@ namespace UI.Controls.Calendar
 
     public CalendarDayAvailability Availability { get; set; }
 
+    public bool HasNotes { get; set; }
+
     public bool IsSelected
     {
       get => _isSelected;
@@ -58,6 +60,8 @@ namespace UI.Controls.Calendar
     private DateTime _selectedDate;
 
     public Func<DateTime, CalendarDayAvailability>? AvailabilityProvider { get; set; }
+
+    public Func<DateTime, bool>? NotesProvider { get; set; }
 
     public CalendarViewModel()
     {
@@ -140,6 +144,7 @@ namespace UI.Controls.Calendar
           IsCurrentMonth = date.Month == _displayMonth.Month && date.Year == _displayMonth.Year,
           IsSelected = date.Date == _selectedDate.Date,
           Availability = AvailabilityProvider?.Invoke(date.Date) ?? CalendarDayAvailability.Unspecified,
+          HasNotes = NotesProvider?.Invoke(date.Date) ?? false,
         });
       }
 

@@ -13,7 +13,7 @@ namespace MainWindowProgram.Init
 
     /// <summary>
     /// Запускает окно-заставку (<see cref="SplashWindow"/>) в отдельном UI-потоке.
-    /// </summary>
+    /// </summary>d
     /// <remarks>
     /// Создаёт новый STA-поток, в котором создаётся и отображается окно SplashWindow.
     /// Используется <see cref="ManualResetEvent"/>, чтобы дождаться загрузки окна перед продолжением выполнения программы.
