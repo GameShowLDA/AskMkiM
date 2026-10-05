@@ -70,6 +70,39 @@ public sealed class CalendarNoteServiceTests : IDisposable
   }
 
   [Fact]
+  public void DeleteAndRestore_ReturnsLatestSnapshotAndPreservesOtherRecords()
+  {
+    var note = new CalendarNote { Id = Guid.NewGuid(), Date = new DateTime(2026, 10, 5), Title = "Заголовок", Text = "Исходный" };
+    var other = note with { Id = Guid.NewGuid(), Text = "Другая" };
+    Service.Save(note);
+    Service.Save(other);
+    var latest = note with { Text = "Изменён другим окном", IsCompleted = true };
+    Service.Save(latest);
+    var deleted = Service.DeleteAndGet(note.Id);
+    Assert.Equal(latest, deleted);
+    Assert.Equal(other.Id, Assert.Single(Service.Load()).Id);
+    Assert.Null(Service.DeleteAndGet(note.Id));
+    Assert.True(Service.Restore(deleted!));
+    Assert.Equal(latest, Service.Load().Single(item => item.Id == note.Id));
+    Assert.Equal(2, Service.Load().Count);
+  }
+
+  [Fact]
+  public void Restore_DoesNotOverwriteExistingRecordOrCorruptFile()
+  {
+    var note = new CalendarNote { Id = Guid.NewGuid(), Date = DateTime.Today, Text = "Удалённая" };
+    Service.Save(note);
+    var deleted = Service.DeleteAndGet(note.Id)!;
+    var newer = note with { Text = "Новая запись", Date = note.Date.AddDays(1) };
+    Service.Save(newer);
+    Assert.False(Service.Restore(deleted));
+    Assert.Equal(newer, Assert.Single(Service.Load()));
+    File.WriteAllText(FilePath, "broken json");
+    Assert.Throws<JsonException>(() => Service.Restore(deleted));
+    Assert.Equal("broken json", File.ReadAllText(FilePath));
+  }
+
+  [Fact]
   public void EmptyText_IsRejectedWithoutChangingStorage()
   {
     var note = new CalendarNote { Id = Guid.NewGuid(), Date = DateTime.Today, Text = "Запись" };

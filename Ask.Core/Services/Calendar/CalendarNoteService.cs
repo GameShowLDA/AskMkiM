@@ -54,12 +54,40 @@ public sealed class CalendarNoteService
 
   /// <summary>Удаляет заметку по идентификатору.</summary>
   /// <param name="id">Идентификатор удаляемой заметки.</param>
-  public void Delete(Guid id) => WithLock(() =>
+  public void Delete(Guid id) => DeleteAndGet(id);
+
+  /// <summary>Удаляет запись и возвращает её фактическое содержимое для отмены удаления.</summary>
+  /// <param name="id">Идентификатор записи.</param>
+  /// <returns>Удалённая запись или null, если она отсутствует.</returns>
+  public CalendarNote? DeleteAndGet(Guid id) => WithLock(() =>
   {
     var notes = Read();
-    if (notes.RemoveAll(item => item.Id == id) > 0) Write(notes);
-    return true;
+    var deleted = notes.FirstOrDefault(note => note.Id == id);
+    if (deleted is not null)
+    {
+      notes.Remove(deleted);
+      Write(notes);
+    }
+    return deleted;
   });
+
+  /// <summary>Восстанавливает удалённую запись, не перезаписывая существующую с тем же Id.</summary>
+  /// <param name="note">Снимок удалённой записи.</param>
+  /// <returns>true, если запись восстановлена; false, если идентификатор уже существует.</returns>
+  public bool Restore(CalendarNote note)
+  {
+    ArgumentNullException.ThrowIfNull(note);
+    if (note.Id == Guid.Empty || string.IsNullOrWhiteSpace(note.Text))
+      throw new ArgumentException("Некорректная удалённая заметка.", nameof(note));
+    return WithLock(() =>
+    {
+      var notes = Read();
+      if (notes.Any(item => item.Id == note.Id)) return false;
+      notes.Add(note);
+      Write(notes);
+      return true;
+    });
+  }
 
   /// <summary>Изменяет только отметку выполнения существующей записи.</summary>
   /// <param name="id">Идентификатор записи.</param>

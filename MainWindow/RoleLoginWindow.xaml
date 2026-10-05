@@ -402,7 +402,7 @@
                 <StackPanel VerticalAlignment="Center">
                     <TextBlock Text="Добро пожаловать!" FontFamily="{StaticResource Manrope}" FontWeight="SemiBold" FontSize="28"
                                Foreground="White" TextAlignment="Center"/>
-                    <TextBlock x:Name="WelcomeDescriptionTextBlock" Text="Выберите роль и войдите в систему, чтобы начать работу с АСК-МКИ-М."
+                    <TextBlock x:Name="WelcomeDescriptionTextBlock" Text="Выберите пользователя и войдите в систему, чтобы начать работу с АСК-МКИ-М."
                                Margin="0,18,0,0" FontFamily="{StaticResource Manrope}" FontSize="16"
                                Foreground="#ADB4C0" TextAlignment="Center"
                                TextWrapping="Wrap" LineHeight="24" LineStackingStrategy="BlockLineHeight"/>
@@ -429,9 +429,9 @@
             </Grid.ColumnDefinitions>
             <Grid Grid.Column="1" Margin="32,0,8,0">
                 <StackPanel x:Name="LoginPanel" VerticalAlignment="Center">
-                    <TextBlock Text="Роль" Margin="0,0,0,8" FontFamily="{StaticResource Manrope}" FontSize="16"/>
+                    <TextBlock Text="Пользователь" Margin="0,0,0,8" FontFamily="{StaticResource Manrope}" FontSize="16"/>
                     <ComboBox x:Name="RolesComboBox" Height="48" Style="{StaticResource LoginRoleComboBoxStyle}"
-                              AutomationProperties.Name="Роль"
+                              AutomationProperties.Name="Пользователь"
                               VerticalContentAlignment="Center" TextSearch.TextPath="DisplayText"
                               IsEditable="True" IsReadOnly="True"
                               SelectionChanged="RolesComboBox_SelectionChanged"/>

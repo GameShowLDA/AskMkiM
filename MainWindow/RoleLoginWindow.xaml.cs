@@ -1,4 +1,8 @@
 using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Calendar;
+using Ask.Core.Services.App;
+using System.IO;
+using System.Text.Json;
 using Ask.Core.Shared.Entity.Settings;
 using Ask.Core.Shared.Metadata.Enums.RoleEnums;
 using Message;
@@ -61,10 +65,11 @@ namespace MainWindowProgram
     private IntPtr _keyboardHookHandle;
     private bool _isStartupLoading;
     private bool _allowClose;
+    private bool _isClosed;
     private bool _isPasswordVisible;
     private bool _isSyncingPasswordText;
     private bool _isRootLoginSelected;
-    private readonly string _welcomeDescription;
+    private string _welcomeDescription;
     private System.Windows.Media.Animation.Storyboard? _loadingStoryboard;
 
     /// <summary>
@@ -141,8 +146,32 @@ namespace MainWindowProgram
       UpdatePasswordPlaceholderVisibility();
       UpdateCapsLockWarning();
       _keyboardLayoutTimer.Start();
-      await LoadRolesAsync();
-      BringToFront();
+      await Task.WhenAll(LoadRolesAsync(), UpdateWelcomeDescriptionAsync());
+      if (!_isClosed) BringToFront();
+    }
+
+    private async Task UpdateWelcomeDescriptionAsync()
+    {
+      try
+      {
+        var date = ApplicationClockService.CurrentDateTime.Date;
+        int count = (await Task.Run(() => new CalendarNoteService().LoadPending(date))).Count;
+        if (_isClosed) return;
+        if (count > 0) _welcomeDescription = DescribeTodayTasks(count);
+        if (!_isStartupLoading) WelcomeDescriptionTextBlock.Text = _welcomeDescription;
+      }
+      catch (Exception error) when (error is IOException or UnauthorizedAccessException or JsonException)
+      {
+        Ask.LogLib.LoggerUtility.LogException("Не удалось загрузить дела для приветствия", error);
+      }
+    }
+
+    private static string DescribeTodayTasks(int count)
+    {
+      int ending = count % 100 is >= 11 and <= 14 ? 0 : count % 10;
+      string scheduled = ending == 1 ? "запланирована" : ending is >= 2 and <= 4 ? "запланированы" : "запланировано";
+      string noun = ending == 1 ? "задача" : ending is >= 2 and <= 4 ? "задачи" : "задач";
+      return $"На сегодня {scheduled} {count} {noun}.\nВыберите пользователя и войдите, чтобы приступить к выполнению.";
     }
 
     private void RoleLoginWindow_ContentRendered(object? sender, EventArgs e)
@@ -158,6 +187,7 @@ namespace MainWindowProgram
         return;
       }
 
+      _isClosed = true;
       _loadingStoryboard?.Remove(LoadingPanel);
       _keyboardLayoutTimer.Stop();
       InputLanguageManager.Current.InputLanguageChanged -= Current_InputLanguageChanged;
@@ -316,7 +346,7 @@ namespace MainWindowProgram
 
       if (RolesComboBox.SelectedItem is not RoleLoginItem selectedRoleItem)
       {
-        SetStatus("Выберите роль.");
+        SetStatus("Выберите пользователя.");
         return;
       }
 

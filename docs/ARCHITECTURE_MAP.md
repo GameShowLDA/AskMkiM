@@ -307,7 +307,15 @@ App.OnStartup()
 ### Authentication and Debug access flow
 
 `MainWindow/RoleLoginWindow.xaml` — окно 800×600 по центру экрана: приветствие слева,
-выпадающий выбор роли и пароль справа; при открытии выбран Администратор.
+выпадающий выбор с подписью «Пользователь» и пароль справа; при открытии выбран Администратор.
+Механизм авторизации по RoleType не меняется. Loaded параллельно запускает LoadRolesAsync
+и UpdateWelcomeDescriptionAsync → Task.Run → CalendarNoteService.LoadPending для даты
+ApplicationClockService.CurrentDateTime.Date. Если есть невыполненные дела, приветствие
+показывает «На сегодня запланирована/запланированы/запланировано N задача/задачи/задач»
+и приглашение выбрать пользователя и войти. При нуле сохраняется обычное приветствие.
+Описание сохраняется в _welcomeDescription для возврата после ошибки startup; завершение
+загрузки заметок не перезаписывает экран загрузки. Ошибка хранилища логируется и не
+блокирует авторизацию, стандартное приветствие остаётся.
 Левая панель использует встроенную гарнитуру Manrope (Regular/SemiBold) из
 `Ask.UI/Resources/Assets/Fonts/Manrope/`, ресурс `Manrope` в
 `Ask.UI/Resources/Assets/Fonts/Font.xaml`; там же определены ключи Winston для остальных UI.
@@ -2148,7 +2156,15 @@ _busy защищает от повторных операций; ошибка в
 - EditIcon → EditListNote_Click → BeginEdit выбранной записи.
 - TrashDeleteIcon → DeleteListNote_Click → RowActions заменяется на RowConfirmation
   (✓/× на том же месте карточки, без вопроса) → ConfirmDelete_Click →
-  CalendarNoteService.Delete → Read/RemoveAll/Write → Load → RefreshNotes.
+  CalendarNoteService.DeleteAndGet → WithLock → Read/удаление по Id/Write →
+  фактический снимок удалённой записи + Load → RefreshNotes → стек _deletedNotes.
+  UndoDeleteButton («Отменить») в фиксированной нижней строке доступна 8 секунд:
+  _undoTimer сбрасывается каждым удалением/отменой; несколько удалений отменяются LIFO.
+  UndoDelete_Click → CalendarNoteService.Restore → WithLock → Read → проверка отсутствия Id
+  → добавление снимка/Write → Load/RefreshNotes. При существующем Id запись не заменяется.
+  Ошибка восстановления сохраняет снимок для повторной попытки и сообщение об ошибке.
+  ExpireUndo/Unloaded очищают стек; отмена не сохраняется между запусками приложения.
+  Footer имеет постоянную высоту 24, чтобы появление кнопки не сдвигало содержимое.
   CancelDelete_Click → ResetDeleteConfirmation возвращает карандаш и корзину.
   Смена дня, обновление списка, начало редактирования сбрасывают подтверждение.
 

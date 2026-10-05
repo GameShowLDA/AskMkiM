@@ -21,6 +21,8 @@ public partial class CalendarControl : UserControl
   private Guid? _editingId;
   private bool _busy;
   private bool _loadedNotes;
+  private readonly Stack<CalendarNote> _deletedNotes = new();
+  private readonly DispatcherTimer _undoTimer = new() { Interval = TimeSpan.FromSeconds(8) };
   private readonly DispatcherTimer _statusTimer = new() { Interval = TimeSpan.FromSeconds(4) };
 
   public static readonly DependencyProperty NotesEnabledProperty = DependencyProperty.Register(
@@ -42,7 +44,8 @@ public partial class CalendarControl : UserControl
   {
     InitializeComponent();
     _statusTimer.Tick += (_, _) => ShowStatus(string.Empty, false);
-    Unloaded += (_, _) => _statusTimer.Stop();
+    _undoTimer.Tick += (_, _) => ExpireUndo();
+    Unloaded += (_, _) => { _statusTimer.Stop(); ExpireUndo(); };
     PreviewKeyDown += OnCalendarKeyDown;
     _viewModel = new CalendarViewModel();
     _viewModel.SelectedDateChanged += (_, _) =>
@@ -344,14 +347,54 @@ public partial class CalendarControl : UserControl
     if (_pendingDeleteId is not { } id) return;
     await RunStorageAsync(() =>
     {
-      _notesService.Delete(id);
-      return _notesService.Load();
-    }, notes =>
+      var deleted = _notesService.DeleteAndGet(id);
+      return (Deleted: deleted, Notes: _notesService.Load());
+    }, result =>
     {
-      _notes = notes;
+      _notes = result.Notes;
       ResetDeleteConfirmation();
       RefreshNotes();
-      ShowStatus("Заметка удалена.", true);
+      if (result.Deleted is { } deleted)
+      {
+        if (IsLoaded) _deletedNotes.Push(deleted);
+        RestartUndoTimer();
+        ShowStatus("Заметка удалена.", false);
+      }
+      else ShowStatus("Заметка уже удалена.", true);
     });
+  }
+
+  private void RestartUndoTimer()
+  {
+    _undoTimer.Stop();
+    UndoDeleteButton.Visibility = _deletedNotes.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+    if (_deletedNotes.Count > 0 && IsLoaded) _undoTimer.Start();
+  }
+
+  private void ExpireUndo()
+  {
+    _undoTimer.Stop();
+    _deletedNotes.Clear();
+    UndoDeleteButton.Visibility = Visibility.Collapsed;
+    if (NotesStatus.Text == "Заметка удалена.") ShowStatus(string.Empty, false);
+  }
+
+  private async void UndoDelete_Click(object sender, RoutedEventArgs e)
+  {
+    if (_busy || _deletedNotes.Count == 0) return;
+    var deleted = _deletedNotes.Peek();
+    _undoTimer.Stop();
+    await RunStorageAsync(() =>
+    {
+      bool restored = _notesService.Restore(deleted);
+      return (Restored: restored, Notes: _notesService.Load());
+    }, result =>
+    {
+      _notes = result.Notes;
+      if (_deletedNotes.Count > 0 && _deletedNotes.Peek().Id == deleted.Id) _deletedNotes.Pop();
+      RefreshNotes();
+      ShowStatus(result.Restored ? "Заметка восстановлена." : "Заметка уже существует — изменения сохранены.", true);
+    });
+    RestartUndoTimer();
   }
 }
