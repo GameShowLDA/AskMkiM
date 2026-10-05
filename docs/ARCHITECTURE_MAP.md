@@ -2094,14 +2094,22 @@ SelectedDateChanged → CalendarControl.SelectedDateChanged. AvailabilityProvide
   CalendarNoteService.Load → WithLock → Read → JSON deserialize/validation →
   RefreshNotes → NotesProvider/BuildCalendar (HasNotes) + UpdateNotesList.
 - SelectDateCommand → CalendarViewModel.SelectDate → SelectedDateChanged →
-  UpdateNotesList; просмотр закрывается, открытый редактор сохраняет черновик и свою дату.
-- AddNote_Click / EditNote_Click → BeginEdit → встроенные поля даты, заголовка и текста;
-  OpenNote_Click показывает полный текст в прокручиваемой области.
+  UpdateNotesList; подтверждение удаления сбрасывается, редактор сохраняет черновик и свою дату.
+- AddNote_Click / EditListNote_Click → BeginEdit → встроенные поля даты, заголовка и текста;
+  Полный текст показывается непосредственно в карточке; отдельного экрана просмотра нет.
+  NoteDate использует локальный DatePicker-шаблон: единая поверхность, центрированный
+  PART_TextBox и CalendarIcon в PART_Button; PART_Popup сохраняет штатный выбор даты.
+  SaveNoteButton/CancelEditButton — ✓/× с подсказками и AutomationProperties.Name.
 - SaveNote_Click → проверка даты/текста → CalendarNoteService.Save → WithLock →
   Read текущих записей → обновление по Id → Write временного JSON → File.Move(overwrite)
   → Load → EndEdit/RefreshNotes. CancelEdit_Click отменяет черновик.
-- DeleteNote_Click → встроенное подтверждение → ConfirmDelete_Click →
-  CalendarNoteService.Delete → Read/RemoveAll/Write → Load → CloseDetails/RefreshNotes.
+- EditIcon → EditListNote_Click → BeginEdit выбранной записи.
+- TrashDeleteIcon → DeleteListNote_Click → RowActions заменяется на RowConfirmation
+  (✓/× на том же месте карточки, без вопроса) → ConfirmDelete_Click →
+  CalendarNoteService.Delete → Read/RemoveAll/Write → Load → RefreshNotes.
+  CancelDelete_Click → ResetDeleteConfirmation возвращает карандаш и корзину.
+  Смена дня, обновление списка, начало редактирования сбрасывают подтверждение.
+
 
 Хранилище `Settings/calendarNotes.json` относительно `AppContext.BaseDirectory`;
 `CalendarNoteService` создаётся непосредственно календарём, без DI. Именованный Mutex
@@ -2117,7 +2125,11 @@ IOException/InvalidDataException/UnauthorizedAccessException/JsonException → N
 Отметка заметок отдельна от TodayDot и AvailabilityDot. Все новые поверхности и
 кнопки используют DynamicResource текущей темы; общий фон календаря —
 SettingsPanelBackgroundSolidColorBrush (есть во всех четырёх темах). CalendarActionButtonStyle общий
-для навигации и CRUD. ScrollViewer ограничивает высоту календаря и длинных текстов.
+для навигации и CRUD. При NotesEnabled календарь имеет фиксированную компоновку
+680 px: сетка дат слева, панель заметок справа; CalendarLayout.Height=500.
+Редактор заменяет список в правой панели; удаление меняет только кнопки карточки.
+Общего ScrollViewer нет: прокрутка ограничена списком заметок, полным текстом и полем ввода.
+Обычный выбор даты (NotesEnabled=False) сохраняет ширину 352 и автоматическую высоту.
 Хранилище проверяется `Ask.UI.UnitTests/Services/Calendar/CalendarNoteServiceTests.cs`:
 CRUD/перенос даты, сохранение между экземплярами, валидация, повреждённый файл и
 параллельные записи.

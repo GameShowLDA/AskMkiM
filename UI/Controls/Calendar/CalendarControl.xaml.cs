@@ -12,7 +12,9 @@ public partial class CalendarControl : UserControl
   private readonly CalendarViewModel _viewModel;
   private readonly CalendarNoteService _notesService = new();
   private IReadOnlyList<CalendarNote> _notes = Array.Empty<CalendarNote>();
-  private CalendarNote? _openedNote;
+  private Guid? _pendingDeleteId;
+  private StackPanel? _deleteActions;
+  private StackPanel? _deleteConfirmation;
   private Guid? _editingId;
   private bool _busy;
   private bool _loadedNotes;
@@ -38,7 +40,7 @@ public partial class CalendarControl : UserControl
     _viewModel.SelectedDateChanged += (_, _) =>
     {
       UpdateNotesList();
-      if (NoteEditor.Visibility != Visibility.Visible) CloseDetails();
+
       SelectedDateChanged?.Invoke(this, EventArgs.Empty);
     };
     DataContext = _viewModel;
@@ -59,7 +61,10 @@ public partial class CalendarControl : UserControl
   private static void OnNotesEnabledChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
   {
     var control = (CalendarControl)sender;
-    control.NotesPanel.Visibility = (bool)args.NewValue ? Visibility.Visible : Visibility.Collapsed;
+    bool enabled = (bool)args.NewValue;
+    control.NotesPanel.Visibility = enabled ? Visibility.Visible : Visibility.Collapsed;
+    control.Width = enabled ? 680 : 352;
+    control.CalendarLayout.Height = enabled ? 500 : double.NaN;
     if (!(bool)args.NewValue)
     {
       control._viewModel.NotesProvider = null;
@@ -113,6 +118,7 @@ public partial class CalendarControl : UserControl
 
   private void UpdateNotesList()
   {
+    ResetDeleteConfirmation();
     var notes = _notes.Where(note => note.Date.Date == SelectedDate.Date).ToArray();
     NotesList.ItemsSource = notes;
     NotesHeading.Text = $"Заметки дня · {notes.Length}";
@@ -128,26 +134,29 @@ public partial class CalendarControl : UserControl
     BeginEdit(null);
   }
 
-  private void OpenNote_Click(object sender, RoutedEventArgs e)
+  private void EditListNote_Click(object sender, RoutedEventArgs e)
   {
-    if (NoteEditor.Visibility == Visibility.Visible) return;
-    _openedNote = (CalendarNote)((Button)sender).Tag;
-    DetailTitle.Text = _openedNote.Caption;
-    DetailText.Text = _openedNote.Text;
-    NoteDetails.Visibility = Visibility.Visible;
-    DeleteConfirmation.Visibility = Visibility.Collapsed;
+    var note = (CalendarNote)((Button)sender).Tag;
+    _editingId = note.Id;
+    BeginEdit(note);
   }
 
-  private void EditNote_Click(object sender, RoutedEventArgs e)
+  private void DeleteListNote_Click(object sender, RoutedEventArgs e)
   {
-    if (_openedNote is null) return;
-    _editingId = _openedNote.Id;
-    BeginEdit(_openedNote);
+    ResetDeleteConfirmation();
+    var button = (Button)sender;
+    _pendingDeleteId = ((CalendarNote)button.Tag).Id;
+    _deleteActions = (StackPanel)button.Parent;
+    var row = (Grid)_deleteActions.Parent;
+    _deleteConfirmation = row.Children.OfType<StackPanel>().Single(panel => panel.Name == "RowConfirmation");
+    _deleteActions.Visibility = Visibility.Collapsed;
+    _deleteConfirmation.Visibility = Visibility.Visible;
+    ((Button)_deleteConfirmation.Children[1]).Focus();
   }
 
   private void BeginEdit(CalendarNote? note)
   {
-    NoteDetails.Visibility = DeleteConfirmation.Visibility = Visibility.Collapsed;
+    ResetDeleteConfirmation();
     NoteEditor.Visibility = Visibility.Visible;
     NotesListScroll.Visibility = Visibility.Collapsed;
     EmptyNotesText.Visibility = Visibility.Collapsed;
@@ -157,8 +166,9 @@ public partial class CalendarControl : UserControl
     NoteTitle.Text = note?.Title ?? string.Empty;
     NoteText.Text = note?.Text ?? string.Empty;
     EditorError.Text = string.Empty;
+    NotesStatus.Text = string.Empty;
     NoteText.Focus();
-    NoteEditor.BringIntoView();
+
   }
 
   private async void SaveNote_Click(object sender, RoutedEventArgs e)
@@ -195,31 +205,23 @@ public partial class CalendarControl : UserControl
     NotesListScroll.Visibility = Visibility.Visible;
     _editingId = null;
     AddNoteButton.IsEnabled = _loadedNotes;
-    CloseDetails();
+    ResetDeleteConfirmation();
     UpdateNotesList();
   }
 
-  private void CloseNote_Click(object sender, RoutedEventArgs e) => CloseDetails();
-
-  private void CloseDetails()
+  private void ResetDeleteConfirmation()
   {
-    _openedNote = null;
-    NoteDetails.Visibility = DeleteConfirmation.Visibility = Visibility.Collapsed;
+    if (_deleteActions is not null) _deleteActions.Visibility = Visibility.Visible;
+    if (_deleteConfirmation is not null) _deleteConfirmation.Visibility = Visibility.Collapsed;
+    _deleteActions = _deleteConfirmation = null;
+    _pendingDeleteId = null;
   }
 
-  private void DeleteNote_Click(object sender, RoutedEventArgs e)
-  {
-    if (_openedNote is null) return;
-    DeleteConfirmation.Visibility = Visibility.Visible;
-    DeleteConfirmation.BringIntoView();
-  }
-
-  private void CancelDelete_Click(object sender, RoutedEventArgs e) => DeleteConfirmation.Visibility = Visibility.Collapsed;
+  private void CancelDelete_Click(object sender, RoutedEventArgs e) => ResetDeleteConfirmation();
 
   private async void ConfirmDelete_Click(object sender, RoutedEventArgs e)
   {
-    if (_openedNote is null) return;
-    var id = _openedNote.Id;
+    if (_pendingDeleteId is not { } id) return;
     await RunStorageAsync(() =>
     {
       _notesService.Delete(id);
@@ -227,7 +229,7 @@ public partial class CalendarControl : UserControl
     }, notes =>
     {
       _notes = notes;
-      CloseDetails();
+      ResetDeleteConfirmation();
       RefreshNotes();
       NotesStatus.Text = "Заметка удалена.";
     });
