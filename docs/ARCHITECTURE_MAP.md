@@ -2092,9 +2092,9 @@ SelectedDateChanged → CalendarControl.SelectedDateChanged. AvailabilityProvide
 
 - IsVisibleChanged (при открытии) → ReloadAsync → RunStorageAsync → Task.Run →
   CalendarNoteService.Load → WithLock → Read → JSON deserialize/validation →
-  RefreshNotes → NotesProvider/BuildCalendar (HasNotes) + UpdateNotesList.
+  RefreshNotes → NotesProvider/BuildCalendar (NoteCount/NoteCountCaption) + UpdateNotesList.
 - SelectDateCommand → CalendarViewModel.SelectDate → SelectedDateChanged →
-  UpdateNotesList; подтверждение удаления сбрасывается, редактор сохраняет черновик и свою дату.
+  UpdateNotesList → ShowNotes (если NotesEnabled); подтверждение сбрасывается, редактор сохраняет черновик и дату.
 - AddNote_Click / EditListNote_Click → BeginEdit → встроенные поля даты, заголовка и текста;
   Полный текст показывается непосредственно в карточке; отдельного экрана просмотра нет.
   NoteDate использует локальный DatePicker-шаблон: единая поверхность, центрированный
@@ -2122,14 +2122,33 @@ IOException/InvalidDataException/UnauthorizedAccessException/JsonException → N
 При закрытии popup черновик остаётся в его экземпляре до отмены/сохранения;
 перезапуск приложения несохранённый черновик не восстанавливает.
 
-Отметка заметок отдельна от TodayDot и AvailabilityDot. Все новые поверхности и
-кнопки используют DynamicResource текущей темы; общий фон календаря —
-SettingsPanelBackgroundSolidColorBrush (есть во всех четырёх темах). CalendarActionButtonStyle общий
-для навигации и CRUD. При NotesEnabled календарь имеет фиксированную компоновку
-680 px: сетка дат слева, панель заметок справа; CalendarLayout.Height=500.
-Редактор заменяет список в правой панели; удаление меняет только кнопки карточки.
-Общего ScrollViewer нет: прокрутка ограничена списком заметок, полным текстом и полем ввода.
-Обычный выбор даты (NotesEnabled=False) сохраняет ширину 352 и автоматическую высоту.
+Счётчик NoteCountBadge — контрастный бейдж справа сверху на дне: 1–9, затем «9+»;
+при нуле скрыт. NotesProvider возвращает число записей для даты, отдельно от Availability.
+Все поверхности используют DynamicResource текущей темы и CalendarActionButtonStyle.
+При открытии DateTimeControl показывается только CalendarSurface шириной 352;
+DateTimeButton_Click → PrepareForOpenAsync → HideNotes/ReloadAsync.
+IsVisibleChanged также загружает данные при самостоятельном размещении контрола.
+Выбор даты → ShowNotes расширяет общий
+popup до 704: NotesSurface с отдельной рамкой слева, CalendarSurface справа.
+NotesSurface имеет автоматическую высоту списка (MinHeight=180, MaxHeight=534);
+BeginEdit задаёт Height=534, EndEdit возвращает Auto. NotesHeading — «d MMMM» (ru-RU),
+NotesCountText — число с формой «заметка/заметки/заметок». Карточки получают мягкую
+подложку при наведении. NotesStatus — нижняя строка вместо NotesHint; ShowStatus
+запускает DispatcherTimer на 4 с для успеха, ошибки сохраняются. HideNotes/Unloaded
+останавливают таймер; пустые сообщения не резервируют место над карточками.
+PreviewKeyDown: Esc отменяет подтверждение → редактор → закрывает заметки →
+CloseCalendarRequested (DateTimeControl закрывает popup); Ctrl+Enter сохраняет редактор.
+CloseNotes_Click → HideNotes оставляет календарь открытым. CalendarLayout.Height=554
+постоянна в режиме заметок: раскрытие редактора не меняет вертикальный размер popup.
+DateTimeControl.CalendarPopup использует CustomPopupPlacementCallback:
+x=targetWidth-popupWidth, y=-popupHeight плюс VerticalOffset=-8; правая граница закреплена у часов,
+расширение происходит влево. CalendarSurface и NotesSurface выровнены по нижнему
+краю: короткий календарь остаётся рядом с часами, высокая панель заметок растёт вверх.
+На границах рабочего экрана WPF может корректировать размещение.
+Переключение даты обновляет панель, при новом открытии она опять скрыта.
+Редактор заменяет список в панели; удаление меняет только кнопки карточки.
+Общего ScrollViewer нет; прокрутка только списка и текста. Экспорт диагностики
+(NotesEnabled=False) сохраняет ширину 352, автоматическую высоту и отсутствие счётчиков.
 Хранилище проверяется `Ask.UI.UnitTests/Services/Calendar/CalendarNoteServiceTests.cs`:
 CRUD/перенос даты, сохранение между экземплярами, валидация, повреждённый файл и
 параллельные записи.

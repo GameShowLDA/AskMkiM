@@ -3,6 +3,9 @@ using System.IO;
 using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Threading;
+using System.Globalization;
 
 namespace UI.Controls.Calendar;
 
@@ -18,6 +21,7 @@ public partial class CalendarControl : UserControl
   private Guid? _editingId;
   private bool _busy;
   private bool _loadedNotes;
+  private readonly DispatcherTimer _statusTimer = new() { Interval = TimeSpan.FromSeconds(4) };
 
   public static readonly DependencyProperty NotesEnabledProperty = DependencyProperty.Register(
     nameof(NotesEnabled), typeof(bool), typeof(CalendarControl),
@@ -31,16 +35,20 @@ public partial class CalendarControl : UserControl
   }
 
   public event EventHandler? SelectedDateChanged;
+  public event EventHandler? CloseCalendarRequested;
   public DateTime SelectedDate => _viewModel.SelectedDate;
 
   public CalendarControl()
   {
     InitializeComponent();
+    _statusTimer.Tick += (_, _) => ShowStatus(string.Empty, false);
+    Unloaded += (_, _) => _statusTimer.Stop();
+    PreviewKeyDown += OnCalendarKeyDown;
     _viewModel = new CalendarViewModel();
     _viewModel.SelectedDateChanged += (_, _) =>
     {
       UpdateNotesList();
-
+      if (NotesEnabled) ShowNotes();
       SelectedDateChanged?.Invoke(this, EventArgs.Empty);
     };
     DataContext = _viewModel;
@@ -48,7 +56,11 @@ public partial class CalendarControl : UserControl
     EmptyNotesText.Visibility = Visibility.Collapsed;
     IsVisibleChanged += async (_, _) =>
     {
-      if (IsVisible && NotesEnabled) await ReloadAsync();
+      if (IsVisible && NotesEnabled)
+      {
+        HideNotes();
+        await ReloadAsync();
+      }
     };
   }
 
@@ -62,15 +74,39 @@ public partial class CalendarControl : UserControl
   {
     var control = (CalendarControl)sender;
     bool enabled = (bool)args.NewValue;
-    control.NotesPanel.Visibility = enabled ? Visibility.Visible : Visibility.Collapsed;
-    control.Width = enabled ? 680 : 352;
-    control.CalendarLayout.Height = enabled ? 500 : double.NaN;
+    control.HideNotes();
+    control.CalendarLayout.Height = enabled ? 554 : double.NaN;
     if (!(bool)args.NewValue)
     {
       control._viewModel.NotesProvider = null;
       control._viewModel.Refresh();
     }
   }
+
+  /// <summary>Скрывает панель заметок и обновляет счётчики перед открытием календаря.</summary>
+  /// <returns>Задача обновления заметок.</returns>
+  public async Task PrepareForOpenAsync()
+  {
+    HideNotes();
+    if (NotesEnabled) await ReloadAsync();
+  }
+
+  private void ShowNotes()
+  {
+    NotesSurface.Visibility = Visibility.Visible;
+    Width = 704;
+  }
+
+  private void HideNotes()
+  {
+    NotesSurface.Visibility = Visibility.Collapsed;
+    Width = 352;
+    Focus();
+    ResetDeleteConfirmation();
+    ShowStatus(string.Empty, false);
+  }
+
+  private void CloseNotes_Click(object sender, RoutedEventArgs e) => HideNotes();
 
   private async Task ReloadAsync()
   {
@@ -80,7 +116,7 @@ public partial class CalendarControl : UserControl
       _notes = notes;
       _loadedNotes = true;
       ReloadNotesButton.Visibility = Visibility.Collapsed;
-      NotesStatus.Text = string.Empty;
+      ShowStatus(string.Empty, false);
       RefreshNotes();
     });
   }
@@ -97,7 +133,7 @@ public partial class CalendarControl : UserControl
     }
     catch (Exception error) when (error is IOException or InvalidDataException or UnauthorizedAccessException or JsonException)
     {
-      NotesStatus.Text = "Не удалось прочитать или сохранить заметки. " + error.Message;
+      ShowStatus("Не удалось прочитать или сохранить заметки. " + error.Message, false);
       ReloadNotesButton.Visibility = Visibility.Visible;
     }
     finally
@@ -110,8 +146,8 @@ public partial class CalendarControl : UserControl
 
   private void RefreshNotes()
   {
-    var dates = _notes.Select(note => note.Date.Date).ToHashSet();
-    _viewModel.NotesProvider = dates.Contains;
+    var counts = _notes.GroupBy(note => note.Date.Date).ToDictionary(group => group.Key, group => group.Count());
+    _viewModel.NotesProvider = date => counts.GetValueOrDefault(date.Date);
     _viewModel.Refresh();
     UpdateNotesList();
   }
@@ -121,9 +157,42 @@ public partial class CalendarControl : UserControl
     ResetDeleteConfirmation();
     var notes = _notes.Where(note => note.Date.Date == SelectedDate.Date).ToArray();
     NotesList.ItemsSource = notes;
-    NotesHeading.Text = $"Заметки дня · {notes.Length}";
+    NotesHeading.Text = SelectedDate.ToString("d MMMM", CultureInfo.GetCultureInfo("ru-RU"));
+    int count = notes.Length;
+    string noun = count % 100 is >= 11 and <= 14 ? "заметок"
+      : count % 10 == 1 ? "заметка" : count % 10 is >= 2 and <= 4 ? "заметки" : "заметок";
+    NotesCountText.Text = $"{count} {noun}";
     EmptyNotesText.Visibility = _loadedNotes && notes.Length == 0 && NoteEditor.Visibility != Visibility.Visible
       ? Visibility.Visible : Visibility.Collapsed;
+  }
+
+  private void ShowStatus(string text, bool temporary)
+  {
+    _statusTimer.Stop();
+    NotesStatus.Text = text;
+    bool hasMessage = !string.IsNullOrEmpty(text);
+    NotesStatus.Visibility = hasMessage ? Visibility.Visible : Visibility.Collapsed;
+    NotesHint.Visibility = hasMessage ? Visibility.Collapsed : Visibility.Visible;
+    if (temporary && hasMessage) _statusTimer.Start();
+  }
+
+  private void OnCalendarKeyDown(object sender, KeyEventArgs e)
+  {
+    if (_busy) return;
+    if (e.Key == Key.Enter && Keyboard.Modifiers.HasFlag(ModifierKeys.Control)
+        && NoteEditor.Visibility == Visibility.Visible)
+    {
+      e.Handled = true;
+      SaveNote_Click(sender, e);
+    }
+    else if (e.Key == Key.Escape)
+    {
+      e.Handled = true;
+      if (_pendingDeleteId is not null) ResetDeleteConfirmation();
+      else if (NoteEditor.Visibility == Visibility.Visible) EndEdit();
+      else if (NotesSurface.Visibility == Visibility.Visible) HideNotes();
+      else CloseCalendarRequested?.Invoke(this, EventArgs.Empty);
+    }
   }
 
   private async void ReloadNotes_Click(object sender, RoutedEventArgs e) => await ReloadAsync();
@@ -158,6 +227,7 @@ public partial class CalendarControl : UserControl
   {
     ResetDeleteConfirmation();
     NoteEditor.Visibility = Visibility.Visible;
+    NotesSurface.Height = 534;
     NotesListScroll.Visibility = Visibility.Collapsed;
     EmptyNotesText.Visibility = Visibility.Collapsed;
     AddNoteButton.IsEnabled = false;
@@ -166,7 +236,7 @@ public partial class CalendarControl : UserControl
     NoteTitle.Text = note?.Title ?? string.Empty;
     NoteText.Text = note?.Text ?? string.Empty;
     EditorError.Text = string.Empty;
-    NotesStatus.Text = string.Empty;
+    ShowStatus(string.Empty, false);
     NoteText.Focus();
 
   }
@@ -193,7 +263,7 @@ public partial class CalendarControl : UserControl
       _notes = notes;
       EndEdit();
       RefreshNotes();
-      NotesStatus.Text = $"Заметка сохранена на {date:dd.MM.yyyy}.";
+      ShowStatus($"Заметка сохранена на {date:dd.MM.yyyy}.", true);
     });
   }
 
@@ -202,9 +272,11 @@ public partial class CalendarControl : UserControl
   private void EndEdit()
   {
     NoteEditor.Visibility = Visibility.Collapsed;
+    NotesSurface.Height = double.NaN;
     NotesListScroll.Visibility = Visibility.Visible;
     _editingId = null;
     AddNoteButton.IsEnabled = _loadedNotes;
+    Focus();
     ResetDeleteConfirmation();
     UpdateNotesList();
   }
@@ -231,7 +303,7 @@ public partial class CalendarControl : UserControl
       _notes = notes;
       ResetDeleteConfirmation();
       RefreshNotes();
-      NotesStatus.Text = "Заметка удалена.";
+      ShowStatus("Заметка удалена.", true);
     });
   }
 }

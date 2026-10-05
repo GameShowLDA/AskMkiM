@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
 using System.Runtime.CompilerServices;
@@ -28,7 +28,11 @@ namespace UI.Controls.Calendar
 
     public CalendarDayAvailability Availability { get; set; }
 
-    public bool HasNotes { get; set; }
+    public int NoteCount { get; set; }
+
+    public bool HasNotes => NoteCount > 0;
+
+    public string NoteCountCaption => NoteCount > 9 ? "9+" : NoteCount > 0 ? NoteCount.ToString() : string.Empty;
 
     public bool IsSelected
     {
@@ -61,7 +65,7 @@ namespace UI.Controls.Calendar
 
     public Func<DateTime, CalendarDayAvailability>? AvailabilityProvider { get; set; }
 
-    public Func<DateTime, bool>? NotesProvider { get; set; }
+    public Func<DateTime, int>? NotesProvider { get; set; }
 
     public CalendarViewModel()
     {
@@ -144,7 +148,7 @@ namespace UI.Controls.Calendar
           IsCurrentMonth = date.Month == _displayMonth.Month && date.Year == _displayMonth.Year,
           IsSelected = date.Date == _selectedDate.Date,
           Availability = AvailabilityProvider?.Invoke(date.Date) ?? CalendarDayAvailability.Unspecified,
-          HasNotes = NotesProvider?.Invoke(date.Date) ?? false,
+          NoteCount = NotesProvider?.Invoke(date.Date) ?? 0,
         });
       }
 
