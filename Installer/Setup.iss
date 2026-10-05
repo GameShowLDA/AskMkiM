@@ -1,8 +1,9 @@
 [Setup]
+
 AppName=АСК-МКИ-М
 AppVersion=1.0
 
-DefaultDirName=D:\AskMkiM
+DefaultDirName={code:GetDefaultDirName}
 DefaultGroupName=АСК-МКИ-М
 
 OutputDir=Output
@@ -13,19 +14,40 @@ SolidCompression=yes
 
 PrivilegesRequired=admin
 
+ArchitecturesAllowed=x64compatible
+ArchitecturesInstallIn64BitMode=x64compatible
+
+DisableFinishedPage=no
+
 
 [Files]
 
+; ============================================================
+; Драйвер CP210x
+; ============================================================
+
 Source: "Drivers\*"; DestDir: "{tmp}\Drivers"; Flags: recursesubdirs createallsubdirs
 
-Source: "D:\NewGit\AskMkiM\MainWindow\Bin\MainWindowProgram\win-x64\publish\*"; DestDir: "{app}\Bin"; Flags: ignoreversion recursesubdirs createallsubdirs
+
+; ============================================================
+; WebView2 Runtime
+; ============================================================
+
+Source: "WebView2\MicrosoftEdgeWebView2RuntimeInstallerX64.exe"; DestDir: "{tmp}\WebView2"; Flags: ignoreversion
+
+
+; ============================================================
+; Основное приложение
+; ============================================================
+
+Source: "D:\AskMkiM\Bin\*"; DestDir: "{app}\Bin"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 
 [Icons]
 
-Name: "{group}\АСКМKIM"; Filename: "{app}\Bin\AskMkiM.exe"
+Name: "{group}\АСК-МКИ-М"; Filename: "{app}\Bin\AskMkiM.exe"
 
-Name: "{commondesktop}\АСКМKIM"; Filename: "{app}\Bin\AskMkiM.exe"
+Name: "{commondesktop}\АСК-МКИ-М"; Filename: "{app}\Bin\AskMkiM.exe"
 
 
 [Run]
@@ -35,22 +57,25 @@ Filename: "{app}\Bin\AskMkiM.exe"; Description: "Запустить АСК-МК�
 
 [Code]
 
-function InitializeSetup(): Boolean;
+
+{ ============================================================ }
+{ Выбор диска установки                                       }
+{ ============================================================ }
+
+function GetDefaultDirName(Param: String): String;
 begin
-  Result := True;
 
-  if not DirExists('D:\') then
-  begin
-    MsgBox(
-      'Не найден диск D.'#13#10 +
-      'Установка невозможна.',
-      mbError,
-      MB_OK);
+  if DirExists('D:\') then
+    Result := 'D:\AskMkiM'
+  else
+    Result := 'C:\AskMkiM';
 
-    Result := False;
-  end;
 end;
 
+
+{ ============================================================ }
+{ CP210x                                                      }
+{ ============================================================ }
 
 function DriverFile(): String;
 begin
@@ -97,19 +122,12 @@ begin
 
 
   if not Exec(
-
       DriverFile(),
-
       '',
-
       '',
-
       SW_SHOW,
-
       ewWaitUntilTerminated,
-
       ResultCode)
-
   then
   begin
 
@@ -129,20 +147,88 @@ begin
     mbInformation,
     MB_OK);
 
-  Result := True;
+end;
 
+
+{ ============================================================ }
+{ WebView2                                                    }
+{ ============================================================ }
+
+function WebView2Installer(): String;
+begin
+
+  Result :=
+    ExpandConstant(
+      '{tmp}\WebView2\MicrosoftEdgeWebView2RuntimeInstallerX64.exe');
 
 end;
 
 
-procedure CurStepChanged(CurStep: TSetupStep);
+function InstallWebView2(): Boolean;
+var
+  ResultCode: Integer;
 begin
 
-  if CurStep = ssPostInstall then
+  Result := True;
+
+  if not FileExists(WebView2Installer()) then
   begin
 
-    if not InstallDriver() then
-      Abort;
+    MsgBox(
+      'Не найден установщик Microsoft Edge WebView2 Runtime.',
+      mbError,
+      MB_OK);
+
+    Result := False;
+    Exit;
+
+  end;
+
+
+  if not Exec(
+      WebView2Installer(),
+      '/silent /install',
+      '',
+      SW_HIDE,
+      ewWaitUntilTerminated,
+      ResultCode)
+  then
+  begin
+
+    MsgBox(
+      'Не удалось запустить установку Microsoft Edge WebView2 Runtime.',
+      mbError,
+      MB_OK);
+
+    Result := False;
+    Exit;
+
+  end;
+
+end;
+
+
+{ ============================================================ }
+{ После установки                                              }
+{ ============================================================ }
+
+procedure CurPageChanged(CurPageID: Integer);
+begin
+
+  if CurPageID = wpFinished then
+  begin
+
+    WizardForm.FinishedHeadingLabel.Caption :=
+      'АСК-МКИ-М установлена';
+
+    WizardForm.FinishedLabel.Caption :=
+      'Установка успешно завершена.'#13#10#13#10 +
+      'Программа АСК-МКИ-М готова к работе.';
+
+    WizardForm.FinishedHeadingLabel.Font.Size := 16;
+    WizardForm.FinishedHeadingLabel.Font.Style := [fsBold];
+
+    WizardForm.FinishedLabel.Font.Size := 10;
 
   end;
 
