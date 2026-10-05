@@ -75,6 +75,5 @@ namespace MainWindowProgram.Init
       _splashWindow = null;
       _splashThread = null;
     }
-
   }
 }

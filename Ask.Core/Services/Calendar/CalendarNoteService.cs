@@ -8,6 +8,8 @@ namespace Ask.Core.Services.Calendar;
 /// <summary>Хранит общие заметки установки с атомарной заменой файла.</summary>
 public sealed class CalendarNoteService
 {
+  /// <summary>Возникает после успешного изменения файла заметок в текущем процессе.</summary>
+  public static event Action? Changed;
   private readonly string _path;
   private readonly string _mutexName;
 
@@ -26,6 +28,12 @@ public sealed class CalendarNoteService
   /// <summary>Загружает все заметки, не создавая отсутствующий файл.</summary>
   /// <returns>Заметки установки.</returns>
   public IReadOnlyList<CalendarNote> Load() => WithLock(Read);
+
+  /// <summary>Загружает невыполненные дела за указанную календарную дату.</summary>
+  /// <param name="date">Дата списка дел.</param>
+  /// <returns>Записи указанного дня без отметки выполнения.</returns>
+  public IReadOnlyList<CalendarNote> LoadPending(DateTime date) =>
+    Load().Where(note => note.Date.Date == date.Date && !note.IsCompleted).ToArray();
 
   /// <summary>Создаёт или изменяет заметку, сохраняя остальные записи.</summary>
   /// <param name="note">Заметка с непустым текстом и датой.</param>
@@ -53,6 +61,21 @@ public sealed class CalendarNoteService
     return true;
   });
 
+  /// <summary>Изменяет только отметку выполнения существующей записи.</summary>
+  /// <param name="id">Идентификатор записи.</param>
+  /// <param name="isCompleted">Признак выполнения дела.</param>
+  public void SetCompleted(Guid id, bool isCompleted) => WithLock(() =>
+  {
+    var notes = Read();
+    int index = notes.FindIndex(note => note.Id == id);
+    if (index >= 0)
+    {
+      notes[index] = notes[index] with { IsCompleted = isCompleted };
+      Write(notes);
+    }
+    return true;
+  });
+
   private List<CalendarNote> Read()
   {
     if (!File.Exists(_path)) return new();
@@ -72,6 +95,7 @@ public sealed class CalendarNoteService
     {
       File.WriteAllText(temporary, JsonSerializer.Serialize(notes, new JsonSerializerOptions { WriteIndented = true }));
       File.Move(temporary, _path, overwrite: true);
+      Changed?.Invoke();
     }
     finally
     {

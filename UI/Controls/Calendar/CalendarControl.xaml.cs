@@ -121,14 +121,16 @@ public partial class CalendarControl : UserControl
     });
   }
 
-  private async Task RunStorageAsync<T>(Func<T> operation, Action<T> onSuccess)
+  private async Task RunStorageAsync<T>(Func<T> operation, Action<T> onSuccess, bool animateCompletion = false)
   {
     if (_busy) return;
     _busy = true;
-    IsEnabled = false;
+    if (!animateCompletion) IsEnabled = false;
     try
     {
-      var result = await Task.Run(operation);
+      var storage = Task.Run(operation);
+      if (animateCompletion) await Task.WhenAll(storage, Task.Delay(250));
+      var result = await storage;
       onSuccess(result);
     }
     catch (Exception error) when (error is IOException or InvalidDataException or UnauthorizedAccessException or JsonException)
@@ -139,8 +141,8 @@ public partial class CalendarControl : UserControl
     finally
     {
       _busy = false;
-      IsEnabled = true;
-      AddNoteButton.IsEnabled = _loadedNotes && NoteEditor.Visibility != Visibility.Visible;
+      if (!animateCompletion) IsEnabled = true;
+      if (!animateCompletion) AddNoteButton.IsEnabled = _loadedNotes && NoteEditor.Visibility != Visibility.Visible;
     }
   }
 
@@ -155,8 +157,8 @@ public partial class CalendarControl : UserControl
   private void UpdateNotesList()
   {
     ResetDeleteConfirmation();
-    var notes = _notes.Where(note => note.Date.Date == SelectedDate.Date).ToArray();
-    NotesList.ItemsSource = notes;
+    var notes = _notes.Where(note => note.Date.Date == SelectedDate.Date).OrderBy(note => note.IsCompleted).ToArray();
+    NotesList.ItemsSource = new System.Collections.ObjectModel.ObservableCollection<CalendarNote>(notes);
     NotesHeading.Text = SelectedDate.ToString("d MMMM", CultureInfo.GetCultureInfo("ru-RU"));
     int count = notes.Length;
     string noun = count % 100 is >= 11 and <= 14 ? "заметок"
@@ -178,7 +180,7 @@ public partial class CalendarControl : UserControl
 
   private void OnCalendarKeyDown(object sender, KeyEventArgs e)
   {
-    if (_busy) return;
+    if (_busy) { e.Handled = true; return; }
     if (e.Key == Key.Enter && Keyboard.Modifiers.HasFlag(ModifierKeys.Control)
         && NoteEditor.Visibility == Visibility.Visible)
     {
@@ -199,12 +201,14 @@ public partial class CalendarControl : UserControl
 
   private void AddNote_Click(object sender, RoutedEventArgs e)
   {
+    if (_busy) return;
     _editingId = null;
     BeginEdit(null);
   }
 
   private void EditListNote_Click(object sender, RoutedEventArgs e)
   {
+    if (_busy) return;
     var note = (CalendarNote)((Button)sender).Tag;
     _editingId = note.Id;
     BeginEdit(note);
@@ -212,6 +216,7 @@ public partial class CalendarControl : UserControl
 
   private void DeleteListNote_Click(object sender, RoutedEventArgs e)
   {
+    if (_busy) return;
     ResetDeleteConfirmation();
     var button = (Button)sender;
     _pendingDeleteId = ((CalendarNote)button.Tag).Id;
@@ -251,7 +256,8 @@ public partial class CalendarControl : UserControl
     var note = new CalendarNote
     {
       Id = _editingId ?? Guid.NewGuid(), Date = date.Date,
-      Title = NoteTitle.Text, Text = NoteText.Text
+      Title = NoteTitle.Text, Text = NoteText.Text,
+      IsCompleted = _notes.FirstOrDefault(item => item.Id == _editingId)?.IsCompleted ?? false
     };
     _editingId = note.Id;
     await RunStorageAsync(() =>
@@ -265,6 +271,48 @@ public partial class CalendarControl : UserControl
       RefreshNotes();
       ShowStatus($"Заметка сохранена на {date:dd.MM.yyyy}.", true);
     });
+  }
+
+  private async void Completion_Click(object sender, RoutedEventArgs e)
+  {
+    var checkbox = (CheckBox)sender;
+    var note = (CalendarNote)checkbox.Tag;
+    if (_busy) { checkbox.SetCurrentValue(CheckBox.IsCheckedProperty, note.IsCompleted); return; }
+    bool isCompleted = checkbox.IsChecked == true;
+    bool saved = false;
+    checkbox.IsHitTestVisible = false;
+    try
+    {
+      await RunStorageAsync(() =>
+      {
+        _notesService.SetCompleted(note.Id, isCompleted);
+        return _notesService.Load();
+      }, notes =>
+      {
+        _notes = notes;
+        var updated = notes.FirstOrDefault(item => item.Id == note.Id);
+        if (updated is not null)
+        {
+          var header = (Grid)checkbox.Parent;
+          var content = (StackPanel)header.Parent;
+          ((Grid)content.Parent).DataContext = updated;
+          var visible = NotesList.ItemsSource as System.Collections.ObjectModel.ObservableCollection<CalendarNote>;
+          if (visible is not null)
+          {
+            int index = visible.IndexOf(note);
+            if (index >= 0)
+            {
+              visible[index] = updated;
+              int target = isCompleted ? visible.Count - 1 : 0;
+              if (index != target) visible.Move(index, target);
+            }
+          }
+        }
+        saved = true;
+      }, animateCompletion: true);
+      if (!saved) checkbox.SetCurrentValue(CheckBox.IsCheckedProperty, note.IsCompleted);
+    }
+    finally { checkbox.IsHitTestVisible = true; }
   }
 
   private void CancelEdit_Click(object sender, RoutedEventArgs e) => EndEdit();

@@ -4,12 +4,17 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:Clock="clr-namespace:UI.Components"
+             xmlns:calendar="clr-namespace:UI.Controls.Calendar"
              xmlns:icons="clr-namespace:Ask.UI.Shared.Components.Icons;assembly=Ask.UI"
              mc:Ignorable="d"
              d:DesignHeight="440"
              d:DesignWidth="352"
              Width="352" Focusable="True">
     <UserControl.Resources>
+      <ResourceDictionary>
+        <ResourceDictionary.MergedDictionaries>
+          <ResourceDictionary Source="/UI;component/Resources/Styles/TaskCompletionStyle.xaml"/>
+        </ResourceDictionary.MergedDictionaries>
         <Style x:Key="NoteInputStyle" TargetType="TextBox">
             <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
             <Setter Property="Background" Value="{DynamicResource SettingsInteractiveBackgroundSolidColorBrush}"/>
@@ -285,6 +290,7 @@
                 </Setter.Value>
             </Setter>
         </Style>
+          </ResourceDictionary>
     </UserControl.Resources>
 
     <Grid x:Name="CalendarLayout">
@@ -455,9 +461,15 @@
                                     <Grid>
                                         <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="76"/></Grid.ColumnDefinitions>
                                         <StackPanel Margin="0,0,8,0">
-                                            <TextBlock Text="{Binding Caption}" FontSize="13" FontWeight="SemiBold" TextWrapping="Wrap" Foreground="{DynamicResource ForegrounfBrushes}"/>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                                                <CheckBox x:Name="TaskCompletionBox" Style="{StaticResource TaskCompletionCheckBoxStyle}" IsChecked="{Binding IsCompleted, Mode=OneWay}" Tag="{Binding}" Click="Completion_Click" Margin="0,0,8,0" VerticalAlignment="Center" ToolTip="Отметить выполнение дела" AutomationProperties.Name="Отметить выполнение дела"/>
+                                                <calendar:TaskTitle Grid.Column="1" IsCompleted="{Binding IsChecked, ElementName=TaskCompletionBox}" Text="{Binding Caption}" FontSize="13" FontWeight="SemiBold" TextWrapping="Wrap" VerticalAlignment="Center" Foreground="{DynamicResource ForegrounfBrushes}">
+                                                    <calendar:TaskTitle.Style><Style TargetType="calendar:TaskTitle"><Style.Triggers><Trigger Property="IsCompleted" Value="True"><Setter Property="Opacity" Value="0.65"/></Trigger></Style.Triggers></Style></calendar:TaskTitle.Style>
+                                                </calendar:TaskTitle>
+                                            </Grid>
                                             <ScrollViewer MaxHeight="150" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="0,4,0,0">
-                                                <TextBlock Text="{Binding Text}" TextWrapping="Wrap" FontSize="12" Foreground="{DynamicResource ForegrounfBrushes85}"/>
+                                                <TextBlock Text="{Binding Text}" TextWrapping="Wrap" FontSize="12" Foreground="{DynamicResource ForegrounfBrushes85}"><TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers><DataTrigger Binding="{Binding IsChecked, ElementName=TaskCompletionBox}" Value="True"><Setter Property="Opacity" Value="0.7"/></DataTrigger></Style.Triggers></Style></TextBlock.Style></TextBlock>
                                             </ScrollViewer>
                                         </StackPanel>
                                         <StackPanel x:Name="RowActions" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">

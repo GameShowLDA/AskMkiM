@@ -9,6 +9,7 @@
         
         xmlns:DefaultGUI="clr-namespace:UI.Components;assembly=UI" 
         xmlns:TextEditorControl ="clr-namespace:UI.Controls.TextEditorControl;assembly=UI"
+        xmlns:calendar="clr-namespace:UI.Controls.Calendar;assembly=UI"
         xmlns:Controls ="clr-namespace:UI.Controls;assembly=UI"
         xmlns:Components ="clr-namespace:UI.Components;assembly=UI"
         xmlns:askUi="clr-namespace:Ask.UI.Features.ExecutionSelection.Views;assembly=Ask.UI"
@@ -34,6 +35,7 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Resources/MainMenuStyles.xaml"/>
+                <ResourceDictionary Source="/UI;component/Resources/Styles/TaskCompletionStyle.xaml"/>
             </ResourceDictionary.MergedDictionaries>
         <Style x:Key="WindowActionButtonStyle" TargetType="Button">
             <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
@@ -377,6 +379,44 @@
                     Background="Transparent"
                     Margin="0,2,6,2"
                     >
+
+                    <Button x:Name="TodayTasksButton" Style="{StaticResource CurrentUserButtonStyle}" ToolTip="Дела на сегодня" AutomationProperties.Name="Дела на сегодня" Click="TodayTasksButton_Click">
+                        <Grid>
+                            <askUiIcons:NotificationBellIcon Size="18" Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}"/>
+                            <Border Background="{DynamicResource SettingsSelectorSelectedSolidColorBrush}" CornerRadius="4" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="10,-5,-6,0" Padding="2,0" Visibility="{Binding ElementName=TodayTasksCount, Path=Visibility}">
+                                <TextBlock x:Name="TodayTasksCount" Visibility="Collapsed" FontSize="8" Foreground="{DynamicResource ForegrounfBrushes}"/>
+                            </Border>
+                        </Grid>
+                    </Button>
+                    <Popup x:Name="TodayTasksPopup" PlacementTarget="{Binding ElementName=TodayTasksButton}" Placement="Bottom" VerticalOffset="8" StaysOpen="False" AllowsTransparency="True">
+                        <Border Width="344" Padding="16" CornerRadius="16" Background="{DynamicResource SettingsInteractiveBackgroundSolidColorBrush}" BorderBrush="{DynamicResource SettingsInteractiveBorderSolidColorBrush}" BorderThickness="1">
+                            <StackPanel>
+                                <TextBlock Text="Дела на сегодня" FontFamily="{DynamicResource Manrope}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource ForegrounfBrushes}"/>
+                                <TextBlock x:Name="TodayTasksEmpty" Text="На сегодня дел нет" Visibility="Collapsed" Margin="0,12,0,0" Foreground="{DynamicResource ForegrounfBrushes85}"/>
+                                <ScrollViewer MaxHeight="350" VerticalScrollBarVisibility="Auto" Margin="0,12,0,0">
+                                    <ItemsControl x:Name="TodayTasksList">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border Padding="10" Margin="0,0,0,6" CornerRadius="10" BorderBrush="{DynamicResource SettingsInteractiveBorderSolidColorBrush}" BorderThickness="1">
+                                                    <StackPanel>
+                                                        <Grid>
+                                                            <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                                                            <CheckBox x:Name="TodayCompletionBox" IsChecked="{Binding IsCompleted, Mode=OneWay}" Style="{StaticResource TaskCompletionCheckBoxStyle}" Tag="{Binding}" Click="TodayTaskCompleted_Click" Margin="0,0,8,0" VerticalAlignment="Center" ToolTip="Отметить выполнение дела" AutomationProperties.Name="Отметить выполнение дела"/>
+                                                            <calendar:TaskTitle Grid.Column="1" IsCompleted="{Binding IsChecked, ElementName=TodayCompletionBox}" Text="{Binding Caption}" TextWrapping="Wrap" FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="{DynamicResource ForegrounfBrushes}">
+                                                                <calendar:TaskTitle.Style><Style TargetType="calendar:TaskTitle"><Style.Triggers><Trigger Property="IsCompleted" Value="True"><Setter Property="Opacity" Value="0.65"/></Trigger></Style.Triggers></Style></calendar:TaskTitle.Style>
+                                                            </calendar:TaskTitle>
+                                                        </Grid>
+                                                        <TextBlock Text="{Binding Text}" TextWrapping="Wrap" Margin="26,6,0,0" FontSize="12" Foreground="{DynamicResource ForegrounfBrushes85}"><TextBlock.Style><Style TargetType="TextBlock"><Style.Triggers><DataTrigger Binding="{Binding IsChecked, ElementName=TodayCompletionBox}" Value="True"><Setter Property="Opacity" Value="0.7"/></DataTrigger></Style.Triggers></Style></TextBlock.Style></TextBlock>
+                                                    </StackPanel>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </ScrollViewer>
+                                <TextBlock x:Name="TodayTasksError" TextWrapping="Wrap" Foreground="{DynamicResource ForegrounfBrushes}"/>
+                            </StackPanel>
+                        </Border>
+                    </Popup>
 
                     <Button x:Name="DailyReportButton" Style="{StaticResource CurrentUserButtonStyle}"
                             ToolTip="Собрать отчёт за выбранный день в ZIP"

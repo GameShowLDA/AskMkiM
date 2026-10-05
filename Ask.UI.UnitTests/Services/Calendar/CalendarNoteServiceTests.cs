@@ -39,6 +39,37 @@ public sealed class CalendarNoteServiceTests : IDisposable
   }
 
   [Fact]
+  public void Completion_FiltersDateAndPreservesLatestContent()
+  {
+    var today = new DateTime(2026, 10, 5);
+    var note = new CalendarNote { Id = Guid.NewGuid(), Date = today, Text = "Первый текст" };
+    Service.Save(note);
+    Service.Save(new CalendarNote { Id = Guid.NewGuid(), Date = today.AddDays(1), Text = "Завтра" });
+    Service.Save(note with { Text = "Обновлено" });
+    Service.SetCompleted(note.Id, true);
+    Assert.Empty(Service.LoadPending(today));
+    var completed = Service.Load().Single(item => item.Id == note.Id);
+    Assert.True(completed.IsCompleted);
+    Assert.Equal("Обновлено", completed.Text);
+    Service.Save(completed with { Title = "Редактирование" });
+    Assert.True(Service.Load().Single(item => item.Id == note.Id).IsCompleted);
+    Service.SetCompleted(note.Id, false);
+    Assert.Equal(note.Id, Assert.Single(Service.LoadPending(today.AddHours(12))).Id);
+    Assert.Single(Service.LoadPending(today.AddDays(1)));
+  }
+
+  [Fact]
+  public void LegacyNote_WithoutCompletion_IsPending()
+  {
+    Directory.CreateDirectory(Path.GetDirectoryName(FilePath)!);
+    var id = Guid.NewGuid();
+    File.WriteAllText(FilePath, JsonSerializer.Serialize(new[] { new { Id = id, Date = new DateTime(2026, 10, 5), Title = "Старая", Text = "Запись" } }));
+    Assert.False(Assert.Single(Service.LoadPending(new DateTime(2026, 10, 5))).IsCompleted);
+    Service.SetCompleted(Guid.NewGuid(), true);
+    Assert.Equal(id, Assert.Single(Service.Load()).Id);
+  }
+
+  [Fact]
   public void EmptyText_IsRejectedWithoutChangingStorage()
   {
     var note = new CalendarNote { Id = Guid.NewGuid(), Date = DateTime.Today, Text = "Запись" };
