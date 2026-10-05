@@ -93,6 +93,7 @@ namespace MainWindowProgram
     public MainWindow()
     {
       InitializeComponent();
+      InitializeTodayTasks();
       AddHandler(Keyboard.PreviewKeyDownEvent, new KeyEventHandler(MainWindow_PreviewKeyDown), true);
 
       this.Visibility = Visibility.Hidden;

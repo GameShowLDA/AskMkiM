@@ -1,0 +1,144 @@
+using System.IO;
+using System.Security.Cryptography;
+using System.Text;
+using System.Text.Json;
+
+namespace Ask.Core.Services.Calendar;
+
+/// <summary>Хранит общие заметки установки с атомарной заменой файла.</summary>
+public sealed class CalendarNoteService
+{
+  /// <summary>Возникает после успешного изменения файла заметок в текущем процессе.</summary>
+  public static event Action? Changed;
+  private readonly string _path;
+  private readonly string _mutexName;
+
+  /// <summary>Создаёт хранилище в каталоге Settings приложения.</summary>
+  public CalendarNoteService() : this(AppContext.BaseDirectory) { }
+
+  /// <summary>Создаёт хранилище для заданного каталога приложения.</summary>
+  /// <param name="applicationDirectory">Каталог приложения, содержащий общие настройки.</param>
+  public CalendarNoteService(string applicationDirectory)
+  {
+    _path = Path.Combine(Path.GetFullPath(applicationDirectory), "Settings", "calendarNotes.json");
+    _mutexName = "AskMkiM.CalendarNotes." + Convert.ToHexString(
+      SHA256.HashData(Encoding.UTF8.GetBytes(_path.ToUpperInvariant())));
+  }
+
+  /// <summary>Загружает все заметки, не создавая отсутствующий файл.</summary>
+  /// <returns>Заметки установки.</returns>
+  public IReadOnlyList<CalendarNote> Load() => WithLock(Read);
+
+  /// <summary>Загружает невыполненные дела за указанную календарную дату.</summary>
+  /// <param name="date">Дата списка дел.</param>
+  /// <returns>Записи указанного дня без отметки выполнения.</returns>
+  public IReadOnlyList<CalendarNote> LoadPending(DateTime date) =>
+    Load().Where(note => note.Date.Date == date.Date && !note.IsCompleted).ToArray();
+
+  /// <summary>Создаёт или изменяет заметку, сохраняя остальные записи.</summary>
+  /// <param name="note">Заметка с непустым текстом и датой.</param>
+  public void Save(CalendarNote note)
+  {
+    ArgumentNullException.ThrowIfNull(note);
+    if (note.Id == Guid.Empty || string.IsNullOrWhiteSpace(note.Text))
+      throw new ArgumentException("Укажите текст заметки и её идентификатор.", nameof(note));
+    WithLock(() =>
+    {
+      var notes = Read();
+      notes.RemoveAll(item => item.Id == note.Id);
+      notes.Add(note with { Date = note.Date.Date, Title = note.Title.Trim(), Text = note.Text.Trim() });
+      Write(notes);
+      return true;
+    });
+  }
+
+  /// <summary>Удаляет заметку по идентификатору.</summary>
+  /// <param name="id">Идентификатор удаляемой заметки.</param>
+  public void Delete(Guid id) => DeleteAndGet(id);
+
+  /// <summary>Удаляет запись и возвращает её фактическое содержимое для отмены удаления.</summary>
+  /// <param name="id">Идентификатор записи.</param>
+  /// <returns>Удалённая запись или null, если она отсутствует.</returns>
+  public CalendarNote? DeleteAndGet(Guid id) => WithLock(() =>
+  {
+    var notes = Read();
+    var deleted = notes.FirstOrDefault(note => note.Id == id);
+    if (deleted is not null)
+    {
+      notes.Remove(deleted);
+      Write(notes);
+    }
+    return deleted;
+  });
+
+  /// <summary>Восстанавливает удалённую запись, не перезаписывая существующую с тем же Id.</summary>
+  /// <param name="note">Снимок удалённой записи.</param>
+  /// <returns>true, если запись восстановлена; false, если идентификатор уже существует.</returns>
+  public bool Restore(CalendarNote note)
+  {
+    ArgumentNullException.ThrowIfNull(note);
+    if (note.Id == Guid.Empty || string.IsNullOrWhiteSpace(note.Text))
+      throw new ArgumentException("Некорректная удалённая заметка.", nameof(note));
+    return WithLock(() =>
+    {
+      var notes = Read();
+      if (notes.Any(item => item.Id == note.Id)) return false;
+      notes.Add(note);
+      Write(notes);
+      return true;
+    });
+  }
+
+  /// <summary>Изменяет только отметку выполнения существующей записи.</summary>
+  /// <param name="id">Идентификатор записи.</param>
+  /// <param name="isCompleted">Признак выполнения дела.</param>
+  public void SetCompleted(Guid id, bool isCompleted) => WithLock(() =>
+  {
+    var notes = Read();
+    int index = notes.FindIndex(note => note.Id == id);
+    if (index >= 0)
+    {
+      notes[index] = notes[index] with { IsCompleted = isCompleted };
+      Write(notes);
+    }
+    return true;
+  });
+
+  private List<CalendarNote> Read()
+  {
+    if (!File.Exists(_path)) return new();
+    var notes = JsonSerializer.Deserialize<List<CalendarNote>>(File.ReadAllText(_path))
+      ?? throw new InvalidDataException("Файл заметок не содержит списка записей.");
+    if (notes.Any(note => note is null || note.Id == Guid.Empty || note.Title is null ||
+        string.IsNullOrWhiteSpace(note.Text)) || notes.Select(note => note.Id).Distinct().Count() != notes.Count)
+      throw new InvalidDataException("Файл заметок содержит некорректные записи.");
+    return notes;
+  }
+
+  private void Write(List<CalendarNote> notes)
+  {
+    Directory.CreateDirectory(Path.GetDirectoryName(_path)!);
+    string temporary = _path + "." + Guid.NewGuid().ToString("N") + ".tmp";
+    try
+    {
+      File.WriteAllText(temporary, JsonSerializer.Serialize(notes, new JsonSerializerOptions { WriteIndented = true }));
+      File.Move(temporary, _path, overwrite: true);
+      Changed?.Invoke();
+    }
+    finally
+    {
+      if (File.Exists(temporary)) File.Delete(temporary);
+    }
+  }
+
+  private T WithLock<T>(Func<T> action)
+  {
+    using var mutex = new Mutex(false, _mutexName);
+    bool acquired;
+    try { acquired = mutex.WaitOne(TimeSpan.FromSeconds(5)); }
+    catch (AbandonedMutexException) { acquired = true; }
+    if (!acquired) throw new IOException("Хранилище заметок занято. Повторите операцию.");
+    try { return action(); }
+    finally { mutex.ReleaseMutex(); }
+  }
+}

@@ -1,4 +1,4 @@
-using Ask.Core.Services.App;
+﻿using Ask.Core.Services.App;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -12,13 +12,30 @@ namespace UI.Controls
     public DateTimeControl()
     {
       InitializeComponent();
+      CalendarPopup.CustomPopupPlacementCallback = (popupSize, targetSize, offset) =>
+        new[] { new System.Windows.Controls.Primitives.CustomPopupPlacement(
+          new Point(targetSize.Width - popupSize.Width, -popupSize.Height),
+          System.Windows.Controls.Primitives.PopupPrimaryAxis.Horizontal) };
+      CalendarControl.CloseCalendarRequested += (_, _) => CalendarPopup.IsOpen = false;
+      CalendarPopup.Opened += (_, _) => CalendarControl.Focus();
       Time.ChangeDate += Time_ChangeDate;
       Application.Current.Deactivated += App_Deactivated;
     }
 
-    private void DateTimeButton_Click(object sender, RoutedEventArgs e)
+    private async void DateTimeButton_Click(object sender, RoutedEventArgs e)
     {
-      CalendarPopup.IsOpen = !CalendarPopup.IsOpen;
+      if (CalendarPopup.IsOpen)
+      {
+        CalendarPopup.IsOpen = false;
+        return;
+      }
+      DateTimeButton.IsEnabled = false;
+      try
+      {
+        await CalendarControl.PrepareForOpenAsync();
+        CalendarPopup.IsOpen = true;
+      }
+      finally { DateTimeButton.IsEnabled = true; }
     }
 
     private void Time_ChangeDate()

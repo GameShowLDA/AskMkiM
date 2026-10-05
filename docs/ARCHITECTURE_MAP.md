@@ -29,6 +29,8 @@ Size/Foreground и анимации общей кнопки; лицензия с
 
 | Нужно изменить | Сначала смотреть | Затем смотреть |
 | --- | --- | --- |
+| Уведомления о делах на сегодня | `MainWindow/MainWindow.TodayTasks.cs`, `MainWindow/MainWindow.xaml` | `CalendarNoteService.Load/SetCompleted`, `CalendarControl.Completion_Click`; [заметки](#calendar-notes) |
+| Заметки календаря | `UI/Controls/Calendar/CalendarControl.xaml.cs`, `CalendarControl.xaml` | `Ask.Core/Services/Calendar/CalendarNoteService.cs`, `CalendarNote.cs`; [заметки](#calendar-notes) |
 | Запуск приложения | `MainWindow/App.xaml.cs`, `MainWindow/Init/PreStartupInitializer.cs` | `MainWindow/Init/DatabaseInitializer.cs`, `MainWindow/Engine/AppServices.cs`, `MainWindow/MainWindow.xaml.cs` |
 | Версия, история коммитов и идентификация сборки | `Directory.Build.targets`, `Ask.Core/Services/App/ApplicationBuildInfo.cs` | `Ask.UI/Features/BuildDiagnostics/Views/BuildHistoryWindow.xaml`, `UI/Controls/EmptyWorkspace/EmptyWorkspaceView.xaml.cs`, `MainWindow/Init/PreStartupInitializer.cs`, `Ask.Diagnostics/Collectors/SystemInfoCollector.cs`, `Ask.Core/Services/Protocols/ExecutionProtocolHistoryService.cs` |
 | DI и composition root | `MainWindow/Init/PreStartupInitializer.cs` | `Ask.Diagnostics/Extensions/ServiceCollectionExtensions.cs`, `Ask.Core/Services/App/ServiceLocator.cs`, `MainWindow/Engine/AppServices.cs` |
@@ -73,6 +75,7 @@ Size/Foreground и анимации общей кнопки; лицензия с
 
 ## Runtime Flow Index
 
+- [Calendar notes CRUD](#calendar-notes)
 - [Application startup](#application-startup-flow)
 - [Database initialization](#database-startup-flow)
 - [Translation](#translation-flow)
@@ -304,7 +307,15 @@ App.OnStartup()
 ### Authentication and Debug access flow
 
 `MainWindow/RoleLoginWindow.xaml` — окно 800×600 по центру экрана: приветствие слева,
-выпадающий выбор роли и пароль справа; при открытии выбран Администратор.
+выпадающий выбор с подписью «Пользователь» и пароль справа; при открытии выбран Администратор.
+Механизм авторизации по RoleType не меняется. Loaded параллельно запускает LoadRolesAsync
+и UpdateWelcomeDescriptionAsync → Task.Run → CalendarNoteService.LoadPending для даты
+ApplicationClockService.CurrentDateTime.Date. Если есть невыполненные дела, приветствие
+показывает «На сегодня запланирована/запланированы/запланировано N задача/задачи/задач»
+и приглашение выбрать пользователя и войти. При нуле сохраняется обычное приветствие.
+Описание сохраняется в _welcomeDescription для возврата после ошибки startup; завершение
+загрузки заметок не перезаписывает экран загрузки. Ошибка хранилища логируется и не
+блокирует авторизацию, стандартное приветствие остаётся.
 Левая панель использует встроенную гарнитуру Manrope (Regular/SemiBold) из
 `Ask.UI/Resources/Assets/Fonts/Manrope/`, ресурс `Manrope` в
 `Ask.UI/Resources/Assets/Fonts/Font.xaml`; там же определены ключи Winston для остальных UI.
@@ -2076,6 +2087,133 @@ PrevMonthCommand/NextMonthCommand → ChangeMonth → BuildCalendar; TodayComman
 GoToToday; SelectDateCommand → SelectDate → BuildCalendar/NotifyHeaderChanged →
 SelectedDateChanged → CalendarControl.SelectedDateChanged. AvailabilityProvider
 используется при BuildCalendar и сохраняет индикаторы None/Partial/Complete в экспорте.
+
+<a id="calendar-notes"></a>
+#### Общие заметки календаря
+
+`DateTimeControl.xaml` включает `CalendarControl.NotesEnabled=True`; по умолчанию
+свойство выключено, поэтому `DailyReportDateWindow` остаётся только выбором даты.
+Заметки общие для всех ролей установки: роли не фильтруют чтение и CRUD.
+`CalendarNote` (`Ask.Core/Services/Calendar/CalendarNote.cs`) содержит Guid Id,
+локальную календарную Date, необязательный Title, обязательный Text и IsCompleted (по умолчанию false для старого JSON).
+
+Кнопка `TodayTasksButton` перед выгрузкой отчёта в `MainWindow/MainWindow.xaml`
+использует `Ask.UI/Shared/Components/Icons/ChecklistIcon.xaml` (SemiIconChecklistStroked,
+лицензия `Semi.Avalonia.LICENSE.txt`). Кнопка со списком и галочками видна постоянно. Список содержит все записи текущей даты
+`ApplicationClockService.CurrentDateTime.Date`, невыполненные сверху, выполненные снизу.
+Бейдж 1–9/9+ считает только невыполненные и скрывается при нуле. Пустой день
+показывает «На сегодня дел нет»; завершение последнего дела не закрывает popup.
+`MainWindow/MainWindow.TodayTasks.cs`: InitializeTodayTasks → Loaded/Activated,
+DispatcherTimer (30 с) и CalendarNoteService.Changed → Dispatcher.BeginInvoke →
+RefreshTodayTasksAsync → Task.Run → CalendarNoteService.Load → WithLock/Read
+→ фильтр Date.Date → OrderBy(IsCompleted) → согласование ObservableCollection по Id
+через Insert/Move/Replace/Remove → TodayTasksList/TodayTasksCount/TodayTasksEmpty.
+Timer учитывает смену дня и изменения файла другим процессом; Changed обновляет
+окна текущего процесса сразу после File.Move в Write (событие приходит с потока записи).
+Closed останавливает timer и снимает подписку. Deactivated/Esc закрывают popup.
+TodayTasksButton_Click повторно загружает записи и открывает popup под кнопкой;
+TodayTaskCompleted_Click → Task.Run → SetCompleted → WithLock → Read/поиск Id →
+изменение только IsCompleted → Write → обновление списка; отметку можно снять в popup.
+После анимации выполненная карточка перемещается вниз, без замены ItemsSource. Ошибка загрузки/сохранения логируется и показывается в popup;
+ошибка сохранения возвращает checkbox в исходное состояние, файл не очищается.
+`UI/Resources/Styles/TaskCompletionStyle.xaml` — отдельный TaskCompletionCheckBoxStyle:
+тёмный квадрат, зелёная рамка и галочка через NotificationSuccessIconBrush.
+CalendarControl и MainWindow подключают словарь локально. `TaskTitle.cs` — Grid с
+TextBlock и StrikeOverlay; IsCompleted связан с IsChecked checkbox. Изменение после
+Loaded анимирует StrikeProgress 0↔1 за 250 мс; Loaded задаёт конечное состояние без
+анимации. Геометрия строк берётся через FormattedText.BuildHighlightGeometry с текущими шрифтом, шириной и DPI, кэшируется и
+сбрасывается при изменении текста/шрифта/размера. Линия учитывает переносы; заголовок
+и тело карточки приглушаются, тело не зачёркивается. Completion_Click передаёт
+animateCompletion=true в RunStorageAsync: Task.WhenAll(storage, Task.Delay(250))
+сохраняет анимацию; весь календарь не отключается. Completion_Click меняет DataContext
+только выбранной строки и заменяет/перемещает её в ObservableCollection, без
+RefreshNotes/пересоздания ItemsSource и календарных кнопок. Календарь также группирует
+невыполненные сверху, выполненные снизу.
+_busy защищает от повторных операций; ошибка возвращает галочку без замены карточек. Для TodayTasks аналогичный
+барьер и _todayCompletionInProgress откладывают RefreshTodayTasksAsync, включая уже
+начатую загрузку, до окончания анимации. У TodayTasks временно отключается hit testing списка без смены IsEnabled/disabled-цветов.
+Ошибка возвращает checkbox в исходное состояние и сохраняет сообщение после reload.
+
+В календаре Completion_Click также вызывает SetCompleted/Load/RefreshNotes; выполненные
+записи остаются видимыми и отметку можно снять. Редактор сохраняет IsCompleted.
+Смена completion не перезаписывает заголовок/текст, обновлённые другим экземпляром.
+
+Потоки (`UI/Controls/Calendar/CalendarControl.xaml.cs`):
+
+- IsVisibleChanged (при открытии) → ReloadAsync → RunStorageAsync → Task.Run →
+  CalendarNoteService.Load → WithLock → Read → JSON deserialize/validation →
+  RefreshNotes → NotesProvider/BuildCalendar (NoteCount/NoteCountCaption) + UpdateNotesList.
+- SelectDateCommand → CalendarViewModel.SelectDate → SelectedDateChanged →
+  UpdateNotesList → ShowNotes (если NotesEnabled); подтверждение сбрасывается, редактор сохраняет черновик и дату.
+- AddNote_Click / EditListNote_Click → BeginEdit → встроенные поля даты, заголовка и текста;
+  Полный текст показывается непосредственно в карточке; отдельного экрана просмотра нет.
+  NoteDate использует локальный DatePicker-шаблон: единая поверхность, центрированный
+  PART_TextBox и CalendarIcon в PART_Button; PART_Popup сохраняет штатный выбор даты.
+  SaveNoteButton/CancelEditButton — ✓/× с подсказками и AutomationProperties.Name.
+- SaveNote_Click → проверка даты/текста → CalendarNoteService.Save → WithLock →
+  Read текущих записей → обновление по Id → Write временного JSON → File.Move(overwrite)
+  → Load → EndEdit/RefreshNotes. CancelEdit_Click отменяет черновик.
+- EditIcon → EditListNote_Click → BeginEdit выбранной записи.
+- TrashDeleteIcon → DeleteListNote_Click → RowActions заменяется на RowConfirmation
+  (✓/× на том же месте карточки, без вопроса) → ConfirmDelete_Click →
+  CalendarNoteService.DeleteAndGet → WithLock → Read/удаление по Id/Write →
+  фактический снимок удалённой записи + Load → RefreshNotes → стек _deletedNotes.
+  UndoDeleteButton («Отменить») в фиксированной нижней строке доступна 8 секунд:
+  _undoTimer сбрасывается каждым удалением/отменой; несколько удалений отменяются LIFO.
+  UndoDelete_Click → CalendarNoteService.Restore → WithLock → Read → проверка отсутствия Id
+  → добавление снимка/Write → Load/RefreshNotes. При существующем Id запись не заменяется.
+  Ошибка восстановления сохраняет снимок для повторной попытки и сообщение об ошибке.
+  ExpireUndo/Unloaded очищают стек; отмена не сохраняется между запусками приложения.
+  Footer имеет постоянную высоту 24, чтобы появление кнопки не сдвигало содержимое.
+  CancelDelete_Click → ResetDeleteConfirmation возвращает карандаш и корзину.
+  Смена дня, обновление списка, начало редактирования сбрасывают подтверждение.
+
+
+Хранилище `Settings/calendarNotes.json` относительно `AppContext.BaseDirectory`;
+`CalendarNoteService` создаётся непосредственно календарём, без DI. Именованный Mutex
+по полному пути сериализует read-modify-write между экземплярами приложения
+(таймаут 5 с). File I/O и ожидание mutex выполняются вне UI thread; календарь на время
+загрузки, сохранения редактора и удаления отключает ввод; смена отметки выполнения
+использует _busy/hit testing/обработчик клавиатуры без переключения IsEnabled всего контрола. Повреждённый/некорректный JSON не заменяется пустым списком.
+IOException/InvalidDataException/UnauthorizedAccessException/JsonException → NotesStatus + повторная
+загрузка; редактор при ошибке сохраняет введённый текст. Новая запись сохраняет Id
+между повторными попытками. Заголовок до 200, текст до 20000 символов в UI.
+При закрытии popup черновик остаётся в его экземпляре до отмены/сохранения;
+перезапуск приложения несохранённый черновик не восстанавливает.
+
+Счётчик NoteCountBadge — контрастный бейдж справа сверху на дне: 1–9, затем «9+»;
+при нуле скрыт. NotesProvider возвращает число записей для даты, отдельно от Availability.
+Все поверхности используют DynamicResource текущей темы и CalendarActionButtonStyle.
+При открытии DateTimeControl показывается только CalendarSurface шириной 352;
+DateTimeButton_Click → PrepareForOpenAsync → HideNotes/ReloadAsync.
+IsVisibleChanged также загружает данные при самостоятельном размещении контрола.
+Выбор даты → ShowNotes расширяет общий
+popup до 704: NotesSurface с отдельной рамкой слева, CalendarSurface справа.
+NotesSurface имеет автоматическую высоту списка (MinHeight=180, MaxHeight=534);
+BeginEdit задаёт Height=534, EndEdit возвращает Auto. NotesHeading — «d MMMM» (ru-RU),
+NotesCountText — число с формой «заметка/заметки/заметок». Карточки получают мягкую
+подложку при наведении. NotesStatus — нижняя строка вместо NotesHint; ShowStatus
+запускает DispatcherTimer на 4 с для успеха, ошибки сохраняются. HideNotes/Unloaded
+останавливают таймер; пустые сообщения не резервируют место над карточками.
+PreviewKeyDown: Esc отменяет подтверждение → редактор → закрывает заметки →
+CloseCalendarRequested (DateTimeControl закрывает popup); Ctrl+Enter сохраняет редактор.
+CloseNotes_Click → HideNotes оставляет календарь открытым. CalendarLayout.Height=554
+постоянна в режиме заметок: раскрытие редактора не меняет вертикальный размер popup.
+DateTimeControl.CalendarPopup использует CustomPopupPlacementCallback:
+x=targetWidth-popupWidth, y=-popupHeight плюс VerticalOffset=-8; правая граница закреплена у часов,
+расширение происходит влево. CalendarSurface и NotesSurface выровнены по нижнему
+краю: короткий календарь остаётся рядом с часами, высокая панель заметок растёт вверх.
+На границах рабочего экрана WPF может корректировать размещение.
+Переключение даты обновляет панель, при новом открытии она опять скрыта.
+Редактор заменяет список в панели; удаление меняет только кнопки карточки.
+Общего ScrollViewer нет; прокрутка только списка и текста. Экспорт диагностики
+(NotesEnabled=False) сохраняет ширину 352, автоматическую высоту и отсутствие счётчиков.
+`Ask.UI.UnitTests/Services/Calendar/TaskTitleTests.cs` проверяет реальное bitmap-зачёркивание многострочного заголовка, снятие отметки и отсутствие анимации при начальной загрузке выполненной записи.
+
+Хранилище проверяется `Ask.UI.UnitTests/Services/Calendar/CalendarNoteServiceTests.cs`:
+CRUD/перенос даты, сохранение между экземплярами, валидация, повреждённый файл и
+параллельные записи.
+
 `ExecutionIndicatorSurface` — некликабельная плашка 32×32 с иконкой
 `Ask.UI/Shared/Components/Icons/UploadErrorIcon` размером 18 и рабочей подсказкой на Border.
 Несмотря на историческое имя UploadErrorIndicator, это индикатор выполнения:
@@ -2884,6 +3022,8 @@ ErrorItem → translator/runner ErrorList
 
 | Type | Kind | Project | Responsibility | Section |
 | --- | --- | --- | --- | --- |
+| `CalendarNoteService` | file storage service | Ask.Core | общие заметки календаря, атомарный JSON и межпроцессная синхронизация | [Calendar notes](#calendar-notes) |
+| `CalendarControl` / `CalendarViewModel` | WPF control / view model | UI | выбор даты, отметки заметок и опциональный CRUD общих записей | [Calendar notes](#calendar-notes) |
 | `App` | WPF application | MainWindowProgram | process startup/global failure handling | [Entry Points](#entry-points) |
 | `PreStartupInitializer` | bootstrapper | MainWindowProgram | DB, host, DI, help startup | [Dependency Injection](#dependency-injection) |
 | `AppServices` | manual composition | MainWindowProgram | shell services/ViewModels | [Dependency Injection](#manual-composition) |
