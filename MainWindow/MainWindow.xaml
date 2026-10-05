@@ -382,7 +382,7 @@
 
                     <Button x:Name="TodayTasksButton" Style="{StaticResource CurrentUserButtonStyle}" ToolTip="Дела на сегодня" AutomationProperties.Name="Дела на сегодня" Click="TodayTasksButton_Click">
                         <Grid>
-                            <askUiIcons:NotificationBellIcon Size="18" Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}"/>
+                            <askUiIcons:ChecklistIcon Size="18" Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}"/>
                             <Border Background="{DynamicResource SettingsSelectorSelectedSolidColorBrush}" CornerRadius="4" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="10,-5,-6,0" Padding="2,0" Visibility="{Binding ElementName=TodayTasksCount, Path=Visibility}">
                                 <TextBlock x:Name="TodayTasksCount" Visibility="Collapsed" FontSize="8" Foreground="{DynamicResource ForegrounfBrushes}"/>
                             </Border>

@@ -2090,8 +2090,8 @@ SelectedDateChanged → CalendarControl.SelectedDateChanged. AvailabilityProvide
 локальную календарную Date, необязательный Title, обязательный Text и IsCompleted (по умолчанию false для старого JSON).
 
 Кнопка `TodayTasksButton` перед выгрузкой отчёта в `MainWindow/MainWindow.xaml`
-использует `Ask.UI/Shared/Components/Icons/NotificationBellIcon.xaml` (SemiIconBellStroked,
-лицензия `Semi.Avalonia.LICENSE.txt`). Колокольчик виден постоянно. Список содержит все записи текущей даты
+использует `Ask.UI/Shared/Components/Icons/ChecklistIcon.xaml` (SemiIconChecklistStroked,
+лицензия `Semi.Avalonia.LICENSE.txt`). Кнопка со списком и галочками видна постоянно. Список содержит все записи текущей даты
 `ApplicationClockService.CurrentDateTime.Date`, невыполненные сверху, выполненные снизу.
 Бейдж 1–9/9+ считает только невыполненные и скрывается при нуле. Пустой день
 показывает «На сегодня дел нет»; завершение последнего дела не закрывает popup.
