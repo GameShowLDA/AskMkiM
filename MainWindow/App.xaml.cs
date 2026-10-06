@@ -114,7 +114,7 @@ namespace MainWindowProgram
           Application.Current.Shutdown();
           return;
         }
-        mainWindow.Show();
+        if (!await WindowOpacityTransition.ShowAsync(mainWindow)) return;
         ApplicationActivator.FlushPendingFileRequests();
 
         if (databaseInitializationReport?.DatabaseAlreadyExisted == false)

@@ -665,13 +665,15 @@ namespace MainWindowProgram
       {
         Effect = previousEffect;
         IsEnabled = wasEnabled;
-        _isUserSwitchInProgress = false;
         if (authenticated && wasEnabled)
         {
-          Show();
-          Activate();
-          ApplicationActivator.FlushPendingFileRequests();
+          if (await WindowOpacityTransition.ShowAsync(this))
+          {
+            Activate();
+            ApplicationActivator.FlushPendingFileRequests();
+          }
         }
+        _isUserSwitchInProgress = false;
         if (CurrentUserButton != null)
         {
           CurrentUserButton.IsEnabled = true;

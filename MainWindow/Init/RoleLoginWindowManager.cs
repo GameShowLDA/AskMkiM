@@ -41,30 +41,34 @@ namespace MainWindowProgram.Init
       return StartWindow(rolesWithSavedSessions, owner);
     }
 
-    private Task StartWindow(IReadOnlySet<RoleType>? rolesWithSavedSessions, Window? owner)
+    private async Task StartWindow(IReadOnlySet<RoleType>? rolesWithSavedSessions, Window? owner)
     {
       if (_windowThread != null)
       {
-        return Task.CompletedTask;
+        return;
       }
 
       Interlocked.Exchange(ref _authenticationActive, 1);
-      owner?.Hide();
       var ownerHandle = owner == null ? IntPtr.Zero : new WindowInteropHelper(owner).Handle;
       bool ownerWasEnabled = ownerHandle != IntPtr.Zero && IsWindowEnabled(ownerHandle);
       if (ownerWasEnabled)
       {
         EnableWindow(ownerHandle, false);
       }
+      if (owner != null) await WindowOpacityTransition.HideAsync(owner);
       var windowStarted = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
 
       _windowThread = new Thread(() =>
       {
         var dispatcher = Dispatcher.CurrentDispatcher;
-        var loginWindow = new RoleLoginWindow(rolesWithSavedSessions);
+        var loginWindow = new RoleLoginWindow(rolesWithSavedSessions) { Opacity = 0 };
         _window = loginWindow;
 
-        loginWindow.Loaded += (_, _) => windowStarted.TrySetResult();
+        loginWindow.Loaded += async (_, _) =>
+        {
+          await WindowOpacityTransition.FadeAsync(loginWindow, 1);
+          windowStarted.TrySetResult();
+        };
         loginWindow.Closed += (_, _) =>
         {
           IsClosedByUser = !_closedByManager;
@@ -75,6 +79,7 @@ namespace MainWindowProgram.Init
           {
             EnableWindow(ownerHandle, true);
           }
+          windowStarted.TrySetResult();
           _windowClosedSource.TrySetResult(true);
           dispatcher.BeginInvokeShutdown(DispatcherPriority.Background);
         };
@@ -91,7 +96,7 @@ namespace MainWindowProgram.Init
       _windowThread.IsBackground = true;
       _windowThread.Start();
 
-      return windowStarted.Task;
+      await windowStarted.Task;
     }
 
     public Task<RoleCredentialModel?> WaitForAuthenticationAsync()
@@ -111,11 +116,19 @@ namespace MainWindowProgram.Init
 
     public async Task CloseAsync()
     {
-      await InvokeWindowAsync(window =>
+      var window = _window;
+      if (window != null)
       {
-        _closedByManager = true;
-        window.CompleteStartupLoading();
-      });
+        await window.Dispatcher.InvokeAsync(async () =>
+        {
+          if (!ReferenceEquals(_window, window)) return;
+          if (await WindowOpacityTransition.FadeAsync(window, 0) && ReferenceEquals(_window, window))
+          {
+            _closedByManager = true;
+            window.CompleteStartupLoading();
+          }
+        }).Task.Unwrap();
+      }
       await _windowClosedSource.Task;
       if (!IsClosedByUser) Interlocked.Exchange(ref _authenticationActive, 0);
     }

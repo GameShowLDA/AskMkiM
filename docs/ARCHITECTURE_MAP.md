@@ -454,6 +454,16 @@ Manager сначала вызывает штатный WPF `owner.Hide()`, по�
 `SwitchCurrentUserAsync` сохраняет исходный `Window.Effect`, применяет `BlurEffect` с радиусом 8
 перед открытием окна входа и восстанавливает исходный эффект в `finally`. Окно входа
 на отдельном Dispatcher не размывается. Первичный запуск без owner использует тот же флаг авторизации.
+`MainWindow/Init/WindowOpacityTransition.cs` задаёт переходы Opacity за 180 мс
+с QuadraticEase: ShowAsync показывает окно с Opacity=0 и доводит её до 1;
+HideAsync сначала доводит Opacity до 0, затем вызывает штатный Hide и восстанавливает
+базовую Opacity=1. Completed/Closed снимают подписки и clock; крестик во время
+анимации завершает ожидающую задачу. StartWindow отключает owner до fade-out
+и открывает авторизацию только после Hide; Loaded завершается после fade-in.
+CloseAsync делает fade-out авторизации на её Dispatcher и затем закрывает окно;
+крестик во время перехода остаётся отменой без показа shell. После CloseAsync
+App.OnStartup / SwitchCurrentUserAsync вызывают ShowAsync главного окна;
+флаг смены пользователя удерживается до окончания появления.
 `ClosedByUser` публикуется на Dispatcher приложения; при повторном входе shell завершает приложение.
 `IsClosedByUser` не даёт позднему `CloseAsync` показать основное окно после крестика.
 Только успешный `SwitchCurrentUserAsync` вызывает `Show/Activate`; ошибка перехода завершает приложение.
