@@ -59,6 +59,7 @@ namespace Ask.Core.Services.Config.Base
     {
       SetLanguage(user.Language);
       SetTheme(user.Theme);
+      UserInterfaceModel.AutoLockMinutes = NormalizeAutoLockMinutes(user.AutoLockMinutes);
       SetSyntaxHighlighting(user.UseSyntaxHighlighting);
       SetDiagnosticUnderliningMode(DiagnosticUnderliningModeExtensions.FromVisibility(
         user.UseSyntaxErrorUnderlining, user.UseStyleErrorUnderlining));
@@ -81,6 +82,9 @@ namespace Ask.Core.Services.Config.Base
     /// <returns>true, если отображается; false, если скрывается.</returns>
     public static Task<string> GetLanguage() => Task.FromResult(UserInterfaceModel.Language);
     public static Task<ThemeMode> GetTheme() => Task.FromResult(UserInterfaceModel.Theme);
+    public static int GetAutoLockMinutes() => UserInterfaceModel.AutoLockMinutes;
+    private static int NormalizeAutoLockMinutes(int value) => value is 1 or 2 or 5 or 10 ? value : 0;
+
     public static bool GetSyntaxHighlighting() => UserInterfaceModel.UseSyntaxHighlighting;
     public static bool GetSyntaxErrorUnderlining() => UserInterfaceModel.UseSyntaxErrorUnderlining;
     public static bool GetStyleErrorUnderlining() => UserInterfaceModel.UseStyleErrorUnderlining;
@@ -95,6 +99,7 @@ namespace Ask.Core.Services.Config.Base
       {
         Language = UserInterfaceModel.Language,
         Theme = UserInterfaceModel.Theme,
+        AutoLockMinutes = UserInterfaceModel.AutoLockMinutes,
         UseSyntaxHighlighting = UserInterfaceModel.UseSyntaxHighlighting,
         UseSyntaxErrorUnderlining = UserInterfaceModel.UseSyntaxErrorUnderlining,
         UseStyleErrorUnderlining = UserInterfaceModel.UseStyleErrorUnderlining,
@@ -110,6 +115,8 @@ namespace Ask.Core.Services.Config.Base
     {
       SetLanguage(parametrModel.Language);
       SetTheme(parametrModel.Theme);
+      parametrModel.AutoLockMinutes = NormalizeAutoLockMinutes(parametrModel.AutoLockMinutes);
+      UserInterfaceModel.AutoLockMinutes = parametrModel.AutoLockMinutes;
       SetSyntaxHighlighting(parametrModel.UseSyntaxHighlighting);
       var diagnosticMode = DiagnosticUnderliningModeExtensions.FromVisibility(
         parametrModel.UseSyntaxErrorUnderlining, parametrModel.UseStyleErrorUnderlining);

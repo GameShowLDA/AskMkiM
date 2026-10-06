@@ -82,6 +82,13 @@ namespace Ask.UI.Features.ServiceTools.Gpt.Modes
 
     private async void StartTestButton_Click(object sender, RoutedEventArgs e)
     {
+      var runGuard = new Ask.UI.Features.ProtocolNew.Execution.ExecutionRunGuard();
+      if (!runGuard.TryAcquire("Ручной тест GPT IR", this, out var activeProcessName))
+      {
+        TestResultText.Text = $"Уже выполняется: {activeProcessName}";
+        return;
+      }
+
       TestResultText.Text = $"Результат теста: ???";
       try
       {
@@ -101,6 +108,10 @@ namespace Ask.UI.Features.ServiceTools.Gpt.Modes
       {
         TestResultText.Text = "Результат теста: ошибка оборудования";
         GptUiOperation.ReportError("запуск теста IR", ex);
+      }
+      finally
+      {
+        runGuard.Release(this);
       }
     }
 

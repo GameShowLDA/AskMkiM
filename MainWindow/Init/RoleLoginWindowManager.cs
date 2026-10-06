@@ -17,6 +17,13 @@ namespace MainWindowProgram.Init
     [return: MarshalAs(UnmanagedType.Bool)]
     private static extern bool IsWindowEnabled(IntPtr windowHandle);
 
+    private static int _authenticationActive;
+    internal static bool IsAuthenticationActive => Volatile.Read(ref _authenticationActive) != 0;
+
+    private bool _closedByManager;
+    internal bool IsClosedByUser { get; private set; }
+    public event Action? ClosedByUser;
+
     private Thread? _windowThread;
     private RoleLoginWindow? _window;
     private readonly TaskCompletionSource<RoleCredentialModel?> _authenticationSource =
@@ -41,6 +48,8 @@ namespace MainWindowProgram.Init
         return Task.CompletedTask;
       }
 
+      Interlocked.Exchange(ref _authenticationActive, 1);
+      owner?.Hide();
       var ownerHandle = owner == null ? IntPtr.Zero : new WindowInteropHelper(owner).Handle;
       bool ownerWasEnabled = ownerHandle != IntPtr.Zero && IsWindowEnabled(ownerHandle);
       if (ownerWasEnabled)
@@ -58,8 +67,11 @@ namespace MainWindowProgram.Init
         loginWindow.Loaded += (_, _) => windowStarted.TrySetResult();
         loginWindow.Closed += (_, _) =>
         {
+          IsClosedByUser = !_closedByManager;
           _window = null;
-          if (ownerWasEnabled)
+          if (IsClosedByUser)
+            Application.Current?.Dispatcher.BeginInvoke(() => ClosedByUser?.Invoke());
+          if (ownerWasEnabled && !IsClosedByUser)
           {
             EnableWindow(ownerHandle, true);
           }
@@ -99,8 +111,13 @@ namespace MainWindowProgram.Init
 
     public async Task CloseAsync()
     {
-      await InvokeWindowAsync(window => window.CompleteStartupLoading());
+      await InvokeWindowAsync(window =>
+      {
+        _closedByManager = true;
+        window.CompleteStartupLoading();
+      });
       await _windowClosedSource.Task;
+      if (!IsClosedByUser) Interlocked.Exchange(ref _authenticationActive, 0);
     }
 
     public Task WaitForCloseAsync()
@@ -116,7 +133,10 @@ namespace MainWindowProgram.Init
         return Task.CompletedTask;
       }
 
-      return window.Dispatcher.InvokeAsync(() => action(window)).Task;
+      return window.Dispatcher.InvokeAsync(() =>
+      {
+        if (ReferenceEquals(_window, window)) action(window);
+      }).Task;
     }
   }
 }

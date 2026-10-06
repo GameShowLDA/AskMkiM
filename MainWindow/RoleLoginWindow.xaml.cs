@@ -708,6 +708,7 @@ namespace MainWindowProgram
 
     private void BringToFront()
     {
+      if (_isClosed) return;
       if (!IsVisible)
       {
         Show();
@@ -726,6 +727,7 @@ namespace MainWindowProgram
 
       Dispatcher.BeginInvoke(() =>
       {
+        if (_isClosed) return;
         Topmost = false;
         Activate();
 

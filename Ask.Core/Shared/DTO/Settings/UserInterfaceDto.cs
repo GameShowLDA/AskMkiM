@@ -27,6 +27,9 @@ public class UserInterfaceDto
   /// </summary>
   public ThemeMode Theme { get; set; }
 
+  /// <summary>Время до автоматической блокировки в минутах; 0 отключает блокировку.</summary>
+  public int AutoLockMinutes { get; set; }
+
   /// <summary>
   /// Включает подсветку синтаксиса в редакторе.
   /// </summary>

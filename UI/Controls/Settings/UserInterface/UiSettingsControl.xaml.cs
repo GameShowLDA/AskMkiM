@@ -25,6 +25,9 @@ namespace UI.Controls.Settings.UserInterface
     private bool _isInitialized;
     private record LangOption(string Key, string Title);
     private record ThemeOption(string Key, string Title);
+    private record AutoLockOption(int Minutes, LocalizedString Title);
+    private static readonly List<AutoLockOption> AutoLockOptions = new[] { 0, 1, 2, 5, 10 }
+      .Select(minutes => new AutoLockOption(minutes, new LocalizedString($"Settings_AutoLock_{minutes}"))).ToList();
     private record DiagnosticUnderliningOption(DiagnosticUnderliningMode Mode, string Title);
 
     /// <summary>
@@ -106,6 +109,7 @@ namespace UI.Controls.Settings.UserInterface
       {
         LanguageSelect.ValueChanged += ValueChanged;
         ThemeSelect.ValueChanged += ValueChanged;
+        AutoLockSelect.ValueChanged += ValueChanged;
         SyntaxHighlighting.CheckedChanged += SettingsCard_CheckedChanged;
         DiagnosticUnderliningSelect.ValueChanged += ValueChanged;
         CommandBodyBackgroundHighlighting.CheckedChanged += SettingsCard_CheckedChanged;
@@ -187,6 +191,10 @@ namespace UI.Controls.Settings.UserInterface
       var currentTheme = _baseParameterModel.Theme.ToString();
       ThemeSelect.DefaultValue = currentTheme;
       ThemeSelect.SelectedValue = currentTheme;
+
+      AutoLockSelect.ItemsSource = AutoLockOptions;
+      AutoLockSelect.DefaultValue = _baseParameterModel.AutoLockMinutes;
+      AutoLockSelect.SelectedValue = _baseParameterModel.AutoLockMinutes;
 
       SyntaxHighlighting.IsChecked = _baseParameterModel.UseSyntaxHighlighting;
       LoadDiagnosticUnderliningOptions();
@@ -279,6 +287,7 @@ namespace UI.Controls.Settings.UserInterface
       {
         Language = languageCode,
         Theme = parsedTheme,
+        AutoLockMinutes = AutoLockSelect.SelectedValue is int minutes ? minutes : 0,
         UseSyntaxHighlighting = SyntaxHighlighting.IsChecked,
         UseSyntaxErrorUnderlining = diagnosticMode.ShowsErrors(),
         UseStyleErrorUnderlining = diagnosticMode.ShowsWarnings(),
@@ -305,6 +314,7 @@ namespace UI.Controls.Settings.UserInterface
     /// </summary>
     private static bool UserInterfaceEquals(UserInterfaceDto a, UserInterfaceDto b) =>
       a.Language == b.Language &&
+      a.AutoLockMinutes == b.AutoLockMinutes &&
       a.UseSyntaxHighlighting == b.UseSyntaxHighlighting &&
       DiagnosticUnderliningModeExtensions.FromVisibility(
         a.UseSyntaxErrorUnderlining, a.UseStyleErrorUnderlining) ==

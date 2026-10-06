@@ -67,6 +67,7 @@ Size/Foreground и анимации общей кнопки; лицензия с
 | Crash reports | `MainWindow/App.xaml.cs`, `MainWindow/Init/PreStartupInitializer.cs`, `MainWindow/Services/TranslationServices.cs` | `Ask.Diagnostics/Services/CrashPackageService.cs`, `Ask.Diagnostics/Services/ExceptionDiagnosticReporter.cs`, `Ask.Diagnostics/Collectors/` |
 | Архивы APK/APKW | `Ask.UI/Features/Archive/` | `Ask.Core/Services/FileFormats/Apk/`, `MainWindow/Services/Conversion/` |
 | Рабочее пространство и вкладки | `UI/Components/MultiEditorControl.xaml.cs` | `UI/Components/MultiEditorMethods/FileManager.cs`, `UI/Services/`, `MainWindow/Services/MultiWindowService.cs` |
+| Автоматическая блокировка | `MainWindow/MainWindow.AutoLock.cs`, `Ask.Core/Services/App/InactivityLockPolicy.cs` | `ExecutionRunGuard.GetActivity`, `UiSettingsControl`, `UserInterfaceConfig`, `RoleLoginWindowManager`; [таймер](#automatic-inactivity-lock) |
 | Роли и права | `MainWindow/Init/RoleApplicationConfigurator.cs` | `Ask.Core/Services/Config/AppSettings/RoleAuthorizationConfig.cs`, `Ask.UI/Features/RoleManagement/` |
 | Фон главного окна и выделение меню | `MainWindow/MainWindow.xaml`, `UI/Controls/EmptyWorkspace/EmptyWorkspaceView.xaml` | `UI/Resources/Theme/{dark,light}.xaml`, `UI/Resources/Theme/{dark,light}.custom.xaml`, `UI/Components/MultiWindowControl.xaml` |
 | Административные и сервисные утилиты | `MainWindow/MainWindow.xaml`, `MainWindow/ViewModels/AdminViewModel.cs`, `MainWindow/Services/AdminServices.cs` | `UI/Controls/AdminPanel/ServiceUtilitiesControl.xaml`, `UI/Controls/AdminPanel/SetCommand.xaml`, `Ask.UI/Features/ServiceTools/{Gpt,Chassis,SwitchingDevice}/`, `UI/Controls/AdminPanel/DataBaseView.xaml` |
@@ -90,7 +91,67 @@ Size/Foreground и анимации общей кнопки; лицензия с
 - [Protocol generation, save and print](#protocol-flow)
 - [Error propagation and retry](#equipment-error-flow)
 - [Crash diagnostics](#crash-diagnostics-flow)
+- [Automatic inactivity lock](#automatic-inactivity-lock)
 - [Authentication and Debug access](#authentication-and-debug-access-flow)
+
+## Automatic Inactivity Lock
+
+### Purpose
+
+Блокировка с существующим выбором роли/пароля после отсутствия ввода в WPF-приложении.
+Не использует системный hook или GetLastInputInfo: ввод в других приложениях не сбрасывает отсчёт.
+
+### Entry Points / Files
+
+- `MainWindow/MainWindow.AutoLock.cs`: `InitializeAutoLock` из конструктора shell;
+  `AutoLock_PreProcessInput`, `AutoLock_Tick`.
+- `Ask.Core/Services/App/InactivityLockPolicy.cs`: проверка срока по монотонному Stopwatch.
+- `UI/Controls/Settings/UserInterface/UiSettingsControl.xaml(.cs)`:
+  карточка после языка/темы; 0/1/2/5/10 минут, 0 = «Никогда» (default).
+- `Ask.Core/Shared/DTO/Settings/UserInterfaceDto.cs`: `AutoLockMinutes`.
+- `Ask.Core/Services/Config/Base/UserInterfaceConfig.cs`: нормализация неподдерживаемых значений в 0,
+  загрузка, копирование и сохранение настройки.
+- `Ask.DataBase.Provider/Migrations/20261006144346_AddUserInterfaceAutoLock.cs`:
+  недеструктивное добавление INTEGER NOT NULL DEFAULT 0 в UserInterface.
+- `DatabaseInitializationService.EnsureUserInterfaceAutoLockColumnAsync`:
+  идемпотентное дополнение принятой старой схемы без истории миграций.
+
+### Call Chains / Background Operations
+
+```text
+MainWindow.InitializeAutoLock
+→ InputManager.Current.PreProcessInput (Dispatcher shell)
+  → MouseEventArgs / KeyEventArgs / TextCompositionEventArgs → InactivityLockPolicy.Reset
+→ DispatcherTimer.Tick (Background, раз в секунду)
+  → ExecutionRunGuard.GetActivity (атомарный snapshot под SyncRoot)
+  → SystemStateManager.GetIsLocked
+  → проверка видимости, IsEnabled, текущей авторизации и глобального drawer
+  → InactivityLockPolicy.ShouldLock
+  → MainWindow.SwitchCurrentUserAsync
+  → существующий поток авторизации (см. Authentication and Debug access)
+  → успешное закрытие → Show/Activate → Reset
+```
+
+`ExecutionRunGuard` — общий слот `ActionExecutor.StartAsync` для программ контроля,
+тестов, самоконтроля и метрологии. Слот удерживается во время паузы, ожидания,
+отмены и финализации; освобождение выполняется после `ExecutionFinalizer`.
+`GetActivity` возвращает IsBusy и LastReleaseTimestamp; `Release` фиксирует Stopwatch timestamp,
+поэтому даже короткий процесс между двумя ticks сбрасывает срок до полного интервала.
+Проверка срока запрещена при busy, блокировке системы, авторизации, отключённом/скрытом shell
+и drawer, блокирующем глобальный ввод. Изменение интервала начинает новый отсчёт.
+`GetIsControlProgramActive` не используется: это признак выбранной вкладки ПК, а не выполнения.
+На Closed shell таймер останавливается и обе подписки отсоединяются.
+Ручные тесты GPT из `Ask.UI/Features/ServiceTools/Gpt/Modes/{Acw,Dcw,Ir}Mode.xaml.cs`
+также захватывают общий слот в `StartTestButton_Click` и освобождают его в `finally`
+после измерения/ошибки. Занятый контур отклоняет повторный запуск с именем активного процесса.
+
+### Error Flow / Configuration
+
+Ошибка пароля сохраняет окно авторизации и скрытый shell. Крестик завершает приложение;
+неуспешный переход в `SwitchCurrentUserAsync` логируется и также завершает приложение.
+Бизнес-проверка пароля и выбор роли переиспользуются без изменения.
+`UserInterfaceConfig → UserInterfaceSettings → UserInterfaceDtoService → AppDbContext.UserInterface`.
+Ресурсы карточки/вариантов находятся в `Ask.UI/Resources/Localization/Language/Strings(.en).resx`.
 
 ## Solution Structure
 
@@ -301,8 +362,9 @@ App.OnStartup()
   → CommandLineParser.ProcessCommandLineArgs()
   → ApplicationInitializer.SubscribeToMessageEvents()
   → HotkeyBinderManager.AttachAllHotkeys()
-→ ApplicationActivator.FlushPendingFileRequests()
+→ RoleLoginWindowManager.CloseAsync()
 → show main window
+→ ApplicationActivator.FlushPendingFileRequests()
 ```
 
 ### Authentication and Debug access flow
@@ -357,9 +419,11 @@ ApplicationClockService.CurrentDateTime.Date. Если есть невыполн
 приходит через `UpdateLoadingStatus`; при `FailStartupLoading` возвращается форма входа.
 
 Завершение успешного входа проходит через:
-`App.OnStartup → MainWindow.InitializeAsync → MainWindow.Visibility = Visible
+`App.OnStartup → скрытый MainWindow → MainWindow.InitializeAsync
 → RoleLoginWindowManager.CloseAsync → Dispatcher.InvokeAsync(CompleteStartupLoading)
-→ RoleLoginWindow.Close`. Окно входа закрывается после готовности главного окна.
+→ RoleLoginWindow.Close → MainWindow.Show`. До успешного закрытия авторизации
+главное окно не показывается. `ApplicationActivator` блокирует ACTIVATE/OPENFILE
+при `RoleLoginWindowManager.IsAuthenticationActive`; отложенные файлы открываются после входа.
 Storyboard загрузки снимается при возврате формы после ошибки и при закрытии окна.
 
 Debug-доступ не является параметром запуска или независимо изменяемым состоянием.
@@ -381,14 +445,18 @@ RoleLoginWindow authenticates RoleCredentialModel successfully
 
 При смене пользователя главное окно передаётся в `RoleLoginWindowManager.ShowAsync` как owner.
 Ожидание открытия асинхронно, чтобы основной Dispatcher продолжал обрабатывать системные сообщения.
-Manager получает native handle через `WindowInteropHelper` и блокирует окно
-владельца через `EnableWindow(false)` до закрытия окна входа; исходно отключённый owner
+Manager сначала вызывает штатный WPF `owner.Hide()`, получает native handle
+через `WindowInteropHelper` и блокирует окно
+владельца через `EnableWindow(false)` до успешного закрытия окна входа; исходно отключённый owner
 не включается. `MainWindow.SwitchCurrentUserAsync` также временно отключает WPF `IsEnabled`
 и восстанавливает прежнее значение в `finally`. `InputManager_PreProcessInput` отменяет ввод
 основного Dispatcher во время смены пользователя, включая глобальные горячие клавиши.
 `SwitchCurrentUserAsync` сохраняет исходный `Window.Effect`, применяет `BlurEffect` с радиусом 8
 перед открытием окна входа и восстанавливает исходный эффект в `finally`. Окно входа
-на отдельном Dispatcher не размывается. Первичный запуск без owner сохраняет прежний маршрут.
+на отдельном Dispatcher не размывается. Первичный запуск без owner использует тот же флаг авторизации.
+`ClosedByUser` публикуется на Dispatcher приложения; при повторном входе shell завершает приложение.
+`IsClosedByUser` не даёт позднему `CloseAsync` показать основное окно после крестика.
+Только успешный `SwitchCurrentUserAsync` вызывает `Show/Activate`; ошибка перехода завершает приложение.
 
 Смена пользователя без перезапуска проходит через
 `MainWindow.SwitchCurrentUserAsync → RoleLoginWindowManager → успешная аутентификация
@@ -3092,6 +3160,8 @@ ErrorItem → translator/runner ErrorList
 
 | Type | Kind | Project | Responsibility | Section |
 | --- | --- | --- | --- | --- |
+| `InactivityLockPolicy` | policy | Ask.Core | монотонный отсчёт бездействия, запрет при занятом контуре | [Auto lock](#automatic-inactivity-lock) |
+| `ExecutionRunGuard` | execution guard | Ask.UI | общий слот выполнения, snapshot занятости и последнего завершения | [Auto lock](#automatic-inactivity-lock) |
 | `CalendarNoteService` | file storage service | Ask.Core | общие заметки календаря, атомарный JSON и межпроцессная синхронизация | [Calendar notes](#calendar-notes) |
 | `CalendarControl` / `CalendarViewModel` | WPF control / view model | UI | выбор даты, отметки заметок и опциональный CRUD общих записей | [Calendar notes](#calendar-notes) |
 | `App` | WPF application | MainWindowProgram | process startup/global failure handling | [Entry Points](#entry-points) |

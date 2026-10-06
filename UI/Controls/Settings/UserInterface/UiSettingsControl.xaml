@@ -10,6 +10,10 @@
              xmlns:LocalizeStrings="clr-namespace:Ask.UI.Infrastructure.Localization;assembly=Ask.UI"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <LocalizeStrings:LocalizedString x:Key="AutoLockTitle" Key="Settings_AutoLock_Title"/>
+        <LocalizeStrings:LocalizedString x:Key="AutoLockDescription" Key="Settings_AutoLock_Description"/>
+    </UserControl.Resources>
 
     <Border 
         Style="{DynamicResource SettingPanelStyle}"
@@ -107,6 +111,14 @@
                         DisplayMemberPath="Title"
                         Visibility="Visible"
                         SelectedValuePath="Key"/>
+
+                    <Components:SettingsCardSelect
+                        Margin="10,10"
+                        x:Name="AutoLockSelect"
+                        Title="{Binding Source={StaticResource AutoLockTitle}, Path=Value}"
+                        Description="{Binding Source={StaticResource AutoLockDescription}, Path=Value}"
+                        DisplayMemberPath="Title.Value"
+                        SelectedValuePath="Minutes"/>
 
                     <SharedComponents:SettingsCard
                         Title="{Binding Source={StaticResource Settings_UserInterface_CommandAutoCollapse_Title}, Path=Value}"

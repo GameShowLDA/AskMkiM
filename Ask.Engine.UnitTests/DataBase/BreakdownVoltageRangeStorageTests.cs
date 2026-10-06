@@ -118,6 +118,9 @@ public sealed class BreakdownVoltageRangeStorageTests
     var options = new DbContextOptionsBuilder<AppDbContext>().UseSqlite(connection).Options;
     await using var context = new AppDbContext(options);
     var migrations = context.Database.GetMigrations().ToArray();
+    const string targetMigration = "20261006045223_AddBreakdownVoltageRanges";
+    int targetIndex = Array.IndexOf(migrations, targetMigration);
+    Assert.True(targetIndex > 0);
     await context.Database.ExecuteSqlRawAsync("""
       CREATE TABLE BreakdownTesters (Id INTEGER PRIMARY KEY, AcwMaxVoltage INTEGER NOT NULL,
         DcwMaxVoltage INTEGER NOT NULL, IRMinVoltage INTEGER NOT NULL, SiMaxVoltage INTEGER NOT NULL, Note TEXT);
@@ -125,9 +128,9 @@ public sealed class BreakdownVoltageRangeStorageTests
       INSERT INTO BreakdownTesters VALUES (2, 0, 0, 0, 0, 'defaults');
       CREATE TABLE __EFMigrationsHistory (MigrationId TEXT PRIMARY KEY, ProductVersion TEXT NOT NULL);
       """);
-    foreach (string migration in migrations.SkipLast(1))
+    foreach (string migration in migrations.Take(targetIndex))
       await context.Database.ExecuteSqlInterpolatedAsync($"INSERT INTO __EFMigrationsHistory VALUES ({migration}, {"9.0.4"})");
-    await context.Database.MigrateAsync();
+    await context.GetService<IMigrator>().MigrateAsync(targetMigration);
     await using var command = connection.CreateCommand();
     command.CommandText = "SELECT AcwVoltageRange, DcwVoltageRange, IrVoltageRange, Note FROM BreakdownTesters";
     await using (var reader = await command.ExecuteReaderAsync())
@@ -153,7 +156,7 @@ public sealed class BreakdownVoltageRangeStorageTests
       Assert.Equal(50, reader.GetInt32(1));
       Assert.Equal(1000, reader.GetInt32(2));
     }
-    await context.GetService<IMigrator>().MigrateAsync(migrations[^2]);
+    await context.GetService<IMigrator>().MigrateAsync(migrations[targetIndex - 1]);
     command.CommandText = "SELECT AcwMaxVoltage, DcwMaxVoltage, IRMinVoltage, SiMaxVoltage FROM BreakdownTesters";
     await using var rollbackReader = await command.ExecuteReaderAsync();
     Assert.True(await rollbackReader.ReadAsync());
