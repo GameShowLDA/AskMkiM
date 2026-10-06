@@ -107,9 +107,8 @@ internal sealed class ApplicationAutoConfigurationService
         {
           Id = 1,
           Mode = BreakdownTypeMode.None,
-          DcwMaxVoltage = 1000,
-          SiMaxVoltage = 0,
-          IRMinVoltage = 0,
+          DcwVoltageRange = new() { MinVoltage = 50, MaxVoltage = 1000, Step = 2 },
+          IrVoltageRange = new() { MinVoltage = 50, MaxVoltage = 1000, Step = 50, Exceptions = [125] },
           Name = "GPT79904",
           Description = "Реализовать описание в Ask.Device.Runtime.Device.GPT79904",
           Number = 1,
@@ -117,7 +116,7 @@ internal sealed class ApplicationAutoConfigurationService
           DeviceType = DeviceType.BreakdownTester,
           DeviceClass = "Ask.Device.Runtime.Device.GPT79904",
           NumberChassis = 1,
-          AcwMaxVoltage = 700
+          AcwVoltageRange = new() { MinVoltage = 50, MaxVoltage = 700, Step = 2 }
         }
       ]
     };

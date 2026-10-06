@@ -1,3 +1,4 @@
+using VoltageRange = Ask.Core.Shared.DTO.Devices.Breakdown.VoltageRange;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Errors.Device;
 using Ask.Core.Services.Errors.Device.Breakdown;
@@ -49,6 +50,13 @@ namespace Ask.Device.Application.FunctionAdapters.GPT
     /// </summary>
     public IVoltageConfigurable Voltage { get; set; }
 
+    /// <inheritdoc />
+    public VoltageRange VoltageRange
+    {
+      get => _dcwMode.VoltageRange;
+      set => _dcwMode.VoltageRange = value;
+    }
+
     /// <summary>
     /// Управление пределами тока в режиме DCW.
     /// </summary>
@@ -94,7 +102,7 @@ namespace Ask.Device.Application.FunctionAdapters.GPT
     public DcwModeAdapter(GPT79904 device)
     {
       _device = device ?? throw new ArgumentNullException(nameof(device));
-      _dcwMode = new DcwMode(device);
+      _dcwMode = new DcwMode(device) { VoltageRange = device.DcwManger.VoltageRange };
 
       Mode = new DcwAdapterMode(_dcwMode, _device);
       Voltage = new VoltageAdapterMode(_dcwMode, _device);

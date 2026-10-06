@@ -24,10 +24,6 @@ namespace Ask.Device.Runtime.Device
       DeviceClass = GetType().FullName;
 
       DeviceType = DeviceType.BreakdownTester;
-      AcwMaxVoltage = 700;
-      DcwMaxVoltage = 1000;
-      IrMaxVoltage = 1000;
-      IrMinVoltage = 50;
       IrMaxResistanceMOhm = 60000;
       SystemInsulationResistanceGOhm = 60;
       ConnectedProfile.CheckMode = "GPT";
@@ -85,18 +81,6 @@ namespace Ask.Device.Runtime.Device
     public ISystemSettingsBreakdown SystemManger { get; set; }
 
     /// <inheritdoc />
-    public int AcwMaxVoltage { get; set; }
-
-    /// <inheritdoc />
-    public int DcwMaxVoltage { get; set; }
-
-    /// <inheritdoc />
-    public int IrMaxVoltage { get; set; }
-
-    /// <inheritdoc />
-    public int IrMinVoltage { get; set; }
-
-    /// <inheritdoc />
     public int IrMaxResistanceMOhm { get; set; }
 
     /// <inheritdoc />
@@ -150,10 +134,9 @@ namespace Ask.Device.Runtime.Device
         DeviceType = DeviceType,
         DeviceClass = DeviceClass ?? string.Empty,
         Mode = Mode,
-        AcwMaxVoltage = AcwMaxVoltage,
-        DcwMaxVoltage = DcwMaxVoltage,
-        SiMaxVoltage = IrMaxVoltage,
-        IRMinVoltage = IrMinVoltage,
+        AcwVoltageRange = AcwManger.VoltageRange.Clone(),
+        DcwVoltageRange = DcwManger.VoltageRange.Clone(),
+        IrVoltageRange = IrManger.VoltageRange.Clone(),
         SystemInsulationResistanceGOhm = SystemInsulationResistanceGOhm
       };
     }

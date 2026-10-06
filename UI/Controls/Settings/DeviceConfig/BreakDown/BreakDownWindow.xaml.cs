@@ -85,10 +85,9 @@ namespace UI.Controls.Settings.DeviceConfig.BreakDown
 
         if (deviceDto != null)
         {
-          deviceDto.AcwMaxVoltage = (baseDevice as IBreakdownTester).AcwMaxVoltage;
-          deviceDto.DcwMaxVoltage = (baseDevice as IBreakdownTester).DcwMaxVoltage;
-          deviceDto.SiMaxVoltage = (baseDevice as IBreakdownTester).IrMaxVoltage;
-          deviceDto.IRMinVoltage = (baseDevice as IBreakdownTester).IrMinVoltage;
+          deviceDto.AcwVoltageRange = _editingDto?.AcwVoltageRange ?? (baseDevice as IBreakdownTester).AcwManger.VoltageRange;
+          deviceDto.DcwVoltageRange = _editingDto?.DcwVoltageRange ?? (baseDevice as IBreakdownTester).DcwManger.VoltageRange;
+          deviceDto.IrVoltageRange = _editingDto?.IrVoltageRange ?? (baseDevice as IBreakdownTester).IrManger.VoltageRange;
           deviceDto.SystemInsulationResistanceGOhm = deviceSettingsWindow.GetSystemInsulationResistanceGOhm();
 
           if (deviceDto.SystemInsulationResistanceGOhm is < 1 or > 60)
