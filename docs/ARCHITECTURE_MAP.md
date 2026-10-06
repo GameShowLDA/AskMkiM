@@ -45,6 +45,7 @@ Size/Foreground и анимации общей кнопки; лицензия с
 | МКР и точки | `Ask.Core/Shared/Interfaces/DeviceInterfaces/RelaySwitchModule/` | `Ask.Device.Application/FunctionAdapters/ModuleRelayControl/`, `Ask.Device.Runtime/Function/ModuleRelayControl/`, `Ask.Device.Emulator/ModuleRelayControl/` |
 | Устройство коммутации | `Ask.Core/Shared/Interfaces/DeviceInterfaces/SwitchingDevice/` | `Ask.Device.Application/FunctionAdapters/DeviceBusCommutation/`, `Ask.Device.Runtime/Function/DeviceBusCommutation/` |
 | Быстрый мультиметр | `Ask.Core/Shared/Interfaces/DeviceInterfaces/Multimeter/` | `Ask.Device.Runtime/Device/KeysightDevice.cs`, `Ask.Device.Runtime/Device/MultimeterB7783.cs`, `Ask.Device.Runtime/Function/Base/Multimeter/` |
+| Диапазоны напряжения ППУ, шаг и исключения | `Ask.Core/Shared/DTO/Devices/Breakdown/VoltageRange.cs`, `Ask.Device.Runtime/Device/GPT79904.cs` | [Диапазоны GPT](#breakdown-voltage-ranges), `VoltageManagment.cs`, `PiVoltageProcessor.cs`, `SiVoltageProcessor.cs`, `AppDbContext.Device.cs` |
 | Пробойная установка GPT | `Ask.Device.ResponseProcessor/BreakdownTester/`, `Ask.Core/Shared/Interfaces/DeviceInterfaces/BreakdownTester/` | `Ask.Device.Application/FunctionAdapters/GPT/`, `Ask.Device.Runtime/Function/GPT/`, `Ask.Device.Runtime/Device/GPT79904.cs` |
 | Источник напряжения/тока | `Ask.Core/Shared/Interfaces/DeviceInterfaces/PowerSourceModule/` | `Ask.Device.Application/FunctionAdapters/ModuleVoltageCurrent/`, `Ask.Device.Runtime/Function/ModuleVoltageCurrentSource/` |
 | Шасси и питание | `Ask.Core/Shared/Interfaces/DeviceInterfaces/Chassis/` | `Ask.Device.Runtime/Device/ManagerChassis.cs`, `Ask.Device.Runtime/Function/ManagerChassis/`, `Ask.Device.Emulator/Chassis/`, `UI/Components/PowerButton.xaml.cs` |
@@ -667,6 +668,8 @@ RunControl.Start(models)
   → new CommandExecutionManager(ProtocolUI, editor, models, opkPath)
   → subscribe AddError/ClearError
   → CommandExecutionManager.ExecuteAllAsync()
+    → ValidateInputsAsync (все ошибки перевода и диапазоны ППУ до первой команды;
+      подробности: раздел breakdown-voltage-ranges)
 ```
 
 #### Command dispatch flow
@@ -1654,6 +1657,64 @@ executor/metrology
   Idle-ветка `MeasureHelper.MeasureAsync` возвращает симулированное значение со статусом `Pass`;
 - `BreakdownTesterMessages` является фасадом над `Ask.Protocol.Messages` для рабочих операций
   ACW/DCW/IR/System и самоконтроля; существующие тексты сообщений остаются в вызывающем коде.
+
+<a id="breakdown-voltage-ranges"></a>
+### Диапазоны установки напряжения GPT
+
+- Предварительная проверка до оборудования: `UIValidationHelper.EnsureValidMetrologyInputAsync`
+  → разбор точек/параметров и проверка конфигурации
+  → `BreakdownTesters.GetDevicesByNumberChassisAsync(firstPoint.DeviceNumber)`
+  → `BreakdownInputValidator.ValidateMeasurement` → `ValidateVoltage` → `VoltageRange.IsAllowed`.
+  Общий путь используется метрологией, узловыми и групповыми тестами SI/PI ACW/DCW.
+  Для метрологии PI проверяется `DataModel.Param`, для SI и тестов PI — `DataModel.Voltage`;
+  ошибка публикуется до `ConnectToEquipment`, reset, коммутации и настройки ППУ.
+  Все девять метрологических `Mode*.ExecuteMeasurementProcess` также вызывают
+  `MeasurementToleranceCalculator.TryCalculateAsync(mode, data.Param, output)` до
+  `ConnectToEquipment`: значение вне таблицы метрологических погрешностей останавливает
+  запуск до подключения. Проверки в `PerformMeasurement` сохраняются для повторных измерений.
+- `CommandExecutionManager.ExecuteAllCoreAsync` сначала вызывает `ValidateInputsAsync`:
+  проверяет ошибки перевода всех команд, определяет шасси по каждой РМ и проверяет
+  все PI/SI через `BreakdownInputValidator.ValidateCommand`, включая вложенную `PiCommandModel.SiCommand`.
+  Выбор ППУ соответствует порядку шасси РМ и первому найденному устройству, как в
+  `EquipmentService.GetBreakdownTesterOrThrow`. Читается runtime-конфигурация без подключения;
+  диапазоны повторно проверяются при запуске даже после успешного перевода программы.
+  `InputValidationException` выводится через `ValidationMessages.PublishDataErrorAsync`;
+  проверка стоит вне цикла исполнения, поэтому ошибка не запускает аварийную КСЦ.
+  Файл валидатора: `Ask.Engine/ControlCommandExecutor/Execution/BreakdownInputValidator.cs`.
+- `AcwMode`, `DcwMode`, `IrMode` задают диапазоны (В): ACW 50–700 / шаг 2; DCW 50–1000 / шаг 2;
+  IR 50–1000 / шаг 50 / исключение 125. Максимумы остаются ограничениями системы.
+- `IBreakdownMode<TConfig>.VoltageRange` наследуется интерфейсами `IAcwModeBreakdown`,
+  `IDcwModeBreakdown`, `IIrModeBreakdown`; доступ через `IBreakdownTester.{Acw,Dcw,Ir}Manger.VoltageRange`.
+  Runtime-режим владеет диапазоном отдельно от `Config`; reset и смена режима не меняют диапазон.
+  `DeviceApplicationComposer.Compose` → `{Acw,Dcw,Ir}ModeAdapter` сохраняет диапазон прежнего
+  режима и делегирует свойство внутреннему runtime-режиму. `BreakdownTesterMapper` и
+  `GPT79904.Convert` явно копируют диапазоны между режимами и прежними полями DTO;
+  схема БД и формат JSON конфигурации сохраняются.
+- `IBreakdownTester.{Acw,Dcw,Ir}Manger.VoltageRange` → `VoltageManagment.SetVoltageAsync`
+  → `VoltageRange.IsAllowed` **до** `CongifHelper.SetParameterAsync` и cached-value shortcut
+  → `VoltageHelper.SetVoltageAsync` → SCPI `MANU:{ACW,DCW,IR}:VOLT` (значение в кВ)
+  → Real/Idle protocol. Проверка одинакова для Real и Idle.
+- `PiVoltageProcessor.Process` выбирает диапазон ACW/DCW из `ParameterContext.Breakdown`,
+  `SiVoltageProcessor.Process` — IR; проверяются границы, шаг и исключения до исполнения.
+- Сервисные `Modes/{Acw,Dcw,Ir}Mode.xaml.cs.LoadConfigurationAsync` устанавливают
+  `NumericComboBox.Minimum/Maximum/Increment/Exceptions` из выбранного устройства.
+  Общий `NumericComboBox` сохраняет введённое исключение без округления и добавляет его
+  в список выбора; остальные числовые поля продолжают использовать прежнюю сетку.
+- `AppDbContext.Device.OnModelCreating` сохраняет три диапазона как JSON в TEXT-колонках
+  `BreakdownTesters.AcwVoltageRange/DcwVoltageRange/IrVoltageRange`. `ValueComparer`
+  отслеживает изменение полей и списка исключений; `BreakdownTesterMapper` и `GPT79904.Convert`
+  копируют диапазоны без разделения изменяемых ссылок между DTO и runtime.
+- Миграция `20261006045223_AddBreakdownVoltageRanges` переносит прежние максимумы ACW/DCW,
+  минимум `IRMinVoltage` и максимум `SiMaxVoltage`, добавляет шаги/исключение, затем удаляет
+  старые колонки. Нулевые/отрицательные legacy-границы заменяются defaults GPT (50 В,
+  максимумы 700/1000/1000 В): прежняя автоконфигурация сохраняла IR-границы как нули. `Down` восстанавливает старые границы из JSON; шаг/исключения старой схемой
+  не поддерживаются. `DatabaseInitializationService.EnsureBreakdownTesterVoltageColumnsAsync`
+  выполняет идемпотентный перенос для схем без истории миграций, включая legacy `PiMaxVoltage`.
+- `UI/.../Configuration/DeviceConfigurationService` экспортирует формат версии 2;
+  `ParseConfigurationFile` принимает старые scalar поля версии 1 и преобразует их в диапазоны.
+  `BreakDownWindow` сохраняет полные диапазоны и не заменяет их defaults при редактировании подключения.
+- Проверки: `BreakdownVoltageRangeTests`, `BreakdownVoltageTranslationTests`,
+  `BreakdownVoltageRangeStorageTests`, `BreakdownVoltageUiTests` в соответствующих unit-test проектах.
 
 Runtime-путь GPT:
 
@@ -2987,6 +3048,15 @@ startup; changes from settings controls update the static model and asynchronous
 write through to SQLite.
 
 ## Shared Contracts and DTO
+
+`Ask.Core.Shared.DTO.Devices.Breakdown.VoltageRange`
+(`Ask.Core/Shared/DTO/Devices/Breakdown/VoltageRange.cs`) — модель диапазона установки
+напряжения: `MinVoltage`, `MaxVoltage` (ограничение системы), `Step` от минимума и
+`Exceptions` — отдельные допустимые напряжения вне сетки шага, но внутри диапазона.
+Все значения в вольтах; `IsAllowed` проверяет границы, шаг от минимума и исключения,
+`Clone` создаёт независимую копию списка. `IBreakdownMode<TConfig>` содержит `VoltageRange`;
+`BreakdownTesterDto` сохраняет `AcwVoltageRange`, `DcwVoltageRange`, `IrVoltageRange`.
+Старые scalar properties удалены; [подключение диапазонов](#breakdown-voltage-ranges).
 
 Main contract groups:
 

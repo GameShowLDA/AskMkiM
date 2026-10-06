@@ -7,11 +7,41 @@ using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Devices.SwitchingDevice;
 using Ask.Core.Shared.DTO.Devices.UninterruptiblePowerSupply;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using System.Text.Json;
 
 namespace Ask.DataBase.Provider.Context
 {
   public partial class AppDbContext
   {
+    /// <inheritdoc />
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+      base.OnModelCreating(modelBuilder);
+      var converter = new ValueConverter<VoltageRange, string>(
+        range => JsonSerializer.Serialize(range, (JsonSerializerOptions?)null),
+        json => JsonSerializer.Deserialize<VoltageRange>(json, (JsonSerializerOptions?)null)!);
+      var comparer = new ValueComparer<VoltageRange>(
+        (left, right) => JsonSerializer.Serialize(left, (JsonSerializerOptions?)null)
+          == JsonSerializer.Serialize(right, (JsonSerializerOptions?)null),
+        range => JsonSerializer.Serialize(range, (JsonSerializerOptions?)null).GetHashCode(),
+        range => JsonSerializer.Deserialize<VoltageRange>(
+          JsonSerializer.Serialize(range, (JsonSerializerOptions?)null), (JsonSerializerOptions?)null)!);
+
+      foreach (var name in new[]
+      {
+        nameof(BreakdownTesterDto.AcwVoltageRange),
+        nameof(BreakdownTesterDto.DcwVoltageRange),
+        nameof(BreakdownTesterDto.IrVoltageRange),
+      })
+      {
+        var property = modelBuilder.Entity<BreakdownTesterDto>().Property<VoltageRange>(name);
+        property.HasConversion(converter).IsRequired();
+        property.Metadata.SetValueComparer(comparer);
+      }
+    }
+
     /// <summary>
     /// Таблица менеджеров шасси.
     /// </summary>

@@ -1,3 +1,4 @@
+using VoltageRange = Ask.Core.Shared.DTO.Devices.Breakdown.VoltageRange;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.DTO.Devices.Breakdown;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
@@ -39,6 +40,9 @@ namespace Ask.Device.Runtime.Function.GPT
 
     /// <inheritdoc />
     public IVoltageConfigurable Voltage { get; set; }
+
+    /// <inheritdoc />
+    public VoltageRange VoltageRange { get; set; } = new() { MinVoltage = 50, MaxVoltage = 700, Step = 2 };
 
     /// <inheritdoc />
     public IModeConfigurable Mode { get; set; }

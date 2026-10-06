@@ -12,6 +12,9 @@ using Ask.Core.Shared.Metadata.Enums.ExecutionEnums;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Ask.Engine.ControlCommandAnalyser;
 using Ask.Engine.ControlCommandAnalyser.Model;
+using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
+using Ask.DataBase.Engine.Static.Devices;
 
 namespace Ask.Engine.ControlCommandExecutor.Execution
 {
@@ -208,6 +211,7 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
 
     private async Task ExecuteAllCoreAsync()
     {
+      await ValidateInputsAsync();
       int index = 0;
       CommandExecutionState.LastCuResult = null;
       CommandExecutionState.LastRejectFlag = false;
@@ -358,6 +362,64 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
         }
 
         index++;
+      }
+    }
+
+    private async Task ValidateInputsAsync()
+    {
+      try
+      {
+        IBreakdownTester? tester = null;
+        int[] chassisNumbers = [];
+        foreach (var command in _commands.Snapshot())
+        {
+          _console.GetCancellationToken().ThrowIfCancellationRequested();
+          if (command.Errors.Count > 0)
+            throw new InputValidationException(command.Errors[0]);
+
+          if (command is RmCommandModel rm)
+          {
+            chassisNumbers = PointModel.ConvertToPointModels(rm.GetAllDestinationPoints())
+              .Select(point => point.DeviceNumber).Distinct().ToArray();
+            tester = null;
+          }
+
+          if (command is not (PiCommandModel or SiCommandModel))
+            continue;
+
+          foreach (var chassis in chassisNumbers)
+          {
+            tester ??= (await BreakdownTesters.GetDevicesByNumberChassisAsync(
+              chassis, _console.GetCancellationToken())).FirstOrDefault();
+            if (tester != null)
+              break;
+          }
+
+          if (tester == null)
+            throw new InputValidationException(new ErrorItem
+            {
+              Code = ErrorCode.Metrology_Validation_EquipmentNotFound,
+              Description = "Для команды ПИ/СИ не найдена пробойная установка в шасси, заданных РМ."
+            });
+
+          try
+          {
+            BreakdownInputValidator.ValidateCommand(tester, command);
+          }
+          catch (InputValidationException ex)
+          {
+            throw new InputValidationException(new ErrorItem
+            {
+              Code = ex.Code,
+              Description = $"Команда {command.CommandNumber} {command.Mnemonic}: {ex.Description}"
+            });
+          }
+        }
+      }
+      catch (InputValidationException ex)
+      {
+        await ValidationMessages.PublishDataErrorAsync(ex.Description, _console);
+        throw;
       }
     }
 

@@ -32,6 +32,11 @@ namespace Ask.UI.Features.ServiceTools.Gpt.Modes
     {
       try
       {
+        var range = GptUiOperation.GetDevice(deviceContext).DcwManger.VoltageRange;
+        VoltageSlider.Minimum = range.MinVoltage;
+        VoltageSlider.Maximum = range.MaxVoltage;
+        VoltageSlider.Increment = range.Step;
+        VoltageSlider.Exceptions = range.Exceptions;
         var systemData = await GptUiOperation.GetDevice(deviceContext).DcwManger.Config.ReadConfigurationAsync();
 
         VoltageSlider.Value = systemData.Voltage * 1000.0;

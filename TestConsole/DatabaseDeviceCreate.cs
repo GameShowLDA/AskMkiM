@@ -223,21 +223,21 @@ internal static class DatabaseDeviceCreate
     {
       var breakdownTester = (IBreakdownTester)device;
       breakdownTester.Mode = ReadEnum("Режим ППУ", breakdownTester.Mode);
-      breakdownTester.AcwMaxVoltage = ReadInt(
+      breakdownTester.AcwManger.VoltageRange.MaxVoltage = ReadInt(
         "Максимальное напряжение ПИ(ACW)",
-        breakdownTester.AcwMaxVoltage > 0 ? breakdownTester.AcwMaxVoltage : 700);
+        breakdownTester.AcwManger.VoltageRange.MaxVoltage > 0 ? (int)breakdownTester.AcwManger.VoltageRange.MaxVoltage : 700);
 
-      breakdownTester.DcwMaxVoltage = ReadInt(
+      breakdownTester.DcwManger.VoltageRange.MaxVoltage = ReadInt(
        "Максимальное напряжение ПИ(DCW)",
-       breakdownTester.DcwMaxVoltage > 0 ? breakdownTester.DcwMaxVoltage : 1000);
+       breakdownTester.DcwManger.VoltageRange.MaxVoltage > 0 ? (int)breakdownTester.DcwManger.VoltageRange.MaxVoltage : 1000);
 
-      breakdownTester.IrMaxVoltage = ReadInt(
+      breakdownTester.IrManger.VoltageRange.MaxVoltage = ReadInt(
         "Максимальное напряжение СИ",
-        breakdownTester.IrMaxVoltage > 0 ? breakdownTester.IrMaxVoltage : 1000);
+        breakdownTester.IrManger.VoltageRange.MaxVoltage > 0 ? (int)breakdownTester.IrManger.VoltageRange.MaxVoltage : 1000);
 
-      breakdownTester.IrMinVoltage = ReadInt(
+      breakdownTester.IrManger.VoltageRange.MinVoltage = ReadInt(
         "Минимальное напряжение СИ",
-        breakdownTester.IrMinVoltage > 0 ? breakdownTester.IrMinVoltage : 50);
+        breakdownTester.IrManger.VoltageRange.MinVoltage > 0 ? (int)breakdownTester.IrManger.VoltageRange.MinVoltage : 50);
       return;
     }
 

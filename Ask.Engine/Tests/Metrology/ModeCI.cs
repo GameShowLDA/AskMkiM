@@ -65,15 +65,16 @@ namespace Ask.Engine.Tests.Metrology
     private async Task ExecuteMeasurementProcess(ActionSettings settings, IUserInteractionService messageService, IInputFieldProvider inputFieldProvider, IInputHighlightService inputHighlightService, CancellationToken cancellationToken)
     {
       var data = await EnsureValidMetrologyInputAsync(inputFieldProvider, messageService, metrologyMode: metrologicalModeRole, timeCheck: true, voltageCheck: true);
-      await testMeasurement.ConnectToEquipment(data.FirstPoint, data.SecondPoint, metrologicalModeRole, messageService);
-      await testMeasurement.SetupCommutation(messageService, data.FirstPoint, data.SecondPoint, metrologicalModeRole);
-      await testMeasurement.ConfigureMeter(messageService, metrologicalModeRole, data);
       var tolerance = await MeasurementToleranceCalculator.TryCalculateAsync(
         MeasurementTypeCommand.SI,
         data.Param,
         messageService);
       if (tolerance == null)
         return;
+
+      await testMeasurement.ConnectToEquipment(data.FirstPoint, data.SecondPoint, metrologicalModeRole, messageService);
+      await testMeasurement.SetupCommutation(messageService, data.FirstPoint, data.SecondPoint, metrologicalModeRole);
+      await testMeasurement.ConfigureMeter(messageService, metrologicalModeRole, data);
 
       await messageService.AppendEmptyLineAsync();
       await UserActionHelper.RunWithUserRepeatAsync(async () => await testMeasurement.PerformMeasurement(metrologicalModeRole, data.Param, messageService), _userInteractionService, true);
