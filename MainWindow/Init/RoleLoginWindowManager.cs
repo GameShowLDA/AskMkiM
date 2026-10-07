@@ -31,9 +31,9 @@ namespace MainWindowProgram.Init
     private readonly TaskCompletionSource<bool> _windowClosedSource =
       new(TaskCreationOptions.RunContinuationsAsynchronously);
 
-    public void Show(IReadOnlySet<RoleType>? rolesWithSavedSessions = null)
+    public Task ShowAsync(IReadOnlySet<RoleType>? rolesWithSavedSessions = null)
     {
-      StartWindow(rolesWithSavedSessions, null).GetAwaiter().GetResult();
+      return StartWindow(rolesWithSavedSessions, null);
     }
 
     public Task ShowAsync(IReadOnlySet<RoleType>? rolesWithSavedSessions, Window owner)

@@ -75,7 +75,7 @@ namespace MainWindowProgram
 
       try
       {
-        loginWindowManager.Show();
+        await loginWindowManager.ShowAsync();
 
         var authenticatedRole = await loginWindowManager.WaitForAuthenticationAsync();
         if (authenticatedRole == null)

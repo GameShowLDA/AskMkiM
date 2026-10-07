@@ -349,7 +349,7 @@ App.OnStartup()
 → FileAssociationRegistrar.RegisterCurrentUserAssociations()
 → ApplicationClockService.Start()
 → Task.Run(PreStartupInitializer.Initialize)
-→ RoleLoginWindowManager.Show/WaitForAuthenticationAsync
+→ await RoleLoginWindowManager.ShowAsync/WaitForAuthenticationAsync
 → RoleApplicationConfigurator.Apply(role)
 → await startup initialization
 → InitializeTheme()
@@ -413,6 +413,10 @@ ApplicationClockService.CurrentDateTime.Date. Если есть невыполн
 Нормализация старого JSON без `Login` добавляет `admin`/`adjuster`/`developer`/`root`,
 сохраняя существующие хэши и соли паролей. После входа то же окно показывает загрузку,
 а `RoleLoginWindowManager` сохраняет прежний жизненный цикл окна на отдельном STA-потоке.
+Первичное открытие через `App.OnStartup → await ShowAsync() → StartWindow` не блокирует
+главный Dispatcher: продолжение после `windowStarted.Task` возвращается на него.
+Синхронное ожидание этой задачи на главном UI-потоке приводит к deadlock до обработки
+результата авторизации (окно входа остаётся на «Подготовка приложения...»).
 
 Загрузка оформлена локальным `LoadingCircuitAnimation` в `MainWindow/RoleLoginWindow.xaml`:
 циклический импульс проходит через три узла. Это индикатор ожидания, а фактический этап
