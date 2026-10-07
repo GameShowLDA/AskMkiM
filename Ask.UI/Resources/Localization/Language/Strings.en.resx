@@ -712,7 +712,7 @@
     <value>System insulation resistance, GOhm</value>
   </data>
   <data name="Settings_AutoLock_Title" xml:space="preserve"><value>Automatic lock</value></data>
-  <data name="Settings_AutoLock_Description" xml:space="preserve"><value>When there is no input and no running process</value></data>
+  <data name="Settings_AutoLock_Description" xml:space="preserve"><value>For the current role, when there is no input and no running process</value></data>
   <data name="Settings_AutoLock_0" xml:space="preserve"><value>Never</value></data>
   <data name="Settings_AutoLock_1" xml:space="preserve"><value>1 minute</value></data>
   <data name="Settings_AutoLock_2" xml:space="preserve"><value>2 minutes</value></data>

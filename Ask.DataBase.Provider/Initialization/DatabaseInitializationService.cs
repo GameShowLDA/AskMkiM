@@ -684,6 +684,14 @@ public static class DatabaseInitializationService
     if (!await TableExistsAsync(connection, "UserInterface", cancellationToken)) return;
     await EnsureColumnAsync(connection, "UserInterface", "AutoLockMinutes", "INTEGER NOT NULL DEFAULT 0",
       report, progress, cancellationToken);
+    foreach (var column in new[]
+    {
+      nameof(UserInterfaceDto.AdministratorAutoLockMinutes), nameof(UserInterfaceDto.DeveloperAutoLockMinutes),
+      nameof(UserInterfaceDto.AdjusterAutoLockMinutes), nameof(UserInterfaceDto.RootAutoLockMinutes)
+    })
+    {
+      await EnsureColumnAsync(connection, "UserInterface", column, "INTEGER NULL", report, progress, cancellationToken);
+    }
   }
 
   private static async Task EnsureDiagnosticUnderliningColumnsAsync(

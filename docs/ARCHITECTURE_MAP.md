@@ -109,12 +109,23 @@ Size/Foreground и анимации общей кнопки; лицензия с
 - `UI/Controls/Settings/UserInterface/UiSettingsControl.xaml(.cs)`:
   карточка после языка/темы; 0/1/2/5/10 минут, 0 = «Никогда» (default).
 - `Ask.Core/Shared/DTO/Settings/UserInterfaceDto.cs`: `AutoLockMinutes`.
-- `Ask.Core/Services/Config/Base/UserInterfaceConfig.cs`: нормализация неподдерживаемых значений в 0,
-  загрузка, копирование и сохранение настройки.
+- `Ask.Core/Services/Config/Base/UserInterfaceConfig.cs`: `GetAutoLockMinutes` выбирает интервал
+  по `RoleAuthorizationConfig.CurrentRole`; `GetParameterModel` возвращает его в `AutoLockMinutes`
+  для существующего UI. `SaveProtocolModel` обновляет только поле текущей роли и копирует остальные
+  интервалы из runtime-модели в сохраняемый DTO, даже если UI передал новую модель без этих полей.
+  Неподдерживаемые значения нормализуются в 0.
 - `Ask.DataBase.Provider/Migrations/20261006144346_AddUserInterfaceAutoLock.cs`:
   недеструктивное добавление INTEGER NOT NULL DEFAULT 0 в UserInterface.
 - `DatabaseInitializationService.EnsureUserInterfaceAutoLockColumnAsync`:
   идемпотентное дополнение принятой старой схемы без истории миграций.
+- `Ask.DataBase.Provider/Migrations/20261007043208_AddRoleAutoLockMinutes.cs`:
+  четыре nullable INTEGER-поля в `UserInterface`: `AdministratorAutoLockMinutes`,
+  `DeveloperAutoLockMinutes`, `AdjusterAutoLockMinutes`, `RootAutoLockMinutes`.
+  `null` означает отсутствие индивидуальной настройки: администратор/разработчик — 5 минут,
+  регулировщик/Root — 0 («Никогда»). Явно сохранённый 0 отличается от `null`.
+  Старый `AutoLockMinutes` оставлен в схеме для совместимости; общий интервал больше не определяет
+  таймер ролей. Остальные настройки интерфейса остаются общими. Без авторизации интервал равен 0.
+  Repair-метод выше также добавляет новые поля; существующие значения сохраняются.
 
 ### Call Chains / Background Operations
 
@@ -139,6 +150,9 @@ MainWindow.InitializeAutoLock
 поэтому даже короткий процесс между двумя ticks сбрасывает срок до полного интервала.
 Проверка срока запрещена при busy, блокировке системы, авторизации, отключённом/скрытом shell
 и drawer, блокирующем глобальный ввод. Изменение интервала начинает новый отсчёт.
+После успешного `SwitchCurrentUserAsync` отсчёт явно сбрасывается, включая ручную смену
+между ролями с одинаковыми интервалами. Интервал выбирается заново на каждом tick;
+startup-загрузка общей UI-модели не зависит от порядка авторизации/фоновой инициализации БД.
 `GetIsControlProgramActive` не используется: это признак выбранной вкладки ПК, а не выполнения.
 На Closed shell таймер останавливается и обе подписки отсоединяются.
 Ручные тесты GPT из `Ask.UI/Features/ServiceTools/Gpt/Modes/{Acw,Dcw,Ir}Mode.xaml.cs`
@@ -152,6 +166,10 @@ MainWindow.InitializeAutoLock
 Бизнес-проверка пароля и выбор роли переиспользуются без изменения.
 `UserInterfaceConfig → UserInterfaceSettings → UserInterfaceDtoService → AppDbContext.UserInterface`.
 Ресурсы карточки/вариантов находятся в `Ask.UI/Resources/Localization/Language/Strings(.en).resx`.
+Проверки: `Ask.UI.UnitTests/Services/Config/UserInterfaceAutoLockRoleTests.cs` (defaults,
+изоляция ролей, явный 0, перезагрузка модели) и
+`Ask.Engine.UnitTests/DataBase/UserInterfaceAutoLockStorageTests.cs` (migration, SQLite round trip,
+идемпотентный repair). `UiSettingsControl.Loaded` перечитывает модель текущей роли при восстановлении вкладки.
 
 ## Solution Structure
 

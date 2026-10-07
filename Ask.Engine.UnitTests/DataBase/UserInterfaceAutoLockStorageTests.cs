@@ -28,6 +28,10 @@ public sealed class UserInterfaceAutoLockStorageTests
     Assert.Equal("en", settings.Language);
     Assert.True(settings.UseTopMenuIcons);
     Assert.Equal(0, settings.AutoLockMinutes);
+    Assert.Null(settings.AdministratorAutoLockMinutes);
+    Assert.Null(settings.DeveloperAutoLockMinutes);
+    Assert.Null(settings.AdjusterAutoLockMinutes);
+    Assert.Null(settings.RootAutoLockMinutes);
     settings.AutoLockMinutes = 5;
     await context.SaveChangesAsync();
     context.ChangeTracker.Clear();
@@ -41,10 +45,20 @@ public sealed class UserInterfaceAutoLockStorageTests
     await connection.OpenAsync();
     await using var context = new AppDbContext(new DbContextOptionsBuilder<AppDbContext>().UseSqlite(connection).Options);
     await context.Database.MigrateAsync();
-    context.UserInterface.Add(new UserInterfaceDto { Language = "ru", AutoLockMinutes = 10 });
+    context.UserInterface.Add(new UserInterfaceDto
+    {
+      Language = "ru", AutoLockMinutes = 10,
+      AdministratorAutoLockMinutes = 0, DeveloperAutoLockMinutes = 2,
+      AdjusterAutoLockMinutes = 5, RootAutoLockMinutes = 10
+    });
     await context.SaveChangesAsync();
     context.ChangeTracker.Clear();
-    Assert.Equal(10, (await context.UserInterface.SingleAsync()).AutoLockMinutes);
+    var settings = await context.UserInterface.SingleAsync();
+    Assert.Equal(10, settings.AutoLockMinutes);
+    Assert.Equal(0, settings.AdministratorAutoLockMinutes);
+    Assert.Equal(2, settings.DeveloperAutoLockMinutes);
+    Assert.Equal(5, settings.AdjusterAutoLockMinutes);
+    Assert.Equal(10, settings.RootAutoLockMinutes);
   }
 
   [Fact]
@@ -62,11 +76,16 @@ public sealed class UserInterfaceAutoLockStorageTests
       await DatabaseInitializationService.EnsureUserInterfaceAutoLockColumnAsync(path, report, null, CancellationToken.None);
       command.CommandText = "SELECT AutoLockMinutes FROM UserInterface";
       Assert.Equal(0L, await command.ExecuteScalarAsync());
-      command.CommandText = "UPDATE UserInterface SET AutoLockMinutes=2";
+      command.CommandText = "UPDATE UserInterface SET AutoLockMinutes=2, AdministratorAutoLockMinutes=0, DeveloperAutoLockMinutes=10, AdjusterAutoLockMinutes=5, RootAutoLockMinutes=1";
       await command.ExecuteNonQueryAsync();
       await DatabaseInitializationService.EnsureUserInterfaceAutoLockColumnAsync(path, report, null, CancellationToken.None);
       command.CommandText = "SELECT AutoLockMinutes FROM UserInterface";
       Assert.Equal(2L, await command.ExecuteScalarAsync());
+      foreach (var (column, expected) in new[] { ("AdministratorAutoLockMinutes", 0L), ("DeveloperAutoLockMinutes", 10L), ("AdjusterAutoLockMinutes", 5L), ("RootAutoLockMinutes", 1L) })
+      {
+        command.CommandText = $"SELECT {column} FROM UserInterface";
+        Assert.Equal(expected, await command.ExecuteScalarAsync());
+      }
       command.CommandText = "SELECT Language FROM UserInterface";
       Assert.Equal("en", await command.ExecuteScalarAsync());
     }

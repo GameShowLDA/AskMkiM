@@ -674,6 +674,10 @@ namespace MainWindowProgram
           }
         }
         _isUserSwitchInProgress = false;
+        if (authenticated)
+        {
+          _inactivityLock.Reset(System.Diagnostics.Stopwatch.GetTimestamp());
+        }
         if (CurrentUserButton != null)
         {
           CurrentUserButton.IsEnabled = true;
