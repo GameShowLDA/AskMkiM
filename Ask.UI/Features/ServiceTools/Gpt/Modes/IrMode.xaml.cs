@@ -179,6 +179,7 @@ namespace Ask.UI.Features.ServiceTools.Gpt.Modes
 
         var mode = GptUiOperation.GetDevice(deviceContext).IrManger;
         GptUiOperation.EnsureSuccess(await mode.Voltage.SetVoltageAsync(voltage), "напряжение IR");
+        GptUiOperation.GetDevice(deviceContext).Time.SetTargetTime(time);
         GptUiOperation.EnsureSuccess(await mode.Time.SetTestTimeAsync(time), "время теста IR");
         GptUiOperation.EnsureSuccess(await mode.ResistanceLimits.SetLowResistanceLimitAsync(rlo), "нижний предел сопротивления IR");
         GptUiOperation.EnsureSuccess(await mode.ResistanceLimits.SetHighResistanceLimitAsync(rhi), "верхний предел сопротивления IR");

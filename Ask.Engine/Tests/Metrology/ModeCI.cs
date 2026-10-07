@@ -102,6 +102,7 @@ namespace Ask.Engine.Tests.Metrology
         await breakDown.ConnectableManager.InitializeAsync(messageService);
         await breakDown.IrManger.Mode.SetModeAsync(messageService);
         await breakDown.IrManger.Voltage.SetVoltageAsync(dataModel.Voltage, messageService);
+        breakDown.Time.SetTargetTime(dataModel.Time);
         await breakDown.IrManger.Time.SetTestTimeAsync(dataModel.Time, messageService);
       }
 

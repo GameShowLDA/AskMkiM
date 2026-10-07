@@ -168,10 +168,10 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       await ExecutionMessages.PublishBreakdownTesterSetupAsync(userMessageService);
 
       await breakDown.IrManger.Mode.SetModeAsync(userMessageService);
+      breakDown.Time.SetTargetTime(time);
       await breakDown.IrManger.Time.SetTestTimeAsync(time, userMessageService);
       await breakDown.IrManger.ResistanceLimits.SetLowResistanceLimitAsync(resistance, userMessageService);
       await breakDown.IrManger.Voltage.SetVoltageAsync(voltage, userMessageService);
-      breakDown.Time.SetTargetTime(time);
     }
 
     /// <summary>

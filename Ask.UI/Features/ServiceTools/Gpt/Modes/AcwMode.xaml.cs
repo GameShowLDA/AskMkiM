@@ -201,6 +201,7 @@ namespace Ask.UI.Features.ServiceTools.Gpt.Modes
 
         var mode = GptUiOperation.GetDevice(deviceContext).AcwManger;
         GptUiOperation.EnsureSuccess(await mode.Voltage.SetVoltageAsync(voltage), "напряжение ACW");
+        GptUiOperation.GetDevice(deviceContext).Time.SetTargetTime(time);
         GptUiOperation.EnsureSuccess(await mode.Time.SetTestTimeAsync(time), "время теста ACW");
         GptUiOperation.EnsureSuccess(await mode.Time.SetRampTimeAsync(timeRamp), "время нарастания ACW");
         GptUiOperation.EnsureSuccess(await mode.FrequencyConfigurable.SetFrequencyAsync(frequency), "частота ACW");

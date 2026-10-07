@@ -3102,8 +3102,19 @@ and `StateEventsBinder`, then calls `ApplicationEventsBinder.BindAll`.
 измерение; `PASS` сразу возвращается, а при другом конечном статусе устанавливается нижний
 предел `1`, восстанавливается `TestTime` из `breakDown.Time.GetTargetTime()` и запускается
 основное измерение. `TargetTime` — отдельное поле `TimeManager`, поэтому его обязан задать
-исполнитель при настройке команды (production `SiCommandExecutor.SetupAsync`); helper его
-не перезаписывает. `MeasureFastPollingAsync` остаётся private legacy-методом и текущим
+исполнитель при настройке команды; helper его не перезаписывает. Перед отправкой
+`mode.Time.SetTestTimeAsync(value)` вызывается `device.Time.SetTargetTime(value)`:
+`SiCommandExecutor.SetupAsync`, `PiCommandExecutor.SettingBreakdown` (обе ACW/DCW-ветки),
+`Ask.Engine/Tests/Metrology/{ModePiAcw,ModePiDcw,ModeCI}.cs` → `ConfigureMeter`,
+узловые/групповые тесты ПИ/СИ (`Tests/{NodeMethod,MethodExecutor}/{PI,Si,CI}/`),
+`SelfTestManager` и ручные режимы `Ask.UI/Features/ServiceTools/Gpt/Modes/`.
+Это обязательный шаг подготовки: `TimeManager` изначально содержит -1;
+неустановленный либо устаревший TargetTime раньше отправлялся прибору при запуске измерения.
+Удалённое в commit `7ae82f7e` автоматическое заполнение внутри helper не восстановлено,
+чтобы предварительный IR-тест на 1 секунду не заменял выбранную длительность основного теста.
+Регрессионная проверка порядка и повторной настройки ПИ ACW/DCW:
+`Ask.Engine.UnitTests/Tests/Metrology/PiTargetTimeTests.cs`.
+`MeasureFastPollingAsync` остаётся private legacy-методом и текущим
 потоком не вызывается.
 Long-running loops in metrology/GPT measurement helpers are bounded by
 cancellation, timers or device conditions; inspect the concrete mode before
