@@ -1,3 +1,4 @@
+using VoltageRange = Ask.Core.Shared.DTO.Devices.Breakdown.VoltageRange;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Errors.Device;
 using Ask.Core.Services.Errors.Device.Breakdown;
@@ -46,6 +47,13 @@ namespace Ask.Device.Application.FunctionAdapters.GPT
     /// Адаптер, обеспечивающий управление параметрами напряжения в режиме IR.
     /// </summary>
     public IVoltageConfigurable Voltage { get; set; }
+
+    /// <inheritdoc />
+    public VoltageRange VoltageRange
+    {
+      get => _irMode.VoltageRange;
+      set => _irMode.VoltageRange = value;
+    }
 
     /// <summary>
     /// Адаптер, обеспечивающий управление параметрами времени теста в режиме IR.
@@ -102,7 +110,7 @@ namespace Ask.Device.Application.FunctionAdapters.GPT
     public IrModeAdapter(GPT79904 device)
     {
       _device = device ?? throw new ArgumentNullException(nameof(device));
-      _irMode = new IrMode(device);
+      _irMode = new IrMode(device) { VoltageRange = device.IrManger.VoltageRange };
 
       Mode = new IrAdapterMode(_irMode, _device);
       Voltage = new VoltageAdapterMode(_irMode, _device);

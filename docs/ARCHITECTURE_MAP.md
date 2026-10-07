@@ -45,6 +45,7 @@ Size/Foreground и анимации общей кнопки; лицензия с
 | МКР и точки | `Ask.Core/Shared/Interfaces/DeviceInterfaces/RelaySwitchModule/` | `Ask.Device.Application/FunctionAdapters/ModuleRelayControl/`, `Ask.Device.Runtime/Function/ModuleRelayControl/`, `Ask.Device.Emulator/ModuleRelayControl/` |
 | Устройство коммутации | `Ask.Core/Shared/Interfaces/DeviceInterfaces/SwitchingDevice/` | `Ask.Device.Application/FunctionAdapters/DeviceBusCommutation/`, `Ask.Device.Runtime/Function/DeviceBusCommutation/` |
 | Быстрый мультиметр | `Ask.Core/Shared/Interfaces/DeviceInterfaces/Multimeter/` | `Ask.Device.Runtime/Device/KeysightDevice.cs`, `Ask.Device.Runtime/Device/MultimeterB7783.cs`, `Ask.Device.Runtime/Function/Base/Multimeter/` |
+| Диапазоны напряжения ППУ, шаг и исключения | `Ask.Core/Shared/DTO/Devices/Breakdown/VoltageRange.cs`, `Ask.Device.Runtime/Device/GPT79904.cs` | [Диапазоны GPT](#breakdown-voltage-ranges), `VoltageManagment.cs`, `PiVoltageProcessor.cs`, `SiVoltageProcessor.cs`, `AppDbContext.Device.cs` |
 | Пробойная установка GPT | `Ask.Device.ResponseProcessor/BreakdownTester/`, `Ask.Core/Shared/Interfaces/DeviceInterfaces/BreakdownTester/` | `Ask.Device.Application/FunctionAdapters/GPT/`, `Ask.Device.Runtime/Function/GPT/`, `Ask.Device.Runtime/Device/GPT79904.cs` |
 | Источник напряжения/тока | `Ask.Core/Shared/Interfaces/DeviceInterfaces/PowerSourceModule/` | `Ask.Device.Application/FunctionAdapters/ModuleVoltageCurrent/`, `Ask.Device.Runtime/Function/ModuleVoltageCurrentSource/` |
 | Шасси и питание | `Ask.Core/Shared/Interfaces/DeviceInterfaces/Chassis/` | `Ask.Device.Runtime/Device/ManagerChassis.cs`, `Ask.Device.Runtime/Function/ManagerChassis/`, `Ask.Device.Emulator/Chassis/`, `UI/Components/PowerButton.xaml.cs` |
@@ -66,6 +67,7 @@ Size/Foreground и анимации общей кнопки; лицензия с
 | Crash reports | `MainWindow/App.xaml.cs`, `MainWindow/Init/PreStartupInitializer.cs`, `MainWindow/Services/TranslationServices.cs` | `Ask.Diagnostics/Services/CrashPackageService.cs`, `Ask.Diagnostics/Services/ExceptionDiagnosticReporter.cs`, `Ask.Diagnostics/Collectors/` |
 | Архивы APK/APKW | `Ask.UI/Features/Archive/` | `Ask.Core/Services/FileFormats/Apk/`, `MainWindow/Services/Conversion/` |
 | Рабочее пространство и вкладки | `UI/Components/MultiEditorControl.xaml.cs` | `UI/Components/MultiEditorMethods/FileManager.cs`, `UI/Services/`, `MainWindow/Services/MultiWindowService.cs` |
+| Автоматическая блокировка | `MainWindow/MainWindow.AutoLock.cs`, `Ask.Core/Services/App/InactivityLockPolicy.cs` | `ExecutionRunGuard.GetActivity`, `UiSettingsControl`, `UserInterfaceConfig`, `RoleLoginWindowManager`; [таймер](#automatic-inactivity-lock) |
 | Роли и права | `MainWindow/Init/RoleApplicationConfigurator.cs` | `Ask.Core/Services/Config/AppSettings/RoleAuthorizationConfig.cs`, `Ask.UI/Features/RoleManagement/` |
 | Фон главного окна и выделение меню | `MainWindow/MainWindow.xaml`, `UI/Controls/EmptyWorkspace/EmptyWorkspaceView.xaml` | `UI/Resources/Theme/{dark,light}.xaml`, `UI/Resources/Theme/{dark,light}.custom.xaml`, `UI/Components/MultiWindowControl.xaml` |
 | Административные и сервисные утилиты | `MainWindow/MainWindow.xaml`, `MainWindow/ViewModels/AdminViewModel.cs`, `MainWindow/Services/AdminServices.cs` | `UI/Controls/AdminPanel/ServiceUtilitiesControl.xaml`, `UI/Controls/AdminPanel/SetCommand.xaml`, `Ask.UI/Features/ServiceTools/{Gpt,Chassis,SwitchingDevice}/`, `UI/Controls/AdminPanel/DataBaseView.xaml` |
@@ -89,7 +91,85 @@ Size/Foreground и анимации общей кнопки; лицензия с
 - [Protocol generation, save and print](#protocol-flow)
 - [Error propagation and retry](#equipment-error-flow)
 - [Crash diagnostics](#crash-diagnostics-flow)
+- [Automatic inactivity lock](#automatic-inactivity-lock)
 - [Authentication and Debug access](#authentication-and-debug-access-flow)
+
+## Automatic Inactivity Lock
+
+### Purpose
+
+Блокировка с существующим выбором роли/пароля после отсутствия ввода в WPF-приложении.
+Не использует системный hook или GetLastInputInfo: ввод в других приложениях не сбрасывает отсчёт.
+
+### Entry Points / Files
+
+- `MainWindow/MainWindow.AutoLock.cs`: `InitializeAutoLock` из конструктора shell;
+  `AutoLock_PreProcessInput`, `AutoLock_Tick`.
+- `Ask.Core/Services/App/InactivityLockPolicy.cs`: проверка срока по монотонному Stopwatch.
+- `UI/Controls/Settings/UserInterface/UiSettingsControl.xaml(.cs)`:
+  карточка после языка/темы; 0/1/2/5/10 минут, 0 = «Никогда» (default).
+- `Ask.Core/Shared/DTO/Settings/UserInterfaceDto.cs`: `AutoLockMinutes`.
+- `Ask.Core/Services/Config/Base/UserInterfaceConfig.cs`: `GetAutoLockMinutes` выбирает интервал
+  по `RoleAuthorizationConfig.CurrentRole`; `GetParameterModel` возвращает его в `AutoLockMinutes`
+  для существующего UI. `SaveProtocolModel` обновляет только поле текущей роли и копирует остальные
+  интервалы из runtime-модели в сохраняемый DTO, даже если UI передал новую модель без этих полей.
+  Неподдерживаемые значения нормализуются в 0.
+- `Ask.DataBase.Provider/Migrations/20261006144346_AddUserInterfaceAutoLock.cs`:
+  недеструктивное добавление INTEGER NOT NULL DEFAULT 0 в UserInterface.
+- `DatabaseInitializationService.EnsureUserInterfaceAutoLockColumnAsync`:
+  идемпотентное дополнение принятой старой схемы без истории миграций.
+- `Ask.DataBase.Provider/Migrations/20261007043208_AddRoleAutoLockMinutes.cs`:
+  четыре nullable INTEGER-поля в `UserInterface`: `AdministratorAutoLockMinutes`,
+  `DeveloperAutoLockMinutes`, `AdjusterAutoLockMinutes`, `RootAutoLockMinutes`.
+  `null` означает отсутствие индивидуальной настройки: администратор/разработчик — 5 минут,
+  регулировщик/Root — 0 («Никогда»). Явно сохранённый 0 отличается от `null`.
+  Старый `AutoLockMinutes` оставлен в схеме для совместимости; общий интервал больше не определяет
+  таймер ролей. Остальные настройки интерфейса остаются общими. Без авторизации интервал равен 0.
+  Repair-метод выше также добавляет новые поля; существующие значения сохраняются.
+
+### Call Chains / Background Operations
+
+```text
+MainWindow.InitializeAutoLock
+→ InputManager.Current.PreProcessInput (Dispatcher shell)
+  → MouseEventArgs / KeyEventArgs / TextCompositionEventArgs → InactivityLockPolicy.Reset
+→ DispatcherTimer.Tick (Background, раз в секунду)
+  → ExecutionRunGuard.GetActivity (атомарный snapshot под SyncRoot)
+  → SystemStateManager.GetIsLocked
+  → проверка видимости, IsEnabled, текущей авторизации и глобального drawer
+  → InactivityLockPolicy.ShouldLock
+  → MainWindow.SwitchCurrentUserAsync
+  → существующий поток авторизации (см. Authentication and Debug access)
+  → успешное закрытие → Show/Activate → Reset
+```
+
+`ExecutionRunGuard` — общий слот `ActionExecutor.StartAsync` для программ контроля,
+тестов, самоконтроля и метрологии. Слот удерживается во время паузы, ожидания,
+отмены и финализации; освобождение выполняется после `ExecutionFinalizer`.
+`GetActivity` возвращает IsBusy и LastReleaseTimestamp; `Release` фиксирует Stopwatch timestamp,
+поэтому даже короткий процесс между двумя ticks сбрасывает срок до полного интервала.
+Проверка срока запрещена при busy, блокировке системы, авторизации, отключённом/скрытом shell
+и drawer, блокирующем глобальный ввод. Изменение интервала начинает новый отсчёт.
+После успешного `SwitchCurrentUserAsync` отсчёт явно сбрасывается, включая ручную смену
+между ролями с одинаковыми интервалами. Интервал выбирается заново на каждом tick;
+startup-загрузка общей UI-модели не зависит от порядка авторизации/фоновой инициализации БД.
+`GetIsControlProgramActive` не используется: это признак выбранной вкладки ПК, а не выполнения.
+На Closed shell таймер останавливается и обе подписки отсоединяются.
+Ручные тесты GPT из `Ask.UI/Features/ServiceTools/Gpt/Modes/{Acw,Dcw,Ir}Mode.xaml.cs`
+также захватывают общий слот в `StartTestButton_Click` и освобождают его в `finally`
+после измерения/ошибки. Занятый контур отклоняет повторный запуск с именем активного процесса.
+
+### Error Flow / Configuration
+
+Ошибка пароля сохраняет окно авторизации и скрытый shell. Крестик завершает приложение;
+неуспешный переход в `SwitchCurrentUserAsync` логируется и также завершает приложение.
+Бизнес-проверка пароля и выбор роли переиспользуются без изменения.
+`UserInterfaceConfig → UserInterfaceSettings → UserInterfaceDtoService → AppDbContext.UserInterface`.
+Ресурсы карточки/вариантов находятся в `Ask.UI/Resources/Localization/Language/Strings(.en).resx`.
+Проверки: `Ask.UI.UnitTests/Services/Config/UserInterfaceAutoLockRoleTests.cs` (defaults,
+изоляция ролей, явный 0, перезагрузка модели) и
+`Ask.Engine.UnitTests/DataBase/UserInterfaceAutoLockStorageTests.cs` (migration, SQLite round trip,
+идемпотентный repair). `UiSettingsControl.Loaded` перечитывает модель текущей роли при восстановлении вкладки.
 
 ## Solution Structure
 
@@ -287,7 +367,7 @@ App.OnStartup()
 → FileAssociationRegistrar.RegisterCurrentUserAssociations()
 → ApplicationClockService.Start()
 → Task.Run(PreStartupInitializer.Initialize)
-→ RoleLoginWindowManager.Show/WaitForAuthenticationAsync
+→ await RoleLoginWindowManager.ShowAsync/WaitForAuthenticationAsync
 → RoleApplicationConfigurator.Apply(role)
 → await startup initialization
 → InitializeTheme()
@@ -300,8 +380,9 @@ App.OnStartup()
   → CommandLineParser.ProcessCommandLineArgs()
   → ApplicationInitializer.SubscribeToMessageEvents()
   → HotkeyBinderManager.AttachAllHotkeys()
-→ ApplicationActivator.FlushPendingFileRequests()
+→ RoleLoginWindowManager.CloseAsync()
 → show main window
+→ ApplicationActivator.FlushPendingFileRequests()
 ```
 
 ### Authentication and Debug access flow
@@ -350,15 +431,21 @@ ApplicationClockService.CurrentDateTime.Date. Если есть невыполн
 Нормализация старого JSON без `Login` добавляет `admin`/`adjuster`/`developer`/`root`,
 сохраняя существующие хэши и соли паролей. После входа то же окно показывает загрузку,
 а `RoleLoginWindowManager` сохраняет прежний жизненный цикл окна на отдельном STA-потоке.
+Первичное открытие через `App.OnStartup → await ShowAsync() → StartWindow` не блокирует
+главный Dispatcher: продолжение после `windowStarted.Task` возвращается на него.
+Синхронное ожидание этой задачи на главном UI-потоке приводит к deadlock до обработки
+результата авторизации (окно входа остаётся на «Подготовка приложения...»).
 
 Загрузка оформлена локальным `LoadingCircuitAnimation` в `MainWindow/RoleLoginWindow.xaml`:
 циклический импульс проходит через три узла. Это индикатор ожидания, а фактический этап
 приходит через `UpdateLoadingStatus`; при `FailStartupLoading` возвращается форма входа.
 
 Завершение успешного входа проходит через:
-`App.OnStartup → MainWindow.InitializeAsync → MainWindow.Visibility = Visible
+`App.OnStartup → скрытый MainWindow → MainWindow.InitializeAsync
 → RoleLoginWindowManager.CloseAsync → Dispatcher.InvokeAsync(CompleteStartupLoading)
-→ RoleLoginWindow.Close`. Окно входа закрывается после готовности главного окна.
+→ RoleLoginWindow.Close → MainWindow.Show`. До успешного закрытия авторизации
+главное окно не показывается. `ApplicationActivator` блокирует ACTIVATE/OPENFILE
+при `RoleLoginWindowManager.IsAuthenticationActive`; отложенные файлы открываются после входа.
 Storyboard загрузки снимается при возврате формы после ошибки и при закрытии окна.
 
 Debug-доступ не является параметром запуска или независимо изменяемым состоянием.
@@ -380,14 +467,28 @@ RoleLoginWindow authenticates RoleCredentialModel successfully
 
 При смене пользователя главное окно передаётся в `RoleLoginWindowManager.ShowAsync` как owner.
 Ожидание открытия асинхронно, чтобы основной Dispatcher продолжал обрабатывать системные сообщения.
-Manager получает native handle через `WindowInteropHelper` и блокирует окно
-владельца через `EnableWindow(false)` до закрытия окна входа; исходно отключённый owner
+Manager сначала вызывает штатный WPF `owner.Hide()`, получает native handle
+через `WindowInteropHelper` и блокирует окно
+владельца через `EnableWindow(false)` до успешного закрытия окна входа; исходно отключённый owner
 не включается. `MainWindow.SwitchCurrentUserAsync` также временно отключает WPF `IsEnabled`
 и восстанавливает прежнее значение в `finally`. `InputManager_PreProcessInput` отменяет ввод
 основного Dispatcher во время смены пользователя, включая глобальные горячие клавиши.
 `SwitchCurrentUserAsync` сохраняет исходный `Window.Effect`, применяет `BlurEffect` с радиусом 8
 перед открытием окна входа и восстанавливает исходный эффект в `finally`. Окно входа
-на отдельном Dispatcher не размывается. Первичный запуск без owner сохраняет прежний маршрут.
+на отдельном Dispatcher не размывается. Первичный запуск без owner использует тот же флаг авторизации.
+`MainWindow/Init/WindowOpacityTransition.cs` задаёт переходы Opacity за 180 мс
+с QuadraticEase: ShowAsync показывает окно с Opacity=0 и доводит её до 1;
+HideAsync сначала доводит Opacity до 0, затем вызывает штатный Hide и восстанавливает
+базовую Opacity=1. Completed/Closed снимают подписки и clock; крестик во время
+анимации завершает ожидающую задачу. StartWindow отключает owner до fade-out
+и открывает авторизацию только после Hide; Loaded завершается после fade-in.
+CloseAsync делает fade-out авторизации на её Dispatcher и затем закрывает окно;
+крестик во время перехода остаётся отменой без показа shell. После CloseAsync
+App.OnStartup / SwitchCurrentUserAsync вызывают ShowAsync главного окна;
+флаг смены пользователя удерживается до окончания появления.
+`ClosedByUser` публикуется на Dispatcher приложения; при повторном входе shell завершает приложение.
+`IsClosedByUser` не даёт позднему `CloseAsync` показать основное окно после крестика.
+Только успешный `SwitchCurrentUserAsync` вызывает `Show/Activate`; ошибка перехода завершает приложение.
 
 Смена пользователя без перезапуска проходит через
 `MainWindow.SwitchCurrentUserAsync → RoleLoginWindowManager → успешная аутентификация
@@ -667,6 +768,8 @@ RunControl.Start(models)
   → new CommandExecutionManager(ProtocolUI, editor, models, opkPath)
   → subscribe AddError/ClearError
   → CommandExecutionManager.ExecuteAllAsync()
+    → ValidateInputsAsync (все ошибки перевода и диапазоны ППУ до первой команды;
+      подробности: раздел breakdown-voltage-ranges)
 ```
 
 #### Command dispatch flow
@@ -1654,6 +1757,64 @@ executor/metrology
   Idle-ветка `MeasureHelper.MeasureAsync` возвращает симулированное значение со статусом `Pass`;
 - `BreakdownTesterMessages` является фасадом над `Ask.Protocol.Messages` для рабочих операций
   ACW/DCW/IR/System и самоконтроля; существующие тексты сообщений остаются в вызывающем коде.
+
+<a id="breakdown-voltage-ranges"></a>
+### Диапазоны установки напряжения GPT
+
+- Предварительная проверка до оборудования: `UIValidationHelper.EnsureValidMetrologyInputAsync`
+  → разбор точек/параметров и проверка конфигурации
+  → `BreakdownTesters.GetDevicesByNumberChassisAsync(firstPoint.DeviceNumber)`
+  → `BreakdownInputValidator.ValidateMeasurement` → `ValidateVoltage` → `VoltageRange.IsAllowed`.
+  Общий путь используется метрологией, узловыми и групповыми тестами SI/PI ACW/DCW.
+  Для метрологии PI проверяется `DataModel.Param`, для SI и тестов PI — `DataModel.Voltage`;
+  ошибка публикуется до `ConnectToEquipment`, reset, коммутации и настройки ППУ.
+  Все девять метрологических `Mode*.ExecuteMeasurementProcess` также вызывают
+  `MeasurementToleranceCalculator.TryCalculateAsync(mode, data.Param, output)` до
+  `ConnectToEquipment`: значение вне таблицы метрологических погрешностей останавливает
+  запуск до подключения. Проверки в `PerformMeasurement` сохраняются для повторных измерений.
+- `CommandExecutionManager.ExecuteAllCoreAsync` сначала вызывает `ValidateInputsAsync`:
+  проверяет ошибки перевода всех команд, определяет шасси по каждой РМ и проверяет
+  все PI/SI через `BreakdownInputValidator.ValidateCommand`, включая вложенную `PiCommandModel.SiCommand`.
+  Выбор ППУ соответствует порядку шасси РМ и первому найденному устройству, как в
+  `EquipmentService.GetBreakdownTesterOrThrow`. Читается runtime-конфигурация без подключения;
+  диапазоны повторно проверяются при запуске даже после успешного перевода программы.
+  `InputValidationException` выводится через `ValidationMessages.PublishDataErrorAsync`;
+  проверка стоит вне цикла исполнения, поэтому ошибка не запускает аварийную КСЦ.
+  Файл валидатора: `Ask.Engine/ControlCommandExecutor/Execution/BreakdownInputValidator.cs`.
+- `AcwMode`, `DcwMode`, `IrMode` задают диапазоны (В): ACW 50–700 / шаг 2; DCW 50–1000 / шаг 2;
+  IR 50–1000 / шаг 50 / исключение 125. Максимумы остаются ограничениями системы.
+- `IBreakdownMode<TConfig>.VoltageRange` наследуется интерфейсами `IAcwModeBreakdown`,
+  `IDcwModeBreakdown`, `IIrModeBreakdown`; доступ через `IBreakdownTester.{Acw,Dcw,Ir}Manger.VoltageRange`.
+  Runtime-режим владеет диапазоном отдельно от `Config`; reset и смена режима не меняют диапазон.
+  `DeviceApplicationComposer.Compose` → `{Acw,Dcw,Ir}ModeAdapter` сохраняет диапазон прежнего
+  режима и делегирует свойство внутреннему runtime-режиму. `BreakdownTesterMapper` и
+  `GPT79904.Convert` явно копируют диапазоны между режимами и прежними полями DTO;
+  схема БД и формат JSON конфигурации сохраняются.
+- `IBreakdownTester.{Acw,Dcw,Ir}Manger.VoltageRange` → `VoltageManagment.SetVoltageAsync`
+  → `VoltageRange.IsAllowed` **до** `CongifHelper.SetParameterAsync` и cached-value shortcut
+  → `VoltageHelper.SetVoltageAsync` → SCPI `MANU:{ACW,DCW,IR}:VOLT` (значение в кВ)
+  → Real/Idle protocol. Проверка одинакова для Real и Idle.
+- `PiVoltageProcessor.Process` выбирает диапазон ACW/DCW из `ParameterContext.Breakdown`,
+  `SiVoltageProcessor.Process` — IR; проверяются границы, шаг и исключения до исполнения.
+- Сервисные `Modes/{Acw,Dcw,Ir}Mode.xaml.cs.LoadConfigurationAsync` устанавливают
+  `NumericComboBox.Minimum/Maximum/Increment/Exceptions` из выбранного устройства.
+  Общий `NumericComboBox` сохраняет введённое исключение без округления и добавляет его
+  в список выбора; остальные числовые поля продолжают использовать прежнюю сетку.
+- `AppDbContext.Device.OnModelCreating` сохраняет три диапазона как JSON в TEXT-колонках
+  `BreakdownTesters.AcwVoltageRange/DcwVoltageRange/IrVoltageRange`. `ValueComparer`
+  отслеживает изменение полей и списка исключений; `BreakdownTesterMapper` и `GPT79904.Convert`
+  копируют диапазоны без разделения изменяемых ссылок между DTO и runtime.
+- Миграция `20261006045223_AddBreakdownVoltageRanges` переносит прежние максимумы ACW/DCW,
+  минимум `IRMinVoltage` и максимум `SiMaxVoltage`, добавляет шаги/исключение, затем удаляет
+  старые колонки. Нулевые/отрицательные legacy-границы заменяются defaults GPT (50 В,
+  максимумы 700/1000/1000 В): прежняя автоконфигурация сохраняла IR-границы как нули. `Down` восстанавливает старые границы из JSON; шаг/исключения старой схемой
+  не поддерживаются. `DatabaseInitializationService.EnsureBreakdownTesterVoltageColumnsAsync`
+  выполняет идемпотентный перенос для схем без истории миграций, включая legacy `PiMaxVoltage`.
+- `UI/.../Configuration/DeviceConfigurationService` экспортирует формат версии 2;
+  `ParseConfigurationFile` принимает старые scalar поля версии 1 и преобразует их в диапазоны.
+  `BreakDownWindow` сохраняет полные диапазоны и не заменяет их defaults при редактировании подключения.
+- Проверки: `BreakdownVoltageRangeTests`, `BreakdownVoltageTranslationTests`,
+  `BreakdownVoltageRangeStorageTests`, `BreakdownVoltageUiTests` в соответствующих unit-test проектах.
 
 Runtime-путь GPT:
 
@@ -2988,6 +3149,15 @@ write through to SQLite.
 
 ## Shared Contracts and DTO
 
+`Ask.Core.Shared.DTO.Devices.Breakdown.VoltageRange`
+(`Ask.Core/Shared/DTO/Devices/Breakdown/VoltageRange.cs`) — модель диапазона установки
+напряжения: `MinVoltage`, `MaxVoltage` (ограничение системы), `Step` от минимума и
+`Exceptions` — отдельные допустимые напряжения вне сетки шага, но внутри диапазона.
+Все значения в вольтах; `IsAllowed` проверяет границы, шаг от минимума и исключения,
+`Clone` создаёт независимую копию списка. `IBreakdownMode<TConfig>` содержит `VoltageRange`;
+`BreakdownTesterDto` сохраняет `AcwVoltageRange`, `DcwVoltageRange`, `IrVoltageRange`.
+Старые scalar properties удалены; [подключение диапазонов](#breakdown-voltage-ranges).
+
 Main contract groups:
 
 - `Shared/Interfaces/DeviceInterfaces` — `IDevice`, `IConnectable`,
@@ -3022,6 +3192,8 @@ ErrorItem → translator/runner ErrorList
 
 | Type | Kind | Project | Responsibility | Section |
 | --- | --- | --- | --- | --- |
+| `InactivityLockPolicy` | policy | Ask.Core | монотонный отсчёт бездействия, запрет при занятом контуре | [Auto lock](#automatic-inactivity-lock) |
+| `ExecutionRunGuard` | execution guard | Ask.UI | общий слот выполнения, snapshot занятости и последнего завершения | [Auto lock](#automatic-inactivity-lock) |
 | `CalendarNoteService` | file storage service | Ask.Core | общие заметки календаря, атомарный JSON и межпроцессная синхронизация | [Calendar notes](#calendar-notes) |
 | `CalendarControl` / `CalendarViewModel` | WPF control / view model | UI | выбор даты, отметки заметок и опциональный CRUD общих записей | [Calendar notes](#calendar-notes) |
 | `App` | WPF application | MainWindowProgram | process startup/global failure handling | [Entry Points](#entry-points) |

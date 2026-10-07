@@ -32,6 +32,11 @@ namespace Ask.UI.Features.ServiceTools.Gpt.Modes
     {
       try
       {
+        var range = GptUiOperation.GetDevice(deviceContext).DcwManger.VoltageRange;
+        VoltageSlider.Minimum = range.MinVoltage;
+        VoltageSlider.Maximum = range.MaxVoltage;
+        VoltageSlider.Increment = range.Step;
+        VoltageSlider.Exceptions = range.Exceptions;
         var systemData = await GptUiOperation.GetDevice(deviceContext).DcwManger.Config.ReadConfigurationAsync();
 
         VoltageSlider.Value = systemData.Voltage * 1000.0;
@@ -89,6 +94,13 @@ namespace Ask.UI.Features.ServiceTools.Gpt.Modes
     /// <param name="e">Данные события.</param>
     private async void StartTestButton_Click(object sender, RoutedEventArgs e)
     {
+      var runGuard = new Ask.UI.Features.ProtocolNew.Execution.ExecutionRunGuard();
+      if (!runGuard.TryAcquire("Ручной тест GPT DCW", this, out var activeProcessName))
+      {
+        TestResultText.Text = $"Уже выполняется: {activeProcessName}";
+        return;
+      }
+
       try
       {
         MeasurementRange measurementRange = new MeasurementRange(0, 0, 0);
@@ -99,6 +111,10 @@ namespace Ask.UI.Features.ServiceTools.Gpt.Modes
       {
         TestResultText.Text = "Результат теста: ошибка оборудования";
         GptUiOperation.ReportError("запуск теста DCW", ex);
+      }
+      finally
+      {
+        runGuard.Release(this);
       }
     }
 

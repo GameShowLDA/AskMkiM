@@ -23,6 +23,7 @@ using System.IO;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Text.Json.Nodes;
 
 namespace UI.Controls.Settings.Configuration;
 
@@ -72,7 +73,7 @@ public static class DeviceConfigurationService
 
     return new DeviceConfigurationFileModel
     {
-      Version = 1,
+      Version = 2,
       ExportedAtUtc = DateTime.UtcNow,
       Chassis = chassisTask.Result
         .OrderBy(x => x.Number)
@@ -113,6 +114,28 @@ public static class DeviceConfigurationService
 
   internal static DeviceConfigurationFileModel ParseConfigurationFile(string json)
   {
+    var document = JsonNode.Parse(json, new JsonNodeOptions { PropertyNameCaseInsensitive = true })
+      ?? throw new InvalidDataException("Не удалось прочитать JSON конфигурации.");
+    if (document["BreakdownTesters"] is JsonArray testers)
+    {
+      foreach (var tester in testers.OfType<JsonObject>())
+      {
+        tester["AcwVoltageRange"] ??= JsonSerializer.SerializeToNode(new Ask.Core.Shared.DTO.Devices.Breakdown.VoltageRange
+        {
+          MinVoltage = 50, MaxVoltage = tester["AcwMaxVoltage"]?.GetValue<double>() is > 0 and var acwMaxVoltage ? acwMaxVoltage : 700, Step = 2,
+        });
+        tester["DcwVoltageRange"] ??= JsonSerializer.SerializeToNode(new Ask.Core.Shared.DTO.Devices.Breakdown.VoltageRange
+        {
+          MinVoltage = 50, MaxVoltage = tester["DcwMaxVoltage"]?.GetValue<double>() is > 0 and var dcwMaxVoltage ? dcwMaxVoltage : 1000, Step = 2,
+        });
+        tester["IrVoltageRange"] ??= JsonSerializer.SerializeToNode(new Ask.Core.Shared.DTO.Devices.Breakdown.VoltageRange
+        {
+          MinVoltage = tester["IRMinVoltage"]?.GetValue<double>() is > 0 and var iRMinVoltage ? iRMinVoltage : 50,
+          MaxVoltage = tester["SiMaxVoltage"]?.GetValue<double>() is > 0 and var siMaxVoltage ? siMaxVoltage : 1000, Step = 50, Exceptions = [125],
+        });
+      }
+    }
+    json = document.ToJsonString();
     var model = JsonSerializer.Deserialize<DeviceConfigurationFileModel>(json, ImportJsonOptions)
       ?? throw new InvalidDataException("Не удалось прочитать JSON конфигурации.");
 

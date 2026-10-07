@@ -44,6 +44,16 @@ namespace Ask.Device.Runtime.Function.GPT.Managment
     /// <inheritdoc />
     public async Task<(bool Success, string Message)> SetVoltageAsync(double value, IUserInteractionService? userMessageService = null)
     {
+      var range = _mode switch
+      {
+        BreakdownTypeMode.ACW => _gptModel.AcwManger.VoltageRange,
+        BreakdownTypeMode.DCW => _gptModel.DcwManger.VoltageRange,
+        BreakdownTypeMode.IR => _gptModel.IrManger.VoltageRange,
+        _ => throw new NotSupportedException($"Режим {_mode} не поддерживает установку напряжения."),
+      };
+      if (!range.IsAllowed(value))
+        return (false, $"Недопустимое напряжение {value} В для {_mode}: диапазон {range.MinVoltage}–{range.MaxVoltage} В, шаг {range.Step} В.");
+
       double kvValue = value / 1000;
 
       var result = await CongifHelper.SetParameterAsync(

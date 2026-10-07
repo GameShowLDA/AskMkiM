@@ -1,3 +1,4 @@
+using VoltageRange = Ask.Core.Shared.DTO.Devices.Breakdown.VoltageRange;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Errors.Device;
 using Ask.Core.Services.Errors.Device.Breakdown;
@@ -39,6 +40,13 @@ namespace Ask.Device.Application.FunctionAdapters.GPT
     /// Адаптер, обеспечивающий управление параметрами напряжения в режиме ACW.
     /// </summary>
     public IVoltageConfigurable Voltage { get; set; }
+
+    /// <inheritdoc />
+    public VoltageRange VoltageRange
+    {
+      get => _acwMode.VoltageRange;
+      set => _acwMode.VoltageRange = value;
+    }
 
     /// <summary>
     /// Адаптер, обеспечивающий управление пределами тока (верхним и нижним) в режиме ACW.
@@ -115,7 +123,7 @@ namespace Ask.Device.Application.FunctionAdapters.GPT
     public AcwModeAdapter(GPT79904 device)
     {
       _device = device ?? throw new ArgumentNullException(nameof(device));
-      _acwMode = new AcwMode(device);
+      _acwMode = new AcwMode(device) { VoltageRange = device.AcwManger.VoltageRange };
 
       Mode = new AcwAdapterMode(_acwMode, _device);
       Voltage = new VoltageAdapterMode(_acwMode, _device);

@@ -23,15 +23,17 @@ namespace Ask.DataBase.Provider.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("AcwMaxVoltage")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("AcwVoltageRange")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("ConnectionDetails")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("DcwMaxVoltage")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("DcwVoltageRange")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -44,10 +46,11 @@ namespace Ask.DataBase.Provider.Migrations
                     b.Property<int>("DeviceType")
                         .HasColumnType("INTEGER");
 
-                    b.Property<bool>("IsHardwareFailureSimulationEnabled")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("IrVoltageRange")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
-                    b.Property<int>("IRMinVoltage")
+                    b.Property<bool>("IsHardwareFailureSimulationEnabled")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("Mode")
@@ -61,9 +64,6 @@ namespace Ask.DataBase.Provider.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("NumberChassis")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("SiMaxVoltage")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("SystemInsulationResistanceGOhm")
@@ -873,6 +873,13 @@ namespace Ask.DataBase.Provider.Migrations
                     b.Property<bool>("GenerateProtocol")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("PrintFontFamily")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<double>("PrintFontSize")
+                        .HasColumnType("REAL");
+
                     b.Property<bool>("ShowCommandHeadersInProtocol")
                         .HasColumnType("INTEGER");
 
@@ -902,9 +909,24 @@ namespace Ask.DataBase.Provider.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<int?>("AdjusterAutoLockMinutes")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("AdministratorAutoLockMinutes")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("AutoLockMinutes")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("DeveloperAutoLockMinutes")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Language")
                         .IsRequired()
                         .HasColumnType("TEXT");
+
+                    b.Property<int?>("RootAutoLockMinutes")
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("Theme")
                         .HasColumnType("INTEGER");
@@ -918,13 +940,13 @@ namespace Ask.DataBase.Provider.Migrations
                     b.Property<bool>("UseCommandBodyBackgroundHighlighting")
                         .HasColumnType("INTEGER");
 
-                    b.Property<bool>("UseSyntaxHighlighting")
+                    b.Property<bool>("UseStyleErrorUnderlining")
                         .HasColumnType("INTEGER");
 
                     b.Property<bool>("UseSyntaxErrorUnderlining")
                         .HasColumnType("INTEGER");
 
-                    b.Property<bool>("UseStyleErrorUnderlining")
+                    b.Property<bool>("UseSyntaxHighlighting")
                         .HasColumnType("INTEGER");
 
                     b.Property<bool>("UseTopMenuIcons")

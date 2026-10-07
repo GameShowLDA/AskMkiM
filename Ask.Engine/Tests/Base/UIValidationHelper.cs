@@ -12,6 +12,7 @@ using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.Core.Shared.Metadata.Static;
 using Ask.Core.Shared.Metadata.Static.Messages;
 using Ask.DataBase.Engine.Static.Devices;
+using Ask.Engine.ControlCommandExecutor.Execution;
 using System.Globalization;
 
 namespace Ask.Engine.Tests.Base
@@ -84,6 +85,20 @@ namespace Ask.Engine.Tests.Base
             timeRampCheck: timeRampCheck,
             busCheck: busCheck,
             pairBusCheck: pairBusCheck);
+
+        if (metrologyMode is MeasurementTypeCommand.SI or MeasurementTypeCommand.PI_ACW or MeasurementTypeCommand.PI_DCW)
+        {
+          var tester = (await BreakdownTesters.GetDevicesByNumberChassisAsync(result.FirstPoint.DeviceNumber))
+            .FirstOrDefault();
+          if (tester == null)
+            throw new InputValidationException(new ErrorItem
+            {
+              Code = ErrorCode.Metrology_Validation_EquipmentNotFound,
+              Description = $"Пробойная установка для шасси {result.FirstPoint.DeviceNumber} не найдена в конфигурации."
+            });
+
+          BreakdownInputValidator.ValidateMeasurement(tester, metrologyMode.Value, result, voltageCheck);
+        }
 
         MeasurementTestData.SaveMeasurementData(
           result,

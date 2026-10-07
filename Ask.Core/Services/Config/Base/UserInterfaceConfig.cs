@@ -3,6 +3,7 @@ using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.DTO.Settings;
+using Ask.Core.Shared.Metadata.Enums.RoleEnums;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
 
 namespace Ask.Core.Services.Config.Base
@@ -59,6 +60,8 @@ namespace Ask.Core.Services.Config.Base
     {
       SetLanguage(user.Language);
       SetTheme(user.Theme);
+      UserInterfaceModel.AutoLockMinutes = NormalizeAutoLockMinutes(user.AutoLockMinutes);
+      CopyRoleAutoLockMinutes(user, UserInterfaceModel);
       SetSyntaxHighlighting(user.UseSyntaxHighlighting);
       SetDiagnosticUnderliningMode(DiagnosticUnderliningModeExtensions.FromVisibility(
         user.UseSyntaxErrorUnderlining, user.UseStyleErrorUnderlining));
@@ -81,6 +84,24 @@ namespace Ask.Core.Services.Config.Base
     /// <returns>true, если отображается; false, если скрывается.</returns>
     public static Task<string> GetLanguage() => Task.FromResult(UserInterfaceModel.Language);
     public static Task<ThemeMode> GetTheme() => Task.FromResult(UserInterfaceModel.Theme);
+    public static int GetAutoLockMinutes() => NormalizeAutoLockMinutes(RoleAuthorizationConfig.CurrentRole switch
+    {
+      RoleType.Administrator => UserInterfaceModel.AdministratorAutoLockMinutes ?? 5,
+      RoleType.Developer => UserInterfaceModel.DeveloperAutoLockMinutes ?? 5,
+      RoleType.Adjuster => UserInterfaceModel.AdjusterAutoLockMinutes ?? 0,
+      RoleType.Root => UserInterfaceModel.RootAutoLockMinutes ?? 0,
+      _ => 0
+    });
+    private static int NormalizeAutoLockMinutes(int value) => value is 1 or 2 or 5 or 10 ? value : 0;
+
+    private static void CopyRoleAutoLockMinutes(UserInterfaceDto source, UserInterfaceDto target)
+    {
+      target.AdministratorAutoLockMinutes = source.AdministratorAutoLockMinutes;
+      target.DeveloperAutoLockMinutes = source.DeveloperAutoLockMinutes;
+      target.AdjusterAutoLockMinutes = source.AdjusterAutoLockMinutes;
+      target.RootAutoLockMinutes = source.RootAutoLockMinutes;
+    }
+
     public static bool GetSyntaxHighlighting() => UserInterfaceModel.UseSyntaxHighlighting;
     public static bool GetSyntaxErrorUnderlining() => UserInterfaceModel.UseSyntaxErrorUnderlining;
     public static bool GetStyleErrorUnderlining() => UserInterfaceModel.UseStyleErrorUnderlining;
@@ -95,6 +116,7 @@ namespace Ask.Core.Services.Config.Base
       {
         Language = UserInterfaceModel.Language,
         Theme = UserInterfaceModel.Theme,
+        AutoLockMinutes = GetAutoLockMinutes(),
         UseSyntaxHighlighting = UserInterfaceModel.UseSyntaxHighlighting,
         UseSyntaxErrorUnderlining = UserInterfaceModel.UseSyntaxErrorUnderlining,
         UseStyleErrorUnderlining = UserInterfaceModel.UseStyleErrorUnderlining,
@@ -103,6 +125,7 @@ namespace Ask.Core.Services.Config.Base
         UseTopMenuIcons = UserInterfaceModel.UseTopMenuIcons,
         UseCommandAutoCollapse = UserInterfaceModel.UseCommandAutoCollapse
       };
+      CopyRoleAutoLockMinutes(UserInterfaceModel, parametrModel);
       return Task.FromResult(parametrModel);
     }
 
@@ -110,6 +133,23 @@ namespace Ask.Core.Services.Config.Base
     {
       SetLanguage(parametrModel.Language);
       SetTheme(parametrModel.Theme);
+      parametrModel.AutoLockMinutes = NormalizeAutoLockMinutes(parametrModel.AutoLockMinutes);
+      switch (RoleAuthorizationConfig.CurrentRole)
+      {
+        case RoleType.Administrator:
+          UserInterfaceModel.AdministratorAutoLockMinutes = parametrModel.AutoLockMinutes;
+          break;
+        case RoleType.Developer:
+          UserInterfaceModel.DeveloperAutoLockMinutes = parametrModel.AutoLockMinutes;
+          break;
+        case RoleType.Adjuster:
+          UserInterfaceModel.AdjusterAutoLockMinutes = parametrModel.AutoLockMinutes;
+          break;
+        case RoleType.Root:
+          UserInterfaceModel.RootAutoLockMinutes = parametrModel.AutoLockMinutes;
+          break;
+      }
+      CopyRoleAutoLockMinutes(UserInterfaceModel, parametrModel);
       SetSyntaxHighlighting(parametrModel.UseSyntaxHighlighting);
       var diagnosticMode = DiagnosticUnderliningModeExtensions.FromVisibility(
         parametrModel.UseSyntaxErrorUnderlining, parametrModel.UseStyleErrorUnderlining);
