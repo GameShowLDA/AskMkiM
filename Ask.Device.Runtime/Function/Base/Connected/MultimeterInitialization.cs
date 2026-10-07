@@ -16,7 +16,7 @@ internal static class MultimeterInitialization
 {
   internal static async Task<(bool Connect, string Answer)> InitializeAsync(
     IMultimeter device, string command, int port = 0, IUserInteractionService? messages = null,
-    Action<int>? onAttempt = null)
+    Action<int>? onAttempt = null, Func<int, CancellationToken, Task>? delayAsync = null)
   {
     using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(
       EquipmentExecutionContext.CancellationToken,
@@ -30,7 +30,7 @@ internal static class MultimeterInitialization
       {
         int delay = (attempt - 1) * 1000;
         LogInformation($"[{device.Name}] Инициализация: пауза {delay} мс перед попыткой {attempt}/{attempts}.", isDeviceLog: true);
-        await Task.Delay(delay, token);
+        await (delayAsync ?? Task.Delay)(delay, token);
       }
 
       LogInformation($"[{device.Name}] Инициализация: попытка {attempt}/{attempts}, команда {command}, ожидание 1000 мс.", isDeviceLog: true);

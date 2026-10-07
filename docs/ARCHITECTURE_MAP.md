@@ -1941,6 +1941,8 @@ IMultimeter.ConnectableManager.InitializeAsync()
 и паузам. Idle выполняет единственный запрос эмулятору. Предварительное подключение
 остаётся в TCP/USB transport; измерения, сброс и другие устройства этот механизм не используют.
 Регрессии: `Ask.Engine.UnitTests/DeviceRuntime/MultimeterInitializationTests.cs`.
+Внутренний параметр `delayAsync` позволяет тестам проверять точные запрошенные паузы
+и их порядок без зависимости от системного таймера; production-вызовы используют `Task.Delay`.
 
 Номер фактически выполненной попытки передаётся callback `onAttempt` из
 `MultimeterInitialization` через внутренние overloads TCP/USB в локальную переменную

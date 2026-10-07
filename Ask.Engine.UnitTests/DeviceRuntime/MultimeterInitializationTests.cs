@@ -5,7 +5,6 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Device.Runtime.Function.Base.Connected;
 using Moq;
-using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using Ask.Device.Runtime.Device;
@@ -139,24 +138,31 @@ public sealed class MultimeterInitializationTests
       var protocol = new Mock<IDeviceProtocol>();
       device.SetupGet(x => x.Name).Returns("Keysight 34465A");
       device.SetupGet(x => x.DeviceProtocol).Returns(protocol.Object);
-      var sends = new List<TimeSpan>();
-      var clock = Stopwatch.StartNew();
+      int sends = 0;
+      var delays = new List<int>();
       protocol.Setup(x => x.QueryAsync("*IDN?", 0, 1000, 5025, 0, It.IsAny<CancellationToken>()))
         .Returns(() =>
         {
-          sends.Add(clock.Elapsed);
-          return sends.Count == successAttempt
+          sends++;
+          Assert.Equal(sends - 1, delays.Count);
+          return sends == successAttempt
             ? Task.FromResult(" Keysight Technologies,34465A,TEST,1.0 ")
             : Task.FromException<string>(new DeviceNoResponseException(device.Object, "*IDN?", 1000));
         });
 
-      var result = await MultimeterInitialization.InitializeAsync(device.Object, "*IDN?", 5025);
+      var result = await MultimeterInitialization.InitializeAsync(device.Object, "*IDN?", 5025,
+        delayAsync: (delay, token) =>
+        {
+          Assert.True(token.CanBeCanceled);
+          token.ThrowIfCancellationRequested();
+          delays.Add(delay);
+          return Task.CompletedTask;
+        });
 
       Assert.True(result.Connect);
       Assert.Equal("Keysight Technologies,34465A,TEST,1.0", result.Answer);
-      Assert.Equal(successAttempt, sends.Count);
-      for (int index = 1; index < sends.Count; index++)
-        Assert.True(sends[index] - sends[index - 1] >= TimeSpan.FromSeconds(index));
+      Assert.Equal(successAttempt, sends);
+      Assert.Equal(Enumerable.Range(1, successAttempt - 1).Select(index => index * 1000), delays);
       protocol.Verify(x => x.QueryAsync("*IDN?", 0, 1000, 5025, 0, It.IsAny<CancellationToken>()), Times.Exactly(successAttempt));
       protocol.VerifyNoOtherCalls();
     }
