@@ -76,6 +76,7 @@ public static class DatabaseInitializationService
     await EnsureSettingsProtocolPrintColumnsAsync(databasePath, report, progress, cancellationToken);
     await EnsureDeviceDisplayDelayMessagesColumnAsync(databasePath, report, progress, cancellationToken);
     await EnsureDiagnosticUnderliningColumnsAsync(databasePath, report, progress, cancellationToken);
+    await EnsureUserInterfaceAutoLockColumnAsync(databasePath, report, progress, cancellationToken);
     await EnsureFastMeterPpuDividerCoefficientColumnAsync(databasePath, report, progress, cancellationToken);
     await EnsureBreakdownTesterVoltageColumnsAsync(databasePath, report, progress, cancellationToken);
     await EnsureBreakdownTesterSystemInsulationResistanceColumnAsync(databasePath, report, progress, cancellationToken);
@@ -672,6 +673,27 @@ public static class DatabaseInitializationService
   /// <summary>
   /// Добавляет настройки подчёркиваний в принятую без истории миграций старую схему.
   /// </summary>
+  internal static async Task EnsureUserInterfaceAutoLockColumnAsync(
+    string databasePath,
+    DatabaseInitializationReport report,
+    Action<string>? progress,
+    CancellationToken cancellationToken)
+  {
+    await using var connection = new SqliteConnection($"Data Source={databasePath}");
+    await connection.OpenAsync(cancellationToken);
+    if (!await TableExistsAsync(connection, "UserInterface", cancellationToken)) return;
+    await EnsureColumnAsync(connection, "UserInterface", "AutoLockMinutes", "INTEGER NOT NULL DEFAULT 0",
+      report, progress, cancellationToken);
+    foreach (var column in new[]
+    {
+      nameof(UserInterfaceDto.AdministratorAutoLockMinutes), nameof(UserInterfaceDto.DeveloperAutoLockMinutes),
+      nameof(UserInterfaceDto.AdjusterAutoLockMinutes), nameof(UserInterfaceDto.RootAutoLockMinutes)
+    })
+    {
+      await EnsureColumnAsync(connection, "UserInterface", column, "INTEGER NULL", report, progress, cancellationToken);
+    }
+  }
+
   private static async Task EnsureDiagnosticUnderliningColumnsAsync(
     string databasePath,
     DatabaseInitializationReport report,

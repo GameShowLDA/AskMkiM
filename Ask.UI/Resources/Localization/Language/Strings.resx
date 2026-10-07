@@ -714,4 +714,11 @@
   <data name="settings.device.breakdownTester.systemInsulationResistance" xml:space="preserve">
     <value>Сопротивление изоляции системы, ГОм</value>
   </data>
+  <data name="Settings_AutoLock_Title" xml:space="preserve"><value>Автоматическая блокировка</value></data>
+  <data name="Settings_AutoLock_Description" xml:space="preserve"><value>Для текущей роли, при отсутствии действий и запущенных процессов</value></data>
+  <data name="Settings_AutoLock_0" xml:space="preserve"><value>Никогда</value></data>
+  <data name="Settings_AutoLock_1" xml:space="preserve"><value>1 минута</value></data>
+  <data name="Settings_AutoLock_2" xml:space="preserve"><value>2 минуты</value></data>
+  <data name="Settings_AutoLock_5" xml:space="preserve"><value>5 минут</value></data>
+  <data name="Settings_AutoLock_10" xml:space="preserve"><value>10 минут</value></data>
 </root>

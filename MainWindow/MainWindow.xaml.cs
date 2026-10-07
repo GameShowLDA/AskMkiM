@@ -94,6 +94,7 @@ namespace MainWindowProgram
     {
       InitializeComponent();
       InitializeTodayTasks();
+      InitializeAutoLock();
       AddHandler(Keyboard.PreviewKeyDownEvent, new KeyEventHandler(MainWindow_PreviewKeyDown), true);
 
       this.Visibility = Visibility.Hidden;
@@ -611,9 +612,11 @@ namespace MainWindowProgram
       }
 
       var loginWindowManager = new RoleLoginWindowManager();
+      loginWindowManager.ClosedByUser += () => Application.Current.Shutdown();
       var previousEffect = Effect;
       bool wasEnabled = IsEnabled;
       bool loginWindowShown = false;
+      bool authenticated = false;
 
       try
       {
@@ -646,6 +649,7 @@ namespace MainWindowProgram
         RestoreWorkspaceSession(authenticatedRole.Role);
         UpdateCurrentUserBadge();
         await loginWindowManager.CloseAsync();
+        authenticated = !loginWindowManager.IsClosedByUser;
       }
       catch (Exception exception)
       {
@@ -655,16 +659,24 @@ namespace MainWindowProgram
         }
 
         LogException("Ошибка смены пользователя.", exception);
-        MessageBoxCustom.Show($"Ошибка смены пользователя: {exception.Message}", image: MessageBoxImage.Error);
+        Application.Current.Shutdown();
       }
       finally
       {
         Effect = previousEffect;
         IsEnabled = wasEnabled;
-        _isUserSwitchInProgress = false;
-        if (IsVisible && wasEnabled)
+        if (authenticated && wasEnabled)
         {
-          Activate();
+          if (await WindowOpacityTransition.ShowAsync(this))
+          {
+            Activate();
+            ApplicationActivator.FlushPendingFileRequests();
+          }
+        }
+        _isUserSwitchInProgress = false;
+        if (authenticated)
+        {
+          _inactivityLock.Reset(System.Diagnostics.Stopwatch.GetTimestamp());
         }
         if (CurrentUserButton != null)
         {

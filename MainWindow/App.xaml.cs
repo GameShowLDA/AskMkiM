@@ -75,7 +75,7 @@ namespace MainWindowProgram
 
       try
       {
-        loginWindowManager.Show();
+        await loginWindowManager.ShowAsync();
 
         var authenticatedRole = await loginWindowManager.WaitForAuthenticationAsync();
         if (authenticatedRole == null)
@@ -99,7 +99,6 @@ namespace MainWindowProgram
           Visibility = Visibility.Hidden
         };
         Application.Current.MainWindow = mainWindow;
-        mainWindow.Show();
         ShutdownMode = ShutdownMode.OnMainWindowClose;
 
         await loginWindowManager.UpdateLoadingStatusAsync("Инициализация главного окна...");
@@ -109,9 +108,14 @@ namespace MainWindowProgram
         await SplashScreenManager.CloseSplashAsync();
 
         SetThreadExecutionState(EXECUTION_STATE.ES_CONTINUOUS | EXECUTION_STATE.ES_DISPLAY_REQUIRED);
-        mainWindow.Visibility = Visibility.Visible;
         await loginWindowManager.CloseAsync();
-        mainWindow.Show();
+        if (loginWindowManager.IsClosedByUser)
+        {
+          Application.Current.Shutdown();
+          return;
+        }
+        if (!await WindowOpacityTransition.ShowAsync(mainWindow)) return;
+        ApplicationActivator.FlushPendingFileRequests();
 
         if (databaseInitializationReport?.DatabaseAlreadyExisted == false)
         {

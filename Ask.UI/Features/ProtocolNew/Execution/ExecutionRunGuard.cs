@@ -5,7 +5,7 @@ namespace Ask.UI.Features.ProtocolNew.Execution;
 /// <summary>
 /// Потокобезопасная реализация глобального ограничения на один активный процесс выполнения.
 /// </summary>
-internal sealed class ExecutionRunGuard : IExecutionRunGuard
+public sealed class ExecutionRunGuard : IExecutionRunGuard
 {
   /// <summary>
   /// Объект синхронизации доступа к глобальному слоту.
@@ -21,6 +21,14 @@ internal sealed class ExecutionRunGuard : IExecutionRunGuard
   /// Имя текущего активного процесса.
   /// </summary>
   private static string _activeProcessName = string.Empty;
+
+  private static long _lastReleaseTimestamp;
+
+  /// <summary>Состояние занятого контура и время последнего освобождения по Stopwatch.</summary>
+  public static (bool IsBusy, long LastReleaseTimestamp) GetActivity()
+  {
+    lock (SyncRoot) return (_activeOwner != null, _lastReleaseTimestamp);
+  }
 
   internal static bool CanHandleInput(object owner)
   {
@@ -56,6 +64,7 @@ internal sealed class ExecutionRunGuard : IExecutionRunGuard
         return;
       }
 
+      _lastReleaseTimestamp = System.Diagnostics.Stopwatch.GetTimestamp();
       _activeOwner = null;
       _activeProcessName = string.Empty;
     }
