@@ -1886,6 +1886,7 @@ IBreakdownTester / GPT79904
 ```text
 IMultimeter.ConnectableManager.InitializeAsync()
 → TcpTransport.InitializeAsync() / UsbTransport.InitializeAsync()
+→ MultimeterInitialization.InitializeAsync()
 → DeviceProtocolEmulator.QueryMultimeterAsync(ConnectedProfile.Initialize, idleIdentificationResponse)
   → Real: TcpProtocol / UsbProtocol
   → Idle: идентификационный SCPI-ответ
@@ -1896,6 +1897,28 @@ IMultimeter.ConnectableManager.InitializeAsync()
     → Real: TcpProtocol / UsbProtocol
     → Idle: команда поглощается эмулятором без обращения к физическому прибору
 ```
+
+`Ask.Device.Runtime/Function/Base/Connected/MultimeterInitialization.cs` выполняет только
+идентификационный запрос мультиметра: Real — до трёх попыток с timeout 1000 мс каждая,
+перед попыткой 2 пауза 1000 мс, перед попыткой 3 — 2000 мс. Непустой ответ прекращает
+повторы; пустой ответ или `DeviceNoResponseException` допускают следующую попытку.
+Последнее исключение пробрасывается с сохранением stack trace в существующий
+`Transport.ExecuteOperationAsync` → `UserActionHelper`; три пустых ответа возвращают
+`Connect=false`. Попытки и паузы логируются, команды/ответы — через существующий
+`DeviceProtocolEmulator`. Отмена UI и `EquipmentExecutionContext` передаётся запросам
+и паузам. Idle выполняет единственный запрос эмулятору. Предварительное подключение
+остаётся в TCP/USB transport; измерения, сброс и другие устройства этот механизм не используют.
+Регрессии: `Ask.Engine.UnitTests/DeviceRuntime/MultimeterInitializationTests.cs`.
+
+Номер фактически выполненной попытки передаётся callback `onAttempt` из
+`MultimeterInitialization` через внутренние overloads TCP/USB в локальную переменную
+`Transport.InitializeAsync`. Итог публикуется через
+`MultimeterResponseProcessor.PublishInitializationResultAsync(attempt)` →
+`EquipmentMessages.PublishInitializationResultAsync(attempt)`: начиная со второй попытки
+к `ShowMessageModel.Message` добавляется ` (Попытка N/3)` перед статусом результата.
+Первая попытка сохраняет прежний текст. При финальном `DeviceNoResponseException`
+суффикс добавляется к `Operation`, поэтому существующий `UserActionHelper` выводит
+номер вместе со статусом `[СБОЙ ОБМЕНА]`, сохраняя классификацию ошибки.
 
 После первого успешного идентификационного обмена `Transport` вызывает
 `InitialDeviceSoundConfigurator` для конкретного runtime-экземпляра устройства. Для `GPT79904`

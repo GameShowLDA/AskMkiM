@@ -151,7 +151,24 @@ namespace Ask.Device.Runtime.Function.Base.Connected
     {
       var (connect, answer) = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
-        var result = await ExecuteOperationAsync(() => _connectionTransport.InitializeAsync(userMessageService), "Инициализация");
+        int initializationAttempt = 1;
+        (bool Connect, string Answer) result;
+        try
+        {
+          result = await ExecuteOperationAsync(() => _connectionTransport switch
+          {
+            TcpTransport tcp when _device is IMultimeter =>
+              tcp.InitializeAsync(userMessageService, attempt => initializationAttempt = attempt),
+            UsbTransport usb when _device is IMultimeter =>
+              usb.InitializeAsync(userMessageService, attempt => initializationAttempt = attempt),
+            _ => _connectionTransport.InitializeAsync(userMessageService),
+          }, "Инициализация");
+        }
+        catch (DeviceNoResponseException ex) when (_device is IMultimeter && initializationAttempt > 1)
+        {
+          ex.Operation += $" (Попытка {initializationAttempt}/3)";
+          throw;
+        }
         if (result.Connect)
         {
           await _initialSoundConfigurator.ApplyOnceAsync();
@@ -171,7 +188,7 @@ namespace Ask.Device.Runtime.Function.Base.Connected
         else if (_device is IMultimeter multimeter)
         {
           await MultimeterResponseProcessor.PublishInitializationResultAsync(
-            multimeter, result.Connect, error, userMessageService);
+            multimeter, result.Connect, error, userMessageService, initializationAttempt);
         }
         else if (_device is IBreakdownTester breakdownTester)
         {
