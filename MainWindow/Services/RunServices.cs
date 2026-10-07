@@ -30,7 +30,7 @@ namespace MainWindowProgram.Services
       _fileService = fileService;
 
       EventAggregator.Unsubscribe<FileInteractionEvents.OpenFileInEditorAgain>(e => OpenFileCommand(e.FilePath));
-      EventAggregator.Subscribe<FileInteractionEvents.OpenFileInEditorAgain>(e => OpenFileCommand(e.FilePath));
+      EventAggregator.Subscribe<FileInteractionEvents.OpenFileInEditorAgain>(e => _fileService.OpenFileAsync(e.FilePath, e.SourceArchiveName));
 
       EventAggregator.Unsubscribe<EditorEvents.CloseRunItem>(e => CloseRunItem(e.RunControl));
       EventAggregator.Subscribe<EditorEvents.CloseRunItem>(e => CloseRunItem(e.RunControl));

@@ -164,11 +164,12 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
      IUserInteractionService console,
      ITextEditorAdapter textEditor,
      List<BaseCommandModel> controlProgram,
-     string? opkFilePath)
+     string? opkFilePath, string? sourceArchiveName = null)
     {
       _console = console;
       _textEditor = textEditor;
       _opkFilePath = opkFilePath;
+      _protocolModel.SourceArchiveName = sourceArchiveName;
       CommandsToExecute = controlProgram;
 
       _commands = new CommandCollection(controlProgram);

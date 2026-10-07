@@ -631,6 +631,7 @@ namespace MainWindowProgram.Services
     private async Task PrepareRun(TextEditorContainer runContainer, TextEditorUI editor, RunControl runControl)
     {
       runControl.OpkFilePath = editor.TextEditorModel.FilePath;
+      runControl.SourceArchiveName = editor.TextEditorModel.SourceArchiveName;
       runControl.FileName = BuildDerivedFileName(
         editor.TextEditorModel.FilePath,
         editor.TextEditorModel.OriginalFileName,
@@ -852,6 +853,7 @@ namespace MainWindowProgram.Services
       if (editor.TextEditorModel != null && translateEditor.TextEditorModel != null)
       {
         translateEditor.TextEditorModel.FilePath = editor.TextEditorModel.FilePath;
+        translateEditor.TextEditorModel.SourceArchiveName = editor.TextEditorModel.SourceArchiveName;
       }
 
       var currentItem = foundDockItem.Content as TranslatorItem;
@@ -1009,6 +1011,7 @@ namespace MainWindowProgram.Services
         if (editor.TextEditorModel != null && translateEditor.TextEditorModel != null)
         {
           translateEditor.TextEditorModel.FilePath = editor.TextEditorModel.FilePath;
+          translateEditor.TextEditorModel.SourceArchiveName = editor.TextEditorModel.SourceArchiveName;
         }
 
         SetDeferredVisibility(translateEditor.View, false);

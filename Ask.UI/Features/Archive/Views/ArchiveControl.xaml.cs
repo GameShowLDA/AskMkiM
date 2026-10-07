@@ -3573,7 +3573,8 @@ namespace Ask.UI.Features.Archive.Views
       try
       {
         var entryName = NormalizeEntryName(_lastSelectedEntryName);
-        var text = await Task.Run(() => ReadArchiveEntryTextWithManager(_lastSelectedArchivePath, entryName));
+        var sourceArchivePath = _lastSelectedArchivePath;
+        var text = await Task.Run(() => ReadArchiveEntryTextWithManager(sourceArchivePath, entryName));
         if (string.IsNullOrWhiteSpace(text))
         {
           ShowArchiveNotification("Запуск в исполнителе", "Выбранный файл пустой.", NotificationType.Warning);
@@ -3588,7 +3589,7 @@ namespace Ask.UI.Features.Archive.Views
           : Encoding.GetEncoding(866);
 
         await File.WriteAllTextAsync(tempFilePath, text, encoding);
-        FileInteractionEventAdapter.RaiseOpenFileInEditorAgain(tempFilePath);
+        FileInteractionEventAdapter.RaiseOpenFileInEditorAgain(tempFilePath, Path.GetFileName(sourceArchivePath));
 
         await Task.Delay(120);
         if (!TryExecuteRunCommand())

@@ -56,6 +56,7 @@ namespace UI.Controls.Runner
     public string FileName { get; set; }
 
     public string OpkFilePath { get; set; }
+    public string? SourceArchiveName { get; set; }
 
     private List<BaseCommandModel> translationModels = new List<BaseCommandModel>();
 
@@ -530,7 +531,7 @@ namespace UI.Controls.Runner
         }
       });
 
-      var manager = new CommandExecutionManager(ProtocolUI, editor, ControlProgram, OpkFilePath);
+      var manager = new CommandExecutionManager(ProtocolUI, editor, ControlProgram, OpkFilePath, SourceArchiveName);
       manager.ClearError += ErrorClear;
       manager.AddError += AddError;
 

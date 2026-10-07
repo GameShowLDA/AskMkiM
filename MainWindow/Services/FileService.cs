@@ -199,7 +199,9 @@ namespace MainWindowProgram.Services
     /// Открывает указанный файл в редакторе.
     /// </summary>
     /// <param name="filePath">Путь к файлу.</param>
-    public async void OpenFileAsync(string filePath)
+    public void OpenFileAsync(string filePath) => OpenFileAsync(filePath, null);
+
+    public async void OpenFileAsync(string filePath, string? sourceArchiveName)
     {
       if (_isLockedProvider())
       {
@@ -207,11 +209,11 @@ namespace MainWindowProgram.Services
       }
       else
       {
-        await OpenFileWithLegacyConversion(filePath);
+        await OpenFileWithLegacyConversion(filePath, sourceArchiveName);
       }
     }
 
-    private async Task OpenFileWithLegacyConversion(string filePath)
+    private async Task OpenFileWithLegacyConversion(string filePath, string? sourceArchiveName = null)
     {
       string extension = Path.GetExtension(filePath);
       if (ProtocolFileExtensions.IsSummary(extension))
@@ -228,11 +230,11 @@ namespace MainWindowProgram.Services
           return;
         }
 
-        _multiWindow.EditorDocumentService.OpenFile(convertedPath);
+        _multiWindow.EditorDocumentService.OpenFile(convertedPath, sourceArchiveName);
         return;
       }
 
-      _multiWindow.EditorDocumentService.OpenFile(filePath);
+      _multiWindow.EditorDocumentService.OpenFile(filePath, sourceArchiveName);
     }
 
     private async Task OpenLinkedResultProtocol(string resultProtocolPath)
