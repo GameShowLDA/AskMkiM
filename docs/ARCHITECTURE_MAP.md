@@ -57,6 +57,7 @@ Size/Foreground и анимации общей кнопки; лицензия с
 | Настройки выполнения/протокола/UI | `Ask.Core/Services/Config/` | `Ask.DataBase.Engine/Static/Settings/`, `Ask.DataBase.Provider/Services/Settings/`, `MainWindow/Init/DatabaseInitializer.cs` |
 | Фиксированные задержки оборудования | `UI/Controls/Settings/Delays/DelaySettingsControl.xaml`, `Ask.Core/Services/Config/AppSettings/DelaySettingsFileService.cs` | `Ask.Core/Shared/DTO/Settings/DelaySettings.cs`, `Ask.Core/Shared/Metadata/Static/Delays/`, `Ask.Protocol.Messages/EntryPoints/ExecutionMessages.cs` |
 | Протокол выполнения | `Ask.UI/Controls/ProtocolNew/ProtocolUI*.cs` | `Ask.UI/Features/ProtocolNew/Protocol/`, `Ask.Core/Services/Protocols/ExecutionProtocolHistoryService.cs` |
+| Имя и источник программы в итоговом протоколе | `Ask.Core/Shared/DTO/Protocol/ProtocolModel.cs` (`GetProgramDescription`) | `SourceArchiveName`: `ArchiveControl.RunSelectedFileInExecutorAsync` → event → editor → `TranslationServices.PrepareRun` → `RunControl` → `CommandExecutionManager`; [источник](#источник-программы-в-заголовке-протокола) |
 | Формирование унифицированных сообщений протокола | `Ask.Protocol.Messages/EntryPoints/` | `Ask.Protocol.Messages/Builders/`, `Ask.Protocol.Messages/Show/`; сообщения executor-команд, блоков проверки, оборудования, измерений, допустимых диапазонов и ошибок UI-валидации формируются централизованно |
 | Форматы `.asktrace/.askresult/.askreport` | `Ask.Core/Services/Protocols/ExecutionProtocolHistoryService.cs` | `Ask.Core/Shared/Metadata/Static/ProtocolFileExtensions.cs`, `Ask.UI/Features/ProtocolNew/Protocol/ProtocolStorageService.cs` |
 | Печать протокола | `Ask.UI/Features/ProtocolNew/Protocol/ProtocolCompletionService.cs` | `Ask.UI/Features/ProtocolNew/Execution/ExecutionFinalizer.cs`, `Ask.Core/Services/Config/AppSettings/ProtocolConfig.cs`, `PrintUtility` usages |
@@ -1254,6 +1255,27 @@ Other runtime branches:
 - `Ask.Engine/Tests/SelfControl/`
 
 ### Protocols and file formats
+
+#### Источник программы в заголовке протокола
+
+`ProtocolModel.GetProtocolText/GetProtocolWithErrorsText → GetProgramDescription` заменяет
+`$ПРОГРАММА` на `ProgramName (источник)`: для диска источник — `Path.GetFullPath(ProgramPath)`,
+для архива — `SourceArchiveName` (имя с расширением, без пути). Если источник отсутствует,
+выводится только имя. `ProgramPath` сохраняет настоящий путь исполнения для остальных потребителей.
+
+Путь архивного источника: `Ask.UI/Features/Archive/Views/ArchiveControl.xaml.cs`
+`RunSelectedFileInExecutorAsync` фиксирует выбранный архив, извлекает файл во временный каталог
+и публикует `RaiseOpenFileInEditorAgain(tempFilePath, Path.GetFileName(sourceArchivePath))`
+→ `FileInteractionEvents.OpenFileInEditorAgain.SourceArchiveName`
+→ `MainWindow/Services/RunServices.cs` → `FileService.OpenFileAsync/OpenFileWithLegacyConversion`
+→ `IEditorDocumentService.OpenFile` → `UI/Services/FileManager/FileService.cs`
+→ `FileOpenService.OpenFile/OpenNewFile` → `TextEditorModel.SourceArchiveName`
+→ `MainWindow/Services/TranslationServices.cs` (копирование в перевод и `PrepareRun`)
+→ `RunControl.SourceArchiveName` → `CommandExecutionManager` constructor
+→ `ProtocolModel.SourceArchiveName`. Обычные открытия оставляют metadata пустой.
+`KscCommandExecutor.GetProtocol` задаёт `ProgramName/ProgramPath`, а форматтер выбирает
+архивное имя вместо временного пути. Проверка обоих шаблонов:
+`Ask.UI.UnitTests/Services/Config/ProtocolProgramSourceTests.cs`.
 
 Диагностический журнал ASKTRACE: `Ask.Core/Services/Protocols/ExecutionLogCapture.cs`
 подписывается на `LoggerUtility.LogMessageWritten` и `ExceptionLogged` на время запуска.

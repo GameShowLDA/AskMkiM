@@ -43,7 +43,7 @@ namespace UI.Services.FileManager
     /// Открывает файл по указанному пути и отображает его содержимое в текстовом редакторе.
     /// </summary>
     /// <param name="path">Полный путь к файлу.</param>
-    public void OpenFile(string path)
+    public void OpenFile(string path, string? sourceArchiveName = null)
     {
       Application.Current.Dispatcher.BeginInvoke(async () =>
       {
@@ -107,7 +107,7 @@ namespace UI.Services.FileManager
             return;
           }
 
-          OpenNewFile(path, fileName, fileContent, encoding, fileType, container);
+          OpenNewFile(path, fileName, fileContent, encoding, fileType, container, sourceArchiveName);
           LastDirectoryService.RememberFile(path);
         }
         catch (Exception ex)
@@ -172,7 +172,7 @@ namespace UI.Services.FileManager
     /// <summary>
     /// Открывает новый файл в редакторе.
     /// </summary>
-    private void OpenNewFile(string path, string fileName, string fileContent, Encoding encoding, FileType fileType, TextEditorContainer container)
+    private void OpenNewFile(string path, string fileName, string fileContent, Encoding encoding, FileType fileType, TextEditorContainer container, string? sourceArchiveName = null)
     {
       var uniqueName = _fileManager.FileService.Name.EnsureUniqueFileName(path, fileName);
       var uniqueNameWithoutExtention = Path.GetFileNameWithoutExtension(uniqueName);
@@ -183,6 +183,7 @@ namespace UI.Services.FileManager
       }
       var originalName = uniqueNameWithoutExtention + Path.GetExtension(uniqueName);
       var textEditorModel = new TextEditorModel(path, uniqueName, originalName, encoding);
+      textEditorModel.SourceArchiveName = sourceArchiveName;
       var textEditor = _fileManager.TextEditorService.CreateTextEditor(textEditorModel, fileContent, fileType);
       textEditor.ConfigureBreakpoints(interactive: false, visible: false);
       textEditor.TextArea.TextView.LineTransformers.Add(new BracesCommentColorizer());

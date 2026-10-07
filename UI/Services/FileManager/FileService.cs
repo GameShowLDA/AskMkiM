@@ -54,9 +54,9 @@ namespace UI.Services.FileManager
       Creation.CreateNewFile();
     }
 
-    public void OpenFile(string filePath)
+    public void OpenFile(string filePath, string? sourceArchiveName = null)
     {
-      Opening.OpenFile(filePath);
+      Opening.OpenFile(filePath, sourceArchiveName);
     }
 
     public void SaveFile()

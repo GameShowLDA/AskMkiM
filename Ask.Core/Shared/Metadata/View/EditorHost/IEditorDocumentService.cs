@@ -22,7 +22,8 @@ namespace Ask.Core.Shared.Metadata.View.EditorHost
     /// Открывает документ по указанному пути.
     /// </summary>
     /// <param name="filePath">Абсолютный путь к файлу.</param>
-    void OpenFile(string filePath);
+    /// <param name="sourceArchiveName">Название исходного архива, если документ открыт из архива.</param>
+    void OpenFile(string filePath, string? sourceArchiveName = null);
 
     /// <summary>
     /// Сохраняет текущий активный документ.
