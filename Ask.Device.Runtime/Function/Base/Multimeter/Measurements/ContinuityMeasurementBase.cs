@@ -5,7 +5,6 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
-using Ask.Device.Emulator;
 using Ask.Device.ResponseProcessor.Multimeter.ResponseProcessing;
 using Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common;
 using Ask.Device.Runtime.Function.Helpers;
@@ -43,10 +42,11 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements
       var execution = await AdapterMeasurementExecutor.ExecuteAsync(
         _device,
         "Прозвонка",
-        () => CheckContinuityCoreAsync(expectedOutcome, responseDelay: responseDelay),
+        () => CheckContinuityCoreAsync(expectedOutcome, userMessageService, responseDelay: responseDelay),
         value => !value,
         maxAttempts: 2,
-        messageService: userMessageService);
+        messageService: userMessageService,
+        retryOnNoResponse: false);
 
       if (!execution.Success)
       {
@@ -125,17 +125,24 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements
         ? expectedOutcome
         : !expectedOutcome;
       string idleResponse = actualOutcome ? "+1.00000000E+00" : "+9.90000000E+37";
-      string response = await DeviceProtocolEmulator.QueryMultimeterAsync(
+      var query = await MultimeterMeasurementQuery.QueryAsync(
         _device,
         _device.ContinuityCommands.Measure,
         idleResponse,
+        "Прозвонка",
+        _device.ContinuityCommands.Timeout,
         responseDelay: responseDelay,
-        timeout: _device.ContinuityCommands.Timeout);
+        messages: userMessageService);
+      string response = query.Response;
       if (!MultimeterResponseProcessor.TryCheckContinuity(
             response, expectedOutcome, out bool matchesExpected))
       {
         throw new InvalidOperationException($"Не удалось обработать ответ прозвонки: {response}");
       }
+
+      if (query.Attempt > 1)
+        await MultimeterMessages.PublishOperationResultAsync(_device, "Прозвонка",
+          $"{response} (Попытка {query.Attempt}/{query.MaxAttempts})", matchesExpected, 2, userMessageService);
 
       return matchesExpected;
     }

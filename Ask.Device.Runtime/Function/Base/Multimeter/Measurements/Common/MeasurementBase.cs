@@ -7,7 +7,6 @@ using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.UnitEnums;
 using Ask.Core.Shared.Metadata.Static.Messages;
-using Ask.Device.Emulator;
 using Ask.Device.ResponseProcessor.Multimeter.ResponseProcessing;
 using Ask.Device.Runtime.Function.Helpers;
 using System.Globalization;
@@ -51,7 +50,8 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
           measurementRange,
           userMessageService,
           measurementCount,
-          responseDelay);
+          responseDelay,
+          cancellationToken);
       }
       else
       {
@@ -117,7 +117,8 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
             responseDelay: responseDelay,
             cancellationToken: cancellationToken),
           maxAttempts: userMessageService == null ? 2 : 1,
-          messageService: userMessageService);
+          messageService: userMessageService,
+          retryOnNoResponse: false);
 
         if (!execution.Success)
         {
@@ -174,7 +175,8 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
       MeasurementRange measurementRange,
       IUserInteractionService? userMessageService = null,
       int measurementCount = 1,
-      double responseDelay = 0)
+      double responseDelay = 0,
+      CancellationToken cancellationToken = default)
     {
       if (measurementCount < 1)
       {
@@ -211,9 +213,11 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
             measurementRange.LowerBound,
             measurementRange.UpperBound,
             userMessageService: userMessageService,
-            responseDelay: responseDelay),
+            responseDelay: responseDelay,
+            cancellationToken: cancellationToken),
           maxAttempts: 1,
-          messageService: userMessageService);
+          messageService: userMessageService,
+          retryOnNoResponse: false);
 
         if (!execution.Success)
         {
@@ -339,28 +343,30 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
       string idleResponse = simulatedValue == -1
         ? string.Empty
         : simulatedValue.ToString("+0.00000000E+00;-0.00000000E+00", CultureInfo.InvariantCulture);
-      string response = await DeviceProtocolEmulator.QueryMultimeterAsync(
+      var query = await MultimeterMeasurementQuery.QueryAsync(
         device,
         profile.Measure,
         idleResponse,
+        header,
+        profile.Timeout,
         responseDelay: responseDelay,
-        timeout: profile.Timeout,
+        messages: userMessageService,
         cancellationToken: cancellationToken);
+      string response = query.Response;
       LogInformation($"[{header}] ответ мультиметра: {response}");
 
       if (MultimeterResponseProcessor.TryParseMeasurement(response, out var measurement))
       {
-        if (measurement!.State == Ask.Device.ResponseProcessor.Multimeter.ResponseModels.MeasurementState.Overload)
-        {
-          return double.PositiveInfinity;
-        }
-
-        if (profile.Unit is CapacitanceUnit)
-        {
-          return MeasurementAdapterHelper.Round(measurement!.Value * 1e9);
-        }
-
-        return MeasurementAdapterHelper.Round(measurement!.Value);
+        double value = measurement!.State == Ask.Device.ResponseProcessor.Multimeter.ResponseModels.MeasurementState.Overload
+          ? double.PositiveInfinity
+          : profile.Unit is CapacitanceUnit
+            ? MeasurementAdapterHelper.Round(measurement.Value * 1e9)
+            : MeasurementAdapterHelper.Round(measurement.Value);
+        if (query.Attempt > 1)
+          await MultimeterMessages.PublishOperationResultAsync(device, header,
+            $"{value} (Попытка {query.Attempt}/{query.MaxAttempts})",
+            IsWithinRange(value, rangeFrom, rangeTo), 2, userMessageService);
+        return value;
       }
 
       throw new InvalidOperationException(LogError($"Не удалось обработать значение при \"{header}\": {response}", isDeviceLog: true));
