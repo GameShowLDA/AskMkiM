@@ -96,13 +96,15 @@ public static class MultimeterResponseProcessor
   /// <param name="result">Результат инициализации.</param>
   /// <param name="error">Ответ прибора или описание ошибки.</param>
   /// <param name="outputService">Сервис вывода результата.</param>
+  /// <param name="attempt">Номер попытки инициализации; первая попытка не отображается.</param>
   /// <returns>Задача публикации сообщения.</returns>
   public static Task PublishInitializationResultAsync(
     IMultimeter device,
     bool result,
     string? error,
-    IUserInteractionService? outputService = null)
-    => EquipmentMessages.PublishInitializationResultAsync(device, result, error, outputService);
+    IUserInteractionService? outputService = null,
+    int attempt = 1)
+    => EquipmentMessages.PublishInitializationResultAsync(device, result, error, outputService, attempt: attempt);
 
   /// <summary>
   /// Публикует результат сброса мультиметра.

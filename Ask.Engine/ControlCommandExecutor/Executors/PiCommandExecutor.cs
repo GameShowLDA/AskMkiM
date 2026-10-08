@@ -185,10 +185,10 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       if (voltageType == VoltageEnum.Type.ACW)
       {
         await breakDown.AcwManger.Mode.SetModeAsync(userMessageService);
+        breakDown.Time.SetTargetTime(time);
         await breakDown.AcwManger.Time.SetTestTimeAsync(time, userMessageService);
         await breakDown.AcwManger.Voltage.SetVoltageAsync(voltage, userMessageService);
         await breakDown.AcwManger.CurrentLimits.SetHighCurrentLimitAsync(amperhMaxACW, userMessageService);
-        breakDown.Time.SetTargetTime(time);
 
         if (time == 60)
         {
@@ -202,6 +202,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       else if (voltageType == VoltageEnum.Type.DCW)
       {
         await breakDown.DcwManger.Mode.SetModeAsync(userMessageService);
+        breakDown.Time.SetTargetTime(time);
         await breakDown.DcwManger.Time.SetTestTimeAsync(time, userMessageService);
         await breakDown.DcwManger.Voltage.SetVoltageAsync(voltage, userMessageService);
         await breakDown.DcwManger.CurrentLimits.SetHighCurrentLimitAsync(amperhMaxDCW, userMessageService);

@@ -87,7 +87,7 @@ namespace Ask.Engine.Tests.Metrology
       return _userInteractionService;
     }
 
-    private class PiMeasurement : BaseMeasurement
+    internal class PiMeasurement : BaseMeasurement
     {
       private IReferenceVoltageRequestService _reference;
 
@@ -106,6 +106,7 @@ namespace Ask.Engine.Tests.Metrology
 
         await breakDown.ConnectableManager.InitializeAsync(messageService);
         await breakDown.DcwManger.Mode.SetModeAsync(messageService);
+        breakDown.Time.SetTargetTime(dataModel.Time);
         await breakDown.DcwManger.Time.SetTestTimeAsync(dataModel.Time, messageService);
         await breakDown.DcwManger.Time.SetRampTimeAsync(dataModel.RampTime, messageService);
         await breakDown.DcwManger.CurrentLimits.SetLowCurrentLimitAsync(0, messageService);

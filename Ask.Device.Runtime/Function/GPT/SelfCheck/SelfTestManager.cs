@@ -115,6 +115,7 @@ namespace Ask.Device.Runtime.Function.GPT.SelfCheck
         await SelfTestMessages.PublishInformationAsync("Настройка оборудования", userMessageService);
 
         await breakdownTester.IrManger.Mode.SetModeAsync(userMessageService);
+        breakdownTester.Time.SetTargetTime(1);
         await breakdownTester.IrManger.Time.SetTestTimeAsync(1, userMessageService);
         await breakdownTester.IrManger.Time.SetRampTimeAsync(0.1, userMessageService);
 
@@ -210,6 +211,7 @@ namespace Ask.Device.Runtime.Function.GPT.SelfCheck
         await SelfTestMessages.PublishInformationAsync("Настройка оборудования", userMessageService);
 
         await breakdownTester.AcwManger.Mode.SetModeAsync(userMessageService);
+        breakdownTester.Time.SetTargetTime(5);
         await breakdownTester.AcwManger.Time.SetTestTimeAsync(5, userMessageService);
         await breakdownTester.AcwManger.Time.SetRampTimeAsync(0.1, userMessageService);
 
@@ -316,6 +318,7 @@ namespace Ask.Device.Runtime.Function.GPT.SelfCheck
         await SelfTestMessages.PublishInformationAsync("Настройка оборудования", userMessageService);
 
         await breakdownTester.DcwManger.Mode.SetModeAsync(userMessageService);
+        breakdownTester.Time.SetTargetTime(5);
         await breakdownTester.DcwManger.Time.SetTestTimeAsync(5, userMessageService);
         await breakdownTester.DcwManger.Time.SetRampTimeAsync(0.1, userMessageService);
 

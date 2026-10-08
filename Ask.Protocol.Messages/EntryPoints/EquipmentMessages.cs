@@ -112,6 +112,7 @@ public static class EquipmentMessages
   /// <param name="callerName">Имя метода, вызвавшего публикацию.</param>
   /// <param name="callerFile">Путь к файлу, вызвавшему публикацию.</param>
   /// <param name="callerLine">Номер строки, вызвавшей публикацию.</param>
+  /// <param name="attempt">Номер попытки инициализации; первая попытка не отображается.</param>
   /// <returns>Задача, представляющая операцию публикации сообщения.</returns>
   public static Task PublishInitializationResultAsync(
     IDevice device,
@@ -120,12 +121,15 @@ public static class EquipmentMessages
     IMessageOutputService? outputService = null,
     [CallerMemberName] string callerName = "",
     [CallerFilePath] string callerFile = "",
-    [CallerLineNumber] int callerLine = 0)
+    [CallerLineNumber] int callerLine = 0,
+    int attempt = 1)
   {
     if (device is IAttachableDevice attachableDevice
         && DeviceDisplayConfig.ShouldDisplayOperationResult(isSuccessful))
     {
       var message = EquipmentMessageBuilder.BuildInitializationResult(attachableDevice, isSuccessful, details);
+      if (attempt > 1)
+        message.Message += $" (Попытка {attempt}/3)";
       return EquipmentMessagePublisher.PublishAsync(message, outputService, callerName, callerFile, callerLine);
     }
 

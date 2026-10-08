@@ -45,6 +45,7 @@ Size/Foreground и анимации общей кнопки; лицензия с
 | МКР и точки | `Ask.Core/Shared/Interfaces/DeviceInterfaces/RelaySwitchModule/` | `Ask.Device.Application/FunctionAdapters/ModuleRelayControl/`, `Ask.Device.Runtime/Function/ModuleRelayControl/`, `Ask.Device.Emulator/ModuleRelayControl/` |
 | Устройство коммутации | `Ask.Core/Shared/Interfaces/DeviceInterfaces/SwitchingDevice/` | `Ask.Device.Application/FunctionAdapters/DeviceBusCommutation/`, `Ask.Device.Runtime/Function/DeviceBusCommutation/` |
 | Быстрый мультиметр | `Ask.Core/Shared/Interfaces/DeviceInterfaces/Multimeter/` | `Ask.Device.Runtime/Device/KeysightDevice.cs`, `Ask.Device.Runtime/Device/MultimeterB7783.cs`, `Ask.Device.Runtime/Function/Base/Multimeter/` |
+| Повторы чтения мультиметра и скрытая идентификация | `Ask.Device.Runtime/Function/Base/Multimeter/Measurements/Common/MultimeterMeasurementQuery.cs` | `MeasurementBase.cs`, `ContinuityMeasurementBase.cs`, `AdapterMeasurementResult.cs` в той же подсистеме; `Ask.Engine.UnitTests/DeviceRuntime/MultimeterMeasurementRecoveryTests.cs` |
 | Диапазоны напряжения ППУ, шаг и исключения | `Ask.Core/Shared/DTO/Devices/Breakdown/VoltageRange.cs`, `Ask.Device.Runtime/Device/GPT79904.cs` | [Диапазоны GPT](#breakdown-voltage-ranges), `VoltageManagment.cs`, `PiVoltageProcessor.cs`, `SiVoltageProcessor.cs`, `AppDbContext.Device.cs` |
 | Пробойная установка GPT | `Ask.Device.ResponseProcessor/BreakdownTester/`, `Ask.Core/Shared/Interfaces/DeviceInterfaces/BreakdownTester/` | `Ask.Device.Application/FunctionAdapters/GPT/`, `Ask.Device.Runtime/Function/GPT/`, `Ask.Device.Runtime/Device/GPT79904.cs` |
 | Источник напряжения/тока | `Ask.Core/Shared/Interfaces/DeviceInterfaces/PowerSourceModule/` | `Ask.Device.Application/FunctionAdapters/ModuleVoltageCurrent/`, `Ask.Device.Runtime/Function/ModuleVoltageCurrentSource/` |
@@ -1874,18 +1875,50 @@ IBreakdownTester / GPT79904
 Сопротивление, напряжение, диод и прозвонка сначала выполняют один замер. Если его
 результат вне `MeasurementRange`, он отбрасывается и `MeasureOtherAsync` выполняет второй
 замер, результат которого становится итоговым независимо от диапазона. Это не усреднение.
-Отдельный путь В7-78/3 в `B7783/VoltageMeasurementBase.MeasureVoltageAsync` применяет то же
-правило двух попыток.
-Повтор внутри `AdapterMeasurementExecutor` относится только к восстановлению после ошибки
-оборудования. Серия измерений с усреднением реализована только для ёмкости в
+`MultimeterB7783` создаёт те же общие managers, что `KeysightDevice`, и использует этот pipeline
+с USB-профилями и `READ?`. Абстрактный legacy-класс `B7783/VoltageMeasurementBase` содержит
+собственный алгоритм, но наследников и runtime-использований в текущем production-коде нет.
+`AdapterMeasurementExecutor` сохраняет повтор обработки неуспешного значения/исключений,
+но при `retryOnNoResponse: false` терминальный `DeviceNoResponseException` сразу пробрасывает: повтор обмена уже выполнен
+в `MultimeterMeasurementQuery`, поэтому вложенный повтор всего recovery pipeline запрещён.
+Серия измерений с усреднением реализована только для ёмкости в
 `MeasurementBase.MeasureCapacitanceAsync`; количество задаётся параметром
 `ICapacitanceMeasurement.MeasureCapacitanceAsync.measurementCount`.
+
+Получение результата во всех шести режимах и в bool-прозвонке:
+
+```text
+MeasurementBase.MeasureCoreAsync / ContinuityMeasurementBase.CheckContinuityCoreAsync
+→ MultimeterMeasurementQuery.QueryAsync
+  → DeviceProtocolEmulator.QueryMultimeterAsync(measurement command, timeout: profile.Timeout, responseDelay: responseDelay)
+    → Real TCP/USB / Idle emulator
+  → Real, при DeviceNoResponseException или пустом ответе: максимум два запроса значения без дополнительных пауз
+  → если оба не получили ответ: один скрытый запрос ConnectedProfile.Initialize, timeout: 1000
+    → без ConnectableManager.InitializeAsync, повторов, звуковой настройки и строки инициализации
+    → ответ есть: ещё два запроса измерения без дополнительных пауз
+    → ответа нет: существующий путь ошибки измерения
+  → ответ → MultimeterResponseProcessor.TryParseMeasurement / TryCheckContinuity
+```
+
+Профиль идентификации выбирается по `DeviceWithIP/DeviceWithUSB/DeviceWithCOM`.
+Скрытый обмен остаётся в диагностическом журнале команд. Отдельная инициализация через
+`MultimeterInitialization` не изменяется. Числа вне допуска, перегрузка и усреднение не
+запускают скрытый запрос: они обрабатываются после получения ответа существующей логикой.
+Результат recovery запроса содержит `Response/Attempt/MaxAttempts`: до восстановления
+номер `N/2`, после восстановления `3/4` или `4/4`. Для повторного успешного обмена runtime
+публикует строку результата с суффиксом перед статусом; финальный сбой сохраняет
+номер в `DeviceNoResponseException.Operation` для `UserActionHelper`.
+Отмена UI, явного запроса и `EquipmentExecutionContext` проходит в транспорт измерения и скрытой идентификации.
+Idle выполняет один эмулируемый запрос без скрытой идентификации.
+Файл: `Ask.Device.Runtime/Function/Base/Multimeter/Measurements/Common/MultimeterMeasurementQuery.cs`.
+Регрессии: `Ask.Engine.UnitTests/DeviceRuntime/MultimeterMeasurementRecoveryTests.cs`.
 
 Инициализация обоих мультиметров использует тот же журнал команд:
 
 ```text
 IMultimeter.ConnectableManager.InitializeAsync()
 → TcpTransport.InitializeAsync() / UsbTransport.InitializeAsync()
+→ MultimeterInitialization.InitializeAsync()
 → DeviceProtocolEmulator.QueryMultimeterAsync(ConnectedProfile.Initialize, idleIdentificationResponse)
   → Real: TcpProtocol / UsbProtocol
   → Idle: идентификационный SCPI-ответ
@@ -1896,6 +1929,30 @@ IMultimeter.ConnectableManager.InitializeAsync()
     → Real: TcpProtocol / UsbProtocol
     → Idle: команда поглощается эмулятором без обращения к физическому прибору
 ```
+
+`Ask.Device.Runtime/Function/Base/Connected/MultimeterInitialization.cs` выполняет только
+идентификационный запрос мультиметра: Real — до трёх попыток с timeout 1000 мс каждая,
+перед попыткой 2 пауза 1000 мс, перед попыткой 3 — 2000 мс. Непустой ответ прекращает
+повторы; пустой ответ или `DeviceNoResponseException` допускают следующую попытку.
+Последнее исключение пробрасывается с сохранением stack trace в существующий
+`Transport.ExecuteOperationAsync` → `UserActionHelper`; три пустых ответа возвращают
+`Connect=false`. Попытки и паузы логируются, команды/ответы — через существующий
+`DeviceProtocolEmulator`. Отмена UI и `EquipmentExecutionContext` передаётся запросам
+и паузам. Idle выполняет единственный запрос эмулятору. Предварительное подключение
+остаётся в TCP/USB transport; измерения, сброс и другие устройства этот механизм не используют.
+Регрессии: `Ask.Engine.UnitTests/DeviceRuntime/MultimeterInitializationTests.cs`.
+Внутренний параметр `delayAsync` позволяет тестам проверять точные запрошенные паузы
+и их порядок без зависимости от системного таймера; production-вызовы используют `Task.Delay`.
+
+Номер фактически выполненной попытки передаётся callback `onAttempt` из
+`MultimeterInitialization` через внутренние overloads TCP/USB в локальную переменную
+`Transport.InitializeAsync`. Итог публикуется через
+`MultimeterResponseProcessor.PublishInitializationResultAsync(attempt)` →
+`EquipmentMessages.PublishInitializationResultAsync(attempt)`: начиная со второй попытки
+к `ShowMessageModel.Message` добавляется ` (Попытка N/3)` перед статусом результата.
+Первая попытка сохраняет прежний текст. При финальном `DeviceNoResponseException`
+суффикс добавляется к `Operation`, поэтому существующий `UserActionHelper` выводит
+номер вместе со статусом `[СБОЙ ОБМЕНА]`, сохраняя классификацию ошибки.
 
 После первого успешного идентификационного обмена `Transport` вызывает
 `InitialDeviceSoundConfigurator` для конкретного runtime-экземпляра устройства. Для `GPT79904`
@@ -3102,8 +3159,19 @@ and `StateEventsBinder`, then calls `ApplicationEventsBinder.BindAll`.
 измерение; `PASS` сразу возвращается, а при другом конечном статусе устанавливается нижний
 предел `1`, восстанавливается `TestTime` из `breakDown.Time.GetTargetTime()` и запускается
 основное измерение. `TargetTime` — отдельное поле `TimeManager`, поэтому его обязан задать
-исполнитель при настройке команды (production `SiCommandExecutor.SetupAsync`); helper его
-не перезаписывает. `MeasureFastPollingAsync` остаётся private legacy-методом и текущим
+исполнитель при настройке команды; helper его не перезаписывает. Перед отправкой
+`mode.Time.SetTestTimeAsync(value)` вызывается `device.Time.SetTargetTime(value)`:
+`SiCommandExecutor.SetupAsync`, `PiCommandExecutor.SettingBreakdown` (обе ACW/DCW-ветки),
+`Ask.Engine/Tests/Metrology/{ModePiAcw,ModePiDcw,ModeCI}.cs` → `ConfigureMeter`,
+узловые/групповые тесты ПИ/СИ (`Tests/{NodeMethod,MethodExecutor}/{PI,Si,CI}/`),
+`SelfTestManager` и ручные режимы `Ask.UI/Features/ServiceTools/Gpt/Modes/`.
+Это обязательный шаг подготовки: `TimeManager` изначально содержит -1;
+неустановленный либо устаревший TargetTime раньше отправлялся прибору при запуске измерения.
+Удалённое в commit `7ae82f7e` автоматическое заполнение внутри helper не восстановлено,
+чтобы предварительный IR-тест на 1 секунду не заменял выбранную длительность основного теста.
+Регрессионная проверка порядка и повторной настройки ПИ ACW/DCW:
+`Ask.Engine.UnitTests/Tests/Metrology/PiTargetTimeTests.cs`.
+`MeasureFastPollingAsync` остаётся private legacy-методом и текущим
 потоком не вызывается.
 Long-running loops in metrology/GPT measurement helpers are bounded by
 cancellation, timers or device conditions; inspect the concrete mode before

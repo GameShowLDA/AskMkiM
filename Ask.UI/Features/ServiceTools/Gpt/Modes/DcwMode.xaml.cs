@@ -191,6 +191,7 @@ namespace Ask.UI.Features.ServiceTools.Gpt.Modes
 
         var mode = GptUiOperation.GetDevice(deviceContext).DcwManger;
         GptUiOperation.EnsureSuccess(await mode.Voltage.SetVoltageAsync(voltage), "напряжение DCW");
+        GptUiOperation.GetDevice(deviceContext).Time.SetTargetTime(time);
         GptUiOperation.EnsureSuccess(await mode.Time.SetTestTimeAsync(time), "время теста DCW");
         GptUiOperation.EnsureSuccess(await mode.Time.SetRampTimeAsync(timeRamp), "время нарастания DCW");
         GptUiOperation.EnsureSuccess(await mode.Offset.SetOffsetAsync(refValue), "смещение DCW");

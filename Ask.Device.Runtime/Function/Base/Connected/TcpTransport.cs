@@ -2,9 +2,8 @@
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
-using Ask.Device.Emulator;
-using Ask.Device.ResponseProcessor.Multimeter.ResponseProcessing;
 using Ask.Device.Runtime.Base.Device;
+using Ask.Device.Runtime.Function.Base.Connected;
 using System.Net;
 using System.Net.Sockets;
 
@@ -32,7 +31,11 @@ namespace Ask.Device.Runtime.Function.Connected
     }
 
     /// <inheritdoc />
-    public async Task<(bool Connect, string Answer)> InitializeAsync(IUserInteractionService userMessageService = null)
+    public Task<(bool Connect, string Answer)> InitializeAsync(IUserInteractionService userMessageService = null)
+      => InitializeAsync(userMessageService, null);
+
+    internal async Task<(bool Connect, string Answer)> InitializeAsync(
+      IUserInteractionService userMessageService, Action<int>? onAttempt)
     {
       if (_device is IMultimeter multimeter)
       {
@@ -41,16 +44,8 @@ namespace Ask.Device.Runtime.Function.Connected
           return (false, $"Нет связи с {_device.Name}");
         }
 
-        string idleResponse = $"ASK,{_device.Name},0,IDLE";
-        string answer = await DeviceProtocolEmulator.QueryMultimeterAsync(
-          multimeter,
-          _device.ConnectedProfile.Initialize,
-          idleResponse,
-          timeout: _device.ConnectedProfile.Timeout,
-          port: _device.ConnectedProfile.Port);
-        return !MultimeterResponseProcessor.CheckInitialization(answer)
-          ? (false, $"Нет ответа на команду {_device.ConnectedProfile.Initialize} от {_device.Name}")
-          : (true, answer.Trim());
+        return await MultimeterInitialization.InitializeAsync(
+          multimeter, _device.ConnectedProfile.Initialize, _device.ConnectedProfile.Port, userMessageService, onAttempt);
       }
 
       if (ExecutionConfig.GetIsIdleModeEnabled())
