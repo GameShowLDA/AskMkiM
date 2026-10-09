@@ -809,6 +809,12 @@ CommandExecutionManager.ExecuteAllCoreAsync loop
 
 Связка операторского вопроса `ЦУ` и условного перехода `УП`:
 
+`CuCommandParser.Parse` удаляет из текста сообщения только последний `?` как
+признак вопроса: `40 ЦУ Тест?` → `MessageText = "Тест"`,
+`40 ЦУ Тест??` → `MessageText = "Тест?"`. Остальные знаки сохраняются;
+`SourceLines` содержит исходный текст. `CuCommandExecutor.ShowQuestionDialog`
+передаёт `MessageText` в окно с заголовком `ПОДТВЕРДИТЬ?`.
+
 ```text
 CuCommandExecutor.ExecuteAsync
 → CuCommandModel.CuType == Question
