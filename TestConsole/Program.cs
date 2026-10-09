@@ -11,6 +11,12 @@ namespace TestConsole
   {
     private static async Task Main(string[] args)
     {
+      if (args.Length > 0 && string.Equals(args[0], "keysight-stress", StringComparison.OrdinalIgnoreCase))
+      {
+        Environment.ExitCode = await Keysight.Stress.KeysightStressTest.RunAsync(args[1..]);
+        return;
+      }
+
       if (args.Any(static arg =>
             string.Equals(arg, "encoding-scanner", StringComparison.OrdinalIgnoreCase)
             || string.Equals(arg, "encoding", StringComparison.OrdinalIgnoreCase)))
@@ -44,10 +50,11 @@ namespace TestConsole
         Console.WriteLine("20. ModuleRelayControl");
         Console.WriteLine("21. DeviceBusCommutation ConnectorManager");
         Console.WriteLine("22. Unused code Roslyn analyzer");
+        Console.WriteLine("23. Нагрузочный тест Keysight 34465A (непрерывное измерение ёмкости)");
         Console.WriteLine("0. Exit");
         Console.Write("Введите номер действия: ");
         string? input = Console.ReadLine()?.Trim().Trim('\uFEFF');
-        if (!int.TryParse(input, out int choice) || choice < 0 || choice > 22)
+        if (!int.TryParse(input, out int choice) || choice < 0 || choice > 23)
         {
           Console.Write("Введите номер действия: ");
           continue;
@@ -141,6 +148,10 @@ namespace TestConsole
 
           case 22:
             await UnusedCodeAnalyzer.RunAsync();
+            break;
+
+          case 23:
+            await Keysight.Stress.KeysightStressTest.RunAsync([]);
             break;
 
           case 0:

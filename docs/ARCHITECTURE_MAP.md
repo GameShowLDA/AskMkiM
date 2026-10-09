@@ -29,6 +29,7 @@ Size/Foreground и анимации общей кнопки; лицензия с
 
 | Нужно изменить | Сначала смотреть | Затем смотреть |
 | --- | --- | --- |
+| Автономная нагрузка Keysight без АСК | `TestConsole/Keysight/Stress/KeysightStressTest.cs`, `TestConsole/Keysight/Stress/README.md` | [KeysightStress](#keysight-stress-tool), `TestConsole/Keysight/Stress/verify.py` |
 | Уведомления о делах на сегодня | `MainWindow/MainWindow.TodayTasks.cs`, `MainWindow/MainWindow.xaml` | `CalendarNoteService.Load/SetCompleted`, `CalendarControl.Completion_Click`; [заметки](#calendar-notes) |
 | Заметки календаря | `UI/Controls/Calendar/CalendarControl.xaml.cs`, `CalendarControl.xaml` | `Ask.Core/Services/Calendar/CalendarNoteService.cs`, `CalendarNote.cs`; [заметки](#calendar-notes) |
 | Запуск приложения | `MainWindow/App.xaml.cs`, `MainWindow/Init/PreStartupInitializer.cs` | `MainWindow/Init/DatabaseInitializer.cs`, `MainWindow/Engine/AppServices.cs`, `MainWindow/MainWindow.xaml.cs` |
@@ -78,6 +79,8 @@ Size/Foreground и анимации общей кнопки; лицензия с
 | Встроенная справка | `Ask.Support/HelpServer.cs` | `Ask.Support/HelpProvider.cs`, `Ask.Support/HelpViewerWindow.cs`, `Ask.Support/AppHelp/` |
 
 ## Runtime Flow Index
+
+- Автономный непрерывный опрос Keysight: [KeysightStress](#keysight-stress-tool).
 
 - [Calendar notes CRUD](#calendar-notes)
 - [Application startup](#application-startup-flow)
@@ -3288,6 +3291,7 @@ ErrorItem → translator/runner ErrorList
 
 | Type | Kind | Project | Responsibility | Section |
 | --- | --- | --- | --- | --- |
+| `TestConsole.Keysight.Stress.KeysightStressTest` / `ScpiConnection` | console mode / TCP client | TestConsole | цикл измерений, восстановление соединения и журнал JSONL | [KeysightStress](#keysight-stress-tool) |
 | `InactivityLockPolicy` | policy | Ask.Core | монотонный отсчёт бездействия, запрет при занятом контуре | [Auto lock](#automatic-inactivity-lock) |
 | `ExecutionRunGuard` | execution guard | Ask.UI | общий слот выполнения, snapshot занятости и последнего завершения | [Auto lock](#automatic-inactivity-lock) |
 | `CalendarNoteService` | file storage service | Ask.Core | общие заметки календаря, атомарный JSON и межпроцессная синхронизация | [Calendar notes](#calendar-notes) |
@@ -3414,3 +3418,61 @@ ErrorItem → translator/runner ErrorList
 5. Обновить call chain, Real/Idle, error/event/background flow по факту.
 6. Проверить относительные paths и внутренние anchors.
 7. Не переписывать незатронутые разделы.
+
+<a id="keysight-stress-tool"></a>
+## KeysightStress — нагрузочный режим TestConsole
+
+### Purpose
+
+Нагрузочный режим существующего harness-проекта `TestConsole/TestConsole.csproj`.
+Нового проекта нет; зависимости TestConsole сохранены. Основное приложение
+не вызывает этот режим. Сам режим использует только BCL TCP/JSON/file APIs;
+конфигурация БД, DI, Real/Idle и factories АСК в этот путь не входят.
+
+### Entry Points / Key Classes / Configuration
+
+`TestConsole.Program.Main` → аргумент `keysight-stress` либо пункт меню 23
+→ `TestConsole.Keysight.Stress.KeysightStressTest.RunAsync(string[])` → `Options.Parse` (IP аргументом либо
+ввод из консоли; port=5025, timeout=10000 мс, cycles=0 непрерывно, delay=0,
+log=уникальный JSONL рядом с exe) → `Journal` / `ScpiConnection`.
+Справка и команды сборки: `TestConsole/Keysight/Stress/README.md`.
+
+### Call Chains
+
+`KeysightStressTest.RunAsync` loop → при `!ScpiConnection.Ready`: `ExchangeAsync("*IDN?")`
+→ проверка модели 34465A → `ExchangeAsync("CONF:CAP", read:false)`
+→ `ExchangeAsync("FUNC?")` → проверка CAP → `Ready=true`
+→ `Journal.Write(WAIT)` → отменяемая `Task.Delay(5000)` для подключения конденсатора
+→ `KeysightStressTest.MeasureAsync` → `ScpiConnection.ExchangeAsync("MEAS:CAP?")`
+→ `TcpClient.ConnectAsync` при отсутствии client → `GetStream`
+→ `NetworkStream.WriteAsync` (ASCII + LF)
+→ последовательный `ReadAsync` до LF (CR/whitespace удаляются, предел 64 КиБ)
+→ `double.TryParse` invariant / проверка finite
+→ `Journal.Write(MEASUREMENT/STATUS)` → следующий цикл без задержки.
+Серия не усредняется; перегрузка >=9e37 отображается отдельно, без брака.
+
+### Error Flow / Events / Background Operations
+
+На каждую операцию создаётся linked CTS; timeout ограничивает connect+write+read.
+Timeout, EOF, I/O/socket/invalid response пишутся в JSONL с временем и exception;
+повреждённый транспорт закрывается. `MeasureAsync`: два запроса → после двух
+ошибок один `*IDN?` с проверкой модели → ещё два запроса измерения. Ошибка probe
+или четвёртого измерения выходит в cycle catch. Он увеличивает failed, сбрасывает
+Ready, делает отменяемую паузу 1 с, затем начинает новый цикл с инициализацией.
+Queries считает все команды, transportErrors включает восстановленные сбои.
+
+`Console.CancelKeyPress` → `CancellationTokenSource.Cancel` → отмена connect/I/O/
+паузы → STOP/SUMMARY → Dispose stream/client/log. Нет параллельных запросов,
+таймеров или fire-and-forget. Каждый JSONL event сбрасывается в файл немедленно.
+Очередь ошибок не читается и не сбрасывается. В отличие от `TcpProtocol` АСК,
+читает полную строку и ограничивает всю операцию; внешнего watchdog здесь нет.
+
+### Files / Verification
+
+Типы режима находятся в `TestConsole/Keysight/Stress/KeysightStressTest.cs`,
+namespace `TestConsole.Keysight.Stress`. После Ctrl+C RunAsync возвращает
+управление меню; при запуске аргументом Main присваивает Environment.ExitCode.
+`TestConsole/Keysight/Stress/verify.py` — интеграционные проверки subprocess утилиты
+на локальном TCP-сервере: фрагментация, перегрузка, timeout, EOF, recovery,
+неверная модель/ответ, отсутствие ответа, валидация параметров.
+Реальный сбой прибора этими проверками не воспроизводится.
