@@ -791,7 +791,10 @@ CommandExecutionManager.ExecuteAllCoreAsync loop
     Retry/Continue/Finish и не применяют StopOnError внутри команды
 → определить ошибки, добавленные всей попыткой команды
 → StopOnError OFF или ошибок нет: принять попытку
-→ StopOnError ON и есть ошибки: MessageBoxCustom показывает количество ошибок
+→ StopOnError ON и есть ошибки: IUserInteractionService.ConfirmControlProgramCommandRetryAsync
+  (errorCount, commandNumber, mnemonic) → ProtocolUI → MessageBoxCustom, заголовок «ПОВТОРИТЬ?»;
+  сообщение «В команде {commandNumber} {mnemonic} обнаружены ошибки.» без количества;
+  этот вызов передаёт titleFontSize: 28.5 (обычный размер заголовка MessageBoxCustom — 19)
   и вопрос о повторе команды (`YesNoCancel`)
   → Да: сохранить все шаги попытки в левом экранном протоколе,
     восстановить ProtocolModel протокола результатов и отбросить ещё не

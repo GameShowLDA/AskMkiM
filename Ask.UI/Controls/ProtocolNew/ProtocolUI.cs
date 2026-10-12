@@ -543,7 +543,7 @@ namespace Ask.UI.Controls.ProtocolNew
     }
 
     /// <inheritdoc />
-    public async Task<UserAction> ConfirmControlProgramCommandRetryAsync(int errorCount)
+    public async Task<UserAction> ConfirmControlProgramCommandRetryAsync(int errorCount, string commandNumber, string mnemonic)
     {
       if (!await ExecutionConfig.GetIsStopOnErrorEnabled())
       {
@@ -551,13 +551,14 @@ namespace Ask.UI.Controls.ProtocolNew
       }
 
       MessageBoxResult ShowDialog() => MessageBoxCustom.Show(
-        $"Найдено ошибок: {errorCount}.\r\n\r\n" +
+        $"В команде {commandNumber} {mnemonic} обнаружены ошибки.\r\n\r\n" +
         "Да — повторить всю команду.\r\n" +
         "Нет — принять результат с ошибками и продолжить выполнение.\r\n" +
         "Отмена — закрыть окно, изучить протокол и выбрать действие позже.",
-        "Ошибки выполнения команды",
+        "ПОВТОРИТЬ?",
         MessageBoxButton.YesNoCancel,
-        MessageBoxImage.Question);
+        MessageBoxImage.Question,
+        titleFontSize: 24);
 
       var result = Dispatcher.CheckAccess()
         ? ShowDialog()

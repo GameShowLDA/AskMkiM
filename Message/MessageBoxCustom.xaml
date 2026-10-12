@@ -158,9 +158,9 @@
                         <TextBlock x:Name="MessageText"
                                    Grid.Column="1"
                                    Margin="16,2,0,0"
-                                   Foreground="{StaticResource TextSecondaryBrush}"
-                                   FontFamily="Cascadia Mono, Consolas, Courier New"
-                                   FontSize="15"
+                                   Foreground="{StaticResource TextPrimaryBrush}"
+                                   FontFamily="Segoe UI"
+                                   FontSize="18"
                                    TextWrapping="Wrap"
                                    MaxWidth="620"/>
                     </Grid>
