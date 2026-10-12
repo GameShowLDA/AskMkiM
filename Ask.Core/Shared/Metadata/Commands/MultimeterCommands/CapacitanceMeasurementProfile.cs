@@ -76,6 +76,6 @@ namespace Ask.Core.Shared.Metadata.Commands.MultimeterCommands
     /// <summary>
     /// Время ожидания ответа устройства, в миллисекундах.
     /// </summary>
-    public int Timeout { get; init; } = 1000;
+    public int Timeout { get; init; } = 5000;
   }
 }

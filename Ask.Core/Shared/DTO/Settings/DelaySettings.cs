@@ -6,6 +6,11 @@ namespace Ask.Core.Shared.DTO.Settings;
 public sealed class DelaySettings
 {
   /// <summary>
+  /// Задержка между отправкой запроса ёмкости и чтением ответа в миллисекундах.
+  /// </summary>
+  public int CapacitanceResponseDelay { get; set; } = 200;
+
+  /// <summary>
   /// Задержки пробойной установки.
   /// </summary>
   public BreakdownTesterDelaySettings BreakdownTester { get; set; } = new();

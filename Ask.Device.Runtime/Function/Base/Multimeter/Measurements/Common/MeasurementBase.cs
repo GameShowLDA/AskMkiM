@@ -195,6 +195,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
 
       await RangeBase.SetRangeForMeasurementAsync(device, measurementRange.TargetValue, userMessageService);
 
+      responseDelay += Ask.Core.Shared.Metadata.Static.Delays.AppDelays.CapacitanceResponseDelay.Delay;
       var measurements = new List<double>(measurementCount);
       int maxMeasurementAttempts = measurementCount + 5;
       string lastErrorMessage = string.Empty;
@@ -351,7 +352,8 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
         profile.Timeout,
         responseDelay: responseDelay,
         messages: userMessageService,
-        cancellationToken: cancellationToken);
+        cancellationToken: cancellationToken,
+        allowRecovery: profile.Unit is not CapacitanceUnit);
       string response = query.Response;
       LogInformation($"[{header}] ответ мультиметра: {response}");
 

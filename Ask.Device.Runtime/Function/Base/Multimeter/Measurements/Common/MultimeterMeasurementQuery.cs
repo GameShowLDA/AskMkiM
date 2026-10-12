@@ -19,7 +19,7 @@ internal static class MultimeterMeasurementQuery
   internal static async Task<(string Response, int Attempt, int MaxAttempts)> QueryAsync(
     IMultimeter device, string command, string idleResponse, string operation,
     int timeout, double responseDelay = 0, IUserInteractionService? messages = null,
-    CancellationToken cancellationToken = default)
+    CancellationToken cancellationToken = default, bool allowRecovery = true)
   {
     using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(
       cancellationToken, EquipmentExecutionContext.CancellationToken,
@@ -30,7 +30,14 @@ internal static class MultimeterMeasurementQuery
     for (int attempt = 1; attempt <= maxAttempts; attempt++)
     {
       token.ThrowIfCancellationRequested();
-      LogInformation($"[{device.Name}] {operation}: запрос {attempt}/{maxAttempts}, восстановление={recovered}, ожидание {timeout} мс.", isDeviceLog: true);
+      LogInformation($"[{device.Name}] {operation}: запрос {attempt}/{maxAttempts}, восстановление={recovered}, тайм-аут ответа {timeout} мс.", isDeviceLog: true);
+      if (responseDelay > 0)
+      {
+        string delayDescription = ExecutionConfig.GetIsIdleModeEnabled()
+          ? "задана, в холостом режиме ожидание пропускается"
+          : "после отправки команды, перед чтением ответа";
+        LogInformation($"[{device.Name}] {operation}: задержка {responseDelay} мс — {delayDescription}.", isDeviceLog: true);
+      }
       try
       {
         string response = await DeviceProtocolEmulator.QueryMultimeterAsync(
@@ -50,7 +57,7 @@ internal static class MultimeterMeasurementQuery
         LogWarning($"[{device.Name}] {ex.Operation}: {ex.Message}", isDeviceLog: true);
         if (attempt < maxAttempts)
           continue;
-        if (recovered || ExecutionConfig.GetIsIdleModeEnabled())
+        if (!allowRecovery || recovered || ExecutionConfig.GetIsIdleModeEnabled())
           throw;
 
         ConnectedBaseProfile profile = device switch

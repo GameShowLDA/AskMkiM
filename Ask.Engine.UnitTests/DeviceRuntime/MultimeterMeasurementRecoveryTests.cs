@@ -15,6 +15,97 @@ namespace Ask.Engine.UnitTests.DeviceRuntime;
 
 public sealed class MultimeterMeasurementRecoveryTests
 {
+  [Theory]
+  [InlineData(false, 1)]
+  [InlineData(false, 2)]
+  [InlineData(false, 3)]
+  [InlineData(true, 1)]
+  [InlineData(true, 2)]
+  [InlineData(true, 3)]
+  public async Task Capacitance_TwoReadsWithProfileTimeoutWithoutIdentification(bool usb, int successOnRead)
+  {
+    bool idle = ExecutionConfig.GetIsIdleModeEnabled();
+    try
+    {
+      ExecutionConfig.SetIdleMode(false);
+      IMultimeter device = usb ? new MultimeterB7783() : new KeysightDevice();
+      var profile = device.CapacitanceCommands;
+      device.TypeMode = profile.TypeMode;
+      device.ConnectionInfo.IsConnected = true;
+      using var protocol = new RecoveryProtocol(device, profile.Measure, successOnRead, measurementTimeout: profile.Timeout);
+      device.DeviceProtocol = protocol;
+
+      if (successOnRead <= 2)
+      {
+        double result = await MeasurementBase.MeasureAsync(device, profile, new MeasurementRange(1, -1, -1));
+        Assert.Equal(1e9, result);
+      }
+      else
+      {
+        var error = await Assert.ThrowsAsync<DeviceNoResponseException>(() =>
+          MeasurementBase.MeasureAsync(device, profile, new MeasurementRange(1, -1, -1)));
+        Assert.Contains("Попытка 2/2", error.Operation);
+      }
+
+      Assert.All(protocol.ResponseDelays, delay => Assert.Equal(
+        (double)Ask.Core.Shared.Metadata.Static.Delays.AppDelays.CapacitanceResponseDelay.Delay, delay));
+      Assert.Equal(Math.Min(successOnRead, 2), protocol.Reads);
+      Assert.Equal(0, protocol.Probes);
+      Assert.All(protocol.AllCommands, command => Assert.Equal(profile.Measure, command));
+    }
+    finally { ExecutionConfig.SetIdleMode(idle); }
+  }
+
+  [Theory]
+  [InlineData(0)]
+  [InlineData(275)]
+  public async Task Capacitance_FiveMeasurementsUseConfiguredResponseDelay(int configuredDelay)
+  {
+    bool idle = ExecutionConfig.GetIsIdleModeEnabled();
+    var original = Ask.Core.Shared.Metadata.Static.Delays.AppDelays.GetSettings();
+    try
+    {
+      ExecutionConfig.SetIdleMode(false);
+      var settings = Ask.Core.Shared.Metadata.Static.Delays.AppDelays.GetSettings();
+      settings.CapacitanceResponseDelay = configuredDelay;
+      Ask.Core.Shared.Metadata.Static.Delays.AppDelays.SaveAndApply(settings);
+      var device = new KeysightDevice { TypeMode = MultimeterTypeMode.Capacitance };
+      device.ConnectionInfo.IsConnected = true;
+      using var protocol = new RecoveryProtocol(device, device.CapacitanceCommands.Measure, 1,
+        measurementTimeout: device.CapacitanceCommands.Timeout) { VaryMeasurements = true };
+      device.DeviceProtocol = protocol;
+      double result = await device.CapacitanceManager.MeasureCapacitanceAsync(new MeasurementRange(1, -1, -1));
+      Assert.Equal(3e9, result);
+      Assert.Equal(5, protocol.Reads);
+      Assert.Equal(0, protocol.Probes);
+      Assert.Equal(5, protocol.ResponseDelays.Count);
+      Assert.All(protocol.ResponseDelays, delay => Assert.Equal((double)configuredDelay, delay));
+    }
+    finally
+    {
+      ExecutionConfig.SetIdleMode(idle);
+      Ask.Core.Shared.Metadata.Static.Delays.AppDelays.SaveAndApply(original);
+    }
+  }
+
+  [Fact]
+  public async Task IdleCapacitance_DoesNotUseRealTransport()
+  {
+    bool idle = ExecutionConfig.GetIsIdleModeEnabled();
+    try
+    {
+      ExecutionConfig.SetIdleMode(true);
+      var device = new KeysightDevice { TypeMode = MultimeterTypeMode.Capacitance };
+      var protocol = new Mock<IDeviceProtocol>(MockBehavior.Strict);
+      device.DeviceProtocol = protocol.Object;
+      double result = await MeasurementBase.MeasureAsync(device, device.CapacitanceCommands,
+        new MeasurementRange(1, 1, 1));
+      Assert.Equal(1, result);
+      protocol.VerifyNoOtherCalls();
+    }
+    finally { ExecutionConfig.SetIdleMode(idle); }
+  }
+
   [Fact]
   public async Task Capacitance_CancellationStopsRecovery()
   {
@@ -87,13 +178,11 @@ public sealed class MultimeterMeasurementRecoveryTests
   [InlineData("AC", false)]
   [InlineData("DC", false)]
   [InlineData("RES", false)]
-  [InlineData("CAP", false)]
   [InlineData("CONT", false)]
   [InlineData("DIOD", false)]
   [InlineData("AC", true)]
   [InlineData("DC", true)]
   [InlineData("RES", true)]
-  [InlineData("CAP", true)]
   [InlineData("CONT", true)]
   [InlineData("DIOD", true)]
   public async Task EveryMode_TwoFailuresProbeOnceThenTwoReads(string mode, bool usb)
@@ -191,8 +280,10 @@ public sealed class MultimeterMeasurementRecoveryTests
     string probeOutcome = "success", int measurementTimeout = 1000) : IDeviceProtocol, IDisposable
   {
     public SemaphoreSlim OperationLock { get; set; } = new(1, 1);
+    public List<double> ResponseDelays { get; } = [];
     public List<string> Exchanges { get; } = [];
     public List<string> AllCommands { get; } = [];
+    public bool VaryMeasurements { get; init; }
     public bool BlockRead { get; init; }
     public int Reads { get; private set; }
     public int Probes { get; private set; }
@@ -219,11 +310,12 @@ public sealed class MultimeterMeasurementRecoveryTests
             _ => Task.FromResult("Keysight Technologies,34465A,TEST,1.0"),
           };
         }
+        ResponseDelays.Add(responseDelay);
         Reads++;
         if (BlockRead) return WaitForCancellationAsync(cancellationToken);
         return Reads < successOnRead
           ? Task.FromException<string>(new DeviceNoResponseException(device, command, timeout))
-          : Task.FromResult("1");
+          : Task.FromResult(VaryMeasurements ? Reads.ToString(System.Globalization.CultureInfo.InvariantCulture) : "1");
       }
       return Task.FromResult(string.Empty);
     }

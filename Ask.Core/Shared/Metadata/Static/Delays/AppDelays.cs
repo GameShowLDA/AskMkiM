@@ -11,6 +11,11 @@
     private static readonly object SyncRoot = new();
 
     /// <summary>
+    /// Задержка между запросом ёмкости и чтением ответа мультиметра.
+    /// </summary>
+    public static readonly DelayModel CapacitanceResponseDelay;
+
+    /// <summary>
     /// Задержки, используемые при работе с пробойной установкой.
     /// </summary>
     public readonly static BreakdownTesterDelays BreakdownTesterDelays;
@@ -26,6 +31,11 @@
     static AppDelays()
     {
       DelaySettings settings = new DelaySettingsFileService().Load();
+      CapacitanceResponseDelay = new DelayModel
+      {
+        Name = "Задержка перед чтением ёмкости",
+        Delay = settings.CapacitanceResponseDelay,
+      };
       BreakdownTesterDelays = new BreakdownTesterDelays(
         settings.BreakdownTester.PostTestDelay);
       ModuleRelayControlDelays = new ModuleRelayControlDelays(
@@ -43,6 +53,7 @@
       {
         return new DelaySettings
         {
+          CapacitanceResponseDelay = CapacitanceResponseDelay.Delay,
           BreakdownTester = new BreakdownTesterDelaySettings
           {
             PostTestDelay = BreakdownTesterDelays.PostTestDelay.Delay,
@@ -72,6 +83,7 @@
       lock (SyncRoot)
       {
         new DelaySettingsFileService().Save(settings);
+        CapacitanceResponseDelay.Delay = settings.CapacitanceResponseDelay;
         BreakdownTesterDelays.PostTestDelay.Delay = settings.BreakdownTester.PostTestDelay;
         ModuleRelayControlDelays.PreCommandDelay.Delay = settings.ModuleRelayControl.PreCommandDelay;
         ModuleRelayControlDelays.PostCommandDelay.Delay = settings.ModuleRelayControl.PostCommandDelay;

@@ -1352,8 +1352,8 @@ equipment/self-test builders оставляют его выключенным. �
 `Ask.Core/Shared/Metadata/Static/Delays/`. При первой инициализации `AppDelays` сервис
 `DelaySettingsFileService` читает `Settings/delaySettings.yaml` через `YamlService<DelaySettings>`.
 Отсутствующий или пустой файл записывается с дефолтами: задержка ППУ после испытания — 100 мс,
-МКР перед командой — 20 мс, после команды — 20 мс. `ModuleRelayControlDelays` пока не подключён
-к runtime-пути МКР. Административный `DelaySettingsControl` сохраняет изменения через
+МКР перед командой — 20 мс, после команды — 20 мс. `ModuleRelayControlDelays` подключён к `PointManagerAdapter`, `BusManagerAdapter` и
+`MeterManagerAdapter` в `Ask.Device.Application/FunctionAdapters/ModuleRelayControl/`. Административный `DelaySettingsControl` сохраняет изменения через
 `AppDelays.SaveAndApply`: сначала перезаписывается YAML, затем обновляются существующие
 `DelayModel` текущего процесса без перезапуска приложения. Вывод применяемых задержек проходит
 единым путём:
@@ -1902,14 +1902,27 @@ MeasurementBase.MeasureCoreAsync / ContinuityMeasurementBase.CheckContinuityCore
   → DeviceProtocolEmulator.QueryMultimeterAsync(measurement command, timeout: profile.Timeout, responseDelay: responseDelay)
     → Real TCP/USB / Idle emulator
   → Real, при DeviceNoResponseException или пустом ответе: максимум два запроса значения без дополнительных пауз
-  → если оба не получили ответ: один скрытый запрос ConnectedProfile.Initialize, timeout: 1000
+  → ёмкость: если оба не получили ответ — DeviceNoResponseException без идентификации и дополнительных запросов
+  → остальные режимы, если оба не получили ответ: один скрытый запрос ConnectedProfile.Initialize, timeout: 1000
     → без ConnectableManager.InitializeAsync, повторов, звуковой настройки и строки инициализации
     → ответ есть: ещё два запроса измерения без дополнительных пауз
     → ответа нет: существующий путь ошибки измерения
   → ответ → MultimeterResponseProcessor.TryParseMeasurement / TryCheckContinuity
 ```
 
-Профиль идентификации выбирается по `DeviceWithIP/DeviceWithUSB/DeviceWithCOM`.
+`MeasurementBase.MeasureCoreAsync` передаёт для ёмкости `allowRecovery: false` в
+`MultimeterMeasurementQuery.QueryAsync`: каждый отдельный замер серии выполняет максимум
+два запроса с ожиданием `profile.Timeout`; первый полученный ответ сразу возвращается.
+Defaults профилей: ёмкость — 5000 мс, остальные пять режимов — 3000 мс.
+`MultimeterB7783` переопределяет сопротивление/ёмкость на 2500 мс и ACV на 2000 мс
+в собственном конструкторе; изменение defaults этих трёх профилей на него не влияет.
+Усреднение серии сохраняется. Real TCP закрывает соединение после тайм-аута и создаёт
+новое при втором запросе; управляющая инициализация между запросами не выполняется.
+Внешние watchdog по-прежнему ограничивают всю реальную операцию 5 секундами.
+`TcpProtocol.QueryAsync` сейчас выполняет один `NetworkStream.ReadAsync`, без ожидания
+терминатора ответа. При фрагментации TCP числовой префикс может быть принят за полный
+результат. Это ограничение транспорта, не устраняемое увеличением timeout.
+Профиль идентификации остальных режимов выбирается по `DeviceWithIP/DeviceWithUSB/DeviceWithCOM`.
 Скрытый обмен остаётся в диагностическом журнале команд. Отдельная инициализация через
 `MultimeterInitialization` не изменяется. Числа вне допуска, перегрузка и усреднение не
 запускают скрытый запрос: они обрабатываются после получения ответа существующей логикой.
@@ -3240,7 +3253,7 @@ provider error and cancellation; a later query builds a fresh runtime instance f
 | `RoleAuthorizationConfig` | role/credential files | login/configurator | current session role, menu/archive permissions and Debug derivation |
 | `DebugAccessConfig` | derived session state | `RoleAuthorizationConfig.CurrentRole` | protocol debug source and ErrorList DEBUG-column visibility |
 | `LegacyMkiConfig` | legacy hardware profile/config file + DB storage | LegacyMki services | compatibility execution |
-| `AppDelays` | `DelaySettings` / `Settings/delaySettings.yaml` | `DelaySettingsFileService`, `YamlService<DelaySettings>` | задержка после испытания ППУ; зарезервированные задержки до/после команды МКР |
+| `AppDelays` | `DelaySettings` / `Settings/delaySettings.yaml` | `DelaySettingsFileService`, `YamlService<DelaySettings>` | задержка после испытания ППУ; задержки до/после команд МКР; задержка чтения ёмкости мультиметра |
 
 Config managers are static global state. Their save events are subscribed once in
 startup; changes from settings controls update the static model and asynchronously
@@ -3333,8 +3346,8 @@ ErrorItem → translator/runner ErrorList
 | `DelayModel` | shared timing model | Ask.Core | хранит отображаемое наименование и продолжительность фиксированной задержки в миллисекундах; экземпляры группируются в `AppDelays` | [Protocols](#protocols-and-file-formats) |
 | `AppDelays` | static timing catalog | Ask.Core | при первом обращении загружает `Settings/delaySettings.yaml` и предоставляет сгруппированные задержки ППУ и МКР | [Protocols](#protocols-and-file-formats) |
 | `DelaySettingsFileService` | YAML configuration service | Ask.Core | читает `delaySettings.yaml`, а при отсутствии или пустом файле записывает дефолты 100/20/20 мс | [Configuration](#configuration) |
-| `ModuleRelayControlDelays` | timing catalog | Ask.Core | задаёт загруженные из YAML модели задержек перед отправкой и после отправки команды МКР; пока не вызывается runtime-кодом | [Protocols](#protocols-and-file-formats) |
-| `DelaySettingsControl` | privileged settings UI | UI | встроен в `SettingsProgrammControl`, показывает три отдельные числовые карточки и доступен только `Root`/`Administrator`; через `AppDelays.SaveAndApply` сохраняет YAML и немедленно обновляет значения текущего процесса | [UI Architecture](#ui-architecture) |
+| `ModuleRelayControlDelays` | timing catalog | Ask.Core | задаёт загруженные из YAML модели задержек перед отправкой и после отправки команды МКР; вызывается адаптерами точек, шин и измерителей МКР | [Protocols](#protocols-and-file-formats) |
+| `DelaySettingsControl` | privileged settings UI | UI | встроен в `SettingsProgrammControl`, показывает четыре отдельные числовые карточки и доступен только `Root`/`Administrator`; через `AppDelays.SaveAndApply` сохраняет YAML и немедленно обновляет значения текущего процесса | [UI Architecture](#ui-architecture) |
 | `ExecutionMessages` | static facade | Ask.Protocol.Messages | проверяет видимость параметров выполнения и коммутации, публикует накопленные результаты проверки, ошибки, debug-сообщения, задержки из числовых параметров и `DelayModel`, этапы анализа цепей и локализации, границы этапов, инициализацию, настройку оборудования и коммутацию; сообщения `DelayModel` фильтруются `DeviceDisplayConfig.ShowDelayMessages`, но само ожидание сохраняется; формирует только накапливаемую ошибку локализации | [Protocols](#protocols-and-file-formats) |
 | `ExecutionMessageBuilder` | internal static builder | Ask.Protocol.Messages | содержит заголовок накопленных результатов, ошибки и задержки выполнения, включая формат `<имя> <значение>мс` для `DelayModel`, сообщения подготовки, настройки и коммутации устройств, подключения диапазонов, сброса точек, этапов и запуска теста | [Protocols](#protocols-and-file-formats) |
 | `ExecutionMessagePublisher` | internal static publisher | Ask.Protocol.Messages | передаёт сообщения этапов выполнения в `IMessageOutputService`, сохраняет признаки начала блока, обхода паузы/пошагового режима и метаданные исходного вызова | [Protocols](#protocols-and-file-formats) |
@@ -3476,3 +3489,26 @@ namespace `TestConsole.Keysight.Stress`. После Ctrl+C RunAsync возвра
 на локальном TCP-сервере: фрагментация, перегрузка, timeout, EOF, recovery,
 неверная модель/ответ, отсутствие ответа, валидация параметров.
 Реальный сбой прибора этими проверками не воспроизводится.
+
+### Capacitance response delay
+
+`DelaySettings.CapacitanceResponseDelay` (по умолчанию 200 мс) хранится в
+`Settings/delaySettings.yaml`, редактируется четвёртой карточкой
+`UI/Controls/Settings/Delays/DelaySettingsControl.xaml` (Root/Administrator).
+`AppDelays.SaveAndApply` обновляет `AppDelays.CapacitanceResponseDelay.Delay`
+сразу после сохранения. Старый YAML без поля получает 200 мс; ноль отключает паузу.
+
+`CapacitanceMeasurementBase.MeasureCapacitanceAsync(measurementCount: 5)`
+→ `MeasurementBase.MeasureCapacitanceAsync`
+→ к аргументу `responseDelay` добавляется настроенная задержка (один снимок на серию)
+→ цикл сбора пяти положительных значений
+→ `MeasureCoreAsync` → `MultimeterMeasurementQuery.QueryAsync`
+→ каждая попытка получает суммарный `responseDelay`
+→ TCP `SendCommandAsync` → отменяемая пауза → `ReadAsync`;
+USB `UsbCommandHandler.ExecuteVisaCommand`: `RawIO.Write` → пауза → `ReadResponse`.
+→ перевод F в нФ → среднее собранных значений.
+Другие режимы мультиметра новую настройку не используют. Idle сохраняет маршрутизацию
+эмулятора: `MultimeterEmulatorProtocol` возвращает ответ без ожидания `responseDelay`.
+`MultimeterMeasurementQuery` пишет отдельный диагностический лог задержки каждого запроса;
+в Idle лог явно сообщает, что ожидание пропускается. Пауза Real входит в существующий
+общий watchdog 5 секунд; тайм-ауты не изменены.

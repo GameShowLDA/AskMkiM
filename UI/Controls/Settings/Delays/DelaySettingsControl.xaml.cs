@@ -107,6 +107,8 @@ namespace UI.Controls.Settings.Delays
       _isUpdatingText = true;
       try
       {
+        CapacitanceResponseDelayTextBox.Text =
+          _savedSettings.CapacitanceResponseDelay.ToString(CultureInfo.InvariantCulture);
         BreakdownPostTestDelayTextBox.Text =
           _savedSettings.BreakdownTester.PostTestDelay.ToString(CultureInfo.InvariantCulture);
         ModulePreCommandDelayTextBox.Text =
@@ -125,6 +127,7 @@ namespace UI.Controls.Settings.Delays
     private bool MatchesSavedSettings()
     {
       return TryReadSettings(out DelaySettings settings)
+        && settings.CapacitanceResponseDelay == _savedSettings.CapacitanceResponseDelay
         && settings.BreakdownTester.PostTestDelay == _savedSettings.BreakdownTester.PostTestDelay
         && settings.ModuleRelayControl.PreCommandDelay == _savedSettings.ModuleRelayControl.PreCommandDelay
         && settings.ModuleRelayControl.PostCommandDelay == _savedSettings.ModuleRelayControl.PostCommandDelay;
@@ -133,13 +136,15 @@ namespace UI.Controls.Settings.Delays
     private bool TryReadSettings(out DelaySettings settings)
     {
       settings = new DelaySettings();
-      if (!TryReadDelay(BreakdownPostTestDelayTextBox, out int breakdownPostTestDelay)
+      if (!TryReadDelay(CapacitanceResponseDelayTextBox, out int capacitanceResponseDelay)
+        || !TryReadDelay(BreakdownPostTestDelayTextBox, out int breakdownPostTestDelay)
         || !TryReadDelay(ModulePreCommandDelayTextBox, out int modulePreCommandDelay)
         || !TryReadDelay(ModulePostCommandDelayTextBox, out int modulePostCommandDelay))
       {
         return false;
       }
 
+      settings.CapacitanceResponseDelay = capacitanceResponseDelay;
       settings.BreakdownTester.PostTestDelay = breakdownPostTestDelay;
       settings.ModuleRelayControl.PreCommandDelay = modulePreCommandDelay;
       settings.ModuleRelayControl.PostCommandDelay = modulePostCommandDelay;

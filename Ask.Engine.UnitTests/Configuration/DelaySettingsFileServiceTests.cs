@@ -19,6 +19,7 @@ public sealed class DelaySettingsFileServiceTests
 
       DelaySettings settings = new DelaySettingsFileService(applicationDirectory).Load();
 
+      Assert.Equal(200, settings.CapacitanceResponseDelay);
       Assert.Equal(100, settings.BreakdownTester.PostTestDelay);
       Assert.Equal(20, settings.ModuleRelayControl.PreCommandDelay);
       Assert.Equal(20, settings.ModuleRelayControl.PostCommandDelay);
@@ -74,6 +75,7 @@ public sealed class DelaySettingsFileServiceTests
     {
       var settings = new DelaySettings
       {
+        CapacitanceResponseDelay = 375,
         BreakdownTester = new BreakdownTesterDelaySettings { PostTestDelay = 150 },
         ModuleRelayControl = new ModuleRelayControlDelaySettings
         {
@@ -86,6 +88,7 @@ public sealed class DelaySettingsFileServiceTests
       service.Save(settings);
       DelaySettings savedSettings = new YamlService<DelaySettings>(settingsPath).Load();
 
+      Assert.Equal(375, savedSettings.CapacitanceResponseDelay);
       Assert.Equal(150, savedSettings.BreakdownTester.PostTestDelay);
       Assert.Equal(25, savedSettings.ModuleRelayControl.PreCommandDelay);
       Assert.Equal(35, savedSettings.ModuleRelayControl.PostCommandDelay);
@@ -94,6 +97,22 @@ public sealed class DelaySettingsFileServiceTests
     {
       Directory.Delete(applicationDirectory, recursive: true);
     }
+  }
+
+  [Fact]
+  public void Load_LegacyFile_UsesDefaultCapacitanceDelay()
+  {
+    string directory = CreateApplicationDirectory();
+    string path = GetSettingsPath(directory);
+    try
+    {
+      Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+      File.WriteAllText(path, "breakdownTester:\n  postTestDelay: 125\n");
+      var settings = new DelaySettingsFileService(directory).Load();
+      Assert.Equal(200, settings.CapacitanceResponseDelay);
+      Assert.Equal(125, settings.BreakdownTester.PostTestDelay);
+    }
+    finally { Directory.Delete(directory, recursive: true); }
   }
 
   private static string CreateApplicationDirectory()

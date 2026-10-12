@@ -23,6 +23,7 @@ public sealed class AppDelaysTests
     DelaySettings originalSettings = AppDelays.GetSettings();
     var updatedSettings = new DelaySettings
     {
+      CapacitanceResponseDelay = 350,
       BreakdownTester = new BreakdownTesterDelaySettings { PostTestDelay = 140 },
       ModuleRelayControl = new ModuleRelayControlDelaySettings
       {
@@ -37,6 +38,9 @@ public sealed class AppDelaysTests
 
       DelaySettings currentSettings = AppDelays.GetSettings();
       DelaySettings persistedSettings = new DelaySettingsFileService().Load();
+      Assert.Equal(350, currentSettings.CapacitanceResponseDelay);
+      Assert.Equal(350, AppDelays.CapacitanceResponseDelay.Delay);
+      Assert.Equal(350, persistedSettings.CapacitanceResponseDelay);
       Assert.Equal(140, currentSettings.BreakdownTester.PostTestDelay);
       Assert.Equal(30, currentSettings.ModuleRelayControl.PreCommandDelay);
       Assert.Equal(40, currentSettings.ModuleRelayControl.PostCommandDelay);

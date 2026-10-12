@@ -224,6 +224,38 @@
                             </Grid>
                         </Grid>
                     </Border>
+                    <Border Width="300"
+                            Margin="10"
+                            Padding="10"
+                            Style="{DynamicResource SettingCardStyle}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Text="Мультиметр — ёмкость"
+                                       Style="{DynamicResource SettingsHeaderStyle}"
+                                       Margin="0,0,0,2"/>
+                            <TextBlock Grid.Row="1"
+                                       Text="Задержка после запроса ёмкости перед чтением ответа каждого измерения."
+                                       MinHeight="32"
+                                       Style="{DynamicResource SettingsDescriptionStyle}"/>
+                            <Grid Grid.Row="2" Margin="0,6,0,0">
+                                <TextBox x:Name="CapacitanceResponseDelayTextBox"
+                                         Style="{StaticResource DelayTextBoxStyle}"
+                                         PreviewTextInput="DelayTextBox_PreviewTextInput"
+                                         TextChanged="DelayTextBox_TextChanged"
+                                         DataObject.Pasting="DelayTextBox_Pasting"/>
+                                <TextBlock Margin="0,0,14,0"
+                                           HorizontalAlignment="Right"
+                                           VerticalAlignment="Center"
+                                           IsHitTestVisible="False"
+                                           Text="мс"
+                                           Style="{DynamicResource SettingsDescriptionStyle}"/>
+                            </Grid>
+                        </Grid>
+                    </Border>
                 </WrapPanel>
             </StackPanel>
         </Grid>
