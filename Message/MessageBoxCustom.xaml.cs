@@ -118,7 +118,7 @@ namespace Message
       Close();
     }
 
-    public static MessageBoxResult Show(string text = "", string title = "", MessageBoxButton buttons = MessageBoxButton.OK, MessageBoxImage image = MessageBoxImage.None)
+    public static MessageBoxResult Show(string text = "", string title = "", MessageBoxButton buttons = MessageBoxButton.OK, MessageBoxImage image = MessageBoxImage.None, double? titleFontSize = null)
     {
       return Application.Current.Dispatcher.Invoke(() =>
        {
@@ -133,6 +133,10 @@ namespace Message
 
          // можно настроить текст и заголовок, если нужно
          window.Header.Text = title;
+         if (titleFontSize.HasValue)
+         {
+           window.Header.FontSize = titleFontSize.Value;
+         }
          window.MessageText.Text = text;
 
          try

@@ -282,7 +282,7 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
             hasExecutionErrors = !hasExecutor || executionErrorCount > 0;
             var action = hasExecutionErrors
               ? await _console.ConfirmControlProgramCommandRetryAsync(
-                hasExecutor ? executionErrorCount : 1)
+                hasExecutor ? executionErrorCount : 1, command.CommandNumber, command.Mnemonic)
               : UserAction.None;
 
             if (action == UserAction.Retry)
