@@ -2,7 +2,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const $ = (selector, root = document) => root.querySelector(selector);
     const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
     const textOf = el => el?.textContent.trim() || '';
-    const normalize = text => text.replace(/\s+/g, ' ').trim().toLowerCase();
+    const normalizeWhitespace = text => String(text ?? '').replace(/\s+/g, ' ').trim();
+    const normalize = (text, caseSensitive = false) => {
+        const normalized = normalizeWhitespace(text);
+        return caseSensitive ? normalized : normalized.toLocaleLowerCase('ru-RU');
+    };
 
     const tabs = $$('.tab');
     const panes = $$('.tab-content');
@@ -16,6 +20,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const searchResults = $('#search-results');
     const clearBtn = $('#clear-btn');
     const searchModes = $$('input[name="search-mode"]');
+    const searchOptions = $$('input[name="search-option"]');
+    const caseSensitiveOption = $('#search-case-sensitive');
+    const wholeWordsOption = $('#search-whole-words');
     const resizer = $('#resizer');
     const primaryArea = $('.primary-area');
     const secondaryArea = $('.secondary-area');
@@ -40,7 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
         el,
         src: el.dataset.src,
         title: textOf(el),
-        titleSearch: normalize(`${el.id} ${textOf(el)}`),
+        titleSearch: normalizeWhitespace(`${el.id} ${textOf(el)}`),
         isPage: el.classList.contains('page')
     }));
     const pageMap = new Map(pages.map(page => [page.id, page]));
@@ -56,9 +63,14 @@ document.addEventListener('DOMContentLoaded', () => {
     let contentIndexPromise = null;
     let searchFrame = null;
     let pendingSelectionQuery = '';
+    let pendingSelectionOptions = null;
     let currentTheme = 'light';
 
     const getSearchMode = () => $('input[name="search-mode"]:checked')?.value || 'title';
+    const getSearchOptions = () => ({
+        caseSensitive: Boolean(caseSensitiveOption?.checked),
+        wholeWords: Boolean(wholeWordsOption?.checked)
+    });
     const getTheme = () => currentTheme;
     const setClearVisible = visible => { clearBtn.style.display = visible ? 'block' : 'none'; };
     const setBookmarkVisible = visible => { bookmarkBtn.style.visibility = visible ? 'visible' : 'hidden'; };
@@ -297,11 +309,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function loadPage(id, pushHistory = true, selectionQuery = '') {
+    function loadPage(id, pushHistory = true, selectionQuery = '', selectionOptions = null) {
         const page = pageMap.get(id);
         if (!page) return;
 
         pendingSelectionQuery = selectionQuery.trim();
+        pendingSelectionOptions = pendingSelectionQuery ? { ...selectionOptions } : null;
 
         currentPage = id;
         expandPathTo(page.el);
@@ -424,11 +437,48 @@ document.addEventListener('DOMContentLoaded', () => {
         return contentIndexPromise;
     }
 
-    function buildSnippet(text, query) {
+    function isWordCharacter(character) {
+        return Boolean(character && /[\p{L}\p{N}_]/u.test(character));
+    }
+
+    function findMatchIndex(text, query, options = {}) {
+        const source = normalizeWhitespace(text);
+        const pattern = normalizeWhitespace(query);
+        if (!source || !pattern) return -1;
+
+        const searchableSource = options.caseSensitive
+            ? source
+            : source.toLocaleLowerCase('ru-RU');
+        const searchablePattern = options.caseSensitive
+            ? pattern
+            : pattern.toLocaleLowerCase('ru-RU');
+        const requireLeadingBoundary = options.wholeWords && isWordCharacter(pattern[0]);
+        const requireTrailingBoundary = options.wholeWords && isWordCharacter(pattern.at(-1));
+
+        for (let fromIndex = 0; fromIndex <= searchableSource.length - searchablePattern.length;) {
+            const index = searchableSource.indexOf(searchablePattern, fromIndex);
+            if (index < 0) return -1;
+
+            const before = index > 0 ? source[index - 1] : '';
+            const after = source[index + pattern.length] || '';
+            const leadingBoundaryMatches = !requireLeadingBoundary || !isWordCharacter(before);
+            const trailingBoundaryMatches = !requireTrailingBoundary || !isWordCharacter(after);
+
+            if (leadingBoundaryMatches && trailingBoundaryMatches) return index;
+            fromIndex = index + 1;
+        }
+
+        return -1;
+    }
+
+    function matchesSearch(text, query, options) {
+        return findMatchIndex(text, query, options) >= 0;
+    }
+
+    function buildSnippet(text, query, options) {
         if (!text) return '';
 
-        const searchText = text.toLowerCase();
-        const index = searchText.indexOf(query);
+        const index = findMatchIndex(text, query, options);
         if (index < 0) return '';
 
         const start = Math.max(0, index - 55);
@@ -436,7 +486,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return `${start ? '…' : ''}${text.slice(start, end).trim()}${end < text.length ? '…' : ''}`;
     }
 
-    function renderSearchResults(items, mode, query) {
+    function renderSearchResults(items, mode, query, options) {
         if (!query) {
             searchResults.innerHTML = '';
             return;
@@ -447,8 +497,11 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        searchResults.innerHTML = items.map(page => {
-            const snippet = mode === 'content' ? buildSnippet(contentIndex.get(page.id), query) : '';
+        const summary = `<div class="search-summary">Найдено: ${items.length}</div>`;
+        searchResults.innerHTML = summary + items.map(page => {
+            const snippet = mode === 'content'
+                ? buildSnippet(contentIndex.get(page.id), query, options)
+                : '';
             return `
                 <div class="result-item" data-id="${page.id}">
                     <div class="result-title">${page.title}</div>
@@ -460,8 +513,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function runSearch() {
         const token = ++searchToken;
-        const query = normalize(searchBox.value);
+        const query = normalizeWhitespace(searchBox.value);
         const mode = getSearchMode();
+        const options = getSearchOptions();
 
         setClearVisible(Boolean(query));
         if (!query) {
@@ -470,7 +524,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (mode === 'title') {
-            renderSearchResults(pages.filter(page => page.titleSearch.includes(query)), mode, query);
+            renderSearchResults(
+                pages.filter(page => matchesSearch(page.titleSearch, query, options)),
+                mode,
+                query,
+                options
+            );
             return;
         }
 
@@ -479,15 +538,16 @@ document.addEventListener('DOMContentLoaded', () => {
         if (token !== searchToken) return;
 
         renderSearchResults(
-            pages.filter(page => contentIndex.get(page.id)?.toLowerCase().includes(query)),
+            pages.filter(page => matchesSearch(contentIndex.get(page.id), query, options)),
             mode,
-            query
+            query,
+            options
         );
     }
 
-    function findTextRange(doc, query) {
+    function findTextRange(doc, query, options = {}) {
         if (!doc?.body) return null;
-        const pattern = normalize(query || '');
+        const pattern = normalize(query || '', options.caseSensitive);
         if (!pattern) return null;
 
         // KMP walks text nodes until the first match. Only query-sized buffers are
@@ -498,8 +558,10 @@ document.addEventListener('DOMContentLoaded', () => {
             if (pattern[i] === pattern[j]) j++;
             prefix[i] = j;
         }
-        const nodes = new Array(pattern.length);
-        const offsets = new Uint32Array(pattern.length);
+        const capacity = pattern.length + 1;
+        const nodes = new Array(capacity);
+        const offsets = new Uint32Array(capacity);
+        const characters = new Array(capacity);
         const walker = doc.createTreeWalker(doc.body, NodeFilter.SHOW_TEXT, {
             acceptNode: node => node.parentElement?.closest('script,style,noscript')
                 ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT
@@ -507,6 +569,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let count = 0;
         let matched = 0;
         let whitespace = true;
+        let pendingRange = null;
         let node;
         while ((node = walker.nextNode())) {
             const text = node.nodeValue;
@@ -514,25 +577,49 @@ document.addEventListener('DOMContentLoaded', () => {
                 const isSpace = /\s/.test(text[offset]);
                 if (isSpace && whitespace) continue;
                 whitespace = isSpace;
-                const chars = isSpace ? ' ' : text[offset].toLowerCase();
+                const chars = isSpace
+                    ? ' '
+                    : options.caseSensitive
+                        ? text[offset]
+                        : text[offset].toLocaleLowerCase('ru-RU');
                 for (let i = 0; i < chars.length; i++) {
                     const ch = chars[i];
-                    const slot = count++ % pattern.length;
+
+                    if (pendingRange) {
+                        if (!isWordCharacter(ch)) return pendingRange;
+                        pendingRange = null;
+                    }
+
+                    const slot = count++ % capacity;
                     nodes[slot] = node;
                     offsets[slot] = offset;
+                    characters[slot] = ch;
                     while (matched && ch !== pattern[matched]) matched = prefix[matched - 1];
                     if (ch === pattern[matched]) matched++;
                     if (matched === pattern.length) {
-                        const start = count % pattern.length;
+                        const startIndex = count - pattern.length;
+                        const start = startIndex % capacity;
+                        const before = startIndex > 0
+                            ? characters[(startIndex - 1) % capacity]
+                            : '';
+                        const leadingBoundaryMatches = !options.wholeWords ||
+                            !isWordCharacter(pattern[0]) ||
+                            !isWordCharacter(before);
                         const range = doc.createRange();
                         range.setStart(nodes[start], offsets[start]);
                         range.setEnd(node, offset + 1);
-                        return range;
+
+                        if (leadingBoundaryMatches) {
+                            if (!options.wholeWords || !isWordCharacter(pattern.at(-1))) return range;
+                            pendingRange = range;
+                        }
+
+                        matched = prefix[matched - 1];
                     }
                 }
             }
         }
-        return null;
+        return pendingRange;
     }
 
     function scrollFrameSelectionIntoView(range) {
@@ -582,7 +669,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return document.scrollingElement || document.documentElement;
     }
 
-    function selectTextInContentFrame(query) {
+    function selectTextInContentFrame(query, options) {
         const doc = contentFrame.contentDocument;
         const win = contentFrame.contentWindow;
 
@@ -593,7 +680,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (!query) return;
 
-        const range = findTextRange(doc, query);
+        const range = findTextRange(doc, query, options);
         if (!range) return;
 
         selection.addRange(range);
@@ -609,21 +696,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
         requestAnimationFrame(() => {
             fitFrame();
-            selectTextInContentFrame(pendingSelectionQuery);
+            selectTextInContentFrame(pendingSelectionQuery, pendingSelectionOptions);
         });
 
         $$('img', doc).forEach(img => {
             if (!img.complete) {
                 img.addEventListener('load', () => {
                     fitFrame();
-                    selectTextInContentFrame(pendingSelectionQuery);
+                    selectTextInContentFrame(pendingSelectionQuery, pendingSelectionOptions);
                 });
             }
         });
 
         doc.fonts?.ready.then(() => {
             fitFrame();
-            selectTextInContentFrame(pendingSelectionQuery);
+            selectTextInContentFrame(pendingSelectionQuery, pendingSelectionOptions);
         });
     });
 
@@ -660,6 +747,10 @@ document.addEventListener('DOMContentLoaded', () => {
         updateSearchPlaceholder();
         runSearch();
     }));
+    searchOptions.forEach(option => option.addEventListener('change', () => {
+        clearTimeout(searchTimer);
+        runSearch();
+    }));
 
     clearBtn.addEventListener('click', () => {
         clearTimeout(searchTimer);
@@ -674,12 +765,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const item = event.target.closest('.result-item');
         if (!item) return;
 
-        const queryForSelection = getSearchMode() === 'content'
+        const isContentSearch = getSearchMode() === 'content';
+        const queryForSelection = isContentSearch
             ? searchBox.value.trim()
             : '';
+        const optionsForSelection = isContentSearch ? getSearchOptions() : null;
 
         showTab('menu');
-        loadPage(item.dataset.id, true, queryForSelection);
+        loadPage(item.dataset.id, true, queryForSelection, optionsForSelection);
     });
 
     bookmarkBtn.addEventListener('click', () => {
