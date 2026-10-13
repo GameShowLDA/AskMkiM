@@ -15,8 +15,14 @@ namespace Ask.UI.Controls.TextEditorControl
 
     public void UpdateFoldings(FoldingManager manager, TextDocument document)
     {
+      manager.UpdateFoldings(CreateFoldings(document), -1);
+    }
+
+    public List<NewFolding> CreateFoldings(TextDocument document)
+    {
       var newFoldings = new List<NewFolding>();
-      var matches = CommandHeaderRegex.Matches(document.Text);
+      var matches = CommandHeaderRegex.Matches(
+        Ask.Core.Services.Translator.ProgramCommentRanges.Mask(document.Text));
 
       for (int i = 0; i < matches.Count; i++)
       {
@@ -50,7 +56,7 @@ namespace Ask.UI.Controls.TextEditorControl
         }
       }
 
-      manager.UpdateFoldings(newFoldings, -1);
+      return newFoldings;
     }
   }
 }

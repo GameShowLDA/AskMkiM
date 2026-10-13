@@ -49,6 +49,13 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
       if (IsEmpty(lines))
         return new List<string>();
 
+      // Use the translation preprocessor so nested blocks have identical semantics
+      // when a command parser is called directly.
+      var (cleanLines, comments) = PreprocessText.PreprocessTextAndExtractComments(string.Join("\n", lines));
+      model.Comment.AddRange(comments.Select(comment => comment.Text));
+      for (int lineIndex = 0; lineIndex < lines.Count; lineIndex++)
+        lines[lineIndex] = cleanLines.GetValueOrDefault(lineIndex, string.Empty);
+
       var result = new List<string>(lines.Count);
 
       int i = 0;

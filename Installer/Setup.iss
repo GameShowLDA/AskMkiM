@@ -9,7 +9,7 @@ DefaultGroupName=АСК-МКИ-М
 OutputDir=Output
 OutputBaseFilename=Setup_ASKMKIM
 
-Compression=lzma
+Compression=lzma2/ultra64
 SolidCompression=yes
 
 PrivilegesRequired=admin
@@ -40,7 +40,7 @@ Source: "WebView2\MicrosoftEdgeWebView2RuntimeInstallerX64.exe"; DestDir: "{tmp}
 ; Основное приложение
 ; ============================================================
 
-Source: "D:\AskMkiM\Bin\*"; DestDir: "{app}\Bin"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "D:\AskMkiM\Bin\win-x64\publish\*"; DestDir: "{app}\Bin"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 
 [Icons]
@@ -80,12 +80,9 @@ end;
 function DriverFile(): String;
 begin
 
-  if IsWin64 then
+  
     Result := ExpandConstant('{tmp}\Drivers\CP210xVCPInstaller_x64.exe')
-  else
-    Result := ExpandConstant('{tmp}\Drivers\CP210xVCPInstaller_x86.exe');
-
-end;
+  end;
 
 
 function InstallDriver(): Boolean;

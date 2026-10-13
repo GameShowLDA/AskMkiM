@@ -685,6 +685,18 @@ TranslationViewModel command
 → ErrorList + left/right AvalonEdit editors
 ```
 
+`PreprocessText` разбирает вложенные `{…}` и `/*…*/` общим стеком до
+разделения текста на команды; `//` внутри блока скрывает разделители до конца
+строки. `CommentsParser.ParseComments` использует тот же препроцессор при
+прямом вызове парсеров команд, сохраняя текст комментариев и индексы строк.
+
+Оба WPF-редактора (`UI` и `Ask.UI`) используют
+`Ask.Core/Services/Translator/ProgramCommentRanges.cs` для диапазонов вложенных
+комментариев. `BracesCommentColorizer` применяется после XSHD-подсветки также
+к результату трансляции; `OpkwFoldingStrategy` маскирует эти диапазоны с
+сохранением offsets перед поиском заголовков, поэтому команды внутри
+комментария не создают маркеры сворачивания.
+
 Диагностика исходника при вводе использует те же `ICommandParser`,
 `CkCommandValidator` и `CommandPostAnalyzer` через `CommandTranslationManager.AnalyzeSource`:
 

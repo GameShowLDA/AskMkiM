@@ -583,6 +583,14 @@ namespace UI.Controls.TextEditorControl
       {
         using var reader = new XmlTextReader(stream);
         textEditor.SyntaxHighlighting = HighlightingLoader.Load(reader, HighlightingManager.Instance);
+        if (FileTypeResolver.SupportsBraceCommentColorizer(FileType))
+        {
+          // Keep comment coloring after the XSHD highlighter, including after theme changes.
+          var transformers = textEditor.TextArea.TextView.LineTransformers;
+          foreach (var colorizer in transformers.OfType<UI.Components.SearchControls.BracesCommentColorizer>().ToList())
+            transformers.Remove(colorizer);
+          transformers.Add(new UI.Components.SearchControls.BracesCommentColorizer());
+        }
         ApplyProtocolRuntimeColors();
         LogDebug($"Подсветка включена: {textEditor.SyntaxHighlighting?.Name}");
       }
