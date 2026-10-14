@@ -428,3 +428,15 @@ Installer/Drivers/CP210xVCPInstaller_x64.exe
 Installer/WebView2/MicrosoftEdgeWebView2RuntimeInstallerX64.exe
 Installer/Output/Setup_ASKMKIM.exe
 Installer/Output/Setup_ASKMKIM.exe
+
+# Repository hygiene: generated binaries, local caches and editor backups
+/Installer/Output/
+/Dll/
+/.nuget/
+*.dll
+*.exe
+*.dmp
+*.bkp
+*.bak
+*.drawio.dtmp
+*.drawio.tmp
