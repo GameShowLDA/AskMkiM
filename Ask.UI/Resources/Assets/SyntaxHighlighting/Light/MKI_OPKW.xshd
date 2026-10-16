@@ -60,6 +60,7 @@
 		<Rule color="Mnemonic">\bРМ\b</Rule>
 		<Rule color="Mnemonic">\bЦУ\b</Rule>
 		<Rule color="Mnemonic">\bПР\b</Rule>
+		<Rule color="Mnemonic">\bПЭ\b</Rule>
 		<Rule color="Mnemonic">\bПИ\b</Rule>
 		<Rule color="Mnemonic">\bКЦ\b</Rule>
 		<Rule color="Mnemonic">\bУП\b</Rule>
