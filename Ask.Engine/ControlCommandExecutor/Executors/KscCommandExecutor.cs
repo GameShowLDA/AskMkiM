@@ -11,7 +11,7 @@ using Ask.Engine.ControlCommandExecutor.Execution;
 
 namespace Ask.Engine.ControlCommandExecutor.Executors
 {
-  internal class KscCommandExecutor : CommandExecutorBase, ICommandExecutor
+  internal class KscCommandExecutor : CommandExecutorBase, ICommandExecutor, ICommandCompletionHandler
   {
     public string Mnemonic => EnumExtensions.GetCommandOrganizationalInfo(OrganizationalComands.KSC).DisplayName;
 
@@ -26,7 +26,6 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       {
         StepControlManager.EnableStepMode(false);
       }
-      EventAggregator.Subscribe<FileInteractionEvents.ProtocolInfoClose>(OnProtocolClose);
 
       var command = GetRequiredCommand<KscCommandModel>(context);
       SetActiveLine(context, command);
@@ -35,11 +34,36 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       var message = CommandMessages.FormatSourceLines(command.SourceLines);
       await CommandMessages.PublishCommandExecutionAsync(context.Console, nameCommand, message, isBlockStart: false);
 
-      GetProtocol(context, command, protocolModel);
-      EventAggregator.Unsubscribe<FileInteractionEvents.ProtocolInfoClose>(OnProtocolClose);
+      PrepareProtocol(context, command, protocolModel);
     }
 
-    private void GetProtocol(CommandExecutionContext context, KscCommandModel command, ProtocolModel protocolModel)
+    public Task OnCommandCompletedAsync(CommandExecutionContext context, ProtocolModel protocolModel)
+    {
+      if (ProtocolConfig.GetGenerateProtocol() && ProtocolConfig.ShouldShowProtocolInfoDialog())
+      {
+        context.CommandExecutionManager.DeferUntilAfterEquipmentReset(() =>
+        {
+          EventAggregator.Subscribe<FileInteractionEvents.ProtocolInfoClose>(OnProtocolClose);
+          try
+          {
+            FileInteractionEventAdapter.RaiseGetProtocolInfo(protocolModel);
+          }
+          finally
+          {
+            EventAggregator.Unsubscribe<FileInteractionEvents.ProtocolInfoClose>(OnProtocolClose);
+          }
+
+          return Task.CompletedTask;
+        });
+      }
+
+      return Task.CompletedTask;
+    }
+
+    private static void PrepareProtocol(
+      CommandExecutionContext context,
+      KscCommandModel command,
+      ProtocolModel protocolModel)
     {
       protocolModel.Designation = command.OkCommandModel.ObjectCode;
       protocolModel.ControlObjectName = command.OkCommandModel.ControlObjectName;
@@ -63,16 +87,9 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
           ? "Название программы контроля"
           : $"{uniqueNameWithoutExtention}{Path.GetExtension(opkPath)}";
 
-      if (ProtocolConfig.GetGenerateProtocol())
-      {
-        if (ProtocolConfig.ShouldShowProtocolInfoDialog())
-        {
-          FileInteractionEventAdapter.RaiseGetProtocolInfo(protocolModel);
-        }
-      }
     }
 
-    private async void OnProtocolInfoClosing(string number, string executor, string agent, string customer, ProtocolModel protocolModel)
+    private void OnProtocolInfoClosing(string number, string executor, string agent, string customer, ProtocolModel protocolModel)
     {
       protocolModel.Number = number;
       protocolModel.Executor = executor;
@@ -80,7 +97,6 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       protocolModel.Customer = customer;
       protocolModel.Mode = ExecutionConfig.GetIsIdleModeEnabled() ? "Холостой режим" : "Рабочий режим";
       FileInteractionEventAdapter.RaiseViewProtocol(protocolModel);
-      EventAggregator.Unsubscribe<FileInteractionEvents.ProtocolInfoClose>(OnProtocolClose);
     }
   }
 }

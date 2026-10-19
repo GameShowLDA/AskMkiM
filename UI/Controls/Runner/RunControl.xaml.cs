@@ -537,8 +537,14 @@ namespace UI.Controls.Runner
       var manager = new CommandExecutionManager(ProtocolUI, editor, ControlProgram, OpkFilePath, SourceArchiveName);
       manager.ClearError += ErrorClear;
       manager.AddError += AddError;
-
-      await manager.ExecuteAllAsync();
+      try
+      {
+        await manager.ExecuteAllAsync();
+      }
+      finally
+      {
+        settings.AfterEquipmentResetDelegate = manager.AfterEquipmentResetDelegate;
+      }
     }
 
     private bool CanReturnToSourceFile()
