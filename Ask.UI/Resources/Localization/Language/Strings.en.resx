@@ -405,9 +405,6 @@
   <data name="menu.test.metrology.eht" xml:space="preserve">
     <value>ЭТ Mode</value>
   </data>
-  <data name="menu.execution.run.stepByStepMode" xml:space="preserve">
-    <value>Run (Step by step mode)</value>
-  </data>
   <data name="menu.admin" xml:space="preserve">
     <value>Admin</value>
   </data>
@@ -497,12 +494,6 @@
   </data>
   <data name="settings.execution.repeatMeasurement.description" xml:space="preserve">
     <value>Allows individual equipment measurements to be repeated. Does not repeat the entire command, test, or control program.</value>
-  </data>
-  <data name="settings.execution.stepByStepMode.title" xml:space="preserve">
-    <value>Step-by-step mode</value>
-  </data>
-  <data name="settings.execution.stepByStepMode.description" xml:space="preserve">
-    <value>Enables debug execution: F10 executes the whole block (Step Over); F11 enters the block and stops at each step (Step Into).</value>
   </data>
   <data name="settings.execution.idleMode.title" xml:space="preserve">
     <value>Idle execution mode</value>

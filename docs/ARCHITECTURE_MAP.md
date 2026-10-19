@@ -39,6 +39,7 @@ Size/Foreground и анимации общей кнопки; лицензия с
 | Исполнение программы контроля | `UI/Controls/Runner/RunControl.xaml.cs` | `Ask.UI/Features/ProtocolNew/Execution/ActionExecutor.cs`, `Ask.Engine/ControlCommandExecutor/Execution/CommandExecutionManager.cs` |
 | Алгоритм конкретной команды | `Ask.Engine/ControlCommandExecutor/Executors/` | `Ask.Engine/ControlCommandExecutor/BaseStrategies/`, `Ask.Engine/ControlCommandExecutor/Execution/EquipmentService.cs` |
 | Пауза, шаг, остановка, переход к команде | `Ask.UI/Features/ProtocolNew/Execution/ActionExecutor.cs` | `Ask.Core/Services/App/StepControlManager.cs`, `Ask.Engine/ControlCommandExecutor/Execution/CommandExecutionManager.cs`, `Ask.Engine/ControlCommandExecutor/Execution/BreakpointHandler.cs`, `Ask.Engine/ControlCommandExecutor/Execution/CommandJumpService.cs` |
+| Горячие клавиши и диагностика кнопок выполнения | `Ask.UI/Features/ProtocolNew/Hotkeys/ProtocolHotkeyController.cs`, `MainWindow/HotkeyBindings/MenuHotkeyBinder.cs` | `Ask.UI/Controls/ProtocolNew/ProtocolUI.ButtonManager.cs`, `Ask.LogLib/LoggerUtility.cs`; отдельный `logs/yyyy-MM-dd/input.log` и сводный `all.log` |
 | Холостой режим и симуляция ошибок | `Ask.Core/Services/Config/AppSettings/ExecutionConfig.cs`, `IdleMeasurementErrorSimulator.cs`, `IdleHardwareErrorSimulator.cs` | `UI/Controls/Settings/Execution/ExecutionControl.xaml`, целевой manager/adapter в `Ask.Device.*`, конкретный executor/strategy |
 | Ошибка оборудования и интерактивный повтор | `Ask.Core/Services/UI/UserActionHelper.cs` | `Ask.Core/Services/UI/EquipmentExecutionContext.cs`, `Ask.UI/Controls/ProtocolNew/ProtocolUI.cs`, целевой adapter/manager/transport |
 | Нет ответа устройства вместо брака | `Ask.Core/Services/Errors/Device/DeviceNoResponseException.cs`, `Ask.Core/Services/UI/UserActionHelper.cs` | UDP/TCP/COM/VISA transports, `AdapterMeasurementResult.cs`, `ProtocolEntryOutputService.cs`, `TestError.IsNoResponse`, `InspectionProtocolBuilder.cs`; [путь отсутствия ответа](#отсутствие-ответа-устройства) |
@@ -1134,6 +1135,41 @@ ProtocolUI.RequestCommandJump
 → CommandExecutionManager resumes at selected command
 ```
 
+Запуск из главного окна использует существующую инфраструктуру `MenuHotkeyBinder`:
+`Ctrl+F5` привязан к видимой команде Run, а `Ctrl+F10` и `Ctrl+F11` — к скрытым
+командам `RunStepByStepMode` (Step Over) и `RunStepIntoMode` (Step Into).
+Обе пошаговые команды передают режим через `TranslationViewModel`
+→ `TranslationServices.RunAsync`
+→ `PrepareRun`
+→ `RunControl.Start`
+→ `ProtocolUI.StartAsync`
+→ `ActionExecutor.StartAsync`, где режим включается после успешной предварительной
+проверки перед запуском обработки.
+Одиночные F10/F11 поглощаются при недоступном `Continue` без изменения состояния
+исполнения (в частности, чтобы F10 не активировал меню WPF); при доступном `Continue`
+они передают Step Over/Step Into существующим обработчикам кнопок. `ProtocolButtonController`
+показывает оба шага в состоянии Paused,
+в том числе при запуске через обычный режим; в Running они отображаются только
+при активном пошаговом режиме. После пошагового ожидания `ProtocolPostOutputController`
+показывает шаги в Running только если режим всё ещё активен; оставшегося
+`StepControlManager.IsStepInto` недостаточно после выхода из режима. Обычный КС и аварийный КС переводят уже активный
+step-over режим в обход завершающей команды, но не включают его при обычном запуске.
+Одиночный F5 продолжает/ставит на
+паузу согласно UI state; F5 во время пошагового ожидания отключает режим и
+пробуждает ожидающую операцию. `DatabaseInitializationService.EnsureDefaultDataAsync`
+создаёт недостающие строки горячих клавиш. `MenuHotkeyBinder` направляет три
+фиксированных сочетания к соответствующим командам главного окна; универсальный
+обработчик пропускает комбинации, уже занятые меню.
+
+Настройка пошагового режима удалена. `SettingsExecutionDto.StepByStepMode`
+и столбец SQLite сохранены для совместимости со старыми файлами БД, но
+`ExecutionConfig.SetExecutionModel` игнорирует legacy-значение, а snapshot и
+сохранение выставляют `false`. Единственный runtime state — `StepControlManager`;
+он меняется обработчиками запуска/продолжения, breakpoint и пошаговых клавиш,
+а загруженный `ProtocolUI` получает изменения через `ExecutionEvents.StepByStepModeChanged`
+и синхронизирует локальное состояние `ActionExecutor`. Подписка принадлежит UI
+и снимается при выгрузке контрола, а не накапливается на каждом экземпляре исполнителя.
+
 `CommandExecutionManager` передаёт сообщения о неизвестной команде, запуске аварийного
 `КЦ` и ошибке аварийного `КЦ` в `ExecutionMessages`; моделей экранного протокола сам не создаёт.
 
@@ -1331,6 +1367,13 @@ Other runtime branches:
 `KscCommandExecutor.GetProtocol` задаёт `ProgramName/ProgramPath`, а форматтер выбирает
 архивное имя вместо временного пути. Проверка обоих шаблонов:
 `Ask.UI.UnitTests/Services/Config/ProtocolProgramSourceTests.cs`.
+
+Файловое логирование выполняется через `Ask.LogLib/LoggerUtility.cs` и NLog. `ConfigureInputLog`
+добавляет target `inputLogFile` в текущую конфигурацию NLog при startup; `LogInput` использует
+логгеры с суффиксом `_Input`, правило которых пишет в `logs/yyyy-MM-dd/input.log`, а общее правило
+`*` одновременно направляет те же записи в `all.log`. Журналируются назначенные клавиши выполнения,
+решение маршрутизатора, команды меню Ctrl+F5/F10/F11, действия кнопок протокола и смена состояния
+панели управления. Произвольный текстовый ввод и все нажатия клавиш подряд не журналируются.
 
 Диагностический журнал ASKTRACE: `Ask.Core/Services/Protocols/ExecutionLogCapture.cs`
 подписывается на `LoggerUtility.LogMessageWritten` и `ExceptionLogged` на время запуска.

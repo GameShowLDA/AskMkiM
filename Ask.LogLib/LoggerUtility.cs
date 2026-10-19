@@ -1,4 +1,6 @@
 using NLog;
+using NLog.Config;
+using NLog.Targets;
 using System.Runtime.CompilerServices;
 
 namespace Ask.LogLib
@@ -102,6 +104,8 @@ namespace Ask.LogLib
   static public class LoggerUtility
   {
     private static readonly AsyncLocal<bool> IsNotifyingExceptionLogged = new();
+    private static readonly object InputLogConfigurationLock = new();
+    private static bool _inputLogConfigured;
 
     public static event EventHandler<LoggedExceptionEventArgs>? ExceptionLogged;
 
@@ -111,6 +115,53 @@ namespace Ask.LogLib
     public static event EventHandler<ApplicationLogMessageEventArgs>? LogMessageWritten;
 
     public static Action<LoggedExceptionEventArgs>? ExceptionLoggedCallback { get; set; }
+
+    /// <summary>
+    /// Подключает отдельный файл журнала пользовательского ввода к общей конфигурации NLog.
+    /// </summary>
+    public static void ConfigureInputLog()
+    {
+      lock (InputLogConfigurationLock)
+      {
+        if (_inputLogConfigured)
+        {
+          return;
+        }
+
+        var configuration = LogManager.Configuration ?? new LoggingConfiguration();
+        if (configuration.FindTargetByName("inputLogFile") == null)
+        {
+          var target = new FileTarget("inputLogFile")
+          {
+            FileName = "${basedir}/logs/${shortdate}/input.log",
+            Layout = "${longdate} | ${uppercase:${level}} | ${callsite:className=true:methodName=true:skipFrames=1} | ${message} ${exception:format=tostring}",
+            Encoding = System.Text.Encoding.UTF8,
+            CreateDirs = true
+          };
+
+          configuration.AddTarget(target);
+          configuration.LoggingRules.Add(new LoggingRule("*_Input", LogLevel.Debug, target));
+          LogManager.Configuration = configuration;
+          LogManager.ReconfigExistingLoggers();
+        }
+
+        _inputLogConfigured = true;
+      }
+    }
+
+    /// <summary>
+    /// Записывает событие обработки клавиатуры или элемента управления в отдельный журнал ввода и общий журнал.
+    /// </summary>
+    /// <param name="message">Контекст события, принятое решение и результат обработки.</param>
+    /// <param name="callerFilePath">Путь к исходному файлу, откуда вызван метод. Заполняется автоматически.</param>
+    /// <param name="lineNumber">Номер строки, откуда вызван метод. Заполняется автоматически.</param>
+    public static void LogInput(string message, [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int lineNumber = 0)
+    {
+      var logger = LogManager.GetLogger(GetLoggerName(callerFilePath, isDeviceLog: false, isInputLog: true));
+      var formattedMessage = BuildMessage(message, callerFilePath, lineNumber);
+      logger.Info(formattedMessage);
+      NotifyLogMessageWritten(ApplicationLogLevel.Information, formattedMessage, isDeviceLog: false);
+    }
 
     /// <summary>
     /// Логирует информационное сообщение.
@@ -252,9 +303,14 @@ namespace Ask.LogLib
     /// <param name="filePath">Полный путь к файлу, откуда был вызван метод.</param>
     /// <param name="isDeviceLog">Если true, используется логгер для оборудования.</param>
     /// <returns>Имя логгера.</returns>
-    private static string GetLoggerName(string filePath, bool isDeviceLog)
+    private static string GetLoggerName(string filePath, bool isDeviceLog, bool isInputLog = false)
     {
       var baseName = Path.GetFileNameWithoutExtension(filePath);
+      if (isInputLog)
+      {
+        return $"{baseName}_Input";
+      }
+
       return isDeviceLog ? $"{baseName}_Device" : $"{baseName}_UI";
     }
 

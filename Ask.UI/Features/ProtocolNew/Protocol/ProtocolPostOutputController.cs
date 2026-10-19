@@ -5,6 +5,7 @@ using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.UI.Features.ProtocolNew.Hotkeys;
 using static Ask.Core.Shared.DTO.Protocol.ShowMessageModel;
+using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.UI.Features.ProtocolNew.Protocol
 {
@@ -58,8 +59,13 @@ namespace Ask.UI.Features.ProtocolNew.Protocol
         await stepWait;
         token.ThrowIfCancellationRequested();
 
-        var showStepButtons = StepControlManager.IsStepInto
+        var showStepButtons = StepControlManager.StepMode
+          && StepControlManager.IsStepInto
           && !StepControlManager.StepOverUntilNextControlCommand;
+        LogInput($"Пошаговое ожидание завершено: stepMode={StepControlManager.StepMode}, " +
+          $"stepInto={StepControlManager.IsStepInto}, " +
+          $"stepOverUntilControl={StepControlManager.StepOverUntilNextControlCommand}, " +
+          $"showStepButtons={showStepButtons}.");
         _context.ShowRunningButtons(showStepButtons);
       }
 

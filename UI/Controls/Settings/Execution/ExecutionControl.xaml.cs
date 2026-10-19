@@ -134,7 +134,6 @@ namespace UI.Controls.Settings.Execution
       {
         StopInError.CheckedChanged += CheckedChanged;
         RepeatMeasurement.CheckedChanged += CheckedChanged;
-        StepByStepMode.CheckedChanged += CheckedChanged;
         ErroneousMeasurementTypeSelect.ValueChanged += ErroneousMeasurementTypeChanged;
         IdleMode.CheckedChanged += IdleMode_CheckedChanged;
 
@@ -225,7 +224,6 @@ namespace UI.Controls.Settings.Execution
       {
         StopOnError = StopInError.IsChecked,
         RepeatMeasurement = RepeatMeasurement.IsChecked,
-        StepByStepMode = StepByStepMode.IsChecked,
         ErroneousMeasurementType = ErroneousMeasurementTypeSelect.SelectedValue is TypeErroneousMeasurement selectedType
           ? selectedType
           : _baseExecutionModel.ErroneousMeasurementType,
@@ -246,7 +244,6 @@ namespace UI.Controls.Settings.Execution
       a.IdleModeExecution == b.IdleModeExecution &&
       a.ErroneousMeasurementType == b.ErroneousMeasurementType &&
       a.IsHardwareErrorSimulationMode == b.IsHardwareErrorSimulationMode &&
-      a.StepByStepMode == b.StepByStepMode &&
       a.StopOnError == b.StopOnError &&
       a.RepeatMeasurement == b.RepeatMeasurement &&
       a.LegacyCompatibilityMode == b.LegacyCompatibilityMode &&
@@ -265,7 +262,6 @@ namespace UI.Controls.Settings.Execution
         item.Card.IsChecked = item.SavedValue;
       }
 
-      StepByStepMode.IsChecked = _baseExecutionModel.StepByStepMode;
       StopInError.IsChecked = _baseExecutionModel.StopOnError;
       RepeatMeasurement.IsChecked = _baseExecutionModel.RepeatMeasurement;
       CompatibilityModeCheckBox.IsChecked = _baseExecutionModel.LegacyCompatibilityMode;

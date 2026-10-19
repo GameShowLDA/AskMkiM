@@ -149,7 +149,15 @@ namespace Ask.UI.Controls.ProtocolNew
     /// Начинает запуск измерения.
     /// </summary>
     /// <returns>Задача, представляющая асинхронную операцию измерения.</returns>
-    public async Task StartAsync()
+    public Task StartAsync() => StartAsync(startStepByStep: false, isStepInto: true);
+
+    /// <summary>
+    /// Начинает выполнение с выбранным режимом пошагового запуска.
+    /// </summary>
+    /// <param name="startStepByStep">Включает пошаговый режим перед началом выполнения.</param>
+    /// <param name="isStepInto">Определяет выполнение с заходом внутрь блоков.</param>
+    /// <returns>Задача, представляющая асинхронную операцию запуска.</returns>
+    public async Task StartAsync(bool startStepByStep, bool isStepInto)
     {
       if (_isStartPending || ActionExecutor.IsActive) return;
       _isStartPending = true;
@@ -189,7 +197,7 @@ namespace Ask.UI.Controls.ProtocolNew
           actionSettings.Name = executionName;
         }
 
-        await ActionExecutor.StartAsync(actionSettings);
+        await ActionExecutor.StartAsync(actionSettings, startStepByStep, isStepInto);
       }
       finally
       {

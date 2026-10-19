@@ -34,7 +34,7 @@ public class SettingsExecutionDto
   public bool IsHardwareErrorSimulationMode { get; set; }
 
   /// <summary>
-  /// Включает пошаговый режим выполнения.
+  /// Устаревшее поле, сохранённое для чтения существующей схемы базы данных.
   /// </summary>
   public bool StepByStepMode { get; set; }
 

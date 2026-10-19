@@ -603,7 +603,10 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
 
       using var finalizationScope = EquipmentExecutionContext.EnterMandatoryFinalization();
       _isExecutingEmergencyKsc = true;
-      StepControlManager.EnableStepMode(false);
+      if (StepControlManager.StepMode)
+      {
+        StepControlManager.EnableStepMode(false);
+      }
       try
       {
         if (!IsStepCancellation(ex))

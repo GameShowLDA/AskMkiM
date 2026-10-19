@@ -27,6 +27,7 @@
         { "Run", "Ctrl+F5" },
         { "RunAskMki", "Ctrl+Shift+F5" },
         { "RunStepByStepMode", "Ctrl+F10" },
+        { "RunStepIntoMode", "Ctrl+F11" },
 
         // Включение питания
         { "Power", "Ctrl+Shift+P" },

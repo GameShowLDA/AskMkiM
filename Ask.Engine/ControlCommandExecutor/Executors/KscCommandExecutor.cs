@@ -22,7 +22,10 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
 
     public async Task ExecuteAsync(CommandExecutionContext context, ProtocolModel protocolModel)
     {
-      StepControlManager.EnableStepMode(false);
+      if (StepControlManager.StepMode)
+      {
+        StepControlManager.EnableStepMode(false);
+      }
 
       var command = GetRequiredCommand<KscCommandModel>(context);
       SetActiveLine(context, command);

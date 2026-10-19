@@ -409,7 +409,10 @@ namespace UI.Controls.Runner
       }
     }
 
-    public async Task Start(List<BaseCommandModel> models)
+    public async Task Start(
+      List<BaseCommandModel> models,
+      bool startStepByStep = false,
+      bool isStepInto = true)
     {
       ProtocolUI.MenuButtonVisibility(false);
       ControlProgram = models;
@@ -434,7 +437,7 @@ namespace UI.Controls.Runner
       ProtocolUI.SetSettings(settings);
       this.FileName = ProtocolUI.Header;
 
-      await ProtocolUI.StartAsync();
+      await ProtocolUI.StartAsync(startStepByStep, isStepInto);
     }
 
     private void OnViewProtocol(FileInteractionEvents.ViewProtocol e)
