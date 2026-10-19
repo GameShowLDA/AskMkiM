@@ -890,7 +890,7 @@ TIMEOUT / HARDWARE ERROR / COMMUNICATION ERROR / EXCEPTION
       CancellationToken.None)
   → clear executor/session state
   → reset global execution state
-  → print/display/save protocol
+  → addressed reset is awaited before inspection-protocol construction, control-program completion output and persistence
 ```
 
 Запуск кнопкой и горячей клавишей не меняет панель до принятия запуска
@@ -956,9 +956,34 @@ EquipmentUsageSession.GetUsedDevices
 поведение `Repeat/Continue` для промежуточных алгоритмических сбросов (`ОС`,
 command jump и self-check stages).
 
-В программе контроля команда `КЦ` оформляет завершающий блок и формирует
-протокол, но не сбрасывает оборудование. Единственный Reset выполняет общий
-mandatory finalizer. Для `CheckType.ControlProgram` отдельный заголовок
+В программе контроля команда `КЦ` оформляет завершающий блок, но не сбрасывает
+оборудование. Единственный Reset выполняет общий mandatory finalizer. Порядок
+финальных шагов в `ExecutionFinalizer.FinalizeAsync`:
+
+```text
+cancel/await process and StopDelegate
+→ reset executor/session state
+→ ExecutionSystemResetService.ResetAsync
+→ reset used equipment (await DeviceResetService.ResetDevicesAsync)
+→ print current streaming protocol when enabled
+→ DisplayCompletionAsync (build inspection protocol except ControlProgram/Metrology)
+→ completion notification
+→ AppendControlProgramCompletionAsync for ControlProgram
+→ save streaming and inspection protocols
+```
+
+Сообщения о результате сброса могут быть добавлены в потоковый протокол
+непосредственно во время `DeviceResetService`; поэтому утверждение, что любое
+заполнение протокола начинается только после сброса, неверно. После возврата
+операции сброса выполняются построение итогового inspection protocol,
+финальный блок `КЦ` и сохранение. Сброс устройств внутренне обрабатывает
+исключения и `false` по каждому устройству, пишет ошибку и переходит к следующему;
+в mandatory finalization интерактивный Retry/Continue не запускается. Если
+`resetUsedEquipmentAsync` всё же выбрасывает исключение, `RunMandatoryStepsAsync`
+логирует его и продолжает следующие независимые mandatory steps. Таким образом,
+ошибка сброса не блокирует формирование итоговых данных в текущей реализации.
+
+Для `CheckType.ControlProgram` отдельный заголовок
 `Завершение теста` не выводится, поэтому результаты финального сброса остаются
 в блоке `КЦ`.
 
@@ -1107,8 +1132,9 @@ ProtocolUI.RequestCommandJump
 `CommandExecutionManager` передаёт сообщения о неизвестной команде, запуске аварийного
 `КЦ` и ошибке аварийного `КЦ` в `ExecutionMessages`; моделей экранного протокола сам не создаёт.
 
-`ExecutionFinalizer` последовательно отменяет текущую задачу, сбрасывает оборудование,
-очищает состояние сеанса, печатает при включённой настройке, показывает результат
+`ExecutionFinalizer` последовательно отменяет текущую задачу, очищает состояние
+сеанса и глобальное состояние выполнения, затем ожидает адресный сброс оборудования.
+После него печатает потоковый протокол при включённой настройке, показывает результат
 и добавляет обязательный финальный блок программы контроля через
 `ProtocolCompletionService.AppendControlProgramCompletionAsync` →
 `ControlProgramCompletionMessageBuilder.Build` и сохраняет протоколы. Финальный блок
@@ -1117,7 +1143,9 @@ ProtocolUI.RequestCommandJump
 закрывает последнюю группу команды, поэтому финальная зелёная запись отображается отдельно и не сворачивается
 вместе с `КЦ` или другой последней командой. Все шаги выполняются внутри
 `EquipmentExecutionContext.EnterMandatoryFinalization`; ошибка отдельного шага
-логируется и не прерывает оставшиеся обязательные действия. Кнопка запуска
+логируется и не прерывает оставшиеся обязательные действия. Следовательно, сбой
+сброса не предотвращает построение/сохранение итоговых данных в текущем порядке.
+Кнопка запуска
 возвращается после сохранения протоколов и освобождения исполнителя в
 `ActionExecutor.FinalizeAsync.finally`.
 

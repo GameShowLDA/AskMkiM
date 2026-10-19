@@ -58,9 +58,9 @@ internal sealed class ExecutionFinalizer
   {
     await RunMandatoryStepsAsync(
       ("остановка выполняемой задачи", cancelProcessAsync),
-      ("финальный сброс использованного оборудования", resetUsedEquipmentAsync),
       ("сброс состояния исполнителя", AsAsync(resetExecutorState)),
       ("сброс глобального состояния выполнения", _systemResetService.ResetAsync),
+      ("финальный сброс использованного оборудования", resetUsedEquipmentAsync),
       ("печать протокола", AsAsync(
         () => _protocolCompletionService.PrintIfRequired(settings, protocol))),
       ("снятие блокировки системы", AsAsync(() => SystemStateManager.SetIsLocked(false))),
