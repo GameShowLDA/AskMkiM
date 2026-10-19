@@ -61,6 +61,7 @@ internal sealed class ExecutionFinalizer
       ("сброс состояния исполнителя", AsAsync(resetExecutorState)),
       ("сброс глобального состояния выполнения", _systemResetService.ResetAsync),
       ("финальный сброс использованного оборудования", resetUsedEquipmentAsync),
+      ("ввод данных итогового протокола", settings.AfterEquipmentResetDelegate ?? (() => Task.CompletedTask)),
       ("печать протокола", AsAsync(
         () => _protocolCompletionService.PrintIfRequired(settings, protocol))),
       ("снятие блокировки системы", AsAsync(() => SystemStateManager.SetIsLocked(false))),

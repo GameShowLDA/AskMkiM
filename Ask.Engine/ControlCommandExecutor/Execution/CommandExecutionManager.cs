@@ -98,6 +98,12 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
     /// </summary>
     private bool _isExecutingEmergencyKsc;
 
+    /// <summary>Действие, которое требуется выполнить после сброса оборудования.</summary>
+    public Func<Task>? AfterEquipmentResetDelegate { get; private set; }
+
+    /// <summary>Откладывает действие до окончания основного выполнения и сброса оборудования.</summary>
+    internal void DeferUntilAfterEquipmentReset(Func<Task> action) => AfterEquipmentResetDelegate = action;
+
     /// <summary>
     /// Ошибки текущей попытки команды, публикуемые только после принятия результата оператором.
     /// </summary>
@@ -306,6 +312,10 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
 
             FlushAttemptErrors();
             await _console.CompleteCommandAsync(hasExecutionErrors);
+            if (executor is ICommandCompletionHandler completionHandler)
+            {
+              await completionHandler.OnCommandCompletedAsync(context, _protocolModel);
+            }
             break;
           }
 
@@ -618,6 +628,10 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
             this, kscCommand, _console, _textEditor, _opkFilePath);
 
           await kscExecutor.ExecuteAsync(kscContext, _protocolModel);
+          if (kscExecutor is ICommandCompletionHandler completionHandler)
+          {
+            await completionHandler.OnCommandCompletedAsync(kscContext, _protocolModel);
+          }
         }
       }
       catch (Exception kscEx)

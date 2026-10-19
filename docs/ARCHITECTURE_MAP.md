@@ -815,6 +815,8 @@ CommandExecutionManager.ExecuteAllCoreAsync loop
   → Отмена: закрыть диалог, оставить выполнение в ожидании и показать штатные
     кнопки Repeat/Continue/Finish для изучения левого протокола перед решением
 → CompleteCommandAsync(hasErrors) только для принятой попытки
+→ для `КЦ` — `ICommandCompletionHandler.OnCommandCompletedAsync`; окно ввода реквизитов
+  откладывается в `CommandExecutionManager.AfterEquipmentResetDelegate`
 → apply JumpToCommandNumber for УП
 ```
 
@@ -965,6 +967,7 @@ cancel/await process and StopDelegate
 → reset executor/session state
 → ExecutionSystemResetService.ResetAsync
 → reset used equipment (await DeviceResetService.ResetDevicesAsync)
+→ deferred KЦ protocol metadata dialog (if protocol generation and dialog are enabled)
 → print current streaming protocol when enabled
 → DisplayCompletionAsync (build inspection protocol except ControlProgram/Metrology)
 → completion notification
@@ -976,7 +979,9 @@ cancel/await process and StopDelegate
 непосредственно во время `DeviceResetService`; поэтому утверждение, что любое
 заполнение протокола начинается только после сброса, неверно. После возврата
 операции сброса выполняются построение итогового inspection protocol,
-финальный блок `КЦ` и сохранение. Сброс устройств внутренне обрабатывает
+ввод реквизитов протокола, финальный блок `КЦ` и сохранение. Ввод реквизитов
+запускается только после завершения команды `КЦ` и возврата финального сброса
+оборудования. Сброс устройств внутренне обрабатывает
 исключения и `false` по каждому устройству, пишет ошибку и переходит к следующему;
 в mandatory finalization интерактивный Retry/Continue не запускается. Если
 `resetUsedEquipmentAsync` всё же выбрасывает исключение, `RunMandatoryStepsAsync`
