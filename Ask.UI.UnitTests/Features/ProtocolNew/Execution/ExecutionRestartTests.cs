@@ -1,3 +1,4 @@
+using Ask.Core.Services.App;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.DTO.Protocol;
@@ -47,7 +48,7 @@ public sealed class ExecutionRestartTests
     var previousExecution = ExecutionConfig.GetExecutionModelSnapshot();
     var previousPrint = ProtocolConfig.GetPrintProtocol();
     ExecutionConfig.SetIdleMode(true);
-    ExecutionConfig.SetStepByStepMode(false);
+    StepControlManager.DisableStepMode();
     ProtocolConfig.SetPrintProtocol(false);
     try
     {

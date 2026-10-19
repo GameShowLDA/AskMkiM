@@ -3,6 +3,7 @@ using Ask.Core.Services.EventCore.Adapters;
 using Ask.UI.Infrastructure.UI.Overlay.Drawer.Runtime;
 using System.Windows;
 using System.Windows.Input;
+using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.UI.Features.ProtocolNew.Hotkeys
 {
@@ -18,41 +19,6 @@ namespace Ask.UI.Features.ProtocolNew.Hotkeys
     /// </summary>
     private static TaskCompletionSource<bool>? _tcs;
     private static int _hookUsers;
-
-    /// <summary>
-    /// Делегат, вызываемый при нажатии клавиши Enter (запуск).
-    /// </summary>
-    public static Action? OnStartPressed;
-
-    /// <summary>
-    /// Делегат, вызываемый при запуске выполнения клавишами пошагового режима F10 или F11.
-    /// </summary>
-    public static Action? OnStartPressedByStepMode;
-
-    /// <summary>
-    /// Единый обработчик F5 с учётом текущего состояния: запуск, пауза или продолжение.
-    /// </summary>
-    public static Action? OnRunOrPausePressed;
-
-    /// <summary>
-    /// Делегат, вызываемый при нажатии клавиши P (остановка или продолжение).
-    /// </summary>
-    public static Action? OnPausePressed;
-
-    /// <summary>
-    /// Делегат, вызываемый для продолжения приостановленного выполнения.
-    /// </summary>
-    public static Action? OnContinuePressed;
-
-    /// <summary>
-    /// Делегат, вызываемый при нажатии клавиши Escape (завершить).
-    /// </summary>
-    public static Action? OnExitPressed;
-
-    /// <summary>
-    /// Делегат, вызываемый для повтора текущей операции.
-    /// </summary>
-    public static Action? OnRepeatPressed;
 
     /// <summary>
     /// Регистрирует глобальный обработчик нажатий клавиш.
@@ -81,12 +47,20 @@ namespace Ask.UI.Features.ProtocolNew.Hotkeys
     private static void OnGlobalKeyPressed(object sender, PreProcessInputEventArgs e)
     {
       var args = e.StagingItem.Input as KeyEventArgs;
-      if (args == null || args.RoutedEvent != Keyboard.PreviewKeyDownEvent || args.Handled
-        || args.IsRepeat || Keyboard.Modifiers != ModifierKeys.None) return;
+      if (args == null || args.RoutedEvent != Keyboard.PreviewKeyDownEvent) return;
 
       var key = args.Key == Key.System ? args.SystemKey : args.Key;
+      var isStepHotkey = key is Key.F5 or Key.F10 or Key.F11;
+      if (isStepHotkey)
+      {
+        LogInput($"KeyboardManager получил {Keyboard.Modifiers}+{key}: handled={args.Handled}, " +
+          $"repeat={args.IsRepeat}, stepMode={StepControlManager.StepMode}, waitActive={_tcs != null}.");
+      }
+
+      if (args.Handled || args.IsRepeat || Keyboard.Modifiers != ModifierKeys.None) return;
       if (DrawerHostService.Instance.ShouldBlockGlobalInput)
       {
+        if (isStepHotkey) LogInput($"KeyboardManager пропустил {key}: ввод заблокирован выдвижной панелью.");
         return;
       }
 
@@ -97,14 +71,17 @@ namespace Ask.UI.Features.ProtocolNew.Hotkeys
           case Key.F5:
             ExecutionEventAdapter.ExecutionControlEventAdapter.Raise(Ask.Core.Shared.Metadata.Enums.HotkeysEnums.ExecutionControlButton.Run);
             args.Handled = true;
+            LogInput("KeyboardManager передал F5 в breakpoint-flow как Run.");
             return;
           case Key.F10:
             ExecutionEventAdapter.ExecutionControlEventAdapter.Raise(Ask.Core.Shared.Metadata.Enums.HotkeysEnums.ExecutionControlButton.StepOver);
             args.Handled = true;
+            LogInput("KeyboardManager передал F10 в breakpoint-flow как StepOver.");
             return;
           case Key.F11:
             ExecutionEventAdapter.ExecutionControlEventAdapter.Raise(Ask.Core.Shared.Metadata.Enums.HotkeysEnums.ExecutionControlButton.StepInto);
             args.Handled = true;
+            LogInput("KeyboardManager передал F11 в breakpoint-flow как StepInto.");
             return;
         }
       }
@@ -124,6 +101,7 @@ namespace Ask.UI.Features.ProtocolNew.Hotkeys
           StepControlManager.RequestStepOverUntilNextControlCommand();
           _tcs.TrySetResult(true);
           args.Handled = true;
+          LogInput("KeyboardManager принял F10 для пошагового ожидания: выбран StepOver.");
           MessageEventAdapter.RaiseInfoMessage("Нажата клавиша: F10", true);
           Application.Current.Dispatcher.InvokeAsync(() =>
           {
@@ -137,6 +115,7 @@ namespace Ask.UI.Features.ProtocolNew.Hotkeys
           StepControlManager.SetStepIntoMode();
           _tcs.TrySetResult(true);
           args.Handled = true;
+          LogInput("KeyboardManager принял F11 для пошагового ожидания: выбран StepInto.");
           MessageEventAdapter.RaiseInfoMessage("Нажата клавиша: F11", true);
           break;
 
@@ -149,6 +128,7 @@ namespace Ask.UI.Features.ProtocolNew.Hotkeys
           // Синхронизируем UI с действием "Продолжить":
           // убираем шаговые кнопки и возвращаем "Пауза / Завершить".
           args.Handled = true;
+          LogInput("KeyboardManager принял F5 для пошагового ожидания: режим шагов отключён.");
           MessageEventAdapter.RaiseInfoMessage("Нажата клавиша: F5", true);
           break;
 
@@ -192,6 +172,8 @@ namespace Ask.UI.Features.ProtocolNew.Hotkeys
       cancellationToken.ThrowIfCancellationRequested();
       var completion = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
       _tcs = completion;
+      LogInput($"Начато ожидание пошаговой клавиши: stepMode={StepControlManager.StepMode}, " +
+        $"stepInto={StepControlManager.IsStepInto}, stepOverUntilControl={StepControlManager.StepOverUntilNextControlCommand}.");
 
       using (cancellationToken.Register(() => completion.TrySetCanceled(cancellationToken)))
       {
@@ -207,6 +189,8 @@ namespace Ask.UI.Features.ProtocolNew.Hotkeys
         finally
         {
           Interlocked.CompareExchange(ref _tcs, null, completion);
+          LogInput($"Ожидание пошаговой клавиши завершено: cancelled={completion.Task.IsCanceled}, " +
+            $"stepMode={StepControlManager.StepMode}.");
         }
       }
     }
@@ -215,7 +199,11 @@ namespace Ask.UI.Features.ProtocolNew.Hotkeys
     /// Принудительно завершает ожидание следующего шага.
     /// Используется, например, для внешнего управления пошаговым режимом.
     /// </summary>
-    public static void TriggerStep() => _tcs?.TrySetResult(true);
+    public static void TriggerStep()
+    {
+      var triggered = _tcs?.TrySetResult(true) == true;
+      LogInput($"Программный сигнал TriggerStep: waitActive={_tcs != null}, triggered={triggered}.");
+    }
   }
 
 }

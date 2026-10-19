@@ -33,16 +33,6 @@ namespace Ask.Core.Services.Config.AppSettings
     }
 
     /// <summary>
-    /// Устанавливает режим по шагам.
-    /// </summary>
-    /// <param name="enable">true для включения, false для выключения.</param>
-    public static void SetStepByStepMode(bool enable)
-    {
-      SettingsExecutionModel.StepByStepMode = enable;
-      ExecutionEventAdapter.RaiseStepByStepModeChanged(enable);
-    }
-
-    /// <summary>
     /// Устанавливает флаг остановки выполнения при ошибке.
     /// </summary>
     /// <param name="enable">true для включения, false для выключения.</param>
@@ -85,7 +75,7 @@ namespace Ask.Core.Services.Config.AppSettings
       SetIdleMode(protocolModel.IdleModeExecution);
       SetErroneousMeasurementType(protocolModel.ErroneousMeasurementType);
       SetIsHardwareErrorSimulationMode(protocolModel.IsHardwareErrorSimulationMode);
-      SetStepByStepMode(protocolModel.StepByStepMode);
+      SettingsExecutionModel.StepByStepMode = false;
       SetStopOnError(protocolModel.StopOnError);
       SettingsExecutionModel.RepeatMeasurement = protocolModel.RepeatMeasurement;
       SetLegacyCompatibilityMode(protocolModel.LegacyCompatibilityMode);
@@ -145,11 +135,6 @@ namespace Ask.Core.Services.Config.AppSettings
     public static bool GetIsHardwareErrorSimulationEnabled() =>
       SettingsExecutionModel?.IsHardwareErrorSimulationMode ?? false;
 
-    /// <summary>
-    /// Возвращает, включен ли пошаговый режим.
-    /// </summary>
-    /// <returns>true, если включен; false, если выключена.</returns>
-    public static bool GetIsStepByStepModeEnabled() => SettingsExecutionModel?.StepByStepMode ?? false;
     public static bool GetIsLegacyCompatibilityModeEnabled() => SettingsExecutionModel?.LegacyCompatibilityMode ?? false;
 
     /// <summary>
@@ -171,7 +156,7 @@ namespace Ask.Core.Services.Config.AppSettings
         IdleModeExecution = SettingsExecutionModel.IdleModeExecution,
         ErroneousMeasurementType = SettingsExecutionModel.ErroneousMeasurementType,
         IsHardwareErrorSimulationMode = SettingsExecutionModel.IsHardwareErrorSimulationMode,
-        StepByStepMode = SettingsExecutionModel.StepByStepMode,
+        StepByStepMode = false,
         StopOnError = SettingsExecutionModel.StopOnError,
         RepeatMeasurement = SettingsExecutionModel.RepeatMeasurement,
         LegacyCompatibilityMode = SettingsExecutionModel.LegacyCompatibilityMode,
@@ -186,7 +171,8 @@ namespace Ask.Core.Services.Config.AppSettings
       SetIdleMode(execution.IdleModeExecution);
       SetErroneousMeasurementType(execution.ErroneousMeasurementType);
       SetIsHardwareErrorSimulationMode(execution.IsHardwareErrorSimulationMode);
-      SetStepByStepMode(execution.StepByStepMode);
+      execution.StepByStepMode = false;
+      SettingsExecutionModel.StepByStepMode = false;
       SetStopOnError(execution.StopOnError);
       SettingsExecutionModel.RepeatMeasurement = execution.RepeatMeasurement;
       SetLegacyCompatibilityMode(execution.LegacyCompatibilityMode);

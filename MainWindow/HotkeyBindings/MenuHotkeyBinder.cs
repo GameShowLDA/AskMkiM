@@ -15,6 +15,12 @@ namespace MainWindowProgram.HotkeyBindings
   {
     private static MenuItem? _currentOpenMenu;
     private static string? _currentUidPrefix;
+    private static readonly Dictionary<string, string> ExecutionActions = new(StringComparer.OrdinalIgnoreCase)
+    {
+      ["Ctrl+F5"] = "Run",
+      ["Ctrl+F10"] = "RunStepByStepMode",
+      ["Ctrl+F11"] = "RunStepIntoMode",
+    };
 
     /// <summary>
     /// Привязывает горячие клавиши к пунктам меню, основываясь на Tag и ActionName.
@@ -66,6 +72,16 @@ namespace MainWindowProgram.HotkeyBindings
 
         if (menuItem.Command != null)
         {
+          if (ExecutionActions.TryGetValue(hotkey.KeyCombination, out var fixedAction))
+          {
+            if (string.Equals(fixedAction, actionName, StringComparison.Ordinal))
+            {
+              BindExecutionHotkey(window, menuItem, hotkey.KeyCombination);
+            }
+
+            continue;
+          }
+
           var binding = new KeyBinding(menuItem.Command, gesture);
           window.InputBindings.Add(binding);
           menuItem.InputGestureText = hotkey.KeyCombination;
@@ -82,6 +98,43 @@ namespace MainWindowProgram.HotkeyBindings
       {
         ProcessHierarchyKeyCombination(menuItems, msg, ref handled);
       };
+    }
+
+    private static void BindExecutionHotkey(Window window, MenuItem menuItem, string combination)
+    {
+      window.PreviewKeyDown += (_, e) =>
+      {
+        if (!string.Equals(combination, GetExecutionHotkey(e), StringComparison.OrdinalIgnoreCase))
+        {
+          return;
+        }
+
+        var command = menuItem.Command;
+        var parameter = menuItem.CommandParameter;
+        var canExecute = command?.CanExecute(parameter) == true;
+        LogInput($"Горячая клавиша {combination}: получена; handled={e.Handled}, repeat={e.IsRepeat}, " +
+          $"action={menuItem.Tag}, canExecute={canExecute}.");
+
+        if (e.Handled || e.IsRepeat || command == null || !canExecute)
+        {
+          return;
+        }
+
+        command.Execute(parameter);
+        e.Handled = true;
+        LogInput($"Горячая клавиша {combination}: команда {menuItem.Tag} выполнена.");
+      };
+    }
+
+    private static string? GetExecutionHotkey(KeyEventArgs e)
+    {
+      var key = e.Key == Key.System ? e.SystemKey : e.Key;
+      if (Keyboard.Modifiers != ModifierKeys.Control || key is not (Key.F5 or Key.F10 or Key.F11))
+      {
+        return null;
+      }
+
+      return $"Ctrl+{key}";
     }
 
     /// <summary>

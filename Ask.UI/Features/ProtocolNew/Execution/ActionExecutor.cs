@@ -3,8 +3,6 @@ using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Devices;
 using Ask.Core.Services.UI;
 using Ask.Core.Services.Errors.Models;
-using Ask.Core.Services.EventCore.Events;
-using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Exceptions;
@@ -43,7 +41,6 @@ namespace Ask.UI.Features.ProtocolNew.Execution
       _systemResetService = new ExecutionSystemResetService();
       var protocolCompletionService = new ProtocolCompletionService(new InspectionProtocolBuilder());
       _finalizer = new ExecutionFinalizer(_systemResetService, protocolCompletionService);
-      EventAggregator.Subscribe<ExecutionEvents.StepByStepModeChanged>(e => StepMode = e.IsEnabled);
     }
 
     /// <summary>
@@ -191,7 +188,10 @@ namespace Ask.UI.Features.ProtocolNew.Execution
     /// Запуск самоконтроля/режима.
     /// </summary>
     /// <returns>Задача, представляющая асинхронную операцию запуска процесса.</returns>
-    internal async Task StartAsync(ActionSettings actionSettings)
+    internal async Task StartAsync(
+      ActionSettings actionSettings,
+      bool startStepByStep = false,
+      bool isStepInto = true)
     {
       if (IsActive)
       {
@@ -227,13 +227,8 @@ namespace Ask.UI.Features.ProtocolNew.Execution
 
         // Новый запуск не должен наследовать "залипшее" состояние
         // брейкпоинта/пошагового режима от предыдущего выполнения.
-        StepControlManager.Reset();
-        if (StepControlManager.StepMode)
-        {
-          StepControlManager.DisableStepMode();
-        }
         StepMode = false;
-
+        StepControlManager.Reset();
         await ProtocolSelfCheck.ClearAllMessagesAsync();
         ProtocolSelfCheck.StartLogCapture();
         if (actionSettings.PreActionDelegate != null)
@@ -250,14 +245,14 @@ namespace Ask.UI.Features.ProtocolNew.Execution
           return;
         }
 
+        StepControlManager.DisableStepMode();
+        if (startStepByStep)
+        {
+          StepControlManager.EnableStepMode(isStepInto);
+        }
+
         ProtocolSelfCheck.ShowOnlyStopAndFinishButtons();
         StartProcessing?.Invoke(true);
-
-        if (ExecutionConfig.GetIsStepByStepModeEnabled())
-        {
-          StepControlManager.EnableStepMode(true);
-          StepMode = true;
-        }
 
         PrepareForStartAsync(actionSettings.Name);
 
@@ -969,7 +964,7 @@ namespace Ask.UI.Features.ProtocolNew.Execution
       actionExecutor.ProtocolSelfCheck = parentClass;
       actionExecutor.ShouldShowPauseMessage = true;
       actionExecutor.ShouldShowResumeMessage = false;
-      actionExecutor.StepMode = ExecutionConfig.GetIsStepByStepModeEnabled();
+      actionExecutor.StepMode = false;
       actionExecutor._pauseController.Reset();
       return actionExecutor;
     }

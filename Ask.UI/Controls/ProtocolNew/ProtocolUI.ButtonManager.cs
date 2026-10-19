@@ -1,5 +1,4 @@
 using Ask.Core.Services.App;
-using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.HotkeysEnums;
@@ -19,7 +18,6 @@ namespace Ask.UI.Controls.ProtocolNew
     private ProtocolButtonController _buttonController = null!;
 
     private TaskCompletionSource<bool>? _adminButtonTcs;
-    private bool _startRequestedInStepMode;
 
     #region Делегаты по нажатию кнопок.
 
@@ -220,19 +218,16 @@ namespace Ask.UI.Controls.ProtocolNew
     private void StartMeasureResistanceButton_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
       LogInformation($"Сработан обработчик события для кнопки \"Запустить\"");
+      LogInput($"Кнопка «Запустить»: isStartPending={_isStartPending}, executorActive={ActionExecutor.IsActive}.");
 
       if (_isStartPending || ActionExecutor.IsActive)
       {
-        _startRequestedInStepMode = false;
+        LogInput("Кнопка «Запустить»: запуск отклонён, исполнитель уже активен или ожидает запуска.");
         return;
       }
 
-      var startInStepMode = _startRequestedInStepMode ||
-        ExecutionConfig.GetIsStepByStepModeEnabled();
-      _startRequestedInStepMode = false;
-      ExecutionConfig.SetStepByStepMode(startInStepMode);
-
       StartMeasureResistanceButtonPreviewMouseDown?.Invoke(this, e);
+      LogInput("Кнопка «Запустить»: запрос передан подписчикам.");
     }
 
     /// <summary>
@@ -241,6 +236,7 @@ namespace Ask.UI.Controls.ProtocolNew
     private void StopButton_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
       LogInformation($"Сработан обработчик события для кнопки \"Остановить\"");
+      LogInput("Кнопка «Пауза»: запрос передан подписчикам.");
 
       PauseButtonPreviewMouseDown?.Invoke(this, e);
     }
@@ -251,6 +247,8 @@ namespace Ask.UI.Controls.ProtocolNew
     private void NextButton_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
       LogInformation($"Сработан обработчик события для кнопки \"Продолжить\"");
+      LogInput($"Кнопка «Продолжить»: breakpointStep={StepControlManager.IsBreakpointStepModeActive}, " +
+        $"executorStepMode={ActionExecutor.StepMode}, stepMode={StepControlManager.StepMode}.");
 
       if (StepControlManager.IsBreakpointStepModeActive)
       {
@@ -262,7 +260,6 @@ namespace Ask.UI.Controls.ProtocolNew
 
       if (ActionExecutor.StepMode || StepControlManager.StepMode)
       {
-        ExecutionConfig.SetStepByStepMode(false);
         StepControlManager.DisableStepMode();
         KeyboardManager.TriggerStep();
       }
@@ -270,6 +267,7 @@ namespace Ask.UI.Controls.ProtocolNew
       ShowOnlyStopAndFinishButtons(false);
 
       NextButtonPreviewMouseDown?.Invoke(this, e);
+      LogInput("Кнопка «Продолжить»: запрос передан подписчикам.");
     }
 
     /// <summary>
@@ -278,32 +276,12 @@ namespace Ask.UI.Controls.ProtocolNew
     private void ExitButton_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
       LogInformation($"Сработан обработчик события для кнопки \"Завершить\"");
+      LogInput("Кнопка «Завершить»: запрошено прерывание выполнения.");
       // TODO: добавить событие на отслеживание прерывания команды
       ExecutionEventAdapter.RaiseExecutionInterrupted();
       SetNonVisibleAllButton();
       ExitButtonPreviewMouseDown?.Invoke(this, e);
     }
-    private void RegisterHotkeys()
-    {
-      KeyboardManager.OnRunOrPausePressed = HandleRunOrPause;
-
-      KeyboardManager.OnStartPressed = StartFromHotkey;
-
-      KeyboardManager.OnStartPressedByStepMode = () =>
-        Application.Current.Dispatcher.Invoke(() =>
-        {
-          if (_isStartPending || ActionExecutor.IsActive) return;
-          _startRequestedInStepMode = true;
-          ExecutionConfig.SetStepByStepMode(true);
-          StartMeasureResistanceButton_PreviewMouseDown(StartButtonElement, CreateMouseArgs());
-        });
-
-      KeyboardManager.OnExitPressed = ExitFromHotkey;
-      KeyboardManager.OnPausePressed = PauseFromHotkey;
-      KeyboardManager.OnContinuePressed = ContinueFromHotkey;
-      KeyboardManager.OnRepeatPressed = RepeatFromHotkey;
-    }
-
     /// <summary>
     /// Запускает выполнение по команде горячей клавиши.
     /// </summary>
@@ -311,7 +289,6 @@ namespace Ask.UI.Controls.ProtocolNew
     {
       Application.Current.Dispatcher.Invoke(() =>
       {
-        _startRequestedInStepMode = false;
         StartMeasureResistanceButton_PreviewMouseDown(StartButtonElement, CreateMouseArgs());
       });
     }
@@ -374,6 +351,7 @@ namespace Ask.UI.Controls.ProtocolNew
     private void ReturnMeasureResistanceButton_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
       LogInformation($"Сработан обработчик события для кнопки \"Повторить\"");
+      LogInput("Кнопка «Повторить»: запрос передан подписчикам.");
       ReturnMeasureResistanceButtonPreviewMouseDown?.Invoke(this, e);
     }
 
@@ -383,6 +361,8 @@ namespace Ask.UI.Controls.ProtocolNew
     private void TopLayer_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
       LogInformation($"Сработан обработчик события для кнопки \"Поверх\"");
+      LogInput($"Кнопка «Поверх»: continueVisible={ContinueButtonElement.Visibility == Visibility.Visible}, " +
+        $"stepMode={StepControlManager.StepMode}, breakpointStep={StepControlManager.IsBreakpointStepModeActive}.");
 
       if (ContinueButtonElement.Visibility == Visibility.Visible)
       {
@@ -399,6 +379,8 @@ namespace Ask.UI.Controls.ProtocolNew
     private void BottomLayer_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
       LogInformation($"Сработан обработчик события для кнопки \"Вглубь\"");
+      LogInput($"Кнопка «Вглубь»: continueVisible={ContinueButtonElement.Visibility == Visibility.Visible}, " +
+        $"stepMode={StepControlManager.StepMode}, breakpointStep={StepControlManager.IsBreakpointStepModeActive}.");
 
       if (ContinueButtonElement.Visibility == Visibility.Visible)
       {
@@ -543,20 +525,27 @@ namespace Ask.UI.Controls.ProtocolNew
 
     private void EnterStepModeFromPause(bool isStepInto, MouseButtonEventArgs e)
     {
+      LogInput($"Переход с паузы к шагу {(isStepInto ? "F11/Вглубь" : "F10/Поверх")}: " +
+        $"stepModeBefore={StepControlManager.StepMode}, executorStepModeBefore={ActionExecutor.StepMode}, " +
+        $"breakpointStep={StepControlManager.IsBreakpointStepModeActive}.");
       if (StepControlManager.IsBreakpointStepModeActive)
       {
         ShowButtonsOnPause();
         ExecutionEventAdapter.ExecutionControlEventAdapter.Raise(
           isStepInto ? ExecutionControlButton.StepInto : ExecutionControlButton.StepOver);
+        LogInput("Пошаговое действие передано обработчику точки останова.");
         return;
       }
 
-      ExecutionConfig.SetStepByStepMode(true);
       StepControlManager.EnableStepMode(isStepInto);
       if (!isStepInto) StepControlManager.RequestStepOverUntilNextControlCommand();
       NextButtonPreviewMouseDown?.Invoke(this, e);
       KeyboardManager.TriggerStep();
       ShowOnlyStopAndFinishButtons(isStepInto);
+      LogInput($"Пошаговое действие обработано: stepModeAfter={StepControlManager.StepMode}, " +
+        $"executorStepModeAfter={ActionExecutor.StepMode}, pauseVisible={PauseButtonElement.Visibility == Visibility.Visible}, " +
+        $"continueVisible={ContinueButtonElement.Visibility == Visibility.Visible}, " +
+        $"stepButtonsVisible={StepIntoButtonElement.Visibility == Visibility.Visible || StepOverButtonElement.Visibility == Visibility.Visible}.");
     }
 
     public void ShowProtocolManager()

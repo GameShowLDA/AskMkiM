@@ -241,15 +241,6 @@ namespace Ask.UI.Resources.Localization.Language {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на Запуск (Пошаговый режим).
-        /// </summary>
-        internal static string menu_execution_run_stepByStepMode {
-            get {
-                return ResourceManager.GetString("menu.execution.run.stepByStepMode", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Ищет локализованную строку, похожую на Файл.
         /// </summary>
         internal static string menu_file {
@@ -1227,24 +1218,6 @@ namespace Ask.UI.Resources.Localization.Language {
         internal static string settings_execution_section_title {
             get {
                 return ResourceManager.GetString("settings.execution.section.title", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Ищет локализованную строку, похожую на Включает отладочное выполнение: F10 — выполнить блок целиком (поверх); F11 — заходить в блок и останавливаться на каждом шаге (вглубь)..
-        /// </summary>
-        internal static string settings_execution_stepByStepMode_description {
-            get {
-                return ResourceManager.GetString("settings.execution.stepByStepMode.description", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Ищет локализованную строку, похожую на Пошаговый режим.
-        /// </summary>
-        internal static string settings_execution_stepByStepMode_title {
-            get {
-                return ResourceManager.GetString("settings.execution.stepByStepMode.title", resourceCulture);
             }
         }
         

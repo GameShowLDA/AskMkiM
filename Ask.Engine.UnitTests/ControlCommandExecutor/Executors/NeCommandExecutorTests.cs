@@ -1,4 +1,5 @@
 using System.Reflection;
+using Ask.Core.Services.App;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Errors.Device;
 using Ask.Core.Services.Errors.Models;
@@ -99,7 +100,7 @@ public sealed class NeCommandExecutorTests : IDisposable
   public void Dispose()
   {
     ExecutionConfig.SetIdleMode(false);
-    ExecutionConfig.SetStepByStepMode(false);
+    StepControlManager.DisableStepMode();
   }
 
   private static NeCommandModel CreateNeCommand()
@@ -141,7 +142,7 @@ public sealed class NeCommandExecutorTests : IDisposable
     public NeExecutionHarness()
     {
       ExecutionConfig.SetIdleMode(false);
-      ExecutionConfig.SetStepByStepMode(false);
+      StepControlManager.DisableStepMode();
       DeviceDisplayConfig.SetExecutionParametersVisibility(false);
       DeviceDisplayConfig.SetMeasurementResultsVisibility(false);
       DeviceDisplayConfig.SetMachineAddressVisibility(false);
