@@ -68,6 +68,33 @@ public sealed class ProtocolOverviewTests
   }
 
   [Fact]
+  public void NavigationFromTailKeepsTargetVisibleWhenProtocolGrows()
+  {
+    RunInSta(() =>
+    {
+      var control = new ProtocolListBoxUI();
+      control.LoadMessages(Enumerable.Range(1, 200).Select(index =>
+        new ShowMessageModel { Header = $"Строка {index}", Message = new string('т', 150) }).ToArray());
+      control.Measure(new System.Windows.Size(500, 300));
+      control.Arrange(new System.Windows.Rect(0, 0, 500, 300));
+      control.UpdateLayout();
+      control.RaiseEvent(new System.Windows.RoutedEventArgs(System.Windows.FrameworkElement.LoadedEvent));
+      var viewer = FindDescendant<ScrollViewer>((ListBox)control.FindName("ProtocolListBox"))!;
+      Assert.NotNull(viewer);
+      viewer.ScrollToEnd();
+      control.UpdateLayout();
+
+      control.NavigateToErrorOverviewLine(1);
+      WaitForDispatcherTasks(control.AppendLineAsync(new ShowMessageModel { Header = "Новая запись", Message = "Результат" }));
+      control.UpdateLayout();
+
+      Assert.True(viewer.ScrollableHeight > 0);
+      Assert.True(viewer.VerticalOffset < viewer.ScrollableHeight / 2,
+        $"Переход к началу вытеснен автопрокруткой: {viewer.VerticalOffset}/{viewer.ScrollableHeight}");
+    });
+  }
+
+  [Fact]
   public void NavigationRevealsErrorInsideCollapsedCommand()
   {
     RunInSta(() =>

@@ -327,6 +327,7 @@ namespace Ask.UI.Components.ProtocolListBox
 
     private void ProtocolVerticalScrollBar_Scroll(object sender, ScrollEventArgs e)
     {
+      _followTail = false;
       _protocolScrollViewer?.ScrollToVerticalOffset(e.NewValue);
     }
 
@@ -379,8 +380,11 @@ namespace Ask.UI.Components.ProtocolListBox
           positions[diagnostic.LineNumber] = ProjectOverviewOffset(index, anchors) / extent;
       }
       errorOverviewBar.SetLinePositions(positions, fraction =>
+      {
+        _followTail = false;
         _protocolScrollViewer!.ScrollToVerticalOffset(Math.Max(0,
-          fraction * _protocolScrollViewer.ExtentHeight - _protocolScrollViewer.ViewportHeight / 2)));
+          fraction * _protocolScrollViewer.ExtentHeight - _protocolScrollViewer.ViewportHeight / 2));
+      });
     }
 
     // Нереализованные строки виртуализированного списка оцениваются между измеренными границами.
@@ -979,6 +983,8 @@ namespace Ask.UI.Components.ProtocolListBox
       }
 
       var targetMessage = _historyMessages[messageIndex];
+      // Пересчёт высоты виртуализированных строк при переходе не должен возвращать список в конец.
+      _followTail = false;
       _activeErrorMessage = targetMessage;
       _errorOverviewIndex = _errorOverviewDiagnostics.FindIndex(diagnostic =>
         diagnostic.LineNumber == lineNumber);
@@ -1257,6 +1263,7 @@ namespace Ask.UI.Components.ProtocolListBox
       {
         int index = Math.Max(0, Math.Min(lineNumber, DisplayItems.Count - 1));
         var item = DisplayItems[index];
+        _followTail = false;
         ProtocolListBox.SelectedItem = item;
         ProtocolListBox.ScrollIntoView(item);
       });
