@@ -230,8 +230,6 @@ namespace MainWindowProgram.Events
         _mainWindow.Build.IsEnabled = true;
         _mainWindow.Run.Visibility = Visibility.Visible;
         _mainWindow.Run.IsEnabled = true;
-        _mainWindow.RunStepByStepMode.Visibility = Visibility.Visible;
-        _mainWindow.RunStepByStepMode.IsEnabled = true;
       });
     }
 

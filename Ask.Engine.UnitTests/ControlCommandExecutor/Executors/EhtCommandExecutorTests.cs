@@ -1,3 +1,4 @@
+using Ask.Core.Services.App;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Errors.Models;
 using Ask.Core.Shared.DTO.Devices.Measurements;
@@ -379,7 +380,7 @@ public sealed class EhtCommandExecutorTests
     private readonly Queue<double> _measurements;
     private readonly int _measurementCount;
     private readonly bool _originalIdleMode = ExecutionConfig.GetIsIdleModeEnabled();
-    private readonly bool _originalStepByStepMode = ExecutionConfig.GetIsStepByStepModeEnabled();
+    private readonly bool _originalStepByStepMode = StepControlManager.StepMode;
     private readonly bool _originalLegacyMode = ExecutionConfig.GetIsLegacyCompatibilityModeEnabled();
     private readonly bool _originalMachineAddressVisibility = DeviceDisplayConfig.GetMachineAddressVisibility();
     private readonly bool _originalExecutionParametersVisibility = DeviceDisplayConfig.GetExecutionParametersVisibility();
@@ -390,7 +391,7 @@ public sealed class EhtCommandExecutorTests
       _measurementCount = measurements.Count;
       _measurements = new Queue<double>(measurements);
       ExecutionConfig.SetIdleMode(false);
-      ExecutionConfig.SetStepByStepMode(false);
+      StepControlManager.DisableStepMode();
       ExecutionConfig.SetLegacyCompatibilityMode(false);
       DeviceDisplayConfig.SetMachineAddressVisibility(true);
       DeviceDisplayConfig.SetExecutionParametersVisibility(false);
@@ -499,7 +500,10 @@ public sealed class EhtCommandExecutorTests
     {
       _scope.Dispose();
       ExecutionConfig.SetIdleMode(_originalIdleMode);
-      ExecutionConfig.SetStepByStepMode(_originalStepByStepMode);
+      if (_originalStepByStepMode)
+        StepControlManager.EnableStepMode(isStepInto: true);
+      else
+        StepControlManager.DisableStepMode();
       ExecutionConfig.SetLegacyCompatibilityMode(_originalLegacyMode);
       DeviceDisplayConfig.SetMachineAddressVisibility(_originalMachineAddressVisibility);
       DeviceDisplayConfig.SetExecutionParametersVisibility(_originalExecutionParametersVisibility);

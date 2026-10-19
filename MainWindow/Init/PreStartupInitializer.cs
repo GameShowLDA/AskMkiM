@@ -66,6 +66,7 @@ namespace MainWindowProgram.Init
     /// </remarks>
     static internal async Task<DatabaseInitializationReport?> Initialize()
     {
+      LoggerUtility.ConfigureInputLog();
       var buildInfo = ApplicationBuildInfo.Current;
       LogInformation($"Запуск приложения. {buildInfo.ToDiagnosticString()}");
       try

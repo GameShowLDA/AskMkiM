@@ -1,5 +1,6 @@
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using System.Windows;
+using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.UI.Features.ProtocolNew.Controls;
 
@@ -81,6 +82,11 @@ internal sealed class ProtocolButtonController
         default:
           throw new ArgumentOutOfRangeException(nameof(state), state, "Неизвестное состояние панели кнопок.");
       }
+
+      LogInput($"Состояние панели управления применено: state={state}, stepMode={stepMode}, " +
+        $"start={_view.StartVisibility}, pause={_view.PauseVisibility}, continue={_view.ContinueVisibility}, " +
+        $"exit={_view.ExitVisibility}, repeat={_view.RepeatVisibility}, " +
+        $"stepOver={_view.StepOverVisibility}, stepInto={_view.StepIntoVisibility}.");
     });
   }
 
@@ -115,6 +121,8 @@ internal sealed class ProtocolButtonController
       }
 
       SetStepButtons(visible: false);
+      LogInput($"Обновление пошаговых кнопок без активной панели: stepMode={stepModeEnabled}, " +
+        $"breakpointStep={breakpointPauseActive}, stepOver={_view.StepOverVisibility}, stepInto={_view.StepIntoVisibility}.");
     });
   }
 

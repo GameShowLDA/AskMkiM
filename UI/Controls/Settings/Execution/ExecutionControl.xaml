@@ -16,8 +16,6 @@
         <LocalizeStrings:LocalizedString x:Key="Settings_Execution_StopOnError_Description" Key="settings.execution.stopOnError.description" />
         <LocalizeStrings:LocalizedString x:Key="Settings_Execution_RepeatMeasurement_Title" Key="settings.execution.repeatMeasurement.title" />
         <LocalizeStrings:LocalizedString x:Key="Settings_Execution_RepeatMeasurement_Description" Key="settings.execution.repeatMeasurement.description" />
-        <LocalizeStrings:LocalizedString x:Key="Settings_Execution_StepByStepMode_Title" Key="settings.execution.stepByStepMode.title" />
-        <LocalizeStrings:LocalizedString x:Key="Settings_Execution_StepByStepMode_Description" Key="settings.execution.stepByStepMode.description" />
         <LocalizeStrings:LocalizedString x:Key="Settings_Execution_IdleMode_Title" Key="settings.execution.idleMode.title" />
         <LocalizeStrings:LocalizedString x:Key="Settings_Execution_IdleMode_Description" Key="settings.execution.idleMode.description" />
         <LocalizeStrings:LocalizedString x:Key="Settings_Execution_ErrorSimulation_Title" Key="settings.execution.errorSimulation.title" />
@@ -124,15 +122,6 @@
                     VerticalAlignment="Top"
                     x:Name="RepeatMeasurement"
                  />
-
-                <SharedComponents:SettingsCard
-                     Title="{Binding Source={StaticResource Settings_Execution_StepByStepMode_Title}, Path=Value}"
-                     Description="{Binding Source={StaticResource Settings_Execution_StepByStepMode_Description}, Path=Value}"
-                     IsChecked="{Binding IdleMode, Mode=TwoWay}" 
-                     Margin="10,10"
-                     VerticalAlignment="Top"
-                    x:Name="StepByStepMode"
-                     />
 
                 <SharedComponents:SettingsCard 
                     Title="{Binding Source={StaticResource Settings_Execution_IdleMode_Title}, Path=Value}" 

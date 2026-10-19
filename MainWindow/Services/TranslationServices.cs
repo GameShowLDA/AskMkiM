@@ -480,7 +480,7 @@ namespace MainWindowProgram.Services
     /// в соответствии с успешностью распознавания.
     /// </summary>
     /// <returns>Задача, представляющая асинхронную операцию трансляции.</returns>
-    public async Task RunAsync()
+    public async Task RunAsync(bool startStepByStep = false, bool isStepInto = true)
     {
       var editor = _multiWindow.GetActiveTextEditor(EditorType.TextEditor);
       var container = _multiWindow.GetActiveTextEditorContainer(EditorType.Translator);
@@ -566,7 +566,7 @@ namespace MainWindowProgram.Services
           {
             TranslationModels = run.TranslationModels,
           };
-          await PrepareRun(runContainer, actualTextEditor, runControl);
+          await PrepareRun(runContainer, actualTextEditor, runControl, startStepByStep, isStepInto);
         }
         else
         {
@@ -607,7 +607,7 @@ namespace MainWindowProgram.Services
 
         RunControl runControl = new RunControl();
         runControl.TranslationModels = translator.TranslationModels;
-        await PrepareRun(runContainer, actualTextEditor, runControl);
+        await PrepareRun(runContainer, actualTextEditor, runControl, startStepByStep, isStepInto);
       }
     }
 
@@ -628,7 +628,12 @@ namespace MainWindowProgram.Services
     /// <param name="runContainer">Контейнер исполнения.</param>
     /// <param name="editor">Редактор, содержащий путь к файлу и исходные данные.</param>
     /// <param name="runControl">Контрол исполнения.</param>
-    private async Task PrepareRun(TextEditorContainer runContainer, TextEditorUI editor, RunControl runControl)
+    private async Task PrepareRun(
+      TextEditorContainer runContainer,
+      TextEditorUI editor,
+      RunControl runControl,
+      bool startStepByStep,
+      bool isStepInto)
     {
       runControl.OpkFilePath = editor.TextEditorModel.FilePath;
       runControl.SourceArchiveName = editor.TextEditorModel.SourceArchiveName;
@@ -655,7 +660,7 @@ namespace MainWindowProgram.Services
         await _multiWindow.RunService.AddRunItem(runControl, EditorType.Run);
       }
 
-      await runControl.Start(runControl.TranslationModels);
+      await runControl.Start(runControl.TranslationModels, startStepByStep, isStepInto);
     }
 
     private static string GetDisplayFileName(string? filePath, string? fileName)

@@ -1,3 +1,4 @@
+using Ask.Core.Services.App;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Errors.Models;
 using Ask.Core.Shared.DTO.Devices.Measurements;
@@ -720,7 +721,7 @@ public class KsCommandExecutorTests : IClassFixture<FastMeterDbFixture>, IDispos
       bool includeRelayModules = true)
     {
       ExecutionConfig.SetIdleMode(idleMode);
-      ExecutionConfig.SetStepByStepMode(false);
+      StepControlManager.DisableStepMode();
       ExecutionConfig.SetErroneousMeasurementType(errorSimulation);
       DeviceDisplayConfig.SetExecutionParametersVisibility(false);
       DeviceDisplayConfig.SetMeasurementResultsVisibility(false);
@@ -810,7 +811,7 @@ public class KsCommandExecutorTests : IClassFixture<FastMeterDbFixture>, IDispos
     {
       _scope.Dispose();
       ExecutionConfig.SetIdleMode(false);
-      ExecutionConfig.SetStepByStepMode(false);
+      StepControlManager.DisableStepMode();
       ExecutionConfig.SetErroneousMeasurementType(_originalErrorSimulation);
     }
   }

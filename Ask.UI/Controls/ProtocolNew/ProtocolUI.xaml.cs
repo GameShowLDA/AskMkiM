@@ -154,6 +154,8 @@ namespace Ask.UI.Controls.ProtocolNew
 
     private void EventAggregator_StepByStepModeChanged(bool obj)
     {
+      LogInput($"Событие пошагового режима: enabled={obj}.");
+      ActionExecutor.StepMode = obj;
       UpdateStepButtonsForCurrentState(obj);
     }
 
@@ -191,7 +193,6 @@ namespace Ask.UI.Controls.ProtocolNew
           _attachedWindow.AddHandler(Keyboard.PreviewKeyDownEvent, new KeyEventHandler(OnGlobalKeyDown), true);
         }
 
-        RegisterHotkeys();
       };
 
       this.Unloaded += (s, e) =>
@@ -270,6 +271,7 @@ namespace Ask.UI.Controls.ProtocolNew
 
       EventAggregator.Subscribe(_controlButtonHandler);
       EventAggregator.Subscribe(_stepByStepModeChangedHandler);
+      ActionExecutor.StepMode = StepControlManager.StepMode;
       _eventSubscriptionsAttached = true;
     }
 
@@ -277,7 +279,6 @@ namespace Ask.UI.Controls.ProtocolNew
     {
       if (e.Handled || !IsVisible || !IsEnabled || ActionExecutor.IsStopping
         || !Ask.UI.Features.ProtocolNew.Execution.ExecutionRunGuard.CanHandleInput(ActionExecutor)) return;
-      RegisterHotkeys();
       _hotkeyController.HandleKeyDown(sender, e);
     }
 
@@ -388,6 +389,8 @@ namespace Ask.UI.Controls.ProtocolNew
 
     private void OnControlButtonPressed(ExecutionEvents.ControlButtonPressed e)
     {
+      LogInput($"Событие управления точкой останова: button={e.Button}, " +
+        $"stepMode={StepControlManager.StepMode}, breakpointStep={StepControlManager.IsBreakpointStepModeActive}.");
       // Эти события публикуются только в breakpoint-flow.
       // Здесь нельзя повторно звать обычные обработчики F5/F10/F11,
       // потому что они снова публикуют те же ControlButtonPressed
@@ -453,7 +456,6 @@ namespace Ask.UI.Controls.ProtocolNew
     {
       if (StartButtonElement.Visibility == Visibility.Visible)
       {
-        KeyboardManager.OnStartPressedByStepMode?.Invoke();
         return;
       }
 

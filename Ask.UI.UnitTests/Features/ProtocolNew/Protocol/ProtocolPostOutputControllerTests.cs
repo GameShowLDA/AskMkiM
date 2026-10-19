@@ -1,5 +1,7 @@
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Services.App;
+using Ask.UI.Features.ProtocolNew.Hotkeys;
 using Ask.UI.Features.ProtocolNew.Protocol;
 
 namespace Ask.UI.UnitTests.Features.ProtocolNew.Protocol;
@@ -44,11 +46,38 @@ public sealed class ProtocolPostOutputControllerTests
     Assert.Equal(1, context.PauseWaitCount);
   }
 
+  [Fact(DisplayName = "Отключение шагов во время ожидания скрывает пошаговые кнопки")]
+  public async Task ProcessAsync_WhenStepModeIsDisabledDuringWait_HidesStepButtonsAfterResume()
+  {
+    StepControlManager.DisableStepMode();
+    StepControlManager.Reset();
+    try
+    {
+      StepControlManager.EnableStepMode(isStepInto: true);
+      var context = new RecordingPostOutputContext();
+      var processing = new ProtocolPostOutputController(context)
+        .ProcessAsync(new ShowMessageModel(), false, false, false);
+
+      StepControlManager.DisableStepMode();
+      KeyboardManager.TriggerStep();
+      await processing;
+
+      Assert.Equal([false], context.RunningButtonStepModes);
+    }
+    finally
+    {
+      StepControlManager.DisableStepMode();
+      StepControlManager.Reset();
+    }
+  }
+
   private sealed class RecordingPostOutputContext : IProtocolPostOutputContext
   {
     public bool IsPaused { get; init; }
 
     public int PauseWaitCount { get; private set; }
+
+    public List<bool> RunningButtonStepModes { get; } = [];
 
     public CancellationToken GetCancellationToken() => CancellationToken.None;
 
@@ -66,6 +95,7 @@ public sealed class ProtocolPostOutputControllerTests
 
     public void ShowRunningButtons(bool showStepButtons)
     {
+      RunningButtonStepModes.Add(showStepButtons);
     }
   }
 }
