@@ -194,6 +194,10 @@ namespace Ask.Core.Services.UI
         {
           throw;
         }
+        catch (Ask.Core.Shared.Exceptions.CommandJumpRequestedException)
+        {
+          throw;
+        }
         catch (Exception ex)
         {
           hardwareException = ex;

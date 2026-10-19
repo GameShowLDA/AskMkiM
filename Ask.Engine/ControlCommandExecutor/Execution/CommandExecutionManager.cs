@@ -166,6 +166,21 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
       return manager?.RequestCommandJumpAsync() ?? Task.CompletedTask;
     }
 
+    /// <summary>
+    /// Прерывает текущую команду программы контроля и продолжает со следующей.
+    /// </summary>
+    /// <returns>Задача обработки перехода к следующей команде.</returns>
+    public static Task RequestNextCommandAsync()
+    {
+      CommandExecutionManager? manager;
+      lock (ActiveManagerSync)
+      {
+        manager = _activeManager;
+      }
+
+      return manager?.RequestNextCommandCoreAsync() ?? Task.CompletedTask;
+    }
+
     public CommandExecutionManager(
      IUserInteractionService console,
      ITextEditorAdapter textEditor,
@@ -241,6 +256,8 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
           {
             break;
           }
+
+          await _console.WaitIfPausedAsync();
 
           if (!ReferenceEquals(selected, command))
           {
@@ -471,6 +488,46 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
         }
 
         commandJumpGate.InterruptPauseForCommandJump();
+      }
+      finally
+      {
+        _commandJumpSemaphore.Release();
+      }
+    }
+
+    private async Task RequestNextCommandCoreAsync()
+    {
+      if (_console is not IExecutionCommandJumpGate commandJumpGate ||
+          _console.GetCancellationToken().IsCancellationRequested)
+      {
+        return;
+      }
+
+      await _commandJumpSemaphore.WaitAsync().ConfigureAwait(false);
+      try
+      {
+        BaseCommandModel? nextCommand;
+        lock (_commandStateSync)
+        {
+          if (_pendingJumpCommand != null)
+          {
+            return;
+          }
+
+          nextCommand = _currentCommand == null ? null : GetNextCommand(_currentCommand);
+        }
+
+        if (nextCommand == null || _console.GetCancellationToken().IsCancellationRequested)
+        {
+          return;
+        }
+
+        lock (_commandStateSync)
+        {
+          _pendingJumpCommand = nextCommand;
+        }
+
+        commandJumpGate.InterruptCurrentCommand();
       }
       finally
       {

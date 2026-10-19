@@ -393,6 +393,9 @@
   <data name="protocol.tooltip.commandjump" xml:space="preserve">
     <value>Go to another command (F4)</value>
   </data>
+  <data name="protocol.tooltip.skipcommand" xml:space="preserve">
+    <value>Finish the current command and go to the next one</value>
+  </data>
   <data name="translator.editor.tooltip.back" xml:space="preserve">
     <value>Return to the source file</value>
   </data>

@@ -15,6 +15,21 @@ namespace Ask.Engine.UnitTests.Services.UI;
 public sealed class UserActionHelperTests
 {
   [Fact]
+  public async Task CommandInterruptionPropagatesWithoutHardwareErrorHandling()
+  {
+    var interruption = new Ask.Core.Shared.Exceptions.CommandJumpRequestedException();
+    var interaction = new Mock<IUserInteractionService>(MockBehavior.Strict);
+    interaction.Setup(x => x.GetCancellationToken()).Returns(CancellationToken.None);
+    interaction.Setup(x => x.GetLastLineNumber()).Returns(0);
+
+    var thrown = await Assert.ThrowsAsync<Ask.Core.Shared.Exceptions.CommandJumpRequestedException>(
+      () => UserActionHelper.RunWithUserRepeatAsync(
+        () => Task.FromException<bool>(interruption), interaction.Object, deviceTask: true));
+
+    Assert.Same(interruption, thrown);
+  }
+
+  [Fact]
   public async Task EnabledMeasurementRepeatRetriesMeasurementInsideControlCommand()
   {
     var original = ExecutionConfig.GetExecutionModelSnapshot();
