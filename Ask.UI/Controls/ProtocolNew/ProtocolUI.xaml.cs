@@ -354,6 +354,9 @@ namespace Ask.UI.Controls.ProtocolNew
     }
 
     /// <inheritdoc />
+    Task IExecutionCommandJumpGate.PauseBeforeNextCommandAsync() => PauseAsync();
+
+    /// <inheritdoc />
     void IProtocolHotkeyContext.NotifyOtherKey(object sender, KeyEventArgs e) =>
       AnotherKeyPressed?.Invoke(sender, e);
 

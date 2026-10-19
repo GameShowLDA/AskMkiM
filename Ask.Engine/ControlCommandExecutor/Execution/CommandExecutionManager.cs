@@ -52,6 +52,7 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
     /// Команда, выбранная для отложенного перехода.
     /// </summary>
     private BaseCommandModel? _pendingJumpCommand;
+    private bool _pauseAfterCommandJump;
 
     /// <summary>
     /// Реестр исполнителей команд, обеспечивающий получение исполнителя по мнемонике команды.
@@ -219,6 +220,7 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
         {
           _currentCommand = null;
           _pendingJumpCommand = null;
+          _pauseAfterCommandJump = false;
         }
 
         lock (ActiveManagerSync)
@@ -353,7 +355,7 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
           {
             _attemptErrors = null;
           }
-          var targetCommand = TakePendingJumpCommand();
+          var targetCommand = TakePendingJumpCommand(out bool pauseAfterJump);
           if (targetCommand == null)
           {
             throw;
@@ -371,6 +373,11 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
           if (targetCommand.FormattedStartLineNumber >= 0)
           {
             _textEditor.SetActiveLine(targetCommand.FormattedStartLineNumber);
+          }
+
+          if (pauseAfterJump && _console is IExecutionCommandJumpGate commandJumpGate)
+          {
+            await commandJumpGate.PauseBeforeNextCommandAsync().ConfigureAwait(false);
           }
 
           continue;
@@ -525,6 +532,7 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
         lock (_commandStateSync)
         {
           _pendingJumpCommand = nextCommand;
+          _pauseAfterCommandJump = true;
         }
 
         commandJumpGate.InterruptCurrentCommand();
@@ -543,12 +551,14 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
       }
     }
 
-    private BaseCommandModel? TakePendingJumpCommand()
+    private BaseCommandModel? TakePendingJumpCommand(out bool pauseAfterJump)
     {
       lock (_commandStateSync)
       {
         var command = _pendingJumpCommand;
+        pauseAfterJump = _pauseAfterCommandJump;
         _pendingJumpCommand = null;
+        _pauseAfterCommandJump = false;
         return command;
       }
     }

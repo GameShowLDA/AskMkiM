@@ -20,6 +20,8 @@ public sealed class CommandExecutionManagerSkipCurrentCommandTests
     {
       var pauseReached = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
       var pauseInterrupted = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+      var transitionPaused = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+      var continueExecution = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
       bool isPaused = initiallyPaused;
       int checkpointCount = 0;
 
@@ -34,6 +36,13 @@ public sealed class CommandExecutionManagerSkipCurrentCommandTests
       console.As<IExecutionCommandJumpGate>()
         .SetupGet(x => x.IsExecutionPaused)
         .Returns(() => isPaused);
+      console.As<IExecutionCommandJumpGate>()
+        .Setup(x => x.PauseBeforeNextCommandAsync())
+        .Returns(async () =>
+        {
+          transitionPaused.TrySetResult();
+          await continueExecution.Task;
+        });
       console.As<IExecutionCommandJumpGate>()
         .Setup(x => x.InterruptCurrentCommand())
         .Callback(() =>
@@ -73,6 +82,11 @@ public sealed class CommandExecutionManagerSkipCurrentCommandTests
       var execution = manager.ExecuteAllAsync();
       await pauseReached.Task.WaitAsync(TimeSpan.FromSeconds(3));
       await CommandExecutionManager.RequestNextCommandAsync();
+      await transitionPaused.Task.WaitAsync(TimeSpan.FromSeconds(3));
+      Assert.False(execution.IsCompleted);
+      console.Verify(x => x.CompleteCommandAsync(It.IsAny<bool>()), Times.Never);
+      console.As<IExecutionCommandJumpGate>().Verify(x => x.PauseBeforeNextCommandAsync(), Times.Once);
+      continueExecution.TrySetResult();
       await execution.WaitAsync(TimeSpan.FromSeconds(3));
 
       editor.Verify(x => x.SetActiveLine(10), Times.AtLeastOnce);

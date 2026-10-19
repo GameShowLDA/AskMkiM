@@ -825,6 +825,8 @@ CommandExecutionManager.ExecuteAllCoreAsync loop
   `UserActionHelper` пропускает `CommandJumpRequestedException` без преобразования в аппаратную ошибку;
   обработчик перехода переиспользует `CommandJumpService.PrepareAsync`
   (сообщение о переходе и общий сброс оборудования)
+  → только для кнопки следующей команды: `PauseBeforeNextCommandAsync` → `ProtocolUI.PauseAsync`;
+    следующая команда выделена в редакторе, её исполнитель запускается после действия пользователя
 → apply JumpToCommandNumber for УП
 ```
 
