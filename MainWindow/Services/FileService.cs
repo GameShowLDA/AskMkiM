@@ -24,7 +24,7 @@ using System.Windows;
 using System.Windows.Media.Effects;
 using System.Windows.Threading;
 using UI.Components;
-using UI.Controls.FileCompare;
+using Ask.UI.Features.FileComparison.Views;
 using UI.Controls.Search;
 using UI.Controls.TextEditorControl;
 using static Ask.Core.Services.EventCore.Events.ExecutionEvents;

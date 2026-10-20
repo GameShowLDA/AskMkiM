@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<TargetFramework>net8.0-windows</TargetFramework>
@@ -28,6 +28,7 @@
 
 	<ItemGroup>
 	  <PackageReference Include="AvalonEdit" Version="6.3.0.90" />
+	  <PackageReference Include="DiffPlex" Version="1.9.0" />
 	  <PackageReference Include="InputSimulator" Version="1.0.4" />
 	</ItemGroup>
 

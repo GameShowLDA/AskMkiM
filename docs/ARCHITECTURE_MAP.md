@@ -29,6 +29,7 @@ Size/Foreground и анимации общей кнопки; лицензия с
 
 | Нужно изменить | Сначала смотреть | Затем смотреть |
 | --- | --- | --- |
+| Сравнение открытых файлов | `MainWindow/MainWindow.xaml`, `MainWindow/Events/UiEventsBinder.cs` | `MainWindow/ViewModels/FileViewModel.cs`, `MainWindow/Services/FileService.cs`, `Ask.UI/Features/FileComparison/Views/FileCompareSelectionControl.xaml(.cs)`; [сравнение файлов](#file-comparison-ui) |
 | Уведомления о делах на сегодня | `MainWindow/MainWindow.TodayTasks.cs`, `MainWindow/MainWindow.xaml` | `CalendarNoteService.Load/SetCompleted`, `CalendarControl.Completion_Click`; [заметки](#calendar-notes) |
 | Заметки календаря | `UI/Controls/Calendar/CalendarControl.xaml.cs`, `CalendarControl.xaml` | `Ask.Core/Services/Calendar/CalendarNoteService.cs`, `CalendarNote.cs`; [заметки](#calendar-notes) |
 | Запуск приложения | `MainWindow/App.xaml.cs`, `MainWindow/Init/PreStartupInitializer.cs` | `MainWindow/Init/DatabaseInitializer.cs`, `MainWindow/Engine/AppServices.cs`, `MainWindow/MainWindow.xaml.cs` |
@@ -82,6 +83,7 @@ Size/Foreground и анимации общей кнопки; лицензия с
 ## Runtime Flow Index
 
 - [Calendar notes CRUD](#calendar-notes)
+- [Сравнение открытых файлов](#file-comparison-ui)
 - [Application startup](#application-startup-flow)
 - [Database initialization](#database-startup-flow)
 - [Translation](#translation-flow)
@@ -2324,6 +2326,74 @@ same path with gates enabled and performs real transport I/O.
 Translation, Run, Metrology, Test, SelfTest, Settings, Admin and Window ViewModels.
 Their services generally route operations into `MultiWindowService`.
 
+<a id="file-comparison-ui"></a>
+### Сравнение открытых файлов
+
+Пункт `File.CompareFileCommand` в меню «Файл» показывается только при активном
+текстовом редакторе и не менее чем двух открытых редакторах. Маршрут:
+`MainWindow/Events/UiEventsBinder.OnTextEditorActive/OnTextEditorActivated`
+→ `UpdateCompareMenuVisibility` → `MainWindow.xaml compareMenuItem`
+→ `FileViewModel.CompareFileCommand` → `MainWindow/Services/FileService.CompareFileAsync`
+→ `MultiWindowService.GetOpenTextEditors` → `WorkspaceService.AddControl`
+→ `Ask.UI.Features.FileComparison.Views.FileCompareSelectionControl`.
+Control получает актуальные `OpenTextEditorDescriptor` через provider, позволяет
+выбрать исходный документ и один или несколько документов назначения, запускает
+сравнение в `Task.Run` с `CancellationTokenSource` и показывает каждый результат
+в отдельной вкладке с синхронизированной прокруткой двух панелей. Diff строится
+`DiffPlex.DiffBuilder.SideBySideDiffBuilder.Diff` с учётом пробелов и регистра;
+`DiffPiece` преобразуется в локальную модель раскраски строк; пробелы и регистр
+считаются значимыми. Это сравнение
+содержимого открытых вкладок, не файлов, повторно читаемых с диска.
+`FileDiffEngine.Compare` передаёт `Differ.Instance` и `CharacterChunker.Instance`
+в `SideBySideDiffBuilder.Diff`, получая посимвольные `DiffPiece.SubPieces` внутри
+изменённых строк. `BuildSegments` исключает пустые позиции и объединяет соседние
+символы с одинаковым состоянием в `DiffTextSegment(Text, IsChanged)`; неизменённые,
+добавленные и удалённые строки содержат один обычный фрагмент.
+`DiffLineViewModel.Segments` → attached property `DiffTextHighlight.Line`
+(`Ask.UI/Features/FileComparison/Views/DiffTextHighlight.cs`) → `TextBlock.Inlines`
+из `Run`. Callback очищает старые Inlines при смене модели, включая recycling
+виртуализированных контейнеров. Изменённые символы имеют насыщенный жёлтый фон
+и жирное начертание. `DiffPresentation` задаёт изменённым строкам с обеих сторон
+светло-жёлтый фон и маркер `~`, удалённым — красный и `-`, добавленным — зелёный
+и `+`. Палитра различий фиксирована и контрастна в обеих темах; фон обычных строк
+и пустых позиций продолжает использовать ресурсы текущей темы.
+Верхнее табло `FileCompareSelectionControl.xaml` показывает агрегаты всех результатов:
+`ComparedFilesCount`, `AddedLinesCount`, `RemovedLinesCount`, `ModifiedLinesCount`.
+`NotifyComparisonStatisticsChanged` обновляет привязки после завершения сравнения
+и очистки результатов; до первого сравнения счётчики равны нулю. Подробная
+`ComparisonSummary` доступна в подсказке карточек. Табло использует динамические
+ресурсы существующих светлой и тёмной тем и общий `FileDocumentIcon`.
+Панели результатов имеют одинаковые заголовки высотой 74 DIP с именем и путём
+документа; пути берутся из `ActiveComparison.SourceFile/TargetFile.FilePath`.
+`FileComparisonResult.Rows` объединяет одинаковые по индексу `SourceLines` и
+`TargetLines` в `DiffRowViewModel(Source, Target)`, включая пустые позиции DiffPlex.
+Конструктор проверяет равенство числа строк обеих сторон. Единственный
+`ComparisonRowsListBox` привязан к `ActiveComparison.Rows`; `DiffRowPairTemplate`
+отображает обе стороны в одной строке Grid. Высота пары определяется максимумом
+высот её ячеек, поэтому перенос текста с любой стороны сохраняет выравнивание.
+`DiffLineTemplate` использует `TextWrapping=Wrap`: переносит слова, а длинные
+фрагменты без пробелов разбивает по доступной ширине. Горизонтальная прокрутка
+отключена через `HorizontalScrollBarVisibility=Disabled`; вертикальная общая,
+отдельная синхронизация двух ScrollViewer больше не требуется.
+`CompareLinesListStyle` сохраняет виртуализацию Recycling с прокруткой в пикселях
+и тематическую вертикальную полосу прокрутки. Заголовки и фон панелей находятся
+в общем Grid; справа зарезервирована ширина общей полосы прокрутки, чтобы ширины
+левой и правой ячеек совпадали с заголовками.
+`FileCompareSelectionControl.Zoom.cs`: `CompareLinesListStyle.PreviewMouseWheel`
+→ `DiffLines_PreviewMouseWheel` → `ZoomDiffText` меняет общий `DiffFontSize`
+на 1 пункт в диапазоне 12–48, как текстовый редактор. Ctrl + колесо помечается
+обработанным; обычное колесо сохраняет прокрутку. Вместе с текстом масштабируются
+номера, маркеры и ширина их колонки. `DiffRowHeight` (22 DIP при шрифте 14)
+задаёт `LineHeight` текста и `MinHeight` контейнера/ячейки; фактическая высота пары
+увеличивается при переносе. Масштаб сохраняется при переключении результатов.
+`ComparisonTabControl` снизу правой панели переключает `ActiveComparison`,
+показывается только при нескольких результатах и рисует только заголовки вкладок.
+Общая нижняя строка Grid резервирует высоту вкладок сразу для обеих панелей.
+Ключевые файлы: `MainWindow/MainWindow.xaml`, `MainWindow/Events/UiEventsBinder.cs`,
+`MainWindow/ViewModels/FileViewModel.cs`, `MainWindow/Services/FileService.cs`,
+`Ask.UI/Features/FileComparison/Views/FileCompareSelectionControl.xaml(.cs)`;
+`Ask.UI/Ask.UI.csproj` ссылается на пакет `DiffPlex`.
+
 `MainWindow` рисует общий фон окна через тематический `EmptyBackgroundBrush`.
 Корневой `Grid`, верхняя/нижняя панели и фон полосы вкладок `MultiWindowControl` поверх него прозрачны;
 верхняя и нижняя панели прилегают к краям рабочей области: Margin=0,
@@ -3427,6 +3497,7 @@ ErrorItem → translator/runner ErrorList
 | `MainWindow` | View/shell | MainWindowProgram | top-level UI and lifecycle | [UI Architecture](#ui-architecture) |
 | `MultiEditorControl` | workspace View | UI | editors/tabs/user controls | [UI Architecture](#ui-architecture) |
 | `FileManager` | service composer | UI | workspace services | [UI Architecture](#ui-architecture) |
+| `FileCompareSelectionControl` | WPF control | Ask.UI | выбор открытых редакторов и отображение построчного diff через DiffPlex | [Сравнение файлов](#file-comparison-ui) |
 | `RunControl` | execution View | UI | launches control programs | [Execution Engine](#execution-engine) |
 | `ShowMessageModel` | shared protocol DTO | Ask.Core | хранит содержимое, статус и признаки записи; `IsMeasurement` выбирает `[НОРМА]/[БРАК]` вместо неизмерительных `[ОК]/[ERR]` без общего изменяемого состояния | [Protocols](#protocols-and-file-formats) |
 | `ProtocolUI` | View + adapter | Ask.UI | execution controller and protocol output | [Protocols](#protocols-and-file-formats) |

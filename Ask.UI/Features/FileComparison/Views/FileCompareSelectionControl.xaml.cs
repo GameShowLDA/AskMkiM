@@ -1,4 +1,9 @@
-using Ask.Core.Shared.DTO.TextEditor;
+﻿using Ask.Core.Shared.DTO.TextEditor;
+using DiffPlex.DiffBuilder;
+using DiffPlex.DiffBuilder.Model;
+using DiffPlex;
+using DiffPlex.Chunkers;
+using System.Text;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -6,13 +11,12 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 
-namespace UI.Controls.FileCompare
+namespace Ask.UI.Features.FileComparison.Views
 {
   public partial class FileCompareSelectionControl : UserControl, INotifyPropertyChanged
   {
     private readonly Func<IReadOnlyList<OpenTextEditorDescriptor>> _openFilesProvider;
     private CancellationTokenSource? _compareCancellation;
-    private bool _isSynchronizingScroll;
     private OpenTextEditorDescriptor? _selectedSourceFile;
     private FileComparisonResult? _activeComparison;
     private bool _hasEnoughFiles;
@@ -181,6 +185,26 @@ namespace UI.Controls.FileCompare
       }
     }
 
+    /// <summary>
+    /// Количество файлов, сравнённых с исходным документом.
+    /// </summary>
+    public int ComparedFilesCount => ComparisonResults.Count;
+
+    /// <summary>
+    /// Общее количество добавленных строк в результатах сравнения.
+    /// </summary>
+    public int AddedLinesCount => ComparisonResults.Sum(result => result.AddedLines);
+
+    /// <summary>
+    /// Общее количество удалённых строк в результатах сравнения.
+    /// </summary>
+    public int RemovedLinesCount => ComparisonResults.Sum(result => result.RemovedLines);
+
+    /// <summary>
+    /// Общее количество изменённых строк в результатах сравнения.
+    /// </summary>
+    public int ModifiedLinesCount => ComparisonResults.Sum(result => result.ModifiedLines);
+
     public void RefreshOpenFiles()
     {
       if (IsComparing)
@@ -271,7 +295,8 @@ namespace UI.Controls.FileCompare
 
         ActiveComparison = ComparisonResults.FirstOrDefault();
         ComparisonSummary = BuildComparisonSummary(source, results);
-        StateText = $"Сравнение завершено. Файлов справа: {ComparisonResults.Count}.";
+        NotifyComparisonStatisticsChanged();
+        StateText = "Сравнение завершено.";
         OnPropertyChanged(nameof(SelectionPanelVisibility));
         OnPropertyChanged(nameof(ResultsPanelVisibility));
       }
@@ -377,8 +402,20 @@ namespace UI.Controls.FileCompare
       ComparisonResults.Clear();
       ActiveComparison = null;
       ComparisonSummary = string.Empty;
+      NotifyComparisonStatisticsChanged();
       OnPropertyChanged(nameof(SelectionPanelVisibility));
       OnPropertyChanged(nameof(ResultsPanelVisibility));
+    }
+
+    /// <summary>
+    /// Обновляет привязки счётчиков после замены результатов сравнения.
+    /// </summary>
+    private void NotifyComparisonStatisticsChanged()
+    {
+      OnPropertyChanged(nameof(ComparedFilesCount));
+      OnPropertyChanged(nameof(AddedLinesCount));
+      OnPropertyChanged(nameof(RemovedLinesCount));
+      OnPropertyChanged(nameof(ModifiedLinesCount));
     }
 
     private static string BuildComparisonSummary(OpenTextEditorDescriptor source, IReadOnlyCollection<FileComparisonResult> results)
@@ -390,112 +427,6 @@ namespace UI.Controls.FileCompare
 
       return $"Исходный файл: {source.DisplayName}. Сравнено файлов: {results.Count}. "
         + $"Файлов с изменениями: {changedFiles}. Добавлено строк: {added}, удалено: {removed}, изменено: {modified}.";
-    }
-
-    private void SourceLinesListBox_ScrollChanged(object sender, ScrollChangedEventArgs e)
-    {
-      if (_isSynchronizingScroll || (e.VerticalChange == 0 && e.HorizontalChange == 0))
-      {
-        return;
-      }
-
-      SyncScroll(SourceLinesListBox, GetVisibleTargetLinesListBox());
-    }
-
-    private void TargetLinesListBox_ScrollChanged(object sender, ScrollChangedEventArgs e)
-    {
-      if (_isSynchronizingScroll || (e.VerticalChange == 0 && e.HorizontalChange == 0))
-      {
-        return;
-      }
-
-      if (sender is not ListBox targetListBox)
-      {
-        return;
-      }
-
-      SyncScroll(targetListBox, SourceLinesListBox);
-    }
-
-    private void SyncScroll(DependencyObject source, DependencyObject? target)
-    {
-      if (target == null)
-      {
-        return;
-      }
-
-      var sourceViewer = FindScrollViewer(source);
-      var targetViewer = FindScrollViewer(target);
-      if (sourceViewer == null || targetViewer == null)
-      {
-        return;
-      }
-
-      _isSynchronizingScroll = true;
-      try
-      {
-        targetViewer.ScrollToVerticalOffset(sourceViewer.VerticalOffset);
-        targetViewer.ScrollToHorizontalOffset(sourceViewer.HorizontalOffset);
-      }
-      finally
-      {
-        _isSynchronizingScroll = false;
-      }
-    }
-
-    private ListBox? GetVisibleTargetLinesListBox()
-    {
-      return FindVisualChildren<ListBox>(ComparisonTabControl)
-        .FirstOrDefault(listBox => string.Equals(listBox.Name, "TargetLinesListBox", StringComparison.Ordinal) && listBox.IsVisible);
-    }
-
-    private static ScrollViewer? FindScrollViewer(DependencyObject? root)
-    {
-      if (root == null)
-      {
-        return null;
-      }
-
-      if (root is ScrollViewer viewer)
-      {
-        return viewer;
-      }
-
-      for (var childIndex = 0; childIndex < VisualTreeHelper.GetChildrenCount(root); childIndex++)
-      {
-        var child = VisualTreeHelper.GetChild(root, childIndex);
-        var result = FindScrollViewer(child);
-        if (result != null)
-        {
-          return result;
-        }
-      }
-
-      return null;
-    }
-
-    private static IEnumerable<T> FindVisualChildren<T>(DependencyObject? root)
-      where T : DependencyObject
-    {
-      if (root == null)
-      {
-        yield break;
-      }
-
-      var count = VisualTreeHelper.GetChildrenCount(root);
-      for (var childIndex = 0; childIndex < count; childIndex++)
-      {
-        var child = VisualTreeHelper.GetChild(root, childIndex);
-        if (child is T result)
-        {
-          yield return result;
-        }
-
-        foreach (var nested in FindVisualChildren<T>(child))
-        {
-          yield return nested;
-        }
-      }
     }
 
     private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
@@ -536,16 +467,30 @@ namespace UI.Controls.FileCompare
 
   public sealed class FileComparisonResult
   {
+    /// <summary>
+    /// Создаёт результат сравнения с общими парами строк для отображения.
+    /// </summary>
+    /// <param name="sourceFile">Исходный документ.</param>
+    /// <param name="targetFile">Сравниваемый документ.</param>
+    /// <param name="sourceLines">Выровненные строки исходного документа.</param>
+    /// <param name="targetLines">Выровненные строки сравниваемого документа.</param>
+    /// <exception cref="ArgumentException">Количество строк в панелях не совпадает.</exception>
     public FileComparisonResult(
       OpenTextEditorDescriptor sourceFile,
       OpenTextEditorDescriptor targetFile,
       IReadOnlyList<DiffLineViewModel> sourceLines,
       IReadOnlyList<DiffLineViewModel> targetLines)
     {
+      if (sourceLines.Count != targetLines.Count)
+      {
+        throw new ArgumentException("Количество выровненных строк должно совпадать в обеих панелях.", nameof(targetLines));
+      }
+
       SourceFile = sourceFile;
       TargetFile = targetFile;
       SourceLines = sourceLines;
       TargetLines = targetLines;
+      Rows = sourceLines.Select((line, index) => new DiffRowViewModel(line, targetLines[index])).ToArray();
       AddedLines = targetLines.Count(line => line.Kind == DiffLineKind.Added);
       RemovedLines = sourceLines.Count(line => line.Kind == DiffLineKind.Removed);
       ModifiedLines = Math.Max(
@@ -567,6 +512,11 @@ namespace UI.Controls.FileCompare
 
     public IReadOnlyList<DiffLineViewModel> TargetLines { get; }
 
+    /// <summary>
+    /// Пары строк для совместного отображения с переносом текста.
+    /// </summary>
+    public IReadOnlyList<DiffRowViewModel> Rows { get; }
+
     public int AddedLines { get; }
 
     public int RemovedLines { get; }
@@ -576,9 +526,46 @@ namespace UI.Controls.FileCompare
     public bool HasChanges => AddedLines > 0 || RemovedLines > 0 || ModifiedLines > 0;
   }
 
+  /// <summary>
+  /// Объединяет выровненные строки двух документов в одну визуальную строку сравнения.
+  /// </summary>
+  public sealed class DiffRowViewModel
+  {
+    /// <summary>
+    /// Создаёт пару строк исходного и сравниваемого документов.
+    /// </summary>
+    /// <param name="source">Строка исходного документа или пустая позиция.</param>
+    /// <param name="target">Строка сравниваемого документа или пустая позиция.</param>
+    public DiffRowViewModel(DiffLineViewModel source, DiffLineViewModel target)
+    {
+      Source = source;
+      Target = target;
+    }
+
+    /// <summary>
+    /// Строка исходного документа или пустая позиция.
+    /// </summary>
+    public DiffLineViewModel Source { get; }
+
+    /// <summary>
+    /// Строка сравниваемого документа или пустая позиция.
+    /// </summary>
+    public DiffLineViewModel Target { get; }
+  }
+
   public sealed class DiffLineViewModel
   {
-    public DiffLineViewModel(DiffLineKind kind, DiffPaneSide paneSide, int displayLineNumber, int? originalLineNumber, string text)
+    /// <summary>
+    /// Создаёт строку сравнения с раскраской и посимвольными фрагментами.
+    /// </summary>
+    /// <param name="kind">Тип изменения строки.</param>
+    /// <param name="paneSide">Сторона сравнения.</param>
+    /// <param name="displayLineNumber">Номер позиции в выровненном сравнении.</param>
+    /// <param name="originalLineNumber">Номер строки документа или пустая позиция.</param>
+    /// <param name="text">Полный текст строки.</param>
+    /// <param name="segments">Фрагменты с признаками изменения; при отсутствии весь текст считается обычным.</param>
+    public DiffLineViewModel(DiffLineKind kind, DiffPaneSide paneSide, int displayLineNumber, int? originalLineNumber, string text,
+      IReadOnlyList<DiffTextSegment>? segments = null)
     {
       Kind = kind;
       PaneSide = paneSide;
@@ -586,6 +573,7 @@ namespace UI.Controls.FileCompare
       OriginalLineNumber = originalLineNumber;
       LineNumberText = originalLineNumber?.ToString() ?? string.Empty;
       Text = text;
+      Segments = segments ?? new[] { new DiffTextSegment(text, false) };
       Prefix = DiffPresentation.GetPrefix(kind, paneSide);
       BackgroundBrush = DiffPresentation.GetBackground(kind, paneSide);
       ForegroundBrush = DiffPresentation.GetForeground(kind, paneSide);
@@ -605,6 +593,11 @@ namespace UI.Controls.FileCompare
     public string LineNumberText { get; }
 
     public string Text { get; }
+
+    /// <summary>
+    /// Последовательные фрагменты текста с признаком изменённых символов.
+    /// </summary>
+    public IReadOnlyList<DiffTextSegment> Segments { get; }
 
     public Brush BackgroundBrush { get; }
 
@@ -630,197 +623,99 @@ namespace UI.Controls.FileCompare
 
   internal static class FileDiffEngine
   {
-    private const long MaxDynamicProgrammingCells = 12_000_000;
-
     public static FileComparisonResult Compare(
       OpenTextEditorDescriptor sourceFile,
       OpenTextEditorDescriptor targetFile,
       CancellationToken cancellationToken)
     {
-      var sourceLines = SplitLines(sourceFile.TextContent);
-      var targetLines = SplitLines(targetFile.TextContent);
+      cancellationToken.ThrowIfCancellationRequested();
+      var diff = SideBySideDiffBuilder.Diff(
+        Differ.Instance,
+        sourceFile.TextContent,
+        targetFile.TextContent,
+        ignoreWhiteSpace: false,
+        ignoreCase: false,
+        wordChunker: CharacterChunker.Instance);
 
-      var sourceViewLines = new List<DiffLineViewModel>();
-      var targetViewLines = new List<DiffLineViewModel>();
-      var maxLineCount = Math.Max(sourceLines.Count, targetLines.Count);
-      for (int index = 0; index < maxLineCount; index++)
+      var sourceViewLines = new List<DiffLineViewModel>(diff.OldText.Lines.Count);
+      var targetViewLines = new List<DiffLineViewModel>(diff.NewText.Lines.Count);
+      for (int index = 0; index < diff.OldText.Lines.Count; index++)
       {
         cancellationToken.ThrowIfCancellationRequested();
+        var sourceLine = diff.OldText.Lines[index];
+        var targetLine = diff.NewText.Lines[index];
 
-        var hasSource = index < sourceLines.Count;
-        var hasTarget = index < targetLines.Count;
-        var sourceText = hasSource ? sourceLines[index] : string.Empty;
-        var targetText = hasTarget ? targetLines[index] : string.Empty;
-        var lineNumber = index + 1;
-
-        if (hasSource)
-        {
-          var sourceKind = !hasTarget
-            ? DiffLineKind.Removed
-            : sourceText == targetText
-              ? DiffLineKind.Unchanged
-              : DiffLineKind.Modified;
-
-          sourceViewLines.Add(new DiffLineViewModel(
-            sourceKind,
-            DiffPaneSide.Source,
-            lineNumber,
-            lineNumber,
-            sourceText));
-        }
-
-        if (hasTarget)
-        {
-          var targetKind = !hasSource
-            ? DiffLineKind.Added
-            : sourceText == targetText
-              ? DiffLineKind.Unchanged
-              : DiffLineKind.Modified;
-
-          targetViewLines.Add(new DiffLineViewModel(
-            targetKind,
-            DiffPaneSide.Target,
-            lineNumber,
-            lineNumber,
-            targetText));
-        }
+        sourceViewLines.Add(CreateViewLine(sourceLine, DiffPaneSide.Source, index + 1));
+        targetViewLines.Add(CreateViewLine(targetLine, DiffPaneSide.Target, index + 1));
       }
 
       return new FileComparisonResult(sourceFile, targetFile, sourceViewLines, targetViewLines);
     }
 
-    private static List<RawDiffLine> BuildOperations(
-      IReadOnlyList<string> sourceLines,
-      IReadOnlyList<string> targetLines,
-      CancellationToken cancellationToken)
+    private static DiffLineViewModel CreateViewLine(DiffPiece piece, DiffPaneSide paneSide, int displayLineNumber)
     {
-      var cellCount = (long)(sourceLines.Count + 1) * (targetLines.Count + 1);
-      if (cellCount > MaxDynamicProgrammingCells)
+      var kind = piece.Type switch
       {
-        return BuildIndexBasedOperations(sourceLines, targetLines, cancellationToken);
-      }
+        ChangeType.Unchanged => DiffLineKind.Unchanged,
+        ChangeType.Deleted => DiffLineKind.Removed,
+        ChangeType.Inserted => DiffLineKind.Added,
+        ChangeType.Modified => DiffLineKind.Modified,
+        ChangeType.Imaginary => DiffLineKind.Empty,
+        _ => throw new ArgumentOutOfRangeException(nameof(piece), piece.Type, "Неизвестный тип строки diff."),
+      };
 
-      return BuildLcsOperations(sourceLines, targetLines, cancellationToken);
+      return new DiffLineViewModel(kind, paneSide, displayLineNumber, piece.Position, piece.Text ?? string.Empty,
+        kind == DiffLineKind.Modified ? BuildSegments(piece) : null);
     }
 
-    private static List<RawDiffLine> BuildLcsOperations(
-      IReadOnlyList<string> sourceLines,
-      IReadOnlyList<string> targetLines,
-      CancellationToken cancellationToken)
+    /// <summary>
+    /// Объединяет соседние символы с одинаковым состоянием для компактного отображения.
+    /// </summary>
+    /// <param name="piece">Изменённая строка с посимвольными различиями DiffPlex.</param>
+    /// <returns>Фрагменты исходного текста без пустых позиций выравнивания.</returns>
+    private static IReadOnlyList<DiffTextSegment> BuildSegments(DiffPiece piece)
     {
-      var oldCount = sourceLines.Count;
-      var newCount = targetLines.Count;
-      var lcs = new int[oldCount + 1, newCount + 1];
-
-      for (int oldIndex = oldCount - 1; oldIndex >= 0; oldIndex--)
+      var segments = new List<DiffTextSegment>();
+      var text = new StringBuilder();
+      bool changed = false;
+      foreach (var part in piece.SubPieces)
       {
-        cancellationToken.ThrowIfCancellationRequested();
-        for (int newIndex = newCount - 1; newIndex >= 0; newIndex--)
+        if (part.Type == ChangeType.Imaginary || string.IsNullOrEmpty(part.Text))
         {
-          lcs[oldIndex, newIndex] = sourceLines[oldIndex] == targetLines[newIndex]
-            ? lcs[oldIndex + 1, newIndex + 1] + 1
-            : Math.Max(lcs[oldIndex + 1, newIndex], lcs[oldIndex, newIndex + 1]);
-        }
-      }
-
-      var result = new List<RawDiffLine>();
-      var oldCursor = 0;
-      var newCursor = 0;
-      while (oldCursor < oldCount && newCursor < newCount)
-      {
-        cancellationToken.ThrowIfCancellationRequested();
-
-        if (sourceLines[oldCursor] == targetLines[newCursor])
-        {
-          result.Add(new RawDiffLine(RawDiffKind.Equal, sourceLines[oldCursor], oldCursor + 1, newCursor + 1));
-          oldCursor++;
-          newCursor++;
-        }
-        else if (lcs[oldCursor + 1, newCursor] >= lcs[oldCursor, newCursor + 1])
-        {
-          result.Add(new RawDiffLine(RawDiffKind.Delete, sourceLines[oldCursor], oldCursor + 1, null));
-          oldCursor++;
-        }
-        else
-        {
-          result.Add(new RawDiffLine(RawDiffKind.Insert, targetLines[newCursor], null, newCursor + 1));
-          newCursor++;
-        }
-      }
-
-      while (oldCursor < oldCount)
-      {
-        result.Add(new RawDiffLine(RawDiffKind.Delete, sourceLines[oldCursor], oldCursor + 1, null));
-        oldCursor++;
-      }
-
-      while (newCursor < newCount)
-      {
-        result.Add(new RawDiffLine(RawDiffKind.Insert, targetLines[newCursor], null, newCursor + 1));
-        newCursor++;
-      }
-
-      return result;
-    }
-
-    private static List<RawDiffLine> BuildIndexBasedOperations(
-      IReadOnlyList<string> sourceLines,
-      IReadOnlyList<string> targetLines,
-      CancellationToken cancellationToken)
-    {
-      var result = new List<RawDiffLine>();
-      var commonLength = Math.Min(sourceLines.Count, targetLines.Count);
-
-      for (int index = 0; index < commonLength; index++)
-      {
-        cancellationToken.ThrowIfCancellationRequested();
-        if (sourceLines[index] == targetLines[index])
-        {
-          result.Add(new RawDiffLine(RawDiffKind.Equal, sourceLines[index], index + 1, index + 1));
           continue;
         }
 
-        result.Add(new RawDiffLine(RawDiffKind.Delete, sourceLines[index], index + 1, null));
-        result.Add(new RawDiffLine(RawDiffKind.Insert, targetLines[index], null, index + 1));
+        bool partChanged = part.Type != ChangeType.Unchanged;
+        if (text.Length > 0 && changed != partChanged)
+        {
+          segments.Add(new DiffTextSegment(text.ToString(), changed));
+          text.Clear();
+        }
+
+        changed = partChanged;
+        text.Append(part.Text);
       }
 
-      for (int index = commonLength; index < sourceLines.Count; index++)
+      if (text.Length > 0)
       {
-        result.Add(new RawDiffLine(RawDiffKind.Delete, sourceLines[index], index + 1, null));
+        segments.Add(new DiffTextSegment(text.ToString(), changed));
       }
 
-      for (int index = commonLength; index < targetLines.Count; index++)
-      {
-        result.Add(new RawDiffLine(RawDiffKind.Insert, targetLines[index], null, index + 1));
-      }
-
-      return result;
-    }
-
-    private static IReadOnlyList<string> SplitLines(string text)
-    {
-      return (text ?? string.Empty)
-        .Replace("\r\n", "\n")
-        .Replace('\r', '\n')
-        .Split('\n');
+      return segments;
     }
   }
-
-  internal sealed record RawDiffLine(RawDiffKind Kind, string Text, int? OldLineNumber, int? NewLineNumber);
-
-  internal enum RawDiffKind
-  {
-    Equal,
-    Delete,
-    Insert
-  }
-
   internal static class DiffBrushes
   {
     public static readonly Brush Border = CreateBrush(218, 225, 233);
     private static readonly Brush UnchangedBackground = Brushes.Transparent;
     private static readonly Brush PresentBackground = CreateBrush(220, 252, 231);
     private static readonly Brush MissingBackground = CreateBrush(254, 226, 226);
+    private static readonly Brush ModifiedBackground = CreateBrush(254, 243, 199);
+    private static readonly Brush ModifiedForeground = CreateBrush(146, 64, 14);
+    /// <summary>
+    /// Насыщенный жёлтый фон изменённых символов внутри строки.
+    /// </summary>
+    internal static readonly Brush ChangedCharacterBackground = CreateBrush(251, 191, 36);
     private static readonly Brush EmptyFallbackBackground = CreateBrush(235, 240, 246);
     private static readonly Brush DefaultForeground = CreateBrush(30, 41, 59);
     private static readonly Brush PresentForeground = CreateBrush(22, 101, 52);
@@ -829,6 +724,16 @@ namespace UI.Controls.FileCompare
     public static Brush GetPresentBackground() => PresentBackground;
 
     public static Brush GetMissingBackground() => MissingBackground;
+
+    /// <summary>
+    /// Возвращает жёлтый фон изменённой строки.
+    /// </summary>
+    public static Brush GetModifiedBackground() => ModifiedBackground;
+
+    /// <summary>
+    /// Возвращает цвет текста изменённой строки.
+    /// </summary>
+    public static Brush GetModifiedForeground() => ModifiedForeground;
 
     public static Brush GetUnchangedBackground() => UnchangedBackground;
 
@@ -872,8 +777,7 @@ namespace UI.Controls.FileCompare
       DiffLineKind.Empty => string.Empty,
       DiffLineKind.Added => "+",
       DiffLineKind.Removed => "-",
-      DiffLineKind.Modified when paneSide == DiffPaneSide.Source => "-",
-      DiffLineKind.Modified => "+",
+      DiffLineKind.Modified => "~",
       _ => string.Empty,
     };
 
@@ -893,8 +797,7 @@ namespace UI.Controls.FileCompare
       {
         DiffLineKind.Added => DiffBrushes.GetPresentBackground(),
         DiffLineKind.Removed => DiffBrushes.GetMissingBackground(),
-        DiffLineKind.Modified when paneSide == DiffPaneSide.Source => DiffBrushes.GetMissingBackground(),
-        DiffLineKind.Modified => DiffBrushes.GetPresentBackground(),
+        DiffLineKind.Modified => DiffBrushes.GetModifiedBackground(),
         _ => DiffBrushes.GetUnchangedBackground(),
       };
     }
@@ -915,8 +818,7 @@ namespace UI.Controls.FileCompare
       {
         DiffLineKind.Added => DiffBrushes.GetPresentForeground(),
         DiffLineKind.Removed => DiffBrushes.GetMissingForeground(),
-        DiffLineKind.Modified when paneSide == DiffPaneSide.Source => DiffBrushes.GetMissingForeground(),
-        DiffLineKind.Modified => DiffBrushes.GetPresentForeground(),
+        DiffLineKind.Modified => DiffBrushes.GetModifiedForeground(),
         _ => DiffBrushes.GetThemeForegroundOrDefault(),
       };
     }
