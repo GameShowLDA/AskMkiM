@@ -58,7 +58,7 @@ public partial class SearchPanelWindow
       _results = rows;
       _resultsPage = 0;
       ResultsPanel.Visibility = ResultsBody.Visibility = Visibility.Visible;
-      ResultsChevron.Text = "⌃";
+      CollapseResultsButton.IsArrowUp = true;
       int fileCount = rows is SearchPanelResultCollection collection ? collection.DocumentCount : rows.Select(row => row.Document.Id).Distinct().Count();
       ResultsSummary.Text = $"{rows.Count} совпадений в {fileCount} файлах";
       UpdateShellCorners();
@@ -118,10 +118,17 @@ public partial class SearchPanelWindow
   private void UpdateShellCorners() => PanelShell.CornerRadius = new CornerRadius(
     SettingsPanel.Visibility == Visibility.Visible || ResultsPanel.Visibility == Visibility.Visible ? 20 : 24);
 
+  private void ResultsViewport_SizeChanged(object sender, SizeChangedEventArgs e)
+  {
+    // Border.ClipToBounds clips a rectangle, not its rounded corners.
+    ResultsViewport.Clip = new System.Windows.Media.RectangleGeometry(
+      new Rect(0, 0, e.NewSize.Width, e.NewSize.Height), 5, 5);
+  }
+
   private void ResultsGrid_SizeChanged(object sender, SizeChangedEventArgs e)
   {
     if (e.NewSize.Width > 200 && ResultsGrid.Columns.Count == 3)
-      ResultsGrid.Columns[2].Width = new DataGridLength(Math.Max(40, e.NewSize.Width - 136 - 54 - 2));
+      ResultsGrid.Columns[2].Width = new DataGridLength(Math.Max(40, e.NewSize.Width - 136 - 54));
   }
 
   private void ResultsGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -151,7 +158,7 @@ public partial class SearchPanelWindow
   {
     bool collapse = ResultsBody.Visibility == Visibility.Visible;
     ResultsBody.Visibility = collapse ? Visibility.Collapsed : Visibility.Visible;
-    ResultsChevron.Text = collapse ? "⌄" : "⌃";
+    CollapseResultsButton.IsArrowUp = !collapse;
     CollapseResultsButton.ToolTip = collapse ? "Развернуть результаты" : "Свернуть результаты";
   }
 }

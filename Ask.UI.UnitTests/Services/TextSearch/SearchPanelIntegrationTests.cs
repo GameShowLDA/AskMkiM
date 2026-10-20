@@ -194,6 +194,14 @@ public sealed class SearchPanelIntegrationTests
       Assert.Contains("18", Find<TextBlock>(panel, "ResultsSummary").Text);
       Assert.Contains("4", Find<TextBlock>(panel, "ResultsSummary").Text);
       Assert.True(Find<DataGrid>(panel, "ResultsGrid").Columns[2].ActualWidth > 200);
+      var resultsGrid = Find<DataGrid>(panel, "ResultsGrid");
+      Assert.Equal(DataGridGridLinesVisibility.None, resultsGrid.GridLinesVisibility);
+      Assert.InRange(Math.Abs(resultsGrid.Columns.Sum(column => column.ActualWidth) - resultsGrid.ActualWidth), 0, 1);
+      var viewport = Find<Grid>(panel, "ResultsViewport");
+      var roundedClip = Assert.IsType<System.Windows.Media.RectangleGeometry>(viewport.Clip);
+      Assert.Equal(5, roundedClip.RadiusX);
+      Assert.Equal(viewport.ActualWidth, roundedClip.Rect.Width);
+      Assert.Equal(viewport.ActualHeight, roundedClip.Rect.Height);
       double resultsHeight = panel.ActualHeight;
       Assert.True(resultsHeight > 200);
       Click(panel, "NextResultsPage");
@@ -371,8 +379,12 @@ public sealed class SearchPanelIntegrationTests
   });
 
   private static T Find<T>(SearchPanelWindow panel, string name) where T : class => (T)panel.FindName(name);
-  private static void Click(SearchPanelWindow panel, string name) => Find<Button>(panel, name)
-    .RaiseEvent(new RoutedEventArgs(ButtonBase.ClickEvent));
+  private static void Click(SearchPanelWindow panel, string name)
+  {
+    var control = Find<UIElement>(panel, name);
+    control.RaiseEvent(new RoutedEventArgs(control is Ask.UI.Shared.Components.Icons.ArrowButton
+      ? Ask.UI.Shared.Components.Icons.ArrowButton.ClickEvent : ButtonBase.ClickEvent));
+  }
 
   private static async Task WaitUntil(Func<bool> condition)
   {
