@@ -38,7 +38,7 @@ Size/Foreground и анимации общей кнопки; лицензия с
 | Диагностика текста при вводе | `Ask.UI/Controls/TextEditorControl/Diagnostics/LiveDiagnosticsController.cs` | `Ask.Engine/ControlCommandAnalyser/CommandTranslationManager.Diagnostics.cs`, `SourceDiagnostic.cs`, `Ask.UI/Controls/TextEditorControl/Diagnostics/DiagnosticUnderlineRenderer.cs`, оба `TextEditorUI.xaml.cs` |
 | Исполнение программы контроля | `UI/Controls/Runner/RunControl.xaml.cs` | `Ask.UI/Features/ProtocolNew/Execution/ActionExecutor.cs`, `Ask.Engine/ControlCommandExecutor/Execution/CommandExecutionManager.cs` |
 | Алгоритм конкретной команды | `Ask.Engine/ControlCommandExecutor/Executors/` | `Ask.Engine/ControlCommandExecutor/BaseStrategies/`, `Ask.Engine/ControlCommandExecutor/Execution/EquipmentService.cs` |
-| Пауза, шаг, остановка, переход к команде | `Ask.UI/Features/ProtocolNew/Execution/ActionExecutor.cs` | `Ask.Core/Services/App/StepControlManager.cs`, `Ask.Engine/ControlCommandExecutor/Execution/CommandExecutionManager.cs`, `Ask.Engine/ControlCommandExecutor/Execution/BreakpointHandler.cs`, `Ask.Engine/ControlCommandExecutor/Execution/CommandJumpService.cs` |
+| Пауза, шаг, остановка, переход к выбранной или следующей команде | `Ask.UI/Features/ProtocolNew/Execution/ActionExecutor.cs` | `Ask.Core/Services/App/StepControlManager.cs`, `Ask.Engine/ControlCommandExecutor/Execution/CommandExecutionManager.cs`, `Ask.Engine/ControlCommandExecutor/Execution/BreakpointHandler.cs`, `Ask.Engine/ControlCommandExecutor/Execution/CommandJumpService.cs` |
 | Горячие клавиши и диагностика кнопок выполнения | `Ask.UI/Features/ProtocolNew/Hotkeys/ProtocolHotkeyController.cs`, `MainWindow/HotkeyBindings/MenuHotkeyBinder.cs` | `Ask.UI/Controls/ProtocolNew/ProtocolUI.ButtonManager.cs`, `Ask.LogLib/LoggerUtility.cs`; отдельный `logs/yyyy-MM-dd/input.log` и сводный `all.log` |
 | Холостой режим и симуляция ошибок | `Ask.Core/Services/Config/AppSettings/ExecutionConfig.cs`, `IdleMeasurementErrorSimulator.cs`, `IdleHardwareErrorSimulator.cs` | `UI/Controls/Settings/Execution/ExecutionControl.xaml`, целевой manager/adapter в `Ask.Device.*`, конкретный executor/strategy |
 | Ошибка оборудования и интерактивный повтор | `Ask.Core/Services/UI/UserActionHelper.cs` | `Ask.Core/Services/UI/EquipmentExecutionContext.cs`, `Ask.UI/Controls/ProtocolNew/ProtocolUI.cs`, целевой adapter/manager/transport |
@@ -818,6 +818,15 @@ CommandExecutionManager.ExecuteAllCoreAsync loop
 → CompleteCommandAsync(hasErrors) только для принятой попытки
 → для `КЦ` — `ICommandCompletionHandler.OnCommandCompletedAsync`; окно ввода реквизитов
   откладывается в `CommandExecutionManager.AfterEquipmentResetDelegate`
+→ кнопка следующей команды видна только вместе с «Продолжить» на паузе
+  (`Visibility` привязана к `ContinueButtonTop`): `RequestNextCommandAsync`
+  задаёт `_pendingJumpCommand` следующей командой; `IExecutionCommandJumpGate.InterruptCurrentCommand`
+  снимает паузу и пошаговый режим, сигнализирует прерывание в ближайшем execution checkpoint;
+  `UserActionHelper` пропускает `CommandJumpRequestedException` без преобразования в аппаратную ошибку;
+  обработчик перехода переиспользует `CommandJumpService.PrepareAsync`
+  (сообщение о переходе и общий сброс оборудования)
+  → только для кнопки следующей команды: `PauseBeforeNextCommandAsync` → `ProtocolUI.PauseAsync`;
+    следующая команда выделена в редакторе, её исполнитель запускается после действия пользователя
 → apply JumpToCommandNumber for УП
 ```
 
@@ -2669,6 +2678,9 @@ Renderer выбирает индексированные диапазоны ви
 с визуальными элементами (включая прикреплённые ROOT-логи), `_itemGroups` — с владельцами-командами.
 Кнопки справа и F8/Shift+F8 вызывают `NavigateToOverviewError → NavigateToErrorOverviewLine`
 с раскрытием группы и `ScrollIntoView`; активная ошибка сохраняется ссылкой на сообщение.
+Ручной переход по метке, дорожке, внешней полосе прокрутки или `MoveToLineAsync`
+сбрасывает `_followTail` до изменения списка/позиции: пересчёт высоты виртуализированных
+строк не должен одновременно запускать автопрокрутку в конец и вытеснять выбранную команду.
 Панель показывает счётчик, активный маркер и тематические подсказки.
 `GetOverviewSeverity` добавляет синие (`DodgerBlue`, `Information`)
 маркеры для всех `Status.Command` — заголовков групп протокола, включая `ПИ/ПИ1`.

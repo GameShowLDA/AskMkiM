@@ -340,6 +340,23 @@ namespace Ask.UI.Controls.ProtocolNew
       ActionExecutor.InterruptPauseForCommandJump();
 
     /// <inheritdoc />
+    void IExecutionCommandJumpGate.InterruptCurrentCommand()
+    {
+      bool wasAtBreakpoint = StepControlManager.IsBreakpointStepModeActive;
+      ActionExecutor.InterruptCurrentCommand();
+      if (wasAtBreakpoint)
+      {
+        ExecutionEventAdapter.ExecutionControlEventAdapter.Raise(ExecutionControlButton.Run);
+      }
+
+      _userActionTcs?.TrySetResult(Ask.Core.Shared.Metadata.Enums.UiEnums.UserAction.Continue);
+      ShowOnlyStopAndFinishButtons(false);
+    }
+
+    /// <inheritdoc />
+    Task IExecutionCommandJumpGate.PauseBeforeNextCommandAsync() => PauseAsync();
+
+    /// <inheritdoc />
     void IProtocolHotkeyContext.NotifyOtherKey(object sender, KeyEventArgs e) =>
       AnotherKeyPressed?.Invoke(sender, e);
 
@@ -369,6 +386,8 @@ namespace Ask.UI.Controls.ProtocolNew
 
     private void CommandJumpButtonTop_Click(object sender, RoutedEventArgs e) => RequestCommandJump();
 
+    private void SkipCommandButtonTop_Click(object sender, RoutedEventArgs e) => RequestNextCommand();
+
     private async void RequestCommandJump()
     {
       if (StepControlManager.IsBreakpointStepModeActive && StepControlManager.BreakpointCommandInfo != null)
@@ -384,6 +403,18 @@ namespace Ask.UI.Controls.ProtocolNew
       catch (Exception exception)
       {
         LogException("Ошибка перехода к выбранной команде", exception);
+      }
+    }
+
+    private async void RequestNextCommand()
+    {
+      try
+      {
+        await CommandExecutionManager.RequestNextCommandAsync();
+      }
+      catch (Exception exception)
+      {
+        LogException("Ошибка перехода к следующей команде", exception);
       }
     }
 

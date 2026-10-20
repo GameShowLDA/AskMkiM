@@ -52,6 +52,7 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
     /// Команда, выбранная для отложенного перехода.
     /// </summary>
     private BaseCommandModel? _pendingJumpCommand;
+    private bool _pauseAfterCommandJump;
 
     /// <summary>
     /// Реестр исполнителей команд, обеспечивающий получение исполнителя по мнемонике команды.
@@ -166,6 +167,21 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
       return manager?.RequestCommandJumpAsync() ?? Task.CompletedTask;
     }
 
+    /// <summary>
+    /// Прерывает текущую команду программы контроля и продолжает со следующей.
+    /// </summary>
+    /// <returns>Задача обработки перехода к следующей команде.</returns>
+    public static Task RequestNextCommandAsync()
+    {
+      CommandExecutionManager? manager;
+      lock (ActiveManagerSync)
+      {
+        manager = _activeManager;
+      }
+
+      return manager?.RequestNextCommandCoreAsync() ?? Task.CompletedTask;
+    }
+
     public CommandExecutionManager(
      IUserInteractionService console,
      ITextEditorAdapter textEditor,
@@ -204,6 +220,7 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
         {
           _currentCommand = null;
           _pendingJumpCommand = null;
+          _pauseAfterCommandJump = false;
         }
 
         lock (ActiveManagerSync)
@@ -241,6 +258,8 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
           {
             break;
           }
+
+          await _console.WaitIfPausedAsync();
 
           if (!ReferenceEquals(selected, command))
           {
@@ -336,7 +355,7 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
           {
             _attemptErrors = null;
           }
-          var targetCommand = TakePendingJumpCommand();
+          var targetCommand = TakePendingJumpCommand(out bool pauseAfterJump);
           if (targetCommand == null)
           {
             throw;
@@ -354,6 +373,11 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
           if (targetCommand.FormattedStartLineNumber >= 0)
           {
             _textEditor.SetActiveLine(targetCommand.FormattedStartLineNumber);
+          }
+
+          if (pauseAfterJump && _console is IExecutionCommandJumpGate commandJumpGate)
+          {
+            await commandJumpGate.PauseBeforeNextCommandAsync().ConfigureAwait(false);
           }
 
           continue;
@@ -478,6 +502,47 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
       }
     }
 
+    private async Task RequestNextCommandCoreAsync()
+    {
+      if (_console is not IExecutionCommandJumpGate commandJumpGate ||
+          _console.GetCancellationToken().IsCancellationRequested)
+      {
+        return;
+      }
+
+      await _commandJumpSemaphore.WaitAsync().ConfigureAwait(false);
+      try
+      {
+        BaseCommandModel? nextCommand;
+        lock (_commandStateSync)
+        {
+          if (_pendingJumpCommand != null)
+          {
+            return;
+          }
+
+          nextCommand = _currentCommand == null ? null : GetNextCommand(_currentCommand);
+        }
+
+        if (nextCommand == null || _console.GetCancellationToken().IsCancellationRequested)
+        {
+          return;
+        }
+
+        lock (_commandStateSync)
+        {
+          _pendingJumpCommand = nextCommand;
+          _pauseAfterCommandJump = true;
+        }
+
+        commandJumpGate.InterruptCurrentCommand();
+      }
+      finally
+      {
+        _commandJumpSemaphore.Release();
+      }
+    }
+
     private void SetCurrentCommand(BaseCommandModel command)
     {
       lock (_commandStateSync)
@@ -486,12 +551,14 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
       }
     }
 
-    private BaseCommandModel? TakePendingJumpCommand()
+    private BaseCommandModel? TakePendingJumpCommand(out bool pauseAfterJump)
     {
       lock (_commandStateSync)
       {
         var command = _pendingJumpCommand;
+        pauseAfterJump = _pauseAfterCommandJump;
         _pendingJumpCommand = null;
+        _pauseAfterCommandJump = false;
         return command;
       }
     }

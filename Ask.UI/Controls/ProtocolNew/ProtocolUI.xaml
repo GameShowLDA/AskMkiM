@@ -255,9 +255,10 @@
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <Border Grid.ColumnSpan="8"
+            <Border Grid.ColumnSpan="9"
                     Background="{DynamicResource SettingsNestedGroupBackgroundSolidColorBrush}"
                     BorderBrush="{DynamicResource TopPanelHoverBackgroundBrush}"
                     BorderThickness="1"
@@ -291,20 +292,29 @@
                 <Icons:StopIcon Size="18" IsHitTestVisible="False"/>
             </Button>
 
-            <Button x:Name="RepeatButtonTop" Grid.Column="4" Style="{StaticResource TopMenuButtonStyle}" ToolTip="{Binding Source={StaticResource LS_Protocol_Tooltip_Repeat}, Path=Value}">
+            <Button x:Name="SkipCommandButtonTop"
+                    Grid.Column="4"
+                    Style="{StaticResource TopMenuButtonStyle}"
+                    ToolTip="{Binding Source={StaticResource LS_Protocol_Tooltip_SkipCommand}, Path=Value}"
+                    Click="SkipCommandButtonTop_Click"
+                    Visibility="{Binding ElementName=ContinueButtonTop, Path=Visibility}">
+                <Icons:NextCommandIcon Size="17" IsHitTestVisible="False"/>
+            </Button>
+
+            <Button x:Name="RepeatButtonTop" Grid.Column="5" Style="{StaticResource TopMenuButtonStyle}" ToolTip="{Binding Source={StaticResource LS_Protocol_Tooltip_Repeat}, Path=Value}">
                 <Icons:RepeatIcon Size="18" IsHitTestVisible="False"/>
             </Button>
 
-            <Button x:Name="StepOverTop" Grid.Column="5" Style="{StaticResource TopMenuButtonStyle}" ToolTip="{Binding Source={StaticResource LS_Protocol_Tooltip_StepOver}, Path=Value}">
+            <Button x:Name="StepOverTop" Grid.Column="6" Style="{StaticResource TopMenuButtonStyle}" ToolTip="{Binding Source={StaticResource LS_Protocol_Tooltip_StepOver}, Path=Value}">
                 <Icons:StepOverIcon Size="17" IsHitTestVisible="False"/>
             </Button>
 
-            <Button x:Name="StepIntoTop" Grid.Column="6" Style="{StaticResource TopMenuButtonStyle}" ToolTip="{Binding Source={StaticResource LS_Protocol_Tooltip_StepInto}, Path=Value}">
+            <Button x:Name="StepIntoTop" Grid.Column="7" Style="{StaticResource TopMenuButtonStyle}" ToolTip="{Binding Source={StaticResource LS_Protocol_Tooltip_StepInto}, Path=Value}">
                 <Icons:StepIntoIcon Size="17" IsHitTestVisible="False"/>
             </Button>
 
             <Button x:Name="CommandJumpButtonTop"
-                    Grid.Column="7"
+                    Grid.Column="8"
                     Style="{StaticResource TopMenuButtonStyle}"
                     ToolTip="{Binding Source={StaticResource LS_Protocol_Tooltip_CommandJump}, Path=Value}"
                     Click="CommandJumpButtonTop_Click"

@@ -454,6 +454,22 @@ namespace Ask.UI.Features.ProtocolNew.Execution
     }
 
     /// <summary>
+    /// Запрашивает прерывание команды в ближайшей контрольной точке и снимает паузу.
+    /// </summary>
+    internal void InterruptCurrentCommand()
+    {
+      if (!IsActive || IsStopping)
+      {
+        return;
+      }
+
+      Interlocked.Exchange(ref _commandJumpRequested, 1);
+      StepControlManager.DisableStepMode();
+      _pauseController.Resume();
+      KeyboardManager.TriggerStep();
+    }
+
+    /// <summary>
     /// Возобновляет выполнение метода после паузы.
     /// </summary>
     /// <param name="stepMode">Флаг, указывающий, нужно ли возобновить в пошаговом режиме.</param>
