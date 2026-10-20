@@ -3725,3 +3725,17 @@ ErrorItem → translator/runner ErrorList
 5. Обновить call chain, Real/Idle, error/event/background flow по факту.
 6. Проверить относительные paths и внутренние anchors.
 7. Не переписывать незатронутые разделы.
+
+### Рамки результатов поиска
+
+`TextSearchManager.GoToOccurrence` сохраняет все совпадения текущего документа
+через `TextMarkerService.AddSearchMarker`; только выбранное получает фон с alpha=128.
+FindAllAsync добавляет рамки в документы выбранной области; выбор строки результатов
+сохраняет рамки совпадений документа. Реализации маркеров есть в
+`UI/Controls/TextEditorControl/ITextMarker.cs` и
+`Ask.UI/Controls/TextEditorControl/TextMarkerService.cs`: поисковые маркеры рисуются
+скруглённой рамкой Goldenrod, обычные и стилевые маркеры сохраняют прежнее поведение.
+В сравнении `DiffTextHighlight` сохраняет исходные цвета Run, добавляет активному
+фону alpha=128 и рисует рамки через внутренний SearchOutline (Adorner).
+Слой учитывает переносы и удаляется при Unloaded виртуализированной строки;
+посимвольные различия сохраняются. Рамки не меняют метрики текста.

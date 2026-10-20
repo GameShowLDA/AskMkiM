@@ -10,6 +10,25 @@ namespace Ask.UI.UnitTests.Services.TextSearch;
 /// <summary>Проверяет совместное отображение поиска и различий в WPF.</summary>
 public sealed class TextSearchHighlightTests
 {
+  /// <summary>Сохраняет исходный текст и даёт полупрозрачный фон только активному совпадению.</summary>
+  [Fact]
+  public void Highlight_FillsOnlyCurrentMatch()
+  {
+    RunInSta(() =>
+    {
+      var block = new TextBlock();
+      DiffTextHighlight.SetLine(block, new DiffLineViewModel(DiffLineKind.Unchanged, DiffPaneSide.Source, 1, 1, "AB AB"));
+      DiffTextHighlight.SetSearchRanges(block, new[] { new DiffSearchRange(0, 2, false), new DiffSearchRange(3, 2, true) });
+      var runs = block.Inlines.OfType<Run>().ToArray();
+      Assert.Null(runs[0].Background);
+      var background = Assert.IsType<System.Windows.Media.SolidColorBrush>(runs.Last().Background);
+      Assert.Equal(128, background.Color.A);
+      Assert.Equal("AB AB", string.Concat(runs.Select(run => run.Text)));
+      DiffTextHighlight.SetSearchRanges(block, Array.Empty<DiffSearchRange>());
+      Assert.All(block.Inlines.OfType<Run>(), run => Assert.Null(run.Background));
+    });
+  }
+
   /// <summary>Сохраняет различия после наложения и очистки поиска и повторного использования элемента.</summary>
   [Fact]
   public void Highlight_PreservesDiffAndClearsRecycledContent()

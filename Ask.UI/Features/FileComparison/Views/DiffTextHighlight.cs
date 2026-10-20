@@ -1,4 +1,4 @@
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
@@ -17,9 +17,9 @@ public sealed record DiffTextSegment(string Text, bool IsChanged);
 /// </summary>
 public static class DiffTextHighlight
 {
-  private static readonly Brush MatchBackground = CreateBrush(186, 230, 253);
-  private static readonly Brush CurrentMatchBackground = CreateBrush(56, 189, 248);
-  private static readonly Brush MatchForeground = CreateBrush(12, 74, 110);
+  private static readonly Brush CurrentMatchBackground = CreateBrush(218, 165, 32);
+  private static readonly DependencyProperty OutlineProperty = DependencyProperty.RegisterAttached(
+    "Outline", typeof(SearchOutline), typeof(DiffTextHighlight));
 
   /// <summary>Диапазоны поиска, отображаемые совместно с посимвольными различиями.</summary>
   public static readonly DependencyProperty SearchRangesProperty = DependencyProperty.RegisterAttached(
@@ -73,6 +73,11 @@ public static class DiffTextHighlight
     }
 
     textBlock.Inlines.Clear();
+    textBlock.Loaded -= OnTextLoaded;
+    textBlock.Loaded += OnTextLoaded;
+    textBlock.Unloaded -= OnTextUnloaded;
+    textBlock.Unloaded += OnTextUnloaded;
+    UpdateOutline(textBlock);
     if (GetLine(element) is not DiffLineViewModel line)
     {
       return;
@@ -110,8 +115,7 @@ public static class DiffTextHighlight
       while (rangeIndex < ranges.Count && ranges[rangeIndex].Start + ranges[rangeIndex].Length <= start) rangeIndex++;
       if (rangeIndex < ranges.Count && ranges[rangeIndex].Start <= start)
       {
-        run.Background = ranges[rangeIndex].IsCurrent ? CurrentMatchBackground : MatchBackground;
-        run.Foreground = MatchForeground;
+        if (ranges[rangeIndex].IsCurrent) run.Background = CurrentMatchBackground;
         if (segment.IsChanged) run.TextDecorations = TextDecorations.Underline;
       }
 
@@ -119,9 +123,87 @@ public static class DiffTextHighlight
     }
   }
 
+  /// <summary>Подключает рамки после создания визуального дерева строки.</summary>
+  private static void OnTextLoaded(object sender, RoutedEventArgs args) => UpdateOutline((TextBlock)sender);
+
+  /// <summary>Освобождает слой рамок при выгрузке виртуализированной строки.</summary>
+  private static void OnTextUnloaded(object sender, RoutedEventArgs args)
+  {
+    var block = (TextBlock)sender;
+    if (block.GetValue(OutlineProperty) is SearchOutline outline)
+      AdornerLayer.GetAdornerLayer(block)?.Remove(outline);
+    block.ClearValue(OutlineProperty);
+  }
+
+  /// <summary>Обновляет рамки, сохраняя текст и переносы строки.</summary>
+  private static void UpdateOutline(TextBlock block)
+  {
+    if (block.GetValue(OutlineProperty) is SearchOutline existing)
+    {
+      existing.InvalidateVisual();
+      return;
+    }
+    var layer = AdornerLayer.GetAdornerLayer(block);
+    if (layer == null) return;
+    var outline = new SearchOutline(block);
+    block.SetValue(OutlineProperty, outline);
+    layer.Add(outline);
+  }
+
+  /// <summary>Рисует рамки совпадений поверх текста без изменения его метрик.</summary>
+  private sealed class SearchOutline : Adorner
+  {
+    private readonly Pen OutlinePen = new(Brushes.Goldenrod, 1.5);
+
+    /// <summary>Создаёт слой рамок строки.</summary>
+    /// <param name="block">Текст строки сравнения.</param>
+    public SearchOutline(TextBlock block) : base(block) { IsHitTestVisible = false; }
+
+    /// <inheritdoc />
+    protected override void OnRender(DrawingContext drawingContext)
+    {
+      var block = (TextBlock)AdornedElement;
+      var ranges = GetSearchRanges(block);
+      if (ranges == null || ranges.Count == 0) return;
+      Rect pending = Rect.Empty;
+      int offset = 0;
+      foreach (var run in block.Inlines.OfType<Run>())
+      {
+        foreach (var range in ranges)
+        {
+          int start = Math.Max(offset, range.Start), end = Math.Min(offset + run.Text.Length, range.Start + range.Length);
+          for (int index = start; index < end; index++)
+          {
+            var pointer = run.ContentStart.GetPositionAtOffset(index - offset);
+            var rect = pointer?.GetCharacterRect(LogicalDirection.Forward) ?? Rect.Empty;
+            var endPointer = run.ContentStart.GetPositionAtOffset(index - offset + 1);
+            var endRect = endPointer?.GetCharacterRect(LogicalDirection.Backward) ?? Rect.Empty;
+            if (!rect.IsEmpty && !endRect.IsEmpty && Math.Abs(rect.Top - endRect.Top) < 0.5)
+              rect = new Rect(Math.Min(rect.Left, endRect.Left), rect.Top, Math.Abs(endRect.Left - rect.Left), rect.Height);
+            if (!rect.IsEmpty) AddRectangle(rect);
+          }
+        }
+        offset += run.Text.Length;
+      }
+      Flush();
+      void AddRectangle(Rect rect)
+      {
+        if (!pending.IsEmpty && Math.Abs(pending.Top - rect.Top) < 0.5 && rect.Left <= pending.Right + 1)
+          pending.Union(rect);
+        else { Flush(); pending = rect; }
+      }
+      void Flush()
+      {
+        if (pending.IsEmpty) return;
+        drawingContext.DrawRoundedRectangle(null, OutlinePen, pending, 3, 3);
+        pending = Rect.Empty;
+      }
+    }
+  }
+
   private static Brush CreateBrush(byte red, byte green, byte blue)
   {
-    var brush = new SolidColorBrush(Color.FromRgb(red, green, blue));
+    var brush = new SolidColorBrush(Color.FromArgb(128, red, green, blue));
     brush.Freeze();
     return brush;
   }

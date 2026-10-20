@@ -58,7 +58,6 @@ namespace UI.Components.MultiEditorMethods
     /// </summary>
     private int currentTranslatorIndex = -1;
 
-    private static readonly Color SearchHighlightColor = (Color)ColorConverter.ConvertFromString("#b23a48");
     private const string SourceCommandHeaderPattern = @"^\s*(?<num>\d+(?:\s+\d+)*)\s+(?<mnemo>[А-ЯЁA-Z]{1,})\b";
 
     /// <summary>
@@ -296,6 +295,15 @@ namespace UI.Components.MultiEditorMethods
       List<Task> searchTasks = ExecuteSearchTasks(searchPages, searchText, wholeWord, caseWord);
       await Task.WhenAll(searchTasks);
       EventAggregator.Publish(new SearchEvents.SearchProgressChanged(0, foundInOpenedFiles.Values.Sum(results => results.Count)));
+
+      foreach (var page in searchPages.Keys)
+      {
+        var editor = page.Content is TextEditorUI text ? text : (page.Content as TranslatorItem)?.GetLeftBox().GetTextEditor();
+        if (editor == null) continue;
+        editor.MarkerService.ClearAllMarkers();
+        foreach (var match in FindOccurrencesByLine(editor.Text, searchText, wholeWord, caseWord))
+          editor.MarkerService.AddSearchMarker(match.StartOffset, match.Length, false);
+      }
 
       if (showResults)
       {
@@ -1087,7 +1095,8 @@ namespace UI.Components.MultiEditorMethods
       }
 
       textEditor.MarkerService.ClearAllMarkers();
-      textEditor.MarkerService.AddMarker(result.StartOffset, result.Length, SearchHighlightColor);
+      foreach (var match in foundResults)
+        textEditor.MarkerService.AddSearchMarker(match.StartOffset, match.Length, ReferenceEquals(match, result));
       textEditor.TextArea.TextView.InvalidateLayer(KnownLayer.Selection);
 
       int lineNumber = textEditor.Document.GetLineByOffset(result.StartOffset).LineNumber;
@@ -1295,13 +1304,13 @@ namespace UI.Components.MultiEditorMethods
       var commandNumberGroup = headerMatch.Groups["num"];
       if (commandNumberGroup.Success && commandNumberGroup.Length > 0)
       {
-        rightEditor.MarkerService.AddMarker(line.Offset + commandNumberGroup.Index, commandNumberGroup.Length, SearchHighlightColor);
+        rightEditor.MarkerService.AddSearchMarker(line.Offset + commandNumberGroup.Index, commandNumberGroup.Length, true);
       }
 
       var mnemonicGroup = headerMatch.Groups["mnemo"];
       if (mnemonicGroup.Success && mnemonicGroup.Length > 0)
       {
-        rightEditor.MarkerService.AddMarker(line.Offset + mnemonicGroup.Index, mnemonicGroup.Length, SearchHighlightColor);
+        rightEditor.MarkerService.AddSearchMarker(line.Offset + mnemonicGroup.Index, mnemonicGroup.Length, true);
       }
 
       rightEditor.TextArea.TextView.InvalidateLayer(KnownLayer.Selection);
@@ -1461,7 +1470,9 @@ namespace UI.Components.MultiEditorMethods
 
         var ranges = FindAllOccurrencesInLine(lineText, startOffset);
 
-        textEditor.HighlightRanges(ranges);
+        var matches = FindOccurrencesByLine(textEditor.Text, _searchText, _wholeWord, _caseWord);
+        foreach (var match in matches)
+          textEditor.MarkerService.AddSearchMarker(match.StartOffset, match.Length, match.StartOffset == startOffset);
 
         if (ranges.Count > 0)
         {

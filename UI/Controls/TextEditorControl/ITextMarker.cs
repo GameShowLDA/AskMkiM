@@ -1,4 +1,4 @@
-using ICSharpCode.AvalonEdit.Document;
+﻿using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Rendering;
 using System.Windows;
 using System.Windows.Media;
@@ -83,6 +83,13 @@ namespace UI.Controls.TextEditorControl
 
         foreach (var rect in BackgroundGeometryBuilder.GetRectsForSegment(textView, marker))
         {
+          if (marker.IsSearch)
+          {
+            var outline = new SolidColorBrush(Colors.Goldenrod);
+            var fill = marker.IsCurrentSearch ? new SolidColorBrush(Color.FromArgb(128, 218, 165, 32)) : null;
+            drawingContext.DrawRoundedRectangle(fill, new Pen(outline, 1.5), rect, 3, 3);
+            continue;
+          }
           var brush = new SolidColorBrush(marker.BackgroundColor ?? Colors.Yellow);
           brush.Freeze();
           drawingContext.DrawRectangle(brush, null, new Rect(rect.Location, new Size(rect.Width, rect.Height)));
@@ -136,6 +143,17 @@ namespace UI.Controls.TextEditorControl
 
       markers.Add(marker);
       EnsureColorizerIsLast();
+      editor.TextArea.TextView.InvalidateLayer(KnownLayer.Selection);
+    }
+
+    /// <summary>Добавляет рамку совпадения и полупрозрачный фон активного результата.</summary>
+    /// <param name="startOffset">Смещение совпадения.</param>
+    /// <param name="length">Длина совпадения.</param>
+    /// <param name="isCurrent">Признак активного результата.</param>
+    public void AddSearchMarker(int startOffset, int length, bool isCurrent)
+    {
+      if (!TryNormalizeRange(ref startOffset, ref length)) return;
+      markers.Add(new TextMarker(startOffset, length) { IsSearch = true, IsCurrentSearch = isCurrent });
       editor.TextArea.TextView.InvalidateLayer(KnownLayer.Selection);
     }
 
@@ -206,6 +224,10 @@ namespace UI.Controls.TextEditorControl
         Length = length;
       }
       public bool IsBackground { get; set; } = true;
+      /// <summary>Признак рамки результата поиска.</summary>
+      public bool IsSearch { get; set; }
+      /// <summary>Признак активного результата поиска.</summary>
+      public bool IsCurrentSearch { get; set; }
 
       /// <inheritdoc/>
       public object Tag { get; set; }
