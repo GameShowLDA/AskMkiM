@@ -162,6 +162,14 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
     }
 
     /// <summary>
+    /// Обрабатывает нераспознанные параметры команды ПЭ.
+    /// </summary>
+    public static void HandleUnparsedParameters(PeCommandModel model, int numberLine, string? remainder)
+    {
+      AddUnparsedParameters(model, numberLine, remainder);
+    }
+
+    /// <summary>
     /// Обрабатывает нераспознанные параметры команды IE.
     /// </summary>
     public static void HandleUnparsedParameters(IeCommandModel model, int numberLine, string? remainder)

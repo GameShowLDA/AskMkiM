@@ -19,6 +19,12 @@ namespace Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands
     /// </summary>
     PR,
 
+    [CommandDisplayInfo("Сопротивления", "ПЭ", UnitEnums.QuantitySymbol.R, "Ом", 1, 100_000)]
+    /// <summary>
+    /// Тип команды PE.
+    /// </summary>
+    PE,
+
     [CommandDisplayInfo("Сопротивления изоляции", "СИ", UnitEnums.QuantitySymbol.R, "МОм", 1, 1000)]
     /// <summary>
     /// Тип команды CI.
