@@ -1,4 +1,6 @@
-using Ask.Core.Shared.DTO.TextEditor;
+﻿using Ask.Core.Shared.DTO.TextEditor;
+using DiffPlex.DiffBuilder;
+using DiffPlex.DiffBuilder.Model;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -6,7 +8,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 
-namespace UI.Controls.FileCompare
+namespace Ask.UI.Features.FileComparison.Views
 {
   public partial class FileCompareSelectionControl : UserControl, INotifyPropertyChanged
   {
@@ -630,191 +632,48 @@ namespace UI.Controls.FileCompare
 
   internal static class FileDiffEngine
   {
-    private const long MaxDynamicProgrammingCells = 12_000_000;
-
     public static FileComparisonResult Compare(
       OpenTextEditorDescriptor sourceFile,
       OpenTextEditorDescriptor targetFile,
       CancellationToken cancellationToken)
     {
-      var sourceLines = SplitLines(sourceFile.TextContent);
-      var targetLines = SplitLines(targetFile.TextContent);
+      cancellationToken.ThrowIfCancellationRequested();
+      var diff = SideBySideDiffBuilder.Diff(
+        sourceFile.TextContent,
+        targetFile.TextContent,
+        ignoreWhiteSpace: false,
+        ignoreCase: false);
 
-      var sourceViewLines = new List<DiffLineViewModel>();
-      var targetViewLines = new List<DiffLineViewModel>();
-      var maxLineCount = Math.Max(sourceLines.Count, targetLines.Count);
-      for (int index = 0; index < maxLineCount; index++)
+      var sourceViewLines = new List<DiffLineViewModel>(diff.OldText.Lines.Count);
+      var targetViewLines = new List<DiffLineViewModel>(diff.NewText.Lines.Count);
+      for (int index = 0; index < diff.OldText.Lines.Count; index++)
       {
         cancellationToken.ThrowIfCancellationRequested();
+        var sourceLine = diff.OldText.Lines[index];
+        var targetLine = diff.NewText.Lines[index];
 
-        var hasSource = index < sourceLines.Count;
-        var hasTarget = index < targetLines.Count;
-        var sourceText = hasSource ? sourceLines[index] : string.Empty;
-        var targetText = hasTarget ? targetLines[index] : string.Empty;
-        var lineNumber = index + 1;
-
-        if (hasSource)
-        {
-          var sourceKind = !hasTarget
-            ? DiffLineKind.Removed
-            : sourceText == targetText
-              ? DiffLineKind.Unchanged
-              : DiffLineKind.Modified;
-
-          sourceViewLines.Add(new DiffLineViewModel(
-            sourceKind,
-            DiffPaneSide.Source,
-            lineNumber,
-            lineNumber,
-            sourceText));
-        }
-
-        if (hasTarget)
-        {
-          var targetKind = !hasSource
-            ? DiffLineKind.Added
-            : sourceText == targetText
-              ? DiffLineKind.Unchanged
-              : DiffLineKind.Modified;
-
-          targetViewLines.Add(new DiffLineViewModel(
-            targetKind,
-            DiffPaneSide.Target,
-            lineNumber,
-            lineNumber,
-            targetText));
-        }
+        sourceViewLines.Add(CreateViewLine(sourceLine, DiffPaneSide.Source, index + 1));
+        targetViewLines.Add(CreateViewLine(targetLine, DiffPaneSide.Target, index + 1));
       }
 
       return new FileComparisonResult(sourceFile, targetFile, sourceViewLines, targetViewLines);
     }
 
-    private static List<RawDiffLine> BuildOperations(
-      IReadOnlyList<string> sourceLines,
-      IReadOnlyList<string> targetLines,
-      CancellationToken cancellationToken)
+    private static DiffLineViewModel CreateViewLine(DiffPiece piece, DiffPaneSide paneSide, int displayLineNumber)
     {
-      var cellCount = (long)(sourceLines.Count + 1) * (targetLines.Count + 1);
-      if (cellCount > MaxDynamicProgrammingCells)
+      var kind = piece.Type switch
       {
-        return BuildIndexBasedOperations(sourceLines, targetLines, cancellationToken);
-      }
+        ChangeType.Unchanged => DiffLineKind.Unchanged,
+        ChangeType.Deleted => DiffLineKind.Removed,
+        ChangeType.Inserted => DiffLineKind.Added,
+        ChangeType.Modified => DiffLineKind.Modified,
+        ChangeType.Imaginary => DiffLineKind.Empty,
+        _ => throw new ArgumentOutOfRangeException(nameof(piece), piece.Type, "Неизвестный тип строки diff."),
+      };
 
-      return BuildLcsOperations(sourceLines, targetLines, cancellationToken);
-    }
-
-    private static List<RawDiffLine> BuildLcsOperations(
-      IReadOnlyList<string> sourceLines,
-      IReadOnlyList<string> targetLines,
-      CancellationToken cancellationToken)
-    {
-      var oldCount = sourceLines.Count;
-      var newCount = targetLines.Count;
-      var lcs = new int[oldCount + 1, newCount + 1];
-
-      for (int oldIndex = oldCount - 1; oldIndex >= 0; oldIndex--)
-      {
-        cancellationToken.ThrowIfCancellationRequested();
-        for (int newIndex = newCount - 1; newIndex >= 0; newIndex--)
-        {
-          lcs[oldIndex, newIndex] = sourceLines[oldIndex] == targetLines[newIndex]
-            ? lcs[oldIndex + 1, newIndex + 1] + 1
-            : Math.Max(lcs[oldIndex + 1, newIndex], lcs[oldIndex, newIndex + 1]);
-        }
-      }
-
-      var result = new List<RawDiffLine>();
-      var oldCursor = 0;
-      var newCursor = 0;
-      while (oldCursor < oldCount && newCursor < newCount)
-      {
-        cancellationToken.ThrowIfCancellationRequested();
-
-        if (sourceLines[oldCursor] == targetLines[newCursor])
-        {
-          result.Add(new RawDiffLine(RawDiffKind.Equal, sourceLines[oldCursor], oldCursor + 1, newCursor + 1));
-          oldCursor++;
-          newCursor++;
-        }
-        else if (lcs[oldCursor + 1, newCursor] >= lcs[oldCursor, newCursor + 1])
-        {
-          result.Add(new RawDiffLine(RawDiffKind.Delete, sourceLines[oldCursor], oldCursor + 1, null));
-          oldCursor++;
-        }
-        else
-        {
-          result.Add(new RawDiffLine(RawDiffKind.Insert, targetLines[newCursor], null, newCursor + 1));
-          newCursor++;
-        }
-      }
-
-      while (oldCursor < oldCount)
-      {
-        result.Add(new RawDiffLine(RawDiffKind.Delete, sourceLines[oldCursor], oldCursor + 1, null));
-        oldCursor++;
-      }
-
-      while (newCursor < newCount)
-      {
-        result.Add(new RawDiffLine(RawDiffKind.Insert, targetLines[newCursor], null, newCursor + 1));
-        newCursor++;
-      }
-
-      return result;
-    }
-
-    private static List<RawDiffLine> BuildIndexBasedOperations(
-      IReadOnlyList<string> sourceLines,
-      IReadOnlyList<string> targetLines,
-      CancellationToken cancellationToken)
-    {
-      var result = new List<RawDiffLine>();
-      var commonLength = Math.Min(sourceLines.Count, targetLines.Count);
-
-      for (int index = 0; index < commonLength; index++)
-      {
-        cancellationToken.ThrowIfCancellationRequested();
-        if (sourceLines[index] == targetLines[index])
-        {
-          result.Add(new RawDiffLine(RawDiffKind.Equal, sourceLines[index], index + 1, index + 1));
-          continue;
-        }
-
-        result.Add(new RawDiffLine(RawDiffKind.Delete, sourceLines[index], index + 1, null));
-        result.Add(new RawDiffLine(RawDiffKind.Insert, targetLines[index], null, index + 1));
-      }
-
-      for (int index = commonLength; index < sourceLines.Count; index++)
-      {
-        result.Add(new RawDiffLine(RawDiffKind.Delete, sourceLines[index], index + 1, null));
-      }
-
-      for (int index = commonLength; index < targetLines.Count; index++)
-      {
-        result.Add(new RawDiffLine(RawDiffKind.Insert, targetLines[index], null, index + 1));
-      }
-
-      return result;
-    }
-
-    private static IReadOnlyList<string> SplitLines(string text)
-    {
-      return (text ?? string.Empty)
-        .Replace("\r\n", "\n")
-        .Replace('\r', '\n')
-        .Split('\n');
+      return new DiffLineViewModel(kind, paneSide, displayLineNumber, piece.Position, piece.Text ?? string.Empty);
     }
   }
-
-  internal sealed record RawDiffLine(RawDiffKind Kind, string Text, int? OldLineNumber, int? NewLineNumber);
-
-  internal enum RawDiffKind
-  {
-    Equal,
-    Delete,
-    Insert
-  }
-
   internal static class DiffBrushes
   {
     public static readonly Brush Border = CreateBrush(218, 225, 233);

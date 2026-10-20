@@ -29,6 +29,7 @@ Size/Foreground и анимации общей кнопки; лицензия с
 
 | Нужно изменить | Сначала смотреть | Затем смотреть |
 | --- | --- | --- |
+| Сравнение открытых файлов | `MainWindow/MainWindow.xaml`, `MainWindow/Events/UiEventsBinder.cs` | `MainWindow/ViewModels/FileViewModel.cs`, `MainWindow/Services/FileService.cs`, `Ask.UI/Features/FileComparison/Views/FileCompareSelectionControl.xaml(.cs)`; [сравнение файлов](#file-comparison-ui) |
 | Уведомления о делах на сегодня | `MainWindow/MainWindow.TodayTasks.cs`, `MainWindow/MainWindow.xaml` | `CalendarNoteService.Load/SetCompleted`, `CalendarControl.Completion_Click`; [заметки](#calendar-notes) |
 | Заметки календаря | `UI/Controls/Calendar/CalendarControl.xaml.cs`, `CalendarControl.xaml` | `Ask.Core/Services/Calendar/CalendarNoteService.cs`, `CalendarNote.cs`; [заметки](#calendar-notes) |
 | Запуск приложения | `MainWindow/App.xaml.cs`, `MainWindow/Init/PreStartupInitializer.cs` | `MainWindow/Init/DatabaseInitializer.cs`, `MainWindow/Engine/AppServices.cs`, `MainWindow/MainWindow.xaml.cs` |
@@ -82,6 +83,7 @@ Size/Foreground и анимации общей кнопки; лицензия с
 ## Runtime Flow Index
 
 - [Calendar notes CRUD](#calendar-notes)
+- [Сравнение открытых файлов](#file-comparison-ui)
 - [Application startup](#application-startup-flow)
 - [Database initialization](#database-startup-flow)
 - [Translation](#translation-flow)
@@ -2324,6 +2326,29 @@ same path with gates enabled and performs real transport I/O.
 Translation, Run, Metrology, Test, SelfTest, Settings, Admin and Window ViewModels.
 Their services generally route operations into `MultiWindowService`.
 
+<a id="file-comparison-ui"></a>
+### Сравнение открытых файлов
+
+Пункт `File.CompareFileCommand` в меню «Файл» показывается только при активном
+текстовом редакторе и не менее чем двух открытых редакторах. Маршрут:
+`MainWindow/Events/UiEventsBinder.OnTextEditorActive/OnTextEditorActivated`
+→ `UpdateCompareMenuVisibility` → `MainWindow.xaml compareMenuItem`
+→ `FileViewModel.CompareFileCommand` → `MainWindow/Services/FileService.CompareFileAsync`
+→ `MultiWindowService.GetOpenTextEditors` → `WorkspaceService.AddControl`
+→ `Ask.UI.Features.FileComparison.Views.FileCompareSelectionControl`.
+Control получает актуальные `OpenTextEditorDescriptor` через provider, позволяет
+выбрать исходный документ и один или несколько документов назначения, запускает
+сравнение в `Task.Run` с `CancellationTokenSource` и показывает каждый результат
+в отдельной вкладке с синхронизированной прокруткой двух панелей. Diff строится
+`DiffPlex.DiffBuilder.SideBySideDiffBuilder.Diff` с учётом пробелов и регистра;
+`DiffPiece` преобразуется в локальную модель раскраски строк; пробелы и регистр
+считаются значимыми. Это сравнение
+содержимого открытых вкладок, не файлов, повторно читаемых с диска.
+Ключевые файлы: `MainWindow/MainWindow.xaml`, `MainWindow/Events/UiEventsBinder.cs`,
+`MainWindow/ViewModels/FileViewModel.cs`, `MainWindow/Services/FileService.cs`,
+`Ask.UI/Features/FileComparison/Views/FileCompareSelectionControl.xaml(.cs)`;
+`Ask.UI/Ask.UI.csproj` ссылается на пакет `DiffPlex`.
+
 `MainWindow` рисует общий фон окна через тематический `EmptyBackgroundBrush`.
 Корневой `Grid`, верхняя/нижняя панели и фон полосы вкладок `MultiWindowControl` поверх него прозрачны;
 верхняя и нижняя панели прилегают к краям рабочей области: Margin=0,
@@ -3427,6 +3452,7 @@ ErrorItem → translator/runner ErrorList
 | `MainWindow` | View/shell | MainWindowProgram | top-level UI and lifecycle | [UI Architecture](#ui-architecture) |
 | `MultiEditorControl` | workspace View | UI | editors/tabs/user controls | [UI Architecture](#ui-architecture) |
 | `FileManager` | service composer | UI | workspace services | [UI Architecture](#ui-architecture) |
+| `FileCompareSelectionControl` | WPF control | Ask.UI | выбор открытых редакторов и отображение построчного diff через DiffPlex | [Сравнение файлов](#file-comparison-ui) |
 | `RunControl` | execution View | UI | launches control programs | [Execution Engine](#execution-engine) |
 | `ShowMessageModel` | shared protocol DTO | Ask.Core | хранит содержимое, статус и признаки записи; `IsMeasurement` выбирает `[НОРМА]/[БРАК]` вместо неизмерительных `[ОК]/[ERR]` без общего изменяемого состояния | [Protocols](#protocols-and-file-formats) |
 | `ProtocolUI` | View + adapter | Ask.UI | execution controller and protocol output | [Protocols](#protocols-and-file-formats) |
