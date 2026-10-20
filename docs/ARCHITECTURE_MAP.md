@@ -2364,8 +2364,11 @@ workspace control; для `TextEditorContainer` проверяет содерж�
 `SearchWindow.TargetProvider = MultiWindowService.GetActiveSearchTarget`.
 Оформление окна: `UI/Controls/Search/SearchWindow.xaml` + локальный словарь
 `SearchWindow.Styles.xaml`; динамические brush-ресурсы тем и `SearchAccentBrush`
-для полей и списка областей. Компактные размеры восстановлены: 410 DIP по ширине,
-высота 90/130 DIP. Исходные SearchArrows, ArrowButton, CaseToggleButton,
+для полей и списка областей.
+Фон панели поиска — DynamicResource SearchPanelBackgroundBrush: однотонный цвет нижней
+границы BackgroundBrushes меню; задан в dark/light и dark.custom/light.custom темах.
+Компактные размеры восстановлены: 410 DIP по ширине,
+высота 93/133 DIP. Исходные SearchArrows, ArrowButton, CaseToggleButton,
 WholeWordToggleButton, ReplaseWordButton/ReplaseAllWordsButton и SearchSliderHandle
 сохраняют прежние размеры и значки. Подсказки полей находятся внутри SearchInputStyle и зависят от пустого Text, а не фокуса.
 PART_ContentHost не дублирует Padding поля дополнительным Margin: каретка и подсказка имеют общий отступ.

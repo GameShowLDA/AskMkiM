@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:Elements="clr-namespace:UI.Components.SearchControls"
         xmlns:askUiIcons="clr-namespace:Ask.UI.Shared.Components.Icons;assembly=Ask.UI" 
-        Title="SearchWindow" Height="90" Width="410"
+        Title="SearchWindow" Height="93" Width="410"
         MinWidth="410"
         MaxWidth="410"
         WindowStyle="None"
@@ -158,12 +158,12 @@
                 <TranslateTransform Y="0"/>
             </TransformGroup>
         </Grid.RenderTransform>
-        <Border  Background="{DynamicResource SettingCardBackground}"
+        <Border  Background="{DynamicResource SearchPanelBackgroundBrush}"
                 BorderBrush="{DynamicResource ModernDataGridBorderBrush}"
-                BorderThickness="1"
+                BorderThickness="1,0,1,1"
                 CornerRadius="0,0,9,9">
 
-        <Grid x:Name="MainGrid">
+        <Grid x:Name="MainGrid" Margin="0,0,0,3">
 
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="30"/>
@@ -219,17 +219,21 @@
 
             <Grid Grid.Column="2">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="50*"/>
-                    <ColumnDefinition Width="50*"/>
+                    <ColumnDefinition Width="55"/>
+                    <ColumnDefinition Width="32"/>
                 </Grid.ColumnDefinitions>
 
-                <Elements:SearchArrows x:Name="searchArrows" Grid.Column="0" Margin="3 0 0 0" Cursor="Hand"/>
+                <Elements:SearchArrows x:Name="searchArrows" Grid.Column="0" Width="45"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center" Cursor="Hand"/>
 
             </Grid>
 
             <TextBlock x:Name="SearchStatus" Grid.Row="2" Grid.Column="2" Visibility="Visible"
                        VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="11"
                        Foreground="{DynamicResource ForegrounfBrushes}" TextTrimming="CharacterEllipsis" ToolTip="{Binding Text, RelativeSource={RelativeSource Self}}"/>
+
+            <Border Grid.Row="2" Grid.Column="2" Width="1" Height="20" HorizontalAlignment="Left"
+                    Background="{DynamicResource ModernDataGridBorderBrush}" IsHitTestVisible="False"/>
 
             <!-- Строка 2 (По умолчанию скрыта) -->
             <Grid x:Name="ReplaceRowPanel"
@@ -270,7 +274,8 @@
                     <Elements:ReplaseAllWordsButton Height="25" Width="25" Grid.Column="1" Cursor="Hand" ToolTip="Заменить все совпадения (Alt+A)"/>
                 </Grid>
             </Grid>
-                <Elements:SearchSliderHandle x:Name="SearchSlider" Grid.Row="2" Grid.Column="0" Margin="4 10 2 2"
+                <Elements:SearchSliderHandle x:Name="SearchSlider" Grid.Row="2" Grid.Column="0"
+                                             HorizontalAlignment="Center" VerticalAlignment="Center"
                                              PreviewMouseLeftButtonDown="SearchSlider_MouseLeftButtonDown"
                                              PreviewMouseLeftButtonUp="SearchSlider_MouseLeftButtonUp"
                                              MouseMove="SearchSlider_MouseMove"
@@ -282,9 +287,9 @@
                     <TranslateTransform Y="0"/>
                 </Grid.RenderTransform>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="12*"/>
-                    <ColumnDefinition Width="12*"/>
-                    <ColumnDefinition Width="52*"/>
+                    <ColumnDefinition Width="36"/>
+                    <ColumnDefinition Width="36"/>
+                    <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
                     <Elements:CaseToggleButton x:Name="caseButton" Grid.Row="2" Grid.Column="0" 
                            Width="25" Height="25"
@@ -294,7 +299,10 @@
                            />
                 <Elements:WholeWordToggleButton x:Name="wholeWordButton" Height="25" Width="25" Grid.Column="1" Cursor="Hand" ToolTip="Искать только целые слова"/>
 
-                <ComboBox Style="{StaticResource SearchScopeComboStyle}" x:Name="searchAreaParameters" Grid.Column="2" Margin="2" VerticalAlignment="Stretch" SelectedIndex="0"
+                <Border Grid.Column="2" Width="1" Height="20" HorizontalAlignment="Left" Margin="4,0,0,0"
+                        Background="{DynamicResource ModernDataGridBorderBrush}" IsHitTestVisible="False"/>
+                <ComboBox Style="{StaticResource SearchScopeComboStyle}" x:Name="searchAreaParameters" Grid.Column="2"
+                          Width="179" Height="36" Margin="2" HorizontalAlignment="Right" VerticalAlignment="Center" SelectedIndex="0"
                 SelectionChanged="PART_EditableTextBox_SelectionChanged">
 
                     <ComboBoxItem Content="Текущий документ" Tag="FindInThisFile"/>

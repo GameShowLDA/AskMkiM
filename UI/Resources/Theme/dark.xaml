@@ -758,4 +758,5 @@
     
     
     <!--#endregion-->
+    <SolidColorBrush x:Key="SearchPanelBackgroundBrush" Color="#303843"/>
 </ResourceDictionary>

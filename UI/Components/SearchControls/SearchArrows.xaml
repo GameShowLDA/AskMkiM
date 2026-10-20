@@ -48,7 +48,7 @@
   </Style>
  </UserControl.Resources>
  <Grid Background="Transparent">
-  <ComboBox x:Name="searchArrowsComboBox" Width="45" Height="20" Margin="-4,-1,-21,1" SelectedIndex="0"
+  <ComboBox x:Name="searchArrowsComboBox" Width="45" Height="20" SelectedIndex="0"
    Foreground="{DynamicResource ForegrounfBrushes}" Background="Transparent" BorderThickness="0"
    ToolTip="{Binding SelectedItem.Description, RelativeSource={RelativeSource Self}}"
    ItemTemplate="{StaticResource ActionItem}" ItemContainerStyle="{StaticResource ActionItemStyle}">

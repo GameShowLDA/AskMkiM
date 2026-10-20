@@ -54,8 +54,10 @@ await searchWindow.ShowWindow();
 
 Общее окно оформлено в `UI/Controls/Search/SearchWindow.xaml` и локальном словаре
 `SearchWindow.Styles.xaml`. Цвета берутся через DynamicResource из светлой/тёмной
+Фон панели поиска — DynamicResource SearchPanelBackgroundBrush: однотонный цвет нижней
+границы BackgroundBrushes меню; задан в dark/light и dark.custom/light.custom темах.
 тем; `SearchAccentBrush` задаёт контрастный акцент полей и списка областей.
-Восстановлены компактные размеры 410 DIP по ширине, 90 DIP без замены и 130 DIP
+Восстановлены компактные размеры 410 DIP по ширине, 93 DIP без замены и 133 DIP
 с заменой, а также исходные SearchArrows, ArrowButton, CaseToggleButton,
 WholeWordToggleButton, ReplaseWordButton/ReplaseAllWordsButton и SearchSliderHandle.
 Подсказки полей находятся внутри SearchInputStyle и зависят от пустого Text, а не фокуса.
