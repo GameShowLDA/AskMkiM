@@ -1,5 +1,6 @@
 using Ask.Core.Services.App;
 using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.UI;
 using Ask.Core.Services.Errors.Models;
 using Ask.Core.Services.Protocols;
 using Ask.Core.Shared.DTO.Executor;
@@ -535,7 +536,7 @@ namespace Ask.UI.Controls.ProtocolNew
     {
       var cancellationToken = GetCancellationToken();
       cancellationToken.ThrowIfCancellationRequested();
-      bool stopOnError = await ExecutionConfig.GetIsStopOnErrorEnabled();
+      bool stopOnError = ExecutionConfig.GetStopOnErrorEnabled();
       cancellationToken.ThrowIfCancellationRequested();
       if (ShouldWaitForUserAction(stopOnError, loop, deviceTask))
       {
@@ -553,7 +554,8 @@ namespace Ask.UI.Controls.ProtocolNew
     /// <inheritdoc />
     public async Task<UserAction> ConfirmControlProgramCommandRetryAsync(int errorCount, string commandNumber, string mnemonic)
     {
-      if (!await ExecutionConfig.GetIsStopOnErrorEnabled())
+      bool stopOnError = ExecutionConfig.GetStopOnErrorEnabled();
+      if (!stopOnError)
       {
         return UserAction.None;
       }

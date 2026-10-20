@@ -52,12 +52,24 @@ public sealed class UserActionHelperTests
           () =>
           {
             calls++;
+            if (calls == 1)
+            {
+              ExecutionConfig.SetRepeatMeasurement(false);
+            }
+
             return Task.FromResult(results.Dequeue());
           },
           interaction.Object,
           measurementTask: true);
 
         Assert.True(result);
+
+        bool nextMeasurementResult = await UserActionHelper.GetRunWithUserRepeatAsync(
+          () => Task.FromResult(false),
+          interaction.Object,
+          measurementTask: true);
+
+        Assert.False(nextMeasurementResult);
       }
 
       Assert.Equal(2, calls);

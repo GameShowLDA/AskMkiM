@@ -290,6 +290,8 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
               jumpToIndex = ResolveJumpIndex(targetLabel);
             };
 
+            int executionErrorCount;
+            UserAction action;
             using (ControlProgramCommandExecutionContext.Enter())
             {
               if (hasExecutor)
@@ -301,14 +303,14 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
               {
                 await ExecutionMessages.PublishUnknownCommandAsync(command.Mnemonic, _console);
               }
-            }
 
-            int executionErrorCount = GetNewExecutionErrorCount(command, protocolSnapshot);
-            hasExecutionErrors = !hasExecutor || executionErrorCount > 0;
-            var action = hasExecutionErrors
-              ? await _console.ConfirmControlProgramCommandRetryAsync(
-                hasExecutor ? executionErrorCount : 1, command.CommandNumber, command.Mnemonic)
-              : UserAction.None;
+              executionErrorCount = GetNewExecutionErrorCount(command, protocolSnapshot);
+              hasExecutionErrors = !hasExecutor || executionErrorCount > 0;
+              action = hasExecutionErrors
+                ? await _console.ConfirmControlProgramCommandRetryAsync(
+                  hasExecutor ? executionErrorCount : 1, command.CommandNumber, command.Mnemonic)
+                : UserAction.None;
+            }
 
             if (action == UserAction.Retry)
             {

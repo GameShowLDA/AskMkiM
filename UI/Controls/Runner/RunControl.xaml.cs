@@ -100,6 +100,7 @@ namespace UI.Controls.Runner
     {
       InitializeComponent();
       ProtocolUI = new ProtocolUI(true);
+      ProtocolUI.SetRuntimeExecutionSettingsEnabled(true);
       ProtocolUI.InspectionProtocolHost = this;
       ProtocolUI.ErrorListBoxVerticalVisibility = Visibility.Collapsed;
       MainContent.Content = ProtocolUI;

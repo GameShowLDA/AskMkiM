@@ -256,9 +256,10 @@
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <Border Grid.ColumnSpan="9"
+            <Border Grid.ColumnSpan="10"
                     Background="{DynamicResource SettingsNestedGroupBackgroundSolidColorBrush}"
                     BorderBrush="{DynamicResource TopPanelHoverBackgroundBrush}"
                     BorderThickness="1"
@@ -321,6 +322,58 @@
                     Visibility="{Binding ElementName=ContinueButtonTop, Path=Visibility}">
                 <Icons:FastForwardIcon Size="17" IsHitTestVisible="False"/>
             </Button>
+
+            <Button x:Name="ExecutionSettingsButtonTop"
+                    Grid.Column="9"
+                    Style="{StaticResource TopMenuButtonStyle}"
+                    Foreground="{DynamicResource ForegroundSolidColorBrush}"
+                    ToolTip="Настройки выполнения"
+                    Visibility="Collapsed"
+                    Click="ExecutionSettingsButtonTop_Click">
+                <Icons:SettingsGearIcon Size="17"
+                                        Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}"
+                                        IsHovering="False"/>
+            </Button>
+
+            <Popup x:Name="ExecutionSettingsPopup"
+                   PlacementTarget="{Binding ElementName=ExecutionSettingsButtonTop}"
+                   Placement="Bottom"
+                   StaysOpen="False"
+                   AllowsTransparency="True"
+                   PopupAnimation="None">
+                <Border Padding="10"
+                        Background="{DynamicResource SettingsPanelBackgroundSolidColorBrush}"
+                        BorderBrush="{DynamicResource SettingsPanelBorderSolidColorBrush}"
+                        BorderThickness="1"
+                        CornerRadius="8">
+                    <StackPanel MinWidth="260">
+                        <TextBlock Text="Поведение при ошибке"
+                                   Margin="6,2,6,8"
+                                   Style="{DynamicResource SettingsHeaderStyle}"/>
+                        <CheckBox x:Name="RepeatMeasurementToggle"
+                                  Content="Повтор измерения"
+                                  Style="{DynamicResource SettingsCheckBox2}"
+                                  Margin="6,5"
+                                  Foreground="{DynamicResource ForegrounfBrushes}"
+                                  FontFamily="{DynamicResource WinstonLight}"
+                                  FontSize="13"
+                                  Checked="ExecutionSetting_Changed"
+                                  Unchecked="ExecutionSetting_Changed"/>
+                        <CheckBox x:Name="StopOnErrorToggle"
+                                  Content="Остановка при ошибке"
+                                  Style="{DynamicResource SettingsCheckBox2}"
+                                  Margin="6,5"
+                                  Foreground="{DynamicResource ForegrounfBrushes}"
+                                  FontFamily="{DynamicResource WinstonLight}"
+                                  FontSize="13"
+                                  Checked="ExecutionSetting_Changed"
+                                  Unchecked="ExecutionSetting_Changed"/>
+                        <TextBlock Text="Изменения применятся к следующим проверкам"
+                                   Margin="6,8,6,2"
+                                   Style="{DynamicResource SettingsDescriptionStyle}"/>
+                    </StackPanel>
+                </Border>
+            </Popup>
 
         </Grid>
 

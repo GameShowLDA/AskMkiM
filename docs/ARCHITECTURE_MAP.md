@@ -42,6 +42,7 @@ Size/Foreground и анимации общей кнопки; лицензия с
 | Горячие клавиши и диагностика кнопок выполнения | `Ask.UI/Features/ProtocolNew/Hotkeys/ProtocolHotkeyController.cs`, `MainWindow/HotkeyBindings/MenuHotkeyBinder.cs` | `Ask.UI/Controls/ProtocolNew/ProtocolUI.ButtonManager.cs`, `Ask.LogLib/LoggerUtility.cs`; отдельный `logs/yyyy-MM-dd/input.log` и сводный `all.log` |
 | Холостой режим и симуляция ошибок | `Ask.Core/Services/Config/AppSettings/ExecutionConfig.cs`, `IdleMeasurementErrorSimulator.cs`, `IdleHardwareErrorSimulator.cs` | `UI/Controls/Settings/Execution/ExecutionControl.xaml`, целевой manager/adapter в `Ask.Device.*`, конкретный executor/strategy |
 | Ошибка оборудования и интерактивный повтор | `Ask.Core/Services/UI/UserActionHelper.cs` | `Ask.Core/Services/UI/EquipmentExecutionContext.cs`, `Ask.UI/Controls/ProtocolNew/ProtocolUI.cs`, целевой adapter/manager/transport |
+| Runtime-настройки повтора и остановки при ошибке | `UI/Controls/Runner/RunControl.xaml`, `RunControl.xaml.cs` | `Ask.Core/Services/Config/AppSettings/ExecutionConfig.cs`, `ControlProgramCommandExecutionContext.cs`, `Ask.Core/Services/UI/UserActionHelper.cs`, `Ask.UI/Controls/ProtocolNew/ProtocolUI.cs` |
 | Нет ответа устройства вместо брака | `Ask.Core/Services/Errors/Device/DeviceNoResponseException.cs`, `Ask.Core/Services/UI/UserActionHelper.cs` | UDP/TCP/COM/VISA transports, `AdapterMeasurementResult.cs`, `ProtocolEntryOutputService.cs`, `TestError.IsNoResponse`, `InspectionProtocolBuilder.cs`; [путь отсутствия ответа](#отсутствие-ответа-устройства) |
 | МКР и точки | `Ask.Core/Shared/Interfaces/DeviceInterfaces/RelaySwitchModule/` | `Ask.Device.Application/FunctionAdapters/ModuleRelayControl/`, `Ask.Device.Runtime/Function/ModuleRelayControl/`, `Ask.Device.Emulator/ModuleRelayControl/` |
 | Устройство коммутации | `Ask.Core/Shared/Interfaces/DeviceInterfaces/SwitchingDevice/` | `Ask.Device.Application/FunctionAdapters/DeviceBusCommutation/`, `Ask.Device.Runtime/Function/DeviceBusCommutation/` |
@@ -3142,6 +3143,31 @@ transport exception намеренно доходит до `PowerButton`. UI п�
 результатов и отложенные `ErrorItem` предыдущей попытки, после чего заново
 вызывает тот же executor. Метрология, инженерные тесты и самоконтроль этот
 контекст не создают и сохраняют прежнее поведение `UserActionHelper`.
+
+Для запуска из `UI/Controls/Runner/RunControl.xaml` шестерёнка в панели
+`Ask.UI/Controls/ProtocolNew/ProtocolUI.xaml` открывает runtime-переключатели
+`RepeatMeasurement` и `StopOnError`. Изменение каждого переключателя обновляет
+`ExecutionConfig` и сохраняет общую модель через `ExecutionConfig.SaveExecutionModel`
+и `ExecutionConfig.SaveExecutionAsyncEvent` (регистрация БД в
+`MainWindow/Init/DatabaseInitializer.cs`). Событие `ExecutionModelSaved` синхронизирует
+эти флаги с открытым `UI/Controls/Settings/Execution/ExecutionControl`; остальные
+поля страницы сохраняют собственный draft. В начале каждой попытки команды
+`ControlProgramCommandExecutionContext.Enter` сохраняет настройки команды в AsyncLocal
+scope для совместимости со вложенными путями. При принятии решения `UserActionHelper`
+снимает актуальное значение `RepeatMeasurement` один раз на вызов; текущая операция
+сохраняет это решение, следующая операция в той же команде получает новое значение.
+`ProtocolUI.WaitUserActionAsync` и `ConfirmControlProgramCommandRetryAsync` читают
+актуальный `StopOnError` в момент решения, не используя устаревший snapshot.
+`ProtocolPostOutputController` перечитывает `StopOnError` при каждой новой ошибочной
+строке вне контекста команды.
+`RunControl.xaml.cs`
+включает runtime-настройки для экземпляра `ProtocolUI`. `ProtocolButtonController`
+показывает шестерёнку только в состояниях панели `Ready` (до старта) и `Paused`;
+в `Running`, интерактивных состояниях обработки ошибки и после скрытия панели
+она скрыта. При скрытии шестерёнки контроллер также закрывает открытый popup.
+Настройки:
+`Ask.Core/Services/Config/AppSettings/ExecutionConfig.cs`; snapshot:
+`Ask.Core/Services/UI/ControlProgramCommandExecutionContext.cs`.
 
 В самоконтроле УКШ `SelfTestRetryHelper.CheckRelayStateAsync` публикует результат
 проверки реле с `skipPause: true`: строка `[ERR]` сохраняется, но общая
