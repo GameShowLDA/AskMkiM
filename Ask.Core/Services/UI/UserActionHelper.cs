@@ -162,6 +162,7 @@ namespace Ask.Core.Services.UI
       ArgumentNullException.ThrowIfNull(isSuccessful);
 
       bool interactiveMode = loop;
+      bool repeatMeasurement = measurementTask && ExecutionConfig.GetIsRepeatMeasurementEnabled();
       int attempt = 0;
 
       while (true)
@@ -214,9 +215,6 @@ namespace Ask.Core.Services.UI
         {
           return ResolveWithoutInteraction(result, hardwareException, exceptionFallback);
         }
-
-        bool repeatMeasurement = measurementTask
-          && ExecutionConfig.GetIsRepeatMeasurementEnabled();
 
         if (ControlProgramCommandExecutionContext.IsActive && !repeatMeasurement
           && hardwareException is not DeviceNoResponseException)

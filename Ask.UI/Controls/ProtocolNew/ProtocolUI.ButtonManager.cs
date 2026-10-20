@@ -206,6 +206,20 @@ namespace Ask.UI.Controls.ProtocolNew
       set => StepIntoButtonElement.Visibility = value;
     }
 
+    bool IProtocolButtonView.RuntimeExecutionSettingsEnabled => _runtimeExecutionSettingsEnabled;
+
+    Visibility IProtocolButtonView.ExecutionSettingsVisibility
+    {
+      set
+      {
+        ExecutionSettingsButtonTop.Visibility = value;
+        if (value != Visibility.Visible)
+        {
+          ExecutionSettingsPopup.IsOpen = false;
+        }
+      }
+    }
+
     #endregion
 
     #region События кнопок.

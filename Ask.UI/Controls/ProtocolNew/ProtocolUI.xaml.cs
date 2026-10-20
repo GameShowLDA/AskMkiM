@@ -1,4 +1,5 @@
 using Ask.Core.Services.App;
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
@@ -131,6 +132,8 @@ namespace Ask.UI.Controls.ProtocolNew
     private Action<ExecutionEvents.ControlButtonPressed> _controlButtonHandler;
     private Action<ExecutionEvents.StepByStepModeChanged> _stepByStepModeChangedHandler;
     private bool _eventSubscriptionsAttached;
+    private bool _runtimeExecutionSettingsEnabled;
+    private bool _isUpdatingRuntimeExecutionSettings;
 
     /// <summary>
     /// Конструктор по умолчанию для элемента ProtocolSelfCheck.
@@ -368,6 +371,47 @@ namespace Ask.UI.Controls.ProtocolNew
     public void MenuButtonVisibility(bool visibility)
     {
       MenuButton.Visibility = visibility ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    /// <summary>
+    /// Показывает или скрывает настройки выполнения программы контроля.
+    /// </summary>
+    /// <param name="isEnabled">Признак включения runtime-настроек выполнения.</param>
+    public void SetRuntimeExecutionSettingsEnabled(bool isEnabled)
+    {
+      _runtimeExecutionSettingsEnabled = isEnabled;
+      _buttonController.UpdateRuntimeExecutionSettingsVisibility();
+    }
+
+    private void ExecutionSettingsButtonTop_Click(object sender, RoutedEventArgs e)
+    {
+      _isUpdatingRuntimeExecutionSettings = true;
+      try
+      {
+        RepeatMeasurementToggle.IsChecked = ExecutionConfig.GetIsRepeatMeasurementEnabled();
+        StopOnErrorToggle.IsChecked = ExecutionConfig.GetStopOnErrorEnabled();
+      }
+      finally
+      {
+        _isUpdatingRuntimeExecutionSettings = false;
+      }
+
+      ExecutionSettingsPopup.IsOpen = !ExecutionSettingsPopup.IsOpen;
+    }
+
+    private async void ExecutionSetting_Changed(object sender, RoutedEventArgs e)
+    {
+      if (_isUpdatingRuntimeExecutionSettings
+        || !IsInitialized
+        || RepeatMeasurementToggle == null
+        || StopOnErrorToggle == null)
+      {
+        return;
+      }
+
+      ExecutionConfig.SetRepeatMeasurement(RepeatMeasurementToggle.IsChecked == true);
+      ExecutionConfig.SetStopOnError(StopOnErrorToggle.IsChecked == true);
+      await ExecutionConfig.SaveExecutionModel(ExecutionConfig.GetExecutionModelSnapshot());
     }
 
     public IReadOnlyList<ShowMessageModel> GetShowMessageModels()

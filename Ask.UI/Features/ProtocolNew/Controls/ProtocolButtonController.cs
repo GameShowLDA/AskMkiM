@@ -14,6 +14,8 @@ internal sealed class ProtocolButtonController
   /// </summary>
   private readonly IProtocolButtonView _view;
 
+  private ProtocolButtonState _currentState = ProtocolButtonState.Hidden;
+
   /// <summary>
   /// Инициализирует контроллер указанным представлением кнопок.
   /// </summary>
@@ -83,6 +85,9 @@ internal sealed class ProtocolButtonController
           throw new ArgumentOutOfRangeException(nameof(state), state, "Неизвестное состояние панели кнопок.");
       }
 
+      _currentState = state;
+      UpdateRuntimeExecutionSettingsVisibility();
+
       LogInput($"Состояние панели управления применено: state={state}, stepMode={stepMode}, " +
         $"start={_view.StartVisibility}, pause={_view.PauseVisibility}, continue={_view.ContinueVisibility}, " +
         $"exit={_view.ExitVisibility}, repeat={_view.RepeatVisibility}, " +
@@ -145,7 +150,30 @@ internal sealed class ProtocolButtonController
       _view.ContinueVisibility = Visibility.Collapsed;
       _view.ExitVisibility = Visibility.Collapsed;
       SetStepButtons(visible: false);
+      _currentState = _view.StartVisibility == Visibility.Visible
+        ? ProtocolButtonState.Ready
+        : ProtocolButtonState.Hidden;
+      UpdateRuntimeExecutionSettingsVisibility();
     });
+  }
+
+  /// <summary>
+  /// Обновляет видимость настроек выполнения с учётом текущего состояния панели.
+  /// </summary>
+  public void UpdateRuntimeExecutionSettingsVisibility()
+  {
+    Application.Current.Dispatcher.Invoke(() =>
+    {
+      _view.ExecutionSettingsVisibility =
+        ShouldShowRuntimeExecutionSettings(_view.RuntimeExecutionSettingsEnabled, _currentState)
+          ? Visibility.Visible
+          : Visibility.Collapsed;
+    });
+  }
+
+  public static bool ShouldShowRuntimeExecutionSettings(bool enabled, ProtocolButtonState state)
+  {
+    return enabled && (state is ProtocolButtonState.Ready or ProtocolButtonState.Paused);
   }
 
   /// <summary>

@@ -76,7 +76,7 @@ namespace Ask.UI.Features.ProtocolNew.Protocol
     {
       if (!ControlProgramCommandExecutionContext.IsActive
         && status == MessageType.Error
-        && await ExecutionConfig.GetIsStopOnErrorEnabled())
+        && ControlProgramCommandExecutionContext.GetCurrentStopOnErrorEnabled())
       {
         await _context.PauseAsync();
       }

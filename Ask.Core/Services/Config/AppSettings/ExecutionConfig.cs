@@ -13,6 +13,11 @@ namespace Ask.Core.Services.Config.AppSettings
   {
     static public Func<SettingsExecutionDto, Task>? SaveExecutionAsyncEvent;
 
+    /// <summary>
+    /// Возникает после сохранения общей модели настроек выполнения.
+    /// </summary>
+    public static event Action<SettingsExecutionDto>? ExecutionModelSaved;
+
     private static SettingsExecutionDto SettingsExecutionModel = new SettingsExecutionDto();
 
     /// <summary>
@@ -37,6 +42,18 @@ namespace Ask.Core.Services.Config.AppSettings
     /// </summary>
     /// <param name="enable">true для включения, false для выключения.</param>
     public static void SetStopOnError(bool enable) => SettingsExecutionModel.StopOnError = enable;
+
+    /// <summary>
+    /// Включает или выключает повтор измерения.
+    /// </summary>
+    /// <param name="enable">Признак включения повтора.</param>
+    public static void SetRepeatMeasurement(bool enable) => SettingsExecutionModel.RepeatMeasurement = enable;
+
+    /// <summary>
+    /// Возвращает текущую настройку остановки при ошибке.
+    /// </summary>
+    /// <returns><see langword="true"/>, если выполнение останавливается при ошибке.</returns>
+    public static bool GetStopOnErrorEnabled() => SettingsExecutionModel?.StopOnError ?? false;
     public static void SetLegacyCompatibilityMode(bool enable) => SettingsExecutionModel.LegacyCompatibilityMode = enable;
 
     /// <summary>
@@ -179,6 +196,7 @@ namespace Ask.Core.Services.Config.AppSettings
       SetDisablePowerCheck(execution.DisablePowerCheck);
 
       await InvokeSaveExecutionAsync(execution);
+      ExecutionModelSaved?.Invoke(GetExecutionModelSnapshot());
     }
 
     private static async Task InvokeSaveExecutionAsync(SettingsExecutionDto execution)
