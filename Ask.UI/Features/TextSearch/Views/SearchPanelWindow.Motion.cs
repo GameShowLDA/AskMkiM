@@ -85,13 +85,14 @@ public partial class SearchPanelWindow
     Animate(PanelScale, ScaleTransform.ScaleYProperty, 1, 220);
   }
 
-  private void CloseAnimated()
+  public void CloseAnimated()
   {
     if (_closed || _closingAnimation) return;
     if (!IsVisible || !SystemParameters.ClientAreaAnimation) { Close(); return; }
     _closingAnimation = true;
     int version = ++_motionVersion;
-    MotionRoot.IsHitTestVisible = false;
+    // The window must keep intercepting input until Close; otherwise a second
+    // click can reach the owner's title-bar buttons underneath the fading panel.
     Animate(PanelScale, ScaleTransform.ScaleXProperty, 0.97, 130);
     Animate(PanelScale, ScaleTransform.ScaleYProperty, 0.97, 130);
     var fade = CreateAnimation(MotionRoot.Opacity, 0, 130);

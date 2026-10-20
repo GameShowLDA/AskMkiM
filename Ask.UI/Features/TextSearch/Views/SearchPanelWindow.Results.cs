@@ -62,8 +62,8 @@ public partial class SearchPanelWindow
       int fileCount = rows is SearchPanelResultCollection collection ? collection.DocumentCount : rows.Select(row => row.Document.Id).Distinct().Count();
       ResultsSummary.Text = $"{rows.Count} совпадений в {fileCount} файлах";
       UpdateShellCorners();
-      FindAllButton.SetResourceReference(Control.ForegroundProperty, "SearchAccentBrush");
-      FindAllButton.SetResourceReference(Control.BorderBrushProperty, "SearchAccentBrush");
+      FindAllButton.SetResourceReference(Control.ForegroundProperty, "VioletColorSolidColorBrush");
+      FindAllButton.SetResourceReference(Control.BorderBrushProperty, "VioletColorSolidColorBrush");
       ShowResultsPage();
       SetSectionExpanded(ResultsPanel, true);
       UpdateShellCorners();
@@ -95,8 +95,8 @@ public partial class SearchPanelWindow
           Style = (Style)FindResource("RoundAction"), FontSize = 11, ToolTip = $"Страница {page + 1}" };
         if (page == _resultsPage)
         {
-          button.SetResourceReference(Control.ForegroundProperty, "SearchAccentBrush");
-          button.SetResourceReference(Control.BorderBrushProperty, "SearchAccentBrush");
+          button.SetResourceReference(Control.ForegroundProperty, "VioletColorSolidColorBrush");
+          button.SetResourceReference(Control.BorderBrushProperty, "VioletColorSolidColorBrush");
         }
         button.Click += (_, _) => { _resultsPage = selectedPage; ShowResultsPage(); };
         ResultsPages.Children.Add(button);

@@ -389,6 +389,36 @@ public sealed class SearchPanelIntegrationTests
     return Task.CompletedTask;
   });
 
+  [Fact]
+  public void AnimatedClose_KeepsInputShieldAndLeavesOwnerOpen() => RunInSta(async () =>
+  {
+    var owner = new Window { ShowActivated = false, Opacity = 0 };
+    new System.Windows.Interop.WindowInteropHelper(owner).EnsureHandle();
+    var panel = new SearchPanelWindow(owner, new Grid()) { ShowActivated = false, Opacity = 0 };
+    bool closed = false;
+    panel.Closed += (_, _) => closed = true;
+    try
+    {
+      owner.Show();
+      panel.ShowPanel();
+      panel.CloseAnimated();
+      if (SystemParameters.ClientAreaAnimation)
+      {
+        Assert.False(closed);
+        Assert.True(Find<Grid>(panel, "MotionRoot").IsHitTestVisible);
+        var mouse = new System.Windows.Input.MouseButtonEventArgs(System.Windows.Input.Mouse.PrimaryDevice,
+          Environment.TickCount, System.Windows.Input.MouseButton.Left)
+        { RoutedEvent = System.Windows.Input.Mouse.PreviewMouseDownEvent };
+        panel.RaiseEvent(mouse);
+        Assert.True(mouse.Handled);
+      }
+      await WaitUntil(() => closed);
+      Assert.True(owner.IsVisible);
+      Assert.Equal(WindowState.Normal, owner.WindowState);
+    }
+    finally { if (!closed) panel.Close(); owner.Close(); }
+  });
+
   private static T Find<T>(SearchPanelWindow panel, string name) where T : class => (T)panel.FindName(name);
   private static void Click(SearchPanelWindow panel, string name)
   {

@@ -838,7 +838,7 @@ namespace MainWindowProgram
       {
         if (globalKeyArgs.Key == Key.Escape && Keyboard.FocusedElement is not (MenuItem or System.Windows.Controls.ContextMenu))
         {
-          _searchPanel.Close();
+          _searchPanel.CloseAnimated();
           globalKeyArgs.Handled = true;
           return;
         }

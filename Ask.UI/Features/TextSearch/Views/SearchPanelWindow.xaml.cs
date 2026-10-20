@@ -21,6 +21,8 @@ public partial class SearchPanelWindow : Window
     _owner.StateChanged += Owner_LayoutChanged;
     _anchor.SizeChanged += Owner_LayoutChanged;
     InitializeSearch();
+    PreviewMouseDown += (_, e) => { if (_closingAnimation) e.Handled = true; };
+    PreviewMouseUp += (_, e) => { if (_closingAnimation) e.Handled = true; };
     Closed += (_, _) =>
     {
       ReleaseSearch();
@@ -64,9 +66,9 @@ public partial class SearchPanelWindow : Window
     SetSectionExpanded(SettingsPanel, expanded);
     UpdateShellCorners();
     SettingsButton.SetResourceReference(System.Windows.Controls.Control.ForegroundProperty,
-      expanded ? "SearchAccentBrush" : "ForegrounfBrushes");
+      expanded ? "VioletColorSolidColorBrush" : "ForegrounfBrushes");
     SettingsButton.SetResourceReference(System.Windows.Controls.Control.BorderBrushProperty,
-      expanded ? "SearchAccentBrush" : "TopPanelButtonBevelBrush");
+      expanded ? "VioletColorSolidColorBrush" : "TopPanelButtonBevelBrush");
     System.Windows.Automation.AutomationProperties.SetItemStatus(SettingsButton,
       expanded ? "Настройки открыты" : "Настройки закрыты");
   }

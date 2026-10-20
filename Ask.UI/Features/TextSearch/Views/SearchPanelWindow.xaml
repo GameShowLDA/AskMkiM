@@ -140,7 +140,7 @@
       <Setter Property="Background" Value="{DynamicResource BackgroundBrushes}"/>
       <Setter Property="BorderBrush" Value="{DynamicResource TopPanelButtonBevelBrush}"/>
       <Setter Property="HorizontalContentAlignment" Value="Center"/><Setter Property="VerticalContentAlignment" Value="Center"/><Setter Property="Padding" Value="8,0"/>
-      <Setter Property="search:SearchPanelChrome.CornerRadius" Value="8"/>
+      <Setter Property="search:SearchPanelChrome.CornerRadius" Value="14"/>
       <Setter Property="FontSize" Value="11"/>
       <Setter Property="Cursor" Value="Hand"/>
       <Setter Property="Template" Value="{StaticResource RaisedSearchButtonTemplate}"/>
@@ -149,7 +149,7 @@
       <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
       <Setter Property="Background" Value="{DynamicResource BackgroundBrushes}"/>
       <Setter Property="BorderBrush" Value="{DynamicResource TopPanelButtonBevelBrush}"/>
-      <Setter Property="search:SearchPanelChrome.CornerRadius" Value="8"/>
+      <Setter Property="search:SearchPanelChrome.CornerRadius" Value="15"/>
       <Setter Property="FontSize" Value="11"/>
       <Setter Property="Cursor" Value="Hand"/>
       <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
@@ -159,10 +159,10 @@
       <Setter Property="Template" Value="{StaticResource RaisedSearchButtonTemplate}"/>
       <Style.Triggers>
         <Trigger Property="IsChecked" Value="True">
-          <Setter Property="Foreground" Value="{DynamicResource SearchAccentBrush}"/>
-          <Setter Property="BorderBrush" Value="{DynamicResource SearchAccentBrush}"/>
+          <Setter Property="Foreground" Value="{DynamicResource VioletColorSolidColorBrush}"/>
+          <Setter Property="BorderBrush" Value="{DynamicResource VioletColorSolidColorBrush}"/>
         </Trigger>
-        <Trigger Property="IsKeyboardFocused" Value="True"><Setter Property="BorderBrush" Value="{DynamicResource SearchAccentBrush}"/></Trigger>
+        <Trigger Property="IsKeyboardFocused" Value="True"><Setter Property="BorderBrush" Value="{DynamicResource VioletColorSolidColorBrush}"/></Trigger>
       </Style.Triggers>
     </Style>
     <!-- Inset layers follow the password/role fields in RoleLoginWindow, with theme-neutral shading. -->
@@ -182,12 +182,12 @@
       <Setter Property="VerticalContentAlignment" Value="Stretch"/>
       <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="ContentControl">
         <Grid>
-          <Border CornerRadius="8" Background="{TemplateBinding Background}"/>
-          <Border CornerRadius="8" Background="{StaticResource SearchInsetVertical}" IsHitTestVisible="False"/>
-          <Border CornerRadius="8" Background="{StaticResource SearchInsetHorizontal}" IsHitTestVisible="False"/>
-          <Border CornerRadius="8" BorderThickness="1" BorderBrush="{DynamicResource TopPanelButtonBevelBrush}" Opacity="0.55" IsHitTestVisible="False"/>
+          <Border CornerRadius="{Binding Path=(search:SearchPanelChrome.CornerRadius), RelativeSource={RelativeSource TemplatedParent}}" Background="{TemplateBinding Background}"/>
+          <Border CornerRadius="{Binding Path=(search:SearchPanelChrome.CornerRadius), RelativeSource={RelativeSource TemplatedParent}}" Background="{StaticResource SearchInsetVertical}" IsHitTestVisible="False"/>
+          <Border CornerRadius="{Binding Path=(search:SearchPanelChrome.CornerRadius), RelativeSource={RelativeSource TemplatedParent}}" Background="{StaticResource SearchInsetHorizontal}" IsHitTestVisible="False"/>
+          <Border CornerRadius="{Binding Path=(search:SearchPanelChrome.CornerRadius), RelativeSource={RelativeSource TemplatedParent}}" BorderThickness="1" BorderBrush="{DynamicResource TopPanelButtonBevelBrush}" Opacity="0.55" IsHitTestVisible="False"/>
           <ContentPresenter Margin="{TemplateBinding Padding}"/>
-          <Border x:Name="FieldFocus" CornerRadius="8" BorderThickness="1" BorderBrush="{DynamicResource SearchAccentBrush}" Opacity="0" IsHitTestVisible="False"/>
+          <Border x:Name="FieldFocus" CornerRadius="{Binding Path=(search:SearchPanelChrome.CornerRadius), RelativeSource={RelativeSource TemplatedParent}}" BorderThickness="1" BorderBrush="{DynamicResource VioletColorSolidColorBrush}" Opacity="0" IsHitTestVisible="False"/>
         </Grid>
         <ControlTemplate.Triggers>
           <Trigger Property="IsKeyboardFocusWithin" Value="True">
@@ -237,9 +237,9 @@
       <Setter Property="FontSize" Value="11"/><Setter Property="Cursor" Value="Hand"/>
       <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="DataGridRow">
         <Grid Background="{TemplateBinding Background}">
-          <Border x:Name="RowHighlight" Background="{DynamicResource SearchAccentBrush}" Opacity="0" IsHitTestVisible="False"/>
+          <Border x:Name="RowHighlight" Background="{DynamicResource VioletColorSolidColorBrush}" Opacity="0" IsHitTestVisible="False"/>
           <Border BorderBrush="{StaticResource SearchRowSeparator}" BorderThickness="0,0,0,1"><DataGridCellsPresenter/></Border>
-          <Border x:Name="SelectionAccent" Width="2" Background="{DynamicResource SearchAccentBrush}" HorizontalAlignment="Left" Opacity="0" IsHitTestVisible="False"/>
+          <Border x:Name="SelectionAccent" Width="2" Background="{DynamicResource VioletColorSolidColorBrush}" HorizontalAlignment="Left" Opacity="0" IsHitTestVisible="False"/>
         </Grid>
         <ControlTemplate.Triggers>
           <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="RowHighlight" Property="Opacity" Value="0.06"/></Trigger>
@@ -248,6 +248,8 @@
       </ControlTemplate></Setter.Value></Setter>
     </Style>
   </Window.Resources>
+  <!-- Keep a native hit-test surface while the animated content fades out. -->
+  <Grid Background="#01000000">
   <Grid x:Name="MotionRoot" Margin="8" RenderTransformOrigin="0.5,0">
     <Grid.RenderTransform>
       <ScaleTransform x:Name="PanelScale"/>
@@ -270,7 +272,7 @@
           <ColumnDefinition Width="39"/>
           <ColumnDefinition Width="36"/>
         </Grid.ColumnDefinitions>
-        <ContentControl Style="{StaticResource InsetField}" Height="32">
+        <ContentControl Style="{StaticResource InsetField}" search:SearchPanelChrome.CornerRadius="16" Height="32">
           <Grid Margin="10,0">
             <Grid.ColumnDefinitions><ColumnDefinition Width="24"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
             <Path Data="{StaticResource SearchGeometry}" Fill="{DynamicResource ForegrounfBrushes}"
@@ -306,7 +308,7 @@
         <Button x:Name="PreviousButton" Click="Previous_Click" Grid.Column="2" Style="{StaticResource RoundAction}" ToolTip="Предыдущее совпадение" AutomationProperties.Name="Предыдущее совпадение">
           <Path Data="{StaticResource SemiIconArrowLeft}" Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Width="16" Height="16" Stretch="Uniform"/>
         </Button>
-        <Button x:Name="NextButton" Click="Next_Click" Grid.Column="3" Style="{StaticResource RoundAction}" Foreground="{DynamicResource SearchAccentBrush}"
+        <Button x:Name="NextButton" Click="Next_Click" Grid.Column="3" Style="{StaticResource RoundAction}" Foreground="{DynamicResource VioletColorSolidColorBrush}"
                 ToolTip="Следующее совпадение" AutomationProperties.Name="Следующее совпадение">
           <Path Data="{StaticResource SemiIconArrowRight}" Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" Width="16" Height="16" Stretch="Uniform"/>
         </Button>
@@ -331,7 +333,7 @@
         <StackPanel>
           <Grid x:Name="ReplacementRow" Height="28">
             <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="90"/><ColumnDefinition Width="108"/></Grid.ColumnDefinitions>
-            <ContentControl Style="{StaticResource InsetField}" Margin="0,0,6,0" Padding="10,0">
+            <ContentControl Style="{StaticResource InsetField}" search:SearchPanelChrome.CornerRadius="14" Margin="0,0,6,0" Padding="10,0">
               <Grid>
                 <TextBox x:Name="ReplacementInput" Style="{StaticResource SettingsInput}" AutomationProperties.Name="Заменить на"/>
                 <TextBlock Text="Заменить на..." IsHitTestVisible="False" VerticalAlignment="Center" FontSize="11" Foreground="{DynamicResource ForegrounfBrushes}" Opacity="0.65">
@@ -361,8 +363,8 @@
                   <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="ComboBoxItem">
                     <Border x:Name="ItemBorder" Background="Transparent" CornerRadius="6" Padding="{TemplateBinding Padding}"><ContentPresenter/></Border>
                     <ControlTemplate.Triggers>
-                      <Trigger Property="IsHighlighted" Value="True"><Setter Property="Foreground" Value="{DynamicResource SearchAccentBrush}"/></Trigger>
-                      <Trigger Property="IsSelected" Value="True"><Setter Property="Foreground" Value="{DynamicResource SearchAccentBrush}"/></Trigger>
+                      <Trigger Property="IsHighlighted" Value="True"><Setter Property="Foreground" Value="{DynamicResource VioletColorSolidColorBrush}"/></Trigger>
+                      <Trigger Property="IsSelected" Value="True"><Setter Property="Foreground" Value="{DynamicResource VioletColorSolidColorBrush}"/></Trigger>
                     </ControlTemplate.Triggers>
                   </ControlTemplate></Setter.Value></Setter>
                 </Style>
@@ -371,13 +373,13 @@
                 <Grid>
                   <ToggleButton Focusable="False" IsChecked="{Binding IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}">
                     <ToggleButton.Template><ControlTemplate TargetType="ToggleButton">
-                      <ContentControl Style="{StaticResource InsetField}">
+                      <ContentControl Style="{StaticResource InsetField}" search:SearchPanelChrome.CornerRadius="14">
                         <Path Data="{StaticResource SemiIconChevronDown}" Fill="{DynamicResource ForegrounfBrushes}" Width="14" Height="14" Stretch="Uniform" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,10,0"/>
                       </ContentControl>
                     </ControlTemplate></ToggleButton.Template>
                   </ToggleButton>
                   <ContentPresenter Content="{TemplateBinding SelectionBoxItem}" Margin="12,0,30,0" VerticalAlignment="Center" IsHitTestVisible="False"/>
-                  <Border x:Name="ScopeFocus" CornerRadius="8" BorderThickness="1" BorderBrush="{DynamicResource SearchAccentBrush}" Opacity="0" IsHitTestVisible="False"/>
+                  <Border x:Name="ScopeFocus" CornerRadius="14" BorderThickness="1" BorderBrush="{DynamicResource VioletColorSolidColorBrush}" Opacity="0" IsHitTestVisible="False"/>
                   <Popup x:Name="PART_Popup" IsOpen="{TemplateBinding IsDropDownOpen}" Placement="Bottom" AllowsTransparency="True" Focusable="False">
                     <Border Padding="4" MinWidth="{Binding ActualWidth, RelativeSource={RelativeSource TemplatedParent}}" CornerRadius="10" BorderThickness="1" BorderBrush="{StaticResource SearchPanelOutline}" Background="{DynamicResource SettingCardBackground}">
                       <ScrollViewer MaxHeight="180"><ItemsPresenter KeyboardNavigation.DirectionalNavigation="Contained"/></ScrollViewer>
@@ -400,18 +402,18 @@
               <CheckBox.Template><ControlTemplate TargetType="CheckBox">
                 <StackPanel Orientation="Horizontal">
                   <Border x:Name="Box" Width="16" Height="16" CornerRadius="3" BorderThickness="1" BorderBrush="{StaticResource SearchPanelOutline}" Background="{DynamicResource SettingCardBackground}">
-                    <Path x:Name="Check" Visibility="Collapsed" Data="M 2,6 L 5,9 L 11,2" Stroke="{DynamicResource SearchAccentBrush}" StrokeThickness="1.5" Width="12" Height="12" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                    <Path x:Name="Check" Visibility="Collapsed" Data="M 2,6 L 5,9 L 11,2" Stroke="{DynamicResource VioletColorSolidColorBrush}" StrokeThickness="1.5" Width="12" Height="12" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                   </Border>
                   <ContentPresenter Margin="8,0,0,0" VerticalAlignment="Center"/>
                 </StackPanel>
                 <ControlTemplate.Triggers>
-                  <Trigger Property="IsChecked" Value="True"><Setter TargetName="Check" Property="Visibility" Value="Visible"/><Setter TargetName="Box" Property="BorderBrush" Value="{DynamicResource SearchAccentBrush}"/></Trigger>
-                  <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Box" Property="BorderBrush" Value="{DynamicResource SearchAccentBrush}"/></Trigger>
-                  <Trigger Property="IsKeyboardFocused" Value="True"><Setter TargetName="Box" Property="BorderBrush" Value="{DynamicResource SearchAccentBrush}"/></Trigger>
+                  <Trigger Property="IsChecked" Value="True"><Setter TargetName="Check" Property="Visibility" Value="Visible"/><Setter TargetName="Box" Property="BorderBrush" Value="{DynamicResource VioletColorSolidColorBrush}"/></Trigger>
+                  <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Box" Property="BorderBrush" Value="{DynamicResource VioletColorSolidColorBrush}"/></Trigger>
+                  <Trigger Property="IsKeyboardFocused" Value="True"><Setter TargetName="Box" Property="BorderBrush" Value="{DynamicResource VioletColorSolidColorBrush}"/></Trigger>
                 </ControlTemplate.Triggers>
               </ControlTemplate></CheckBox.Template>
             </CheckBox>
-            <Button x:Name="ResetSettingsButton" Content="Сбросить" Click="ResetSettings_Click" Style="{StaticResource SettingsAction}" HorizontalAlignment="Right" Width="74"/>
+            <Button x:Name="ResetSettingsButton" search:SearchPanelChrome.CornerRadius="12" Content="Сбросить" Click="ResetSettings_Click" Style="{StaticResource SettingsAction}" HorizontalAlignment="Right" Width="74"/>
           </Grid>
         </StackPanel>
       </Border>
@@ -423,7 +425,7 @@
             <TextBlock x:Name="ResultsSummary" Grid.Column="1" Margin="10,0,4,0" FontSize="10" Opacity="0.75" Foreground="{DynamicResource ForegrounfBrushes}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
             <icons:ArrowButton x:Name="CollapseResultsButton" Grid.Column="2" Width="26" Height="26"
                                ButtonBackground="Transparent" ButtonBorder="Transparent"
-                               ArrowBrush="{DynamicResource ForegrounfBrushes}" ArrowHoverBrush="{DynamicResource SearchAccentBrush}"
+                               ArrowBrush="{DynamicResource ForegrounfBrushes}" ArrowHoverBrush="{DynamicResource VioletColorSolidColorBrush}"
                                IsArrowUp="True" ToggleOnClick="False" Click="CollapseResults_Click"
                                ToolTip="Свернуть результаты" AutomationProperties.Name="Свернуть результаты"/>
           </Grid>
@@ -444,7 +446,7 @@
                       <TextBlock Text="{Binding LineNumber}" Opacity="0.6"/>
                     </DataTemplate></DataGridTemplateColumn.CellTemplate></DataGridTemplateColumn>
                     <DataGridTemplateColumn Header="Текст строки" Width="240" CellStyle="{StaticResource LastResultCell}"><DataGridTemplateColumn.CellTemplate><DataTemplate>
-                      <TextBlock TextTrimming="CharacterEllipsis" ToolTip="{Binding LineText}"><Run Text="{Binding Before, Mode=OneWay}"/><Run Text="{Binding Hit, Mode=OneWay}" Foreground="{DynamicResource SearchAccentBrush}" FontWeight="SemiBold"/><Run Text="{Binding After, Mode=OneWay}"/></TextBlock>
+                      <TextBlock TextTrimming="CharacterEllipsis" ToolTip="{Binding LineText}"><Run Text="{Binding Before, Mode=OneWay}"/><Run Text="{Binding Hit, Mode=OneWay}" Foreground="{DynamicResource VioletColorSolidColorBrush}" FontWeight="SemiBold"/><Run Text="{Binding After, Mode=OneWay}"/></TextBlock>
                     </DataTemplate></DataGridTemplateColumn.CellTemplate></DataGridTemplateColumn>
                   </DataGrid.Columns>
                 </DataGrid>
@@ -468,5 +470,6 @@
       </Border>
       </StackPanel>
     </Border>
+  </Grid>
   </Grid>
 </Window>
