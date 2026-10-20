@@ -28,7 +28,7 @@ namespace UI.Controls.Search
     /// </summary>
     private bool _isExpanded = false;
 
-    private const double MinWindowHeight = 93;
+    private const double MinWindowHeight = 117;
     private bool _allowClose;
     private Window _parentWindow;
     private bool IsLoaded;
@@ -48,7 +48,7 @@ namespace UI.Controls.Search
     /// <summary>
     /// Высота окна при развернутой строке замены.
     /// </summary>
-    private double ExpandedWindowHeight => 133;
+    private double ExpandedWindowHeight => 157;
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="SearchWindow"/>.

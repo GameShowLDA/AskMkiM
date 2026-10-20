@@ -2367,8 +2367,8 @@ workspace control; для `TextEditorContainer` проверяет содерж�
 для полей и списка областей.
 Фон панели поиска — DynamicResource SearchPanelBackgroundBrush: однотонный цвет нижней
 границы BackgroundBrushes меню; задан в dark/light и dark.custom/light.custom темах.
-Компактные размеры восстановлены: 410 DIP по ширине,
-высота 93/133 DIP. Исходные SearchArrows, ArrowButton, CaseToggleButton,
+Компактные размеры восстановлены: 426 DIP по ширине (корпус 386 DIP, боковые поля по 20 DIP),
+высота окна 117/157 DIP (включая прозрачное нижнее поле 36 DIP для тени). Исходные SearchArrows, ArrowButton, CaseToggleButton,
 WholeWordToggleButton, ReplaseWordButton/ReplaseAllWordsButton и SearchSliderHandle
 сохраняют прежние размеры и значки. Подсказки полей находятся внутри SearchInputStyle и зависят от пустого Text, а не фокуса.
 PART_ContentHost не дублирует Padding поля дополнительным Margin: каретка и подсказка имеют общий отступ.
@@ -2389,7 +2389,8 @@ Window_Loaded подключён только в XAML, без повторной
 без вызова позиционирования; UpdatePosition проверяет PresentationSource до PointToScreen. Loaded устанавливает признак загрузки до UpdatePosition;
 ShowWindow повторяет позиционирование после Show. UpdatePosition берёт нижний
 край фактической панели через PointToScreen, переводит пиксели в DIP и центрирует
-поиск под меню. WindowContainer не имеет верхнего отступа, углы Border — 0,0,9,9.
+поиск под меню. WindowContainer не имеет верхнего отступа, углы Border — 0,0,9,9; внешние Canvas/Path в боковых полях рисуют вогнутые
+переходы к меню радиусом 20 DIP, не меняя размеры и обработку ввода.
 `EnsureSearchWindowAsync` допускает подключённый компонент без TextEditorUI.
 `UiEventsBinder.OnTextEditorActive` показывает меню поиска для подключённого компонента,
 замену — только для редактируемого. `RefreshActiveEditorUiState` переподключает видимое
