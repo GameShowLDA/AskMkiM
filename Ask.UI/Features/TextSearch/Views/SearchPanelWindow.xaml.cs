@@ -59,7 +59,7 @@ public partial class SearchPanelWindow : Window
   {
     bool expanded = SettingsPanel.Visibility != Visibility.Visible;
     SettingsPanel.Visibility = expanded ? Visibility.Visible : Visibility.Collapsed;
-    PanelShell.CornerRadius = new CornerRadius(expanded ? 20 : 24);
+    UpdateShellCorners();
     SettingsButton.SetResourceReference(System.Windows.Controls.Control.ForegroundProperty,
       expanded ? "SearchAccentBrush" : "ForegrounfBrushes");
     SettingsButton.SetResourceReference(System.Windows.Controls.Control.BorderBrushProperty,

@@ -20,7 +20,7 @@ namespace UI.Components.MultiEditorMethods
   /// <summary>
   /// Класс для работы с поиском по тексту.
   /// </summary>
-  public class TextSearchManager
+  public partial class TextSearchManager
   {
     /// <summary>
     /// Экземпляр класса <see cref="FileManager"/> для управления файлами.
@@ -121,6 +121,13 @@ namespace UI.Components.MultiEditorMethods
     /// <param name="searchParameters">Область поиска: поиск в текущем документе, во всех открытых документах, в файле.</param>
     public async Task SearchData(string searchText, bool? wholeWord, bool? caseWord, int searchArea, string searchParameters)
     {
+      if (searchParameters is "FindNext" or "FindPrevious")
+      {
+        await NavigateCachedAsync(new Ask.Core.Shared.Interfaces.UiInterfaces.TextSearchQuery(
+          searchText, caseWord == true, wholeWord == true), searchArea == 1, searchParameters == "FindNext");
+        return;
+      }
+
       if (searchArea == 2)
       {
         searchArea = 0;
@@ -314,6 +321,35 @@ namespace UI.Components.MultiEditorMethods
     /// <summary>
     /// Показывает предупреждение, если поле для поиска пустое.
     /// </summary>
+    public async Task<IReadOnlyList<Ask.UI.Features.TextSearch.Views.SearchPanelResult>> FindAllForPanelAsync(
+      Ask.Core.Shared.Interfaces.UiInterfaces.TextSearchQuery query, bool allDocuments)
+    {
+      var documents = await GetCachedDocumentsAsync(query, allDocuments);
+      foreach (var document in documents) document.Editor.MarkerService.SetSearchMarkers(document.Matches, -1);
+      if (_panelCacheDocuments != null && _panelCacheRows != null && _panelCacheDocuments.SequenceEqual(documents))
+        return _panelCacheRows;
+      var matched = documents.Where(document => document.Matches.Count > 0).ToArray();
+      var ends = new int[matched.Length];
+      int total = 0;
+      for (int index = 0; index < matched.Length; index++) ends[index] = total += matched[index].Matches.Count;
+      var rows = new Ask.UI.Features.TextSearch.Views.SearchPanelResultCollection(total, matched.Length, globalIndex =>
+      {
+        int group = Array.BinarySearch(ends, globalIndex + 1);
+        if (group < 0) group = ~group;
+        var document = matched[group];
+        int local = globalIndex - (group == 0 ? 0 : ends[group - 1]);
+        return new(document.Snapshot, document.Matches[local], () =>
+        {
+          if (!IsCachedDocumentCurrent(document) || _navigationQuery != query) return false;
+          GoToCachedMatch(documents, document, local);
+          return true;
+        });
+      });
+      _panelCacheDocuments = documents;
+      _panelCacheRows = rows;
+      return rows;
+    }
+
     private void ShowEmptySearchWarning()
     {
       MessageBoxCustom.Show("Введите текст для поиска.", image: MessageBoxImage.Warning);
@@ -1375,33 +1411,26 @@ namespace UI.Components.MultiEditorMethods
 
     public void OnSearchWindowClosing()
     {
-      var activeTab = fileManager.EditorWorkspaceModel.OpenPages.FirstOrDefault(page => page.IsActive);
-      if (activeTab != null && fileManager.EditorWorkspaceModel.UserControls[fileManager.EditorWorkspaceModel.OpenPages.IndexOf(activeTab)] is TextEditorContainer textEditorContainer)
+      ResetNavigationCache();
+      foreach (var container in fileManager.EditorWorkspaceModel.UserControls.OfType<TextEditorContainer>())
       {
-        if (textEditorContainer != null)
+        foreach (var tab in container.DockManager.DockItems)
         {
-          foreach (var control in textEditorContainer.DockManager.DockItems)
+          if (tab.Content is TextEditorUI editor) ClearHighlights(editor);
+          else if (tab.Content is TranslatorItem translator)
           {
-            if (control.Content is TextEditorUI textEditor)
-            {
-              ClearHighlights(textEditor);
-            }
-            else if (control.Content is TranslatorItem item)
-            {
-              ClearHighlights(item.GetLeftBox().GetTextEditor());
-              ClearHighlights(item.GetRightBox().GetTextEditor());
-            }
+            ClearHighlights(translator.GetLeftBox().GetTextEditor());
+            ClearHighlights(translator.GetRightBox().GetTextEditor());
           }
-
-          _pendingHighlights.Clear();
-          _fullText = new Dictionary<UserControl, string>();
-          _wholeWord = false;
-          _caseWord = false;
-          _searchArea = 0;
-          _searchParameters = string.Empty;
-          hasChanged = true;
         }
       }
+      _pendingHighlights.Clear();
+      _fullText = new Dictionary<UserControl, string>();
+      _wholeWord = false;
+      _caseWord = false;
+      _searchArea = 0;
+      _searchParameters = string.Empty;
+      hasChanged = true;
     }
 
     /// <summary>

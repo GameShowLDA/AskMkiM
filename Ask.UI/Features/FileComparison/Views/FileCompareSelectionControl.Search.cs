@@ -9,6 +9,8 @@ namespace Ask.UI.Features.FileComparison.Views;
 /// <summary>Подключает поиск к обеим сторонам активного сравнения без изменения документов.</summary>
 public partial class FileCompareSelectionControl : ITextSearchTarget, ITextSearchScopeProvider
 {
+  private readonly ComparisonSearchIndex _searchIndex = new();
+
   /// <inheritdoc />
   public string AllDocumentsTitle => "Обе панели";
 
@@ -26,22 +28,22 @@ public partial class FileCompareSelectionControl : ITextSearchTarget, ITextSearc
 
   /// <inheritdoc />
   public void HighlightSearchResults(IReadOnlyList<TextSearchMatch> matches, TextSearchMatch? current)
-  {
-    if (ActiveComparison == null) return;
-    ApplySearchRanges(ActiveComparison.SourceLines, "source", ActiveComparison.SourceFile.TextContent, matches, current);
-    ApplySearchRanges(ActiveComparison.TargetLines, "target", ActiveComparison.TargetFile.TextContent, matches, current);
-  }
+    => _searchIndex.Update(ActiveComparison, matches, current);
+
+
 
   /// <inheritdoc />
   public void NavigateToSearchResult(TextSearchMatch match)
   {
     if (ActiveComparison == null) return;
     var lines = match.DocumentId == "source" ? ActiveComparison.SourceLines : ActiveComparison.TargetLines;
-    for (int index = 0; index < lines.Count; index++)
+    int first = _searchIndex.FindRow(ActiveComparison, match) ?? 0;
+    for (int index = first; index < lines.Count; index++)
     {
       if (lines[index].OriginalLineNumber != match.LineNumber) continue;
       ComparisonRowsListBox.ScrollIntoView(ActiveComparison.Rows[index]);
-      ComparisonRowsListBox.UpdateLayout();
+      if (ComparisonRowsListBox.ItemContainerGenerator.ContainerFromIndex(index) == null)
+        ComparisonRowsListBox.UpdateLayout();
       if (ComparisonRowsListBox.ItemContainerGenerator.ContainerFromIndex(index) is DependencyObject container
         && FindSearchTextBlock(container, lines[index]) is TextBlock textBlock)
       {
@@ -77,45 +79,7 @@ public partial class FileCompareSelectionControl : ITextSearchTarget, ITextSearc
     return null;
   }
 
-  /// <summary>Распределяет диапазоны поиска по исходным строкам, включая многострочные совпадения.</summary>
-  /// <param name="lines">Выровненные строки стороны сравнения.</param>
-  /// <param name="documentId">Идентификатор стороны.</param>
-  /// <param name="text">Исходный текст с сохранёнными разделителями строк.</param>
-  /// <param name="matches">Совпадения текущего запроса.</param>
-  /// <param name="current">Активное совпадение.</param>
-  private static void ApplySearchRanges(IReadOnlyList<DiffLineViewModel> lines, string documentId, string text,
-    IReadOnlyList<TextSearchMatch> matches, TextSearchMatch? current)
-  {
-    var starts = new List<int> { 0 };
-    for (int index = 0; index < text.Length; index++)
-    {
-      if (text[index] == '\r')
-      {
-        if (index + 1 < text.Length && text[index + 1] == '\n') index++;
-        starts.Add(index + 1);
-      }
-      else if (text[index] == '\n') starts.Add(index + 1);
-    }
-    var documentMatches = matches.Where(match => match.DocumentId == documentId).ToArray();
-    int firstMatch = 0;
-    foreach (var line in lines)
-    {
-      var ranges = new List<DiffSearchRange>();
-      if (line.OriginalLineNumber is int number && number > 0 && number <= starts.Count)
-      {
-        int start = starts[number - 1], end = start + line.Text.Length;
-        while (firstMatch < documentMatches.Length && documentMatches[firstMatch].StartOffset + documentMatches[firstMatch].Length <= start)
-          firstMatch++;
-        for (int index = firstMatch; index < documentMatches.Length && documentMatches[index].StartOffset < end; index++)
-        {
-          var match = documentMatches[index];
-          int rangeStart = Math.Max(start, match.StartOffset), rangeEnd = Math.Min(end, match.StartOffset + match.Length);
-          if (rangeEnd > rangeStart) ranges.Add(new DiffSearchRange(rangeStart - start, rangeEnd - rangeStart, match == current));
-        }
-      }
-      line.SearchRanges = ranges;
-    }
-  }
+
 }
 
 /// <summary>Диапазон подсветки поиска внутри строки сравнения.</summary>

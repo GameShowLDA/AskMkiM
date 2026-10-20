@@ -29,6 +29,7 @@ Size/Foreground и анимации общей кнопки; лицензия с
 
 | Нужно изменить | Сначала смотреть | Затем смотреть |
 | --- | --- | --- |
+| Скорость поиска, кэш переходов, массовая замена | `UI/Components/MultiEditorMethods/TextSearchManager.Navigation.cs`, `Ask.Core/Services/TextSearch/TextSearchEngine.cs` | `TextMarkerService.SetSearchMarkers`, `Ask.UI/Features/FileComparison/Views/ComparisonSearchIndex.cs`; [замеры](architecture/text-search-performance.md) |
 | Подключение поиска к новому компоненту | `Ask.Core/Shared/Interfaces/UiInterfaces/ITextSearchTarget.cs`, `Ask.UI/Shared/Search/SearchTarget.cs` | `Ask.Core/Services/TextSearch/`, `Ask.UI/Shared/Search/SearchTarget.cs`; [поиск](#pluggable-text-search), `docs/architecture/text-search.md` |
 | Сравнение открытых файлов | `MainWindow/MainWindow.xaml`, `MainWindow/Events/UiEventsBinder.cs` | `MainWindow/ViewModels/FileViewModel.cs`, `MainWindow/Services/FileService.cs`, `Ask.UI/Features/FileComparison/Views/FileCompareSelectionControl.xaml(.cs)`; [сравнение файлов](#file-comparison-ui) |
 | Уведомления о делах на сегодня | `MainWindow/MainWindow.TodayTasks.cs`, `MainWindow/MainWindow.xaml` | `CalendarNoteService.Load/SetCompleted`, `CalendarControl.Completion_Click`; [заметки](#calendar-notes) |
@@ -2340,9 +2341,13 @@ ID непустые, уникальны в компоненте и не зави
 `TextSearchMatch` содержит ID документа, offset/length, строку (1-based) и колонку (0-based).
 
 **Общий алгоритм и сессия.** `Ask.Core/Services/TextSearch/TextSearchEngine.cs`
-→ `Find(documents, query, token)` → `Regex.Escape` / `\b` / `RegexOptions.IgnoreCase`
+→ `Find(documents, query, token)` → `Regex.Escape` / `\b` / `RegexOptions.IgnoreCase` / `EnumerateMatches`
 → неперекрывающиеся совпадения по полному тексту, включая многострочные запросы;
-координаты учитывают CRLF/LF/CR. Зависимости от WPF и редактора отсутствуют.
+координаты учитывают CRLF/LF/CR. EnumerateMatches не создаёт Match/Group на каждое
+совпадение. При нескольких документах суммарным объёмом от 1 млн символов поиск
+разделяется по документам через Parallel.For (не более 4 workers), порядок результатов
+сохраняется. Отмена проверяется между совпадениями и при подсчёте координат.
+Зависимости от WPF и редактора отсутствуют.
 `TextSearchSession.SearchAsync` получает снимки в вызывающем UI-потоке, сравнивает
 с прошлым запросом/снимками, выполняет изменившийся поиск в `Task.Run`, отменяет
 предыдущий запрос и после await применяет только актуальный результат. Сессия
@@ -2361,9 +2366,22 @@ workspace control; для `TextEditorContainer` проверяет содерж�
 `MultiWindowService.GetActiveSearchTarget` экспортирует его в MainWindow.
 
 **Состояние UI.** Прежнее окно `SearchWindow` удалено перед переработкой интерфейса.
-Новая визуальная панель `Ask.UI/Features/TextSearch/Views/SearchPanelWindow.xaml(.cs)` открывается через Ctrl+F и «Файл → Поиск»: FileViewModel.SearchFileCommand → FileService.ShowSearchPanel → MainWindow.Search.cs.ShowSearchPanel. Ширина окна — 500 DIP (уменьшается на узком владельце); высота — 64 DIP. Компактная разметка задана в конечных размерах без масштабирования всей панели; контуры имеют толщину 1 DIP, включены layout rounding и стандартное сглаживание векторных границ. Панель центрируется под TopPanel и следует за владельцем. Повторное открытие фокусирует поле; Esc/крестик и смена роли закрывают окно. Подписки освобождаются при Closed. Шестерёнка открывает/закрывает SettingsPanel, подсвечивается при раскрытии; высота окна подстраивается через SizeToContent.Height. Панель содержит замену, переключатели регистра/целого слова/regex, область (все открытые или текущий документ), поиск в выделении и сброс параметров. Параметры сохраняются при сворачивании в пределах экземпляра окна; сброс очищает замену и возвращает исходные значения, не меняя запрос. Поиск/замена подключены: SearchPanelWindow.Search.cs → awaitable callbacks MainWindow.Search.cs → MultiWindowControl.SearchData/ReplaceData (Task) → прежние TextSearchManager/TextReplacementManager редактора и транслятора. Новые области UI «все/текущий» отображаются в legacy индексы 1/0. Подключённые компоненты используют прежнюю TextSearchSession и свои области; сравнение допускает только чтение, выбор стороны сохраняется через ITextSearchScopeProvider. Стрелки, Enter/Shift+Enter и F3/Shift+F3 выполняют циклическую навигацию: после последнего совпадения переходят к первому, перед первым — к последнему, включая обход всех открытых документов без предупреждения об окончании и без диалогов для документов без совпадений; F3 и Esc также перехватываются главным окном, Alt+R/Alt+A в панели выполняют замену/замену всех. SearchProgressChanged обновляет счётчик редактора; сессия компонента обновляет собственный счётчик. Закрытие отменяет сессию, очищает подсветку и освобождает подписки. Пустой запрос очищает подсветку. Операции сериализованы; замена проверяет, что активный редактор и текст не изменились за время фонового поиска. «Найти все» не подключено; regex и поиск в выделении недоступны, поскольку прежний алгоритм их не поддерживает.
-Общий движок, сессии, контракты, WPF SearchTarget и менеджеры поиска/замены
-редактора сохранены для новой реализации.
+Новая визуальная панель `Ask.UI/Features/TextSearch/Views/SearchPanelWindow.xaml(.cs)` открывается через Ctrl+F и «Файл → Поиск»: FileViewModel.SearchFileCommand → FileService.ShowSearchPanel → MainWindow.Search.cs.ShowSearchPanel. Ширина окна — 500 DIP (уменьшается на узком владельце); высота — 64 DIP. Компактная разметка задана в конечных размерах без масштабирования всей панели; контуры имеют толщину 1 DIP, включены layout rounding и стандартное сглаживание векторных границ. Панель центрируется под TopPanel и следует за владельцем. Повторное открытие фокусирует поле; Esc/крестик и смена роли закрывают окно. Подписки освобождаются при Closed. Шестерёнка открывает/закрывает SettingsPanel, подсвечивается при раскрытии; высота окна подстраивается через SizeToContent.Height. Панель содержит замену, переключатели регистра/целого слова/regex, область (все открытые или текущий документ), поиск в выделении и сброс параметров. Параметры сохраняются при сворачивании в пределах экземпляра окна; сброс очищает замену и возвращает исходные значения, не меняя запрос. Поиск/замена подключены: SearchPanelWindow.Search.cs → awaitable callbacks MainWindow.Search.cs → MultiWindowControl.SearchData/ReplaceData (Task) → кэшированный TextSearchManager редактора и транслятора. Новые области UI «все/текущий» отображаются в legacy индексы 1/0. Подключённые компоненты используют прежнюю TextSearchSession и свои области; сравнение допускает только чтение, выбор стороны сохраняется через ITextSearchScopeProvider. Стрелки, Enter/Shift+Enter и F3/Shift+F3 выполняют циклическую навигацию: после последнего совпадения переходят к первому, перед первым — к последнему, включая обход всех открытых документов без предупреждения об окончании и без диалогов для документов без совпадений; F3 и Esc также перехватываются главным окном, Alt+R/Alt+A в панели выполняют замену/замену всех. SearchProgressChanged обновляет счётчик редактора; сессия компонента обновляет собственный счётчик. Закрытие отменяет сессию, очищает подсветку и освобождает подписки. Пустой запрос очищает подсветку. Операции сериализованы; замена проверяет, что активный редактор и текст не изменились за время фонового поиска. «Найти все» открывает ResultsPanel внутри той же панели — под строкой поиска либо под раскрытыми настройками. SearchPanelWindow.Results.cs вызывает TextSearchSession.FindAll для адаптеров или EditorFindAllAsync → MultiWindowControl/MultiEditorControl → TextSearchManager.FindAllForPanelAsync для редактора/транслятора. Последний использует снимки с уникальными ID на запрос и TextSearchEngine, не открывает прежнюю таблицу в workspace. SearchPanelResult хранит файл, строку, выделенный фрагмент и безопасный callback перехода. Таблица показывает пять строк на страницу, до четырёх кнопок страниц и общий счётчик; заголовок сворачивает только тело результатов. Выбор строки проверяет актуальность снимка и выбирает точное совпадение; TextSearchSession.SelectMatch синхронизирует индекс дальнейшей навигации. При изменении текста результат отклоняется с предложением обновить поиск. Изменение запроса/области/параметров и замена скрывают устаревшие строки. Очистка поисковой подсветки проходит по всем контейнерам и сохраняет историю замен до закрытия. Regex и поиск в выделении остаются недоступными.
+**Быстрые переходы редактора.** `UI/Components/MultiEditorMethods/TextSearchManager.Navigation.cs`
+обслуживает Next/Previous, FindAllForPanelAsync и ReplaceCachedAsync через общий индекс.
+Кэш привязан к экземпляру редактора, TextDocument.Version и TextSearchQuery; при смене
+документа/запроса или закрытии окна отменяются незавершённые вычисления. Только изменённые
+документы создают строковые снимки и проходят фоновый TextSearchEngine. Неизменённые
+совпадения и строки таблицы переиспользуются. SearchPanelResultCollection материализует
+только запрошенные страницы (кэш до 64 строк); переход к далёкой странице не
+перечисляет предыдущие результаты, а выбор строки использует готовый ResultIndex. Документы различаются по экземплярам,
+поэтому одинаковые имена файлов не смешивают поиск и замены. Старт от каретки вычисляется
+бинарным поиском, следующие шаги используют готовые индексы и общий счётчик всех файлов.
+Caret.BringCaretToView прокручивает только при необходимости, без двойного центрирования
+и явного Focus редактора при каждом шаге. Массовая замена идёт с конца каждого документа внутри RunUpdate
+(одна группа Undo), история замен и подтверждение/отмена рамок сохраняются.
+`MultiEditorControl.ReplaceWordData` делегирует в ReplaceCachedAsync; прежние менеджеры
+и legacy-таблица остаются для обратной совместимости, новая панель их не создаёт.
 
 **Сравнение файлов.** `FileCompareSelectionControl.Search.cs` реализует
 ITextSearchTarget: снимки активного сравнения имеют ID `source`/`target`.
@@ -2376,7 +2394,11 @@ ITextSearchTarget: снимки активного сравнения имеют
 подчёркивание. Очистка восстанавливает исходную раскраску diff. Пустые позиции
 DiffPlex не ищутся. `NavigateToSearchResult` → OriginalLineNumber → общая пара
 → ScrollIntoView → TextPointer.GetCharacterRect / BringIntoView для перенесённого текста.
-Замена в сравнении недоступна. Переключение ActiveComparison очищает старые диапазоны;
+`ComparisonSearchIndex.cs` хранит карту подсветки сравнения. Неизменившиеся matches переиспользуют карту совпадение → диапазоны строк:
+при навигации меняется только IsCurrent у прежнего и нового совпадения. Карта
+(docId, номер строки) → индекс исключает линейный поиск нужной строки; UpdateLayout
+вызывается только при создании виртуализированного контейнера. Замена в сравнении
+недоступна. Переключение ActiveComparison очищает старые диапазоны;
 следующий запрос использует актуальную пару документов.
 
 **Проверка.** `Ask.UI.UnitTests/Services/TextSearch/`: буквальный поиск, параметры,
@@ -3691,8 +3713,8 @@ FindAllAsync добавляет рамки в документы выбранн�
 посимвольные различия сохраняются. Рамки не меняют метрики текста.
 
 Заменённые фрагменты получают отдельные маркеры `AddReplacementMarker` с зелёной
-рамкой (`SearchReplacementBrush`, fallback #59C770). `TextReplacementManager`
-добавляет их после замены; TextSegmentCollection отслеживает смещения при следующих
+рамкой (`SearchReplacementBrush`, fallback #59C770). `TextSearchManager.ReplaceCachedMatch`
+(и legacy `TextReplacementManager`) добавляет их после замены; TextSegmentCollection отслеживает смещения при следующих
 редактированиях. Поисковая очистка использует `ClearAllMarkers(preserveReplacements: true)`:
 смена запроса, области и навигация сохраняют историю замен. При `SearchPanelWindow.Closed`
 отдельный callback `ClearReplacementHighlights` очищает её во всех контейнерах
@@ -3705,3 +3727,9 @@ FindAllAsync добавляет рамки в документы выбранн�
 не используется. Отмена доступна, пока текст фрагмента совпадает с результатом
 замены и редактор допускает изменение. Очистка истории, смена документа и Unloaded
 закрывают меню; обычное закрытие меню без выбора сохраняет рамку.
+
+Оптимизированные `TextMarkerService.SetSearchMarkers` переиспользуют сегменты
+неизменённого снимка и меняют только активный маркер. Draw получает через
+TextSegmentCollection.FindOverlappingSegments только видимую область и создаёт
+общие frozen pens/brushes на проход, а не на каждое совпадение. История замен
+не пересоздаётся; добавление рамки замены ищет только пересекающиеся сегменты.

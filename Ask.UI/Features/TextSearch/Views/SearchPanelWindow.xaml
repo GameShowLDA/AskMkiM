@@ -100,6 +100,30 @@
         <ControlTemplate TargetType="TextBox"><ScrollViewer x:Name="PART_ContentHost" VerticalAlignment="Center"/></ControlTemplate>
       </Setter.Value></Setter>
     </Style>
+    <Style x:Key="ResultHeader" TargetType="DataGridColumnHeader">
+      <Setter Property="Background" Value="{DynamicResource SettingCardBackground}"/>
+      <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
+      <Setter Property="FontSize" Value="11"/><Setter Property="FontWeight" Value="Normal"/>
+      <Setter Property="Padding" Value="8,0"/><Setter Property="Height" Value="27"/>
+      <Setter Property="BorderBrush" Value="{StaticResource SearchPanelOutline}"/><Setter Property="BorderThickness" Value="0,0,1,1"/>
+    </Style>
+    <Style x:Key="ResultCell" TargetType="DataGridCell">
+      <Setter Property="BorderThickness" Value="0"/><Setter Property="Padding" Value="8,0"/>
+      <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="DataGridCell">
+        <Border Padding="{TemplateBinding Padding}" Background="{TemplateBinding Background}"><ContentPresenter VerticalAlignment="Center"/></Border>
+      </ControlTemplate></Setter.Value></Setter>
+    </Style>
+    <Style x:Key="ResultRow" TargetType="DataGridRow">
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
+      <Setter Property="FontSize" Value="11"/><Setter Property="Cursor" Value="Hand"/>
+      <Style.Triggers>
+        <Trigger Property="IsSelected" Value="True"><Setter Property="Background" Value="#334D709B"/></Trigger>
+        <Trigger Property="IsMouseOver" Value="True"><Setter Property="Background" Value="#224D709B"/></Trigger>
+      </Style.Triggers>
+    </Style>
   </Window.Resources>
   <Grid Margin="8">
     <Border x:Name="PanelShell" CornerRadius="24" BorderThickness="1"
@@ -159,7 +183,7 @@
           <Path Style="{StaticResource ActionStroke}" Data="M 2,12 L 20,12 M 13,5 L 20,12 L 13,19" Width="14" Height="14" Stretch="Uniform"/>
         </Button>
         <Border Grid.Column="4" Width="1" Height="32" Background="{StaticResource SearchPanelOutline}"/>
-        <Button Grid.Column="5" Style="{StaticResource RoundAction}" IsEnabled="False" ToolTipService.ShowOnDisabled="True" ToolTip="Найти все — пока не подключено" AutomationProperties.Name="Найти все">
+        <Button x:Name="FindAllButton" Click="FindAll_Click" Grid.Column="5" Style="{StaticResource RoundAction}" ToolTip="Найти все" AutomationProperties.Name="Найти все">
           <Viewbox Width="17" Height="18" Stretch="Uniform"><Grid Width="28" Height="30">
             <Path Style="{StaticResource ActionStroke}" Data="M 14,24 L 4,24 L 4,2 L 15,2 L 21,8 L 21,12 M 15,2 L 15,9 L 21,9"/>
             <Path Data="{StaticResource SearchGeometry}" Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
@@ -254,6 +278,49 @@
             </CheckBox>
             <Button x:Name="ResetSettingsButton" Content="Сбросить" Click="ResetSettings_Click" Style="{StaticResource SettingsAction}" HorizontalAlignment="Right" Width="74"/>
           </Grid>
+        </StackPanel>
+      </Border>
+      <Border x:Name="ResultsPanel" Visibility="Collapsed" Margin="-3,0,-3,8" Padding="6" CornerRadius="14" BorderThickness="1" BorderBrush="{StaticResource SearchPanelOutline}">
+        <StackPanel>
+          <Grid Height="30">
+            <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="26"/></Grid.ColumnDefinitions>
+            <TextBlock Text="Результаты поиска" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource ForegrounfBrushes}" VerticalAlignment="Center"/>
+            <TextBlock x:Name="ResultsSummary" Grid.Column="1" Margin="10,0,4,0" FontSize="10" Opacity="0.75" Foreground="{DynamicResource ForegrounfBrushes}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+            <Button x:Name="CollapseResultsButton" Grid.Column="2" Style="{StaticResource SettingsAction}" Click="CollapseResults_Click" ToolTip="Свернуть результаты" AutomationProperties.Name="Свернуть результаты">
+              <TextBlock x:Name="ResultsChevron" Text="⌃" FontSize="16"/>
+            </Button>
+          </Grid>
+          <StackPanel x:Name="ResultsBody">
+            <Border CornerRadius="6" BorderThickness="1" BorderBrush="{StaticResource SearchPanelOutline}" Background="{DynamicResource SettingCardBackground}" ClipToBounds="True">
+              <Grid Height="158">
+                <DataGrid x:Name="ResultsGrid" SizeChanged="ResultsGrid_SizeChanged" Style="{x:Null}" AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False" CanUserDeleteRows="False"
+                          CanUserSortColumns="False" CanUserReorderColumns="False" CanUserResizeRows="False" CanUserResizeColumns="False" RowHeight="26"
+                          HeadersVisibility="Column" RowHeaderWidth="0" GridLinesVisibility="Vertical" VerticalGridLinesBrush="{StaticResource SearchPanelOutline}"
+                          Background="Transparent" BorderThickness="0" Foreground="{DynamicResource ForegrounfBrushes}" FontSize="11"
+                          SelectionMode="Single" SelectionUnit="FullRow" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Disabled"
+                          ColumnHeaderStyle="{StaticResource ResultHeader}" CellStyle="{StaticResource ResultCell}" RowStyle="{StaticResource ResultRow}" SelectionChanged="ResultsGrid_SelectionChanged">
+                  <DataGrid.Columns>
+                    <DataGridTemplateColumn Header="Имя файла" Width="136"><DataGridTemplateColumn.CellTemplate><DataTemplate>
+                      <TextBlock Text="{Binding FileName}" TextTrimming="CharacterEllipsis" ToolTip="{Binding FileName}"/>
+                    </DataTemplate></DataGridTemplateColumn.CellTemplate></DataGridTemplateColumn>
+                    <DataGridTextColumn Header="Строка" Width="54" Binding="{Binding LineNumber}"/>
+                    <DataGridTemplateColumn Header="Текст строки" Width="240"><DataGridTemplateColumn.CellTemplate><DataTemplate>
+                      <TextBlock TextTrimming="CharacterEllipsis" ToolTip="{Binding LineText}"><Run Text="{Binding Before, Mode=OneWay}"/><Run Text="{Binding Hit, Mode=OneWay}" Foreground="{DynamicResource SearchAccentBrush}" FontWeight="SemiBold"/><Run Text="{Binding After, Mode=OneWay}"/></TextBlock>
+                    </DataTemplate></DataGridTemplateColumn.CellTemplate></DataGridTemplateColumn>
+                  </DataGrid.Columns>
+                </DataGrid>
+                <TextBlock x:Name="EmptyResults" Text="Совпадений не найдено" FontSize="11" Foreground="{DynamicResource ForegrounfBrushes}" Opacity="0.65" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed"/>
+              </Grid>
+            </Border>
+            <Grid Height="35" Margin="0,4,0,0">
+              <TextBlock x:Name="ResultsRange" FontSize="11" Foreground="{DynamicResource ForegrounfBrushes}" Opacity="0.75" VerticalAlignment="Center"/>
+              <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                <Button x:Name="PreviousResultsPage" Style="{StaticResource RoundAction}" Width="26" Height="26" Content="‹" FontSize="18" Click="PreviousResultsPage_Click" ToolTip="Предыдущая страница"/>
+                <StackPanel x:Name="ResultsPages" Orientation="Horizontal"/>
+                <Button x:Name="NextResultsPage" Style="{StaticResource RoundAction}" Width="26" Height="26" Content="›" FontSize="18" Click="NextResultsPage_Click" ToolTip="Следующая страница"/>
+              </StackPanel>
+            </Grid>
+          </StackPanel>
         </StackPanel>
       </Border>
       </StackPanel>

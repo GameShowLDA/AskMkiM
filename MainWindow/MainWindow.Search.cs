@@ -20,6 +20,7 @@ public partial class MainWindow
       _searchPanel = new SearchPanelWindow(this, TopPanel)
       {
         TargetProvider = MultiWindow.GetActiveSearchTarget,
+        EditorFindAllAsync = MultiWindow.FindAllForPanelAsync,
         CanReplaceEditor = () => MultiWindow.GetActiveTextEditor()?.TextEditor is { IsReadOnly: false },
         ClearEditorHighlights = MultiWindow.OnSearchWindowClosing,
         ClearReplacementHighlights = MultiWindow.ClearReplacementHighlights,

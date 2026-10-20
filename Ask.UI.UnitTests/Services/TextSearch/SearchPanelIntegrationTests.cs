@@ -162,6 +162,214 @@ public sealed class SearchPanelIntegrationTests
     owner.Close();
   });
 
+  [Fact]
+  public void FindAll_ShowsFiveRowsPerPageAndSupportsBothSettingsLayouts() => RunInSta(async () =>
+  {
+    var owner = new Window();
+    new System.Windows.Interop.WindowInteropHelper(owner).EnsureHandle();
+    var panel = new SearchPanelWindow(owner, new Grid()) { Opacity = 0, ShowActivated = false };
+    try
+    {
+      int navigated = -1;
+      bool searchedAll = false;
+      panel.EditorFindAllAsync = (query, all) =>
+      {
+        Assert.Equal("cat", query.Text);
+        searchedAll = all;
+        IReadOnlyList<SearchPanelResult> rows = Enumerable.Range(0, 18).Select(index =>
+        {
+          int selected = index;
+          return new SearchPanelResult(new SearchDocument((index % 4).ToString(), $"file{index % 4}.txt", "prefix cat suffix"),
+            new TextSearchMatch((index % 4).ToString(), 7, 3, index + 1, 7), () => { navigated = selected; return true; });
+        }).ToArray();
+        return Task.FromResult(rows);
+      };
+      panel.SetSearchText("cat");
+      panel.ShowPanel();
+      await panel.RunSearchAsync(TextSearchAction.FindAll);
+      panel.UpdateLayout();
+      Assert.True(searchedAll);
+      Assert.Equal(5, Find<DataGrid>(panel, "ResultsGrid").Items.Count);
+      Assert.Equal("1–5 из 18", Find<TextBlock>(panel, "ResultsRange").Text);
+      Assert.Contains("18", Find<TextBlock>(panel, "ResultsSummary").Text);
+      Assert.Contains("4", Find<TextBlock>(panel, "ResultsSummary").Text);
+      Assert.True(Find<DataGrid>(panel, "ResultsGrid").Columns[2].ActualWidth > 200);
+      double resultsHeight = panel.ActualHeight;
+      Assert.True(resultsHeight > 200);
+      Click(panel, "NextResultsPage");
+      Assert.Equal("6–10 из 18", Find<TextBlock>(panel, "ResultsRange").Text);
+      Find<DataGrid>(panel, "ResultsGrid").SelectedIndex = 1;
+      Assert.Equal(6, navigated);
+      var pageFour = Find<StackPanel>(panel, "ResultsPages").Children.OfType<Button>().Single(button => Equals(button.Content, "4"));
+      pageFour.RaiseEvent(new RoutedEventArgs(ButtonBase.ClickEvent));
+      Assert.Equal(3, Find<DataGrid>(panel, "ResultsGrid").Items.Count);
+      Assert.Equal("16–18 из 18", Find<TextBlock>(panel, "ResultsRange").Text);
+      Assert.False(Find<Button>(panel, "NextResultsPage").IsEnabled);
+      Click(panel, "SettingsButton");
+      panel.UpdateLayout();
+      Assert.True(panel.ActualHeight > resultsHeight);
+      Assert.Equal(Visibility.Visible, Find<System.Windows.Controls.Border>(panel, "ResultsPanel").Visibility);
+      Click(panel, "CollapseResultsButton");
+      Assert.Equal(Visibility.Collapsed, Find<StackPanel>(panel, "ResultsBody").Visibility);
+      Click(panel, "CollapseResultsButton");
+      Click(panel, "SettingsButton");
+      panel.UpdateLayout();
+      Assert.Equal(resultsHeight, panel.ActualHeight);
+      panel.SetSearchText("changed");
+      Assert.Equal(Visibility.Collapsed, Find<System.Windows.Controls.Border>(panel, "ResultsPanel").Visibility);
+    }
+    finally { panel.Close(); owner.Close(); }
+  });
+
+  [Theory]
+  [InlineData(false)]
+  [InlineData(true)]
+  public void FindAll_ComponentRowsSelectExactMatchAndRejectStaleSnapshots(bool refreshSessionFirst) => RunInSta(async () =>
+  {
+    var owner = new Window();
+    new System.Windows.Interop.WindowInteropHelper(owner).EnsureHandle();
+    var target = new EditableTarget();
+    var panel = new SearchPanelWindow(owner, new Grid()) { TargetProvider = () => target };
+    try
+    {
+      panel.SetSearchText("cat");
+      Find<ToggleButton>(panel, "WholeWordOption").IsChecked = true;
+      await panel.RunSearchAsync(TextSearchAction.FindAll);
+      var grid = Find<DataGrid>(panel, "ResultsGrid");
+      Assert.Equal(4, grid.Items.Count);
+      grid.SelectedIndex = 2;
+      Assert.Equal(16, target.Current!.StartOffset);
+      Assert.Equal("3 из 4", Find<TextBlock>(panel, "SearchStatus").Text);
+      await panel.RunSearchAsync(TextSearchAction.Next);
+      Assert.Equal("target", target.Current!.DocumentId);
+      Assert.Equal("4 из 4", Find<TextBlock>(panel, "SearchStatus").Text);
+      target.ReplaceSearchResult(target.Current, "dog");
+      if (refreshSessionFirst) await panel.RunSearchAsync(TextSearchAction.Next);
+      grid.SelectedIndex = 0;
+      Assert.Equal(Visibility.Collapsed, Find<System.Windows.Controls.Border>(panel, "ResultsPanel").Visibility);
+      Assert.Equal("Обновите поиск", Find<TextBlock>(panel, "SearchStatus").Text);
+    }
+    finally { panel.Close(); owner.Close(); }
+  });
+
+  [Fact]
+  public void FindAll_EmptyAndClosedRequestsDoNotLeaveRowsOrHighlights() => RunInSta(async () =>
+  {
+    var owner = new Window();
+    new System.Windows.Interop.WindowInteropHelper(owner).EnsureHandle();
+    var pending = new TaskCompletionSource<IReadOnlyList<SearchPanelResult>>(TaskCreationOptions.RunContinuationsAsynchronously);
+    int clears = 0;
+    var panel = new SearchPanelWindow(owner, new Grid())
+    {
+      EditorFindAllAsync = (_, _) => Task.FromResult<IReadOnlyList<SearchPanelResult>>(Array.Empty<SearchPanelResult>()),
+      ClearEditorHighlights = () => clears++
+    };
+    try
+    {
+      panel.SetSearchText("cat");
+      await panel.RunSearchAsync(TextSearchAction.FindAll);
+      Assert.Equal(Visibility.Visible, Find<TextBlock>(panel, "EmptyResults").Visibility);
+      Assert.Equal("0 из 0", Find<TextBlock>(panel, "ResultsRange").Text);
+      panel.EditorFindAllAsync = (_, _) => pending.Task;
+      var request = panel.RunSearchAsync(TextSearchAction.FindAll);
+      panel.Close();
+      pending.SetResult(Array.Empty<SearchPanelResult>());
+      await request;
+      Assert.True(clears >= 2);
+    }
+    finally { panel.Close(); owner.Close(); }
+  });
+
+  [Fact]
+  public void EditorNavigation_ReusesUnchangedFilesAndWrapsAcrossDuplicateNames() => RunInSta(async () =>
+  {
+    var workspace = new global::UI.Components.MultiEditorControl();
+    var manager = (global::UI.Components.MultiEditorMethods.FileManager)workspace.GetType()
+      .GetField("fileManager", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)!.GetValue(workspace)!;
+    var search = (global::UI.Components.MultiEditorMethods.TextSearchManager)workspace.GetType()
+      .GetField("textSearchManager", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)!.GetValue(workspace)!;
+    var container = new global::UI.Controls.TextEditorControl.TextEditorContainer();
+    var page = new global::UI.Components.Invoke.OpenFileButton { Text = "TextEditor", IsActive = true };
+    manager.EditorWorkspaceModel.OpenPages.Add(page);
+    manager.EditorWorkspaceModel.UserControls.Add(container);
+    workspace.ContentPanel.Children.Add(container);
+    var first = new global::UI.Controls.TextEditorControl.TextEditorUI { Text = "cat one cat" };
+    var second = new global::UI.Controls.TextEditorControl.TextEditorUI { Text = "cat two" };
+    var one = new global::UI.Windows.WpfDocking.Windows.Docking.DockItem { Title = "same.txt", Content = first };
+    var two = new global::UI.Windows.WpfDocking.Windows.Docking.DockItem { Title = "same.txt", Content = second };
+    var window = new Window { Content = workspace, Width = 700, Height = 400, Opacity = 0, ShowInTaskbar = false, ShowActivated = false };
+    try
+    {
+      window.Show();
+      window.UpdateLayout();
+      one.Show(container.DockManager, global::UI.Windows.WpfDocking.Windows.Docking.DockPosition.Document);
+      two.Show(container.DockManager, global::UI.Windows.WpfDocking.Windows.Docking.DockPosition.Document);
+      one.Show(container.DockManager);
+      var rows = await search.FindAllForPanelAsync(new TextSearchQuery("cat"), true);
+      Assert.Equal(3, rows.Count);
+      Assert.Equal(2, rows.Select(row => row.Document.Id).Distinct().Count());
+      var repeated = await search.FindAllForPanelAsync(new TextSearchQuery("cat"), true);
+      Assert.Same(rows, repeated);
+      Assert.True(rows[0].Navigate());
+      Assert.Equal(3, first.TextArea.Caret.Offset);
+      await search.SearchData("cat", false, false, 1, "FindNext");
+      Assert.Equal(11, first.TextArea.Caret.Offset);
+      await search.SearchData("cat", false, false, 1, "FindNext");
+      Assert.True(two.IsActiveItem);
+      Assert.Equal(3, second.TextArea.Caret.Offset);
+      await search.SearchData("cat", false, false, 1, "FindNext");
+      Assert.True(one.IsActiveItem);
+      Assert.Equal(3, first.TextArea.Caret.Offset);
+      await search.SearchData("cat", false, false, 1, "FindPrevious");
+      Assert.True(two.IsActiveItem);
+      var oldFirstSnapshot = rows[0].Document;
+      second.TextEditor.Document.Insert(0, "cat ");
+      Assert.False(rows[2].Navigate());
+      var updated = await search.FindAllForPanelAsync(new TextSearchQuery("cat"), true);
+      Assert.Equal(4, updated.Count);
+      Assert.Same(oldFirstSnapshot, updated[0].Document);
+      Assert.True(updated[3].Navigate());
+      Assert.Equal(7, second.TextArea.Caret.Offset);
+      await workspace.ReplaceWordData("dog", "cat", false, false, 1, "FindAll");
+      Assert.Equal("dog one dog", first.Text);
+      Assert.Equal("dog dog two", second.Text);
+      first.TextEditor.Document.UndoStack.Undo();
+      Assert.Equal("cat one cat", first.Text);
+      search.OnSearchWindowClosing();
+    }
+    finally { window.Close(); }
+  });
+
+  [Fact]
+  public void ComparisonNavigation_UpdatesOnlyOldAndNewMatchLines() => RunInSta(() =>
+  {
+    var searchIndex = new Ask.UI.Features.FileComparison.Views.ComparisonSearchIndex();
+    var source = Enumerable.Range(1, 3).Select(index => new Ask.UI.Features.FileComparison.Views.DiffLineViewModel(
+      Ask.UI.Features.FileComparison.Views.DiffLineKind.Unchanged,
+      Ask.UI.Features.FileComparison.Views.DiffPaneSide.Source, index, index, index < 3 ? "cat" : "none")).ToArray();
+    var target = Enumerable.Range(1, 3).Select(index => new Ask.UI.Features.FileComparison.Views.DiffLineViewModel(
+      Ask.UI.Features.FileComparison.Views.DiffLineKind.Unchanged,
+      Ask.UI.Features.FileComparison.Views.DiffPaneSide.Target, index, index, index < 3 ? "cat" : "none")).ToArray();
+    var comparison = new Ask.UI.Features.FileComparison.Views.FileComparisonResult(
+      new("same.txt", "left.txt", "cat\ncat\nnone"), new("same.txt", "right.txt", "cat\ncat\nnone"), source, target);
+    var matches = Ask.Core.Services.TextSearch.TextSearchEngine.Find(new[] {
+      new SearchDocument("source", "source", comparison.SourceFile.TextContent),
+      new SearchDocument("target", "target", comparison.TargetFile.TextContent)
+    }, new TextSearchQuery("cat"));
+    searchIndex.Update(comparison, matches, matches[0]);
+    var unchanged = target[0].SearchRanges;
+    var emptyLine = source[2].SearchRanges;
+    Assert.True(source[0].SearchRanges[0].IsCurrent);
+    searchIndex.Update(comparison, matches, matches[1]);
+    Assert.False(source[0].SearchRanges[0].IsCurrent);
+    Assert.True(source[1].SearchRanges[0].IsCurrent);
+    Assert.Same(unchanged, target[0].SearchRanges);
+    Assert.Same(emptyLine, source[2].SearchRanges);
+    searchIndex.Update(comparison, Array.Empty<TextSearchMatch>(), null);
+    Assert.All(source.Concat(target), line => Assert.Empty(line.SearchRanges));
+    return Task.CompletedTask;
+  });
+
   private static T Find<T>(SearchPanelWindow panel, string name) where T : class => (T)panel.FindName(name);
   private static void Click(SearchPanelWindow panel, string name) => Find<Button>(panel, name)
     .RaiseEvent(new RoutedEventArgs(ButtonBase.ClickEvent));

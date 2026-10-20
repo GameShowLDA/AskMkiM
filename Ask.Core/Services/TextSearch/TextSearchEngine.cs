@@ -24,39 +24,57 @@ public static class TextSearchEngine
       || documents.Select(document => document.Id).Distinct(StringComparer.Ordinal).Count() != documents.Count)
       throw new ArgumentException("Идентификаторы документов поиска должны быть непустыми и уникальными.", nameof(documents));
 
-    var results = new List<TextSearchMatch>();
-    if (string.IsNullOrEmpty(query.Text)) return results;
+    if (string.IsNullOrEmpty(query.Text)) return Array.Empty<TextSearchMatch>();
     var escaped = Regex.Escape(query.Text);
     var pattern = query.WholeWord ? $@"\b{escaped}\b" : escaped;
     var regex = new Regex(pattern, query.MatchCase ? RegexOptions.None : RegexOptions.IgnoreCase);
-    foreach (var document in documents)
+    if (documents.Count > 1 && documents.Sum(document => (long)document.Text.Length) >= 1_000_000)
+    {
+      var batches = new IReadOnlyList<TextSearchMatch>[documents.Count];
+      Parallel.For(0, documents.Count, new ParallelOptions
+      {
+        CancellationToken = cancellationToken,
+        MaxDegreeOfParallelism = Math.Min(4, Environment.ProcessorCount)
+      }, index => batches[index] = FindDocument(documents[index], regex, cancellationToken));
+      var combined = new List<TextSearchMatch>(batches.Sum(batch => batch.Count));
+      foreach (var batch in batches) combined.AddRange(batch);
+      return combined;
+    }
+    var results = new List<TextSearchMatch>();
+    foreach (var document in documents) results.AddRange(FindDocument(document, regex, cancellationToken));
+    return results;
+  }
+
+  private static IReadOnlyList<TextSearchMatch> FindDocument(SearchDocument document, Regex regex, CancellationToken cancellationToken)
+  {
+    cancellationToken.ThrowIfCancellationRequested();
+    var results = new List<TextSearchMatch>();
+    int position = 0, lineNumber = 1, lineStart = 0;
+    // ValueMatch enumeration avoids allocating Match/Group objects for each occurrence.
+    foreach (var match in regex.EnumerateMatches(document.Text))
     {
       cancellationToken.ThrowIfCancellationRequested();
-      int position = 0, lineNumber = 1, lineStart = 0;
-      foreach (Match match in regex.Matches(document.Text))
+      while (position < match.Index)
       {
-        cancellationToken.ThrowIfCancellationRequested();
-        while (position < match.Index)
+        if ((position & 0xFFFF) == 0) cancellationToken.ThrowIfCancellationRequested();
+        char character = document.Text[position++];
+        if (character == '\r')
         {
-          char character = document.Text[position++];
-          if (character == '\r')
+          if (position < document.Text.Length && document.Text[position] == '\n')
           {
-            if (position < document.Text.Length && document.Text[position] == '\n')
-            {
-              if (position == match.Index) continue;
-              position++;
-            }
-            lineNumber++;
-            lineStart = position;
+            if (position == match.Index) continue;
+            position++;
           }
-          else if (character == '\n')
-          {
-            lineNumber++;
-            lineStart = position;
-          }
+          lineNumber++;
+          lineStart = position;
         }
-        results.Add(new TextSearchMatch(document.Id, match.Index, match.Length, lineNumber, match.Index - lineStart));
+        else if (character == '\n')
+        {
+          lineNumber++;
+          lineStart = position;
+        }
       }
+      results.Add(new TextSearchMatch(document.Id, match.Index, match.Length, lineNumber, match.Index - lineStart));
     }
     return results;
   }

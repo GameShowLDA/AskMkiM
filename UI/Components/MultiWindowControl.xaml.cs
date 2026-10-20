@@ -365,6 +365,10 @@ namespace UI.Components
     /// <remarks>
     /// Этот метод вызывает завершение обработки поиска и очистку ресурсов редактора, связанных с поиском.
     /// </remarks>
+    public Task<IReadOnlyList<Ask.UI.Features.TextSearch.Views.SearchPanelResult>> FindAllForPanelAsync(
+      Ask.Core.Shared.Interfaces.UiInterfaces.TextSearchQuery query, bool allDocuments)
+      => MultiEditor.FindAllForPanelAsync(query, allDocuments);
+
     public void ClearReplacementHighlights() => MultiEditor.ClearReplacementHighlights();
 
     public void OnSearchWindowClosing()

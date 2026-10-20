@@ -150,6 +150,31 @@ public sealed class ReplacementMarkerTests
     });
   }
 
+  [Theory]
+  [InlineData(false)]
+  [InlineData(true)]
+  public void Navigation_ReusesMarkerObjectsAndPreservesReplacementHistory(bool sharedEditor)
+  {
+    RunInSta(() =>
+    {
+      var editor = new TextEditor { Text = "cat dog cat" };
+      var markers = CreateMarkers(editor, sharedEditor);
+      markers.AddReplacement(4, 3);
+      var matches = Ask.Core.Services.TextSearch.TextSearchEngine.Find(
+        new[] { new Ask.Core.Shared.Interfaces.UiInterfaces.SearchDocument("id", "file", editor.Text) },
+        new Ask.Core.Shared.Interfaces.UiInterfaces.TextSearchQuery("cat"));
+      var setter = markers.Service.GetType().GetMethod("SetSearchMarkers")!;
+      setter.Invoke(markers.Service, new object[] { matches, 0 });
+      var original = GetRanges(markers.Service);
+      setter.Invoke(markers.Service, new object[] { matches, 1 });
+      var reused = GetRanges(markers.Service);
+      Assert.Equal(3, reused.Length);
+      Assert.All(original, marker => Assert.Contains(reused, item => ReferenceEquals(item, marker)));
+      Assert.Single(reused, marker => (bool)marker.GetType().GetProperty("IsCurrentSearch")!.GetValue(marker)!);
+      Assert.Single(reused, marker => (bool)marker.GetType().GetProperty("IsReplacement")!.GetValue(marker)!);
+    });
+  }
+
   private sealed record Harness(object Service, Action<int, int> AddReplacement,
     Action<int, int, bool> AddSearch, Action<bool> Clear, Action ClearReplacements);
 
@@ -174,7 +199,8 @@ public sealed class ReplacementMarkerTests
   private static void RunInSta(Action action)
   {
     Exception? failure = null;
-    var thread = new Thread(() => { try { action(); } catch (Exception error) { failure = error; } });
+    var thread = new Thread(() => { try { action(); } catch (Exception error) { failure = error; }
+      finally { System.Windows.Threading.Dispatcher.CurrentDispatcher.InvokeShutdown(); } });
     thread.SetApartmentState(ApartmentState.STA);
     thread.Start();
     Assert.True(thread.Join(TimeSpan.FromSeconds(15)));

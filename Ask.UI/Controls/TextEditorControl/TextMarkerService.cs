@@ -1,3 +1,4 @@
+using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.UI.Shared.Search;
 using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Rendering;
@@ -42,6 +43,9 @@ namespace Ask.UI.Controls.TextEditorControl
     private readonly ICSharpCode.AvalonEdit.TextEditor editor;
     private TextMarkerColorizer? _colorizer;
     private readonly ReplacementReviewMenu _replacementMenu;
+    private IReadOnlyList<TextSearchMatch>? _searchMatches;
+    private readonly List<TextMarker> _searchMarkers = new();
+    private TextMarker? _currentSearchMarker;
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="TextMarkerService"/>.
@@ -80,7 +84,17 @@ namespace Ask.UI.Controls.TextEditorControl
         return;
       }
 
-      foreach (var marker in markers.OrderBy(marker => marker.IsReplacement))
+      if (textView.VisualLines.Count == 0) return;
+      int visibleStart = textView.VisualLines[0].FirstDocumentLine.Offset;
+      int visibleEnd = textView.VisualLines[^1].LastDocumentLine.EndOffset;
+      var searchColor = (editor.TryFindResource("VioletColorSolidColorBrush") as SolidColorBrush)?.Color ?? Color.FromRgb(145, 132, 238);
+      var replacementColor = (editor.TryFindResource("SearchReplacementBrush") as SolidColorBrush)?.Color ?? Color.FromRgb(89, 199, 112);
+      var searchPen = new Pen(new SolidColorBrush(searchColor), 1.5);
+      var replacementPen = new Pen(new SolidColorBrush(replacementColor), 1.5);
+      var currentFill = new SolidColorBrush(Color.FromArgb(128, searchColor.R, searchColor.G, searchColor.B));
+      searchPen.Freeze(); replacementPen.Freeze(); currentFill.Freeze();
+      foreach (var marker in markers.FindOverlappingSegments(visibleStart, visibleEnd - visibleStart)
+        .OrderBy(marker => marker.IsReplacement))
       {
         if (!marker.IsBackground)
           continue;
@@ -89,12 +103,8 @@ namespace Ask.UI.Controls.TextEditorControl
         {
           if (marker.IsSearch)
           {
-            var color = marker.IsReplacement
-              ? (editor.TryFindResource("SearchReplacementBrush") as SolidColorBrush)?.Color ?? Color.FromRgb(89, 199, 112)
-              : (editor.TryFindResource("VioletColorSolidColorBrush") as SolidColorBrush)?.Color ?? Color.FromRgb(145, 132, 238);
-            var outline = new SolidColorBrush(color);
-            var fill = marker.IsCurrentSearch ? new SolidColorBrush(Color.FromArgb(128, color.R, color.G, color.B)) : null;
-            drawingContext.DrawRoundedRectangle(fill, new Pen(outline, 1.5), rect, 3, 3);
+            drawingContext.DrawRoundedRectangle(marker.IsCurrentSearch ? currentFill : null,
+              marker.IsReplacement ? replacementPen : searchPen, rect, 3, 3);
             continue;
           }
           var brush = new SolidColorBrush(marker.BackgroundColor ?? Colors.Yellow);
@@ -113,6 +123,9 @@ namespace Ask.UI.Controls.TextEditorControl
       if (editor.Document == null)
         return;
 
+      _searchMatches = null;
+      _searchMarkers.Clear();
+      _currentSearchMarker = null;
       markers = new TextSegmentCollection<TextMarker>(editor.Document);
 
       if (_colorizer != null)
@@ -128,6 +141,9 @@ namespace Ask.UI.Controls.TextEditorControl
     /// </summary>
     public void ClearAllMarkers(bool preserveReplacements = false)
     {
+      _searchMatches = null;
+      _searchMarkers.Clear();
+      _currentSearchMarker = null;
       if (preserveReplacements && markers != null)
       {
         foreach (var marker in markers.Where(marker => !marker.IsReplacement).ToArray())
@@ -165,8 +181,31 @@ namespace Ask.UI.Controls.TextEditorControl
     /// <param name="isCurrent">Признак активного результата.</param>
     public void AddSearchMarker(int startOffset, int length, bool isCurrent)
     {
+      _searchMatches = null;
       if (!TryNormalizeRange(ref startOffset, ref length)) return;
       markers.Add(new TextMarker(startOffset, length) { IsSearch = true, IsCurrentSearch = isCurrent });
+      editor.TextArea.TextView.InvalidateLayer(KnownLayer.Selection);
+    }
+
+    /// <summary>Переиспользует рамки неизменившегося снимка; при переходе меняет только активную.</summary>
+    public void SetSearchMarkers(IReadOnlyList<TextSearchMatch> matches, int currentIndex)
+    {
+      if (!ReferenceEquals(_searchMatches, matches))
+      {
+        ClearAllMarkers(preserveReplacements: true);
+        _searchMatches = matches;
+        foreach (var match in matches)
+        {
+          int start = match.StartOffset, length = match.Length;
+          if (!TryNormalizeRange(ref start, ref length)) continue;
+          var marker = new TextMarker(start, length) { IsSearch = true };
+          markers.Add(marker);
+          _searchMarkers.Add(marker);
+        }
+      }
+      if (_currentSearchMarker != null) _currentSearchMarker.IsCurrentSearch = false;
+      _currentSearchMarker = currentIndex >= 0 && currentIndex < _searchMarkers.Count ? _searchMarkers[currentIndex] : null;
+      if (_currentSearchMarker != null) _currentSearchMarker.IsCurrentSearch = true;
       editor.TextArea.TextView.InvalidateLayer(KnownLayer.Selection);
     }
 
@@ -176,8 +215,7 @@ namespace Ask.UI.Controls.TextEditorControl
     public void AddReplacementMarker(int startOffset, int length, string? originalText)
     {
       if (!TryNormalizeRange(ref startOffset, ref length)) return;
-      foreach (var previous in markers.Where(item => item.IsReplacement
-        && (item.Length == 0 || item.StartOffset < startOffset + length && item.EndOffset > startOffset)).ToArray())
+      foreach (var previous in markers.FindOverlappingSegments(startOffset, length).Where(item => item.IsReplacement).ToArray())
         markers.Remove(previous);
       var marker = new TextMarker(startOffset, length) { IsSearch = true, IsReplacement = true };
       markers.Add(marker);
@@ -188,6 +226,7 @@ namespace Ask.UI.Controls.TextEditorControl
           () => ReferenceEquals(editor.Document, document) && markers.Any(item => ReferenceEquals(item, marker)),
           () =>
           {
+            _searchMatches = null;
             foreach (var item in markers.Where(item => ReferenceEquals(item, marker) || item.IsSearch
               && !item.IsReplacement && item.StartOffset < marker.EndOffset && item.EndOffset > marker.StartOffset).ToArray())
               markers.Remove(item);

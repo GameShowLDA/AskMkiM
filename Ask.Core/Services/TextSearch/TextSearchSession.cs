@@ -86,6 +86,21 @@ public sealed class TextSearchSession : IDisposable
     await SearchAsync(query, TextSearchAction.FindAll, documentId);
   }
 
+  /// <summary>Выбирает строку результатов, если снимки документов ещё актуальны.</summary>
+  public bool SelectMatch(TextSearchMatch match)
+  {
+    if (_disposed) return false;
+    var ids = _documents.Select(document => document.Id).ToHashSet();
+    var current = _target.GetSearchDocuments().Where(document => ids.Contains(document.Id)).ToArray();
+    if (!_documents.SequenceEqual(current)) return false;
+    int index = Matches.ToList().IndexOf(match);
+    if (index < 0) return false;
+    CurrentIndex = index;
+    _target.HighlightSearchResults(Matches, Current);
+    _target.NavigateToSearchResult(match);
+    return true;
+  }
+
   /// <summary>Отменяет незавершённый запрос и очищает только подсветку поиска.</summary>
   public void Dispose()
   {

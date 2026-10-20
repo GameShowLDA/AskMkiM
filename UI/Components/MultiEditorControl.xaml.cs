@@ -298,6 +298,10 @@ namespace UI.Components
     /// </summary>
     public void OnSearchWindowClosing() => textSearchManager.OnSearchWindowClosing();
 
+    public Task<IReadOnlyList<Ask.UI.Features.TextSearch.Views.SearchPanelResult>> FindAllForPanelAsync(
+      Ask.Core.Shared.Interfaces.UiInterfaces.TextSearchQuery query, bool allDocuments)
+      => textSearchManager.FindAllForPanelAsync(query, allDocuments);
+
     public void ClearReplacementHighlights() => textSearchManager.ClearReplacementHighlights();
 
     private void OnSearchResultsReady(string searchText, bool? isCaseSensitive, Dictionary<string, List<SearchResult>> results) =>
@@ -371,28 +375,9 @@ namespace UI.Components
     /// <param name="searchParameters">Параметры поиска: найти  далее, найти предыдущее, найти все.</param>
     public async Task ReplaceWordData(string replaceText, string searchText, bool? wholeWord, bool? caseWord, int searchArea, string searchParameters)
     {
-      var replacementEditor = GetActiveTextEditor();
-      var replacementTextSnapshot = replacementEditor?.Text;
-      var fullText = textSearchManager.GetText(searchArea);
-      textSearchManager.InitializeSearch(fullText, searchText, wholeWord, caseWord, searchArea, searchParameters);
-      await textSearchManager.FindAllAsync(searchText, wholeWord, caseWord, searchArea, false);
-      // A tab switch or document edit while snapshots were searched must not redirect replacement.
-      if (replacementEditor == null || !ReferenceEquals(replacementEditor, GetActiveTextEditor())
-          || replacementEditor.Text != replacementTextSnapshot || replacementEditor.TextEditor.IsReadOnly)
-        return;
-      if (string.Equals(searchParameters, "FindNext"))
-      {
-        bool replaced = ReplaceNextWord(replaceText, searchText);
-        if (replaced)
-        {
-          await textSearchManager.SearchData(searchText, wholeWord, caseWord, searchArea, "FindNext");
-        }
-      }
-      else if (string.Equals(searchParameters, "FindAll"))
-      {
-        ReplaceAllWords(replaceText, searchText);
-        await textSearchManager.FindAllAsync(searchText, wholeWord, caseWord, searchArea, false);
-      }
+      await textSearchManager.ReplaceCachedAsync(
+        new Ask.Core.Shared.Interfaces.UiInterfaces.TextSearchQuery(searchText, caseWord == true, wholeWord == true),
+        replaceText ?? string.Empty, searchArea == 1, searchParameters == "FindAll");
     }
 
     private void ReplaceAllWords(string replaceText, string searchText)

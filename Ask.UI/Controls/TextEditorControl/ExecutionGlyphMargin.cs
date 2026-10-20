@@ -34,7 +34,7 @@ namespace Ask.UI.Controls.TextEditorControl
     /// <summary>
     /// Кисть маркера активной строки выполнения.
     /// </summary>
-    public Brush MarkerBrush { get; set; } = (Brush)Application.Current.Resources["YellowColorSolidColorBrush"];
+    public Brush MarkerBrush { get; set; } = (Brush?)Application.Current?.Resources["YellowColorSolidColorBrush"] ?? Brushes.Gold;
 
     /// <summary>
     /// Кисть вертикальной линии диапазона активной команды.
@@ -55,7 +55,7 @@ namespace Ask.UI.Controls.TextEditorControl
     /// <summary>
     /// Базовый цвет подсветки точки останова.
     /// </summary>
-    public Color LineBrush { get; set; } = ((SolidColorBrush)Application.Current.Resources["RedColorSolidColorBrush"]).Color;
+    public Color LineBrush { get; set; } = (Application.Current?.Resources["RedColorSolidColorBrush"] as SolidColorBrush)?.Color ?? Colors.Red;
 
     /// <summary>
     /// Цвет накладываемого кружка для отключённой точки остановки.
@@ -91,7 +91,7 @@ namespace Ask.UI.Controls.TextEditorControl
     /// <summary>
     /// Цвет точек остановки.
     /// </summary>
-    public Brush BreakpointBrush { get; set; } = (Brush)Application.Current.Resources["RedColorSolidColorBrush"];
+    public Brush BreakpointBrush { get; set; } = (Brush?)Application.Current?.Resources["RedColorSolidColorBrush"] ?? Brushes.Red;
 
     private readonly HashSet<int> _rightBreakpoints = new();
     private readonly Dictionary<int, TextAnchor> _bpByCommand = new();

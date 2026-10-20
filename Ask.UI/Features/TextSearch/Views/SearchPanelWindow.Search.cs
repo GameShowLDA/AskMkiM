@@ -23,6 +23,7 @@ public partial class SearchPanelWindow
   public Func<bool>? CanReplaceEditor { get; set; }
   public Func<TextSearchQuery, bool, TextSearchAction, Task>? EditorSearchAsync { get; set; }
   public Func<TextSearchQuery, string, bool, bool, Task>? EditorReplaceAsync { get; set; }
+  public Func<TextSearchQuery, bool, Task<IReadOnlyList<SearchPanelResult>>>? EditorFindAllAsync { get; set; }
   public Action? ClearEditorHighlights { get; set; }
   public Action? ClearReplacementHighlights { get; set; }
 
@@ -116,7 +117,8 @@ public partial class SearchPanelWindow
     ReplacementRow.IsEnabled = allowed && !_busy;
     ReplacementRow.ToolTip = allowed ? null : "Замена недоступна для текущего документа";
     ToolTipService.SetShowOnDisabled(ReplacementRow, true);
-    PreviousButton.IsEnabled = NextButton.IsEnabled = !_busy;
+    PreviousButton.IsEnabled = NextButton.IsEnabled = FindAllButton.IsEnabled = !_busy;
+    ResultsGrid.IsEnabled = !_busy;
     SearchInput.IsReadOnly = _busy;
     MatchCaseOption.IsEnabled = WholeWordOption.IsEnabled = SearchScope.IsEnabled = !_busy;
     ResetSettingsButton.IsEnabled = !_busy;
@@ -124,8 +126,8 @@ public partial class SearchPanelWindow
 
   public async Task RunSearchAsync(TextSearchAction action)
   {
-    // FindAll remains deliberately disconnected in this stage of the new UI.
-    if (_busy || _closed || action == TextSearchAction.FindAll) return;
+    if (action == TextSearchAction.FindAll) { await RunFindAllAsync(); return; }
+    if (_busy || _closed) return;
     try
     {
       SynchronizeTarget();
@@ -161,6 +163,7 @@ public partial class SearchPanelWindow
     {
       SynchronizeTarget();
       if (!ReplacementRow.IsEnabled) return;
+      ClearResultRows();
       _busy = true;
       UpdateReplacementState();
       long version = _targetVersion;
@@ -191,6 +194,7 @@ public partial class SearchPanelWindow
 
   private void ResetStatus()
   {
+    ClearResultRows();
     SearchStatus.Text = "0 из 0";
     SearchStatus.ToolTip = null;
   }

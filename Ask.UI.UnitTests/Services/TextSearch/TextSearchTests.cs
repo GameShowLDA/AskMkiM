@@ -6,6 +6,33 @@ namespace Ask.UI.UnitTests.Services.TextSearch;
 /// <summary>Проверяет общий поиск и сессию без зависимости от редактора.</summary>
 public sealed class TextSearchTests
 {
+  [Fact]
+  public void Results_LargePageAccessDoesNotMaterializeSkippedRows()
+  {
+    int created = 0;
+    var document = new SearchDocument("id", "file", "cat");
+    var match = new TextSearchMatch("id", 0, 3, 1, 0);
+    var rows = new Ask.UI.Features.TextSearch.Views.SearchPanelResultCollection(1_000_000, 1,
+      index => { created++; return new(document, match, () => true); });
+    Assert.Equal(1_000_000, rows.Count);
+    Assert.Equal(999999, rows[999999].ResultIndex);
+    Assert.Same(rows[999999], rows[999999]);
+    Assert.Equal(1, created);
+  }
+
+  [Fact]
+  public void Engine_ParallelSearchPreservesDocumentOrderAndExactOffsets()
+  {
+    var text = string.Concat(Enumerable.Repeat("ток поток ТОК\r\n", 30000));
+    var documents = Enumerable.Range(0, 4).Select(index => new SearchDocument(index.ToString(), "same.txt", text)).ToArray();
+    var query = new TextSearchQuery("ток", false, true);
+    var parallel = TextSearchEngine.Find(documents, query);
+    var sequential = documents.SelectMany(document => TextSearchEngine.Find(new[] { document }, query)).ToArray();
+    Assert.Equal(sequential, parallel);
+    Assert.Equal(240000, parallel.Count);
+    Assert.Equal(new TextSearchMatch("0", 0, 3, 1, 0), parallel[0]);
+  }
+
   /// <summary>Сохраняет буквальную трактовку запроса, регистр и границы слов.</summary>
   /// <param name="query">Текст запроса.</param>
   /// <param name="matchCase">Признак учёта регистра.</param>
