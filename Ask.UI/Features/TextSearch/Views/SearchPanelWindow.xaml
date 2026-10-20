@@ -165,6 +165,38 @@
         <Trigger Property="IsKeyboardFocused" Value="True"><Setter Property="BorderBrush" Value="{DynamicResource SearchAccentBrush}"/></Trigger>
       </Style.Triggers>
     </Style>
+    <!-- Inset layers follow the password/role fields in RoleLoginWindow, with theme-neutral shading. -->
+    <LinearGradientBrush x:Key="SearchInsetVertical" StartPoint="0,0" EndPoint="0,1">
+      <GradientStop Color="#38000000" Offset="0"/><GradientStop Color="#00000000" Offset="0.3"/>
+      <GradientStop Color="#00FFFFFF" Offset="0.7"/><GradientStop Color="#12FFFFFF" Offset="1"/>
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="SearchInsetHorizontal" StartPoint="0,0" EndPoint="1,0">
+      <GradientStop Color="#20000000" Offset="0"/><GradientStop Color="#00000000" Offset="0.05"/>
+      <GradientStop Color="#00FFFFFF" Offset="0.95"/><GradientStop Color="#0CFFFFFF" Offset="1"/>
+    </LinearGradientBrush>
+    <SolidColorBrush x:Key="SearchRowSeparator" Color="#18496171"/>
+    <Style x:Key="InsetField" TargetType="ContentControl">
+      <Setter Property="Background" Value="{DynamicResource BackgroundBrushes}"/>
+      <Setter Property="Focusable" Value="False"/>
+      <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+      <Setter Property="VerticalContentAlignment" Value="Stretch"/>
+      <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="ContentControl">
+        <Grid>
+          <Border CornerRadius="8" Background="{TemplateBinding Background}"/>
+          <Border CornerRadius="8" Background="{StaticResource SearchInsetVertical}" IsHitTestVisible="False"/>
+          <Border CornerRadius="8" Background="{StaticResource SearchInsetHorizontal}" IsHitTestVisible="False"/>
+          <Border CornerRadius="8" BorderThickness="1" BorderBrush="{DynamicResource TopPanelButtonBevelBrush}" Opacity="0.55" IsHitTestVisible="False"/>
+          <ContentPresenter Margin="{TemplateBinding Padding}"/>
+          <Border x:Name="FieldFocus" CornerRadius="8" BorderThickness="1" BorderBrush="{DynamicResource SearchAccentBrush}" Opacity="0" IsHitTestVisible="False"/>
+        </Grid>
+        <ControlTemplate.Triggers>
+          <Trigger Property="IsKeyboardFocusWithin" Value="True">
+            <Trigger.EnterActions><BeginStoryboard><Storyboard><DoubleAnimation Storyboard.TargetName="FieldFocus" Storyboard.TargetProperty="Opacity" To="0.8" Duration="0:0:0.16"/></Storyboard></BeginStoryboard></Trigger.EnterActions>
+            <Trigger.ExitActions><BeginStoryboard><Storyboard><DoubleAnimation Storyboard.TargetName="FieldFocus" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.16"/></Storyboard></BeginStoryboard></Trigger.ExitActions>
+          </Trigger>
+        </ControlTemplate.Triggers>
+      </ControlTemplate></Setter.Value></Setter>
+    </Style>
     <Style x:Key="SettingsInput" TargetType="TextBox">
       <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
       <Setter Property="CaretBrush" Value="{DynamicResource ForegrounfBrushes}"/>
@@ -176,11 +208,11 @@
       </Setter.Value></Setter>
     </Style>
     <Style x:Key="ResultHeader" TargetType="DataGridColumnHeader">
-      <Setter Property="Background" Value="{DynamicResource SettingCardBackground}"/>
+      <Setter Property="Background" Value="{DynamicResource BackgroundBrushes}"/>
       <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
-      <Setter Property="FontSize" Value="11"/><Setter Property="FontWeight" Value="Normal"/>
+      <Setter Property="FontSize" Value="10"/><Setter Property="FontWeight" Value="SemiBold"/>
       <Setter Property="Padding" Value="8,0"/><Setter Property="Height" Value="27"/>
-      <Setter Property="BorderBrush" Value="{StaticResource SearchPanelOutline}"/><Setter Property="BorderThickness" Value="0,0,1,1"/>
+      <Setter Property="BorderBrush" Value="{StaticResource SearchPanelOutline}"/><Setter Property="BorderThickness" Value="0,0,0,1"/>
       <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="DataGridColumnHeader">
         <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Padding="{TemplateBinding Padding}">
           <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Left"/>
@@ -189,7 +221,7 @@
       <Style.Triggers><Trigger Property="DisplayIndex" Value="2"><Setter Property="BorderThickness" Value="0,0,0,1"/></Trigger></Style.Triggers>
     </Style>
     <Style x:Key="ResultCell" TargetType="DataGridCell">
-      <Setter Property="BorderThickness" Value="0,0,1,0"/><Setter Property="BorderBrush" Value="{StaticResource SearchPanelOutline}"/><Setter Property="Padding" Value="8,0"/>
+      <Setter Property="BorderThickness" Value="0"/><Setter Property="BorderBrush" Value="{StaticResource SearchPanelOutline}"/><Setter Property="Padding" Value="8,0"/>
       <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
       <Setter Property="Background" Value="Transparent"/>
       <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="DataGridCell">
@@ -203,10 +235,17 @@
       <Setter Property="Background" Value="Transparent"/>
       <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
       <Setter Property="FontSize" Value="11"/><Setter Property="Cursor" Value="Hand"/>
-      <Style.Triggers>
-        <Trigger Property="IsSelected" Value="True"><Setter Property="Background" Value="#334D709B"/></Trigger>
-        <Trigger Property="IsMouseOver" Value="True"><Setter Property="Background" Value="#224D709B"/></Trigger>
-      </Style.Triggers>
+      <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="DataGridRow">
+        <Grid Background="{TemplateBinding Background}">
+          <Border x:Name="RowHighlight" Background="{DynamicResource SearchAccentBrush}" Opacity="0" IsHitTestVisible="False"/>
+          <Border BorderBrush="{StaticResource SearchRowSeparator}" BorderThickness="0,0,0,1"><DataGridCellsPresenter/></Border>
+          <Border x:Name="SelectionAccent" Width="2" Background="{DynamicResource SearchAccentBrush}" HorizontalAlignment="Left" Opacity="0" IsHitTestVisible="False"/>
+        </Grid>
+        <ControlTemplate.Triggers>
+          <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="RowHighlight" Property="Opacity" Value="0.06"/></Trigger>
+          <Trigger Property="IsSelected" Value="True"><Setter TargetName="RowHighlight" Property="Opacity" Value="0.14"/><Setter TargetName="SelectionAccent" Property="Opacity" Value="1"/></Trigger>
+        </ControlTemplate.Triggers>
+      </ControlTemplate></Setter.Value></Setter>
     </Style>
   </Window.Resources>
   <Grid x:Name="MotionRoot" Margin="8" RenderTransformOrigin="0.5,0">
@@ -231,8 +270,7 @@
           <ColumnDefinition Width="39"/>
           <ColumnDefinition Width="36"/>
         </Grid.ColumnDefinitions>
-        <Border Height="32" CornerRadius="10" BorderThickness="1"
-                Background="{DynamicResource SettingCardBackground}" BorderBrush="{StaticResource SearchPanelOutline}">
+        <ContentControl Style="{StaticResource InsetField}" Height="32">
           <Grid Margin="10,0">
             <Grid.ColumnDefinitions><ColumnDefinition Width="24"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
             <Path Data="{StaticResource SearchGeometry}" Fill="{DynamicResource ForegrounfBrushes}"
@@ -261,7 +299,7 @@
               </TextBlock.Style>
             </TextBlock>
           </Grid>
-        </Border>
+        </ContentControl>
         <TextBlock x:Name="SearchStatus" Grid.Column="1" Text="0 из 0" FontSize="11" Opacity="0.75"
                    Foreground="{DynamicResource ForegrounfBrushes}" HorizontalAlignment="Center"
                    VerticalAlignment="Center" AutomationProperties.Name="Количество совпадений"/>
@@ -293,7 +331,7 @@
         <StackPanel>
           <Grid x:Name="ReplacementRow" Height="28">
             <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="90"/><ColumnDefinition Width="108"/></Grid.ColumnDefinitions>
-            <Border CornerRadius="8" BorderThickness="1" BorderBrush="{StaticResource SearchPanelOutline}" Background="{DynamicResource SettingCardBackground}" Margin="0,0,6,0" Padding="9,0">
+            <ContentControl Style="{StaticResource InsetField}" Margin="0,0,6,0" Padding="10,0">
               <Grid>
                 <TextBox x:Name="ReplacementInput" Style="{StaticResource SettingsInput}" AutomationProperties.Name="Заменить на"/>
                 <TextBlock Text="Заменить на..." IsHitTestVisible="False" VerticalAlignment="Center" FontSize="11" Foreground="{DynamicResource ForegrounfBrushes}" Opacity="0.65">
@@ -302,7 +340,7 @@
                   </Style.Triggers></Style></TextBlock.Style>
                 </TextBlock>
               </Grid>
-            </Border>
+            </ContentControl>
             <Button x:Name="ReplaceButton" Click="Replace_Click" Grid.Column="1" Style="{StaticResource SettingsAction}" Content="Заменить" Margin="0,0,6,0"/>
             <Button x:Name="ReplaceAllButton" Click="ReplaceAll_Click" Grid.Column="2" Style="{StaticResource SettingsAction}" Content="Заменить всё"/>
           </Grid>
@@ -333,18 +371,25 @@
                 <Grid>
                   <ToggleButton Focusable="False" IsChecked="{Binding IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}">
                     <ToggleButton.Template><ControlTemplate TargetType="ToggleButton">
-                      <Border CornerRadius="8" BorderThickness="1" BorderBrush="{StaticResource SearchPanelOutline}" Background="{DynamicResource SettingCardBackground}">
+                      <ContentControl Style="{StaticResource InsetField}">
                         <Path Data="{StaticResource SemiIconChevronDown}" Fill="{DynamicResource ForegrounfBrushes}" Width="14" Height="14" Stretch="Uniform" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                      </Border>
+                      </ContentControl>
                     </ControlTemplate></ToggleButton.Template>
                   </ToggleButton>
                   <ContentPresenter Content="{TemplateBinding SelectionBoxItem}" Margin="12,0,30,0" VerticalAlignment="Center" IsHitTestVisible="False"/>
+                  <Border x:Name="ScopeFocus" CornerRadius="8" BorderThickness="1" BorderBrush="{DynamicResource SearchAccentBrush}" Opacity="0" IsHitTestVisible="False"/>
                   <Popup x:Name="PART_Popup" IsOpen="{TemplateBinding IsDropDownOpen}" Placement="Bottom" AllowsTransparency="True" Focusable="False">
                     <Border Padding="4" MinWidth="{Binding ActualWidth, RelativeSource={RelativeSource TemplatedParent}}" CornerRadius="10" BorderThickness="1" BorderBrush="{StaticResource SearchPanelOutline}" Background="{DynamicResource SettingCardBackground}">
                       <ScrollViewer MaxHeight="180"><ItemsPresenter KeyboardNavigation.DirectionalNavigation="Contained"/></ScrollViewer>
                     </Border>
                   </Popup>
                 </Grid>
+                <ControlTemplate.Triggers>
+                  <Trigger Property="IsKeyboardFocusWithin" Value="True">
+                    <Trigger.EnterActions><BeginStoryboard><Storyboard><DoubleAnimation Storyboard.TargetName="ScopeFocus" Storyboard.TargetProperty="Opacity" To="0.8" Duration="0:0:0.16"/></Storyboard></BeginStoryboard></Trigger.EnterActions>
+                    <Trigger.ExitActions><BeginStoryboard><Storyboard><DoubleAnimation Storyboard.TargetName="ScopeFocus" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.16"/></Storyboard></BeginStoryboard></Trigger.ExitActions>
+                  </Trigger>
+                </ControlTemplate.Triggers>
               </ControlTemplate></ComboBox.Template>
               <ComboBoxItem Content="Все открытые документы"/>
               <ComboBoxItem Content="Текущий документ"/>
@@ -383,7 +428,7 @@
                                ToolTip="Свернуть результаты" AutomationProperties.Name="Свернуть результаты"/>
           </Grid>
           <StackPanel x:Name="ResultsBody">
-            <Border CornerRadius="6" BorderThickness="1" BorderBrush="{StaticResource SearchPanelOutline}" Background="{DynamicResource SettingCardBackground}" ClipToBounds="True">
+            <Border CornerRadius="6" BorderThickness="1" BorderBrush="{DynamicResource TopPanelButtonBevelBrush}" Background="{DynamicResource BackgroundBrushes}" ClipToBounds="True">
               <Grid x:Name="ResultsViewport" Height="157" SizeChanged="ResultsViewport_SizeChanged">
                 <DataGrid x:Name="ResultsGrid" SizeChanged="ResultsGrid_SizeChanged" Style="{x:Null}" AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False" CanUserDeleteRows="False"
                           CanUserSortColumns="False" CanUserReorderColumns="False" CanUserResizeRows="False" CanUserResizeColumns="False" RowHeight="26"
@@ -395,7 +440,9 @@
                     <DataGridTemplateColumn Header="Имя файла" Width="136"><DataGridTemplateColumn.CellTemplate><DataTemplate>
                       <TextBlock Text="{Binding FileName}" TextTrimming="CharacterEllipsis" ToolTip="{Binding FileName}"/>
                     </DataTemplate></DataGridTemplateColumn.CellTemplate></DataGridTemplateColumn>
-                    <DataGridTextColumn Header="Строка" Width="54" Binding="{Binding LineNumber}"/>
+                    <DataGridTemplateColumn Header="Строка" Width="54"><DataGridTemplateColumn.CellTemplate><DataTemplate>
+                      <TextBlock Text="{Binding LineNumber}" Opacity="0.6"/>
+                    </DataTemplate></DataGridTemplateColumn.CellTemplate></DataGridTemplateColumn>
                     <DataGridTemplateColumn Header="Текст строки" Width="240" CellStyle="{StaticResource LastResultCell}"><DataGridTemplateColumn.CellTemplate><DataTemplate>
                       <TextBlock TextTrimming="CharacterEllipsis" ToolTip="{Binding LineText}"><Run Text="{Binding Before, Mode=OneWay}"/><Run Text="{Binding Hit, Mode=OneWay}" Foreground="{DynamicResource SearchAccentBrush}" FontWeight="SemiBold"/><Run Text="{Binding After, Mode=OneWay}"/></TextBlock>
                     </DataTemplate></DataGridTemplateColumn.CellTemplate></DataGridTemplateColumn>
