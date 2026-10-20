@@ -33,9 +33,12 @@ public partial class SearchPanelWindow : Window
 
   public void ShowPanel()
   {
+    bool animate = !IsVisible || _closingAnimation;
+    if (animate) PrepareOpening();
     SynchronizeTarget();
     UpdatePosition();
     Show();
+    if (animate) AnimateOpening();
     Activate();
     SearchInput.Focus();
     SearchInput.SelectAll();
@@ -57,8 +60,8 @@ public partial class SearchPanelWindow : Window
 
   private void Settings_Click(object sender, RoutedEventArgs e)
   {
-    bool expanded = SettingsPanel.Visibility != Visibility.Visible;
-    SettingsPanel.Visibility = expanded ? Visibility.Visible : Visibility.Collapsed;
+    bool expanded = !IsSectionExpanded(SettingsPanel);
+    SetSectionExpanded(SettingsPanel, expanded);
     UpdateShellCorners();
     SettingsButton.SetResourceReference(System.Windows.Controls.Control.ForegroundProperty,
       expanded ? "SearchAccentBrush" : "ForegrounfBrushes");
@@ -79,17 +82,18 @@ public partial class SearchPanelWindow : Window
     ClearSearchResults();
   }
 
-  private void Close_Click(object sender, RoutedEventArgs e) => Close();
+  private void Close_Click(object sender, RoutedEventArgs e) => CloseAnimated();
 
   private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
   {
     if (e.Key == Key.Escape)
     {
-      Close();
+      CloseAnimated();
       e.Handled = true;
     }
     else if (e.Key == Key.F && Keyboard.Modifiers == ModifierKeys.Control)
     {
+      if (_closingAnimation) ShowPanel();
       SearchInput.Focus();
       SearchInput.SelectAll();
       e.Handled = true;

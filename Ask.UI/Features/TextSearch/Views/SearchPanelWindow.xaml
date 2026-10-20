@@ -145,7 +145,10 @@
       </Style.Triggers>
     </Style>
   </Window.Resources>
-  <Grid Margin="8">
+  <Grid x:Name="MotionRoot" Margin="8" RenderTransformOrigin="0.5,0">
+    <Grid.RenderTransform>
+      <ScaleTransform x:Name="PanelScale"/>
+    </Grid.RenderTransform>
     <Border x:Name="PanelShell" CornerRadius="24" BorderThickness="1"
             Background="{DynamicResource SearchPanelBackgroundBrush}"
             BorderBrush="{StaticResource SearchPanelOutline}" Padding="10,0">

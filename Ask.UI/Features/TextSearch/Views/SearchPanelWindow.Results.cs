@@ -57,7 +57,7 @@ public partial class SearchPanelWindow
       }
       _results = rows;
       _resultsPage = 0;
-      ResultsPanel.Visibility = ResultsBody.Visibility = Visibility.Visible;
+      SetSectionExpanded(ResultsBody, true);
       CollapseResultsButton.IsArrowUp = true;
       int fileCount = rows is SearchPanelResultCollection collection ? collection.DocumentCount : rows.Select(row => row.Document.Id).Distinct().Count();
       ResultsSummary.Text = $"{rows.Count} совпадений в {fileCount} файлах";
@@ -65,6 +65,8 @@ public partial class SearchPanelWindow
       FindAllButton.SetResourceReference(Control.ForegroundProperty, "SearchAccentBrush");
       FindAllButton.SetResourceReference(Control.BorderBrushProperty, "SearchAccentBrush");
       ShowResultsPage();
+      SetSectionExpanded(ResultsPanel, true);
+      UpdateShellCorners();
     }
     catch (Exception exception) { ClearResultRows(); ShowSearchError(exception); }
     finally { _busy = false; if (!_closed) UpdateReplacementState(); }
@@ -109,7 +111,7 @@ public partial class SearchPanelWindow
     _updatingResults = true;
     ResultsGrid.ItemsSource = null;
     _updatingResults = false;
-    ResultsPanel.Visibility = Visibility.Collapsed;
+    SetSectionExpanded(ResultsPanel, false);
     FindAllButton.SetResourceReference(Control.ForegroundProperty, "ForegrounfBrushes");
     FindAllButton.SetResourceReference(Control.BorderBrushProperty, "SearchPanelOutline");
     UpdateShellCorners();
@@ -156,8 +158,8 @@ public partial class SearchPanelWindow
   private void NextResultsPage_Click(object sender, RoutedEventArgs e) { _resultsPage++; ShowResultsPage(); }
   private void CollapseResults_Click(object sender, RoutedEventArgs e)
   {
-    bool collapse = ResultsBody.Visibility == Visibility.Visible;
-    ResultsBody.Visibility = collapse ? Visibility.Collapsed : Visibility.Visible;
+    bool collapse = IsSectionExpanded(ResultsBody);
+    SetSectionExpanded(ResultsBody, !collapse);
     CollapseResultsButton.IsArrowUp = !collapse;
     CollapseResultsButton.ToolTip = collapse ? "Развернуть результаты" : "Свернуть результаты";
   }

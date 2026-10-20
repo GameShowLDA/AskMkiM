@@ -59,6 +59,7 @@ public sealed class SearchPanelIntegrationTests
       Click(panel, "ReplaceAllButton");
       Assert.Equal(new[] { ("dog", false), ("dog", true) }, replacements);
       await panel.RunSearchAsync(TextSearchAction.FindAll);
+      await Task.Delay(350);
       Assert.Equal(2, actions.Count);
       Assert.Equal(0, replacementHistoryClears);
       panel.Close();
@@ -187,6 +188,7 @@ public sealed class SearchPanelIntegrationTests
       panel.SetSearchText("cat");
       panel.ShowPanel();
       await panel.RunSearchAsync(TextSearchAction.FindAll);
+      await Task.Delay(350);
       panel.UpdateLayout();
       Assert.True(searchedAll);
       Assert.Equal(5, Find<DataGrid>(panel, "ResultsGrid").Items.Count);
@@ -214,16 +216,22 @@ public sealed class SearchPanelIntegrationTests
       Assert.Equal("16–18 из 18", Find<TextBlock>(panel, "ResultsRange").Text);
       Assert.False(Find<Button>(panel, "NextResultsPage").IsEnabled);
       Click(panel, "SettingsButton");
+      await Task.Delay(350);
       panel.UpdateLayout();
       Assert.True(panel.ActualHeight > resultsHeight);
       Assert.Equal(Visibility.Visible, Find<System.Windows.Controls.Border>(panel, "ResultsPanel").Visibility);
       Click(panel, "CollapseResultsButton");
+      await Task.Delay(350);
       Assert.Equal(Visibility.Collapsed, Find<StackPanel>(panel, "ResultsBody").Visibility);
       Click(panel, "CollapseResultsButton");
+      await Task.Delay(350);
       Click(panel, "SettingsButton");
+      await Task.Delay(350);
       panel.UpdateLayout();
       Assert.Equal(resultsHeight, panel.ActualHeight);
       panel.SetSearchText("changed");
+      await Task.Delay(350);
+      await Task.Delay(350);
       Assert.Equal(Visibility.Collapsed, Find<System.Windows.Controls.Border>(panel, "ResultsPanel").Visibility);
     }
     finally { panel.Close(); owner.Close(); }
@@ -243,6 +251,7 @@ public sealed class SearchPanelIntegrationTests
       panel.SetSearchText("cat");
       Find<ToggleButton>(panel, "WholeWordOption").IsChecked = true;
       await panel.RunSearchAsync(TextSearchAction.FindAll);
+      await Task.Delay(350);
       var grid = Find<DataGrid>(panel, "ResultsGrid");
       Assert.Equal(4, grid.Items.Count);
       grid.SelectedIndex = 2;
@@ -254,6 +263,7 @@ public sealed class SearchPanelIntegrationTests
       target.ReplaceSearchResult(target.Current, "dog");
       if (refreshSessionFirst) await panel.RunSearchAsync(TextSearchAction.Next);
       grid.SelectedIndex = 0;
+      await Task.Delay(350);
       Assert.Equal(Visibility.Collapsed, Find<System.Windows.Controls.Border>(panel, "ResultsPanel").Visibility);
       Assert.Equal("Обновите поиск", Find<TextBlock>(panel, "SearchStatus").Text);
     }
@@ -276,6 +286,7 @@ public sealed class SearchPanelIntegrationTests
     {
       panel.SetSearchText("cat");
       await panel.RunSearchAsync(TextSearchAction.FindAll);
+      await Task.Delay(350);
       Assert.Equal(Visibility.Visible, Find<TextBlock>(panel, "EmptyResults").Visibility);
       Assert.Equal("0 из 0", Find<TextBlock>(panel, "ResultsRange").Text);
       panel.EditorFindAllAsync = (_, _) => pending.Task;
