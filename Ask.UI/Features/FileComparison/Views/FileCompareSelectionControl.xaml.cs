@@ -183,6 +183,26 @@ namespace Ask.UI.Features.FileComparison.Views
       }
     }
 
+    /// <summary>
+    /// Количество файлов, сравнённых с исходным документом.
+    /// </summary>
+    public int ComparedFilesCount => ComparisonResults.Count;
+
+    /// <summary>
+    /// Общее количество добавленных строк в результатах сравнения.
+    /// </summary>
+    public int AddedLinesCount => ComparisonResults.Sum(result => result.AddedLines);
+
+    /// <summary>
+    /// Общее количество удалённых строк в результатах сравнения.
+    /// </summary>
+    public int RemovedLinesCount => ComparisonResults.Sum(result => result.RemovedLines);
+
+    /// <summary>
+    /// Общее количество изменённых строк в результатах сравнения.
+    /// </summary>
+    public int ModifiedLinesCount => ComparisonResults.Sum(result => result.ModifiedLines);
+
     public void RefreshOpenFiles()
     {
       if (IsComparing)
@@ -273,7 +293,8 @@ namespace Ask.UI.Features.FileComparison.Views
 
         ActiveComparison = ComparisonResults.FirstOrDefault();
         ComparisonSummary = BuildComparisonSummary(source, results);
-        StateText = $"Сравнение завершено. Файлов справа: {ComparisonResults.Count}.";
+        NotifyComparisonStatisticsChanged();
+        StateText = "Сравнение завершено.";
         OnPropertyChanged(nameof(SelectionPanelVisibility));
         OnPropertyChanged(nameof(ResultsPanelVisibility));
       }
@@ -379,8 +400,20 @@ namespace Ask.UI.Features.FileComparison.Views
       ComparisonResults.Clear();
       ActiveComparison = null;
       ComparisonSummary = string.Empty;
+      NotifyComparisonStatisticsChanged();
       OnPropertyChanged(nameof(SelectionPanelVisibility));
       OnPropertyChanged(nameof(ResultsPanelVisibility));
+    }
+
+    /// <summary>
+    /// Обновляет привязки счётчиков после замены результатов сравнения.
+    /// </summary>
+    private void NotifyComparisonStatisticsChanged()
+    {
+      OnPropertyChanged(nameof(ComparedFilesCount));
+      OnPropertyChanged(nameof(AddedLinesCount));
+      OnPropertyChanged(nameof(RemovedLinesCount));
+      OnPropertyChanged(nameof(ModifiedLinesCount));
     }
 
     private static string BuildComparisonSummary(OpenTextEditorDescriptor source, IReadOnlyCollection<FileComparisonResult> results)

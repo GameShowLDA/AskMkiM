@@ -2344,6 +2344,12 @@ Control получает актуальные `OpenTextEditorDescriptor` чер�
 `DiffPiece` преобразуется в локальную модель раскраски строк; пробелы и регистр
 считаются значимыми. Это сравнение
 содержимого открытых вкладок, не файлов, повторно читаемых с диска.
+Верхнее табло `FileCompareSelectionControl.xaml` показывает агрегаты всех результатов:
+`ComparedFilesCount`, `AddedLinesCount`, `RemovedLinesCount`, `ModifiedLinesCount`.
+`NotifyComparisonStatisticsChanged` обновляет привязки после завершения сравнения
+и очистки результатов; до первого сравнения счётчики равны нулю. Подробная
+`ComparisonSummary` доступна в подсказке карточек. Табло использует динамические
+ресурсы существующих светлой и тёмной тем и общий `FileDocumentIcon`.
 Ключевые файлы: `MainWindow/MainWindow.xaml`, `MainWindow/Events/UiEventsBinder.cs`,
 `MainWindow/ViewModels/FileViewModel.cs`, `MainWindow/Services/FileService.cs`,
 `Ask.UI/Features/FileComparison/Views/FileCompareSelectionControl.xaml(.cs)`;

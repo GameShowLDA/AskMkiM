@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:icons="clr-namespace:Ask.UI.Shared.Components.Icons"
              mc:Ignorable="d">
     <UserControl.Resources>
         <ResourceDictionary>
@@ -52,6 +53,42 @@
                 <Setter Property="TextWrapping" Value="Wrap"/>
             </Style>
 
+            <Style x:Key="CompareStatisticCardStyle" TargetType="Border">
+                <Setter Property="Width" Value="76"/>
+                <Setter Property="Height" Value="72"/>
+                <Setter Property="Margin" Value="0,0,10,0"/>
+                <Setter Property="CornerRadius" Value="10"/>
+                <Setter Property="Background" Value="{DynamicResource SettingsNestedGroupBackgroundSolidColorBrush}"/>
+            </Style>
+
+            <Style x:Key="CompareStatisticValueStyle" TargetType="TextBlock">
+                <Setter Property="FontFamily" Value="{DynamicResource WinstonBold}"/>
+                <Setter Property="FontSize" Value="26"/>
+                <Setter Property="TextAlignment" Value="Center"/>
+                <Setter Property="Foreground" Value="{DynamicResource MainTitleSolidColorBrush}"/>
+            </Style>
+
+            <Style x:Key="CompareStatisticLabelStyle" TargetType="TextBlock">
+                <Setter Property="FontFamily" Value="{DynamicResource WinstonRegular}"/>
+                <Setter Property="FontSize" Value="11"/>
+                <Setter Property="TextAlignment" Value="Center"/>
+                <Setter Property="Margin" Value="0,3,0,0"/>
+                <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes85}"/>
+            </Style>
+
+            <Style x:Key="CompareRefreshButtonStyle" TargetType="Button" BasedOn="{StaticResource TopMenuLikeIconButtonStyle}">
+                <Setter Property="Background" Value="{DynamicResource SettingsNestedGroupBackgroundSolidColorBrush}"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource SettingsInteractiveBorderSolidColorBrush}"/>
+                <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter Property="Background" Value="{DynamicResource SettingCardBackground}"/>
+                    </Trigger>
+                    <Trigger Property="IsEnabled" Value="False">
+                        <Setter Property="Opacity" Value="0.5"/>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+
             <DataTemplate x:Key="DiffLineTemplate">
                 <Border Background="{Binding BackgroundBrush}"
                         BorderBrush="{Binding BorderBrush}"
@@ -98,39 +135,94 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <DockPanel Grid.Row="0" Margin="0,0,0,12">
-            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Margin="12,0,0,0">
-                <Button Content="Обновить список"
-                        Padding="10,6"
-                        FontFamily="{DynamicResource WinstonBold}"
-                        FontSize="16"
-                        Style="{DynamicResource SaveButtonStyle}"
-                        IsEnabled="{Binding CanRefresh}"
-                        Click="RefreshButton_Click" />
-                <Button Content="Запустить сравнение"
-                        MinWidth="180"
-                        Padding="12,7"
-                        Margin="10,0,0,0"
-                        IsEnabled="{Binding CanStartCompare}"
-                        FontFamily="{DynamicResource WinstonBold}"
-                        FontSize="16"
-                        Style="{DynamicResource SaveButtonStyle}"
-                        Click="StartCompareButton_Click" />
-            </StackPanel>
+        <Border Grid.Row="0" Margin="0,0,0,12" Padding="16"
+                Background="{DynamicResource SettingCardBackground}"
+                BorderBrush="{DynamicResource SettingsInteractiveBorderSolidColorBrush}"
+                BorderThickness="1" CornerRadius="12">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
 
-            <StackPanel>
-                <TextBlock Text="Сравнение файлов"
-                           FontSize="22"
-                           FontFamily="{DynamicResource WinstonBold}"
-                           Foreground="{DynamicResource MainTitleSolidColorBrush}" />
-                <TextBlock Text="Выберите исходный файл и один или несколько открытых файлов справа. После запуска каждый правый файл будет показан отдельной вкладкой."
-                           Margin="0,6,0,0"
-                           TextWrapping="Wrap"
-                           FontSize="15"
-                           Foreground="{DynamicResource ForegrounfBrushes}"
-                           FontFamily="{DynamicResource WinstonRegular}" />
-            </StackPanel>
-        </DockPanel>
+                <Grid Grid.Column="0" Margin="0,0,24,0" VerticalAlignment="Center">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Border Width="64" Height="64" Margin="0,0,18,0" CornerRadius="10"
+                            Background="{DynamicResource SettingsNestedGroupBackgroundSolidColorBrush}">
+                        <icons:FileDocumentIcon Size="34" VerticalAlignment="Center" HorizontalAlignment="Center"
+                                                Foreground="{DynamicResource MainTitleSolidColorBrush}"/>
+                    </Border>
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                        <TextBlock Text="Сравнение файлов" FontSize="24"
+                                   FontFamily="{DynamicResource WinstonBold}"
+                                   Foreground="{DynamicResource MainTitleSolidColorBrush}"/>
+                        <TextBlock Text="Выберите исходный файл и один или несколько открытых файлов справа. После запуска каждый правый файл будет показан отдельной вкладкой."
+                                   Margin="0,8,0,0" TextWrapping="Wrap" FontSize="13"
+                                   Foreground="{DynamicResource ForegrounfBrushes85}"
+                                   FontFamily="{DynamicResource WinstonRegular}"/>
+                    </StackPanel>
+                </Grid>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center"
+                            Margin="0,0,18,0" ToolTip="{Binding ComparisonSummary}">
+                    <Border Style="{StaticResource CompareStatisticCardStyle}">
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="{Binding ComparedFilesCount}" Style="{StaticResource CompareStatisticValueStyle}"/>
+                            <TextBlock Text="Файлов" Style="{StaticResource CompareStatisticLabelStyle}"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Style="{StaticResource CompareStatisticCardStyle}">
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="{Binding AddedLinesCount}" Style="{StaticResource CompareStatisticValueStyle}"
+                                       Foreground="{DynamicResource NotificationSuccessIconBrush}"/>
+                            <TextBlock Text="Добавлено" Style="{StaticResource CompareStatisticLabelStyle}"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Style="{StaticResource CompareStatisticCardStyle}">
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="{Binding RemovedLinesCount}" Style="{StaticResource CompareStatisticValueStyle}"
+                                       Foreground="{DynamicResource NotificationErrorIconBrush}"/>
+                            <TextBlock Text="Удалено" Style="{StaticResource CompareStatisticLabelStyle}"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Style="{StaticResource CompareStatisticCardStyle}" Margin="0">
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="{Binding ModifiedLinesCount}" Style="{StaticResource CompareStatisticValueStyle}"
+                                       Foreground="{DynamicResource NotificationWarningIconBrush}"/>
+                            <TextBlock Text="Изменено" Style="{StaticResource CompareStatisticLabelStyle}"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button Height="46" Padding="16,10" FontFamily="{DynamicResource WinstonBold}" FontSize="14"
+                            Style="{StaticResource CompareRefreshButtonStyle}"
+                            IsEnabled="{Binding CanRefresh}" Click="RefreshButton_Click">
+                        <StackPanel Orientation="Horizontal">
+                            <Path Width="17" Height="17" Margin="0,0,10,0" Stretch="Uniform"
+                                  Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                  StrokeThickness="1.7" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                                  Data="M 17,7 A 7,7 0 1 0 17,13 M 17,2 L 17,7 L 12,7"/>
+                            <TextBlock Text="Обновить список" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Height="46" Padding="16,10" Margin="12,0,0,0"
+                            IsEnabled="{Binding CanStartCompare}" FontFamily="{DynamicResource WinstonBold}" FontSize="14"
+                            Style="{DynamicResource SaveButtonStyle}" Click="StartCompareButton_Click">
+                        <StackPanel Orientation="Horizontal">
+                            <Path Width="12" Height="14" Margin="0,0,10,0" Stretch="Uniform"
+                                  Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                  Data="M 0,0 L 0,14 L 12,7 Z"/>
+                            <TextBlock Text="Запустить сравнение" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Border>
 
         <Grid Grid.Row="1" Visibility="{Binding SelectionPanelVisibility}">
             <Grid.RowDefinitions>
@@ -231,11 +323,6 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <TextBlock Grid.Row="0"
-                       Text="{Binding ComparisonSummary}"
-                       Margin="0,0,0,10"
-                       Style="{StaticResource CompareBodyTextStyle}" />
-
             <Grid Grid.Row="1">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
@@ -318,10 +405,34 @@
 
         <Border Grid.Row="3"
                 Margin="0,12,0,0"
-                Style="{StaticResource CompareCardBorderStyle}">
-            <TextBlock Text="{Binding StateText}"
-                       VerticalAlignment="Center"
-                       Style="{StaticResource CompareBodyTextStyle}" />
+                Padding="14,10"
+                MinHeight="48"
+                CornerRadius="8"
+                Background="{DynamicResource SettingCardBackground}"
+                BorderBrush="{DynamicResource SettingsInteractiveBorderSolidColorBrush}"
+                BorderThickness="1">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Grid Width="26" Height="26" Margin="0,0,16,0"
+                      Visibility="{Binding ResultsPanelVisibility}">
+                    <Ellipse Fill="{DynamicResource NotificationSuccessIconBrush}"/>
+                    <Path Data="M 7,13 L 11,17 L 19,9"
+                          Stroke="White" StrokeThickness="2"
+                          StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                          StrokeLineJoin="Round"/>
+                </Grid>
+                <TextBlock Text="{Binding StateText}" VerticalAlignment="Center"
+                           FontFamily="{DynamicResource WinstonMedium}" FontSize="13"
+                           Foreground="{DynamicResource ForegrounfBrushes85}"/>
+                <Border Width="1" Height="20" Margin="20,0"
+                        Background="{DynamicResource SettingsInteractiveBorderSolidColorBrush}"
+                        Visibility="{Binding ResultsPanelVisibility}"/>
+                <TextBlock VerticalAlignment="Center"
+                           Visibility="{Binding ResultsPanelVisibility}"
+                           FontFamily="{DynamicResource WinstonRegular}" FontSize="13"
+                           Foreground="{DynamicResource ForegrounfBrushes85}">
+                    <Run Text="Файлов справа: "/><Run Text="{Binding ComparedFilesCount, Mode=OneWay}"/>
+                </TextBlock>
+            </StackPanel>
         </Border>
     </Grid>
 </UserControl>
