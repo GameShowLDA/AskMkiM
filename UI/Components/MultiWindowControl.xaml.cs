@@ -181,6 +181,20 @@ namespace UI.Components
         .FirstOrDefault(control => control.Visibility == Visibility.Visible);
     }
 
+    /// <summary>Возвращает подключение поиска активного компонента или активной вложенной вкладки.</summary>
+    /// <returns>Адаптер поиска; отсутствие сохраняет прежний поиск редактора.</returns>
+    public Ask.Core.Shared.Interfaces.UiInterfaces.ITextSearchTarget? GetActiveSearchTarget()
+    {
+      var control = GetActiveWorkspaceControl();
+      if (control is TextEditorContainer container)
+      {
+        var item = container.DockManager.DockItems.FirstOrDefault(tab => tab.IsActiveItem == true);
+        if (item?.Content is DependencyObject content)
+          return Ask.UI.Shared.Search.SearchTarget.Resolve(content);
+      }
+      return Ask.UI.Shared.Search.SearchTarget.Resolve(control);
+    }
+
     /// <summary>
     /// Возвращает активный текстовый редактор независимо от его типа.
     /// </summary>

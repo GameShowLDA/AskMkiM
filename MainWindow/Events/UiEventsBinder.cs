@@ -90,8 +90,10 @@ namespace MainWindowProgram.Events
       _mainWindow.saveAsMenuItem.Visibility = visibility;
       _mainWindow.openFolderMenuItem.Visibility = visibility;
       _mainWindow.printMenuItem.Visibility = visibility;
-      _mainWindow.searchMenuItem.Visibility = visibility;
-      _mainWindow.searchReplaceMenuItem.Visibility = visibility;
+      var searchTarget = _multiWindow.GetActiveSearchTarget();
+      _mainWindow.searchMenuItem.Visibility = isActive || searchTarget != null ? Visibility.Visible : Visibility.Collapsed;
+      _mainWindow.searchReplaceMenuItem.Visibility = isActive
+        || searchTarget is Ask.Core.Shared.Interfaces.UiInterfaces.IReplaceTextSearchTarget ? Visibility.Visible : Visibility.Collapsed;
       UpdateCompareMenuVisibility(isActive);
     }
 
@@ -186,6 +188,8 @@ namespace MainWindowProgram.Events
         new Action(() =>
         {
           var activeEditor = _multiWindow.GetActiveTextEditor();
+          if (_mainWindow.SearchWindow.IsVisible)
+            _mainWindow.SearchWindow.AttachTarget(_multiWindow.GetActiveSearchTarget());
           bool isActive = activeEditor != null;
 
           OnTextEditorActive(isActive);

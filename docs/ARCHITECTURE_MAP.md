@@ -29,6 +29,7 @@ Size/Foreground и анимации общей кнопки; лицензия с
 
 | Нужно изменить | Сначала смотреть | Затем смотреть |
 | --- | --- | --- |
+| Подключение поиска к новому компоненту | `Ask.Core/Shared/Interfaces/UiInterfaces/ITextSearchTarget.cs`, `UI/Controls/Search/SearchWindow.Target.cs` | `Ask.Core/Services/TextSearch/`, `Ask.UI/Shared/Search/SearchTarget.cs`; [поиск](#pluggable-text-search), `docs/architecture/text-search.md` |
 | Сравнение открытых файлов | `MainWindow/MainWindow.xaml`, `MainWindow/Events/UiEventsBinder.cs` | `MainWindow/ViewModels/FileViewModel.cs`, `MainWindow/Services/FileService.cs`, `Ask.UI/Features/FileComparison/Views/FileCompareSelectionControl.xaml(.cs)`; [сравнение файлов](#file-comparison-ui) |
 | Уведомления о делах на сегодня | `MainWindow/MainWindow.TodayTasks.cs`, `MainWindow/MainWindow.xaml` | `CalendarNoteService.Load/SetCompleted`, `CalendarControl.Completion_Click`; [заметки](#calendar-notes) |
 | Заметки календаря | `UI/Controls/Calendar/CalendarControl.xaml.cs`, `CalendarControl.xaml` | `Ask.Core/Services/Calendar/CalendarNoteService.cs`, `CalendarNote.cs`; [заметки](#calendar-notes) |
@@ -82,6 +83,7 @@ Size/Foreground и анимации общей кнопки; лицензия с
 
 ## Runtime Flow Index
 
+- [Подключаемый поиск и существующий поиск редактора](#pluggable-text-search)
 - [Calendar notes CRUD](#calendar-notes)
 - [Сравнение открытых файлов](#file-comparison-ui)
 - [Application startup](#application-startup-flow)
@@ -2326,6 +2328,79 @@ same path with gates enabled and performs real transport I/O.
 Translation, Run, Metrology, Test, SelfTest, Settings, Admin and Window ViewModels.
 Their services generally route operations into `MultiWindowService`.
 
+<a id="pluggable-text-search"></a>
+### Подключаемый поиск текста
+
+**Назначение и контракты.** `Ask.Core/Shared/Interfaces/UiInterfaces/ITextSearchTarget.cs`
+определяет получение неизменяемых `SearchDocument(Id, Title, Text)`, подсветку
+`HighlightSearchResults(matches, current)` и переход `NavigateToSearchResult(match)`.
+ID непустые, уникальны в компоненте и не зависят от заголовка. Дополнительный
+`IReplaceTextSearchTarget.ReplaceSearchResult` разрешает замену; без него строка
+замены недоступна. `TextSearchQuery` задаёт буквальный запрос, регистр и целое слово;
+`TextSearchMatch` содержит ID документа, offset/length, строку (1-based) и колонку (0-based).
+
+**Общий алгоритм и сессия.** `Ask.Core/Services/TextSearch/TextSearchEngine.cs`
+→ `Find(documents, query, token)` → `Regex.Escape` / `\b` / `RegexOptions.IgnoreCase`
+→ неперекрывающиеся совпадения по полному тексту, включая многострочные запросы;
+координаты учитывают CRLF/LF/CR. Зависимости от WPF и редактора отсутствуют.
+`TextSearchSession.SearchAsync` получает снимки в вызывающем UI-потоке, сравнивает
+с прошлым запросом/снимками, выполняет изменившийся поиск в `Task.Run`, отменяет
+предыдущий запрос и после await применяет только актуальный результат. Сессия
+вызывается из UI SynchronizationContext: callback подсветки/перехода возвращается
+в этот контекст. Next/Previous циклически обходят выбранные документы, FindAll
+сохраняет текущий индекс для неизменившегося запроса. Изменение текста или области
+пересчитывает совпадения. ReplaceAll изменяет диапазоны в обратном порядке;
+после любой замены снимки и результаты пересчитываются. Dispose отменяет запрос
+и очищает только поиск, не владеет компонентом. Сессия создаётся явно, без DI.
+
+**Подключение WPF.** `Ask.UI/Shared/Search/SearchTarget.cs`: attached property
+`SearchTarget.Target`, реализация интерфейса самим компонентом либо DataContext.
+`Resolve` предпочитает подключение элемента с фокусом внутри активного компонента,
+затем проверяет корень. `MultiWindowControl.GetActiveSearchTarget` получает видимый
+workspace control; для `TextEditorContainer` проверяет содержимое активного DockItem.
+`MultiWindowService.GetActiveSearchTarget` экспортирует его в MainWindow.
+
+**Окно и маршрутизация.** `FileService` устанавливает
+`SearchWindow.TargetProvider = MultiWindowService.GetActiveSearchTarget`.
+`EnsureSearchWindowAsync` допускает подключённый компонент без TextEditorUI.
+`UiEventsBinder.OnTextEditorActive` показывает меню поиска для подключённого компонента,
+замену — только для редактируемого. `RefreshActiveEditorUiState` переподключает видимое
+окно при смене вкладки, не запускает поиск автоматически.
+`UI/Controls/Search/SearchWindow.Target.cs`: `AttachTarget` → старая сессия Dispose
+→ новая `TextSearchSession` → области из снимков и опция «Все области компонента».
+`SendSearchRequest` / `OnReplaceWordButtonPressed` / `OnReplaceAllWordsButtonPressed`
+сначала синхронизируют адаптер; подключённый компонент обрабатывается локально,
+без публикации глобального SearchText/ReplaceText. Счётчик показывает индекс и число
+совпадений; FindAll подсвечивает все совпадения в компоненте. Ошибка логируется
+через `LoggerUtility.LogException` и показывается в статусе окна. CloseDialog
+освобождает сессию, очищает поиск и восстанавливает прежние пункты области редактора.
+Горячие клавиши F3/Shift+F3 и Esc используют существующие обработчики MainWindow/SearchWindow.
+
+**Совместимость редактора/транслятора.** Если TargetProvider возвращает null,
+сохраняется прежний маршрут `SearchWindow` → `SearchEventAdapter` → EventAggregator
+→ `UiEventsBinder` → `MultiWindowControl.SearchData/ReplaceData` →
+`MultiEditorControl` → `UI/Components/MultiEditorMethods/TextSearchManager.cs` /
+`TextReplacementManager.cs`. Здесь остаются прежние каретка, навигация между
+вкладками, таблицы FindAll, замена и сопоставление исходной строки с командой
+транслятора справа. Этот менеджер пока не переведён на общий алгоритм.
+
+**Сравнение файлов.** `FileCompareSelectionControl.Search.cs` реализует
+ITextSearchTarget: снимки активного сравнения имеют ID `source`/`target`.
+`HighlightSearchResults` → `ApplySearchRanges` → диапазоны в `DiffLineViewModel.SearchRanges`
+→ INotifyPropertyChanged → `DiffTextHighlight.SearchRanges` → пересборка Run по
+общим границам различий и поиска. Поиск голубой, текущий результат ярче; при
+пересечении с изменёнными символами сохраняется жирное начертание и добавляется
+подчёркивание. Очистка восстанавливает исходную раскраску diff. Пустые позиции
+DiffPlex не ищутся. `NavigateToSearchResult` → OriginalLineNumber → общая пара
+→ ScrollIntoView → TextPointer.GetCharacterRect / BringIntoView для перенесённого текста.
+Замена в сравнении недоступна. Переключение ActiveComparison очищает старые диапазоны;
+следующий запрос использует актуальную пару документов.
+
+**Проверка.** `Ask.UI.UnitTests/Services/TextSearch/`: буквальный поиск, параметры,
+координаты/переводы строк, одинаковые заголовки, области, обновление снимков,
+отмена, замена, подключение адаптера и совмещение подсветки WPF.
+Инструкция следующего подключения: `docs/architecture/text-search.md`.
+
 <a id="file-comparison-ui"></a>
 ### Сравнение открытых файлов
 
@@ -3498,6 +3573,9 @@ ErrorItem → translator/runner ErrorList
 | `MultiEditorControl` | workspace View | UI | editors/tabs/user controls | [UI Architecture](#ui-architecture) |
 | `FileManager` | service composer | UI | workspace services | [UI Architecture](#ui-architecture) |
 | `FileCompareSelectionControl` | WPF control | Ask.UI | выбор открытых редакторов и отображение построчного diff через DiffPlex | [Сравнение файлов](#file-comparison-ui) |
+| `ITextSearchTarget` / `IReplaceTextSearchTarget` | contracts | Ask.Core | подключение чтения, подсветки, переходов и опциональной замены для произвольного компонента | [Поиск](#pluggable-text-search) |
+| `TextSearchEngine` / `TextSearchSession` | engine / session | Ask.Core | буквальный поиск по снимкам, отмена, навигация, обновление и замена | [Поиск](#pluggable-text-search) |
+| `SearchTarget` / `SearchWindow` | WPF adapter binding / window | Ask.UI / UI | разрешение подключения и маршрутизация запросов с сохранением прежнего поиска редактора | [Поиск](#pluggable-text-search) |
 | `RunControl` | execution View | UI | launches control programs | [Execution Engine](#execution-engine) |
 | `ShowMessageModel` | shared protocol DTO | Ask.Core | хранит содержимое, статус и признаки записи; `IsMeasurement` выбирает `[НОРМА]/[БРАК]` вместо неизмерительных `[ОК]/[ERR]` без общего изменяемого состояния | [Protocols](#protocols-and-file-formats) |
 | `ProtocolUI` | View + adapter | Ask.UI | execution controller and protocol output | [Protocols](#protocols-and-file-formats) |

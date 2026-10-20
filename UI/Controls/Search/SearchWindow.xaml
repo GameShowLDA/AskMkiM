@@ -238,6 +238,10 @@
 
             </Grid>
 
+            <TextBlock x:Name="SearchStatus" Grid.Row="2" Grid.Column="2" Visibility="Collapsed"
+                       VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="10"
+                       Foreground="{DynamicResource ForegrounfBrushes}" TextWrapping="Wrap"/>
+
             <!-- Строка 2 (По умолчанию скрыта) -->
             <Grid x:Name="ReplaceRowPanel"
                   Grid.Row="1"

@@ -1,6 +1,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
+using System.Windows.Media;
 
 namespace Ask.UI.Features.FileComparison.Views;
 
@@ -16,6 +17,27 @@ public sealed record DiffTextSegment(string Text, bool IsChanged);
 /// </summary>
 public static class DiffTextHighlight
 {
+  private static readonly Brush MatchBackground = CreateBrush(186, 230, 253);
+  private static readonly Brush CurrentMatchBackground = CreateBrush(56, 189, 248);
+  private static readonly Brush MatchForeground = CreateBrush(12, 74, 110);
+
+  /// <summary>Диапазоны поиска, отображаемые совместно с посимвольными различиями.</summary>
+  public static readonly DependencyProperty SearchRangesProperty = DependencyProperty.RegisterAttached(
+    "SearchRanges", typeof(IReadOnlyList<DiffSearchRange>), typeof(DiffTextHighlight),
+    new PropertyMetadata(null, OnLineChanged));
+
+  /// <summary>Возвращает диапазоны поиска текстового элемента.</summary>
+  /// <param name="element">Текстовый элемент.</param>
+  /// <returns>Диапазоны поиска либо отсутствие подсветки.</returns>
+  public static IReadOnlyList<DiffSearchRange>? GetSearchRanges(DependencyObject element) =>
+    (IReadOnlyList<DiffSearchRange>?)element.GetValue(SearchRangesProperty);
+
+  /// <summary>Задаёт диапазоны поиска текстового элемента.</summary>
+  /// <param name="element">Текстовый элемент.</param>
+  /// <param name="ranges">Диапазоны поиска.</param>
+  public static void SetSearchRanges(DependencyObject element, IReadOnlyList<DiffSearchRange>? ranges) =>
+    element.SetValue(SearchRangesProperty, ranges);
+
   /// <summary>
   /// Строка сравнения, отображаемая набором текстовых фрагментов.
   /// </summary>
@@ -51,21 +73,56 @@ public static class DiffTextHighlight
     }
 
     textBlock.Inlines.Clear();
-    if (args.NewValue is not DiffLineViewModel line)
+    if (GetLine(element) is not DiffLineViewModel line)
     {
       return;
     }
 
+    var ranges = GetSearchRanges(element) ?? Array.Empty<DiffSearchRange>();
+    var boundaries = new SortedSet<int> { 0, line.Text.Length };
+    int offset = 0;
     foreach (var segment in line.Segments)
     {
-      var run = new Run(segment.Text);
+      offset += segment.Text.Length;
+      boundaries.Add(offset);
+    }
+    foreach (var range in ranges)
+    {
+      boundaries.Add(Math.Clamp(range.Start, 0, line.Text.Length));
+      boundaries.Add(Math.Clamp(range.Start + range.Length, 0, line.Text.Length));
+    }
+    var points = boundaries.ToArray();
+    int segmentIndex = 0, segmentStart = 0, rangeIndex = 0;
+    for (int index = 0; index + 1 < points.Length; index++)
+    {
+      int start = points[index], length = points[index + 1] - start;
+      while (segmentIndex + 1 < line.Segments.Count && segmentStart + line.Segments[segmentIndex].Text.Length <= start)
+        segmentStart += line.Segments[segmentIndex++].Text.Length;
+      if (line.Segments.Count == 0) break;
+      var segment = line.Segments[segmentIndex];
+      var run = new Run(line.Text.Substring(start, length));
       if (segment.IsChanged)
       {
         run.Background = DiffBrushes.ChangedCharacterBackground;
         run.FontWeight = FontWeights.Bold;
       }
 
+      while (rangeIndex < ranges.Count && ranges[rangeIndex].Start + ranges[rangeIndex].Length <= start) rangeIndex++;
+      if (rangeIndex < ranges.Count && ranges[rangeIndex].Start <= start)
+      {
+        run.Background = ranges[rangeIndex].IsCurrent ? CurrentMatchBackground : MatchBackground;
+        run.Foreground = MatchForeground;
+        if (segment.IsChanged) run.TextDecorations = TextDecorations.Underline;
+      }
+
       textBlock.Inlines.Add(run);
     }
+  }
+
+  private static Brush CreateBrush(byte red, byte green, byte blue)
+  {
+    var brush = new SolidColorBrush(Color.FromRgb(red, green, blue));
+    brush.Freeze();
+    return brush;
   }
 }

@@ -69,6 +69,7 @@ namespace MainWindowProgram.Services
       _multiWindow = multiWindow;
       _mainWindow = mainWindow;
       _mainWindow.SearchWindow = new SearchWindow();
+      _mainWindow.SearchWindow.TargetProvider = _multiWindow.GetActiveSearchTarget;
       _isLockedProvider = isLockedProvider;
       _opkToPkConverter = new OpkToPkConverter();
       _pkToOpkwConverter = new PkToOpkwConverter();
@@ -1081,7 +1082,7 @@ namespace MainWindowProgram.Services
     private async Task<TextEditorUI?> EnsureSearchWindowAsync(bool expandReplaceRow, bool focusReplaceField)
     {
       var activeEditor = _multiWindow.GetActiveTextEditor();
-      if (activeEditor == null)
+      if (activeEditor == null && _multiWindow.GetActiveSearchTarget() == null)
       {
         return null;
       }

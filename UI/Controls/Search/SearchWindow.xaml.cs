@@ -190,6 +190,12 @@ namespace UI.Controls.Search
     }
     public async Task ShowWindow(bool expandReplaceRow = false, bool focusReplaceField = false)
     {
+      SynchronizeTarget();
+      if (_target != null && _target is not Ask.Core.Shared.Interfaces.UiInterfaces.IReplaceTextSearchTarget)
+      {
+        expandReplaceRow = false;
+        focusReplaceField = false;
+      }
       if (this.Top < 0)
       {
         this.Top = 50;
@@ -237,7 +243,8 @@ namespace UI.Controls.Search
 
     public void CloseDialog()
     {
-      ClearHighlights?.Invoke();
+      if (_target == null) ClearHighlights?.Invoke();
+      ReleaseTarget();
       SearchEventAdapter.RaiseSearchWindowClosing(false);
       _allowClose = true;
       var hideAnimation = (Storyboard)Resources["HideAnimation"];
@@ -367,6 +374,7 @@ namespace UI.Controls.Search
 
     private async Task SetReplaceRowStateAsync(bool expand, bool focusReplaceField = false)
     {
+      if (expand && _target != null && _target is not Ask.Core.Shared.Interfaces.UiInterfaces.IReplaceTextSearchTarget) return;
       if (_isExpanded == expand)
       {
         if (expand && focusReplaceField)
@@ -444,6 +452,12 @@ namespace UI.Controls.Search
 
     private void SendSearchRequest(string searchParameters)
     {
+      SynchronizeTarget();
+      if (_session != null)
+      {
+        _ = SearchTargetAsync(searchParameters);
+        return;
+      }
       var searchText = SearchTextBox.Text;
       var searchArea = searchAreaParameters.SelectedIndex;
       var wholeWord = wholeWordButton.IsChecked;
@@ -459,6 +473,12 @@ namespace UI.Controls.Search
 
     private void OnReplaceWordButtonPressed()
     {
+      SynchronizeTarget();
+      if (_session != null)
+      {
+        _ = ReplaceTargetAsync(false);
+        return;
+      }
       var searchText = SearchTextBox.Text;
       var replaceText = ReplaceTextBox.Text;
       var searchArea = searchAreaParameters.SelectedIndex;
@@ -474,6 +494,12 @@ namespace UI.Controls.Search
 
     private void OnReplaceAllWordsButtonPressed()
     {
+      SynchronizeTarget();
+      if (_session != null)
+      {
+        _ = ReplaceTargetAsync(true);
+        return;
+      }
       var searchText = SearchTextBox.Text;
       var replaceText = ReplaceTextBox.Text;
       var searchArea = searchAreaParameters.SelectedIndex;
@@ -520,8 +546,9 @@ namespace UI.Controls.Search
 
     private void PART_EditableTextBox_SelectionChanged(object sender, RoutedEventArgs e)
     {
+      if (_updatingAreas || _target != null) return;
       var selected = searchAreaParameters.SelectedValue as ComboBoxItem;
-      if (selected.Tag.ToString() == "FindInFile")
+      if (selected?.Tag?.ToString() == "FindInFile")
       {
         SelectFileForSearch?.Invoke();
       }
