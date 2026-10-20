@@ -4,6 +4,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:icons="clr-namespace:Ask.UI.Shared.Components.Icons"
+             xmlns:local="clr-namespace:Ask.UI.Features.FileComparison.Views"
              mc:Ignorable="d">
     <UserControl.Resources>
         <ResourceDictionary>
@@ -89,40 +90,224 @@
                 </Style.Triggers>
             </Style>
 
+            <Style x:Key="CompareResultPanelStyle" TargetType="Border">
+                <Setter Property="Background" Value="{DynamicResource SettingCardBackground}"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource SettingsInteractiveBorderSolidColorBrush}"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="CornerRadius" Value="10"/>
+            </Style>
+
+            <Style x:Key="ComparePaneHeaderStyle" TargetType="Border">
+                <Setter Property="Background" Value="{DynamicResource SettingsNestedGroupBackgroundSolidColorBrush}"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource SettingsInteractiveBorderSolidColorBrush}"/>
+                <Setter Property="BorderThickness" Value="0,0,0,1"/>
+                <Setter Property="CornerRadius" Value="9,9,0,0"/>
+                <Setter Property="Padding" Value="12"/>
+            </Style>
+
+            <Style x:Key="ComparePaneTitleStyle" TargetType="TextBlock">
+                <Setter Property="FontFamily" Value="{DynamicResource WinstonBold}"/>
+                <Setter Property="FontSize" Value="16"/>
+                <Setter Property="Foreground" Value="{DynamicResource MainTitleSolidColorBrush}"/>
+                <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+            </Style>
+
+            <Style x:Key="ComparePanePathStyle" TargetType="TextBlock">
+                <Setter Property="FontFamily" Value="{DynamicResource WinstonRegular}"/>
+                <Setter Property="FontSize" Value="12"/>
+                <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes85}"/>
+                <Setter Property="Margin" Value="0,5,0,0"/>
+                <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+            </Style>
+
+            <Style x:Key="CompareScrollThumbStyle" TargetType="Thumb">
+                <Setter Property="Background" Value="{DynamicResource ScrollBarThumbBackgroundBrush}"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Thumb">
+                            <Border Background="{TemplateBinding Background}" CornerRadius="4" Margin="1"/>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+                <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter Property="Background" Value="{DynamicResource ScrollBarThumbHoverBackgroundBrush}"/>
+                    </Trigger>
+                    <Trigger Property="IsDragging" Value="True">
+                        <Setter Property="Background" Value="{DynamicResource ScrollBarThumbPressedBackgroundBrush}"/>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+
+            <Style x:Key="CompareScrollBarStyle" TargetType="ScrollBar">
+                <Setter Property="Width" Value="8"/>
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="ScrollBar">
+                            <Grid Background="{TemplateBinding Background}">
+                                <Track x:Name="PART_Track" Orientation="{TemplateBinding Orientation}"
+                                       IsDirectionReversed="True"
+                                       Minimum="{TemplateBinding Minimum}" Maximum="{TemplateBinding Maximum}"
+                                       ViewportSize="{TemplateBinding ViewportSize}"
+                                       Value="{Binding Value, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}">
+                                    <Track.DecreaseRepeatButton>
+                                        <RepeatButton x:Name="DecreasePage" Command="ScrollBar.PageUpCommand"
+                                                      Focusable="False" IsTabStop="False" Opacity="0"/>
+                                    </Track.DecreaseRepeatButton>
+                                    <Track.Thumb>
+                                        <Thumb Style="{StaticResource CompareScrollThumbStyle}"/>
+                                    </Track.Thumb>
+                                    <Track.IncreaseRepeatButton>
+                                        <RepeatButton x:Name="IncreasePage" Command="ScrollBar.PageDownCommand"
+                                                      Focusable="False" IsTabStop="False" Opacity="0"/>
+                                    </Track.IncreaseRepeatButton>
+                                </Track>
+                            </Grid>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="Orientation" Value="Horizontal">
+                                    <Setter TargetName="PART_Track" Property="IsDirectionReversed" Value="False"/>
+                                    <Setter TargetName="DecreasePage" Property="Command" Value="ScrollBar.PageLeftCommand"/>
+                                    <Setter TargetName="IncreasePage" Property="Command" Value="ScrollBar.PageRightCommand"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+                <Style.Triggers>
+                    <Trigger Property="Orientation" Value="Horizontal">
+                        <Setter Property="Width" Value="Auto"/>
+                        <Setter Property="Height" Value="8"/>
+                    </Trigger>
+                    <Trigger Property="IsEnabled" Value="False">
+                        <Setter Property="Opacity" Value="0"/>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+
+            <Style x:Key="CompareDiffListBoxItemStyle" TargetType="ListBoxItem" BasedOn="{StaticResource DiffListBoxItemStyle}">
+                <Setter Property="MinHeight" Value="{Binding DiffRowHeight, RelativeSource={RelativeSource AncestorType={x:Type local:FileCompareSelectionControl}}}"/>
+            </Style>
+
+            <Style x:Key="CompareLinesListStyle" TargetType="ListBox">
+                <Style.Resources>
+                    <Style TargetType="ScrollBar" BasedOn="{StaticResource CompareScrollBarStyle}"/>
+                </Style.Resources>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="Padding" Value="0"/>
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                <Setter Property="ItemTemplate" Value="{DynamicResource DiffRowPairTemplate}"/>
+                <Setter Property="ItemContainerStyle" Value="{StaticResource CompareDiffListBoxItemStyle}"/>
+                <Setter Property="ScrollViewer.CanContentScroll" Value="True"/>
+                <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled"/>
+                <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Visible"/>
+                <Setter Property="VirtualizingPanel.IsVirtualizing" Value="True"/>
+                <Setter Property="VirtualizingPanel.VirtualizationMode" Value="Recycling"/>
+                <Setter Property="VirtualizingPanel.ScrollUnit" Value="Pixel"/>
+                <EventSetter Event="PreviewMouseWheel" Handler="DiffLines_PreviewMouseWheel"/>
+            </Style>
+
+            <Style x:Key="CompareTargetTabStyle" TargetType="TabItem">
+                <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="Padding" Value="12,6"/>
+                <Setter Property="Margin" Value="0,0,6,0"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="TabItem">
+                            <Border Background="{TemplateBinding Background}"
+                                    BorderBrush="{DynamicResource SettingsInteractiveBorderSolidColorBrush}"
+                                    BorderThickness="1" CornerRadius="5" Padding="{TemplateBinding Padding}">
+                                <ContentPresenter ContentSource="Header"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsSelected" Value="True">
+                                    <Setter Property="Background" Value="{DynamicResource SettingsNestedGroupBackgroundSolidColorBrush}"/>
+                                    <Setter Property="Foreground" Value="{DynamicResource MainTitleSolidColorBrush}"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <Style x:Key="CompareDiffRowStyle" TargetType="Border">
+                <Setter Property="MinHeight" Value="{Binding DiffRowHeight, RelativeSource={RelativeSource AncestorType={x:Type local:FileCompareSelectionControl}}}"/>
+                <Setter Property="Background" Value="{Binding BackgroundBrush}"/>
+                <Setter Property="BorderBrush" Value="{Binding ForegroundBrush}"/>
+                <Setter Property="BorderThickness" Value="2,0,0,0"/>
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding Kind}" Value="Unchanged">
+                        <Setter Property="BorderBrush" Value="Transparent"/>
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding Kind}" Value="Empty">
+                        <Setter Property="BorderBrush" Value="Transparent"/>
+                        <Setter Property="Background" Value="{DynamicResource SettingsNestedGroupBackgroundSolidColorBrush}"/>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+
+            <Style x:Key="CompareDiffTextStyle" TargetType="TextBlock">
+                <Setter Property="FontFamily" Value="Consolas"/>
+                <Setter Property="FontSize" Value="{Binding DiffFontSize, RelativeSource={RelativeSource AncestorType={x:Type local:FileCompareSelectionControl}}}"/>
+                <Setter Property="VerticalAlignment" Value="Top"/>
+                <Setter Property="LineHeight" Value="{Binding DiffRowHeight, RelativeSource={RelativeSource AncestorType={x:Type local:FileCompareSelectionControl}}}"/>
+                <Setter Property="LineStackingStrategy" Value="BlockLineHeight"/>
+                <Setter Property="Foreground" Value="{Binding ForegroundBrush}"/>
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding Kind}" Value="Unchanged">
+                        <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding Kind}" Value="Empty">
+                        <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes45}"/>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+
             <DataTemplate x:Key="DiffLineTemplate">
-                <Border Background="{Binding BackgroundBrush}"
-                        BorderBrush="{Binding BorderBrush}"
-                        BorderThickness="0"
-                        Padding="6,2">
+                <Border Style="{StaticResource CompareDiffRowStyle}">
                     <Grid>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="24"/>
-                            <ColumnDefinition Width="58"/>
+                            <ColumnDefinition Width="{Binding DiffMarkerColumnWidth, RelativeSource={RelativeSource AncestorType={x:Type local:FileCompareSelectionControl}}}"/>
+                            <ColumnDefinition Width="{Binding DiffLineNumberColumnWidth, RelativeSource={RelativeSource AncestorType={x:Type local:FileCompareSelectionControl}}}"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
+                        <Border Grid.ColumnSpan="2"
+                                BorderBrush="{DynamicResource SettingsInteractiveBorderSolidColorBrush}"
+                                BorderThickness="0,0,1,0"/>
                         <TextBlock Grid.Column="0"
                                    Text="{Binding Prefix}"
-                                   FontFamily="Consolas"
-                                   FontSize="14"
+                                   Style="{StaticResource CompareDiffTextStyle}"
                                    FontWeight="Bold"
-                                   Foreground="{Binding ForegroundBrush}"
                                    HorizontalAlignment="Center"/>
                         <TextBlock Grid.Column="1"
                                    Text="{Binding LineNumberText}"
-                                   FontFamily="Consolas"
-                                   FontSize="13"
+                                   Style="{StaticResource CompareDiffTextStyle}"
+                                   FontSize="{Binding DiffLineNumberFontSize, RelativeSource={RelativeSource AncestorType={x:Type local:FileCompareSelectionControl}}}"
                                    Opacity="0.75"
-                                   TextAlignment="Right"
-                                   Foreground="{Binding ForegroundBrush}"/>
+                                   Margin="0,0,12,0"
+                                   TextAlignment="Right"/>
                         <TextBlock Grid.Column="2"
                                    Text="{Binding Text}"
-                                   Margin="10,0,0,0"
-                                   FontFamily="Consolas"
-                                   FontSize="14"
-                                   TextWrapping="NoWrap"
-                                   Foreground="{Binding ForegroundBrush}"/>
+                                   Margin="10,0,4,0"
+                                   Style="{StaticResource CompareDiffTextStyle}"
+                                   TextWrapping="Wrap"/>
                     </Grid>
                 </Border>
+            </DataTemplate>
+            <DataTemplate x:Key="DiffRowPairTemplate">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="8"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <ContentPresenter Content="{Binding Source}" Margin="9,0"
+                                      ContentTemplate="{StaticResource DiffLineTemplate}"/>
+                    <ContentPresenter Grid.Column="2" Content="{Binding Target}" Margin="9,0"
+                                      ContentTemplate="{StaticResource DiffLineTemplate}"/>
+                </Grid>
             </DataTemplate>
         </ResourceDictionary>
     </UserControl.Resources>
@@ -324,82 +509,102 @@
             </Grid.RowDefinitions>
 
             <Grid Grid.Row="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="74"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="8" />
                     <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="8" />
                 </Grid.ColumnDefinitions>
 
-                <Border Grid.Column="0"
-                        Style="{StaticResource CompareCardBorderStyle}">
+                <Border Grid.Column="0" Grid.RowSpan="3" Style="{StaticResource CompareResultPanelStyle}"/>
+                <Border Grid.Column="2" Grid.RowSpan="3" Style="{StaticResource CompareResultPanelStyle}"/>
+                <Border Grid.Column="0" Margin="1" Style="{StaticResource ComparePaneHeaderStyle}">
                     <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="*"/>
-                        </Grid.RowDefinitions>
-                        <TextBlock Grid.Row="0"
-                                   Text="{Binding ActiveComparison.SourceTitle}"
-                                   Padding="12,8"
-                                   FontFamily="{DynamicResource WinstonBold}"
-                                   FontSize="16"
-                                   Foreground="{DynamicResource MainTitleSolidColorBrush}" />
-                        <ListBox x:Name="SourceLinesListBox"
-                                 Grid.Row="1"
-                                 ItemsSource="{Binding ActiveComparison.SourceLines}"
-                                 ItemTemplate="{StaticResource DiffLineTemplate}"
-                                 ItemContainerStyle="{StaticResource DiffListBoxItemStyle}"
-                                 BorderThickness="0"
-                                 Background="Transparent"
-                                 ScrollViewer.ScrollChanged="SourceLinesListBox_ScrollChanged"
-                                 ScrollViewer.HorizontalScrollBarVisibility="Auto"
-                                 ScrollViewer.VerticalScrollBarVisibility="Auto"
-                                 VirtualizingPanel.IsVirtualizing="True"
-                                 VirtualizingPanel.VirtualizationMode="Recycling"/>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Border Width="48" Height="48" CornerRadius="8" Margin="0,0,14,0"
+                                Background="{DynamicResource SettingCardBackground}">
+                            <icons:FileDocumentIcon Size="28" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                    Foreground="{DynamicResource NotificationInfoIconBrush}"/>
+                        </Border>
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding ActiveComparison.SourceTitle}"
+                                       ToolTip="{Binding ActiveComparison.SourceTitle}"
+                                       Style="{StaticResource ComparePaneTitleStyle}"/>
+                            <TextBlock Text="{Binding ActiveComparison.SourceFile.FilePath}"
+                                       ToolTip="{Binding ActiveComparison.SourceFile.FilePath}"
+                                       Style="{StaticResource ComparePanePathStyle}"/>
+                        </StackPanel>
                     </Grid>
                 </Border>
+                <Grid Grid.Row="1" Grid.Column="0" Margin="9,0,9,8" ClipToBounds="True" IsHitTestVisible="False">
+                    <Border Width="{Binding DiffGutterWidth}" HorizontalAlignment="Left"
+                            Background="{DynamicResource SettingsNestedGroupBackgroundSolidColorBrush}"/>
+                </Grid>
 
-                <Border Grid.Column="2"
-                        Style="{StaticResource CompareCardBorderStyle}">
-                    <TabControl x:Name="ComparisonTabControl"
-                                ItemsSource="{Binding ComparisonResults}"
-                                TabStripPlacement="Bottom"
-                                SelectedItem="{Binding ActiveComparison, Mode=TwoWay}"
-                                Background="Transparent">
-                        <TabControl.ItemTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding TargetTitle}" FontFamily="{DynamicResource WinstonRegular}" />
-                            </DataTemplate>
-                        </TabControl.ItemTemplate>
-                        <TabControl.ContentTemplate>
-                            <DataTemplate>
-                                <Grid>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="*"/>
-                                    </Grid.RowDefinitions>
-                                    <TextBlock Grid.Row="0"
-                                               Text="{Binding TargetHeader}"
-                                               Padding="12,8"
-                                               FontFamily="{DynamicResource WinstonBold}"
-                                               FontSize="16"
-                                               Foreground="{DynamicResource MainTitleSolidColorBrush}" />
-                                    <ListBox x:Name="TargetLinesListBox"
-                                             Grid.Row="1"
-                                             ItemsSource="{Binding TargetLines}"
-                                             ItemTemplate="{StaticResource DiffLineTemplate}"
-                                             ItemContainerStyle="{StaticResource DiffListBoxItemStyle}"
-                                             BorderThickness="0"
-                                             Background="Transparent"
-                                             ScrollViewer.ScrollChanged="TargetLinesListBox_ScrollChanged"
-                                             ScrollViewer.HorizontalScrollBarVisibility="Auto"
-                                             ScrollViewer.VerticalScrollBarVisibility="Auto"
-                                             VirtualizingPanel.IsVirtualizing="True"
-                                             VirtualizingPanel.VirtualizationMode="Recycling"/>
-                                </Grid>
-                            </DataTemplate>
-                        </TabControl.ContentTemplate>
-                    </TabControl>
+                <Border Grid.Column="2" Margin="1" Style="{StaticResource ComparePaneHeaderStyle}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Border Width="48" Height="48" CornerRadius="8" Margin="0,0,14,0"
+                                Background="{DynamicResource SettingCardBackground}">
+                            <icons:FileDocumentIcon Size="28" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                    Foreground="{DynamicResource NotificationSuccessIconBrush}"/>
+                        </Border>
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding ActiveComparison.TargetHeader}"
+                                       ToolTip="{Binding ActiveComparison.TargetHeader}"
+                                       Style="{StaticResource ComparePaneTitleStyle}"/>
+                            <TextBlock Text="{Binding ActiveComparison.TargetFile.FilePath}"
+                                       ToolTip="{Binding ActiveComparison.TargetFile.FilePath}"
+                                       Style="{StaticResource ComparePanePathStyle}"/>
+                        </StackPanel>
+                    </Grid>
                 </Border>
+                <Grid Grid.Row="1" Grid.Column="2" Margin="9,0,9,8" ClipToBounds="True" IsHitTestVisible="False">
+                    <Border Width="{Binding DiffGutterWidth}" HorizontalAlignment="Left"
+                            Background="{DynamicResource SettingsNestedGroupBackgroundSolidColorBrush}"/>
+                </Grid>
+                <ListBox x:Name="ComparisonRowsListBox" Grid.Row="1" Grid.ColumnSpan="4" Margin="0,0,0,8"
+                         ItemsSource="{Binding ActiveComparison.Rows}"
+                         Style="{StaticResource CompareLinesListStyle}"/>
+                <TabControl x:Name="ComparisonTabControl" Grid.Row="2" Grid.Column="2"
+                            ItemsSource="{Binding ComparisonResults}"
+                            SelectedItem="{Binding ActiveComparison, Mode=TwoWay}"
+                            ItemContainerStyle="{StaticResource CompareTargetTabStyle}">
+                    <TabControl.Style>
+                        <Style TargetType="TabControl">
+                            <Setter Property="Margin" Value="8,0,8,8"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ComparedFilesCount}" Value="0">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding ComparedFilesCount}" Value="1">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TabControl.Style>
+                    <TabControl.Template>
+                        <ControlTemplate TargetType="TabControl">
+                            <TabPanel IsItemsHost="True" KeyboardNavigation.TabIndex="1"/>
+                        </ControlTemplate>
+                    </TabControl.Template>
+                    <TabControl.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding TargetTitle}" FontFamily="{DynamicResource WinstonRegular}"/>
+                        </DataTemplate>
+                    </TabControl.ItemTemplate>
+                </TabControl>
             </Grid>
         </Grid>
 

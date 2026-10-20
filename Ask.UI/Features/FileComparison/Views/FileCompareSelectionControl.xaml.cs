@@ -14,7 +14,6 @@ namespace Ask.UI.Features.FileComparison.Views
   {
     private readonly Func<IReadOnlyList<OpenTextEditorDescriptor>> _openFilesProvider;
     private CancellationTokenSource? _compareCancellation;
-    private bool _isSynchronizingScroll;
     private OpenTextEditorDescriptor? _selectedSourceFile;
     private FileComparisonResult? _activeComparison;
     private bool _hasEnoughFiles;
@@ -427,112 +426,6 @@ namespace Ask.UI.Features.FileComparison.Views
         + $"Файлов с изменениями: {changedFiles}. Добавлено строк: {added}, удалено: {removed}, изменено: {modified}.";
     }
 
-    private void SourceLinesListBox_ScrollChanged(object sender, ScrollChangedEventArgs e)
-    {
-      if (_isSynchronizingScroll || (e.VerticalChange == 0 && e.HorizontalChange == 0))
-      {
-        return;
-      }
-
-      SyncScroll(SourceLinesListBox, GetVisibleTargetLinesListBox());
-    }
-
-    private void TargetLinesListBox_ScrollChanged(object sender, ScrollChangedEventArgs e)
-    {
-      if (_isSynchronizingScroll || (e.VerticalChange == 0 && e.HorizontalChange == 0))
-      {
-        return;
-      }
-
-      if (sender is not ListBox targetListBox)
-      {
-        return;
-      }
-
-      SyncScroll(targetListBox, SourceLinesListBox);
-    }
-
-    private void SyncScroll(DependencyObject source, DependencyObject? target)
-    {
-      if (target == null)
-      {
-        return;
-      }
-
-      var sourceViewer = FindScrollViewer(source);
-      var targetViewer = FindScrollViewer(target);
-      if (sourceViewer == null || targetViewer == null)
-      {
-        return;
-      }
-
-      _isSynchronizingScroll = true;
-      try
-      {
-        targetViewer.ScrollToVerticalOffset(sourceViewer.VerticalOffset);
-        targetViewer.ScrollToHorizontalOffset(sourceViewer.HorizontalOffset);
-      }
-      finally
-      {
-        _isSynchronizingScroll = false;
-      }
-    }
-
-    private ListBox? GetVisibleTargetLinesListBox()
-    {
-      return FindVisualChildren<ListBox>(ComparisonTabControl)
-        .FirstOrDefault(listBox => string.Equals(listBox.Name, "TargetLinesListBox", StringComparison.Ordinal) && listBox.IsVisible);
-    }
-
-    private static ScrollViewer? FindScrollViewer(DependencyObject? root)
-    {
-      if (root == null)
-      {
-        return null;
-      }
-
-      if (root is ScrollViewer viewer)
-      {
-        return viewer;
-      }
-
-      for (var childIndex = 0; childIndex < VisualTreeHelper.GetChildrenCount(root); childIndex++)
-      {
-        var child = VisualTreeHelper.GetChild(root, childIndex);
-        var result = FindScrollViewer(child);
-        if (result != null)
-        {
-          return result;
-        }
-      }
-
-      return null;
-    }
-
-    private static IEnumerable<T> FindVisualChildren<T>(DependencyObject? root)
-      where T : DependencyObject
-    {
-      if (root == null)
-      {
-        yield break;
-      }
-
-      var count = VisualTreeHelper.GetChildrenCount(root);
-      for (var childIndex = 0; childIndex < count; childIndex++)
-      {
-        var child = VisualTreeHelper.GetChild(root, childIndex);
-        if (child is T result)
-        {
-          yield return result;
-        }
-
-        foreach (var nested in FindVisualChildren<T>(child))
-        {
-          yield return nested;
-        }
-      }
-    }
-
     private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
     {
       PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
@@ -571,16 +464,30 @@ namespace Ask.UI.Features.FileComparison.Views
 
   public sealed class FileComparisonResult
   {
+    /// <summary>
+    /// Создаёт результат сравнения с общими парами строк для отображения.
+    /// </summary>
+    /// <param name="sourceFile">Исходный документ.</param>
+    /// <param name="targetFile">Сравниваемый документ.</param>
+    /// <param name="sourceLines">Выровненные строки исходного документа.</param>
+    /// <param name="targetLines">Выровненные строки сравниваемого документа.</param>
+    /// <exception cref="ArgumentException">Количество строк в панелях не совпадает.</exception>
     public FileComparisonResult(
       OpenTextEditorDescriptor sourceFile,
       OpenTextEditorDescriptor targetFile,
       IReadOnlyList<DiffLineViewModel> sourceLines,
       IReadOnlyList<DiffLineViewModel> targetLines)
     {
+      if (sourceLines.Count != targetLines.Count)
+      {
+        throw new ArgumentException("Количество выровненных строк должно совпадать в обеих панелях.", nameof(targetLines));
+      }
+
       SourceFile = sourceFile;
       TargetFile = targetFile;
       SourceLines = sourceLines;
       TargetLines = targetLines;
+      Rows = sourceLines.Select((line, index) => new DiffRowViewModel(line, targetLines[index])).ToArray();
       AddedLines = targetLines.Count(line => line.Kind == DiffLineKind.Added);
       RemovedLines = sourceLines.Count(line => line.Kind == DiffLineKind.Removed);
       ModifiedLines = Math.Max(
@@ -602,6 +509,11 @@ namespace Ask.UI.Features.FileComparison.Views
 
     public IReadOnlyList<DiffLineViewModel> TargetLines { get; }
 
+    /// <summary>
+    /// Пары строк для совместного отображения с переносом текста.
+    /// </summary>
+    public IReadOnlyList<DiffRowViewModel> Rows { get; }
+
     public int AddedLines { get; }
 
     public int RemovedLines { get; }
@@ -609,6 +521,33 @@ namespace Ask.UI.Features.FileComparison.Views
     public int ModifiedLines { get; }
 
     public bool HasChanges => AddedLines > 0 || RemovedLines > 0 || ModifiedLines > 0;
+  }
+
+  /// <summary>
+  /// Объединяет выровненные строки двух документов в одну визуальную строку сравнения.
+  /// </summary>
+  public sealed class DiffRowViewModel
+  {
+    /// <summary>
+    /// Создаёт пару строк исходного и сравниваемого документов.
+    /// </summary>
+    /// <param name="source">Строка исходного документа или пустая позиция.</param>
+    /// <param name="target">Строка сравниваемого документа или пустая позиция.</param>
+    public DiffRowViewModel(DiffLineViewModel source, DiffLineViewModel target)
+    {
+      Source = source;
+      Target = target;
+    }
+
+    /// <summary>
+    /// Строка исходного документа или пустая позиция.
+    /// </summary>
+    public DiffLineViewModel Source { get; }
+
+    /// <summary>
+    /// Строка сравниваемого документа или пустая позиция.
+    /// </summary>
+    public DiffLineViewModel Target { get; }
   }
 
   public sealed class DiffLineViewModel

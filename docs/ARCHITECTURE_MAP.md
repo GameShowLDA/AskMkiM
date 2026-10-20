@@ -2350,6 +2350,32 @@ Control получает актуальные `OpenTextEditorDescriptor` чер�
 и очистки результатов; до первого сравнения счётчики равны нулю. Подробная
 `ComparisonSummary` доступна в подсказке карточек. Табло использует динамические
 ресурсы существующих светлой и тёмной тем и общий `FileDocumentIcon`.
+Панели результатов имеют одинаковые заголовки высотой 74 DIP с именем и путём
+документа; пути берутся из `ActiveComparison.SourceFile/TargetFile.FilePath`.
+`FileComparisonResult.Rows` объединяет одинаковые по индексу `SourceLines` и
+`TargetLines` в `DiffRowViewModel(Source, Target)`, включая пустые позиции DiffPlex.
+Конструктор проверяет равенство числа строк обеих сторон. Единственный
+`ComparisonRowsListBox` привязан к `ActiveComparison.Rows`; `DiffRowPairTemplate`
+отображает обе стороны в одной строке Grid. Высота пары определяется максимумом
+высот её ячеек, поэтому перенос текста с любой стороны сохраняет выравнивание.
+`DiffLineTemplate` использует `TextWrapping=Wrap`: переносит слова, а длинные
+фрагменты без пробелов разбивает по доступной ширине. Горизонтальная прокрутка
+отключена через `HorizontalScrollBarVisibility=Disabled`; вертикальная общая,
+отдельная синхронизация двух ScrollViewer больше не требуется.
+`CompareLinesListStyle` сохраняет виртуализацию Recycling с прокруткой в пикселях
+и тематическую вертикальную полосу прокрутки. Заголовки и фон панелей находятся
+в общем Grid; справа зарезервирована ширина общей полосы прокрутки, чтобы ширины
+левой и правой ячеек совпадали с заголовками.
+`FileCompareSelectionControl.Zoom.cs`: `CompareLinesListStyle.PreviewMouseWheel`
+→ `DiffLines_PreviewMouseWheel` → `ZoomDiffText` меняет общий `DiffFontSize`
+на 1 пункт в диапазоне 12–48, как текстовый редактор. Ctrl + колесо помечается
+обработанным; обычное колесо сохраняет прокрутку. Вместе с текстом масштабируются
+номера, маркеры и ширина их колонки. `DiffRowHeight` (22 DIP при шрифте 14)
+задаёт `LineHeight` текста и `MinHeight` контейнера/ячейки; фактическая высота пары
+увеличивается при переносе. Масштаб сохраняется при переключении результатов.
+`ComparisonTabControl` снизу правой панели переключает `ActiveComparison`,
+показывается только при нескольких результатах и рисует только заголовки вкладок.
+Общая нижняя строка Grid резервирует высоту вкладок сразу для обеих панелей.
 Ключевые файлы: `MainWindow/MainWindow.xaml`, `MainWindow/Events/UiEventsBinder.cs`,
 `MainWindow/ViewModels/FileViewModel.cs`, `MainWindow/Services/FileService.cs`,
 `Ask.UI/Features/FileComparison/Views/FileCompareSelectionControl.xaml(.cs)`;
