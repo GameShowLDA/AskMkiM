@@ -40,6 +40,18 @@ public interface IReplaceTextSearchTarget : ITextSearchTarget
 }
 
 /// <summary>
+/// Задаёт подпись общей области и сохраняет выбранный документ в подключённом компоненте.
+/// </summary>
+public interface ITextSearchScopeProvider
+{
+  /// <summary>Подпись поиска по всем документам компонента.</summary>
+  string AllDocumentsTitle { get; }
+
+  /// <summary>Идентификатор выбранного документа; отсутствие значения включает все документы.</summary>
+  string? SelectedSearchDocumentId { get; set; }
+}
+
+/// <summary>
 /// Неизменяемый снимок документа для поиска.
 /// </summary>
 /// <param name="Id">Уникальный идентификатор документа, независимый от отображаемого имени.</param>

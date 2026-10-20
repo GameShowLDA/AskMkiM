@@ -69,6 +69,7 @@ namespace MainWindowProgram.Services
       _multiWindow = multiWindow;
       _mainWindow = mainWindow;
       _mainWindow.SearchWindow = new SearchWindow();
+      _mainWindow.SearchWindow.PlacementAnchor = _mainWindow.TopPanel;
       _mainWindow.SearchWindow.TargetProvider = _multiWindow.GetActiveSearchTarget;
       _isLockedProvider = isLockedProvider;
       _opkToPkConverter = new OpkToPkConverter();

@@ -1,4 +1,4 @@
-# AskMkiM Architecture Map
+﻿# AskMkiM Architecture Map
 
 > This file is a navigation and architecture index, not the source of truth.
 > Start here before broad repository exploration.
@@ -2362,6 +2362,31 @@ workspace control; для `TextEditorContainer` проверяет содерж�
 
 **Окно и маршрутизация.** `FileService` устанавливает
 `SearchWindow.TargetProvider = MultiWindowService.GetActiveSearchTarget`.
+Оформление окна: `UI/Controls/Search/SearchWindow.xaml` + локальный словарь
+`SearchWindow.Styles.xaml`; динамические brush-ресурсы тем и `SearchAccentBrush`
+для полей и списка областей. Компактные размеры восстановлены: 410 DIP по ширине,
+высота 90/130 DIP. Исходные SearchArrows, ArrowButton, CaseToggleButton,
+WholeWordToggleButton, ReplaseWordButton/ReplaseAllWordsButton и SearchSliderHandle
+сохраняют прежние размеры и значки. Подсказки полей находятся внутри SearchInputStyle и зависят от пустого Text, а не фокуса.
+PART_ContentHost не дублирует Padding поля дополнительным Margin: каретка и подсказка имеют общий отступ.
+SearchStatus в нижней правой ячейке показывает «N из M». Для подключённых компонентов
+источник — TextSearchSession; для редактора/транслятора — SearchEvents.SearchProgressChanged,
+публикуемый TextSearchManager при переходе, поиске всех совпадений и отсутствии результатов.
+Подписка счётчика освобождается при окончательном закрытии окна.
+SearchArrows показывает подписанные действия «Найти далее», «Найти предыдущее»,
+«Найти все» и сочетания F3/Shift+F3. Список оформлен в цветах темы с индикатором
+выбора; выбор пункта меняет действие, нажатие значка запускает его один раз.
+`SearchWindow.Design.cs`
+содержит только ClearFieldCommand. Раскрытие замены использует прежние storyboard
+и строку Grid с высотой Star; направление стрелки задаёт ToggleArrow.IsArrowUp.
+Window_Loaded подключён только в XAML, без повторной подписки.
+`FileService` задаёт `SearchWindow.PlacementAnchor = MainWindow.TopPanel`.
+`SearchWindow.Placement.cs` отслеживает высоту панели и освобождает подписки при
+окончательном закрытии. Closed сбрасывает признак загрузки и освобождает привязку напрямую,
+без вызова позиционирования; UpdatePosition проверяет PresentationSource до PointToScreen. Loaded устанавливает признак загрузки до UpdatePosition;
+ShowWindow повторяет позиционирование после Show. UpdatePosition берёт нижний
+край фактической панели через PointToScreen, переводит пиксели в DIP и центрирует
+поиск под меню. WindowContainer не имеет верхнего отступа, углы Border — 0,0,9,9.
 `EnsureSearchWindowAsync` допускает подключённый компонент без TextEditorUI.
 `UiEventsBinder.OnTextEditorActive` показывает меню поиска для подключённого компонента,
 замену — только для редактируемого. `RefreshActiveEditorUiState` переподключает видимое
@@ -2386,6 +2411,14 @@ workspace control; для `TextEditorContainer` проверяет содерж�
 
 **Сравнение файлов.** `FileCompareSelectionControl.Search.cs` реализует
 ITextSearchTarget: снимки активного сравнения имеют ID `source`/`target`.
+Дополнительный `ITextSearchScopeProvider` задаёт подпись «Обе панели» и хранит
+`SelectedSearchDocumentId` в экземпляре вкладки сравнения. Отдельные области
+подписаны «Левая — имя файла» / «Правая — имя файла». `SearchWindow.RememberTargetArea`
+сохраняет выбор, отменяет старую сессию и очищает поиск при смене стороны;
+первый выбор — обе панели. При закрытии/повторном открытии и переключении правого
+файла сторона сохраняется. Редактор/транслятор не реализуют этот контракт:
+их прежние пункты области и индекс восстанавливаются из `_legacyAreas/_legacyAreaIndex`.
+Открытие — прежние Ctrl+F / «Файл → Поиск», кнопки на панелях не добавляются.
 `HighlightSearchResults` → `ApplySearchRanges` → диапазоны в `DiffLineViewModel.SearchRanges`
 → INotifyPropertyChanged → `DiffTextHighlight.SearchRanges` → пересборка Run по
 общим границам различий и поиска. Поиск голубой, текущий результат ярче; при

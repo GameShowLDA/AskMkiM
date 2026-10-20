@@ -1,4 +1,4 @@
-using Ask.Core.Services.TextSearch;
+﻿using Ask.Core.Services.TextSearch;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using System.Windows;
 using System.Windows.Controls;
@@ -51,7 +51,7 @@ public partial class SearchWindow
         foreach (var item in _legacyAreas) searchAreaParameters.Items.Add(item);
         searchAreaParameters.SelectedIndex = _legacyAreaIndex;
         _legacyAreas = null;
-        SearchStatus.Visibility = Visibility.Collapsed;
+        SearchStatus.Visibility = Visibility.Visible;
         return;
       }
 
@@ -61,8 +61,11 @@ public partial class SearchWindow
         _legacyAreaIndex = searchAreaParameters.SelectedIndex;
       }
       var documents = _target.GetSearchDocuments();
-      string? selected = (searchAreaParameters.SelectedItem as ComboBoxItem)?.Tag as string;
-      var areas = new[] { new SearchDocument("", "Все области компонента", "") }.Concat(documents).ToArray();
+      var scopeProvider = _target as ITextSearchScopeProvider;
+      string? selected = scopeProvider != null ? scopeProvider.SelectedSearchDocumentId
+        : (searchAreaParameters.SelectedItem as ComboBoxItem)?.Tag as string;
+      var areas = new[] { new SearchDocument("", scopeProvider?.AllDocumentsTitle ?? "Все области компонента", "") }
+        .Concat(documents).ToArray();
       var current = searchAreaParameters.Items.Cast<ComboBoxItem>().ToArray();
       if (current.Length != areas.Length || current.Where((item, index) =>
         !Equals(item.Tag, areas[index].Id) || !Equals(item.Content, areas[index].Title)).Any())
@@ -74,6 +77,16 @@ public partial class SearchWindow
       SearchStatus.Visibility = Visibility.Visible;
     }
     finally { _updatingAreas = false; }
+  }
+
+  /// <summary>Сохраняет выбор области только для компонента, явно поддерживающего эту возможность.</summary>
+  private void RememberTargetArea()
+  {
+    if (_target is not ITextSearchScopeProvider scopeProvider) return;
+    scopeProvider.SelectedSearchDocumentId = GetTargetArea();
+    _session?.Dispose();
+    _session = new TextSearchSession(_target);
+    SearchStatus.Text = string.Empty;
   }
 
   /// <summary>Переключает сессию на текущий компонент рабочей области.</summary>
@@ -130,7 +143,17 @@ public partial class SearchWindow
 
   /// <summary>Показывает позицию среди найденных совпадений.</summary>
   private void UpdateTargetStatus() => SearchStatus.Text = _session == null || _session.Matches.Count == 0
-    ? "Совпадений нет" : $"{_session.CurrentIndex + 1} из {_session.Matches.Count}";
+    ? "0 из 0" : $"{_session.CurrentIndex + 1} из {_session.Matches.Count}";
+
+  /// <summary>Отображает счётчик существующего поиска редактора в потоке интерфейса.</summary>
+  /// <param name="progress">Номер и число найденных совпадений.</param>
+  private void OnLegacySearchProgressChanged(Ask.Core.Services.EventCore.Events.SearchEvents.SearchProgressChanged progress)
+  {
+    if (!Dispatcher.CheckAccess()) { Dispatcher.InvokeAsync(() => OnLegacySearchProgressChanged(progress)); return; }
+    if (_target != null) return;
+    SearchStatus.Visibility = Visibility.Visible;
+    SearchStatus.Text = $"{progress.Current} из {progress.Total}";
+  }
 
   /// <summary>Отменяет запросы и освобождает подключение при закрытии окна.</summary>
   private void ReleaseTarget()

@@ -46,6 +46,7 @@
 
     <!--#region Базовые стили -->
     <SolidColorBrush x:Key="ForegrounfBrushes" Color="#f3f0f9"/>
+    <SolidColorBrush x:Key="SearchAccentBrush" Color="#1CA3E9"/>
     <SolidColorBrush x:Key="ForegrounfBrushes35" Color="#f3f0f9" Opacity="0.35"/>
     <SolidColorBrush x:Key="ForegrounfBrushes45" Color="#f3f0f9" Opacity="0.45"/>
     <SolidColorBrush x:Key="ForegrounfBrushes85" Color="#f3f0f9" Opacity="0.85"/>

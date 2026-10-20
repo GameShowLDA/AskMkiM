@@ -1,4 +1,4 @@
-using Ask.Core.Services.EventCore.Adapters;
+﻿using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using System.Windows;
@@ -28,7 +28,7 @@ namespace UI.Controls.Search
     /// </summary>
     private bool _isExpanded = false;
 
-    private const double MinWindowHeight = 90;  // Высота окна без строки 2 (увеличено под более высокую 3ю строку)
+    private const double MinWindowHeight = 90;
     private bool _allowClose;
     private Window _parentWindow;
     private bool IsLoaded;
@@ -56,7 +56,9 @@ namespace UI.Controls.Search
     public SearchWindow()
     {
       InitializeComponent();
-      this.Loaded += Window_Loaded;
+      InitializeDesignCommands();
+      EventAggregator.Subscribe<SearchEvents.SearchProgressChanged>(OnLegacySearchProgressChanged);
+      Closed += SearchWindow_Closed;
 
       EventAggregator.Subscribe<SearchEvents.SearchButtonPressed>(e => OnSearchButtonPressed(e.SearchParameters));
       EventAggregator.Subscribe<SearchEvents.ReplaceWordButtonPressed>(_ => OnReplaceWordButtonPressed());
@@ -76,6 +78,8 @@ namespace UI.Controls.Search
     /// </summary>
     private void Window_Loaded(object sender, RoutedEventArgs e)
     {
+      this.IsLoaded = true;
+      DetachPlacementOwner();
       _parentWindow = Window.GetWindow(this)?.Owner;
       if (_parentWindow != null)
       {
@@ -85,7 +89,8 @@ namespace UI.Controls.Search
         UpdatePosition();
       }
 
-      this.IsLoaded = true;
+      _isExpanded = false;
+      ToggleArrow.IsArrowUp = false;
       ReplaceRow.Height = new GridLength(0);
       ReplaceRowPanelElement.Visibility = Visibility.Collapsed;
       ReplaceRowPanelElement.Opacity = 0;
@@ -125,35 +130,22 @@ namespace UI.Controls.Search
         return;
       }
 
-      // Получаем координаты родительского окна
-      Point parentTopLeft = _parentWindow.PointToScreen(new Point(0, 0));
-      double parentWidth = _parentWindow.ActualWidth;
-      double parentHeight = _parentWindow.ActualHeight;
+      var anchor = PlacementAnchor ?? _parentWindow;
+      var compositionTarget = PresentationSource.FromVisual(anchor)?.CompositionTarget;
+      if (compositionTarget == null)
+      {
+        return;
+      }
 
-      // Получаем рабочую область экрана, на котором находится родительское окно
+      var screenPoint = anchor.PointToScreen(new Point(anchor.ActualWidth / 2,
+        PlacementAnchor == null ? ToolPanelHeight : anchor.ActualHeight));
+      var fromDevice = compositionTarget.TransformFromDevice;
+      Point anchorPoint = fromDevice.Transform(screenPoint);
       var parentWindowHandle = new System.Windows.Interop.WindowInteropHelper(_parentWindow).Handle;
-      System.Windows.Forms.Screen screen = System.Windows.Forms.Screen.FromHandle(parentWindowHandle);
-      System.Drawing.Rectangle workingArea = screen.WorkingArea; // Рабочая область монитора
-
-      // Располагаем окно поиска по центру сверху относительно родительского окна
-      double newLeft = parentTopLeft.X + ((parentWidth - this.Width) / 2);  // Центрируем по горизонтали относительно родителя
-      double newTop = parentTopLeft.Y + ToolPanelHeight; // Окно поиска привязываем к верхней части родителя
-
-      // Ограничения по горизонтали
-      newLeft = Math.Max(workingArea.Left, Math.Min(newLeft, workingArea.Right - this.Width));
-      // Ограничения по вертикали
-      newTop = Math.Max(workingArea.Top, Math.Min(newTop, workingArea.Bottom - this.Height));
-
-      // Убедитесь, что окно не выходит за пределы экрана
-      if (newLeft < workingArea.Left)
-      {
-        newLeft = workingArea.Left;  // Устанавливаем на левый край экрана
-      }
-      if (newTop < workingArea.Top)
-      {
-        newTop = workingArea.Top;  // Устанавливаем на верхний край экрана
-      }
-
+      var workingArea = System.Windows.Forms.Screen.FromHandle(parentWindowHandle).WorkingArea;
+      var bounds = Rect.Transform(new Rect(workingArea.X, workingArea.Y, workingArea.Width, workingArea.Height), fromDevice);
+      double newLeft = Math.Max(bounds.Left, Math.Min(anchorPoint.X - this.Width / 2, bounds.Right - this.Width));
+      double newTop = Math.Max(bounds.Top, Math.Min(anchorPoint.Y, bounds.Bottom - this.Height));
       this.Left = newLeft;
       this.Top = newTop;
 
@@ -203,6 +195,7 @@ namespace UI.Controls.Search
       this.Activate();
       this.Focus();
       this.Show();
+      UpdatePosition();
 
       var showAnimation = (Storyboard)Resources["ShowAnimation"];
       showAnimation.Begin();
@@ -254,6 +247,7 @@ namespace UI.Controls.Search
 
     private async void ToggleArrow_PreviewMouseDown(object sender, MouseButtonEventArgs e)
     {
+      e.Handled = true;
       await SetReplaceRowStateAsync(!_isExpanded);
     }
     private void PART_EditableTextBox_PreviewMouseDown(object sender, MouseButtonEventArgs e)
@@ -385,7 +379,7 @@ namespace UI.Controls.Search
       }
 
       _isExpanded = expand;
-      ToggleArrow.IsArrowUp = !expand;
+      ToggleArrow.IsArrowUp = expand;
 
       if (expand)
       {
@@ -417,7 +411,6 @@ namespace UI.Controls.Search
     {
       ReplaceTextBox.Focus();
       ReplaceTextBox.CaretIndex = ReplaceTextBox.Text.Length;
-      ReplcePlaceholder.Visibility = Visibility.Collapsed;
     }
 
     private void searchArrows_MouseEnter(object sender, MouseEventArgs e)
@@ -518,35 +511,14 @@ namespace UI.Controls.Search
       CloseDialog();
     }
 
-    private void SearchTextBox_GotFocus(object sender, RoutedEventArgs e)
-    {
-      SearchPlaceholder.Visibility = Visibility.Collapsed;
-    }
-
-    private void SearchTextBox_LostFocus(object sender, RoutedEventArgs e)
-    {
-      if (string.IsNullOrWhiteSpace(SearchTextBox.Text))
-      {
-        SearchPlaceholder.Visibility = Visibility.Visible;
-      }
-    }
-
-    private void ReplaceTextBox_GotFocus(object sender, RoutedEventArgs e)
-    {
-      ReplcePlaceholder.Visibility = Visibility.Collapsed;
-    }
-
-    private void ReplaceTextBox_LostFocus(object sender, RoutedEventArgs e)
-    {
-      if (string.IsNullOrWhiteSpace(SearchTextBox.Text))
-      {
-        ReplcePlaceholder.Visibility = Visibility.Visible;
-      }
-    }
-
     private void PART_EditableTextBox_SelectionChanged(object sender, RoutedEventArgs e)
     {
-      if (_updatingAreas || _target != null) return;
+      if (_updatingAreas) return;
+      if (_target != null)
+      {
+        RememberTargetArea();
+        return;
+      }
       var selected = searchAreaParameters.SelectedValue as ComboBoxItem;
       if (selected?.Tag?.ToString() == "FindInFile")
       {
@@ -560,7 +532,6 @@ namespace UI.Controls.Search
       {
         SearchTextBox.Text = selectedText;
         SearchTextBox.Focus();
-        SearchPlaceholder.Visibility = Visibility.Collapsed;
         SearchTextBox.CaretIndex = SearchTextBox.Text.Length;
       }
     }

@@ -7,15 +7,21 @@ using System.Windows.Media;
 namespace Ask.UI.Features.FileComparison.Views;
 
 /// <summary>Подключает поиск к обеим сторонам активного сравнения без изменения документов.</summary>
-public partial class FileCompareSelectionControl : ITextSearchTarget
+public partial class FileCompareSelectionControl : ITextSearchTarget, ITextSearchScopeProvider
 {
+  /// <inheritdoc />
+  public string AllDocumentsTitle => "Обе панели";
+
+  /// <inheritdoc />
+  public string? SelectedSearchDocumentId { get; set; }
+
   /// <inheritdoc />
   public IReadOnlyList<SearchDocument> GetSearchDocuments() => ActiveComparison == null
     ? Array.Empty<SearchDocument>()
     : new[]
     {
-      new SearchDocument("source", "Слева: " + ActiveComparison.SourceFile.DisplayName, ActiveComparison.SourceFile.TextContent),
-      new SearchDocument("target", "Справа: " + ActiveComparison.TargetFile.DisplayName, ActiveComparison.TargetFile.TextContent),
+      new SearchDocument("source", "Левая — " + ActiveComparison.SourceFile.DisplayName, ActiveComparison.SourceFile.TextContent),
+      new SearchDocument("target", "Правая — " + ActiveComparison.TargetFile.DisplayName, ActiveComparison.TargetFile.TextContent),
     };
 
   /// <inheritdoc />

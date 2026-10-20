@@ -1,4 +1,6 @@
-using Ask.Core.Services.EventCore.Adapters;
+﻿using Ask.Core.Services.EventCore.Adapters;
+using Ask.Core.Services.EventCore.Events;
+using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.DTO.Executor;
 using ICSharpCode.AvalonEdit.Rendering;
 using Message;
@@ -293,6 +295,7 @@ namespace UI.Components.MultiEditorMethods
 
       List<Task> searchTasks = ExecuteSearchTasks(searchPages, searchText, wholeWord, caseWord);
       await Task.WhenAll(searchTasks);
+      EventAggregator.Publish(new SearchEvents.SearchProgressChanged(0, foundInOpenedFiles.Values.Sum(results => results.Count)));
 
       if (showResults)
       {
@@ -678,6 +681,7 @@ namespace UI.Components.MultiEditorMethods
     /// <returns>Возвращает null и выводит сообщение о том, что текст не найден.</returns>
     private List<SearchResult> HandleNoMatches(string searchText)
     {
+      EventAggregator.Publish(new SearchEvents.SearchProgressChanged(0, 0));
       MessageBoxCustom.Show($"Текст {searchText} не найден.", image: MessageBoxImage.Error);
       LogInformation($"Текст {searchText} не найден.");
       return null;
@@ -1075,6 +1079,7 @@ namespace UI.Components.MultiEditorMethods
         return;
       }
 
+      EventAggregator.Publish(new SearchEvents.SearchProgressChanged(index + 1, foundResults.Count));
       var result = foundResults[index];
       if (result.StartOffset < 0 || result.StartOffset + result.Length > textEditor.Document.TextLength)
       {

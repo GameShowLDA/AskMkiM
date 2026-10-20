@@ -8,6 +8,23 @@ namespace Ask.Core.Services.EventCore.Events
   /// </summary>
   public static class SearchEvents
   {
+    /// <summary>Передаёт позицию и число совпадений поиска редактора.</summary>
+    public class SearchProgressChanged : IEvent
+    {
+      /// <summary>Номер текущего совпадения, начиная с единицы; ноль при отсутствии выбора.</summary>
+      public int Current { get; }
+      /// <summary>Общее число найденных совпадений.</summary>
+      public int Total { get; }
+      /// <summary>Создаёт состояние счётчика поиска.</summary>
+      /// <param name="current">Номер выбранного совпадения или ноль.</param>
+      /// <param name="total">Число найденных совпадений.</param>
+      public SearchProgressChanged(int current, int total)
+      {
+        Current = current;
+        Total = total;
+      }
+    }
+
     /// <summary>
     /// Событие, обозначающее закрытие окна поиска.
     /// </summary>
