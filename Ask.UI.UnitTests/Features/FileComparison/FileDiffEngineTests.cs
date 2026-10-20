@@ -9,6 +9,63 @@ namespace Ask.UI.UnitTests.Features.FileComparison;
 public sealed class FileDiffEngineTests
 {
   /// <summary>
+  /// Выделяет только изменённые символы и сохраняет точный текст обеих сторон.
+  /// </summary>
+  /// <param name="sourceText">Исходная строка.</param>
+  /// <param name="targetText">Изменённая строка.</param>
+  /// <param name="removed">Выделенные символы слева.</param>
+  /// <param name="added">Выделенные символы справа.</param>
+  [Theory]
+  [InlineData("НР-12", "НР-1", "2", "")]
+  [InlineData("*71-75", "*71-756", "", "6")]
+  [InlineData("Режим: АВТО", "Режим: АВТА", "О", "А")]
+  [InlineData("A B", "A  B", "", " ")]
+  [InlineData("ABC", "AbC", "B", "b")]
+  [InlineData("AA11BB22CC", "AA31BB24CC", "12", "34")]
+  public void Compare_ModifiedLine_HighlightsChangedCharacters(
+    string sourceText, string targetText, string removed, string added)
+  {
+    var result = FileDiffEngine.Compare(
+      new OpenTextEditorDescriptor("source.txt", "source.txt", sourceText),
+      new OpenTextEditorDescriptor("target.txt", "target.txt", targetText), CancellationToken.None);
+
+    var source = Assert.Single(result.SourceLines);
+    var target = Assert.Single(result.TargetLines);
+    Assert.Equal(DiffLineKind.Modified, source.Kind);
+    Assert.Equal(DiffLineKind.Modified, target.Kind);
+    Assert.Equal(sourceText, string.Concat(source.Segments.Select(segment => segment.Text)));
+    Assert.Equal(targetText, string.Concat(target.Segments.Select(segment => segment.Text)));
+    Assert.Equal(removed, string.Concat(source.Segments.Where(segment => segment.IsChanged).Select(segment => segment.Text)));
+    Assert.Equal(added, string.Concat(target.Segments.Where(segment => segment.IsChanged).Select(segment => segment.Text)));
+    Assert.Same(DiffBrushes.GetModifiedBackground(), source.BackgroundBrush);
+    Assert.Same(source.BackgroundBrush, target.BackgroundBrush);
+    Assert.Equal("~", source.Prefix);
+    Assert.Equal("~", target.Prefix);
+    Assert.Equal(1, result.ModifiedLines);
+    Assert.Equal(0, result.AddedLines);
+    Assert.Equal(0, result.RemovedLines);
+  }
+
+  /// <summary>
+  /// Сохраняет отдельные цвета добавленных и удалённых строк без посимвольного выделения.
+  /// </summary>
+  [Fact]
+  public void Compare_AddedAndRemovedLines_KeepTheirColors()
+  {
+    var result = FileDiffEngine.Compare(
+      new OpenTextEditorDescriptor("source.txt", "source.txt", "A\nX\nB\nC"),
+      new OpenTextEditorDescriptor("target.txt", "target.txt", "A\nB\nC\nY"), CancellationToken.None);
+
+    var removed = Assert.Single(result.SourceLines, line => line.Kind == DiffLineKind.Removed);
+    var added = Assert.Single(result.TargetLines, line => line.Kind == DiffLineKind.Added);
+    Assert.Same(DiffBrushes.GetMissingBackground(), removed.BackgroundBrush);
+    Assert.Same(DiffBrushes.GetPresentBackground(), added.BackgroundBrush);
+    Assert.Equal("-", removed.Prefix);
+    Assert.Equal("+", added.Prefix);
+    Assert.All(removed.Segments.Concat(added.Segments), segment => Assert.False(segment.IsChanged));
+  }
+
+  /// <summary>
   /// Сохраняет выравнивание строк после вставки в исходный текст.
   /// </summary>
   [Fact]

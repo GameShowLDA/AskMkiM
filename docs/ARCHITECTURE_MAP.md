@@ -2344,6 +2344,19 @@ Control получает актуальные `OpenTextEditorDescriptor` чер�
 `DiffPiece` преобразуется в локальную модель раскраски строк; пробелы и регистр
 считаются значимыми. Это сравнение
 содержимого открытых вкладок, не файлов, повторно читаемых с диска.
+`FileDiffEngine.Compare` передаёт `Differ.Instance` и `CharacterChunker.Instance`
+в `SideBySideDiffBuilder.Diff`, получая посимвольные `DiffPiece.SubPieces` внутри
+изменённых строк. `BuildSegments` исключает пустые позиции и объединяет соседние
+символы с одинаковым состоянием в `DiffTextSegment(Text, IsChanged)`; неизменённые,
+добавленные и удалённые строки содержат один обычный фрагмент.
+`DiffLineViewModel.Segments` → attached property `DiffTextHighlight.Line`
+(`Ask.UI/Features/FileComparison/Views/DiffTextHighlight.cs`) → `TextBlock.Inlines`
+из `Run`. Callback очищает старые Inlines при смене модели, включая recycling
+виртуализированных контейнеров. Изменённые символы имеют насыщенный жёлтый фон
+и жирное начертание. `DiffPresentation` задаёт изменённым строкам с обеих сторон
+светло-жёлтый фон и маркер `~`, удалённым — красный и `-`, добавленным — зелёный
+и `+`. Палитра различий фиксирована и контрастна в обеих темах; фон обычных строк
+и пустых позиций продолжает использовать ресурсы текущей темы.
 Верхнее табло `FileCompareSelectionControl.xaml` показывает агрегаты всех результатов:
 `ComparedFilesCount`, `AddedLinesCount`, `RemovedLinesCount`, `ModifiedLinesCount`.
 `NotifyComparisonStatisticsChanged` обновляет привязки после завершения сравнения

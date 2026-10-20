@@ -289,7 +289,7 @@
                                    Margin="0,0,12,0"
                                    TextAlignment="Right"/>
                         <TextBlock Grid.Column="2"
-                                   Text="{Binding Text}"
+                                   local:DiffTextHighlight.Line="{Binding}"
                                    Margin="10,0,4,0"
                                    Style="{StaticResource CompareDiffTextStyle}"
                                    TextWrapping="Wrap"/>

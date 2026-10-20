@@ -1,6 +1,9 @@
 ﻿using Ask.Core.Shared.DTO.TextEditor;
 using DiffPlex.DiffBuilder;
 using DiffPlex.DiffBuilder.Model;
+using DiffPlex;
+using DiffPlex.Chunkers;
+using System.Text;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -552,7 +555,17 @@ namespace Ask.UI.Features.FileComparison.Views
 
   public sealed class DiffLineViewModel
   {
-    public DiffLineViewModel(DiffLineKind kind, DiffPaneSide paneSide, int displayLineNumber, int? originalLineNumber, string text)
+    /// <summary>
+    /// Создаёт строку сравнения с раскраской и посимвольными фрагментами.
+    /// </summary>
+    /// <param name="kind">Тип изменения строки.</param>
+    /// <param name="paneSide">Сторона сравнения.</param>
+    /// <param name="displayLineNumber">Номер позиции в выровненном сравнении.</param>
+    /// <param name="originalLineNumber">Номер строки документа или пустая позиция.</param>
+    /// <param name="text">Полный текст строки.</param>
+    /// <param name="segments">Фрагменты с признаками изменения; при отсутствии весь текст считается обычным.</param>
+    public DiffLineViewModel(DiffLineKind kind, DiffPaneSide paneSide, int displayLineNumber, int? originalLineNumber, string text,
+      IReadOnlyList<DiffTextSegment>? segments = null)
     {
       Kind = kind;
       PaneSide = paneSide;
@@ -560,6 +573,7 @@ namespace Ask.UI.Features.FileComparison.Views
       OriginalLineNumber = originalLineNumber;
       LineNumberText = originalLineNumber?.ToString() ?? string.Empty;
       Text = text;
+      Segments = segments ?? new[] { new DiffTextSegment(text, false) };
       Prefix = DiffPresentation.GetPrefix(kind, paneSide);
       BackgroundBrush = DiffPresentation.GetBackground(kind, paneSide);
       ForegroundBrush = DiffPresentation.GetForeground(kind, paneSide);
@@ -579,6 +593,11 @@ namespace Ask.UI.Features.FileComparison.Views
     public string LineNumberText { get; }
 
     public string Text { get; }
+
+    /// <summary>
+    /// Последовательные фрагменты текста с признаком изменённых символов.
+    /// </summary>
+    public IReadOnlyList<DiffTextSegment> Segments { get; }
 
     public Brush BackgroundBrush { get; }
 
@@ -611,10 +630,12 @@ namespace Ask.UI.Features.FileComparison.Views
     {
       cancellationToken.ThrowIfCancellationRequested();
       var diff = SideBySideDiffBuilder.Diff(
+        Differ.Instance,
         sourceFile.TextContent,
         targetFile.TextContent,
         ignoreWhiteSpace: false,
-        ignoreCase: false);
+        ignoreCase: false,
+        wordChunker: CharacterChunker.Instance);
 
       var sourceViewLines = new List<DiffLineViewModel>(diff.OldText.Lines.Count);
       var targetViewLines = new List<DiffLineViewModel>(diff.NewText.Lines.Count);
@@ -643,7 +664,44 @@ namespace Ask.UI.Features.FileComparison.Views
         _ => throw new ArgumentOutOfRangeException(nameof(piece), piece.Type, "Неизвестный тип строки diff."),
       };
 
-      return new DiffLineViewModel(kind, paneSide, displayLineNumber, piece.Position, piece.Text ?? string.Empty);
+      return new DiffLineViewModel(kind, paneSide, displayLineNumber, piece.Position, piece.Text ?? string.Empty,
+        kind == DiffLineKind.Modified ? BuildSegments(piece) : null);
+    }
+
+    /// <summary>
+    /// Объединяет соседние символы с одинаковым состоянием для компактного отображения.
+    /// </summary>
+    /// <param name="piece">Изменённая строка с посимвольными различиями DiffPlex.</param>
+    /// <returns>Фрагменты исходного текста без пустых позиций выравнивания.</returns>
+    private static IReadOnlyList<DiffTextSegment> BuildSegments(DiffPiece piece)
+    {
+      var segments = new List<DiffTextSegment>();
+      var text = new StringBuilder();
+      bool changed = false;
+      foreach (var part in piece.SubPieces)
+      {
+        if (part.Type == ChangeType.Imaginary || string.IsNullOrEmpty(part.Text))
+        {
+          continue;
+        }
+
+        bool partChanged = part.Type != ChangeType.Unchanged;
+        if (text.Length > 0 && changed != partChanged)
+        {
+          segments.Add(new DiffTextSegment(text.ToString(), changed));
+          text.Clear();
+        }
+
+        changed = partChanged;
+        text.Append(part.Text);
+      }
+
+      if (text.Length > 0)
+      {
+        segments.Add(new DiffTextSegment(text.ToString(), changed));
+      }
+
+      return segments;
     }
   }
   internal static class DiffBrushes
@@ -652,6 +710,12 @@ namespace Ask.UI.Features.FileComparison.Views
     private static readonly Brush UnchangedBackground = Brushes.Transparent;
     private static readonly Brush PresentBackground = CreateBrush(220, 252, 231);
     private static readonly Brush MissingBackground = CreateBrush(254, 226, 226);
+    private static readonly Brush ModifiedBackground = CreateBrush(254, 243, 199);
+    private static readonly Brush ModifiedForeground = CreateBrush(146, 64, 14);
+    /// <summary>
+    /// Насыщенный жёлтый фон изменённых символов внутри строки.
+    /// </summary>
+    internal static readonly Brush ChangedCharacterBackground = CreateBrush(251, 191, 36);
     private static readonly Brush EmptyFallbackBackground = CreateBrush(235, 240, 246);
     private static readonly Brush DefaultForeground = CreateBrush(30, 41, 59);
     private static readonly Brush PresentForeground = CreateBrush(22, 101, 52);
@@ -660,6 +724,16 @@ namespace Ask.UI.Features.FileComparison.Views
     public static Brush GetPresentBackground() => PresentBackground;
 
     public static Brush GetMissingBackground() => MissingBackground;
+
+    /// <summary>
+    /// Возвращает жёлтый фон изменённой строки.
+    /// </summary>
+    public static Brush GetModifiedBackground() => ModifiedBackground;
+
+    /// <summary>
+    /// Возвращает цвет текста изменённой строки.
+    /// </summary>
+    public static Brush GetModifiedForeground() => ModifiedForeground;
 
     public static Brush GetUnchangedBackground() => UnchangedBackground;
 
@@ -703,8 +777,7 @@ namespace Ask.UI.Features.FileComparison.Views
       DiffLineKind.Empty => string.Empty,
       DiffLineKind.Added => "+",
       DiffLineKind.Removed => "-",
-      DiffLineKind.Modified when paneSide == DiffPaneSide.Source => "-",
-      DiffLineKind.Modified => "+",
+      DiffLineKind.Modified => "~",
       _ => string.Empty,
     };
 
@@ -724,8 +797,7 @@ namespace Ask.UI.Features.FileComparison.Views
       {
         DiffLineKind.Added => DiffBrushes.GetPresentBackground(),
         DiffLineKind.Removed => DiffBrushes.GetMissingBackground(),
-        DiffLineKind.Modified when paneSide == DiffPaneSide.Source => DiffBrushes.GetMissingBackground(),
-        DiffLineKind.Modified => DiffBrushes.GetPresentBackground(),
+        DiffLineKind.Modified => DiffBrushes.GetModifiedBackground(),
         _ => DiffBrushes.GetUnchangedBackground(),
       };
     }
@@ -746,8 +818,7 @@ namespace Ask.UI.Features.FileComparison.Views
       {
         DiffLineKind.Added => DiffBrushes.GetPresentForeground(),
         DiffLineKind.Removed => DiffBrushes.GetMissingForeground(),
-        DiffLineKind.Modified when paneSide == DiffPaneSide.Source => DiffBrushes.GetMissingForeground(),
-        DiffLineKind.Modified => DiffBrushes.GetPresentForeground(),
+        DiffLineKind.Modified => DiffBrushes.GetModifiedForeground(),
         _ => DiffBrushes.GetThemeForegroundOrDefault(),
       };
     }
