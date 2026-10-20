@@ -3,6 +3,8 @@ using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Services.TextSearch;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.UI.Features.Notifications.Models;
+using Ask.UI.Infrastructure.UI.Overlay.Notifications.Runtime;
 using System.Windows;
 using System.Windows.Controls;
 using static Ask.LogLib.LoggerUtility;
@@ -21,6 +23,8 @@ public partial class SearchPanelWindow
 
   public Func<ITextSearchTarget?>? TargetProvider { get; set; }
   public Func<bool>? CanReplaceEditor { get; set; }
+  public Func<bool>? CanSearchEditorSelection { get; set; }
+  public Action<bool>? SetEditorSelectionOnly { get; set; }
   public Func<TextSearchQuery, bool, TextSearchAction, Task>? EditorSearchAsync { get; set; }
   public Func<TextSearchQuery, string, bool, bool, Task>? EditorReplaceAsync { get; set; }
   public Func<TextSearchQuery, bool, Task<IReadOnlyList<SearchPanelResult>>>? EditorFindAllAsync { get; set; }
@@ -35,6 +39,9 @@ public partial class SearchPanelWindow
     SearchInput.TextChanged += (_, _) => ResetStatus();
     MatchCaseOption.Click += (_, _) => ResetStatus();
     WholeWordOption.Click += (_, _) => ResetStatus();
+    RegexOption.Click += (_, _) => ClearSearchResults();
+    SelectionOnlyOption.Checked += SelectionOnly_Changed;
+    SelectionOnlyOption.Unchecked += SelectionOnly_Changed;
   }
 
   public void SetSearchText(string? text)
@@ -57,6 +64,16 @@ public partial class SearchPanelWindow
       ResetStatus();
     }
     UpdateScopes(changed);
+    if (_target != null && SelectionOnlyOption.IsChecked == true) SelectionOnlyOption.IsChecked = false;
+    UpdateReplacementState();
+  }
+
+  private void SelectionOnly_Changed(object sender, RoutedEventArgs e)
+  {
+    if (_closed) return;
+    SetEditorSelectionOnly?.Invoke(SelectionOnlyOption.IsChecked == true && _target == null);
+    _targetVersion++;
+    ClearSearchResults();
     UpdateReplacementState();
   }
 
@@ -109,7 +126,7 @@ public partial class SearchPanelWindow
   }
 
   private string? GetDocumentId() => (SearchScope.SelectedItem as ComboBoxItem)?.Tag is string id && id.Length > 0 ? id : null;
-  private TextSearchQuery GetQuery() => new(SearchInput.Text, MatchCaseOption.IsChecked == true, WholeWordOption.IsChecked == true);
+  private TextSearchQuery GetQuery() => new(SearchInput.Text, MatchCaseOption.IsChecked == true, WholeWordOption.IsChecked == true, RegexOption.IsChecked == true);
 
   private void UpdateReplacementState()
   {
@@ -120,7 +137,13 @@ public partial class SearchPanelWindow
     PreviousButton.IsEnabled = NextButton.IsEnabled = FindAllButton.IsEnabled = !_busy;
     ResultsGrid.IsEnabled = !_busy;
     SearchInput.IsReadOnly = _busy;
-    MatchCaseOption.IsEnabled = WholeWordOption.IsEnabled = SearchScope.IsEnabled = !_busy;
+    MatchCaseOption.IsEnabled = WholeWordOption.IsEnabled = RegexOption.IsEnabled = !_busy;
+    SearchScope.IsEnabled = !_busy && SelectionOnlyOption.IsChecked != true;
+    SelectionOnlyOption.IsEnabled = !_busy && _target == null && CanSearchEditorSelection?.Invoke() == true;
+    SelectionOnlyOption.Opacity = SelectionOnlyOption.IsEnabled ? 1 : 0.4;
+    SelectionOnlyOption.ToolTip = _target != null ? "Поиск в выделении доступен в текстовом редакторе"
+      : CanSearchEditorSelection?.Invoke() == true ? "Искать только в тексте, выделенном при открытии поиска"
+      : "Выделите текст перед открытием поиска (обычное, не прямоугольное выделение)";
     ResetSettingsButton.IsEnabled = !_busy;
   }
 
@@ -211,10 +234,18 @@ public partial class SearchPanelWindow
 
   private void ShowSearchError(Exception exception)
   {
-    LogException("Ошибка поиска или замены", exception);
     if (_closed) return;
-    SearchStatus.Text = "Ошибка";
-    SearchStatus.ToolTip = exception.Message;
+    if (exception is AggregateException aggregate) exception = aggregate.Flatten().InnerExceptions[0];
+    ClearSearchResults();
+    if (exception is System.Text.RegularExpressions.RegexParseException)
+    {
+      NotificationHostService.Instance.Show("Поиск", "Некорректное регулярное выражение", NotificationType.Warning);
+      return;
+    }
+    LogException("Ошибка поиска или замены", exception);
+    SearchStatus.Text = exception is System.Text.RegularExpressions.RegexMatchTimeoutException ? "Тайм-аут" : "Ошибка";
+    SearchStatus.ToolTip = exception is System.Text.RegularExpressions.RegexMatchTimeoutException
+      ? "Выражение выполняется слишком долго. Упростите шаблон." : exception.Message;
   }
 
   private void OnCloseRequested(SearchEvents.CloseSearchWindow _) => Dispatcher.InvokeAsync(() => { if (!_closed) Close(); });

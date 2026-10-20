@@ -1,4 +1,4 @@
-using Ask.Core.Services.Config.AppSettings;
+﻿using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.DTO.TextEditor;
@@ -302,6 +302,10 @@ namespace UI.Components
       Ask.Core.Shared.Interfaces.UiInterfaces.TextSearchQuery query, bool allDocuments)
       => textSearchManager.FindAllForPanelAsync(query, allDocuments);
 
+    public bool CaptureSearchSelection() => textSearchManager.CaptureSearchSelection();
+    public void SetSelectionSearch(bool enabled) => textSearchManager.SetSelectionSearch(enabled);
+    public void ReleaseSearchSelection() => textSearchManager.ReleaseSearchSelection();
+
     public void ClearReplacementHighlights() => textSearchManager.ClearReplacementHighlights();
 
     private void OnSearchResultsReady(string searchText, bool? isCaseSensitive, Dictionary<string, List<SearchResult>> results) =>
@@ -357,11 +361,11 @@ namespace UI.Components
     /// <param name="caseWord">Если true - учитываем регистр, false - не учитываем.</param>
     /// <param name="searchArea">Параметры поиска: найти  далее, найти предыдущее, найти все.</param>
     /// <param name="searchParameters">Область поиска: поиск в текущем документе, во всех открытых документах, в файле.</param>
-    public async Task SearchData(string searchText, bool? wholeWord, bool? caseWord, int searchArea, string searchParameters)
+    public async Task SearchData(string searchText, bool? wholeWord, bool? caseWord, int searchArea, string searchParameters, bool useRegex = false)
     {
       textSearchManager.SearchResultsReady -= OnSearchResultsReady;
       textSearchManager.SearchResultsReady += OnSearchResultsReady;
-      await textSearchManager.SearchData(searchText, wholeWord, caseWord, searchArea, searchParameters);
+      await textSearchManager.SearchData(searchText, wholeWord, caseWord, searchArea, searchParameters, useRegex);
     }
 
     /// <summary>
@@ -373,10 +377,10 @@ namespace UI.Components
     /// <param name="caseWord">Если true - учитываем регистр, false - не учитываем.</param>
     /// <param name="searchArea">Область поиска: поиск в текущем документе, во всех открытых документах, в файле.</param>
     /// <param name="searchParameters">Параметры поиска: найти  далее, найти предыдущее, найти все.</param>
-    public async Task ReplaceWordData(string replaceText, string searchText, bool? wholeWord, bool? caseWord, int searchArea, string searchParameters)
+    public async Task ReplaceWordData(string replaceText, string searchText, bool? wholeWord, bool? caseWord, int searchArea, string searchParameters, bool useRegex = false)
     {
       await textSearchManager.ReplaceCachedAsync(
-        new Ask.Core.Shared.Interfaces.UiInterfaces.TextSearchQuery(searchText, caseWord == true, wholeWord == true),
+        new Ask.Core.Shared.Interfaces.UiInterfaces.TextSearchQuery(searchText, caseWord == true, wholeWord == true, useRegex),
         replaceText ?? string.Empty, searchArea == 1, searchParameters == "FindAll");
     }
 

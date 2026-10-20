@@ -17,8 +17,11 @@ public partial class MainWindow
 
     if (_searchPanel == null)
     {
+      bool hasSelection = MultiWindow.CaptureSearchSelection();
       _searchPanel = new SearchPanelWindow(this, TopPanel)
       {
+        CanSearchEditorSelection = () => hasSelection,
+        SetEditorSelectionOnly = MultiWindow.SetSelectionSearch,
         TargetProvider = MultiWindow.GetActiveSearchTarget,
         EditorFindAllAsync = MultiWindow.FindAllForPanelAsync,
         CanReplaceEditor = () => MultiWindow.GetActiveTextEditor()?.TextEditor is { IsReadOnly: false },
@@ -26,12 +29,12 @@ public partial class MainWindow
         ClearReplacementHighlights = MultiWindow.ClearReplacementHighlights,
         EditorSearchAsync = (query, allDocuments, action) => MultiWindow.SearchData(
           query.Text, query.WholeWord, query.MatchCase, allDocuments ? 1 : 0,
-          action == TextSearchAction.Previous ? "FindPrevious" : "FindNext"),
+          action == TextSearchAction.Previous ? "FindPrevious" : "FindNext", query.UseRegex),
         EditorReplaceAsync = (query, replacement, allDocuments, replaceAll) => MultiWindow.ReplaceData(
           replacement, query.Text, query.WholeWord, query.MatchCase, allDocuments ? 1 : 0,
-          replaceAll ? "FindAll" : "FindNext")
+          replaceAll ? "FindAll" : "FindNext", query.UseRegex)
       };
-      _searchPanel.Closed += (_, _) => _searchPanel = null;
+      _searchPanel.Closed += (_, _) => { MultiWindow.ReleaseSearchSelection(); _searchPanel = null; };
     }
 
     _searchPanel.SetSearchText(MultiWindow.GetActiveTextEditor()?.TextArea.Selection.GetText());

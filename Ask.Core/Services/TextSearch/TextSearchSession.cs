@@ -77,11 +77,15 @@ public sealed class TextSearchSession : IDisposable
   {
     if (_target is not IReplaceTextSearchTarget editable) return;
     if (!await SearchAsync(query, TextSearchAction.FindAll, documentId)) return;
+    var selected = replaceAll ? Matches.ToArray() : Current == null ? Array.Empty<TextSearchMatch>() : new[] { Current };
+    var documents = _documents;
+    var replacements = await Task.Run(() => TextSearchEngine.PrepareReplacements(documents, query, selected, replacement));
+    if (_disposed || !documents.SequenceEqual(_target.GetSearchDocuments().Where(document => documentId == null || document.Id == documentId))) return;
     if (replaceAll)
     {
-      foreach (var match in Matches.Reverse()) editable.ReplaceSearchResult(match, replacement);
+      for (int index = selected.Length - 1; index >= 0; index--) editable.ReplaceSearchResult(selected[index], replacements[index]);
     }
-    else if (Current != null) editable.ReplaceSearchResult(Current, replacement);
+    else if (selected.Length > 0) editable.ReplaceSearchResult(selected[0], replacements[0]);
     _query = null;
     await SearchAsync(query, TextSearchAction.FindAll, documentId);
   }

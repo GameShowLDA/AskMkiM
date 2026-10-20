@@ -60,12 +60,12 @@ public interface ITextSearchScopeProvider
 public sealed record SearchDocument(string Id, string Title, string Text);
 
 /// <summary>
-/// Параметры буквального поиска текста.
+/// Параметры поиска текста.
 /// </summary>
 /// <param name="Text">Искомый текст.</param>
 /// <param name="MatchCase">Признак учёта регистра.</param>
 /// <param name="WholeWord">Признак поиска целого слова.</param>
-public sealed record TextSearchQuery(string Text, bool MatchCase = false, bool WholeWord = false);
+public sealed record TextSearchQuery(string Text, bool MatchCase = false, bool WholeWord = false, bool UseRegex = false);
 
 /// <summary>
 /// Найденный диапазон в снимке документа.

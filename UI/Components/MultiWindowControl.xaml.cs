@@ -1,4 +1,4 @@
-using Ask.Core.Services.EventCore.Events;
+﻿using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.DTO.TextEditor;
 using Ask.Core.Shared.Metadata.Static;
@@ -312,7 +312,7 @@ namespace UI.Components
     /// <remarks>
     /// В случае, если редактор не инициализирован, выводится сообщение об ошибке.
     /// </remarks>
-    public async Task SearchData(string searchText, bool? wholeWord, bool? caseWord, int searchArea, string searchParameters)
+    public async Task SearchData(string searchText, bool? wholeWord, bool? caseWord, int searchArea, string searchParameters, bool useRegex = false)
     {
       if (MultiEditor == null)
       {
@@ -323,7 +323,7 @@ namespace UI.Components
       }
 
       LogInformation($"Начат поиск по тексту. Искомый текст: {searchText}");
-      await MultiEditor.SearchData(searchText, wholeWord, caseWord, searchArea, searchParameters);
+      await MultiEditor.SearchData(searchText, wholeWord, caseWord, searchArea, searchParameters, useRegex);
     }
 
     /// <summary>
@@ -344,7 +344,7 @@ namespace UI.Components
     /// <param name="searchParameters">
     /// Область поиска: поиск в текущем документе, во всех открытых документах, в файле.
     /// </param>
-    public async Task ReplaceData(string replaceText, string searchText, bool? wholeWord, bool? caseWord, int searchArea, string searchParameters)
+    public async Task ReplaceData(string replaceText, string searchText, bool? wholeWord, bool? caseWord, int searchArea, string searchParameters, bool useRegex = false)
     {
       if (MultiEditor == null)
       {
@@ -356,7 +356,7 @@ namespace UI.Components
 
       LogInformation($"Начат поиск по тексту. Искомый текст: {searchText}");
       CloseSearchResults();
-      await MultiEditor.ReplaceWordData(replaceText, searchText, wholeWord, caseWord, searchArea, searchParameters);
+      await MultiEditor.ReplaceWordData(replaceText, searchText, wholeWord, caseWord, searchArea, searchParameters, useRegex);
     }
 
     /// <summary>
@@ -368,6 +368,10 @@ namespace UI.Components
     public Task<IReadOnlyList<Ask.UI.Features.TextSearch.Views.SearchPanelResult>> FindAllForPanelAsync(
       Ask.Core.Shared.Interfaces.UiInterfaces.TextSearchQuery query, bool allDocuments)
       => MultiEditor.FindAllForPanelAsync(query, allDocuments);
+
+    public bool CaptureSearchSelection() => MultiEditor.CaptureSearchSelection();
+    public void SetSelectionSearch(bool enabled) => MultiEditor.SetSelectionSearch(enabled);
+    public void ReleaseSearchSelection() => MultiEditor.ReleaseSearchSelection();
 
     public void ClearReplacementHighlights() => MultiEditor.ClearReplacementHighlights();
 

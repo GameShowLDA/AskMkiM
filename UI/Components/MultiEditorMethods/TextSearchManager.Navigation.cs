@@ -31,6 +31,45 @@ public partial class TextSearchManager
   private long _navigationId;
   private IReadOnlyList<NavigationDocument>? _panelCacheDocuments;
   private IReadOnlyList<Ask.UI.Features.TextSearch.Views.SearchPanelResult>? _panelCacheRows;
+  private TextEditorUI? _selectionEditor;
+  private TextDocument? _selectionDocument;
+  private TextAnchor? _selectionStart;
+  private TextAnchor? _selectionEnd;
+  private bool _selectionOnly;
+
+  public bool CaptureSearchSelection()
+  {
+    _selectionOnly = false;
+    _selectionEditor = multiEditorControl.GetActiveTextEditor();
+    _selectionDocument = _selectionEditor?.TextEditor.Document;
+    _selectionStart = _selectionEnd = null;
+    if (_selectionEditor == null || _selectionDocument == null
+        || _selectionEditor.TextEditor.SelectionLength == 0
+        || _selectionEditor.TextArea.Selection is ICSharpCode.AvalonEdit.Editing.RectangleSelection) return false;
+    int start = _selectionEditor.TextEditor.SelectionStart;
+    _selectionStart = _selectionDocument.CreateAnchor(start);
+    _selectionEnd = _selectionDocument.CreateAnchor(start + _selectionEditor.TextEditor.SelectionLength);
+    _selectionStart.SurviveDeletion = _selectionEnd.SurviveDeletion = true;
+    _selectionStart.MovementType = AnchorMovementType.BeforeInsertion;
+    _selectionEnd.MovementType = AnchorMovementType.AfterInsertion;
+    return true;
+  }
+
+  public void SetSelectionSearch(bool enabled)
+  {
+    if (_selectionOnly == enabled) return;
+    _selectionOnly = enabled;
+    ClearAllHighlights();
+    ResetNavigationCache();
+  }
+
+  public void ReleaseSearchSelection()
+  {
+    SetSelectionSearch(false);
+    _selectionEditor = null;
+    _selectionDocument = null;
+    _selectionStart = _selectionEnd = null;
+  }
 
   private void ResetNavigationCache()
   {
@@ -63,7 +102,13 @@ public partial class TextSearchManager
       : (target.item.Content as TranslatorItem)?.GetLeftBox().GetTextEditor()).Where(editor => editor != null).ToHashSet();
     foreach (var closed in _navigationCache.Keys.Where(editor => !alive.Contains(editor)).ToArray())
       _navigationCache.Remove(closed);
-    if (!allDocuments)
+    if (_selectionOnly)
+    {
+      targets = targets.Where(target => ReferenceEquals(target.item.Content is TextEditorUI editor ? editor
+        : (target.item.Content as TranslatorItem)?.GetLeftBox().GetTextEditor(), _selectionEditor)
+        && ReferenceEquals(_selectionEditor?.TextEditor.Document, _selectionDocument)).ToList();
+    }
+    else if (!allDocuments)
     {
       int active = GetActiveSearchTargetIndex(targets);
       targets = active < 0 ? new() : new() { targets[active] };
@@ -105,7 +150,10 @@ public partial class TextSearchManager
       var lookup = matches.ToLookup(match => match.DocumentId);
       foreach (var document in dirty)
       {
-        document.Matches = lookup[document.Snapshot.Id].ToArray();
+        document.Matches = lookup[document.Snapshot.Id].Where(match => !_selectionOnly
+          || (_selectionStart != null && _selectionEnd != null
+              && match.StartOffset >= _selectionStart.Offset
+              && match.StartOffset + match.Length <= _selectionEnd.Offset)).ToArray();
         _navigationCache[document.Editor] = document;
       }
       return documents;
@@ -121,6 +169,7 @@ public partial class TextSearchManager
     if (documents.Count == 0) return;
     var targets = documents.Select(document => document.Target).ToList();
     int active = GetActiveSearchTargetIndex(targets);
+    if (active < 0 && _selectionOnly) active = 0;
     if (active < 0) return;
     var document = documents[active];
     if (document.Matches.Count == 0) document.Editor.MarkerService.SetSearchMarkers(document.Matches, -1);
@@ -163,6 +212,11 @@ public partial class TextSearchManager
         || documents.Count == 0 || documents.Any(document => !IsCachedDocumentCurrent(document))) return;
     if (replaceAll)
     {
+      var plannedMatches = documents.SelectMany(document => document.Matches).ToArray();
+      var snapshots = documents.Select(document => document.Snapshot).ToArray();
+      var replacements = await Task.Run(() => TextSearchEngine.PrepareReplacements(snapshots, query, plannedMatches, replacement));
+      if (_navigationQuery != query || documents.Any(document => !IsCachedDocumentCurrent(document))) return;
+      var plan = plannedMatches.Select((match, index) => (match, text: replacements[index])).ToDictionary(item => item.match, item => item.text);
       foreach (var document in documents)
       {
         if (document.Editor.TextEditor.IsReadOnly || document.Matches.Count == 0) continue;
@@ -170,7 +224,7 @@ public partial class TextSearchManager
         using (document.Document.RunUpdate())
         {
           for (int index = document.Matches.Count - 1; index >= 0; index--)
-            ReplaceCachedMatch(document, document.Matches[index], replacement);
+            ReplaceCachedMatch(document, document.Matches[index], plan[document.Matches[index]]);
         }
       }
       var updated = await GetCachedDocumentsAsync(query, allDocuments);
@@ -179,6 +233,7 @@ public partial class TextSearchManager
       return;
     }
     int active = GetActiveSearchTargetIndex(documents.Select(document => document.Target).ToList());
+    if (active < 0 && _selectionOnly) active = 0;
     if (active < 0) return;
     var current = documents[active];
     int caret = current.Editor.TextArea.Caret.Offset;
@@ -200,9 +255,12 @@ public partial class TextSearchManager
       multiEditorControl.controlManager.ShowControl(current.Target.container, current.Target.page);
       current.Target.item.Show(current.Target.container.DockManager);
     }
-    ReplaceCachedMatch(current, selected, replacement);
+    string expandedReplacement = (await Task.Run(() => TextSearchEngine.PrepareReplacements(
+      new[] { current.Snapshot }, query, new[] { selected }, replacement)))[0];
+    if (_navigationQuery != query || !IsCachedDocumentCurrent(current)) return;
+    ReplaceCachedMatch(current, selected, expandedReplacement);
     current.Editor.TextArea.ClearSelection();
-    current.Editor.TextArea.Caret.Offset = selected.StartOffset + replacement.Length;
+    current.Editor.TextArea.Caret.Offset = selected.StartOffset + expandedReplacement.Length;
     await NavigateCachedAsync(query, allDocuments, true);
   }
 

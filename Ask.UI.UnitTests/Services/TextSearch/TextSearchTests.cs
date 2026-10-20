@@ -6,6 +6,41 @@ namespace Ask.UI.UnitTests.Services.TextSearch;
 /// <summary>Проверяет общий поиск и сессию без зависимости от редактора.</summary>
 public sealed class TextSearchTests
 {
+  [Theory]
+  [InlineData(@"\d+", "X12 X34", false, 2)]
+  [InlineData("cat|dog", "cat dog catfish", true, 2)]
+  [InlineData(@"^\s*//", "a\n  // b\n// c", false, 2)]
+  [InlineData("^|$", "a\nb", false, 4)]
+  public void Engine_RegexSupportsPatternsBoundariesAndZeroLength(string pattern, string text, bool wholeWord, int count)
+  {
+    var results = TextSearchEngine.Find(new[] { new SearchDocument("id", "file", text) },
+      new TextSearchQuery(pattern, WholeWord: wholeWord, UseRegex: true));
+    Assert.Equal(count, results.Count);
+  }
+
+  [Fact]
+  public void Engine_RegexRejectsInvalidAndExcessivelyExpensivePatterns()
+  {
+    var documents = new[] { new SearchDocument("id", "file", new string('a', 20000) + "!") };
+    Assert.Throws<System.Text.RegularExpressions.RegexParseException>(() =>
+      TextSearchEngine.Find(documents, new TextSearchQuery("[", UseRegex: true)));
+    Assert.Throws<System.Text.RegularExpressions.RegexMatchTimeoutException>(() =>
+      TextSearchEngine.Find(documents, new TextSearchQuery("^(a+)+$", UseRegex: true)));
+  }
+
+  [Fact]
+  public async Task Session_RegexReplacementExpandsGroupsAndHandlesEmptyMatches()
+  {
+    var target = new MemoryTarget();
+    target.Texts["left"] = "X12 X34";
+    using var session = new TextSearchSession(target);
+    await session.ReplaceAsync(new TextSearchQuery(@"X(?<number>\d+)", UseRegex: true), "${number}-$1-$$", true, "left");
+    Assert.Equal("12-12-$ 34-34-$", target.Texts["left"]);
+    Assert.Equal("X", target.Texts["right"]);
+    await session.ReplaceAsync(new TextSearchQuery("^|$", UseRegex: true), "!", true, "right");
+    Assert.Equal("!X!", target.Texts["right"]);
+  }
+
   [Fact]
   public void Results_LargePageAccessDoesNotMaterializeSkippedRows()
   {

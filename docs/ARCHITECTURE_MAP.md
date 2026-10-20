@@ -29,7 +29,7 @@ Size/Foreground и анимации общей кнопки; лицензия с
 
 | Нужно изменить | Сначала смотреть | Затем смотреть |
 | --- | --- | --- |
-| Скорость поиска, кэш переходов, массовая замена | `UI/Components/MultiEditorMethods/TextSearchManager.Navigation.cs`, `Ask.Core/Services/TextSearch/TextSearchEngine.cs` | `TextMarkerService.SetSearchMarkers`, `Ask.UI/Features/FileComparison/Views/ComparisonSearchIndex.cs`; [замеры](architecture/text-search-performance.md) |
+| Скорость поиска, кэш переходов, массовая замена, поиск в выделении, regex | `UI/Components/MultiEditorMethods/TextSearchManager.Navigation.cs`, `Ask.Core/Services/TextSearch/TextSearchEngine.cs` | `TextMarkerService.SetSearchMarkers`, `Ask.UI/Features/FileComparison/Views/ComparisonSearchIndex.cs`; [замеры](architecture/text-search-performance.md) |
 | Подключение поиска к новому компоненту | `Ask.Core/Shared/Interfaces/UiInterfaces/ITextSearchTarget.cs`, `Ask.UI/Shared/Search/SearchTarget.cs` | `Ask.Core/Services/TextSearch/`, `Ask.UI/Shared/Search/SearchTarget.cs`; [поиск](#pluggable-text-search), `docs/architecture/text-search.md` |
 | Сравнение открытых файлов | `MainWindow/MainWindow.xaml`, `MainWindow/Events/UiEventsBinder.cs` | `MainWindow/ViewModels/FileViewModel.cs`, `MainWindow/Services/FileService.cs`, `Ask.UI/Features/FileComparison/Views/FileCompareSelectionControl.xaml(.cs)`; [сравнение файлов](#file-comparison-ui) |
 | Уведомления о делах на сегодня | `MainWindow/MainWindow.TodayTasks.cs`, `MainWindow/MainWindow.xaml` | `CalendarNoteService.Load/SetCompleted`, `CalendarControl.Completion_Click`; [заметки](#calendar-notes) |

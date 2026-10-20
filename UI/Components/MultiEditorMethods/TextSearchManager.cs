@@ -119,12 +119,12 @@ namespace UI.Components.MultiEditorMethods
     /// <param name="caseWord">Если true - учитываем регистр, false - не учитываем.</param>
     /// <param name="searchArea">Параметры поиска: найти далее, найти предыдущее, найти все.</param>
     /// <param name="searchParameters">Область поиска: поиск в текущем документе, во всех открытых документах, в файле.</param>
-    public async Task SearchData(string searchText, bool? wholeWord, bool? caseWord, int searchArea, string searchParameters)
+    public async Task SearchData(string searchText, bool? wholeWord, bool? caseWord, int searchArea, string searchParameters, bool useRegex = false)
     {
       if (searchParameters is "FindNext" or "FindPrevious")
       {
         await NavigateCachedAsync(new Ask.Core.Shared.Interfaces.UiInterfaces.TextSearchQuery(
-          searchText, caseWord == true, wholeWord == true), searchArea == 1, searchParameters == "FindNext");
+          searchText, caseWord == true, wholeWord == true, useRegex), searchArea == 1, searchParameters == "FindNext");
         return;
       }
 

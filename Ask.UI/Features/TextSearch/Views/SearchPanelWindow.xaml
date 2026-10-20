@@ -350,7 +350,7 @@
             <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/><ColumnDefinition Width="1.3*"/></Grid.ColumnDefinitions>
             <ToggleButton x:Name="MatchCaseOption" Style="{StaticResource SearchOption}" Content="Aa   Регистр" Margin="0,0,5,0" AutomationProperties.Name="Учитывать регистр"/>
             <ToggleButton x:Name="WholeWordOption" Grid.Column="1" Style="{StaticResource SearchOption}" Content="ab   Целое слово" Margin="0,0,5,0"/>
-            <ToggleButton x:Name="RegexOption" IsEnabled="False" ToolTipService.ShowOnDisabled="True" ToolTip="Регулярные выражения не поддерживаются прежним поиском" Grid.Column="2" Style="{StaticResource SearchOption}" Content=".*   Регулярное выражение"/>
+            <ToggleButton x:Name="RegexOption" ToolTip="Регулярные выражения .NET. В замене: $1, ${имя}, $$" Grid.Column="2" Style="{StaticResource SearchOption}" Content=".*   Регулярное выражение"/>
           </Grid>
           <Grid Height="28" Margin="0,6,0,0">
             <Grid.ColumnDefinitions><ColumnDefinition Width="100"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
@@ -398,7 +398,7 @@
             </ComboBox>
           </Grid>
           <Grid Height="24" Margin="0,5,0,0">
-            <CheckBox x:Name="SelectionOnlyOption" IsEnabled="False" ToolTipService.ShowOnDisabled="True" ToolTip="Поиск в выделении не поддерживается прежним поиском" Content="Искать в выделении" FontSize="11" Foreground="{DynamicResource ForegrounfBrushes}" VerticalAlignment="Center" Opacity="0.4">
+            <CheckBox x:Name="SelectionOnlyOption" IsEnabled="False" ToolTipService.ShowOnDisabled="True" ToolTip="Выделите текст перед открытием поиска" Content="Искать в выделении" FontSize="11" Foreground="{DynamicResource ForegrounfBrushes}" VerticalAlignment="Center">
               <CheckBox.Template><ControlTemplate TargetType="CheckBox">
                 <StackPanel Orientation="Horizontal">
                   <Border x:Name="Box" Width="16" Height="16" CornerRadius="3" BorderThickness="1" BorderBrush="{StaticResource SearchPanelOutline}" Background="{DynamicResource SettingCardBackground}">

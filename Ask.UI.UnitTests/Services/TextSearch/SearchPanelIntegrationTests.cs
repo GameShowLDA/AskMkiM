@@ -46,8 +46,9 @@ public sealed class SearchPanelIntegrationTests
       panel.SetSearchText("cat");
       Find<ToggleButton>(panel, "MatchCaseOption").IsChecked = true;
       Find<ToggleButton>(panel, "WholeWordOption").IsChecked = true;
+      Find<ToggleButton>(panel, "RegexOption").IsChecked = true;
       await panel.RunSearchAsync(TextSearchAction.Next);
-      Assert.Equal(new TextSearchQuery("cat", true, true), lastQuery);
+      Assert.Equal(new TextSearchQuery("cat", true, true, true), lastQuery);
       Assert.True(allDocuments);
       Assert.Equal("2 из 5", Find<TextBlock>(panel, "SearchStatus").Text);
       Find<ComboBox>(panel, "SearchScope").SelectedIndex = 1;
@@ -134,7 +135,7 @@ public sealed class SearchPanelIntegrationTests
       panel.SynchronizeTarget();
       Assert.True(Find<Grid>(panel, "ReplacementRow").IsEnabled);
       Assert.Equal(1, Find<ComboBox>(panel, "SearchScope").SelectedIndex);
-      Assert.False(Find<ToggleButton>(panel, "RegexOption").IsEnabled);
+      Assert.True(Find<ToggleButton>(panel, "RegexOption").IsEnabled);
       Assert.False(Find<CheckBox>(panel, "SelectionOnlyOption").IsEnabled);
     }
     finally { panel.Close(); owner.Close(); }
@@ -354,6 +355,51 @@ public sealed class SearchPanelIntegrationTests
       Assert.Equal("dog dog two", second.Text);
       first.TextEditor.Document.UndoStack.Undo();
       Assert.Equal("cat one cat", first.Text);
+      one.Show(container.DockManager);
+      first.Text = "cat cat cat";
+      second.Text = "cat";
+      first.TextEditor.Select(4, 3);
+      Assert.True(search.CaptureSearchSelection());
+      search.SetSelectionSearch(true);
+      var selectedRows = await search.FindAllForPanelAsync(new TextSearchQuery("cat"), true);
+      Assert.Single(selectedRows);
+      Assert.Equal(4, selectedRows[0].Match.StartOffset);
+      Assert.True(selectedRows[0].Navigate());
+      await search.SearchData("cat", false, false, 1, "FindNext");
+      Assert.Equal(7, first.TextArea.Caret.Offset);
+      first.TextEditor.Document.Insert(0, "cat ");
+      selectedRows = await search.FindAllForPanelAsync(new TextSearchQuery("cat"), true);
+      Assert.Single(selectedRows);
+      Assert.Equal(8, selectedRows[0].Match.StartOffset);
+      await search.ReplaceCachedAsync(new TextSearchQuery("cat"), "kitten", true, true);
+      Assert.Equal("cat cat kitten cat", first.Text);
+      Assert.Equal("cat", second.Text);
+      var replacedSelection = await search.FindAllForPanelAsync(new TextSearchQuery("kitten"), true);
+      Assert.Single(replacedSelection);
+      Assert.Equal(8, replacedSelection[0].Match.StartOffset);
+      await search.ReplaceCachedAsync(new TextSearchQuery("kit(t)en", UseRegex: true), "$1", true, true);
+      Assert.Equal("cat cat t cat", first.Text);
+      search.SetSelectionSearch(false);
+      Assert.Equal(4, (await search.FindAllForPanelAsync(new TextSearchQuery("cat"), true)).Count);
+      first.TextEditor.Select(1, 2);
+      Assert.True(search.CaptureSearchSelection());
+      search.SetSelectionSearch(true);
+      Assert.Empty(await search.FindAllForPanelAsync(new TextSearchQuery("cat"), true));
+      search.ReleaseSearchSelection();
+      first.Text = "X12 X34";
+      second.Text = "X56";
+      first.TextArea.Caret.Offset = 0;
+      await workspace.SearchData(@"X\d+", false, false, 1, "FindNext", true);
+      Assert.Equal(3, first.TextArea.Caret.Offset);
+      Assert.Equal(3, (await search.FindAllForPanelAsync(new TextSearchQuery(@"X\d+", UseRegex: true), true)).Count);
+      await workspace.ReplaceWordData("$1", @"X(\d+)", false, false, 1, "FindAll", true);
+      Assert.Equal("12 34", first.Text);
+      Assert.Equal("56", second.Text);
+      var zeroLength = await search.FindAllForPanelAsync(new TextSearchQuery("^|$", UseRegex: true), true);
+      Assert.Equal(4, zeroLength.Count);
+      Assert.True(zeroLength[0].Navigate());
+      await search.SearchData("^|$", false, false, 1, "FindNext", true);
+      Assert.Equal(5, first.TextArea.Caret.Offset);
       search.OnSearchWindowClosing();
     }
     finally { window.Close(); }
@@ -386,6 +432,56 @@ public sealed class SearchPanelIntegrationTests
     Assert.Same(emptyLine, source[2].SearchRanges);
     searchIndex.Update(comparison, Array.Empty<TextSearchMatch>(), null);
     Assert.All(source.Concat(target), line => Assert.Empty(line.SearchRanges));
+    return Task.CompletedTask;
+  });
+
+  [Fact]
+  public void RegexError_IsShownWithoutBreakingThePanel() => RunInSta(async () =>
+  {
+    var owner = new Window();
+    new System.Windows.Interop.WindowInteropHelper(owner).EnsureHandle();
+    var panel = new SearchPanelWindow(owner, new Grid());
+    var target = new ReadOnlyTarget();
+    panel.TargetProvider = () => target;
+    try
+    {
+      Find<ToggleButton>(panel, "RegexOption").IsChecked = true;
+      panel.SetSearchText("[");
+      await panel.RunSearchAsync(TextSearchAction.Next);
+      Assert.Equal("0 из 0", Find<TextBlock>(panel, "SearchStatus").Text);
+      Assert.Null(Find<TextBlock>(panel, "SearchStatus").ToolTip);
+      Assert.True(Find<ToggleButton>(panel, "RegexOption").IsEnabled);
+      panel.SetSearchText("c.t");
+      await panel.RunSearchAsync(TextSearchAction.Next);
+      Assert.Equal("1 из 1", Find<TextBlock>(panel, "SearchStatus").Text);
+    }
+    finally { panel.Close(); owner.Close(); }
+  });
+
+  [Fact]
+  public void SelectionOption_UpdatesEditorModeAndLocksDocumentScope() => RunInSta(() =>
+  {
+    var owner = new Window();
+    new System.Windows.Interop.WindowInteropHelper(owner).EnsureHandle();
+    bool selectionOnly = false;
+    var panel = new SearchPanelWindow(owner, new Grid())
+    {
+      CanSearchEditorSelection = () => true,
+      SetEditorSelectionOnly = enabled => selectionOnly = enabled
+    };
+    try
+    {
+      panel.SynchronizeTarget();
+      var option = Find<CheckBox>(panel, "SelectionOnlyOption");
+      Assert.True(option.IsEnabled);
+      option.IsChecked = true;
+      Assert.True(selectionOnly);
+      Assert.False(Find<ComboBox>(panel, "SearchScope").IsEnabled);
+      Click(panel, "ResetSettingsButton");
+      Assert.False(selectionOnly);
+      Assert.True(Find<ComboBox>(panel, "SearchScope").IsEnabled);
+    }
+    finally { panel.Close(); owner.Close(); }
     return Task.CompletedTask;
   });
 

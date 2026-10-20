@@ -25,9 +25,7 @@ public static class TextSearchEngine
       throw new ArgumentException("Идентификаторы документов поиска должны быть непустыми и уникальными.", nameof(documents));
 
     if (string.IsNullOrEmpty(query.Text)) return Array.Empty<TextSearchMatch>();
-    var escaped = Regex.Escape(query.Text);
-    var pattern = query.WholeWord ? $@"\b{escaped}\b" : escaped;
-    var regex = new Regex(pattern, query.MatchCase ? RegexOptions.None : RegexOptions.IgnoreCase);
+    var regex = CreateRegex(query);
     if (documents.Count > 1 && documents.Sum(document => (long)document.Text.Length) >= 1_000_000)
     {
       var batches = new IReadOnlyList<TextSearchMatch>[documents.Count];
@@ -43,6 +41,31 @@ public static class TextSearchEngine
     var results = new List<TextSearchMatch>();
     foreach (var document in documents) results.AddRange(FindDocument(document, regex, cancellationToken));
     return results;
+  }
+
+  private static Regex CreateRegex(TextSearchQuery query)
+  {
+    string pattern = query.UseRegex ? query.Text : Regex.Escape(query.Text);
+    if (query.WholeWord) pattern = @"\b(?:" + pattern + @")\b";
+    var options = query.MatchCase ? RegexOptions.None : RegexOptions.IgnoreCase;
+    if (query.UseRegex) options |= RegexOptions.Multiline;
+    return new Regex(pattern, options, TimeSpan.FromMilliseconds(500));
+  }
+
+  /// <summary>Expands regex replacement groups against immutable original documents before editing.</summary>
+  public static IReadOnlyList<string> PrepareReplacements(IReadOnlyList<SearchDocument> documents,
+    TextSearchQuery query, IReadOnlyList<TextSearchMatch> matches, string replacement)
+  {
+    if (!query.UseRegex) return Enumerable.Repeat(replacement, matches.Count).ToArray();
+    var regex = CreateRegex(query);
+    var texts = documents.ToDictionary(document => document.Id, document => document.Text);
+    return matches.Select(match =>
+    {
+      var actual = regex.Match(texts[match.DocumentId], match.StartOffset);
+      if (!actual.Success || actual.Index != match.StartOffset || actual.Length != match.Length)
+        throw new InvalidOperationException("Результаты поиска устарели. Повторите поиск.");
+      return actual.Result(replacement);
+    }).ToArray();
   }
 
   private static IReadOnlyList<TextSearchMatch> FindDocument(SearchDocument document, Regex regex, CancellationToken cancellationToken)
