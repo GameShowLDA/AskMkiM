@@ -300,7 +300,7 @@ namespace UI.Components.MultiEditorMethods
       {
         var editor = page.Content is TextEditorUI text ? text : (page.Content as TranslatorItem)?.GetLeftBox().GetTextEditor();
         if (editor == null) continue;
-        editor.MarkerService.ClearAllMarkers();
+        editor.MarkerService.ClearAllMarkers(preserveReplacements: true);
         foreach (var match in FindOccurrencesByLine(editor.Text, searchText, wholeWord, caseWord))
           editor.MarkerService.AddSearchMarker(match.StartOffset, match.Length, false);
       }
@@ -833,7 +833,7 @@ namespace UI.Components.MultiEditorMethods
         return;
       }
 
-      textEditor?.MarkerService?.ClearAllMarkers();
+      textEditor?.MarkerService?.ClearAllMarkers(preserveReplacements: true);
 
       int nextIndex = currentIndex + 1;
       if (nextIndex < foundResults.Count)
@@ -850,8 +850,6 @@ namespace UI.Components.MultiEditorMethods
           return;
         }
 
-        MessageBoxCustom.Show("Достигнуто последнее совпадение. Дополнительных вхождений в тексте нет.", "Поиск закончен", image: MessageBoxImage.Warning);
-        return;
       }
 
       currentIndex = 0;
@@ -875,28 +873,13 @@ namespace UI.Components.MultiEditorMethods
       }
 
       int activeTargetIndex = GetActiveSearchTargetIndex(targets);
-
-      if (moveForward)
+      // Traverse once, wrapping across the boundary and revisiting the active document last.
+      int startIndex = activeTargetIndex >= 0 ? activeTargetIndex : (moveForward ? -1 : 0);
+      for (int step = 1; step <= targets.Count; step++)
       {
-        int startIndex = activeTargetIndex >= 0 ? activeTargetIndex + 1 : 0;
-        for (int i = startIndex; i < targets.Count; i++)
-        {
-          if (TryActivateTargetAndGoToOccurrence(targets[i], moveForward))
-          {
-            return true;
-          }
-        }
-      }
-      else
-      {
-        int startIndex = activeTargetIndex >= 0 ? activeTargetIndex - 1 : targets.Count - 1;
-        for (int i = startIndex; i >= 0; i--)
-        {
-          if (TryActivateTargetAndGoToOccurrence(targets[i], moveForward))
-          {
-            return true;
-          }
-        }
+        int index = (startIndex + (moveForward ? step : -step) + targets.Count) % targets.Count;
+        if (TryActivateTargetAndGoToOccurrence(targets[index], moveForward))
+          return true;
       }
 
       return false;
@@ -913,7 +896,7 @@ namespace UI.Components.MultiEditorMethods
         return;
       }
 
-      textEditor?.MarkerService?.ClearAllMarkers();
+      textEditor?.MarkerService?.ClearAllMarkers(preserveReplacements: true);
 
       if (currentIndex < 0)
       {
@@ -936,8 +919,6 @@ namespace UI.Components.MultiEditorMethods
           return;
         }
 
-        MessageBoxCustom.Show("Достигнуто первое совпадение. Дополнительных вхождений в тексте нет.", "Поиск закончен", image: MessageBoxImage.Warning);
-        return;
       }
 
       currentIndex = foundResults.Count - 1;
@@ -1010,6 +991,10 @@ namespace UI.Components.MultiEditorMethods
       {
         return false;
       }
+
+      // Skip documents without matches silently; they are not a failed search request.
+      if (!Regex.IsMatch(pageText, BuildRegexPattern(_searchText, _wholeWord), GetRegexOptions(_caseWord)))
+        return false;
 
       var occurrences = FindAllOccurrences(pageText, _searchText, _wholeWord, _caseWord, _searchArea);
       if (occurrences == null || occurrences.Count == 0)
@@ -1094,7 +1079,7 @@ namespace UI.Components.MultiEditorMethods
         return;
       }
 
-      textEditor.MarkerService.ClearAllMarkers();
+      textEditor.MarkerService.ClearAllMarkers(preserveReplacements: true);
       foreach (var match in foundResults)
         textEditor.MarkerService.AddSearchMarker(match.StartOffset, match.Length, ReferenceEquals(match, result));
       textEditor.TextArea.TextView.InvalidateLayer(KnownLayer.Selection);
@@ -1131,7 +1116,7 @@ namespace UI.Components.MultiEditorMethods
         return;
       }
 
-      rightEditor.MarkerService.ClearAllMarkers();
+      rightEditor.MarkerService.ClearAllMarkers(preserveReplacements: true);
 
       var command = FindTranslatorCommandBySourceLine(translatorItem.TranslationModels, leftEditor, sourceLineNumber);
       if (command == null || command.FormattedStartLineNumber < 0)
@@ -1351,7 +1336,7 @@ namespace UI.Components.MultiEditorMethods
     /// </summary>
     private void ClearHighlights(TextEditorUI textEditor, List<SearchResult> searchResults, ref int index)
     {
-      textEditor?.MarkerService?.ClearAllMarkers();
+      textEditor?.MarkerService?.ClearAllMarkers(preserveReplacements: true);
       searchResults?.Clear();
       if (textEditor?.TextArea != null)
       {
@@ -1362,7 +1347,7 @@ namespace UI.Components.MultiEditorMethods
 
     private void ClearHighlights(TextEditorUI textEditor)
     {
-      textEditor?.MarkerService?.ClearAllMarkers();
+      textEditor?.MarkerService?.ClearAllMarkers(preserveReplacements: true);
       if (textEditor?.TextArea != null)
       {
         textEditor.TextArea.SelectionBorder = null;
@@ -1372,6 +1357,22 @@ namespace UI.Components.MultiEditorMethods
     /// <summary>
     /// Очистка подстветки.
     /// </summary>
+    public void ClearReplacementHighlights()
+    {
+      foreach (var container in fileManager.EditorWorkspaceModel.UserControls.OfType<TextEditorContainer>())
+      {
+        foreach (var tab in container.DockManager.DockItems)
+        {
+          if (tab.Content is TextEditorUI editor) editor.MarkerService.ClearReplacementMarkers();
+          else if (tab.Content is TranslatorItem translator)
+          {
+            translator.GetLeftBox().GetTextEditor().MarkerService.ClearReplacementMarkers();
+            translator.GetRightBox().GetTextEditor().MarkerService.ClearReplacementMarkers();
+          }
+        }
+      }
+    }
+
     public void OnSearchWindowClosing()
     {
       var activeTab = fileManager.EditorWorkspaceModel.OpenPages.FirstOrDefault(page => page.IsActive);
@@ -1466,7 +1467,7 @@ namespace UI.Components.MultiEditorMethods
         }
 
         foundDockItem.Show(foundPage.DockManager);
-        textEditor.MarkerService.ClearAllMarkers();
+        textEditor.MarkerService.ClearAllMarkers(preserveReplacements: true);
 
         var ranges = FindAllOccurrencesInLine(lineText, startOffset);
 

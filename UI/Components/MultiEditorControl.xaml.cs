@@ -298,6 +298,8 @@ namespace UI.Components
     /// </summary>
     public void OnSearchWindowClosing() => textSearchManager.OnSearchWindowClosing();
 
+    public void ClearReplacementHighlights() => textSearchManager.ClearReplacementHighlights();
+
     private void OnSearchResultsReady(string searchText, bool? isCaseSensitive, Dictionary<string, List<SearchResult>> results) =>
      SearchResultsReady?.Invoke(searchText, isCaseSensitive, results);
 
@@ -353,6 +355,7 @@ namespace UI.Components
     /// <param name="searchParameters">Область поиска: поиск в текущем документе, во всех открытых документах, в файле.</param>
     public async Task SearchData(string searchText, bool? wholeWord, bool? caseWord, int searchArea, string searchParameters)
     {
+      textSearchManager.SearchResultsReady -= OnSearchResultsReady;
       textSearchManager.SearchResultsReady += OnSearchResultsReady;
       await textSearchManager.SearchData(searchText, wholeWord, caseWord, searchArea, searchParameters);
     }
@@ -368,9 +371,15 @@ namespace UI.Components
     /// <param name="searchParameters">Параметры поиска: найти  далее, найти предыдущее, найти все.</param>
     public async Task ReplaceWordData(string replaceText, string searchText, bool? wholeWord, bool? caseWord, int searchArea, string searchParameters)
     {
+      var replacementEditor = GetActiveTextEditor();
+      var replacementTextSnapshot = replacementEditor?.Text;
       var fullText = textSearchManager.GetText(searchArea);
       textSearchManager.InitializeSearch(fullText, searchText, wholeWord, caseWord, searchArea, searchParameters);
       await textSearchManager.FindAllAsync(searchText, wholeWord, caseWord, searchArea, false);
+      // A tab switch or document edit while snapshots were searched must not redirect replacement.
+      if (replacementEditor == null || !ReferenceEquals(replacementEditor, GetActiveTextEditor())
+          || replacementEditor.Text != replacementTextSnapshot || replacementEditor.TextEditor.IsReadOnly)
+        return;
       if (string.Equals(searchParameters, "FindNext"))
       {
         bool replaced = ReplaceNextWord(replaceText, searchText);
@@ -382,6 +391,7 @@ namespace UI.Components
       else if (string.Equals(searchParameters, "FindAll"))
       {
         ReplaceAllWords(replaceText, searchText);
+        await textSearchManager.FindAllAsync(searchText, wholeWord, caseWord, searchArea, false);
       }
     }
 

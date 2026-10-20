@@ -1,4 +1,4 @@
-﻿using System.Windows.Controls;
+using System.Windows.Controls;
 using UI.Components.SearchControls;
 using UI.Controls;
 using UI.Controls.TextEditorControl;
@@ -68,7 +68,9 @@ namespace UI.Components.MultiEditorMethods
       }
 
       string replacement = replaceText ?? string.Empty;
+      string originalText = textEditor.Text.Substring(startOffset, searchResult.Length);
       document.Replace(startOffset, searchResult.Length, replacement);
+      if (replacement.Length > 0) textEditor.MarkerService.AddReplacementMarker(startOffset, replacement.Length, originalText);
 
       int nextCaretOffset = Math.Min(startOffset + replacement.Length, document.TextLength);
       textEditor.TextArea.ClearSelection();

@@ -1,4 +1,5 @@
-﻿using ICSharpCode.AvalonEdit.Document;
+﻿using Ask.UI.Shared.Search;
+using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Rendering;
 using System.Windows;
 using System.Windows.Media;
@@ -40,6 +41,7 @@ namespace UI.Controls.TextEditorControl
     private TextSegmentCollection<TextMarker> markers;
     private readonly ICSharpCode.AvalonEdit.TextEditor editor;
     private TextMarkerColorizer? _colorizer;
+    private readonly ReplacementReviewMenu _replacementMenu;
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="TextMarkerService"/>.
@@ -49,6 +51,8 @@ namespace UI.Controls.TextEditorControl
     {
       this.editor = editor ?? throw new ArgumentNullException(nameof(editor));
 
+      _replacementMenu = new ReplacementReviewMenu(editor, () => markers == null
+        ? Enumerable.Empty<ReplacementReview>() : markers.Where(marker => marker.Review != null).Select(marker => marker.Review!));
       RebindToCurrentDocument();
 
       editor.DocumentChanged += (_, __) =>
@@ -76,7 +80,7 @@ namespace UI.Controls.TextEditorControl
         return;
       }
 
-      foreach (var marker in markers)
+      foreach (var marker in markers.OrderBy(marker => marker.IsReplacement))
       {
         if (!marker.IsBackground)
           continue;
@@ -85,8 +89,9 @@ namespace UI.Controls.TextEditorControl
         {
           if (marker.IsSearch)
           {
-            var color = (editor.TryFindResource("VioletColorSolidColorBrush") as SolidColorBrush)?.Color
-              ?? Color.FromRgb(145, 132, 238);
+            var color = marker.IsReplacement
+              ? (editor.TryFindResource("SearchReplacementBrush") as SolidColorBrush)?.Color ?? Color.FromRgb(89, 199, 112)
+              : (editor.TryFindResource("VioletColorSolidColorBrush") as SolidColorBrush)?.Color ?? Color.FromRgb(145, 132, 238);
             var outline = new SolidColorBrush(color);
             var fill = marker.IsCurrentSearch ? new SolidColorBrush(Color.FromArgb(128, color.R, color.G, color.B)) : null;
             drawingContext.DrawRoundedRectangle(fill, new Pen(outline, 1.5), rect, 3, 3);
@@ -104,6 +109,7 @@ namespace UI.Controls.TextEditorControl
     /// </summary>
     private void RebindToCurrentDocument()
     {
+      _replacementMenu.Close();
       if (editor.Document == null)
         return;
 
@@ -120,9 +126,14 @@ namespace UI.Controls.TextEditorControl
     /// <summary>
     /// Очищает все существующие маркеры подсветки.
     /// </summary>
-    public void ClearAllMarkers()
+    public void ClearAllMarkers(bool preserveReplacements = false)
     {
-      markers?.Clear();
+      if (preserveReplacements && markers != null)
+      {
+        foreach (var marker in markers.Where(marker => !marker.IsReplacement).ToArray())
+          markers.Remove(marker);
+      }
+      else { _replacementMenu.Close(); markers?.Clear(); }
       editor.TextArea.TextView.InvalidateLayer(KnownLayer.Selection);
       Console.WriteLine("Все маркеры удалены.");
     }
@@ -156,6 +167,43 @@ namespace UI.Controls.TextEditorControl
     {
       if (!TryNormalizeRange(ref startOffset, ref length)) return;
       markers.Add(new TextMarker(startOffset, length) { IsSearch = true, IsCurrentSearch = isCurrent });
+      editor.TextArea.TextView.InvalidateLayer(KnownLayer.Selection);
+    }
+
+    /// <summary>Сохраняет зелёную рамку заменённого фрагмента до завершения сеанса поиска.</summary>
+    public void AddReplacementMarker(int startOffset, int length) => AddReplacementMarker(startOffset, length, null);
+
+    public void AddReplacementMarker(int startOffset, int length, string? originalText)
+    {
+      if (!TryNormalizeRange(ref startOffset, ref length)) return;
+      foreach (var previous in markers.Where(item => item.IsReplacement
+        && (item.Length == 0 || item.StartOffset < startOffset + length && item.EndOffset > startOffset)).ToArray())
+        markers.Remove(previous);
+      var marker = new TextMarker(startOffset, length) { IsSearch = true, IsReplacement = true };
+      markers.Add(marker);
+      if (originalText != null)
+      {
+        var document = editor.Document;
+        marker.Review = new ReplacementReview(editor, marker, originalText, document.GetText(startOffset, length),
+          () => ReferenceEquals(editor.Document, document) && markers.Any(item => ReferenceEquals(item, marker)),
+          () =>
+          {
+            foreach (var item in markers.Where(item => ReferenceEquals(item, marker) || item.IsSearch
+              && !item.IsReplacement && item.StartOffset < marker.EndOffset && item.EndOffset > marker.StartOffset).ToArray())
+              markers.Remove(item);
+            editor.TextArea.TextView.InvalidateLayer(KnownLayer.Selection);
+          });
+      }
+      editor.TextArea.TextView.InvalidateLayer(KnownLayer.Selection);
+    }
+
+    /// <summary>Удаляет только историю замен, сохраняя остальные виды подсветки.</summary>
+    public void ClearReplacementMarkers()
+    {
+      _replacementMenu.Close();
+      if (markers == null) return;
+      foreach (var marker in markers.Where(marker => marker.IsReplacement).ToArray())
+        markers.Remove(marker);
       editor.TextArea.TextView.InvalidateLayer(KnownLayer.Selection);
     }
 
@@ -230,6 +278,8 @@ namespace UI.Controls.TextEditorControl
       public bool IsSearch { get; set; }
       /// <summary>Признак активного результата поиска.</summary>
       public bool IsCurrentSearch { get; set; }
+      public bool IsReplacement { get; set; }
+      public ReplacementReview? Review { get; set; }
 
       /// <inheritdoc/>
       public object Tag { get; set; }

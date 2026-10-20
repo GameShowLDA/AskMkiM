@@ -312,7 +312,7 @@ namespace UI.Components
     /// <remarks>
     /// В случае, если редактор не инициализирован, выводится сообщение об ошибке.
     /// </remarks>
-    public async void SearchData(string searchText, bool? wholeWord, bool? caseWord, int searchArea, string searchParameters)
+    public async Task SearchData(string searchText, bool? wholeWord, bool? caseWord, int searchArea, string searchParameters)
     {
       if (MultiEditor == null)
       {
@@ -344,7 +344,7 @@ namespace UI.Components
     /// <param name="searchParameters">
     /// Область поиска: поиск в текущем документе, во всех открытых документах, в файле.
     /// </param>
-    public async void ReplaceData(string replaceText, string searchText, bool? wholeWord, bool? caseWord, int searchArea, string searchParameters)
+    public async Task ReplaceData(string replaceText, string searchText, bool? wholeWord, bool? caseWord, int searchArea, string searchParameters)
     {
       if (MultiEditor == null)
       {
@@ -365,6 +365,8 @@ namespace UI.Components
     /// <remarks>
     /// Этот метод вызывает завершение обработки поиска и очистку ресурсов редактора, связанных с поиском.
     /// </remarks>
+    public void ClearReplacementHighlights() => MultiEditor.ClearReplacementHighlights();
+
     public void OnSearchWindowClosing()
     {
       MultiEditor.OnSearchWindowClosing();
