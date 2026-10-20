@@ -66,7 +66,7 @@ public partial class SearchPanelWindow : Window
     SettingsButton.SetResourceReference(System.Windows.Controls.Control.ForegroundProperty,
       expanded ? "SearchAccentBrush" : "ForegrounfBrushes");
     SettingsButton.SetResourceReference(System.Windows.Controls.Control.BorderBrushProperty,
-      expanded ? "SearchAccentBrush" : "SearchPanelOutline");
+      expanded ? "SearchAccentBrush" : "TopPanelButtonBevelBrush");
     System.Windows.Automation.AutomationProperties.SetItemStatus(SettingsButton,
       expanded ? "Настройки открыты" : "Настройки закрыты");
   }

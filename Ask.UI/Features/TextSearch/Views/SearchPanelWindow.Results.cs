@@ -113,7 +113,7 @@ public partial class SearchPanelWindow
     _updatingResults = false;
     SetSectionExpanded(ResultsPanel, false);
     FindAllButton.SetResourceReference(Control.ForegroundProperty, "ForegrounfBrushes");
-    FindAllButton.SetResourceReference(Control.BorderBrushProperty, "SearchPanelOutline");
+    FindAllButton.SetResourceReference(Control.BorderBrushProperty, "TopPanelButtonBevelBrush");
     UpdateShellCorners();
   }
 
