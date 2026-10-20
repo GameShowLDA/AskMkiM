@@ -17,7 +17,7 @@ public sealed record DiffTextSegment(string Text, bool IsChanged);
 /// </summary>
 public static class DiffTextHighlight
 {
-  private static readonly Brush CurrentMatchBackground = CreateBrush(218, 165, 32);
+
   private static readonly DependencyProperty OutlineProperty = DependencyProperty.RegisterAttached(
     "Outline", typeof(SearchOutline), typeof(DiffTextHighlight));
 
@@ -115,7 +115,12 @@ public static class DiffTextHighlight
       while (rangeIndex < ranges.Count && ranges[rangeIndex].Start + ranges[rangeIndex].Length <= start) rangeIndex++;
       if (rangeIndex < ranges.Count && ranges[rangeIndex].Start <= start)
       {
-        if (ranges[rangeIndex].IsCurrent) run.Background = CurrentMatchBackground;
+        if (ranges[rangeIndex].IsCurrent)
+        {
+          var color = (textBlock.TryFindResource("VioletColorSolidColorBrush") as SolidColorBrush)?.Color
+            ?? Color.FromRgb(145, 132, 238);
+          run.Background = CreateBrush(color.R, color.G, color.B);
+        }
         if (segment.IsChanged) run.TextDecorations = TextDecorations.Underline;
       }
 
@@ -153,7 +158,7 @@ public static class DiffTextHighlight
   /// <summary>Рисует рамки совпадений поверх текста без изменения его метрик.</summary>
   private sealed class SearchOutline : Adorner
   {
-    private readonly Pen OutlinePen = new(Brushes.Goldenrod, 1.5);
+
 
     /// <summary>Создаёт слой рамок строки.</summary>
     /// <param name="block">Текст строки сравнения.</param>
@@ -195,7 +200,9 @@ public static class DiffTextHighlight
       void Flush()
       {
         if (pending.IsEmpty) return;
-        drawingContext.DrawRoundedRectangle(null, OutlinePen, pending, 3, 3);
+        var outline = block.TryFindResource("VioletColorSolidColorBrush") as Brush
+          ?? new SolidColorBrush(Color.FromRgb(145, 132, 238));
+        drawingContext.DrawRoundedRectangle(null, new Pen(outline, 1.5), pending, 3, 3);
         pending = Rect.Empty;
       }
     }

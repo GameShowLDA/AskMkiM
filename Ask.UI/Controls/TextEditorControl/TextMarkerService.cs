@@ -1,4 +1,4 @@
-using ICSharpCode.AvalonEdit.Document;
+﻿using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Rendering;
 using System.Windows;
 using System.Windows.Media;
@@ -85,8 +85,10 @@ namespace Ask.UI.Controls.TextEditorControl
         {
           if (marker.IsSearch)
           {
-            var outline = new SolidColorBrush(Colors.Goldenrod);
-            var fill = marker.IsCurrentSearch ? new SolidColorBrush(Color.FromArgb(128, 218, 165, 32)) : null;
+            var color = (editor.TryFindResource("VioletColorSolidColorBrush") as SolidColorBrush)?.Color
+              ?? Color.FromRgb(145, 132, 238);
+            var outline = new SolidColorBrush(color);
+            var fill = marker.IsCurrentSearch ? new SolidColorBrush(Color.FromArgb(128, color.R, color.G, color.B)) : null;
             drawingContext.DrawRoundedRectangle(fill, new Pen(outline, 1.5), rect, 3, 3);
             continue;
           }
