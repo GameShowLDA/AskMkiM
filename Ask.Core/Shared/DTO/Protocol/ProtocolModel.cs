@@ -237,6 +237,7 @@ namespace Ask.Core.Shared.DTO.Protocol
       sb.AppendLine().AppendLine().AppendLine();
 
       int sequenceIndex = 1;
+      ProtocolMessageKind? previousKind = null;
 
       foreach (var (command, entries) in protocolModel.Messages)
       {
@@ -252,13 +253,18 @@ namespace Ask.Core.Shared.DTO.Protocol
           {
             continue;
           }
+          if (previousKind.HasValue && previousKind.Value != kind)
+          {
+            sb.AppendLine();
+          }
           var messageText = BuildProtocolMessage(message);
 
           var prefix = kind == ProtocolMessageKind.Error
             ? $"ERR{sequenceIndex++}"
-            : $"DOC{sequenceIndex++}";
+            : $"DOC";
 
           sb.AppendLine($"{prefix} {command}: {messageText}");
+          previousKind = kind;
         }
       }
 
