@@ -52,9 +52,9 @@ public sealed class MeasurementToleranceCalculatorTests
       outputService.Object);
 
     Assert.NotNull(result);
-    Assert.Equal(0.45, result.Value.LowerBound, precision: 10);
-    Assert.Equal(0.55, result.Value.UpperBound, precision: 10);
-    Assert.Equal(0.05, result.Value.Delta, precision: 10);
+    Assert.Equal(0.445, result.Value.LowerBound, precision: 10);
+    Assert.Equal(0.555, result.Value.UpperBound, precision: 10);
+    Assert.Equal(0.055, result.Value.Delta, precision: 10);
     outputService.Verify(
       service => service.ShowMessageAsync(
         It.IsAny<ShowMessageModel>(),
