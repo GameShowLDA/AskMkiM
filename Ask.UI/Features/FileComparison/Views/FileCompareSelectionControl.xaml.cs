@@ -79,6 +79,7 @@ namespace Ask.UI.Features.FileComparison.Views
           return;
         }
 
+        HighlightSearchResults(Array.Empty<Ask.Core.Shared.Interfaces.UiInterfaces.TextSearchMatch>(), null);
         _activeComparison = value;
         OnPropertyChanged();
       }
@@ -553,8 +554,24 @@ namespace Ask.UI.Features.FileComparison.Views
     public DiffLineViewModel Target { get; }
   }
 
-  public sealed class DiffLineViewModel
+  public sealed class DiffLineViewModel : INotifyPropertyChanged
   {
+    private IReadOnlyList<DiffSearchRange> _searchRanges = Array.Empty<DiffSearchRange>();
+
+    /// <summary>Возникает при изменении подсветки поиска.</summary>
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    /// <summary>Диапазоны поиска, отображаемые поверх раскраски различий.</summary>
+    public IReadOnlyList<DiffSearchRange> SearchRanges
+    {
+      get => _searchRanges;
+      internal set
+      {
+        if (_searchRanges.SequenceEqual(value)) return;
+        _searchRanges = value;
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SearchRanges)));
+      }
+    }
     /// <summary>
     /// Создаёт строку сравнения с раскраской и посимвольными фрагментами.
     /// </summary>

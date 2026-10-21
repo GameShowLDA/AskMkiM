@@ -127,7 +127,7 @@ namespace UI.Components.Invoke
 
     private void ApplyLockState(bool isLocked)
     {
-      Application.Current.Dispatcher.Invoke(() =>
+      Dispatcher.Invoke(() =>
       {
         IsEnabled = !isLocked;
       });

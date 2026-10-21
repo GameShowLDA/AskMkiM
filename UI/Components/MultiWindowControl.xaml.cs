@@ -1,4 +1,4 @@
-using Ask.Core.Services.EventCore.Events;
+﻿using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.DTO.TextEditor;
 using Ask.Core.Shared.Metadata.Static;
@@ -181,6 +181,20 @@ namespace UI.Components
         .FirstOrDefault(control => control.Visibility == Visibility.Visible);
     }
 
+    /// <summary>Возвращает подключение поиска активного компонента или активной вложенной вкладки.</summary>
+    /// <returns>Адаптер поиска; отсутствие сохраняет прежний поиск редактора.</returns>
+    public Ask.Core.Shared.Interfaces.UiInterfaces.ITextSearchTarget? GetActiveSearchTarget()
+    {
+      var control = GetActiveWorkspaceControl();
+      if (control is TextEditorContainer container)
+      {
+        var item = container.DockManager.DockItems.FirstOrDefault(tab => tab.IsActiveItem == true);
+        if (item?.Content is DependencyObject content)
+          return Ask.UI.Shared.Search.SearchTarget.Resolve(content);
+      }
+      return Ask.UI.Shared.Search.SearchTarget.Resolve(control);
+    }
+
     /// <summary>
     /// Возвращает активный текстовый редактор независимо от его типа.
     /// </summary>
@@ -298,7 +312,7 @@ namespace UI.Components
     /// <remarks>
     /// В случае, если редактор не инициализирован, выводится сообщение об ошибке.
     /// </remarks>
-    public async void SearchData(string searchText, bool? wholeWord, bool? caseWord, int searchArea, string searchParameters)
+    public async Task SearchData(string searchText, bool? wholeWord, bool? caseWord, int searchArea, string searchParameters, bool useRegex = false)
     {
       if (MultiEditor == null)
       {
@@ -309,7 +323,7 @@ namespace UI.Components
       }
 
       LogInformation($"Начат поиск по тексту. Искомый текст: {searchText}");
-      await MultiEditor.SearchData(searchText, wholeWord, caseWord, searchArea, searchParameters);
+      await MultiEditor.SearchData(searchText, wholeWord, caseWord, searchArea, searchParameters, useRegex);
     }
 
     /// <summary>
@@ -330,7 +344,7 @@ namespace UI.Components
     /// <param name="searchParameters">
     /// Область поиска: поиск в текущем документе, во всех открытых документах, в файле.
     /// </param>
-    public async void ReplaceData(string replaceText, string searchText, bool? wholeWord, bool? caseWord, int searchArea, string searchParameters)
+    public async Task ReplaceData(string replaceText, string searchText, bool? wholeWord, bool? caseWord, int searchArea, string searchParameters, bool useRegex = false)
     {
       if (MultiEditor == null)
       {
@@ -342,7 +356,7 @@ namespace UI.Components
 
       LogInformation($"Начат поиск по тексту. Искомый текст: {searchText}");
       CloseSearchResults();
-      await MultiEditor.ReplaceWordData(replaceText, searchText, wholeWord, caseWord, searchArea, searchParameters);
+      await MultiEditor.ReplaceWordData(replaceText, searchText, wholeWord, caseWord, searchArea, searchParameters, useRegex);
     }
 
     /// <summary>
@@ -351,6 +365,16 @@ namespace UI.Components
     /// <remarks>
     /// Этот метод вызывает завершение обработки поиска и очистку ресурсов редактора, связанных с поиском.
     /// </remarks>
+    public Task<IReadOnlyList<Ask.UI.Features.TextSearch.Views.SearchPanelResult>> FindAllForPanelAsync(
+      Ask.Core.Shared.Interfaces.UiInterfaces.TextSearchQuery query, bool allDocuments)
+      => MultiEditor.FindAllForPanelAsync(query, allDocuments);
+
+    public bool CaptureSearchSelection() => MultiEditor.CaptureSearchSelection();
+    public void SetSelectionSearch(bool enabled) => MultiEditor.SetSelectionSearch(enabled);
+    public void ReleaseSearchSelection() => MultiEditor.ReleaseSearchSelection();
+
+    public void ClearReplacementHighlights() => MultiEditor.ClearReplacementHighlights();
+
     public void OnSearchWindowClosing()
     {
       MultiEditor.OnSearchWindowClosing();

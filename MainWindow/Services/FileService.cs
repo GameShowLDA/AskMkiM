@@ -25,7 +25,6 @@ using System.Windows.Media.Effects;
 using System.Windows.Threading;
 using UI.Components;
 using Ask.UI.Features.FileComparison.Views;
-using UI.Controls.Search;
 using UI.Controls.TextEditorControl;
 using static Ask.Core.Services.EventCore.Events.ExecutionEvents;
 using static Ask.LogLib.LoggerUtility;
@@ -55,8 +54,8 @@ namespace MainWindowProgram.Services
     private readonly ApkToApkwConverter _apkToApkwConverter;
     private readonly ApkwToApkLegacyExportService _apkwToApkExporter;
 
-    private bool _isSearchWindowOpen;
-    private bool _selectFileHandlerAttached;
+    public void ShowSearchPanel() => _mainWindow.ShowSearchPanel();
+
     private bool _executionInterrupted;
 
     /// <summary>
@@ -68,7 +67,6 @@ namespace MainWindowProgram.Services
     {
       _multiWindow = multiWindow;
       _mainWindow = mainWindow;
-      _mainWindow.SearchWindow = new SearchWindow();
       _isLockedProvider = isLockedProvider;
       _opkToPkConverter = new OpkToPkConverter();
       _pkToOpkwConverter = new PkToOpkwConverter();
@@ -101,7 +99,6 @@ namespace MainWindowProgram.Services
         ArchiveDirectoryService.ResolveReviewArchivesRootPath);
       _apkwToApkExporter = new ApkwToApkLegacyExportService();
 
-      EventAggregator.Subscribe<SearchEvents.SearchWindowClosing>(e => OnSearchWindowClosing(e.IsClosing));
 
       EventAggregator.Unsubscribe<FileInteractionEvents.ViewProtocol>(e => ViewProtocol(e.Protocol));
       EventAggregator.Subscribe<FileInteractionEvents.ViewProtocol>(e => ViewProtocol(e.Protocol));
@@ -133,11 +130,7 @@ namespace MainWindowProgram.Services
     }
 
 
-    private void OnSearchWindowClosing(bool closing)
-    {
-      _isSearchWindowOpen = false;
-      MessageEventAdapter.RaiseInfoMessage(string.Empty);
-    }
+
 
     /// <summary>
     /// Открывает диалог выбора файлов и загружает их в редактор.
@@ -658,24 +651,7 @@ namespace MainWindowProgram.Services
       Application.Current.Shutdown();
     }
 
-    /// <summary>
-    /// Выполняет поиск в текущем файле.
-    /// </summary>
-    public async Task SearchFileAsync()
-    {
-      var activeEditor = await EnsureSearchWindowAsync(expandReplaceRow: false, focusReplaceField: false);
-      if (activeEditor == null)
-      {
-        return;
-      }
 
-      string selectedText = activeEditor.TextArea.Selection.GetText();
-
-      if (!string.IsNullOrEmpty(selectedText))
-      {
-        SearchEventAdapter.RaiseSearchTextRequested(selectedText);
-      }
-    }
 
     /// <summary>
     /// Открывает единый контрол выбора уже открытых файлов для сравнения.
@@ -1038,73 +1014,9 @@ namespace MainWindowProgram.Services
     }
     internal void OpenFolder() => _multiWindow.EditorDocumentService.OpenFolder();
 
-    /// <summary>
-    /// Открывает окно поиска сразу с раскрытой строкой замены.
-    /// </summary>
-    public async Task SearchReplaceFileAsync()
-    {
-      string selectedText = null;
-      // вычислим заранее, т.к. EnsureSearchWindowAsync может менять фокус
-      var editorForSelection = _multiWindow.GetActiveTextEditor();
-      if (editorForSelection != null)
-      {
-        selectedText = editorForSelection.TextArea.Selection.GetText();
-      }
 
-      bool focusReplaceField = _mainWindow.SearchWindow.HasSearchText() || !string.IsNullOrEmpty(selectedText);
 
-      var activeEditor = await EnsureSearchWindowAsync(expandReplaceRow: true, focusReplaceField: focusReplaceField);
-      if (activeEditor == null)
-      {
-        return;
-      }
 
-      if (string.IsNullOrEmpty(selectedText))
-      {
-        selectedText = activeEditor.TextArea.Selection.GetText();
-        if (!string.IsNullOrEmpty(selectedText))
-        {
-          focusReplaceField = true;
-        }
-      }
-
-      if (!string.IsNullOrEmpty(selectedText))
-      {
-        SearchEventAdapter.RaiseSearchTextRequested(selectedText);
-      }
-      if (focusReplaceField)
-      {
-        _mainWindow.SearchWindow.FocusReplaceField();
-      }
-    }
-
-    private async Task<TextEditorUI?> EnsureSearchWindowAsync(bool expandReplaceRow, bool focusReplaceField)
-    {
-      var activeEditor = _multiWindow.GetActiveTextEditor();
-      if (activeEditor == null)
-      {
-        return null;
-      }
-
-      if (!_isSearchWindowOpen)
-      {
-        _mainWindow.SearchWindow.Owner = _mainWindow;
-        if (!_selectFileHandlerAttached)
-        {
-          _mainWindow.SearchWindow.SelectFileForSearch += OpenFileAsync;
-          _selectFileHandlerAttached = true;
-        }
-        _isSearchWindowOpen = true;
-      }
-
-      if (!expandReplaceRow && _mainWindow.SearchWindow.IsReplaceExpanded)
-      {
-        await _mainWindow.SearchWindow.CollapseReplaceRowAsync();
-      }
-
-      await _mainWindow.SearchWindow.ShowWindow(expandReplaceRow, focusReplaceField);
-      return activeEditor;
-    }
 
     /// <summary>
     /// Запускает выполнение программы контроля через внешнюю старую программу АСК-МКИ.

@@ -441,3 +441,5 @@ Installer/Output/Setup_ASKMKIM.exe
 *.drawio.dtmp
 *.drawio.tmp
 /Схемы
+.build/search-window-removal/AppHelp/content.css
+/.build

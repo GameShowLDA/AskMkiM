@@ -93,6 +93,11 @@ namespace MainWindowProgram.Services
     /// </returns>
     public UserControl? GetActiveWorkspaceControl() => _multiWindowControl.GetActiveWorkspaceControl();
 
+    /// <summary>Возвращает адаптер поиска активного компонента рабочей области.</summary>
+    /// <returns>Подключённый адаптер либо отсутствие подключения.</returns>
+    public Ask.Core.Shared.Interfaces.UiInterfaces.ITextSearchTarget? GetActiveSearchTarget() =>
+      _multiWindowControl.GetActiveSearchTarget();
+
     /// <summary>
     /// Закрывает вкладку с активным текстовым редактором.
     /// </summary>
