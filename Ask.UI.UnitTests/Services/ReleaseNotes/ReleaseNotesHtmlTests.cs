@@ -39,10 +39,11 @@ public sealed class ReleaseNotesHtmlTests
       Assert.NotNull(HelpServer.BaseUrl);
       using var client = new HttpClient { BaseAddress = HelpServer.BaseUrl };
       using var response = await client.GetAsync("ru/Content/ReleaseNotes.html");
-      Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+      string html = await response.Content.ReadAsStringAsync();
+      Assert.True(response.StatusCode == HttpStatusCode.OK,
+        $"Страница истории вернула {response.StatusCode}. Проверьте поставку AppHelp/releases/*.json. Ответ: {html}");
       Assert.Equal("text/html", response.Content.Headers.ContentType?.MediaType);
       Assert.True(response.Headers.CacheControl?.NoStore);
-      string html = await response.Content.ReadAsStringAsync();
       Assert.Contains("Версия 1.1.0", html);
       Assert.Contains("Сравнение файлов", html);
       string index = await client.GetStringAsync("ru/index.html");

@@ -1643,6 +1643,9 @@ TestConsole: аргумент release-notes [каталог] или пункт �
 I/O и отмена распространяются вызывающему коду. Пустой каталог возвращает пустой список,
 отсутствующий каталог — ошибку. Консоль выводит ошибки чтения/доступа и возвращает код 1.
 Production-каталог `Ask.Support/AppHelp/releases/*.json` копируется в output/publish
+и должен храниться в Git: `.gitignore` явно исключает этот каталог из общего
+правила `[Rr]eleases/`, иначе локальные проверки проходят, но CI получает HTTP 500.
+Каталог в output/publish доступен
 как `AppHelp/releases/`; содержит 1.1.0 (разница с origin/main 1.0.0, дата 2026-10-21).
 Проверка: `TestConsole release-notes Ask.Support/AppHelp/releases` из корня репозитория.
 `SettingsViewModel.HelpOpenReleaseNotesCommand → SettingsService.HelpOpenReleaseNotes
