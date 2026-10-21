@@ -712,4 +712,5 @@
   <data name="Settings_AutoLock_2" xml:space="preserve"><value>2 minutes</value></data>
   <data name="Settings_AutoLock_5" xml:space="preserve"><value>5 minutes</value></data>
   <data name="Settings_AutoLock_10" xml:space="preserve"><value>10 minutes</value></data>
+  <data name="menu.help.releaseNotes" xml:space="preserve"><value>What's New</value></data>
 </root>

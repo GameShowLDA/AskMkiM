@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:UI.Controls.EmptyWorkspace"
+             xmlns:releaseNotes="clr-namespace:Ask.UI.Features.ReleaseNotes.Views;assembly=Ask.UI"
              mc:Ignorable="d"
              d:DesignHeight="450" d:DesignWidth="800"
              IsHitTestVisible="True"
@@ -195,6 +196,8 @@
         </Border>
 
         <!-- ===== ВЕРСИЯ ПО / ДАТА СБОРКИ (внизу справа) ===== -->
+        <releaseNotes:ReleaseNotesPrompt HorizontalAlignment="Center" VerticalAlignment="Bottom"
+                                         Margin="16,0,16,44" MaxWidth="520"/>
         <TextBlock HorizontalAlignment="Right"
                VerticalAlignment="Bottom"
                Margin="0,0,14,10"

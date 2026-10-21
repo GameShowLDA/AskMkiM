@@ -694,6 +694,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const doc = contentFrame.contentDocument;
         if (!doc) return;
 
+        doc.addEventListener('toggle', () => fitFrame(), true);
+
         requestAnimationFrame(() => {
             fitFrame();
             selectTextInContentFrame(pendingSelectionQuery, pendingSelectionOptions);
