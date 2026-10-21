@@ -636,7 +636,10 @@ Engine знает DB Engine и Message, Core содержит WPF/config/applica
 Идентификация сборки проходит поперёк runtime-слоёв: `Directory.Build.targets` перед
 генерацией `AssemblyInfo` проекта `MainWindowProgram` встраивает UTC timestamp,
 полный/короткий Git commit, признак dirty, единый `BuildIdentity` и двадцать последних
-коммитов (`hash`, дата, subject) в entry assembly.
+коммитов (`hash`, дата, subject) в entry assembly. Исполняемый Git сначала разрешается
+из `HKLM\SOFTWARE\GitForWindows\InstallPath`, затем ищется в `PATH`; при отсутствии
+Git сборка сохраняет резервные значения метаданных, не записывая текст ошибки команды
+в версию или историю.
 Для `MainWindowProgram` отключён Visual Studio Fast Up-to-date Check: Git HEAD и
 состояние working tree находятся вне стандартного MSBuild input graph, поэтому без
 этого после checkout/merge IDE могла запустить старый EXE без обновления AssemblyInfo.

@@ -12,30 +12,45 @@
       <BuildGitCommit>unknown</BuildGitCommit>
       <BuildGitCommitShort>unknown</BuildGitCommitShort>
       <BuildGitDirty>false</BuildGitDirty>
+      <GitInstallPath>$([MSBuild]::GetRegistryValue('HKEY_LOCAL_MACHINE\SOFTWARE\GitForWindows', 'InstallPath'))</GitInstallPath>
+      <GitExecutable Condition="Exists('$(GitInstallPath)\cmd\git.exe')">$(GitInstallPath)\cmd\git.exe</GitExecutable>
     </PropertyGroup>
 
-    <Exec Command="git rev-parse HEAD"
+    <Exec Command="where.exe git &gt;nul 2&gt;&amp;1"
+          WorkingDirectory="$(MSBuildThisFileDirectory)"
+          IgnoreExitCode="true">
+      <Output TaskParameter="ExitCode" PropertyName="GitOnPathExitCode" />
+    </Exec>
+    <PropertyGroup Condition="'$(GitExecutable)' == '' and '$(GitOnPathExitCode)' == '0'">
+      <GitExecutable>git</GitExecutable>
+    </PropertyGroup>
+
+    <Exec Command="&quot;$(GitExecutable)&quot; rev-parse HEAD 2&gt;nul"
+          Condition="'$(GitExecutable)' != ''"
           WorkingDirectory="$(MSBuildThisFileDirectory)"
           ConsoleToMSBuild="true"
           StandardOutputImportance="Low"
           IgnoreExitCode="true">
       <Output TaskParameter="ConsoleOutput" PropertyName="BuildGitCommit" />
     </Exec>
-    <Exec Command="git rev-parse --short=8 HEAD"
+    <Exec Command="&quot;$(GitExecutable)&quot; rev-parse --short=8 HEAD 2&gt;nul"
+          Condition="'$(GitExecutable)' != ''"
           WorkingDirectory="$(MSBuildThisFileDirectory)"
           ConsoleToMSBuild="true"
           StandardOutputImportance="Low"
           IgnoreExitCode="true">
       <Output TaskParameter="ConsoleOutput" PropertyName="BuildGitCommitShort" />
     </Exec>
-    <Exec Command="git status --porcelain --untracked-files=normal"
+    <Exec Command="&quot;$(GitExecutable)&quot; status --porcelain --untracked-files=normal 2&gt;nul"
+          Condition="'$(GitExecutable)' != ''"
           WorkingDirectory="$(MSBuildThisFileDirectory)"
           ConsoleToMSBuild="true"
           StandardOutputImportance="Low"
           IgnoreExitCode="true">
       <Output TaskParameter="ConsoleOutput" ItemName="BuildGitStatus" />
     </Exec>
-    <Exec Command="git -c i18n.logOutputEncoding=cp866 log -20 --date=short --pretty=format:&quot;%25%25h,%25%25ad,%25%25s&quot;"
+    <Exec Command="&quot;$(GitExecutable)&quot; -c i18n.logOutputEncoding=cp866 log -20 --date=short --pretty=format:&quot;%25%25h,%25%25ad,%25%25s&quot; 2&gt;nul"
+          Condition="'$(GitExecutable)' != ''"
           WorkingDirectory="$(MSBuildThisFileDirectory)"
           ConsoleToMSBuild="true"
           StandardOutputImportance="Low"
