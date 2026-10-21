@@ -257,6 +257,9 @@
     <Border CornerRadius="{Binding CornerRadius, ElementName=PanelShell}" Background="{DynamicResource BackgroundBrushes}" IsHitTestVisible="False">
       <Border.Effect><DropShadowEffect Color="Black" BlurRadius="10" ShadowDepth="2" Opacity="0.35"/></Border.Effect>
     </Border>
+    <Border CornerRadius="{Binding CornerRadius, ElementName=PanelShell}" Background="{DynamicResource BackgroundBrushes}" IsHitTestVisible="False">
+      <Border.Effect><DropShadowEffect Color="{DynamicResource ForegroundColor}" BlurRadius="18" ShadowDepth="0" Opacity="0.12"/></Border.Effect>
+    </Border>
     <Border x:Name="PanelShell" CornerRadius="24" BorderThickness="1"
             Background="{DynamicResource BackgroundBrushes}"
             BorderBrush="{DynamicResource TopPanelButtonBevelBrush}" Padding="10,0">

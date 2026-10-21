@@ -4,6 +4,7 @@ using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Rendering;
 using System.Windows;
 using System.Windows.Media;
+using System.Windows.Threading;
 
 namespace Ask.UI.Controls.TextEditorControl
 {
@@ -92,7 +93,8 @@ namespace Ask.UI.Controls.TextEditorControl
       var searchPen = new Pen(new SolidColorBrush(searchColor), 1.5);
       var replacementPen = new Pen(new SolidColorBrush(replacementColor), 1.5);
       var currentFill = new SolidColorBrush(Color.FromArgb(128, searchColor.R, searchColor.G, searchColor.B));
-      searchPen.Freeze(); replacementPen.Freeze(); currentFill.Freeze();
+      var replacementFill = new SolidColorBrush(Color.FromArgb(128, replacementColor.R, replacementColor.G, replacementColor.B));
+      searchPen.Freeze(); replacementPen.Freeze(); currentFill.Freeze(); replacementFill.Freeze();
       foreach (var marker in markers.FindOverlappingSegments(visibleStart, visibleEnd - visibleStart)
         .OrderBy(marker => marker.IsReplacement))
       {
@@ -103,7 +105,8 @@ namespace Ask.UI.Controls.TextEditorControl
         {
           if (marker.IsSearch)
           {
-            drawingContext.DrawRoundedRectangle(marker.IsCurrentSearch ? currentFill : null,
+            drawingContext.DrawRoundedRectangle(marker.IsReplacement ? replacementFill
+              : marker.IsCurrentSearch ? currentFill : null,
               marker.IsReplacement ? replacementPen : searchPen, rect, 3, 3);
             continue;
           }
@@ -131,7 +134,7 @@ namespace Ask.UI.Controls.TextEditorControl
       if (_colorizer != null)
         editor.TextArea.TextView.LineTransformers.Remove(_colorizer);
 
-      _colorizer = new TextMarkerColorizer(markers);
+      _colorizer = new TextMarkerColorizer(markers, editor);
       editor.TextArea.TextView.LineTransformers.Add(_colorizer);
       EnsureColorizerIsLast();
     }
@@ -183,7 +186,15 @@ namespace Ask.UI.Controls.TextEditorControl
     {
       _searchMatches = null;
       if (!TryNormalizeRange(ref startOffset, ref length)) return;
-      markers.Add(new TextMarker(startOffset, length) { IsSearch = true, IsCurrentSearch = isCurrent });
+      var marker = new TextMarker(startOffset, length) { IsSearch = true, IsCurrentSearch = isCurrent };
+      if (isCurrent)
+      {
+        marker.FontSizeIncrease = 2;
+        marker.FontWeight = FontWeights.Bold;
+      }
+      markers.Add(marker);
+      if (isCurrent)
+        editor.TextArea.TextView.Redraw(startOffset, length, DispatcherPriority.Normal);
       editor.TextArea.TextView.InvalidateLayer(KnownLayer.Selection);
     }
 
@@ -203,10 +214,28 @@ namespace Ask.UI.Controls.TextEditorControl
           _searchMarkers.Add(marker);
         }
       }
-      if (_currentSearchMarker != null) _currentSearchMarker.IsCurrentSearch = false;
+      var previous = _currentSearchMarker;
+      if (previous != null)
+      {
+        previous.IsCurrentSearch = false;
+        if (!previous.IsReplacement)
+        {
+          previous.FontSizeIncrease = null;
+          previous.FontWeight = null;
+        }
+      }
       _currentSearchMarker = currentIndex >= 0 && currentIndex < _searchMarkers.Count ? _searchMarkers[currentIndex] : null;
-      if (_currentSearchMarker != null) _currentSearchMarker.IsCurrentSearch = true;
+      if (_currentSearchMarker != null)
+      {
+        _currentSearchMarker.IsCurrentSearch = true;
+        _currentSearchMarker.FontSizeIncrease = 2;
+        _currentSearchMarker.FontWeight = FontWeights.Bold;
+      }
       editor.TextArea.TextView.InvalidateLayer(KnownLayer.Selection);
+      if (previous != null)
+        editor.TextArea.TextView.Redraw(previous.StartOffset, previous.Length, DispatcherPriority.Normal);
+      if (_currentSearchMarker != null && !ReferenceEquals(previous, _currentSearchMarker))
+        editor.TextArea.TextView.Redraw(_currentSearchMarker.StartOffset, _currentSearchMarker.Length, DispatcherPriority.Normal);
     }
 
     /// <summary>Сохраняет зелёную рамку заменённого фрагмента до завершения сеанса поиска.</summary>
@@ -217,7 +246,13 @@ namespace Ask.UI.Controls.TextEditorControl
       if (!TryNormalizeRange(ref startOffset, ref length)) return;
       foreach (var previous in markers.FindOverlappingSegments(startOffset, length).Where(item => item.IsReplacement).ToArray())
         markers.Remove(previous);
-      var marker = new TextMarker(startOffset, length) { IsSearch = true, IsReplacement = true };
+      var marker = new TextMarker(startOffset, length)
+      {
+        IsSearch = true,
+        IsReplacement = true,
+        FontSizeIncrease = 2,
+        FontWeight = FontWeights.Bold
+      };
       markers.Add(marker);
       if (originalText != null)
       {
@@ -320,6 +355,7 @@ namespace Ask.UI.Controls.TextEditorControl
       public bool IsCurrentSearch { get; set; }
       public bool IsReplacement { get; set; }
       public ReplacementReview? Review { get; set; }
+      public double? FontSizeIncrease { get; set; }
 
       /// <inheritdoc/>
       public object Tag { get; set; }
@@ -343,10 +379,12 @@ namespace Ask.UI.Controls.TextEditorControl
     private sealed class TextMarkerColorizer : DocumentColorizingTransformer
     {
       private readonly TextSegmentCollection<TextMarker> _markers;
+      private readonly ICSharpCode.AvalonEdit.TextEditor _editor;
 
-      public TextMarkerColorizer(TextSegmentCollection<TextMarker> markers)
+      public TextMarkerColorizer(TextSegmentCollection<TextMarker> markers, ICSharpCode.AvalonEdit.TextEditor editor)
       {
         _markers = markers;
+        _editor = editor;
       }
 
       protected override void ColorizeLine(DocumentLine line)
@@ -374,6 +412,10 @@ namespace Ask.UI.Controls.TextEditorControl
                 marker.FontWeight.Value,
                 tf.Stretch));
             }
+
+            if (marker.FontSizeIncrease.HasValue)
+              element.TextRunProperties.SetFontRenderingEmSize(
+                _editor.FontSize + marker.FontSizeIncrease.Value);
           });
         }
       }

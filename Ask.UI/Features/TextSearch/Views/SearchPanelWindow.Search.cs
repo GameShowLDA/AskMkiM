@@ -36,9 +36,9 @@ public partial class SearchPanelWindow
     EventAggregator.Subscribe<SearchEvents.SearchProgressChanged>(OnEditorProgress);
     EventAggregator.Subscribe<SearchEvents.CloseSearchWindow>(OnCloseRequested);
     SearchScope.SelectionChanged += Scope_SelectionChanged;
-    SearchInput.TextChanged += (_, _) => ResetStatus();
-    MatchCaseOption.Click += (_, _) => ResetStatus();
-    WholeWordOption.Click += (_, _) => ResetStatus();
+    SearchInput.TextChanged += (_, _) => ClearSearchResults();
+    MatchCaseOption.Click += (_, _) => ClearSearchResults();
+    WholeWordOption.Click += (_, _) => ClearSearchResults();
     RegexOption.Click += (_, _) => ClearSearchResults();
     SelectionOnlyOption.Checked += SelectionOnly_Changed;
     SelectionOnlyOption.Unchecked += SelectionOnly_Changed;
