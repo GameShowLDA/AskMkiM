@@ -29,6 +29,9 @@ Size/Foreground и анимации общей кнопки; лицензия с
 
 | Нужно изменить | Сначала смотреть | Затем смотреть |
 | --- | --- | --- |
+| Модель и чтение истории выпусков JSON | `Ask.Support/ReleaseNotes/ReleaseNotesReader.cs` | `ReleaseNotesModel.cs`, `ReleaseChangeModel.cs`, `ReleaseChangeCategory.cs` в той же папке; [история выпусков](#release-notes-catalog) |
+| «Что нового» в меню и справке, HTML истории | `MainWindow/ViewModels/SettingsViewModel.cs`, `Ask.Support/ReleaseNotes/ReleaseNotesHtmlRenderer.cs` | `SettingsService.HelpOpenReleaseNotes`, `HelpProvider.ShowHelp`, middleware `HelpServer`, узел ReleaseNotes в `AppHelp/ru/index.html`; [история выпусков](#release-notes-catalog) |
+| Кнопка «Что нового» на главном экране и отметки просмотра | `Ask.UI/Features/ReleaseNotes/Views/ReleaseNotesPrompt.xaml(.cs)` | `Ask.Support/ReleaseNotes/ReleaseNotesReadStateStore.cs`, `AppHelp/release-notes.js`, POST middleware `HelpServer`; [история выпусков](#release-notes-catalog) |
 | Скорость поиска, кэш переходов, массовая замена, поиск в выделении, regex | `UI/Components/MultiEditorMethods/TextSearchManager.Navigation.cs`, `Ask.Core/Services/TextSearch/TextSearchEngine.cs` | `TextMarkerService.SetSearchMarkers`, `Ask.UI/Features/FileComparison/Views/ComparisonSearchIndex.cs`; [замеры](architecture/text-search-performance.md) |
 | Подключение поиска к новому компоненту | `Ask.Core/Shared/Interfaces/UiInterfaces/ITextSearchTarget.cs`, `Ask.UI/Shared/Search/SearchTarget.cs` | `Ask.Core/Services/TextSearch/`, `Ask.UI/Shared/Search/SearchTarget.cs`; [поиск](#pluggable-text-search), `docs/architecture/text-search.md` |
 | Сравнение открытых файлов | `MainWindow/MainWindow.xaml`, `MainWindow/Events/UiEventsBinder.cs` | `MainWindow/ViewModels/FileViewModel.cs`, `MainWindow/Services/FileService.cs`, `Ask.UI/Features/FileComparison/Views/FileCompareSelectionControl.xaml(.cs)`; [сравнение файлов](#file-comparison-ui) |
@@ -84,6 +87,7 @@ Size/Foreground и анимации общей кнопки; лицензия с
 
 ## Runtime Flow Index
 
+- [Чтение JSON истории выпусков без UI](#release-notes-catalog)
 - [Подключаемый поиск и существующий поиск редактора](#pluggable-text-search)
 - [Calendar notes CRUD](#calendar-notes)
 - [Сравнение открытых файлов](#file-comparison-ui)
@@ -283,7 +287,11 @@ Ask.Device.ResponseProcessor
 `ShowMessageModel` и прямые вызовы `ShowMessageAsync` в этом потоке отсутствуют.
 
 `Directory.Build.props` направляет обычные результаты сборки в
-`Bin/<MSBuildProjectName>/`; `MainWindow/MainWindowProgram.csproj` переопределяет output path
+`Bin/<MSBuildProjectName>/` от корня repository через `MSBuildThisFileDirectory`,
+одинаково для сборки solution/Visual Studio и отдельного проекта через dotnet.
+Не привязывать этот путь к `SolutionDir`: при отдельной сборке он не задан,
+что создаёт второй output внутри проекта и оставляет IDE старые копии зависимостей.
+`MainWindow/MainWindowProgram.csproj` переопределяет output path
 на `D:\AskMkiM\Bin\` и содержит publish/copy targets.
 
 `MainWindowProgram.csproj` задаёт `AssemblyName=AskMkiM`: основной исполняемый
@@ -1607,6 +1615,86 @@ services зарегистрированы singleton в startup. `ArchiveControl`
 проверки вне UI thread через `Task.Run`.
 
 ### Support and diagnostics
+
+<a id="release-notes-catalog"></a>
+#### Каталог истории выпусков
+
+`Ask.Support/ReleaseNotes/` содержит независимый от UI и запуска HTTP-сервера слой:
+`ReleaseNotesModel` (schemaVersion, version, releaseDate, title, summary, changes),
+`ReleaseChangeModel` (id, category, title, description, helpKey) и enum
+`ReleaseChangeCategory` (Added/Changed/Fixed/Removed/Important/KnownIssue).
+JSON использует camelCase; дата — ISO `yyyy-MM-dd`, версия — три неотрицательных
+целых компонента без ведущих нулей. Title/summary/helpKey необязательны.
+
+```text
+TestConsole: аргумент release-notes [каталог] или пункт меню 23
+→ ReleaseNotesDebug.RunAsync
+→ new ReleaseNotesReader().ReadDirectoryAsync(directory, cancellationToken)
+→ Directory.EnumerateFiles("*.json", верхний уровень)
+→ File.OpenRead → JsonSerializer.DeserializeAsync<ReleaseNotesModel>
+→ проверка schemaVersion == 1, обязательных полей, версии и имени файла,
+  даты, непустого changes и уникальных id внутри выпуска
+→ проверка уникальности версий каталога → числовая сортировка Version по убыванию
+→ IReadOnlyList<ReleaseNotesModel> → консольный вывод
+```
+
+Неизвестные JSON-поля, неизвестные/числовые категории и отсутствующие required-поля
+отклоняются. Ошибка JSON/валидации — `InvalidDataException` с путём исходного файла;
+I/O и отмена распространяются вызывающему коду. Пустой каталог возвращает пустой список,
+отсутствующий каталог — ошибку. Консоль выводит ошибки чтения/доступа и возвращает код 1.
+Production-каталог `Ask.Support/AppHelp/releases/*.json` копируется в output/publish
+и должен храниться в Git: `.gitignore` явно исключает этот каталог из общего
+правила `[Rr]eleases/`, иначе локальные проверки проходят, но CI получает HTTP 500.
+Каталог в output/publish доступен
+как `AppHelp/releases/`; содержит 1.1.0 (разница с origin/main 1.0.0, дата 2026-10-21).
+Проверка: `TestConsole release-notes Ask.Support/AppHelp/releases` из корня репозитория.
+`SettingsViewModel.HelpOpenReleaseNotesCommand → SettingsService.HelpOpenReleaseNotes
+→ HelpProvider.ShowHelp("ReleaseNotes") → HelpViewerWindow → HelpServer.EnsureStarted`
+открывает `/ru/index.html?cmd=ReleaseNotes`; для этого раздела язык явно русский
+(переводов содержания пока нет). Дерево `AppHelp/ru/index.html` содержит узел
+`ReleaseNotes` → `Content/ReleaseNotes.html`. Middleware `HelpServer` читает каталог
+через `ReleaseNotesReader` на запрос и возвращает `ReleaseNotesHtmlRenderer.Render`
+как HTML UTF-8 с no-store; HTML не записывается на диск. Текст/атрибуты экранируются,
+helpKey использует `data-nav → internal-links.js → mki:navigate` существующей справки.
+Последний выпуск раскрыт, старые свёрнуты через details/summary; scripts.js
+пересчитывает высоту iframe на toggle. Цвета тем наследуются от content.css и shell.
+Ошибка I/O/формата каталога → лог + HTTP 500 с сообщением на странице, без отказа
+остальной справки. DI-регистрации и автоматических уведомлений пока нет.
+
+Кнопка главного пустого экрана реализована в
+`Ask.UI/Features/ReleaseNotes/Views/ReleaseNotesPrompt.xaml(.cs)`; legacy
+`UI/Controls/EmptyWorkspace/EmptyWorkspaceView.xaml` только размещает её по центру снизу.
+Текст использует `ApplicationBuildInfo.Current.Version`. Loaded/смена роли (существующее
+`SystemStateEvents.ConsoleAccessChanged`, всегда публикуемое RoleApplicationConfigurator)/
+Changed хранилища → фоновая проверка наличия текущей версии в каталоге и HasViewed →
+кнопка видна только до просмотра текущей ролью. Unloaded снимает обе подписки;
+счётчик запросов отбрасывает устаревшие результаты. Тематические brushes и Manrope
+унаследованы от пустого экрана, предусмотрен клавиатурный focus.
+
+Просмотр учитывается после отображения страницы, а не по клику или GET сервера:
+`ReleaseNotesHtmlRenderer.Render(releases, role)` фиксирует роль в data-role и версии
+в data-version → `AppHelp/release-notes.js` после загрузки/раскрытия details при видимом
+документе → POST `/api/release-notes/viewed` → сверка роли с CurrentRole и версии с каталогом
+→ Task.Run → `ReleaseNotesReadStateStore.Default.MarkViewed` → Changed → Dispatcher кнопки.
+Фоновый fetch для индекса поиска справки не исполняет скрипт и не ставит отметку.
+Поиск/кнопка/меню/дерево справки используют одну страницу и один поток отметок.
+Смена роли во время загрузки отклоняет прежний POST (409); неизвестная версия — 400.
+Хранилище `%LocalAppData%/AskMkiM/ReleaseNotes/state.json` содержит словарь роль →
+множество просмотренных версий, отдельно для Windows-пользователя; не содержит текстов
+выпусков. Межпроцессный Mutex по пути (5 с) защищает read-modify-write, временный файл
+заменяется через File.Move. Повторный просмотр идемпотентен. Повреждённый файл не
+перезаписывается, ошибка логируется. Обновление приложения не сбрасывает отметки;
+новая версия и другая роль требуют собственного просмотра. Раздел справки доступен всегда.
+
+Для root меню Admin содержит `ResetReleaseNotesViewCommand` →
+`AdminServices.ResetReleaseNotesViewAsync` (явная проверка CurrentRole == Root) →
+Task.Run → `ReleaseNotesReadStateStore.Default.ResetViewed("Root", ApplicationBuildInfo.Current.Version)`
+→ атомарное удаление одной отметки → Changed → кнопка снова видна без перезапуска.
+Другие роли и версии сохраняются. Результат/ошибка показываются NotificationHostService.
+Без аргумента каталога и по Enter в пункте 23 консоль читает `AppHelp/releases/`
+относительно `AppContext.BaseDirectory`. `TestConsole/ReleaseNotesSamples/*.json`
+можно передать явно: это демонстрационные данные, не фактический релиз 1.0.0.
+Тесты: `Ask.UI.UnitTests/Services/ReleaseNotes/ReleaseNotesReaderTests.cs`.
 
 Справка:
 
@@ -3570,6 +3658,9 @@ ErrorItem → translator/runner ErrorList
 
 | Type | Kind | Project | Responsibility | Section |
 | --- | --- | --- | --- | --- |
+| `ReleaseNotesReader` | catalog reader | Ask.Support | чтение, строгая проверка JSON и числовая сортировка выпусков без запуска справки | [Release notes](#release-notes-catalog) |
+| `ReleaseNotesReadStateStore` | file storage | Ask.Support | атомарные отметки просмотренных версий по ролям, межпроцессный Mutex и Changed | [Release notes](#release-notes-catalog) |
+| `ReleaseNotesPrompt` | WPF control | Ask.UI | кнопка текущей версии пустого экрана до просмотра, синхронизация роли и отметок | [Release notes](#release-notes-catalog) |
 | `InactivityLockPolicy` | policy | Ask.Core | монотонный отсчёт бездействия, запрет при занятом контуре | [Auto lock](#automatic-inactivity-lock) |
 | `ExecutionRunGuard` | execution guard | Ask.UI | общий слот выполнения, snapshot занятости и последнего завершения | [Auto lock](#automatic-inactivity-lock) |
 | `CalendarNoteService` | file storage service | Ask.Core | общие заметки календаря, атомарный JSON и межпроцессная синхронизация | [Calendar notes](#calendar-notes) |

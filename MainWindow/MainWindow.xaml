@@ -328,6 +328,7 @@
                     <MenuItem Command="{Binding Settings.SettingsCommand}" Header="{Binding Source={StaticResource LS_Menu_Settings}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Name="Settings" Tag="menuHeader_4"/>
 
                     <MenuItem Header="{Binding Source={StaticResource LS_Menu_Help}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Name="HelpText">
+                        <MenuItem Header="{Binding Source={StaticResource LS_Menu_Help_ReleaseNotes}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Name="HelpReleaseNotes" Command="{Binding Settings.HelpOpenReleaseNotesCommand}" utilities:HelpProvider.HelpKey="ReleaseNotes"/>
                         <MenuItem Header="{Binding Source={StaticResource LS_Menu_Help_GeneralInformation}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Name="HelpTextGeneralInformation" Command="{Binding Settings.HelpOpenGeneralInformationCommand}"/>
                         <MenuItem Header="{Binding Source={StaticResource LS_Menu_Help_MainMenu}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Name="HelpTextMainMenu" Command="{Binding Settings.HelpOpenMainMenuCommand}"/>
                         <MenuItem Header="{Binding Source={StaticResource LS_Menu_Help_LanguageControlPrograms}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Name="HelpTextLanguageControlPrograms" Command="{Binding Settings.HelpOpenLanguageControlProgramsCommand}"/>
@@ -346,6 +347,9 @@
                         <MenuItem Header="База данных"
                                   Style="{DynamicResource StyleMenuItem}"
                                   Command="{Binding Admin.DatabaseCommand}"/>
+                        <MenuItem Header="Сбросить просмотр «Что нового» для root"
+                                  Style="{DynamicResource StyleMenuItem}"
+                                  Command="{Binding Admin.ResetReleaseNotesViewCommand}"/>
                         <Separator Style="{DynamicResource SeparatorMenuStyle}"/>
                         <!--<MenuItem Header="{Binding Source={StaticResource LS_Menu_Admin_Management}, Path=Value}" Style="{DynamicResource StyleMenuItem}" Name="DeviceManagment">
                         <MenuItem Header="GPT" Style="{DynamicResource StyleMenuItem}" Name="GptManagment" Command="{Binding Admin.GptCommand}"/>

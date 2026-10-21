@@ -2163,4 +2163,9 @@
 	  <Folder Include="AppHelp\en\Conservation\" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <Content Include="AppHelp\releases\*.json" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	  <Content Include="AppHelp\release-notes.js" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	</ItemGroup>
+
 </Project>

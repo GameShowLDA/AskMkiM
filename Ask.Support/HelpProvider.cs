@@ -167,6 +167,7 @@ namespace Ask.Support
       }
 
       string language = LanguageSettings.NormalizeLanguageCode(LanguageSettings.CurrentLanguage);
+      if (pageName == ReleaseNotes.ReleaseNotesHtmlRenderer.HelpPageKey) language = "ru";
       string indexUrl = $"/{language}/index.html";
       string url = string.IsNullOrWhiteSpace(pageName)
           ? indexUrl

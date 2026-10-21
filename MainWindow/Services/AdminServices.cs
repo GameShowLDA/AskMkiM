@@ -5,6 +5,14 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.DataBase.Engine.Static.Devices;
+using Ask.Core.Services.App;
+using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Shared.Metadata.Enums.RoleEnums;
+using Ask.Support.ReleaseNotes;
+using Ask.UI.Features.Notifications.Models;
+using Ask.UI.Infrastructure.UI.Overlay.Notifications.Runtime;
+using System.IO;
+using System.Text.Json;
 using Ask.UI.Features.ServiceTools.Gpt;
 using Ask.UI.Features.ServiceTools.SwitchingDevice;
 using MainWindowProgram.Test.Protocol;
@@ -46,6 +54,27 @@ namespace MainWindowProgram.Services
         TypeWindow.DeviceControl);
 
     public async Task StartConsoleTest() => await Test.ConsoleTest.TestData.PrintTestData();
+
+    /// <summary>Сбрасывает просмотр установленной версии для root и обновляет кнопку главного экрана.</summary>
+    /// <returns>Задача сохранения сброса отметки просмотра.</returns>
+    public async Task ResetReleaseNotesViewAsync()
+    {
+      if (RoleAuthorizationConfig.CurrentRole != RoleType.Root) return;
+      string version = ApplicationBuildInfo.Current.Version;
+      try
+      {
+        await Task.Run(() => ReleaseNotesReadStateStore.Default.ResetViewed(nameof(RoleType.Root), version));
+        NotificationHostService.Instance.Show("Что нового",
+          $"Просмотр версии {version} для root сброшен. Кнопка доступна на главном экране.",
+          NotificationType.Success);
+      }
+      catch (Exception exception) when (exception is JsonException or InvalidDataException or IOException or UnauthorizedAccessException)
+      {
+        Ask.LogLib.LoggerUtility.LogException(exception, customMessage: "Не удалось сбросить просмотр истории выпусков.");
+        NotificationHostService.Instance.Show("Что нового", "Не удалось сбросить просмотр. Подробности в журнале.",
+          NotificationType.Error);
+      }
+    }
 
     /// <summary>
     /// Открывает сервисные утилиты в отдельной вкладке рабочего пространства.
