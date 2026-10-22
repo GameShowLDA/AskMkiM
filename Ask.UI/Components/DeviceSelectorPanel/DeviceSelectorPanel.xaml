@@ -15,24 +15,24 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <Border Name="SelectedDeviceInfoBlock" Margin="5" Grid.Row="1" Background="{StaticResource ActiveBorderSolidColorBrush}" CornerRadius="10">
+        <Border Name="SelectedDeviceInfoBlock" Margin="5" Grid.Row="1" Background="{DynamicResource TestsInputBackgroundHeaderPanelBrush}" CornerRadius="10">
             <Grid>
                 <Grid.RowDefinitions>
-                    <RowDefinition/>
-                    <RowDefinition/>
+                    <RowDefinition Height="40"/>
+                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
-                <TextBlock TextWrapping="Wrap" TextTrimming="None" Text="Проверяемое устройство" FontSize="20" Foreground="{StaticResource ForegroundSolidColorBrush}" Margin="0,5" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                <TextBlock TextWrapping="Wrap" TextTrimming="None" Text="Проверяемое устройство" FontSize="20" Foreground="{DynamicResource TestsInputHeaderSolidColorBrush}" Margin="0,5" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                 <Custom:ChoiceDevice x:Name="RelayData" Grid.Row="1" Height="40" SelectedDisplayText="Выберите модуль"/>
             </Grid>
         </Border>
 
-        <Border Name="SelfControlPartSelector" Margin="5" Grid.Row="2" Background="{StaticResource ActiveBorderSolidColorBrush}" CornerRadius="10">
+        <Border Name="SelfControlPartSelector" Margin="5" Grid.Row="2" Background="{DynamicResource TestsInputBackgroundHeaderPanelBrush}" CornerRadius="10">
             <Grid>
                 <Grid.RowDefinitions>
-                    <RowDefinition/>
-                    <RowDefinition/>
+                    <RowDefinition Height="40"/>
+                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
-                <TextBlock TextWrapping="Wrap" TextTrimming="None" Text="Тип проверки" FontSize="20" Foreground="{StaticResource ForegroundSolidColorBrush}" Margin="0,5" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                <TextBlock TextWrapping="Wrap" TextTrimming="None" Text="Тип проверки" FontSize="20" Foreground="{DynamicResource TestsInputHeaderSolidColorBrush}" Margin="0,5" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                 <Custom:ChoiceDevice x:Name="PartData" Grid.Row="1" Height="40" SelectedDisplayText="Выберите тип проверку"/>
             </Grid>
         </Border>
