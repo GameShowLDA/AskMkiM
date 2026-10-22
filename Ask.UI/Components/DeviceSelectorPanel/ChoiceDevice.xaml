@@ -6,12 +6,12 @@
              mc:Ignorable="d"
              d:DesignHeight="100" d:DesignWidth="300">
     <Border CornerRadius="10"
-          Background="{StaticResource PrimarySolidColorBrush}">
+          Background="{DynamicResource TestsInputBackgroundInputPanelBrush}">
         <Grid>
             <ToggleButton x:Name="toggleButton"
                     Content="{Binding SelectedDisplayText}"
                     Cursor="Hand"
-                    Foreground="White"
+                    Foreground="{DynamicResource TestsInputHeaderSolidColorBrush}"
                     FontSize="16"
                     BorderThickness="0"
                     Padding="8"
@@ -27,15 +27,15 @@
              Placement="Bottom"
              AllowsTransparency="True"
              PlacementTarget="{Binding ElementName=toggleButton}">
-                <Border Background="{StaticResource PrimarySolidColorBrush}"
+                <Border Background="{DynamicResource TestsInputBackgroundInputPanelBrush}"
                 CornerRadius="8"
-                BorderBrush="Gray"
+                BorderBrush="{DynamicResource TestsInputBackgroundHeaderPanelBrush}"
                 BorderThickness="1"
                 MinWidth="200">
                     <ListView x:Name="deviceList"
                     Background="Transparent"
                     BorderThickness="0"
-                    Foreground="White"
+                    Foreground="{DynamicResource TestsInputHeaderSolidColorBrush}"
                     SelectionChanged="deviceList_SelectionChanged">
                         <ListView.ItemTemplate>
                             <DataTemplate>
