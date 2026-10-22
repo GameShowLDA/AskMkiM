@@ -1740,6 +1740,10 @@ NewWindowRequested обрабатывается тем же маршрутом. 
 изменение этой настройки останавливает воспроизведение. Без проигрывателя остаётся
 текстовый символ темы и работоспособная native button. Оба ресурса копируются в output/publish.
 Навигация сохраняет дерево, поиск по названию/содержимому, закладки и переходы;
+`FuncCompare` в дереве «Основное меню → Файл» открывает
+`AppHelp/ru/Content/MainMenuChapter/TabFileChapter/FuncComparePart.html`;
+это заготовка статьи с заголовком «Сравнить», ссылка есть в `TabFilePart.html`.
+HTML включён в output/publish через Ask.Support.csproj.
 `scripts.js.buildBreadcrumb` строит nav/ol с настоящими ссылками предков:
 обычный click/Enter → showTab(menu) → loadPage(id), модифицированный click сохраняет
 обычное поведение ссылки. Текущая статья — span с aria-current=page; предки без
