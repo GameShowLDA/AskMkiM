@@ -16,8 +16,7 @@
             <p>Программное обеспечение АСК-МКИ</p>
         </div>
         <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Включить темную тему">
-            <span class="theme-toggle-icon" aria-hidden="true">🌙</span>
-            <span class="theme-toggle-text">Темная тема</span>
+            <span class="theme-toggle-icon" aria-hidden="true">☀</span>
         </button>
     </div>
 
@@ -25,11 +24,18 @@
     <div class="main-content">
         <!-- Левая панель -->
         <div class="primary-area">
+            <div class="sidebar-search">
+                <div class="search-field">
+                    <svg class="search-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="8" cy="8" r="5.5"/><path d="m12 12 5 5"/></svg>
+                    <input type="text" class="search-box" aria-label="Поиск по справке" placeholder="Поиск по справке">
+                    <span class="search-shortcut" aria-hidden="true">Ctrl + K</span>
+                    <button type="button" class="clear-btn" id="clear-btn" aria-label="Очистить поиск">×</button>
+                </div>
+            </div>
             <!-- Вкладки -->
             <div class="tabs">
-                <div class="tab active" data-tab="menu">Меню</div>
-                <div class="tab" data-tab="search">Поиск</div>
-                <div class="tab" data-tab="bookmarks">Закладки</div>
+                <button type="button" class="tab active" data-tab="menu">Разделы</button>
+                <button type="button" class="tab" data-tab="bookmarks">Закладки</button>
             </div>
 
             <!-- Содержимое вкладок -->
@@ -3016,10 +3022,6 @@
                             <span>По содержимому</span>
                         </label>
                     </div>
-                    <div class="search-field">
-                        <input type="text" class="search-box" placeholder="Введите поисковый запрос…">
-                        <span class="clear-btn" id="clear-btn">✖</span>
-                    </div>
                     <div class="search-options" aria-label="Параметры поиска">
                         <label class="search-option">
                             <input type="checkbox" name="search-option" id="search-case-sensitive">
@@ -3040,29 +3042,37 @@
         </div>
 
         <!-- Ползунок -->
-        <div class="resizer" id="resizer"></div>
+        <div class="resizer" id="resizer" role="separator" aria-label="Ширина навигации" aria-orientation="vertical" tabindex="0"></div>
 
         <!-- Правая панель -->
         <div class="secondary-area">
             <!-- Панель навигации -->
             <div class="nav-bar">
-                <div class="breadcrumb" id="breadcrumb"></div>
+                <nav class="breadcrumb" id="breadcrumb" aria-label="Путь раздела"></nav>
                 <div class="nav-buttons">
-                    <button class="nav-btn bookmark-btn" id="bookmark-btn" title="Добавить в закладки">🔖</button>
-                    <button class="nav-btn" id="prev-btn" disabled>← Предыдущий</button>
-                    <button class="nav-btn" id="next-btn">Следующий →</button>
+                    <button type="button" class="nav-btn bookmark-btn" id="bookmark-btn" title="Добавить в закладки" aria-label="Добавить в закладки" aria-pressed="false">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4h12v16l-6-4-6 4Z"/></svg>
+                    </button>
+                    <button type="button" class="nav-btn" id="prev-btn" disabled>
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m10 6-6 6 6 6M4 12h16"/></svg><span>Предыдущий</span>
+                    </button>
+                    <button type="button" class="nav-btn" id="next-btn">
+                        <span>Следующий</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14 6 6 6-6 6M20 12H4"/></svg>
+                    </button>
                 </div>
             </div>
 
             <!-- Сама страница справки -->
             <div class="content-area">
-                <iframe id="content-frame" name="content-frame" frameborder="0"
+                <iframe id="content-frame" name="content-frame" title="Статья справки" frameborder="0"
                         style="width:100%;height:100%;border:0;"></iframe>
             </div>
         </div>
     </div>
 
     <div class="footer">(c) Ижевский Мотозавод «Аксион-Холдинг», 2025</div>
+    <script src="../vendor/lottie/lottie_light.min.js"></script>
+    <script src="../assets/theme-toggle/dark-theme.js"></script>
     <script src="../scripts.js"></script>
     <script src="../navigation-api.js" defer></script>
 </body>

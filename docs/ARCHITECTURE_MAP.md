@@ -83,7 +83,7 @@ Size/Foreground и анимации общей кнопки; лицензия с
 | Административные и сервисные утилиты | `MainWindow/MainWindow.xaml`, `MainWindow/ViewModels/AdminViewModel.cs`, `MainWindow/Services/AdminServices.cs` | `UI/Controls/AdminPanel/ServiceUtilitiesControl.xaml`, `UI/Controls/AdminPanel/SetCommand.xaml`, `Ask.UI/Features/ServiceTools/{Gpt,Chassis,SwitchingDevice}/`, `UI/Controls/AdminPanel/DataBaseView.xaml` |
 | Debug-доступ текущего пользователя | `Ask.Core/Services/Config/AppSettings/DebugAccessConfig.cs` | `RoleAuthorizationConfig.cs`, `SystemStateEvents.DebugRightsChanged`, оба `ErrorListControl.xaml.cs`, `ProtocolEntryOutputService.cs` |
 | События между подсистемами | `Ask.Core/Services/EventCore/Services/EventAggregator.cs` | `Ask.Core/Services/EventCore/Adapters/`, `Ask.Core/Services/EventCore/Events/`, `MainWindow/Events/` |
-| Встроенная справка | `Ask.Support/HelpServer.cs` | `Ask.Support/HelpProvider.cs`, `Ask.Support/HelpViewerWindow.cs`, `Ask.Support/AppHelp/` |
+| Встроенная справка и окно | `Ask.Support/HelpViewerWindow.cs`, `Ask.Support/HelpBrowserWindow.xaml(.cs)` | `Ask.Support/HelpServer.cs`, `Ask.Support/HelpProvider.cs`, `Ask.Support/AppHelp/` |
 
 ## Runtime Flow Index
 
@@ -206,7 +206,7 @@ startup-загрузка общей UI-модели не зависит от п�
 | `Ask.DataBase.Engine` | `Ask.DataBase.Engine/Ask.DataBase.Engine.csproj` | Runtime device facade, cache, reflection factory, DTO↔device mapping; `Ask.DataBase.Engine.*` | `Ask.Core`, `Ask.Device.Application`, `Ask.DataBase.Provider` |
 | `Ask.DataBase.Provider` | `Ask.DataBase.Provider/Ask.DataBase.Provider.csproj` | EF Core/SQLite context, migrations and CRUD services; `Ask.DataBase.Provider.*` | `Ask.Core`, `Ask.LogLib` |
 | `Ask.Diagnostics` | `Ask.Diagnostics/Ask.Diagnostics.csproj` | Crash packages, command history, diagnostic collectors; `Ask.Diagnostics.*` | `Ask.Core` |
-| `Ask.Support` | `Ask.Support/Ask.Support.csproj` | Local Kestrel help server, Photino help window, WPF help routing; `Ask.Support` | `Ask.LogLib` |
+| `Ask.Support` | `Ask.Support/Ask.Support.csproj` | Local Kestrel help server, WPF/WebView2 help window, WPF help routing; `Ask.Support` | `Ask.Core`, `Ask.LogLib` |
 | `ConsoleUI` | `ConsoleUI/ConsoleUI.csproj` | Встроенная сервисная консоль и команды; `ConsoleUI.*` | `Ask.DataBase.Engine` |
 | `Message` | `Message/Message.csproj` | Кастомные WPF message boxes; `Message` | нет |
 | `Ask.LogLib` | `Ask.LogLib/Ask.LogLib.csproj` | NLog facade, exception bridge and live application-log event; `Ask.LogLib` | нет |
@@ -218,7 +218,7 @@ startup-загрузка общей UI-модели не зависит от п�
 - `Microsoft.Extensions.Hosting`/DI — host в startup и help server;
 - `System.IO.Ports` — COM;
 - National Instruments VISA — runtime приборов;
-- Photino.NET + Kestrel — встроенная справка;
+- Microsoft.Web.WebView2 + WPF WindowChrome + Kestrel — встроенная справка;
 - NLog — логи;
 - YamlDotNet — YAML-related core services.
 
@@ -1698,12 +1698,74 @@ Task.Run → `ReleaseNotesReadStateStore.Default.ResetViewed("Root", Application
 
 Справка:
 
+Оформление HTML-справки: `Ask.Support/AppHelp/content.css` задаёт общие semantic
+CSS-переменные светлой/тёмной темы, типографику статей, таблиц, примечаний и примеров;
+`shell.css` использует те же переменные для оболочки `ru/index.html`.
+Темы переключаются существующим `scripts.js.applyTheme` и передаются в iframe.
+Хост: `HelpViewerWindow` сохраняет статические Load/Show/Close/LoadAndShow и `_IsClose`,
+маршрутизирует вызовы в Dispatcher приложения и держит единственный `HelpBrowserWindow`.
+Окно modeless: Show не блокирует основной интерфейс; повторное открытие активирует
+существующее окно, включая восстановление из Minimized. Closed освобождает singleton.
+`HelpBrowserWindow.xaml(.cs)` — WPF WindowStyle=None + WindowChrome с resize border
+и caption hit testing: перетаскивание, double-click, системное меню и стандартные
+команды сворачивания/разворачивания/восстановления; без AllowsTransparency.
+`Ask.Support/Styles/WindowActionButtons.xaml` — общий `WindowActionButtonStyle`,
+вынесенный из MainWindow.xaml без изменения его template/анимаций. Главный shell
+подключает этот словарь, справка использует BasedOn с собственными тематическими
+brushes, размерами caption и keyboard focus. `WindowActionIcons.xaml` хранит общие
+геометрии SemiIconMinus/Maximize/Restore/Close; четыре существующих Window*Icon
+в Ask.UI подключают этот же словарь, сохраняя свои hover storyboards.
+Справка использует геометрии в Viewbox 14×14; StateChanged выбирает Maximize/Restore.
+Лицензия Semi.Avalonia сохранена в Styles и копируется в output/publish.
+Loaded → CoreWebView2Environment.CreateAsync → EnsureCoreWebView2Async → последний
+pending URL. Закрытие во время await проверяется до обращения к браузеру;
+Closed → WebView2.Dispose. Ошибка инициализации логируется и отображается в окне.
+Профиль браузера: `%LocalAppData%/AskMkiM/Help/WebView2`; требуется установленный
+Microsoft Edge WebView2 Runtime. Старый профиль Photino автоматически не переносится.
+`applyTheme → chrome.webview.postMessage({type:'mki:theme', theme})` →
+`HelpBrowserWindow.OnWebMessage` проверяет origin локального HelpServer и формат →
+ApplyTheme обновляет brushes шапки. Начальная шапка учитывает ThemeSettings,
+затем следует независимой теме справки. Внешние http/https/mailto/tel ссылки
+передаются системному приложению; локальные страницы остаются внутри WebView2,
+NewWindowRequested обрабатывается тем же маршрутом. Photino.NET больше не используется.
+Кнопка темы использует локальный SVG-renderer `vendor/lottie/lottie_light.min.js`
+(lottie-web 5.13.0, MIT) и `assets/theme-toggle/dark-theme.js` (Paras, Lottie Simple License;
+лицензии поставляются рядом). JSON обёрнут в JS для работы без fetch также через file://.
+`updateThemeButton`: кадр 0 — тёмная тема, 22 — светлая; переходы идут к 22 либо 0/43
+из текущего абсолютного кадра, без loop/autoplay; после complete фиксируется состояние.
+Начальная загрузка и prefers-reduced-motion устанавливают кадр без анимации;
+изменение этой настройки останавливает воспроизведение. Без проигрывателя остаётся
+текстовый символ темы и работоспособная native button. Оба ресурса копируются в output/publish.
+Навигация сохраняет дерево, поиск по названию/содержимому, закладки и переходы;
+`scripts.js.buildBreadcrumb` строит nav/ol с настоящими ссылками предков:
+обычный click/Enter → showTab(menu) → loadPage(id), модифицированный click сохраняет
+обычное поведение ссылки. Текущая статья — span с aria-current=page; предки без
+data-src остаются текстом. DOM строится через textContent. Панель переносит элементы
+по ширине окна. SVG-кнопки prev/next сохраняют порядок pageOrder и disabled на границах;
+подсказки содержат название соседней страницы. Закладка синхронизирует active,
+aria-pressed, title и aria-label («Добавить в закладки»/«Удалить из закладок»).
+Hover стрелок учитывает prefers-reduced-motion, клавиатурный focus остаётся видимым.
+вкладки и очистка поиска — native HTML buttons. Разделитель меняет flex-basis
+навигации. Поле поиска постоянно расположено над вкладками «Разделы»/«Закладки»;
+фокус/ввод показывает существующую панель результатов с режимами и параметрами поиска.
+Ctrl+K фокусирует поле из оболочки и статьи iframe. Разделитель меняет flex-basis
+навигации мышью либо ArrowLeft/ArrowRight; ширина ограничена минимумом и половиной окна.
+Минимум читается из актуального CSS `min-width` (включая media query).
+`pointerdown → setPointerCapture → pointermove → setNavigationWidth` использует
+смещение от начальной ширины; `pointerup/pointercancel/lostpointercapture/blur`
+завершают drag через `finishResize`. На время drag iframe не принимает указатель;
+после завершения снимаются CSS-класс и pointer capture, вызывается `fitFrame`.
+`scripts.js`: load iframe → disconnect предыдущего ResizeObserver → наблюдение body
+статьи → fitFrame; resize окна/разделителя и загрузка изображений также пересчитывают
+высоту iframe. Вертикальная прокрутка статьи остаётся на `.content-area`, широкие
+таблицы и pre прокручиваются локально. Содержимое и идентификаторы разделов сохранены.
+
 ```text
 PreStartupInitializer.InitializeHelpServer
 → HelpServer.EnsureStarted
 → Host.CreateDefaultBuilder + Kestrel/static files
 → Ask.Support/AppHelp
-F1 → HelpProvider → HelpViewerWindow (Photino)
+F1 → HelpProvider → HelpViewerWindow → HelpBrowserWindow (WPF/WebView2)
 ```
 
 Дерево `AppHelp/ru/index.html` отражает верхний уровень меню из
@@ -3779,6 +3841,7 @@ ErrorItem → translator/runner ErrorList
 | `IExceptionDiagnosticReporter` | interface | Ask.Diagnostics | automatic and awaited exception reporting with duplicate suppression | [Support](#support-and-diagnostics) |
 | `CrashReportArtifactCollector` | collector | Ask.Diagnostics | contextual JSON/text files supplied by an error source | [Support](#support-and-diagnostics) |
 | `HelpServer` | hosted service facade | Ask.Support | local documentation server | [Support](#support-and-diagnostics) |
+| `HelpBrowserWindow` | WPF/WebView2 window | Ask.Support | тематический caption, browser lifecycle, навигация и bridge темы HTML → WPF | [Support](#support-and-diagnostics) |
 
 ## Maintenance Checklist
 

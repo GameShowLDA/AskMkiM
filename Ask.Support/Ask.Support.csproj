@@ -2136,7 +2136,7 @@
 	  <PackageReference Include="Microsoft.AspNetCore.Server.Kestrel" Version="2.3.9" />
 	  <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.3.9" />
 	  <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.8" />
-	  <PackageReference Include="Photino.NET" Version="4.0.16" />
+	  <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3296.44" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -2166,6 +2166,9 @@
 	<ItemGroup>
 	  <Content Include="AppHelp\releases\*.json" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
 	  <Content Include="AppHelp\release-notes.js" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	  <Content Include="AppHelp\assets\theme-toggle\*" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	  <Content Include="AppHelp\vendor\lottie\*" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	  <Content Include="Styles\Semi.Avalonia.LICENSE.txt" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
 	</ItemGroup>
 
 </Project>
