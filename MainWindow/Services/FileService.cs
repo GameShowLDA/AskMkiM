@@ -287,6 +287,9 @@ namespace MainWindowProgram.Services
         });
         string resultProtocolText = protocolTexts.Result;
         var viewer = new SavedProtocolPairUI(protocolTexts.Messages, resultProtocolText);
+        viewer.ExportPdfRequested += text =>
+          new UI.Services.ProtocolManager.PdfProtocolGenerator().ExportProtocolToPdf(
+            Path.GetFileName(fullResultPath), text);
         _multiWindow.WorkspaceService.AddControl(
           Path.GetFileName(fullResultPath),
           viewer,

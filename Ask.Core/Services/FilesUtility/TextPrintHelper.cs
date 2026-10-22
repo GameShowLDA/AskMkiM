@@ -128,7 +128,7 @@ namespace Ask.Core.Services.FilesUtility
           return TextPrintResult.Canceled;
         }
 
-        FlowDocument doc = new FlowDocument(new Paragraph(new Run(text)))
+        FlowDocument doc = new FlowDocument(new Paragraph(new Run(ProtocolOutputText.Prepare(text))))
         {
           PagePadding = new Thickness(50),
           TextAlignment = TextAlignment.Left,

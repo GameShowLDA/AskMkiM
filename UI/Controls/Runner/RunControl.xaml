@@ -84,8 +84,9 @@
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
                     <Button Grid.Column="0"
@@ -107,7 +108,16 @@
                                                    Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}"/>
                     </Button>
 
-                    <Button Grid.Column="2"
+                    <Button x:Name="ExportPdfButton" Grid.Column="2"
+                            Margin="8,0,0,0" VerticalAlignment="Center"
+                            Click="ExportActiveDocumentPdfButton_Click"
+                            ToolTip="Экспортировать протокол в PDF"
+                            Style="{StaticResource ActionButtonStyle}">
+                        <SharedIcons:ExportConfigIcon Size="16"
+                            Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}"/>
+                    </Button>
+
+                    <Button Grid.Column="3"
                             Margin="8,0,0,0"
                             VerticalAlignment="Center"
                             Click="PrintActiveDocumentButton_Click"
@@ -119,7 +129,7 @@
                     </Button>
 
                     <TextBlock x:Name="ActiveDocumentFileName"
-                               Grid.Column="3"
+                               Grid.Column="4"
                                Margin="12,0"
                                HorizontalAlignment="Left"
                                VerticalAlignment="Center"

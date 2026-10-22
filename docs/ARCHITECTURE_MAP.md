@@ -1561,6 +1561,19 @@ pre-structured text traces.
 При сохранении `.askresult/.askreport` `ExecutionProtocolHistoryService.SaveInspectionAsync`
 добавляет видимые строки версии и Git-ревизии перед текстом итогового протокола.
 
+Ручной экспорт PDF: `RunControl.DocumentActionPanel` → `PdfProtocolGenerator.ExportProtocolToPdf`
+→ SaveFileDialog → существующий MigraDoc renderer с настройками шрифта печати.
+Кнопка экспорта расположена между папкой и печатью; кнопки занимают Auto-колонки.
+Имя PDF по умолчанию берётся из `ProtocolUI.InspectionProtocolFilePath` — фактического
+пути сохранённого итогового протокола текущего выполнения; расширение заменяется на `.pdf`.
+При открытии сохранённого `.askreport/.askresult` `SavedProtocolPairUI` показывает над итогом
+панель печати (`PrintOperationNotificationService`) и экспорта. Событие `ExportPdfRequested`
+обрабатывается в `MainWindow/Services/FileService.OpenLinkedResultProtocol` тем же PDF generator.
+`ProtocolOutputText.Prepare` удаляет строки «Версия ПО:» и «Ревизия ПО:» из текста
+печати (`PrintUtility`, `TextPrintHelper`) и обоих PDF generators для всех ролей, кроме Root.
+Сохранённые протоколы и текст на экране не меняются. PDF generators переводят размер
+шрифта из WPF DIP в пункты PDF (× 72/96), уменьшая прежний размер на 25%.
+
 Автопечать:
 
 ```text

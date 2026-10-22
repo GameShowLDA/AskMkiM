@@ -9,6 +9,21 @@ namespace Ask.UI.Controls.ProtocolNew
   /// </summary>
   public partial class SavedProtocolPairUI : UserControl
   {
+    public event Action<string>? ExportPdfRequested;
+
+    private async void PrintButton_Click(object sender, System.Windows.RoutedEventArgs e)
+    {
+      if (!string.IsNullOrWhiteSpace(ResultProtocolEditor.Text))
+        await Ask.UI.Services.Notifications.PrintOperationNotificationService.PrintTextAsync(
+          ResultProtocolEditor.Text, "Итоговый протокол");
+    }
+
+    private void ExportPdfButton_Click(object sender, System.Windows.RoutedEventArgs e)
+    {
+      if (!string.IsNullOrWhiteSpace(ResultProtocolEditor.Text))
+        ExportPdfRequested?.Invoke(ResultProtocolEditor.Text);
+    }
+
     public SavedProtocolPairUI(string executionProtocolText, string resultProtocolText)
     {
       InitializeComponent();
