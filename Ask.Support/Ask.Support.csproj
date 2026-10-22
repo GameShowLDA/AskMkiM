@@ -1112,27 +1112,40 @@
 	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabSettingsChapter\SettingsProtocolPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabMetrologyChapter\UtilityModeKCMenu.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
 	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabMetrologyChapter\UtilityModeKCImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabMetrologyChapter\UtilityModeIEMenu.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
 	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabMetrologyChapter\UtilityModeIEImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabMetrologyChapter\UtilityModeSIMenu.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
 	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabMetrologyChapter\UtilityModeSIImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabMetrologyChapter\UtilityModePRMenu.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
 	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabMetrologyChapter\UtilityModePRImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabMetrologyChapter\UtilityModePIACWMenu.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabMetrologyChapter\UtilityModePIACWImage.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabMetrologyChapter\UtilityModePIDCWMenu.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabMetrologyChapter\UtilityModePIDCWImage.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
 	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabMetrologyChapter\UtilityModePI1Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabMetrologyChapter\UtilityModePI2Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabMetrologyChapter\UtilityModeKNACWMenu.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabMetrologyChapter\UtilityModeKNACWImage.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabMetrologyChapter\UtilityModeKNDCWMenu.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabMetrologyChapter\UtilityModeKNDCWImage.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
 	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabMetrologyChapter\UtilityModeKNImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabMetrologyChapter\UtilityModeEHTMenu.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
 	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabMetrologyChapter\ehtMetrologyPanelImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
