@@ -35,7 +35,20 @@
         </Style>
           </ResourceDictionary>
     </Window.Resources>
-    <Border BorderBrush="{DynamicResource HelpBorder}" BorderThickness="1">
+    <!-- Дочернее HWND WebView2 не должно перекрывать зону WindowChrome для изменения размера. -->
+    <Border BorderBrush="{DynamicResource HelpBorder}">
+        <Border.Style>
+            <Style TargetType="Border">
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="Padding" Value="5"/>
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding WindowState, RelativeSource={RelativeSource AncestorType=Window}}" Value="Maximized">
+                        <Setter Property="BorderThickness" Value="0"/>
+                        <Setter Property="Padding" Value="0"/>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </Border.Style>
         <Grid>
             <Grid.RowDefinitions><RowDefinition Height="50"/><RowDefinition Height="*"/></Grid.RowDefinitions>
             <Grid Background="{DynamicResource HelpBackground}">

@@ -1709,6 +1709,9 @@ CSS-переменные светлой/тёмной темы, типограф�
 `HelpBrowserWindow.xaml(.cs)` — WPF WindowStyle=None + WindowChrome с resize border
 и caption hit testing: перетаскивание, double-click, системное меню и стандартные
 команды сворачивания/разворачивания/восстановления; без AllowsTransparency.
+В Normal корневой Border (BorderThickness=1 + Padding=5) резервирует 6 DIP
+под ResizeBorderThickness WindowChrome: дочернее HWND WebView2 не перекрывает
+resize hit testing боковых и нижнего краёв. В Maximized border/padding обнуляются.
 `Ask.Support/Styles/WindowActionButtons.xaml` — общий `WindowActionButtonStyle`,
 вынесенный из MainWindow.xaml без изменения его template/анимаций. Главный shell
 подключает этот словарь, справка использует BasedOn с собственными тематическими
