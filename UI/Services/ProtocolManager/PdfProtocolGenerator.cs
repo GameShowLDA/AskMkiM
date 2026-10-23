@@ -22,6 +22,29 @@ namespace UI.Services.ProtocolManager
   /// </summary>
   public class PdfProtocolGenerator
   {
+    public void ExportProtocolToPdf(string fileName, string content)
+    {
+      var dialog = new Microsoft.Win32.SaveFileDialog
+      {
+        Filter = "PDF (*.pdf)|*.pdf",
+        DefaultExt = ".pdf",
+        AddExtension = true,
+        FileName = Path.GetFileNameWithoutExtension(fileName) + ".pdf",
+        Title = "Экспорт протокола в PDF",
+      };
+      if (dialog.ShowDialog(System.Windows.Application.Current.MainWindow) != true)
+        return;
+      try
+      {
+        SavePdfDocument(CreateDocument(content), dialog.FileName);
+        NotificationHostService.Instance.Show("Экспорт протокола в PDF", dialog.FileName, NotificationType.Success);
+      }
+      catch (Exception ex)
+      {
+        HandleGenerationError(ex);
+      }
+    }
+
     /// <summary>
     /// Генерирует PDF-документ протокола и сохраняет его в папке <c>History</c>, создавая подкаталог с текущей датой.
     /// </summary>
@@ -78,9 +101,9 @@ namespace UI.Services.ProtocolManager
       var document = new Document();
       var section = document.AddSection();
 
-      var paragraph = section.AddParagraph(content);
+      var paragraph = section.AddParagraph(Ask.Core.Services.FilesUtility.ProtocolOutputText.Prepare(content));
       var printSettings = Ask.Core.Services.FilesUtility.PrintSettingsService.GetSettings();
-      paragraph.Format.Font.Size = printSettings.FontSize;
+      paragraph.Format.Font.Size = printSettings.FontSize * 72.0 / 96.0;
       paragraph.Format.Font.Name = printSettings.FontFamily;
 
       return document;

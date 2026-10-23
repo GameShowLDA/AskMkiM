@@ -569,6 +569,8 @@ namespace Ask.UI.Controls.ProtocolNew
       OpenLatestProtocolFolder();
     }
 
+    public string? InspectionProtocolFilePath => _protocolStorage.ResolveLatestInspectionProtocolPath();
+
     private void OpenInspectionFileButton_Click(object sender, RoutedEventArgs e)
       => OpenInspectionProtocolInEditor();
 

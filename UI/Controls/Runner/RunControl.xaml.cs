@@ -196,6 +196,8 @@ namespace UI.Controls.Runner
       bool isTranslatedFile = activeDocument?.Content is TranslatorEditor;
       bool isInspectionProtocol = activeDocument == _inspectionProtocolDockItem;
 
+      ExportPdfButton.Visibility = isInspectionProtocol ? Visibility.Visible : Visibility.Collapsed;
+
       DocumentActionPanel.Visibility = isTranslatedFile || isInspectionProtocol
         ? Visibility.Visible
         : Visibility.Collapsed;
@@ -243,6 +245,17 @@ namespace UI.Controls.Runner
         {
           FolderService.OpenFileFolder(filePath);
         }
+      }
+    }
+
+    private void ExportActiveDocumentPdfButton_Click(object sender, RoutedEventArgs e)
+    {
+      if (GetActiveRunnerDocument() == _inspectionProtocolDockItem &&
+          !string.IsNullOrWhiteSpace(_inspectionProtocolEditor?.Text))
+      {
+        new UI.Services.ProtocolManager.PdfProtocolGenerator().ExportProtocolToPdf(
+          ProtocolUI.InspectionProtocolFilePath ?? _inspectionProtocolDockItem.TabText ?? "Протокол",
+          _inspectionProtocolEditor.Text);
       }
     }
 
