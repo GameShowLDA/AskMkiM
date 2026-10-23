@@ -1170,6 +1170,11 @@
 	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabMetrologyChapter\UtilityModeSIPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabSelfControlChapter\selfControlModuleMenu.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabSelfControlChapter\selfControlSystemMenu.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabSelfControlChapter\selfControlModuleCard.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabSelfControlChapter\selfControlDeviceListCard.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabSelfControlChapter\selfControlSystemCard.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
 	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabSelfControlChapter\part_selfControlModule.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
@@ -1185,12 +1190,17 @@
 	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabTestsChapter\CrossTestMkrPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabTestsChapter\CrossTestMkrMenu.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
 	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabTestsChapter\CrossTestMkrImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabTestsChapter\rkommTestPanelImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabTestsChapter\TabTestPIChapter\TestPINodeDCWMenu.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabTestsChapter\TabTestPIChapter\TestPINodeDCWImage.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabTestsChapter\TabTestPIChapter\TestPIGroupDCWMenu.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabTestsChapter\TabTestPIChapter\TestPIGroupDCWImage.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
 	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabTestsChapter\TabTestPIChapter\TestPINodeMethodImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
@@ -1203,9 +1213,11 @@
 	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabTestsChapter\TabTestPIChapter\TestPINodeMethodPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabTestsChapter\TabTestSIChapter\TestSINodeMethodMenu.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
 	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabTestsChapter\TabTestSIChapter\TestSINodeMethodImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabTestsChapter\TabTestSIChapter\TestSIGroupMethodMenu.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
 	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabTestsChapter\TabTestSIChapter\TestSIGroupMethodImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>

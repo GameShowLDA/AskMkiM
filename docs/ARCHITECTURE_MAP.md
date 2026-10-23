@@ -1744,6 +1744,14 @@ NewWindowRequested обрабатывается тем же маршрутом. 
 `AppHelp/ru/Content/MainMenuChapter/TabFileChapter/FuncComparePart.html`;
 это заготовка статьи с заголовком «Сравнить», ссылка есть в `TabFilePart.html`.
 HTML включён в output/publish через Ask.Support.csproj.
+Редакционный статус статей задан в узлах `AppHelp/ru/index.html`:
+`data-reviewed="true"` означает полную проверку и переработку. Остальные узлы
+(страницы и папки) получают жёлтый `!` через `AppHelp/shell.css`; `scripts.js`
+добавляет tooltip и `aria-description`. Открытие статьи не меняет статус;
+поиск, закладки и breadcrumbs используют прежний текст заголовка без значка.
+Папка имеет собственный статус независимо от дочерних статей. После полного
+обновления статьи агент меняет атрибут её узла; частичная переработка сохраняет отметку.
+
 `scripts.js.buildBreadcrumb` строит nav/ol с настоящими ссылками предков:
 обычный click/Enter → showTab(menu) → loadPage(id), модифицированный click сохраняет
 обычное поведение ссылки. Текущая статья — span с aria-current=page; предки без
