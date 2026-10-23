@@ -900,6 +900,10 @@
 	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabArchiveChapter\createArchiveButtonImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabArchiveChapter\exportArchivesMenu.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabArchiveChapter\exportArchivesContextMenu.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabArchiveChapter\importArchiveMenu.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabArchiveChapter\importArchiveContextMenu.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
 	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabArchiveChapter\createArchiveContextMenuImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
