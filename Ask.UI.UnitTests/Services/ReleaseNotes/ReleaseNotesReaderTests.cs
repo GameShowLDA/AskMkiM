@@ -18,9 +18,36 @@ public sealed class ReleaseNotesReaderTests : IDisposable
     Assert.Equal(new[] { "1.10.0", "1.9.0" }, releases.Select(release => release.Version));
     Assert.Equal(new DateOnly(2026, 10, 21), releases[0].ReleaseDate);
     Assert.Null(releases[0].Summary);
+    Assert.Empty(releases[0].RootChanges);
     Assert.Null(releases[0].Changes[0].HelpKey);
     Assert.Equal(ReleaseChangeCategory.Added, releases[0].Changes[0].Category);
     Assert.Equal("Описание", releases[0].Changes[0].Description);
+  }
+
+  [Theory]
+  [InlineData("[]", true)]
+  [InlineData("[{\"id\":\"internal\",\"category\":\"fixed\",\"title\":\"Internal\",\"description\":\"Detail\"}]", true)]
+  [InlineData("null", false)]
+  [InlineData("[null]", false)]
+  [InlineData("[{\"id\":\"internal\",\"category\":\"fixed\",\"title\":\"Internal\",\"description\":\" \"}]", false)]
+  [InlineData("[{\"id\":\"first\",\"category\":\"fixed\",\"title\":\"Internal\",\"description\":\"Detail\"}]", false)]
+  public async Task ValidatesOptionalRootChanges(string rootChanges, bool valid)
+  {
+    string path = Write("1.0.0");
+    string json = File.ReadAllText(path).TrimEnd();
+    File.WriteAllText(path, json[..^1] + ",\"rootChanges\":" + rootChanges + "}");
+    if (valid)
+    {
+      var releases = await new ReleaseNotesReader().ReadDirectoryAsync(_directory);
+      Assert.Single(releases);
+      if (rootChanges != "[]") Assert.Equal("internal", Assert.Single(releases[0].RootChanges).Id);
+    }
+    else
+    {
+      var error = await Assert.ThrowsAsync<InvalidDataException>(() =>
+        new ReleaseNotesReader().ReadDirectoryAsync(_directory));
+      Assert.Contains(path, error.Message);
+    }
   }
 
   [Theory]

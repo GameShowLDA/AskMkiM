@@ -4,6 +4,8 @@ using System.Text.Json;
 using System.Windows;
 using System.Windows.Media;
 using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.EventCore.Events;
+using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Microsoft.Web.WebView2.Core;
 using static Ask.LogLib.LoggerUtility;
@@ -17,6 +19,7 @@ public partial class HelpBrowserWindow : Window
 {
   private Uri? _pendingPage;
   private bool _closed;
+  private readonly string? _role = RoleAuthorizationConfig.CurrentRole?.ToString();
 
   /// <summary>
   /// Создаёт окно справки и настраивает жизненный цикл браузера.
@@ -26,9 +29,11 @@ public partial class HelpBrowserWindow : Window
     InitializeComponent();
     ApplyTheme(ThemeSettings.CurrentTheme is ThemeMode.Dark or ThemeMode.DarkCustom);
     Loaded += InitializeBrowser;
+    EventAggregator.Subscribe<SystemStateEvents.ConsoleAccessChanged>(OnRoleApplied);
     Closed += (_, _) =>
     {
       _closed = true;
+      EventAggregator.Unsubscribe<SystemStateEvents.ConsoleAccessChanged>(OnRoleApplied);
       Browser.Dispose();
     };
     StateChanged += (_, _) =>
@@ -49,6 +54,11 @@ public partial class HelpBrowserWindow : Window
     _pendingPage = page;
     if (Browser.CoreWebView2 != null) Browser.CoreWebView2.Navigate(page.AbsoluteUri);
   }
+
+  private void OnRoleApplied(SystemStateEvents.ConsoleAccessChanged _) => Dispatcher.BeginInvoke(() =>
+  {
+    if (!_closed && _role != RoleAuthorizationConfig.CurrentRole?.ToString()) Close();
+  });
 
   private async void InitializeBrowser(object sender, RoutedEventArgs e)
   {

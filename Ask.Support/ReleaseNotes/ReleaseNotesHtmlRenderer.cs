@@ -1,3 +1,4 @@
+using Ask.Core.Shared.Metadata.Enums.RoleEnums;
 using System.Globalization;
 using System.Net;
 using System.Text;
@@ -59,24 +60,35 @@ public sealed class ReleaseNotesHtmlRenderer
       if (!string.IsNullOrWhiteSpace(release.Title)) html.Append("<h2>").Append(Encode(release.Title)).Append("</h2>");
       if (!string.IsNullOrWhiteSpace(release.Summary)) html.Append("<p class=\"release-description\">")
         .Append(Encode(release.Summary)).Append("</p>");
-      foreach (var category in Enum.GetValues<ReleaseChangeCategory>())
+      AppendChanges(html, release.Changes);
+      if (role == nameof(RoleType.Root) && release.RootChanges.Count > 0)
       {
-        var changes = release.Changes.Where(change => change.Category == category).ToArray();
-        if (changes.Length == 0) continue;
-        html.Append("<section><h3>").Append(GetCategoryTitle(category)).Append("</h3><ul>");
-        foreach (var change in changes)
-        {
-          html.Append("<li><strong>").Append(Encode(change.Title))
-            .Append("</strong><p class=\"release-description\">").Append(Encode(change.Description)).Append("</p>");
-          if (!string.IsNullOrWhiteSpace(change.HelpKey)) html.Append("<a href=\"#\" data-nav=\"")
-            .Append(Encode(change.HelpKey)).Append("\">Открыть инструкцию</a>");
-          html.Append("</li>");
-        }
-        html.Append("</ul></section>");
+        html.Append("<section class=\"root-changes\"><h2>Для разработчиков</h2>");
+        AppendChanges(html, release.RootChanges);
+        html.Append("</section>");
       }
       html.Append("</div></details>");
     }
     return html.Append("</main><script src=\"../../release-notes.js\"></script></body></html>").ToString();
+  }
+
+  private static void AppendChanges(StringBuilder html, IReadOnlyList<ReleaseChangeModel> changesSource)
+  {
+    foreach (var category in Enum.GetValues<ReleaseChangeCategory>())
+    {
+      var changes = changesSource.Where(change => change.Category == category).ToArray();
+      if (changes.Length == 0) continue;
+      html.Append("<section><h3>").Append(GetCategoryTitle(category)).Append("</h3><ul>");
+      foreach (var change in changes)
+      {
+        html.Append("<li><strong>").Append(Encode(change.Title))
+          .Append("</strong><p class=\"release-description\">").Append(Encode(change.Description)).Append("</p>");
+        if (!string.IsNullOrWhiteSpace(change.HelpKey)) html.Append("<a href=\"#\" data-nav=\"")
+          .Append(Encode(change.HelpKey)).Append("\">Открыть инструкцию</a>");
+        html.Append("</li>");
+      }
+      html.Append("</ul></section>");
+    }
   }
 
   private static string Encode(string text) => WebUtility.HtmlEncode(text);

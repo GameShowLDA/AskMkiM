@@ -1619,6 +1619,21 @@ services зарегистрированы singleton в startup. `ArchiveControl`
 <a id="release-notes-catalog"></a>
 #### Каталог истории выпусков
 
+Дополнения ROOT: `ReleaseNotesModel.RootChanges` — необязательный JSON-массив
+`rootChanges`, по умолчанию пустой. `ReleaseNotesReader.Validate` проверяет записи
+`changes.Concat(rootChanges)` с общей уникальностью ID; null недопустим.
+`HelpServer` передаёт текущую роль из `RoleAuthorizationConfig.CurrentRole` в renderer.
+`ReleaseNotesHtmlRenderer.Render → AppendChanges(changes)` для всех;
+только при `role == nameof(RoleType.Root)` дополнительно `AppendChanges(rootChanges)`
+в блоке «Для разработчиков». Другие роли (включая Developer) не получают эти тексты
+и ссылки в HTML и поисковый индекс. Общие title/summary остаются публичными.
+JSON поставляются всем: это фильтрация отображения, не ограничение доступа к файлам.
+`HelpBrowserWindow` подписывается на `ConsoleAccessChanged` и при изменении роли
+закрывается через Dispatcher: уничтожаются WebView2 и индекс поиска старой роли.
+Closed снимает подписку; следующее открытие создаёт окно с актуальной ролью.
+Учёт просмотра остаётся по роли/версии, без отдельных отметок для rootChanges.
+
+
 `Ask.Support/ReleaseNotes/` содержит независимый от UI и запуска HTTP-сервера слой:
 `ReleaseNotesModel` (schemaVersion, version, releaseDate, title, summary, changes),
 `ReleaseChangeModel` (id, category, title, description, helpKey) и enum
