@@ -831,6 +831,11 @@
 	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabExecutionChapter\RunPK_StepByStepModePart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabExecutionChapter\FuncRunAskMkiPart.html" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabExecutionChapter\translationExample.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabExecutionChapter\translationMenu.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabExecutionChapter\runLegacyMenu.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabExecutionChapter\runMenu.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
 	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabExecutionChapter\TranslationPKPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
@@ -1080,6 +1085,12 @@
 	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabArchiveChapter\windowAvailableArchivesImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabSettingsChapter\configurationOverview.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabSettingsChapter\configurationDeviceEditor.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabSettingsChapter\equipmentDelays.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabSettingsChapter\rolePasswordChange.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabSettingsChapter\SettingsDelaysPart.html" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabSettingsChapter\SettingsRolePasswordsPart.html" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
 	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabSettingsChapter\SettingsConfiguration1Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>

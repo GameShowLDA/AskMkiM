@@ -102,6 +102,7 @@ namespace MainWindowProgram.HotkeyBindings
 
     private static void BindExecutionHotkey(Window window, MenuItem menuItem, string combination)
     {
+      menuItem.InputGestureText = combination;
       window.PreviewKeyDown += (_, e) =>
       {
         if (!string.Equals(combination, GetExecutionHotkey(e), StringComparison.OrdinalIgnoreCase))
