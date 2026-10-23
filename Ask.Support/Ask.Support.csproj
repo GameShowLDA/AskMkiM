@@ -1194,9 +1194,14 @@
 	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabTestsChapter\CrossTestMkrImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabTestsChapter\rkommTestMenu.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
 	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabTestsChapter\rkommTestPanelImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabTestsChapter\TabTestPIChapter\TestPINodeACWMenu.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabTestsChapter\TabTestPIChapter\TestPINodeACWImage.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabTestsChapter\TabTestPIChapter\TestPIGroupACWMenu.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabTestsChapter\TabTestPIChapter\TestPIGroupACWImage.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
 	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabTestsChapter\TabTestPIChapter\TestPINodeDCWMenu.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
 	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabTestsChapter\TabTestPIChapter\TestPINodeDCWImage.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
 	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabTestsChapter\TabTestPIChapter\TestPIGroupDCWMenu.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
