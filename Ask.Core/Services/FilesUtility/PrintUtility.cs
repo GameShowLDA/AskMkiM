@@ -28,6 +28,10 @@ namespace Ask.Core.Services.FilesUtility
           Margin = new Thickness(0),
         };
         string line = Ask.Core.Services.Protocols.ExecutionProtocolLineFormatter.Format(model);
+        var outputLine = ProtocolOutputText.Prepare(line);
+        if (line.Length > 0 && outputLine.Length == 0)
+          continue;
+        line = outputLine;
 
         if (!string.IsNullOrWhiteSpace(line))
         {
@@ -69,7 +73,7 @@ namespace Ask.Core.Services.FilesUtility
 
         FlowDocument document = CreateDocument();
 
-        var protocolArray = protocolText.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
+        var protocolArray = ProtocolOutputText.Prepare(protocolText).Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
 
         foreach (var str in protocolArray)
         {

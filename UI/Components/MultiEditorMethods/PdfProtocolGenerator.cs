@@ -26,9 +26,9 @@ namespace UI.Components.MultiEditorMethods
       var section = document.AddSection();
 
       // Заголовок
-      var paragraphContent = section.AddParagraph(content);
+      var paragraphContent = section.AddParagraph(Ask.Core.Services.FilesUtility.ProtocolOutputText.Prepare(content));
       var printSettings = Ask.Core.Services.FilesUtility.PrintSettingsService.GetSettings();
-      paragraphContent.Format.Font.Size = printSettings.FontSize;
+      paragraphContent.Format.Font.Size = printSettings.FontSize * 72.0 / 96.0;
       paragraphContent.Format.Font.Name = printSettings.FontFamily;
 
       // Генерация PDF
