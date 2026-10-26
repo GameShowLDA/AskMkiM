@@ -102,6 +102,9 @@ namespace MainWindowProgram.Services
 
       EventAggregator.Unsubscribe<FileInteractionEvents.ViewProtocol>(e => ViewProtocol(e.Protocol));
       EventAggregator.Subscribe<FileInteractionEvents.ViewProtocol>(e => ViewProtocol(e.Protocol));
+      EventAggregator.Subscribe<FileInteractionEvents.ExportProtocolPdf>(e =>
+        Application.Current.Dispatcher.Invoke(() =>
+          new UI.Services.ProtocolManager.PdfProtocolGenerator().ExportProtocolToPdf(e.FilePath, e.Text)));
 
       EventAggregator.Unsubscribe<FileInteractionEvents.GetProtocolInfo>(e => OnGetProtocolInfo(e.Protocol));
       EventAggregator.Subscribe<FileInteractionEvents.GetProtocolInfo>(e => OnGetProtocolInfo(e.Protocol));
@@ -287,6 +290,8 @@ namespace MainWindowProgram.Services
         });
         string resultProtocolText = protocolTexts.Result;
         var viewer = new SavedProtocolPairUI(protocolTexts.Messages, resultProtocolText);
+        if (hasExecutionProtocol)
+          viewer.SetExecutionProtocolFilePath(executionProtocolPath);
         viewer.ExportPdfRequested += text =>
           new UI.Services.ProtocolManager.PdfProtocolGenerator().ExportProtocolToPdf(
             Path.GetFileName(fullResultPath), text);
