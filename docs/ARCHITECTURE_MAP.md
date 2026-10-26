@@ -1719,6 +1719,13 @@ PreStartupInitializer.InitializeHelpServer
 F1 → HelpProvider → HelpViewerWindow (Photino)
 ```
 
+Оболочка `AppHelp/ru/index.html` содержит левую панель навигации (вкладки «Меню»,
+«Поиск», «Закладки») и правую область содержимого. Кнопка `sidebar-toggle` в
+шапке переключает класс `main-content.sidebar-collapsed`: левая панель и разделитель
+скрываются, а правая область занимает всю ширину; повторное нажатие восстанавливает
+панель. Состояние `mki-help-sidebar-collapsed` хранится в `localStorage` и обновляет
+`aria-expanded`/подпись кнопки.
+
 Дерево `AppHelp/ru/index.html` отражает верхний уровень меню из
 `MainWindow/MainWindow.xaml`: `TabFile` и `TabArchive` представлены отдельными
 темами. Команды меню `ArchiveMenu` маршрутизируются по своим `HelpProvider.HelpKey`

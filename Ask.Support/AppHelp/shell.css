@@ -32,6 +32,14 @@ body {
     min-width: 0
 }
 
+.header-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 8px
+}
+
     .header h1 {
         font-size: 28px;
         font-weight: 600;
@@ -61,6 +69,39 @@ body {
     font-weight: 500;
     white-space: nowrap;
     transition: background .2s,border-color .2s,box-shadow .2s
+}
+
+.sidebar-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 38px;
+    padding: 7px 12px;
+    border: 1px solid rgba(255,255,255,.45);
+    border-radius: 4px;
+    background: rgba(255,255,255,.12);
+    color: #fff;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+    transition: background .2s,border-color .2s,box-shadow .2s
+}
+
+    .sidebar-toggle:hover {
+        background: rgba(255,255,255,.2);
+        border-color: rgba(255,255,255,.75)
+    }
+
+    .sidebar-toggle:focus-visible {
+        outline: 2px solid #fff;
+        outline-offset: 2px
+    }
+
+.sidebar-toggle-icon {
+    font-size: 15px;
+    line-height: 1
 }
 
     .theme-toggle:hover {
@@ -110,6 +151,16 @@ body {
     min-width: 350px;
     background: #f8f9fa;
     overflow: hidden
+}
+
+.main-content.sidebar-collapsed .primary-area,
+.main-content.sidebar-collapsed .resizer {
+    display: none
+}
+
+.main-content.sidebar-collapsed .secondary-area {
+    flex: 1;
+    min-width: 0
 }
 
 /* Tabs */
@@ -420,6 +471,16 @@ body.dark-theme .theme-toggle:hover {
     border-color: rgba(255,255,255,.65)
 }
 
+body.dark-theme .sidebar-toggle {
+    background: rgba(255,255,255,.16);
+    border-color: rgba(255,255,255,.35)
+}
+
+body.dark-theme .sidebar-toggle:hover {
+    background: rgba(255,255,255,.24);
+    border-color: rgba(255,255,255,.65)
+}
+
 body.dark-theme .primary-area,
 body.dark-theme .secondary-area,
 body.dark-theme .nav-bar,
@@ -537,6 +598,10 @@ body.dark-theme .content-area {
     }
 
     .theme-toggle {
+        align-self: flex-end
+    }
+
+    .header-actions {
         align-self: flex-end
     }
 }

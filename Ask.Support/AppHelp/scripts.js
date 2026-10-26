@@ -29,10 +29,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const contentFrame = $('#content-frame');
     const mainContent = $('.main-content');
     const themeToggle = $('#theme-toggle');
+    const sidebarToggle = $('#sidebar-toggle');
 
     const FALLBACK_ID = 'GeneralInformation';
     const THEME_STORAGE_KEY = 'mki-help-theme';
     const THEME_COOKIE = 'mki_help_theme';
+    const SIDEBAR_STORAGE_KEY = 'mki-help-sidebar-collapsed';
     const BOOKMARKS_STORAGE_KEY = 'mki-help-bookmarks-v1';
     const LEGACY_BOOKMARKS_STORAGE_KEY = 'mki-bookmarks';
     const BOOKMARKS_COOKIE = 'mki_help_bookmarks';
@@ -146,6 +148,47 @@ document.addEventListener('DOMContentLoaded', () => {
         const theme = getTheme() === 'dark' ? 'light' : 'dark';
         writeStoredTheme(theme);
         applyTheme(theme);
+    }
+
+    function readSidebarCollapsed() {
+        try {
+            return localStorage.getItem(SIDEBAR_STORAGE_KEY) === 'true';
+        } catch {
+            return false;
+        }
+    }
+
+    function writeSidebarCollapsed(collapsed) {
+        try {
+            localStorage.setItem(SIDEBAR_STORAGE_KEY, String(collapsed));
+        } catch {
+            // При недоступном localStorage состояние всё равно работает до закрытия страницы.
+        }
+    }
+
+    function updateSidebarToggle(collapsed) {
+        if (!sidebarToggle) return;
+
+        sidebarToggle.setAttribute('aria-expanded', String(!collapsed));
+        sidebarToggle.setAttribute(
+            'aria-label',
+            collapsed ? 'Показать панель навигации' : 'Свернуть панель навигации'
+        );
+        sidebarToggle.title = collapsed ? 'Показать меню' : 'Свернуть меню';
+        $('.sidebar-toggle-icon', sidebarToggle).textContent = collapsed ? '▶' : '◀';
+        $('.sidebar-toggle-text', sidebarToggle).textContent = collapsed ? 'Показать меню' : 'Свернуть меню';
+    }
+
+    function applySidebarState(collapsed) {
+        mainContent.classList.toggle('sidebar-collapsed', collapsed);
+        updateSidebarToggle(collapsed);
+        requestAnimationFrame(fitFrame);
+    }
+
+    function toggleSidebar() {
+        const collapsed = !mainContent.classList.contains('sidebar-collapsed');
+        writeSidebarCollapsed(collapsed);
+        applySidebarState(collapsed);
     }
 
     function encodeBookmarks(ids) {
@@ -806,6 +849,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     themeToggle?.addEventListener('click', toggleTheme);
+    sidebarToggle?.addEventListener('click', toggleSidebar);
 
     resizer.addEventListener('mousedown', event => {
         isResizing = true;
@@ -840,6 +884,7 @@ document.addEventListener('DOMContentLoaded', () => {
     renderBookmarksTab();
     updateSearchPlaceholder();
     applyTheme(readStoredTheme());
+    applySidebarState(readSidebarCollapsed());
 
     const params = new URLSearchParams(location.search);
     const cmd = params.get('cmd');

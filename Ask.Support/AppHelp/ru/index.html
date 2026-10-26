@@ -15,16 +15,24 @@
             <h1>Справочное руководство</h1>
             <p>Программное обеспечение АСК-МКИ</p>
         </div>
-        <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Включить темную тему">
-            <span class="theme-toggle-icon" aria-hidden="true">🌙</span>
-            <span class="theme-toggle-text">Темная тема</span>
-        </button>
+        <div class="header-actions">
+            <button class="sidebar-toggle" id="sidebar-toggle" type="button"
+                    aria-expanded="true" aria-controls="primary-area"
+                    aria-label="Свернуть панель навигации" title="Свернуть меню">
+                <span class="sidebar-toggle-icon" aria-hidden="true">◀</span>
+                <span class="sidebar-toggle-text">Свернуть меню</span>
+            </button>
+            <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Включить темную тему">
+                <span class="theme-toggle-icon" aria-hidden="true">🌙</span>
+                <span class="theme-toggle-text">Темная тема</span>
+            </button>
+        </div>
     </div>
 
     <!-- Main layout -->
     <div class="main-content">
         <!-- Левая панель -->
-        <div class="primary-area">
+        <div class="primary-area" id="primary-area">
             <!-- Вкладки -->
             <div class="tabs">
                 <div class="tab active" data-tab="menu">Меню</div>
