@@ -1,26 +1,33 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>5.2 Команды проверок и контроля</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="../../../../content.css">
 </head>
 <body>
     <main class="page-content">
-
-        <h1>5.2 Команды проверок и контроля</h1>
-
-        <p>
-            Команды проверок предназначены для проверки электромонтажа
-            и отличаются от команд проверок тем, что для описания электрических
-            связей в ОК используют метод "ССИРТ".<br>
-            ССИРТ используется в синтаксисе этих команд и в сообщениях об
-            ошибках.<br>
-            Команды контроля используются для измерения электрических
-            параметров ОК между точками, подключенными к АСК.<br>
-        </p>
-
+        <h2>5.2 Команды проверок и контроля</h2>
+        <p>Команды проверяют связи, сопротивление, изоляцию, нелинейные элементы и ёмкость. До проверок задайте РМ и
+            согласуйте структуру шин с конфигурацией. ПР, СИ и ПИ используют ССИРТ; КС, ЭТ, НЭ и ИЕ измеряют параметры
+            относительно первой точки фрагмента.</p>
+        <ul>
+            <li><a href="MeasurementCommandsChapter/CommandPR_Part.html" data-nav="ПР">5.2.1 Команда ПР (Проверка
+                Релейная)</a></li>
+            <li><a href="MeasurementCommandsChapter/CommandET_Part.html" data-nav="ЭТ">5.2.2 Команда ЭТ (проверка в
+                режиме Электронной 4‑х Точки)</a></li>
+            <li><a href="MeasurementCommandsChapter/CommandSI_Part.html" data-nav="СИ">5.2.3 Команда СИ (проверка
+                Сопротивления Изоляции)</a></li>
+            <li><a href="MeasurementCommandsChapter/CommandPI_Part.html" data-nav="ПИ">5.2.4 Команда ПИ
+                (проверка Прочности Изоляции)</a></li>
+            <li><a href="MeasurementCommandsChapter/CommandKC_Part.html" data-nav="КС">5.2.5 Команда КС (Контроль
+                сопротивлений)</a></li>
+            <li><a href="MeasurementCommandsChapter/CommandNE_Part.html" data-nav="НЭ">5.2.6 Команда НЭ (контроль
+                Нелинейных Элементов)</a></li>
+            <li><a href="MeasurementCommandsChapter/CommandIE_Part.html" data-nav="ИЕ">5.2.7 Команда ИЕ (Измерение
+                Ёмкости)</a></li>
+        </ul>
     </main>
 </body>
 </html>

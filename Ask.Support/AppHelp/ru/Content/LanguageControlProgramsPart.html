@@ -1,20 +1,35 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="utf-8">
-    <title>Глава "Язык АСК"</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Язык АСК</title>
     <link rel="stylesheet" href="../../content.css">
 </head>
-
 <body>
     <main class="page-content">
-        <h1 id="yapk">Глава "Язык АСК"</h1>
-
-        <p>
-            В этой главе описывается синтаксис и структура языка АСК
-            – скриптов, используемых ПО АСК‑МКИ для автоматизированной проверки изделий.
-        </p>
+        <h2>Язык АСК</h2>
+        <p>Язык АСК описывает программу контроля: сведения об изделии, соответствие его контактов входам системы,
+            электрические связи, параметры измерений и действия оператора. Транслятор проверяет текст и формирует
+            представление команд для выполнения.</p>
+        <h3>Как пользоваться разделом</h3>
+        <p>Начните с основных понятий и записи адресов, затем изучите структуру команды и параметры. Справочник разделён
+            на организацию контроля, измерения и управление коммутацией.</p>
+        <ul>
+            <li><a href="LanguageControlProgramsChapter/LanguageControlProgramsBasicConceptsPart.html"
+                data-nav="LanguageControlProgramsBasicConcepts">1. Основные понятия языка АСК</a></li>
+            <li><a href="LanguageControlProgramsChapter/LanguageControlProgramsElementsPart.html"
+                data-nav="LanguageControlProgramsElements">2. Элементы языка АСК</a></li>
+            <li><a href="LanguageControlProgramsChapter/GroupAddressesPart.html" data-nav="GroupAddresses">3. Групповые
+                адреса</a></li>
+            <li><a href="LanguageControlProgramsChapter/StructureYAPKCommandsPart.html"
+                data-nav="StructureYAPKCommands">4. Структура команд языка АСК</a></li>
+            <li><a href="LanguageControlProgramsChapter/ASK_MKIControlProgramLanguagePart.html"
+                data-nav="ASK_MKIControlProgramLanguage">5. Язык программ контроля АСК</a></li>
+        </ul>
+        <p>Примеры показывают форму записи. Адреса точек и состав оборудования согласуйте с конфигурацией своего
+            рабочего места. Перед запуском выполните трансляцию и устраните ошибки; проверьте предупреждения о принятых
+            значениях по умолчанию.</p>
     </main>
 </body>
 </html>

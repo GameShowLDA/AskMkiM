@@ -2,21 +2,25 @@
 <html lang="ru">
 <head>
     <meta charset="utf-8">
-    <title>KS005</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>KS005 — Точки КС записаны раньше диапазона</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
     <link rel="stylesheet" href="../../../../../content.css">
 </head>
 <body>
     <main class="page-content">
-
-        <h1>KS005</h1>
-
+        <h1>KS005 — Точки КС записаны раньше диапазона</h1>
+        <p><strong>Тип:</strong> Ошибка.</p>
+        <p><strong>Обозначение в сообщениях ПО:</strong> <code>Ks_InvalidParameterOrder</code>.</p>
         <h2>Описание</h2>
-        <p>
-            В команде КС список точек указан до сопротивления.
-        </p>
-
+        <p>Точки КС записаны раньше диапазона.</p>
+        <h2>Что проверить</h2>
+        <p>Перенесите диапазон сопротивления перед блоком точек.</p>
+        <p>После исправления исходного текста или конфигурации повторите трансляцию и проверьте оставшиеся
+            сообщения.</p>
+        <p>Формат и параметры: <a
+            href="../../../LanguageControlProgramsChapter/ASK_MKIControlProgramLanguageChapter/MeasurementCommandsChapter/CommandKC_Part.html"
+            data-nav="КС">команда КС</a>.</p>
+        <p><a href="../../ErrorListPart.html" data-nav="ErrorList">К списку ошибок и предупреждений</a></p>
     </main>
-
 </body>
 </html>

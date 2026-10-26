@@ -1,21 +1,33 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="utf-8">
-    <title>4. Структура команд языка АСК</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>4. Структура команд языка АСК</title>
     <link rel="stylesheet" href="../../../content.css">
 </head>
 <body>
     <main class="page-content">
-        <h1>4. Структура команд языка АСК</h1>
+        <h2>4. Структура команд языка АСК</h2>
+        <p>Начало команды содержит номер и мнемонику. За ними следуют параметры и, если требуется, список точек. Команда
+            может занимать несколько строк.</p>
 
-        <p>
-            Текст команды обязательно содержит её <u>обозначение (мнемонику)</u> и, при необходимости,
-            может включать <strong>метку</strong> и <strong>аргументы</strong>.
-            Команда допускает произвольное количество строк в программе контроля,
-            а также свободное использование пробелов, комментариев и текстовых сообщений.
-        </p>
+        <pre>номер МНЕМОНИКА параметры *список точек*</pre>
+        <p>Команды выполняются в порядке расположения в тексте, кроме переходов УП. Первая команда — ОК, последняя — КЦ.
+            ОК, РМ и КЦ обязательны и встречаются один раз. СП необязательна; при наличии она также должна быть
+            единственной.</p>
+        <ul>
+            <li><a href="StructureYAPKCommandsChapter/LabelCommandPart.html" data-nav="LabelCommand">4.1 Метка
+                команды</a></li>
+            <li><a href="StructureYAPKCommandsChapter/DesignationCommandPart.html" data-nav="DesignationCommand">4.2
+                Обозначение команды</a></li>
+            <li><a href="StructureYAPKCommandsChapter/ArgumentsCommandPart.html"
+                data-nav="ArgumentsCommand">4.3 Аргументы команды</a></li>
+            <li><a href="StructureYAPKCommandsChapter/AddressesCommandPart.html" data-nav="AddressesCommand">4.4 Адреса
+                команды</a></li>
+        </ul>
+        <p>Разместите РМ до команд, использующих точки. Транслятор проверяет структуру программы, ссылки, параметры и
+            наличие точек в конфигурации.</p>
     </main>
 </body>
 </html>

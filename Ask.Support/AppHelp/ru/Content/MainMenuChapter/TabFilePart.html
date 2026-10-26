@@ -5,11 +5,112 @@
     <title>Меню «Файл»</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="../../../content.css">
+    <script src="../../../internal-links.js" defer></script>
 </head>
 <body>
     <main class="page-content">
         <h1>Меню «Файл»</h1>
-        <p>Раздел объединяет команды для создания, открытия, сохранения, печати и поиска файлов.</p>
+        <p>
+            Меню «Файл» объединяет работу с документами: открытие и создание, сохранение,
+            печать, поиск и сравнение. Здесь же находятся преобразование старых форматов
+            и выход из приложения.
+        </p>
+        <p>
+            Команды сохранения и печати относятся к документу в активном текстовом редакторе.
+            Перед выбором команды переключитесь на нужную вкладку.
+        </p>
+
+        <h2>Команды меню</h2>
+        <table>
+            <thead><tr><th scope="col" style="min-width: 190px;">Команда</th><th scope="col">Действие</th></tr></thead>
+            <tbody>
+                <tr>
+                    <td><a href="TabFileChapter/FuncSavePart.html" data-nav="FuncSave">Сохранить</a></td>
+                    <td>Сохраняет изменения активного документа.</td>
+                </tr>
+                <tr>
+                    <td><a href="TabFileChapter/FuncSaveAsPart.html" data-nav="FuncSaveAs">Сохранить как</a></td>
+                    <td>Позволяет выбрать имя и расположение для сохранения активного документа.</td>
+                </tr>
+                <tr>
+                    <td><a href="TabFileChapter/FuncOpenFolderInExplorerPart.html" data-nav="FuncOpenFolderInExplorer">Открыть папку в проводнике</a></td>
+                    <td>Открывает расположение файла активного документа.</td>
+                </tr>
+                <tr>
+                    <td><a href="TabFileChapter/FuncPrintPart.html" data-nav="FuncPrint">Печать</a></td>
+                    <td>Отправляет документ активного редактора на печать.</td>
+                </tr>
+                <tr>
+                    <td><a href="TabFileChapter/FuncSearchAndReplacePart.html" data-nav="FuncSearchAndReplace">Поиск и замена</a></td>
+                    <td>Открывает общую панель поиска. В текстовом редакторе она также позволяет заменять текст.
+                        Панель можно вызвать сочетанием <kbd>Ctrl + F</kbd>.</td>
+                </tr>
+                <tr>
+                    <td><a href="TabFileChapter/FuncComparePart.html" data-nav="FuncCompare">Сравнить</a></td>
+                    <td>Открывает выбор уже открытых текстовых документов для сравнения.
+                        Команда появляется, когда активен текстовый редактор и открыто больше одного текстового документа.</td>
+                </tr>
+                <tr>
+                    <td><a href="TabFileChapter/FuncOpenPart.html" data-nav="FuncOpen">Открыть</a></td>
+                    <td>Показывает окно выбора файлов. Можно выбрать несколько документов для последовательного открытия.</td>
+                </tr>
+                <tr>
+                    <td><a href="TabFileChapter/FuncCreatePart.html" data-nav="FuncCreate">Создать</a></td>
+                    <td>Создаёт новый документ в редакторе.</td>
+                </tr>
+                <tr>
+                    <td><a href="TabFileChapter/FuncConvertPart.html" data-nav="FuncConvert">Конвертация</a></td>
+                    <td>Открывает подменю преобразования программ и архивов старых форматов.</td>
+                </tr>
+                <tr>
+                    <td><a href="TabFileChapter/FuncExitPart.html" data-nav="FuncExit">Выход</a></td>
+                    <td>Завершает работу приложения.</td>
+                </tr>
+            </tbody>
+        </table>
+        <p>Названия команд со ссылками открывают подробные статьи справки.</p>
+
+        <h2>Открытие документов</h2>
+        <p>В окне выбора доступны следующие группы файлов:</p>
+        <ul>
+            <li>Программы контроля: <code>.pk</code>, <code>.pkw</code>, <code>.opk</code>, <code>.opkw</code>.</li>
+            <li>Протоколы: <code>.asktrace</code>, <code>.askresult</code>, <code>.askreport</code>.</li>
+            <li>Протоколы старых форматов: <code>.lst</code>, <code>.lstw</code>, <code>.rtlst</code>.</li>
+            <li>Файлы <code>.acs</code> и текстовые документы <code>.txt</code>.</li>
+        </ul>
+        <p>
+            Для открытия архивов программ используйте отдельное меню «Архив».
+            Тип выбранного документа определяет способ его открытия: например,
+            протокол загружается для просмотра результатов.
+        </p>
+
+        <h2>Преобразование старых форматов</h2>
+        <p>Подменю «Конвертация» содержит три направления:</p>
+        <ul>
+            <li><strong>OPK в PK</strong> — преобразование программ контроля.</li>
+            <li><strong>APK в APKW</strong> — преобразование архивов.</li>
+            <li><strong>APKW в APK</strong> — экспорт архива в старый формат.</li>
+        </ul>
+        <p>
+            Выберите нужное направление и задайте исходные файлы и параметры в открывшемся окне.
+            Подробности приведены в разделе
+            <a href="TabFileChapter/FuncConvertPart.html" data-nav="FuncConvert">«Конвертация»</a>.
+        </p>
+
+        <h2>Доступность команд</h2>
+        <ul>
+            <li>«Сохранить», «Сохранить как», «Открыть папку в проводнике» и «Печать»
+                отображаются при активном текстовом редакторе.</li>
+            <li>«Сравнить» дополнительно требует хотя бы два открытых текстовых документа.</li>
+            <li>Открытие, создание и преобразование файлов блокируются, если приложение
+                сообщает о текущей работе с аппаратурой. Завершите выполнение и повторите действие.</li>
+        </ul>
+        <section class="note">
+            <p>
+                Открытие файла не запускает проверку изделия.
+                Для трансляции и запуска программы контроля используйте меню «Выполнение».
+            </p>
+        </section>
     </main>
 </body>
 </html>
