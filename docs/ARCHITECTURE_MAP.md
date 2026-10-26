@@ -1563,6 +1563,14 @@ pre-structured text traces.
 
 Ручной экспорт PDF: `RunControl.DocumentActionPanel` → `PdfProtocolGenerator.ExportProtocolToPdf`
 → SaveFileDialog → существующий MigraDoc renderer с настройками шрифта печати.
+
+Также панели execution/inspection в `ProtocolUI` экспортируют `.asktrace/.askresult`:
+`FileInteractionEvents.ExportProtocolPdf` → подписка `MainWindow/Services/FileService`
+→ `PdfProtocolGenerator.ExportProtocolToPdf`. Имя берётся из сохранённого пути соответствующего протокола.
+`SavedExecutionProtocolUI.FilePath` включает панель печати/PDF для открытого `.asktrace`
+и связанного trace в `SavedProtocolPairUI`; `FileOpenService` и `OpenLinkedResultProtocol`
+передают исходный путь. Выводится восстановленный текст сообщений через
+`ExecutionProtocolLineFormatter`, а не служебный формат хранения V2/V3.
 Кнопка экспорта расположена между папкой и печатью; кнопки занимают Auto-колонки.
 Имя PDF по умолчанию берётся из `ProtocolUI.InspectionProtocolFilePath` — фактического
 пути сохранённого итогового протокола текущего выполнения; расширение заменяется на `.pdf`.

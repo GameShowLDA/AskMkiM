@@ -88,7 +88,7 @@ namespace UI.Services.FileManager
             });
             new UI.Components.MultiEditorMethods.ControlManager(_fileManager.EditorWorkspaceModel).AddControl(
               fileName,
-              new SavedExecutionProtocolUI(messages),
+              new SavedExecutionProtocolUI(messages) { FilePath = path },
               TypeWindow.Files,
               path);
             await Application.Current.Dispatcher.InvokeAsync(
