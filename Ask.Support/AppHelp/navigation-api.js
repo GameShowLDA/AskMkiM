@@ -1,9 +1,11 @@
 (function () {
     const escapeId = id => window.CSS?.escape ? CSS.escape(id) : id.replace(/["\\]/g, '\\$&');
-    const navigateTo = id => document
-        .getElementById('nav-tree')
-        ?.querySelector(`.tree-item#${escapeId(id)}`)
-        ?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    const navigateTo = id => {
+        const targetId = window.mkiHelp?.resolvePageId?.(id) || id;
+        document.getElementById('nav-tree')
+            ?.querySelector(`.tree-item#${escapeId(targetId)}`)
+            ?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    };
 
     window.mkiHelp = { ...(window.mkiHelp || {}), navigateTo };
     window.addEventListener('message', ({ data }) => {

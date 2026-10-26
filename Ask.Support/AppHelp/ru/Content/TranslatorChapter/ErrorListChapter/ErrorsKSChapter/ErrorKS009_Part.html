@@ -1,22 +1,27 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="utf-8">
-    <title>KS009</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>KS009 — Некорректны границы сопротивления КС</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
     <link rel="stylesheet" href="../../../../../content.css">
 </head>
 <body>
     <main class="page-content">
-
-        <h1>KS009</h1>
-
+        <h1>KS009 — Некорректны границы сопротивления КС</h1>
+        <p><strong>Тип:</strong> Ошибка.</p>
+        <p><strong>Обозначение в сообщениях ПО:</strong> <code>Ks_CapacityLimitsConflict</code>.</p>
         <h2>Описание</h2>
-        <p>
-            В команде КС нижняя граница сопротивления больше верхней границы сопротивления.
-        </p>
-
+        <p>Некорректны границы сопротивления КС.</p>
+        <h2>Что проверить</h2>
+        <p>Проверьте соотношение нижней и верхней границ и их соответствие пределам команды; причина уточняется в
+            тексте.</p>
+        <p>После исправления исходного текста или конфигурации повторите трансляцию и проверьте оставшиеся
+            сообщения.</p>
+        <p>Формат и параметры: <a
+            href="../../../LanguageControlProgramsChapter/ASK_MKIControlProgramLanguageChapter/MeasurementCommandsChapter/CommandKC_Part.html"
+            data-nav="КС">команда КС</a>.</p>
+        <p><a href="../../ErrorListPart.html" data-nav="ErrorList">К списку ошибок и предупреждений</a></p>
     </main>
-
 </body>
 </html>

@@ -1817,6 +1817,18 @@ F1 → HelpProvider → HelpViewerWindow → HelpBrowserWindow (WPF/WebView2)
 на страницы открытия, создания, экспорта и импорта архивов; значение ключа
 совпадает с `id` соответствующего узла дерева.
 
+Диагностика: `IssueTableControl` → `DiagnosticCodeToTagConverter` →
+`HelpProvider.ShowHelp` передаёт для `IDisplayIssue` строку `CodeString`
+(имя поля enum, например `Gen_FirstMustBeOk`). Плоский каталог кодов находится
+под `ErrorList` в `AppHelp/ru/index.html`; `id` сохраняет тег `GEN001`,
+а `data-aliases` задаёт альтернативные ключи. `scripts.js.resolvePageId`
+сначала ищет точный `id`, затем alias без учёта регистра; разрешение используется
+для URL `?cmd=` и `navigation-api.js.navigateTo`. Поиск по названиям учитывает
+aliases. Ключи исключённых из дерева групп и неформируемых кодов ведут на
+обзор `ErrorList`; прежние HTML-файлы остаются в поставке. Описания сверяются
+с `Ask.Core/Services/Errors/Translation/`, непосредственными присваиваниями
+кодов и вызовами `IPointError` в алгоритмах `Ask.Engine`.
+
 Crash diagnostics:
 
 #### Crash diagnostics flow

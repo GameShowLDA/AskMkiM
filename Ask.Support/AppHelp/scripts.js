@@ -47,11 +47,21 @@ document.addEventListener('DOMContentLoaded', () => {
         el,
         src: el.dataset.src,
         title: textOf(el),
-        titleSearch: normalizeWhitespace(`${el.id} ${textOf(el)}`),
+        titleSearch: normalizeWhitespace(`${el.id} ${textOf(el)} ${el.dataset.aliases || ''}`),
         isPage: el.classList.contains('page')
     }));
     const pageMap = new Map(pages.map(page => [page.id, page]));
     const pageOrder = pages.map(page => page.id);
+
+    function resolvePageId(id) {
+        const key = String(id ?? '').trim().toLowerCase();
+        if (!key) return undefined;
+        return pages.find(page => page.id.toLowerCase() === key)?.id
+            || pages.find(page => (page.el.dataset.aliases || '').split(/\s+/)
+                .some(alias => alias.toLowerCase() === key))?.id;
+    }
+
+    window.mkiHelp = { ...(window.mkiHelp || {}), resolvePageId };
 
     pages.filter(page => page.el.dataset.reviewed !== 'true').forEach(page => {
         const reviewStatus = 'Ещё не проверено и не переработано';
@@ -967,7 +977,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (cmd) {
         const decoded = decodeURIComponent(cmd).toLowerCase();
-        startId = pages.find(page => page.id.toLowerCase() === decoded)?.id || FALLBACK_ID;
+        startId = resolvePageId(decoded) || FALLBACK_ID;
     } else if (section && pageMap.has(section)) {
         startId = section;
     }

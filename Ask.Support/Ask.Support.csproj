@@ -1487,6 +1487,7 @@
 	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\KeyErrorsChapter\ErrorKEY004_Part.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\image_TranslatorWindow-numbered.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
 	  <Content Include="AppHelp\ru\Content\TranslatorChapter\image_TranslatorWindow.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
@@ -2227,4 +2228,17 @@
 	  <Content Include="Styles\Semi.Avalonia.LICENSE.txt" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
 	</ItemGroup>
 
+  <ItemGroup>
+  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\CodeUNKNOWN_ERROR_Part.html" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\CodeWARNING_ERROR_Part.html" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\CodeWRNGEN001_Part.html" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\CodeWRNGEN003_Part.html" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\CodeWRNGEN004_Part.html" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\CodeWRNGEN006_Part.html" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\CodeWRNGEN007_Part.html" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\CodeWRNGEN008_Part.html" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\CodeWRNGEN009_Part.html" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\CodeWRNGEN011_Part.html" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\CodeWRNGEN012_Part.html" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
 </Project>
