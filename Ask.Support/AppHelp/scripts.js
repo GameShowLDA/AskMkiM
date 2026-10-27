@@ -260,8 +260,7 @@ document.addEventListener('DOMContentLoaded', () => {
             collapsed ? 'Показать панель навигации' : 'Свернуть панель навигации'
         );
         sidebarToggle.title = collapsed ? 'Показать меню' : 'Свернуть меню';
-        $('.sidebar-toggle-icon', sidebarToggle).textContent = collapsed ? '▶' : '◀';
-        $('.sidebar-toggle-text', sidebarToggle).textContent = collapsed ? 'Показать меню' : 'Свернуть меню';
+        sidebarToggle.dataset.collapsed = String(collapsed);
     }
 
     function applySidebarState(collapsed) {

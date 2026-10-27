@@ -11,17 +11,20 @@
 <body>
     <!-- Header -->
     <div class="header">
-        <div class="header-title">
-            <h1>Справочное руководство</h1>
-            <p>Программное обеспечение АСК-МКИ</p>
-        </div>
-        <div class="header-actions">
+        <div class="header-main">
             <button class="sidebar-toggle" id="sidebar-toggle" type="button"
                     aria-expanded="true" aria-controls="primary-area"
                     aria-label="Свернуть панель навигации" title="Свернуть меню">
-                <span class="sidebar-toggle-icon" aria-hidden="true">◀</span>
-                <span class="sidebar-toggle-text">Свернуть меню</span>
+                <span class="sidebar-toggle-icon" aria-hidden="true">
+                    <span></span><span></span><span></span>
+                </span>
             </button>
+            <div class="header-title">
+                <h1>Справочное руководство</h1>
+                <p>Программное обеспечение АСК-МКИ</p>
+            </div>
+        </div>
+        <div class="header-actions">
             <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Включить темную тему">
                 <span class="theme-toggle-icon" aria-hidden="true">🌙</span>
                 <span class="theme-toggle-text">Темная тема</span>
@@ -2666,7 +2669,7 @@
         <img class="image-lightbox-image" id="image-lightbox-image" tabindex="0" alt="">
     </div>
 
-    <div class="footer">(c) Ижевский Мотозавод «Аксион-Холдинг», 2025</div>
+    <div class="footer">(c) Ижевский Мотозавод «Аксион-Холдинг», 2026</div>
     <script src="../vendor/lottie/lottie_light.min.js"></script>
     <script src="../assets/theme-toggle/dark-theme.js"></script>
     <script src="../scripts.js"></script>
