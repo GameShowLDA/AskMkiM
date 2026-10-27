@@ -30,6 +30,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const mainContent = $('.main-content');
     const themeToggle = $('#theme-toggle');
     const sidebarToggle = $('#sidebar-toggle');
+    const imageLightbox = $('#image-lightbox');
+    const imageLightboxImage = $('#image-lightbox-image');
+    const imageLightboxClose = $('#image-lightbox-close');
 
     const FALLBACK_ID = 'GeneralInformation';
     const THEME_STORAGE_KEY = 'mki-help-theme';
@@ -67,6 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let pendingSelectionQuery = '';
     let pendingSelectionOptions = null;
     let currentTheme = 'light';
+    let activeImage = null;
 
     const getSearchMode = () => $('input[name="search-mode"]:checked')?.value || 'title';
     const getSearchOptions = () => ({
@@ -148,6 +152,51 @@ document.addEventListener('DOMContentLoaded', () => {
         const theme = getTheme() === 'dark' ? 'light' : 'dark';
         writeStoredTheme(theme);
         applyTheme(theme);
+    }
+
+    function openImageViewer(image) {
+        const rawSource = image?.getAttribute('src') || image?.src || image?.currentSrc;
+        let source = rawSource;
+
+        try {
+            source = rawSource
+                ? new URL(rawSource, image?.ownerDocument?.baseURI || location.href).href
+                : '';
+        } catch {
+            // Если URL нестандартный (например, data:), используем его как есть.
+        }
+
+        if (!source || !imageLightbox || !imageLightboxImage || !imageLightboxClose) return;
+
+        activeImage = image;
+        imageLightboxImage.src = source;
+        imageLightboxImage.alt = image.alt || 'Изображение из справки';
+        imageLightbox.scrollTop = 0;
+        imageLightbox.scrollLeft = 0;
+        imageLightbox.hidden = false;
+        document.body.classList.add('image-lightbox-open');
+        imageLightboxClose.focus();
+    }
+
+    function closeImageViewer() {
+        if (!imageLightbox || imageLightbox.hidden) return;
+
+        const imageToFocus = activeImage;
+        activeImage = null;
+        imageLightbox.hidden = true;
+        imageLightboxImage?.removeAttribute('src');
+        if (imageLightboxImage) imageLightboxImage.alt = '';
+        document.body.classList.remove('image-lightbox-open');
+
+        if (imageToFocus?.isConnected) imageToFocus.focus();
+    }
+
+    function handleContentImageDoubleClick(event) {
+        const image = event.target?.closest?.('img');
+        if (!image) return;
+
+        event.preventDefault();
+        openImageViewer(image);
     }
 
     function readSidebarCollapsed() {
@@ -737,6 +786,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const doc = contentFrame.contentDocument;
         if (!doc) return;
 
+        doc.addEventListener('dblclick', handleContentImageDoubleClick);
         doc.addEventListener('toggle', () => fitFrame(), true);
 
         requestAnimationFrame(() => {
@@ -745,6 +795,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         $$('img', doc).forEach(img => {
+            img.style.cursor = 'zoom-in';
+            if (!img.title) img.title = 'Двойной щелчок для просмотра изображения в оригинальном размере';
+
             if (!img.complete) {
                 img.addEventListener('load', () => {
                     fitFrame();
@@ -850,6 +903,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     themeToggle?.addEventListener('click', toggleTheme);
     sidebarToggle?.addEventListener('click', toggleSidebar);
+    imageLightboxClose?.addEventListener('click', event => {
+        event.preventDefault();
+        closeImageViewer();
+    });
+    document.addEventListener('keydown', event => {
+        if (event.key === 'Escape' && imageLightbox && !imageLightbox.hidden) {
+            event.preventDefault();
+            closeImageViewer();
+        }
+    });
 
     resizer.addEventListener('mousedown', event => {
         isResizing = true;
