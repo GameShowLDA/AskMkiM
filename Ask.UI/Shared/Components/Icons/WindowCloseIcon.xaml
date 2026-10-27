@@ -6,9 +6,10 @@
              Height="{Binding Size, ElementName=Root}"
              IsHitTestVisible="False">
   <UserControl.Resources>
-    <StreamGeometry x:Key="SemiIconClose">
-      M17.66 19.78a1.5 1.5 0 0 0 2.12-2.12L14.12 12l5.66-5.66a1.5 1.5 0 0 0-2.12-2.12L12 9.88 6.34 4.22a1.5 1.5 0 1 0-2.12 2.12L9.88 12l-5.66 5.66a1.5 1.5 0 0 0 2.12 2.12L12 14.12l5.66 5.66Z
-    </StreamGeometry>
+    <ResourceDictionary>
+    <ResourceDictionary.MergedDictionaries>
+      <ResourceDictionary Source="/Ask.Support;component/Styles/WindowActionIcons.xaml"/>
+    </ResourceDictionary.MergedDictionaries>
 
     <Storyboard x:Key="HoverInStoryboard">
       <DoubleAnimation Storyboard.TargetName="IconScale" Storyboard.TargetProperty="ScaleX" To="1.08" Duration="0:0:0.12" />
@@ -27,6 +28,7 @@
       </DoubleAnimationUsingKeyFrames>
       <DoubleAnimation Storyboard.TargetName="IconTranslate" Storyboard.TargetProperty="Y" To="0" Duration="0:0:0.18" />
     </Storyboard>
+      </ResourceDictionary>
   </UserControl.Resources>
 
   <Viewbox Stretch="Uniform">

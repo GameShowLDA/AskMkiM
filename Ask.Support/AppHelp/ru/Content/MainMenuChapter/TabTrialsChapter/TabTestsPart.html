@@ -3,13 +3,66 @@
 <head>
     <meta charset="utf-8">
     <title>Меню «Тесты»</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
     <link rel="stylesheet" href="../../../../content.css">
+    <script src="../../../../internal-links.js" defer></script>
 </head>
 <body>
     <main class="page-content">
         <h1>Меню «Тесты»</h1>
-        <p>Раздел содержит тесты сопротивления изоляции и прочности изоляции, перекрёстный тест и проверку сопротивления коммутатора.</p>
+        <p>Подменю <strong>«Испытания → Тесты»</strong> открывает проверки сопротивления изоляции,
+            прочности изоляции, коммутации МКР и сопротивления контактов коммутатора.
+            Каждый пункт открывает рабочую вкладку с параметрами и протоколом.
+            Проверка начинается только после нажатия «Запустить».</p>
+        <h2>Доступные проверки</h2>
+        <table>
+            <thead><tr><th scope="col">Пункт меню</th><th scope="col">Назначение</th><th scope="col">Что выбрать</th></tr></thead>
+            <tbody>
+                <tr><td><a href="TabTestsChapter/TabTestSIPart.html" data-nav="TabTestSI">Тест СИ</a></td>
+                    <td>Измерение сопротивления изоляции в МОм и сравнение с заданным минимумом.</td>
+                    <td><a href="TabTestsChapter/TabTestSIChapter/TestSINodeMethodPart.html" data-nav="TestSINodeMethod">Метод узла</a>
+                        или <a href="TabTestsChapter/TabTestSIChapter/TestSIGroupMethodPart.html" data-nav="TestSIGroupMethod">групповой метод</a>.</td></tr>
+                <tr><td><a href="TabTestsChapter/TabTestPIPart.html" data-nav="TabTestPI">Тест ПИ на постоянном токе</a></td>
+                    <td>Испытание прочности изоляции постоянным напряжением (DCW), измерение тока утечки в мА.</td>
+                    <td><a href="TabTestsChapter/TabTestPIChapter/TestPINodeMethodPart.html" data-nav="TestPINodeMethod">Метод узла</a>
+                        или <a href="TabTestsChapter/TabTestPIChapter/TestPIGroupMethodPart.html" data-nav="TestPIGroupMethod">групповой метод</a>.</td></tr>
+                <tr><td><a href="TabTestsChapter/TabTestPIPart.html" data-nav="TabTestPI">Тест ПИ на переменном токе</a></td>
+                    <td>Испытание прочности изоляции переменным напряжением (ACW) с частотой 50 Гц,
+                        измерение тока утечки в мА.</td>
+                    <td><a href="TabTestsChapter/TabTestPIChapter/TestPINodeMethodPart.html" data-nav="TestPINodeMethod">Метод узла</a>
+                        или <a href="TabTestsChapter/TabTestPIChapter/TestPIGroupMethodPart.html" data-nav="TestPIGroupMethod">групповой метод</a>.</td></tr>
+                <tr><td><a href="TabTestsChapter/CrossTestMkrPart.html" data-nav="CrossTestMkr">Перекрёстный тест (МКР)</a></td>
+                    <td>Проверка коммутации выбранного МКР с помощью другого, проверяющего модуля.</td>
+                    <td>Проверяемый и проверяющий модули, диапазон и остальные параметры теста.</td></tr>
+                <tr><td><a href="TabTestsChapter/RkommTestMkrPart.html" data-nav="RkommTestMkr">Сопротивление коммутатора</a></td>
+                    <td>Контроль сопротивления контактов коммутатора с помощью мультиметра.</td>
+                    <td>Диапазон точек, электрический параметр и пару шин.</td></tr>
+            </tbody>
+        </table>
+        <h2>Как выбрать тест</h2>
+        <ul>
+            <li>Для проверки минимального сопротивления изоляции используйте <strong>СИ</strong>.
+                Условие успешного результата — сопротивление не ниже заданного минимума.</li>
+            <li>Для испытания изоляции напряжением с контролем тока утечки используйте <strong>ПИ</strong>.
+                Выберите DCW или ACW в соответствии с требуемым видом испытания.
+                Ток должен быть строго меньше заданного предела.</li>
+            <li>Для проверки коммутации с участием двух МКР используйте <strong>перекрёстный тест</strong>.</li>
+            <li>Для контроля сопротивления контактов используйте <strong>«Сопротивление коммутатора»</strong>.</li>
+        </ul>
+        <p>В СИ и ПИ метод узла последовательно проверяет каждую точку относительно остальных точек диапазона.
+            Групповой метод проверяет разбиения точек на две группы и показывает результат по разрядам группировки.</p>
+        <h2>Порядок работы</h2>
+        <ol>
+            <li>Откройте «Испытания → Тесты» и выберите проверку. Для СИ и ПИ дополнительно выберите метод.</li>
+            <li>Заполните параметры в открывшейся вкладке. Состав полей зависит от выбранного теста.</li>
+            <li>Нажмите <strong>«Запустить»</strong>. Приложение проверит ввод и подготовит оборудование.</li>
+            <li>Следите за ходом проверки, измерениями и сообщениями в протоколе.
+                При ошибке ориентируйтесь на её описание и запрос приложения.</li>
+        </ol>
+        <section class="note"><p>Для запуска тестов не требуется открывать или транслировать программу контроля.
+            Оборудование выбирается из конфигурации приложения.
+            Эти проверки не заменяют метрологические режимы сравнения с эталоном.</p></section>
+        <p>Меню доступно администраторам и регулировщикам. Для роли разработчика оно скрыто.</p>
     </main>
 </body>
 </html>

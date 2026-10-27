@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     const $ = (selector, root = document) => root.querySelector(selector);
     const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
-    const textOf = el => el?.textContent.trim() || '';
+    const textOf = el => el?.lastElementChild?.textContent.trim() || '';
     const normalizeWhitespace = text => String(text ?? '').replace(/\s+/g, ' ').trim();
     const normalize = (text, caseSensitive = false) => {
         const normalized = normalizeWhitespace(text);
@@ -52,15 +52,33 @@ document.addEventListener('DOMContentLoaded', () => {
         el,
         src: el.dataset.src,
         title: textOf(el),
-        titleSearch: normalizeWhitespace(`${el.id} ${textOf(el)}`),
+        titleSearch: normalizeWhitespace(`${el.id} ${textOf(el)} ${el.dataset.aliases || ''}`),
         isPage: el.classList.contains('page')
     }));
     const pageMap = new Map(pages.map(page => [page.id, page]));
     const pageOrder = pages.map(page => page.id);
 
+    function resolvePageId(id) {
+        const key = String(id ?? '').trim().toLowerCase();
+        if (!key) return undefined;
+        return pages.find(page => page.id.toLowerCase() === key)?.id
+            || pages.find(page => (page.el.dataset.aliases || '').split(/\s+/)
+                .some(alias => alias.toLowerCase() === key))?.id;
+    }
+
+    window.mkiHelp = { ...(window.mkiHelp || {}), resolvePageId };
+
+    pages.filter(page => page.el.dataset.reviewed !== 'true').forEach(page => {
+        const reviewStatus = 'Ещё не проверено и не переработано';
+        page.el.title = reviewStatus;
+        page.el.setAttribute('aria-description', reviewStatus);
+    });
+
     let currentPage = null;
     let activeItem = null;
-    let isResizing = false;
+    let resizePointerId = null;
+    let resizeStartX = 0;
+    let resizeStartWidth = 0;
     let searchToken = 0;
     let searchTimer = null;
     const bookmarks = new Set(readBookmarks());
@@ -71,6 +89,9 @@ document.addEventListener('DOMContentLoaded', () => {
     let pendingSelectionOptions = null;
     let currentTheme = 'light';
     let activeImage = null;
+    let frameObserver = null;
+    let themeAnimation = null;
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
     const getSearchMode = () => $('input[name="search-mode"]:checked')?.value || 'title';
     const getSearchOptions = () => ({
@@ -78,7 +99,10 @@ document.addEventListener('DOMContentLoaded', () => {
         wholeWords: Boolean(wholeWordsOption?.checked)
     });
     const getTheme = () => currentTheme;
-    const setClearVisible = visible => { clearBtn.style.display = visible ? 'block' : 'none'; };
+    const setClearVisible = visible => {
+        clearBtn.style.display = visible ? 'block' : 'none';
+        $('.search-shortcut').hidden = visible;
+    };
     const setBookmarkVisible = visible => { bookmarkBtn.style.visibility = visible ? 'visible' : 'hidden'; };
     const bookmarkIds = () => [...bookmarks].filter(id => pageMap.get(id)?.isPage);
     const getBranch = folder => folder?.nextElementSibling?.tagName === 'UL' ? folder.nextElementSibling : null;
@@ -131,27 +155,39 @@ document.addEventListener('DOMContentLoaded', () => {
         doc.body.classList.toggle('dark-theme', getTheme() === 'dark');
     }
 
-    function updateThemeButton(theme) {
+    function updateThemeButton(theme, animate = false) {
         if (!themeToggle) return;
 
         const isDark = theme === 'dark';
-        $('.theme-toggle-icon', themeToggle).textContent = isDark ? '☀️' : '🌙';
-        $('.theme-toggle-text', themeToggle).textContent = isDark ? 'Светлая тема' : 'Темная тема';
+        if (themeAnimation) {
+            const currentFrame = themeAnimation.firstFrame + themeAnimation.currentRawFrame;
+            const targetFrame = isDark ? (currentFrame < 22 ? 0 : 43) : 22;
+            if (animate && !reducedMotion.matches && currentFrame !== targetFrame) {
+                themeAnimation.playSegments([currentFrame, targetFrame], true);
+            } else {
+                themeAnimation.resetSegments(true);
+                themeAnimation.goToAndStop(isDark ? 0 : 22, true);
+            }
+        } else {
+            $('.theme-toggle-icon', themeToggle).textContent = isDark ? '☾' : '☀';
+        }
         themeToggle.setAttribute('aria-label', isDark ? 'Включить светлую тему' : 'Включить темную тему');
         themeToggle.setAttribute('aria-pressed', String(isDark));
+        themeToggle.title = themeToggle.getAttribute('aria-label');
     }
 
-    function applyTheme(theme = getTheme()) {
+    function applyTheme(theme = getTheme(), animate = false) {
         currentTheme = theme;
         document.body.classList.toggle('dark-theme', theme === 'dark');
-        updateThemeButton(theme);
+        window.chrome?.webview?.postMessage({ type: 'mki:theme', theme });
+        updateThemeButton(theme, animate);
         applyThemeToFrame();
     }
 
     function toggleTheme() {
         const theme = getTheme() === 'dark' ? 'light' : 'dark';
         writeStoredTheme(theme);
-        applyTheme(theme);
+        applyTheme(theme, true);
     }
 
     function openImageViewer(image) {
@@ -336,12 +372,16 @@ document.addEventListener('DOMContentLoaded', () => {
         activeItem?.classList.remove('active');
         activeItem = item || null;
         activeItem?.classList.add('active');
+        activeItem?.scrollIntoView({ block: 'nearest' });
     }
 
     function updateNavButtons() {
         const index = pageOrder.indexOf(currentPage);
         prevBtn.disabled = index <= 0;
         nextBtn.disabled = index < 0 || index >= pageOrder.length - 1;
+        prevBtn.title = index > 0 ? `Предыдущий раздел: ${pageMap.get(pageOrder[index - 1]).title}` : 'Первый раздел';
+        nextBtn.title = index >= 0 && index < pageOrder.length - 1
+            ? `Следующий раздел: ${pageMap.get(pageOrder[index + 1]).title}` : 'Последний раздел';
     }
 
     function updateBookmarkIcon() {
@@ -353,7 +393,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         setBookmarkVisible(true);
-        bookmarkBtn.classList.toggle('active', bookmarks.has(currentPage));
+        const bookmarked = bookmarks.has(currentPage);
+        bookmarkBtn.classList.toggle('active', bookmarked);
+        bookmarkBtn.setAttribute('aria-pressed', String(bookmarked));
+        bookmarkBtn.title = bookmarked ? 'Удалить из закладок' : 'Добавить в закладки';
+        bookmarkBtn.setAttribute('aria-label', bookmarkBtn.title);
     }
 
     function renderBookmarksTab() {
@@ -387,12 +431,41 @@ document.addEventListener('DOMContentLoaded', () => {
         const parts = [];
 
         for (let node = item; node; ) {
-            if (node.classList?.contains('tree-item')) parts.unshift(textOf(node));
+            if (node.classList?.contains('tree-item')) parts.unshift(node);
             const branch = node.parentElement?.parentElement;
             node = branch ? branch.previousElementSibling : null;
         }
 
-        breadcrumb.innerHTML = parts.map(part => `<span>${part}</span>`).join(' → ');
+        const list = document.createElement('ol');
+        parts.forEach((part, index) => {
+            const entry = document.createElement('li');
+            if (index > 0) {
+                const separator = document.createElement('span');
+                separator.className = 'breadcrumb-separator';
+                separator.textContent = '›';
+                separator.setAttribute('aria-hidden', 'true');
+                entry.append(separator);
+            }
+            const current = index === parts.length - 1;
+            const label = document.createElement(!current && pageMap.has(part.id) ? 'a' : 'span');
+            label.textContent = textOf(part);
+            if (current) label.setAttribute('aria-current', 'page');
+            else if (pageMap.has(part.id)) {
+                const address = new URL(location.href);
+                address.searchParams.delete('cmd');
+                address.searchParams.set('section', part.id);
+                label.href = address.href;
+                label.addEventListener('click', event => {
+                    if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+                    event.preventDefault();
+                    showTab('menu');
+                    loadPage(part.id);
+                });
+            }
+            entry.append(label);
+            list.append(entry);
+        });
+        breadcrumb.replaceChildren(list);
     }
 
     function expandPathTo(item) {
@@ -434,7 +507,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateSearchPlaceholder() {
-        searchBox.placeholder = SEARCH_PLACEHOLDERS[getSearchMode()];
+        searchBox.title = SEARCH_PLACEHOLDERS[getSearchMode()];
     }
 
     function stripDocToText(doc) {
@@ -780,6 +853,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     contentFrame.addEventListener('load', () => {
+        frameObserver?.disconnect();
         applyThemeToFrame();
         fitFrame();
 
@@ -787,6 +861,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!doc) return;
 
         doc.addEventListener('dblclick', handleContentImageDoubleClick);
+        doc.addEventListener('keydown', focusSearchShortcut);
+        frameObserver = new ResizeObserver(() => fitFrame());
+        if (doc.body) frameObserver.observe(doc.body);
+
         doc.addEventListener('toggle', () => fitFrame(), true);
 
         requestAnimationFrame(() => {
@@ -834,7 +912,16 @@ document.addEventListener('DOMContentLoaded', () => {
         if (hasPage) loadPage(item.id);
     });
 
+    function focusSearchShortcut(event) {
+        if (!event.ctrlKey || event.altKey || event.key.toLowerCase() !== 'k') return;
+        event.preventDefault();
+        searchBox.focus();
+        searchBox.select();
+    }
+    document.addEventListener('keydown', focusSearchShortcut);
+    searchBox.addEventListener('focus', () => showTab('search'));
     searchBox.addEventListener('input', () => {
+        showTab('search');
         clearTimeout(searchTimer);
         searchToken++;
         setClearVisible(Boolean(searchBox.value));
@@ -914,27 +1001,54 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    resizer.addEventListener('mousedown', event => {
-        isResizing = true;
-        document.body.style.cursor = 'col-resize';
+    function setNavigationWidth(width) {
+        const minimum = parseFloat(getComputedStyle(primaryArea).minWidth);
+        primaryArea.style.flexBasis = `${Math.min(Math.max(width, minimum), mainContent.clientWidth / 2)}px`;
+    }
+
+    function finishResize() {
+        if (resizePointerId === null) return;
+        const pointerId = resizePointerId;
+        resizePointerId = null;
+        document.body.classList.remove('resizing-navigation');
+        if (resizer.hasPointerCapture(pointerId)) resizer.releasePointerCapture(pointerId);
+        fitFrame();
+    }
+
+    resizer.addEventListener('pointerdown', event => {
+        if (event.button !== 0 || resizePointerId !== null) return;
+        resizer.setPointerCapture(event.pointerId);
+        resizePointerId = event.pointerId;
+        resizeStartX = event.clientX;
+        resizeStartWidth = primaryArea.getBoundingClientRect().width;
+        document.body.classList.add('resizing-navigation');
         event.preventDefault();
     });
 
-    document.addEventListener('mousemove', event => {
-        if (!isResizing) return;
-
-        const totalWidth = mainContent.offsetWidth;
-        const leftWidth = Math.min(Math.max(event.clientX, totalWidth / 3), totalWidth / 2);
-
-        primaryArea.style.width = `${leftWidth}px`;
-        secondaryArea.style.flex = 'none';
-        secondaryArea.style.width = `${totalWidth - leftWidth - resizer.offsetWidth}px`;
+    resizer.addEventListener('pointermove', event => {
+        if (event.pointerId !== resizePointerId) return;
+        if (event.buttons === 0) {
+            finishResize();
+            return;
+        }
+        setNavigationWidth(resizeStartWidth + event.clientX - resizeStartX);
     });
 
-    document.addEventListener('mouseup', () => {
-        isResizing = false;
-        document.body.style.cursor = 'default';
+    for (const eventName of ['pointerup', 'pointercancel', 'lostpointercapture']) {
+        resizer.addEventListener(eventName, event => {
+            if (event.pointerId === resizePointerId) finishResize();
+        });
+    }
+    window.addEventListener('blur', finishResize);
+
+    resizer.addEventListener('keydown', event => {
+        if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+        event.preventDefault();
+        const delta = event.key === 'ArrowRight' ? 16 : -16;
+        setNavigationWidth(primaryArea.offsetWidth + delta);
+        fitFrame();
     });
+    window.addEventListener('resize', fitFrame);
 
     window.addEventListener('popstate', event => {
         readBookmarks().forEach(id => bookmarks.add(id));
@@ -948,6 +1062,21 @@ document.addEventListener('DOMContentLoaded', () => {
     updateSearchPlaceholder();
     applyTheme(readStoredTheme());
     applySidebarState(readSidebarCollapsed());
+    if (window.lottie && window.mkiHelpThemeAnimation) {
+        const icon = $('.theme-toggle-icon', themeToggle);
+        icon.textContent = '';
+        themeAnimation = window.lottie.loadAnimation({
+            container: icon,
+            renderer: 'svg',
+            loop: false,
+            autoplay: false,
+            animationData: window.mkiHelpThemeAnimation
+        });
+        themeAnimation.setSpeed(2);
+        updateThemeButton(getTheme());
+        themeAnimation.addEventListener('complete', () => updateThemeButton(getTheme()));
+    }
+    reducedMotion.addEventListener('change', () => updateThemeButton(getTheme()));
 
     const params = new URLSearchParams(location.search);
     const cmd = params.get('cmd');
@@ -956,7 +1085,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (cmd) {
         const decoded = decodeURIComponent(cmd).toLowerCase();
-        startId = pages.find(page => page.id.toLowerCase() === decoded)?.id || FALLBACK_ID;
+        startId = resolvePageId(decoded) || FALLBACK_ID;
     } else if (section && pageMap.has(section)) {
         startId = section;
     }

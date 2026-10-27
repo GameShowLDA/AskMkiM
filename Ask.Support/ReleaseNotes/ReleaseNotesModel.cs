@@ -22,4 +22,7 @@ public sealed class ReleaseNotesModel
 
   /// <summary>Изменения выпуска в редакционном порядке.</summary>
   public required IReadOnlyList<ReleaseChangeModel> Changes { get; init; }
+
+  /// <summary>Дополнительные изменения для разработчиков, видимые только роли ROOT.</summary>
+  public IReadOnlyList<ReleaseChangeModel> RootChanges { get; init; } = [];
 }

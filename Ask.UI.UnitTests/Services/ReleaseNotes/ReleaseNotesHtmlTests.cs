@@ -8,6 +8,36 @@ namespace Ask.UI.UnitTests.Services.ReleaseNotes;
 
 public sealed class ReleaseNotesHtmlTests
 {
+  [Theory]
+  [InlineData(null, false)]
+  [InlineData("Administrator", false)]
+  [InlineData("Developer", false)]
+  [InlineData("Adjuster", false)]
+  [InlineData("Root", true)]
+  [InlineData("root", false)]
+  public void DeveloperChangesAreRenderedOnlyForRoot(string? role, bool expected)
+  {
+    var release = Create("1.1.0");
+    var withRootChanges = new ReleaseNotesModel
+    {
+      SchemaVersion = release.SchemaVersion,
+      Version = release.Version,
+      ReleaseDate = release.ReleaseDate,
+      Changes = release.Changes,
+      RootChanges = [new ReleaseChangeModel
+      {
+        Id = "internal", Category = ReleaseChangeCategory.Fixed,
+        Title = "Internal-only-title", Description = "<internal-detail>", HelpKey = "InternalHelp"
+      }]
+    };
+    string html = new ReleaseNotesHtmlRenderer().Render([withRootChanges], role);
+    Assert.Equal(expected, html.Contains("Для разработчиков", StringComparison.Ordinal));
+    Assert.Equal(expected, html.Contains("Internal-only-title", StringComparison.Ordinal));
+    Assert.Equal(expected, html.Contains("&lt;internal-detail&gt;", StringComparison.Ordinal));
+    Assert.Equal(expected, html.Contains("InternalHelp", StringComparison.Ordinal));
+    Assert.Contains("Описание &amp; &lt;текст&gt;", html);
+  }
+
   [Fact]
   public void RendersVersionsNewestFirstAndEscapesContent()
   {

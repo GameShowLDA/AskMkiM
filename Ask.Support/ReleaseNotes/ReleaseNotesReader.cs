@@ -77,8 +77,9 @@ public sealed class ReleaseNotesReader
       "имя файла должно совпадать с version.");
     Require(model.ReleaseDate != default, "releaseDate должна содержать дату публикации.");
     Require(model.Changes is { Count: > 0 }, "changes должен содержать хотя бы одно изменение.");
+    Require(model.RootChanges is not null, "rootChanges не должен быть null.");
     var ids = new HashSet<string>(StringComparer.Ordinal);
-    foreach (ReleaseChangeModel change in model.Changes!)
+    foreach (ReleaseChangeModel change in model.Changes!.Concat(model.RootChanges!))
     {
       Require(change is not null, "changes не должен содержать null.");
       Require(!string.IsNullOrWhiteSpace(change!.Id), "id изменения обязателен.");

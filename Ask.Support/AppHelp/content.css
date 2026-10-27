@@ -1,116 +1,80 @@
-﻿/* ---------- КОНТЕНТНЫЕ СТРАНИЦЫ ---------- */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
+:root {
+    --surface: #fafcff;
+    --sidebar: #f2f6fc;
+    --subtle: #e9eff7;
+    --text: #223246;
+    --muted: #67788d;
+    --border: #d4deea;
+    --accent: #426da9;
+    --hover: #eaf0f8;
+    --selected: #dce6f4;
+    --warning: #fff4d9;
+    --warning-text: #704b0c;
+    --warning-border: #ba851d;
+    color-scheme: light;
 }
-
-/* Базовая типографика */
-body {
-    background: #fff;
-    color: #212529;
-    line-height: 1.6;
-    padding: 0;
-}
-
-.page-title {
-    color: #1a3a8f;
-    margin-bottom: 20px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid #eee;
-}
-
-.page-content p {
-    margin-bottom: 15px;
-}
-
-.page-content h1 {
-    color: #1a3a8f;
-    margin: 30px 0 20px;
-}
-
-.page-content h2 {
-    color: #1a3a8f;
-    margin: 25px 0 15px;
-}
-
-.page-content h3 {
-    color: #2c5cc5;
-    margin: 20px 0 10px;
-}
-
-.page-content ul {
-    margin: 10px 0 20px 20px;
-}
-
-.page-content li {
-    margin-bottom: 8px;
-}
-
-/* TOC‑ссылки внутри текста */
-.page-content ul li[data-id] {
-    list-style: none;
-    cursor: pointer;
-    color: #1a3a8f;
-    padding: 6px 8px;
-    border-radius: 4px;
-    transition: background .2s,color .2s;
-}
-
-.page-content ul li[data-id]:hover {
-    background: #e1ebff;
-    text-decoration: underline;
-}
-
-/* ---------- ОФОРМЛЕНИЕ ВСЕХ ТАБЛИЦ ---------- */
-.page-content table {
-    border-collapse: collapse;
-    width: 100%;
-    margin: 1.2em 0; /* равномерные отступы сверху/снизу */
-}
-
-.page-content table th,
-.page-content table td {
-    border: 1px solid #333; /* тонкая видимая рамка вокруг ячеек */
-    padding: .35em .6em;
-    text-align: left;
-}
-
-.page-content table thead th {
-    border-bottom: 4px solid #000; /* ЖИРНАЯ линия под заголовком */
-    background: #f3f3f3; /* лёгкая заливка для выделения */
-    font-weight: 700;
-}
-
 body.dark-theme {
-    background: #111827;
-    color: #e5e7eb;
+    --surface: #1b2430;
+    --sidebar: #151e28;
+    --subtle: #1e2936;
+    --text: #e8eef7;
+    --muted: #a8b6ca;
+    --border: #324255;
+    --accent: #8fb2e5;
+    --hover: #243241;
+    --selected: #2e4153;
+    --warning: #3a3323;
+    --warning-text: #f2d393;
+    --warning-border: #c69a42;
     color-scheme: dark;
 }
-
-body.dark-theme .page-title,
-body.dark-theme .page-content h1,
-body.dark-theme .page-content h2 {
-    color: #93c5fd;
-    border-bottom-color: #334155;
-}
-
-body.dark-theme .page-content h3,
-body.dark-theme .page-content ul li[data-id] {
-    color: #bfdbfe;
-}
-
-body.dark-theme .page-content ul li[data-id]:hover {
-    background: #1e293b;
-}
-
-body.dark-theme .page-content table th,
-body.dark-theme .page-content table td {
-    border-color: #64748b;
-}
-
-body.dark-theme .page-content table thead th {
-    border-bottom-color: #cbd5e1;
-    background: #1f2937;
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--surface); color: var(--text); font: 15px/1.65 'Segoe UI', Tahoma, sans-serif; }
+a { color: var(--accent); text-underline-offset: 3px; }
+a:hover { text-decoration-thickness: 2px; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+::selection { background: var(--selected); color: var(--text); }
+.page-content { max-width: 960px; margin: 0 auto; padding: 28px 40px 48px; overflow-wrap: anywhere; }
+.page-content h1, .page-title { color: var(--text); font-size: 28px; line-height: 1.25; font-weight: 650; margin: 0 0 24px; }
+.page-content h2 { color: var(--text); font-size: 22px; line-height: 1.35; font-weight: 600; margin: 32px 0 12px; }
+.page-content h3 { color: var(--text); font-size: 18px; line-height: 1.4; font-weight: 600; margin: 24px 0 10px; }
+.page-content p { margin: 0 0 16px; }
+.page-content ul, .page-content ol { margin: 12px 0 20px; padding-left: 24px; }
+.page-content li { margin-bottom: 8px; }
+.page-content li > ul, .page-content li > ol { margin-top: 8px; }
+.page-content ul li[data-id] { list-style: none; cursor: pointer; color: var(--accent); padding: 6px 8px; border-radius: 4px; }
+.page-content ul li[data-id]:hover { background: var(--hover); text-decoration: underline; }
+.page-content img { max-width: 100%; height: auto; }
+.page-content figure { margin: 20px 0 24px; }
+.page-content figcaption { color: var(--muted); font-size: 13px; margin-top: 8px; }
+.page-content table { display: block; max-width: 100%; overflow-x: auto; border-collapse: collapse; margin: 20px 0 24px; font-size: 14px; }
+.page-content th, .page-content td { padding: 10px 12px; border: 1px solid var(--border); text-align: left; vertical-align: top; }
+.page-content th { background: var(--sidebar); font-weight: 600; }
+.page-content code, .page-content pre, .page-content kbd { font-family: Consolas, 'Cascadia Mono', monospace; font-size: .9em; }
+.page-content code { background: var(--subtle); padding: 2px 4px; border-radius: 3px; }
+.page-content pre { overflow-x: auto; padding: 16px; background: var(--sidebar); border-radius: 4px; margin: 16px 0 24px; }
+.page-content pre code { background: transparent; padding: 0; }
+.page-content kbd { display: inline-block; padding: 0 5px; border: 1px solid var(--border); border-bottom-width: 2px; border-radius: 4px; background: var(--sidebar); white-space: nowrap; }
+.page-content .note, .page-content blockquote { margin: 20px 0; padding: 12px 16px; border-left: 3px solid var(--accent); background: var(--hover); }
+.page-content .warning { margin: 20px 0; padding: 12px 16px; border-left: 3px solid var(--warning-border); background: var(--warning); color: var(--warning-text); }
+.page-content .note > :last-child, .page-content .warning > :last-child { margin-bottom: 0; }
+/* Local article styles also consume the shared theme without changing their actions. */
+body .page-content.releases { max-width: 960px; padding: 28px 40px 48px; }
+body .page-content .release { border-color: var(--border); border-radius: 4px; }
+body .page-content .release > summary { background: var(--sidebar); color: var(--text); }
+body .page-content .release time { color: var(--muted); }
+body .page-content .about-card { background: var(--surface); border-color: var(--border); border-radius: 4px; box-shadow: none; }
+body .page-content .about-card-title { color: var(--text); }
+body .page-content .about-lead { color: var(--muted); }
+body .page-content .about-badge, body .page-content .about-btn { background: var(--sidebar); border-color: var(--border); color: var(--text); }
+body .page-content .about-btn:hover { background: var(--hover); }
+body .about-modal { background: var(--surface); color: var(--text); }
+body .about-modal th, body .about-modal td { border-color: var(--border); }
+body .about-modal thead th { background: var(--sidebar); border-bottom-width: 1px; }
+body .about-modal .about-close { color: var(--muted); }
+@media (max-width: 600px) {
+    .page-content, body .page-content.releases { padding: 20px 20px 32px; }
+    .page-content h1 { font-size: 25px; }
+    .page-content .about-footer { flex-wrap: wrap; }
+    .page-content .about-dl { grid-template-columns: 1fr; }
 }

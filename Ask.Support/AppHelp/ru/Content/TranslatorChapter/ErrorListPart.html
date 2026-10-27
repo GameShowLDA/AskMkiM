@@ -2,14 +2,233 @@
 <html lang="ru">
 <head>
     <meta charset="utf-8">
-    <title>Список ошибок</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Список ошибок и предупреждений</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
     <link rel="stylesheet" href="../../../content.css">
 </head>
 <body>
     <main class="page-content">
-        <h1>Список ошибок</h1>
-        <p>В разделе приведены коды ошибок трансляции, сгруппированные по назначению и типу проверяемой команды.</p>
+        <h1>Список ошибок и предупреждений</h1>
+        <p>Здесь собраны коды, используемые текущими проверками программы контроля и сообщениями о результатах
+            измерений. В дереве каждый код открывается отдельной страницей без промежуточных папок.</p>
+        <p>Найдите код или текст сообщения через поиск справки. На странице приведены назначение сообщения и действия
+            для проверки. Смотрите также команду, строку и результат измерения: один код может использоваться в
+            нескольких близких ситуациях.</p>
+        <p>В списке ПО сообщение может обозначаться полным именем, например <code>Gen_FirstMustBeOk</code>. Оно также
+            указано на странице кода; поиск и переход из ПО учитывают это имя.</p>
+        <p>Ошибки трансляции нужно устранить перед запуском. Предупреждения требуют проверки выбранных параметров.
+            Сообщения о дефектах цепей во время выполнения описывают результат испытания, а не обязательно ошибку записи
+            программы.</p>
+        <h2>Ошибки</h2>
+        <table>
+        <thead><tr><th>Код</th><th>Сообщение</th></tr></thead>
+        <tbody>
+        <tr><td><a href="ErrorListChapter/ErrorsCKChapter/ErrorCK001_Part.html" data-nav="CK001">CK001</a></td><td>СК
+            запрещена при структуре ВШ 2Ш</td></tr>
+        <tr><td><a href="ErrorListChapter/ErrorsEHTChapter/ErrorEHT001_Part.html"
+            data-nav="EHT001">EHT001</a></td><td>Не разобраны параметры ЭТ</td></tr>
+        <tr><td><a href="ErrorListChapter/ErrorsEHTChapter/ErrorEHT002_Part.html"
+            data-nav="EHT002">EHT002</a></td><td>Пустая команда ЭТ</td></tr>
+        <tr><td><a href="ErrorListChapter/ErrorsEHTChapter/ErrorEHT003_Part.html"
+            data-nav="EHT003">EHT003</a></td><td>Не заданы точки измерения</td></tr>
+        <tr><td><a href="ErrorListChapter/ErrorsEHTChapter/ErrorEHT004_Part.html"
+            data-nav="EHT004">EHT004</a></td><td>Некорректны границы сопротивления ЭТ</td></tr>
+        <tr><td><a href="ErrorListChapter/ErrorsEHTChapter/ErrorEHT006_Part.html"
+            data-nav="EHT006">EHT006</a></td><td>Сопротивление ЭТ вне допустимого диапазона</td></tr>
+        <tr><td><a href="ErrorListChapter/ErrorsEHTChapter/ErrorEHT007_Part.html"
+            data-nav="EHT007">EHT007</a></td><td>Нет необходимого подключения точки ЭТ</td></tr>
+        <tr><td><a href="ErrorListChapter/GeneralErrorsChapter/ErrorGEN001_Part.html"
+            data-nav="GEN001">GEN001</a></td><td>Первая команда должна быть ОК</td></tr>
+        <tr><td><a href="ErrorListChapter/GeneralErrorsChapter/ErrorGEN002_Part.html"
+            data-nav="GEN002">GEN002</a></td><td>Последняя команда должна быть КЦ</td></tr>
+        <tr><td><a href="ErrorListChapter/GeneralErrorsChapter/ErrorGEN003_Part.html"
+            data-nav="GEN003">GEN003</a></td><td>Отсутствует обязательная команда</td></tr>
+        <tr><td><a href="ErrorListChapter/GeneralErrorsChapter/ErrorGEN004_Part.html"
+            data-nav="GEN004">GEN004</a></td><td>Повторяется единственная команда</td></tr>
+        <tr><td><a href="ErrorListChapter/GeneralErrorsChapter/ErrorGEN005_Part.html"
+            data-nav="GEN005">GEN005</a></td><td>Отсутствует карта точек РМ</td></tr>
+        <tr><td><a href="ErrorListChapter/GeneralErrorsChapter/ErrorGEN006_Part.html"
+            data-nav="GEN006">GEN006</a></td><td>Точка не найдена в РМ</td></tr>
+        <tr><td><a href="ErrorListChapter/GeneralErrorsChapter/ErrorGEN007_Part.html"
+            data-nav="GEN007">GEN007</a></td><td>Повторяется машинный адрес назначения</td></tr>
+        <tr><td><a href="ErrorListChapter/GeneralErrorsChapter/ErrorGEN008_Part.html"
+            data-nav="GEN008">GEN008</a></td><td>Не распознана команда или её начало</td></tr>
+        <tr><td><a href="ErrorListChapter/GeneralErrorsChapter/ErrorGEN009_Part.html"
+            data-nav="GEN009">GEN009</a></td><td>Остались нераспознанные параметры</td></tr>
+        <tr><td><a href="ErrorListChapter/GeneralErrorsChapter/ErrorGEN013_Part.html"
+            data-nav="GEN013">GEN013</a></td><td>Нарушен порядок параметров</td></tr>
+        <tr><td><a href="ErrorListChapter/GeneralErrorsChapter/ErrorGEN014_Part.html"
+            data-nav="GEN014">GEN014</a></td><td>Недопустима одиночная точка</td></tr>
+        <tr><td><a href="ErrorListChapter/GeneralErrorsChapter/ErrorGEN015_Part.html"
+            data-nav="GEN015">GEN015</a></td><td>Некорректен диапазон адресов</td></tr>
+        <tr><td><a href="ErrorListChapter/GeneralErrorsChapter/ErrorGEN016_Part.html"
+            data-nav="GEN016">GEN016</a></td><td>Повторяются точки при добавлении схемы</td></tr>
+        <tr><td><a href="ErrorListChapter/GeneralErrorsChapter/ErrorGEN017_Part.html"
+            data-nav="GEN017">GEN017</a></td><td>Напряжение не соответствует возможностям установки</td></tr>
+        <tr><td><a href="ErrorListChapter/GeneralErrorsChapter/ErrorGEN018_Part.html"
+            data-nav="GEN018">GEN018</a></td><td>Уже существует команда с этим номером и мнемоникой</td></tr>
+        <tr><td><a href="ErrorListChapter/GeneralErrorsChapter/ErrorGEN019_Part.html"
+            data-nav="GEN019">GEN019</a></td><td>Не найден необходимый измеритель</td></tr>
+        <tr><td><a href="ErrorListChapter/GeneralErrorsChapter/ErrorGEN021_Part.html"
+            data-nav="GEN021">GEN021</a></td><td>Ключ недопустим для команды</td></tr>
+        <tr><td><a href="ErrorListChapter/GeneralErrorsChapter/ErrorGEN023_Part.html"
+            data-nav="GEN023">GEN023</a></td><td>Не найден или пуст блок точек</td></tr>
+        <tr><td><a href="ErrorListChapter/GeneralErrorsChapter/ErrorGEN024_Part.html"
+            data-nav="GEN024">GEN024</a></td><td>В команде нет требуемых точек</td></tr>
+        <tr><td><a href="ErrorListChapter/GeneralErrorsChapter/ErrorGEN025_Part.html"
+            data-nav="GEN025">GEN025</a></td><td>Некорректна ссылка на ССИРТ</td></tr>
+        <tr><td><a href="ErrorListChapter/GeneralErrorsChapter/ErrorGEN026_Part.html"
+            data-nav="GEN026">GEN026</a></td><td>Недопустима последовательность «,*»</td></tr>
+        <tr><td><a href="ErrorListChapter/ErrorsIEChapter/ErrorIE001_Part.html" data-nav="IE001">IE001</a></td><td>Не
+            задана нижняя граница ёмкости</td></tr>
+        <tr><td><a href="ErrorListChapter/ErrorsIEChapter/ErrorIE006_Part.html"
+            data-nav="IE006">IE006</a></td><td>Ошибка проверки ИЕ методом полного узла</td></tr>
+        <tr><td><a href="ErrorListChapter/ErrorsIEChapter/ErrorIE007_Part.html"
+            data-nav="IE007">IE007</a></td><td>Нарушение при проверке цепи ИЕ</td></tr>
+        <tr><td><a href="ErrorListChapter/ErrorsIEChapter/ErrorIE008_Part.html"
+            data-nav="IE008">IE008</a></td><td>Нарушение между точками или цепями ИЕ</td></tr>
+        <tr><td><a href="ErrorListChapter/ErrorsIEChapter/ErrorIE009_Part.html"
+            data-nav="IE009">IE009</a></td><td>Некорректны границы ёмкости ИЕ</td></tr>
+        <tr><td><a href="ErrorListChapter/KeyErrorsChapter/ErrorKEY001_Part.html"
+            data-nav="KEY001">KEY001</a></td><td>Ключ запрещён для команды</td></tr>
+        <tr><td><a href="ErrorListChapter/KeyErrorsChapter/ErrorKEY002_Part.html"
+            data-nav="KEY002">KEY002</a></td><td>Ключ не распознан</td></tr>
+        <tr><td><a href="ErrorListChapter/KeyErrorsChapter/ErrorKEY003_Part.html"
+            data-nav="KEY003">KEY003</a></td><td>Несовместимая пара ключей</td></tr>
+        <tr><td><a href="ErrorListChapter/KeyErrorsChapter/ErrorKEY004_Part.html"
+            data-nav="KEY004">KEY004</a></td><td>Команда не поддерживает ключи</td></tr>
+        <tr><td><a href="ErrorListChapter/ErrorsKSChapter/ErrorKS001_Part.html" data-nav="KS001">KS001</a></td><td>Не
+            задан диапазон сопротивления КС</td></tr>
+        <tr><td><a href="ErrorListChapter/ErrorsKSChapter/ErrorKS002_Part.html" data-nav="KS002">KS002</a></td><td>Не
+            разобраны параметры КС</td></tr>
+        <tr><td><a href="ErrorListChapter/ErrorsKSChapter/ErrorKS003_Part.html" data-nav="KS003">KS003</a></td><td>Не
+            заданы точки КС</td></tr>
+        <tr><td><a href="ErrorListChapter/ErrorsKSChapter/ErrorKS004_Part.html"
+            data-nav="KS004">KS004</a></td><td>Пустая команда КС</td></tr>
+        <tr><td><a href="ErrorListChapter/ErrorsKSChapter/ErrorKS005_Part.html" data-nav="KS005">KS005</a></td><td>Точки
+            КС записаны раньше диапазона</td></tr>
+        <tr><td><a href="ErrorListChapter/ErrorsKSChapter/ErrorKS006_Part.html"
+            data-nav="KS006">KS006</a></td><td>Ошибка проверки КС методом полного узла</td></tr>
+        <tr><td><a href="ErrorListChapter/ErrorsKSChapter/ErrorKS007_Part.html"
+            data-nav="KS007">KS007</a></td><td>Нарушение при проверке цепи КС</td></tr>
+        <tr><td><a href="ErrorListChapter/ErrorsKSChapter/ErrorKS008_Part.html"
+            data-nav="KS008">KS008</a></td><td>Нарушение между точками или цепями КС</td></tr>
+        <tr><td><a href="ErrorListChapter/ErrorsKSChapter/ErrorKS009_Part.html"
+            data-nav="KS009">KS009</a></td><td>Некорректны границы сопротивления КС</td></tr>
+        <tr><td><a href="ErrorListChapter/ErrorsNEChapter/ErrorNE001_Part.html"
+            data-nav="NE001">NE001</a></td><td>Нарушение при проверке цепи НЭ</td></tr>
+        <tr><td><a href="ErrorListChapter/ErrorsNEChapter/ErrorNE002_Part.html"
+            data-nav="NE002">NE002</a></td><td>Нарушение между точками или цепями НЭ</td></tr>
+        <tr><td><a href="ErrorListChapter/ErrorsNEChapter/ErrorNE004_Part.html" data-nav="NE004">NE004</a></td><td>Не
+            заданы точки НЭ</td></tr>
+        <tr><td><a href="ErrorListChapter/ErrorsNEChapter/ErrorNE007_Part.html"
+            data-nav="NE007">NE007</a></td><td>Некорректны границы напряжения НЭ</td></tr>
+        <tr><td><a href="ErrorListChapter/ErrorsNEChapter/ErrorNE008_Part.html" data-nav="NE008">NE008</a></td><td>Не
+            разобраны параметры НЭ</td></tr>
+        <tr><td><a href="ErrorListChapter/ErrorsNEChapter/ErrorNE011_Part.html"
+            data-nav="NE011">NE011</a></td><td>Ошибка проверки цепи НЭ методом полного узла</td></tr>
+        <tr><td><a href="ErrorListChapter/ErrorsOKChapter/ErrorOK001_Part.html" data-nav="OK001">OK001</a></td><td>Не
+            разобрана первая строка ОК</td></tr>
+        <tr><td><a href="ErrorListChapter/ErrorsOKChapter/ErrorOK002_Part.html" data-nav="OK002">OK002</a></td><td>Не
+            указано обозначение изделия</td></tr>
+        <tr><td><a href="ErrorListChapter/ErrorsOKChapter/ErrorOK004_Part.html"
+            data-nav="OK004">OK004</a></td><td>Пустая команда ОК</td></tr>
+        <tr><td><a href="ErrorListChapter/ErrorsOKChapter/ErrorOK005_Part.html" data-nav="OK005">OK005</a></td><td>Не
+            разобран параметр ОК</td></tr>
+        <tr><td><a href="ErrorListChapter/ErrorsOKChapter/ErrorOK006_Part.html"
+            data-nav="OK006">OK006</a></td><td>Слишком длинное имя параметра ОК</td></tr>
+        <tr><td><a href="ErrorListChapter/ErrorsOKChapter/ErrorOK007_Part.html"
+            data-nav="OK007">OK007</a></td><td>Слишком длинное значение параметра ОК</td></tr>
+        <tr><td><a href="ErrorListChapter/ErrorsOKChapter/ErrorOK008_Part.html"
+            data-nav="OK008">OK008</a></td><td>Повторяется параметр ОК</td></tr>
+        <tr><td><a href="ErrorListChapter/ErrorsOKChapter/ErrorOK009_Part.html"
+            data-nav="OK009">OK009</a></td><td>Слишком длинное обозначение изделия</td></tr>
+        <tr><td><a href="ErrorListChapter/ErrorsOTChapter/ErrorOT001_Part.html"
+            data-nav="OT001">OT001</a></td><td>Пустая команда ОТ</td></tr>
+        <tr><td><a href="ErrorListChapter/ErrorsPIChapter/ErrorPI006_Part.html"
+            data-nav="PI006">PI006</a></td><td>Ошибка проверки ПИ методом полного узла</td></tr>
+        <tr><td><a href="ErrorListChapter/ErrorsPIChapter/ErrorPI007_Part.html"
+            data-nav="PI007">PI007</a></td><td>Нарушение при проверке цепи ПИ</td></tr>
+        <tr><td><a href="ErrorListChapter/ErrorsPIChapter/ErrorPI010_Part.html" data-nav="PI010">PI010</a></td><td>Нет
+            схемы для повторного использования в ПИ</td></tr>
+        <tr><td><a href="ErrorListChapter/ErrorsPRChapter/ErrorPR006_Part.html"
+            data-nav="PR006">PR006</a></td><td>Ошибка проверки методом полного узла</td></tr>
+        <tr><td><a href="ErrorListChapter/ErrorsPRChapter/ErrorPR007_Part.html"
+            data-nav="PR007">PR007</a></td><td>Нарушение при проверке цепи ПР</td></tr>
+        <tr><td><a href="ErrorListChapter/ErrorsPRChapter/ErrorPR008_Part.html"
+            data-nav="PR008">PR008</a></td><td>Нарушение между точками или цепями ПР</td></tr>
+        <tr><td><a href="ErrorListChapter/ErrorsPRChapter/ErrorPR0012_Part.html"
+            data-nav="PR0012">PR0012</a></td><td>Некорректны границы сопротивления ПР</td></tr>
+        <tr><td><a href="ErrorListChapter/ErrorsPRChapter/ErrorPR0013_Part.html" data-nav="PR0013">PR0013</a></td><td>Не
+            разобраны параметры ПР</td></tr>
+        <tr><td><a href="ErrorListChapter/ErrorsPTChapter/ErrorPT002_Part.html"
+            data-nav="PT002">PT002</a></td><td>Пустая команда ПТ</td></tr>
+        <tr><td><a href="ErrorListChapter/ErrorsRMChapter/ErrorRM001_Part.html" data-nav="RM001">RM001</a></td><td>Не
+            разобрано выражение РМ</td></tr>
+        <tr><td><a href="ErrorListChapter/ErrorsRMChapter/ErrorRM002_Part.html" data-nav="RM002">RM002</a></td><td>Пуста
+            часть соответствия РМ</td></tr>
+        <tr><td><a href="ErrorListChapter/ErrorsRMChapter/ErrorRM003_Part.html" data-nav="RM003">RM003</a></td><td>Не
+            совпадает количество адресов в РМ</td></tr>
+        <tr><td><a href="ErrorListChapter/ErrorsRMChapter/ErrorRM007_Part.html"
+            data-nav="RM007">RM007</a></td><td>Пустая команда РМ</td></tr>
+        <tr><td><a href="ErrorListChapter/ErrorsRMChapter/ErrorRM008_Part.html"
+            data-nav="RM008">RM008</a></td><td>Пробел мешает разбору РМ</td></tr>
+        <tr><td><a href="ErrorListChapter/ErrorsRMChapter/ErrorRM009_Part.html"
+            data-nav="RM009">RM009</a></td><td>Недопустимый символ в РМ</td></tr>
+        <tr><td><a href="ErrorListChapter/ErrorsSIChapter/ErrorSI004_Part.html"
+            data-nav="SI004">SI004</a></td><td>Пустая команда СИ</td></tr>
+        <tr><td><a href="ErrorListChapter/ErrorsSIChapter/ErrorSI007_Part.html"
+            data-nav="SI007">SI007</a></td><td>Нарушение при проверке цепи СИ</td></tr>
+        <tr><td><a href="ErrorListChapter/ErrorsSIChapter/ErrorSI008_Part.html"
+            data-nav="SI008">SI008</a></td><td>Нарушение между точками или цепями СИ</td></tr>
+        <tr><td><a href="ErrorListChapter/ErrorsSIChapter/ErrorSI009_Part.html" data-nav="SI009">SI009</a></td><td>Не
+            задано напряжение проверки изоляции</td></tr>
+        <tr><td><a href="ErrorListChapter/ErrorsSIChapter/ErrorSI010_Part.html"
+            data-nav="SI010">SI010</a></td><td>Недопустим предел сопротивления изоляции</td></tr>
+        <tr><td><a href="ErrorListChapter/CodeUNKNOWN_ERROR_Part.html"
+            data-nav="UNKNOWN_ERROR">UNKNOWN_ERROR</a></td><td>Ошибка без определённого кода</td></tr>
+        <tr><td><a href="ErrorListChapter/ErrorsUPChapter/ErrorUP001_Part.html" data-nav="UP001">UP001</a></td><td>Не
+            указана или некорректна метка УП</td></tr>
+        <tr><td><a href="ErrorListChapter/ErrorsUPChapter/ErrorUP002_Part.html" data-nav="UP002">UP002</a></td><td>Метка
+            УП не найдена</td></tr>
+        <tr><td><a href="ErrorListChapter/ErrorsUPChapter/ErrorUP003_Part.html" data-nav="UP003">UP003</a></td><td>УП
+            ссылается на себя</td></tr>
+        <tr><td><a href="ErrorListChapter/ErrorsVSHChapter/ErrorVSH001_Part.html"
+            data-nav="VSH001">VSH001</a></td><td>Недопустимая структура шин ВШ</td></tr>
+        <tr><td><a href="ErrorListChapter/ErrorsVSHChapter/ErrorVSH002_Part.html"
+            data-nav="VSH002">VSH002</a></td><td>Структура шин отсутствует в конфигурации</td></tr>
+        <tr><td><a href="ErrorListChapter/ErrorsVSHChapter/ErrorVSH004_Part.html"
+            data-nav="VSH004">VSH004</a></td><td>Стойка отсутствует в конфигурации</td></tr>
+        </tbody>
+        </table>
+        <h2>Предупреждения</h2>
+        <table>
+        <thead><tr><th>Код</th><th>Сообщение</th></tr></thead>
+        <tbody>
+        <tr><td><a href="ErrorListChapter/CodeWARNING_ERROR_Part.html"
+            data-nav="WARNING_ERROR">WARNING_ERROR</a></td><td>Предупреждение без отдельного кода</td></tr>
+        <tr><td><a href="ErrorListChapter/CodeWRNGEN001_Part.html" data-nav="WRNGEN001">WRNGEN001</a></td><td>Время
+            принято по умолчанию</td></tr>
+        <tr><td><a href="ErrorListChapter/CodeWRNGEN003_Part.html" data-nav="WRNGEN003">WRNGEN003</a></td><td>Нижняя
+            граница принята по умолчанию</td></tr>
+        <tr><td><a href="ErrorListChapter/CodeWRNGEN004_Part.html" data-nav="WRNGEN004">WRNGEN004</a></td><td>Верхняя
+            граница принята по умолчанию</td></tr>
+        <tr><td><a href="ErrorListChapter/CodeWRNGEN006_Part.html"
+            data-nav="WRNGEN006">WRNGEN006</a></td><td>Повторяется ключ</td></tr>
+        <tr><td><a href="ErrorListChapter/CodeWRNGEN007_Part.html"
+            data-nav="WRNGEN007">WRNGEN007</a></td><td>Автоматически добавлен ключ ЗР</td></tr>
+        <tr><td><a href="ErrorListChapter/CodeWRNGEN008_Part.html"
+            data-nav="WRNGEN008">WRNGEN008</a></td><td>Автоматически добавлена ВШ</td></tr>
+        <tr><td><a href="ErrorListChapter/CodeWRNGEN009_Part.html" data-nav="WRNGEN009">WRNGEN009</a></td><td>Параметр
+            напряжения или тока игнорируется</td></tr>
+        <tr><td><a href="ErrorListChapter/CodeWRNGEN011_Part.html" data-nav="WRNGEN011">WRNGEN011</a></td><td>В ЦУ нет
+            сообщения</td></tr>
+        <tr><td><a href="ErrorListChapter/CodeWRNGEN012_Part.html" data-nav="WRNGEN012">WRNGEN012</a></td><td>ПЭ
+            автоматически заменена на ПР</td></tr>
+        </tbody>
+        </table>
+        <p>В списке представлены используемые сообщения. При открытии такой темы
+            по старому ключу показывается этот актуальный список.</p>
     </main>
 </body>
 </html>

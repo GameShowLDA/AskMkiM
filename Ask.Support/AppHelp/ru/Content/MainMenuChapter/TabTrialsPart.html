@@ -5,11 +5,83 @@
     <title>Меню «Испытания»</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="../../../content.css">
+    <script src="../../../internal-links.js" defer></script>
 </head>
 <body>
     <main class="page-content">
         <h1>Меню «Испытания»</h1>
-        <p>В разделе описаны метрологические режимы, самоконтроль оборудования и доступные тесты системы.</p>
+        <p>Меню «Испытания» открывает режимы проверки измерительной аппаратуры и коммутации.
+            Здесь находятся метрологические режимы, самоконтроль отдельных модулей и системы,
+            а также тесты сопротивления и прочности изоляции.</p>
+        <p>Каждая команда открывает отдельную рабочую вкладку с настройками и протоколом.
+            Программу контроля в текстовом редакторе для этого открывать не требуется.</p>
+
+        <h2>Разделы меню</h2>
+        <table>
+            <thead><tr><th scope="col" style="min-width: 150px;">Раздел</th><th scope="col">Назначение</th></tr></thead>
+            <tbody>
+                <tr>
+                    <td><a href="TabTrialsChapter/TabMetrologyPart.html" data-nav="TabMetrology">Метрология</a></td>
+                    <td>Открывает отдельные измерительные режимы для метрологического контроля.
+                        Параметры и оборудование выбираются во вкладке режима.</td>
+                </tr>
+                <tr>
+                    <td><a href="TabTrialsChapter/TabSelfControlPart.html" data-nav="TabSelfControl">Самоконтроль</a></td>
+                    <td>Позволяет проверить выбранный модуль или выполнить самоконтроль системы.</td>
+                </tr>
+                <tr>
+                    <td><a href="TabTrialsChapter/TabTestsPart.html" data-nav="TabTests">Тесты</a></td>
+                    <td>Содержит испытания изоляции методом узла и групповым методом,
+                        перекрёстный тест МКР и проверку сопротивления коммутатора.</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>Метрологические режимы</h2>
+        <p>В подменю «Метрология» доступны девять режимов:</p>
+        <ul>
+            <li>КС, ИЕ, СИ, ПР и ЭТ.</li>
+            <li>ПИ(DCW) и ПИ(ACW).</li>
+            <li>КН(DCW) и КН(ACW).</li>
+        </ul>
+        <p>Обозначения DCW и ACW различают варианты с постоянным и переменным напряжением.
+            Назначение, параметры и порядок работы каждого режима приведены в разделе
+            <a href="TabTrialsChapter/TabMetrologyPart.html" data-nav="TabMetrology">«Метрология»</a>.</p>
+
+        <h2>Самоконтроль</h2>
+        <ul>
+            <li><a href="TabTrialsChapter/TabSelfControlChapter/SelfControlModulePart.html" data-nav="SelfControlModule">Самоконтроль модуля</a>
+                — проверка устройства, выбранного во вкладке самоконтроля.</li>
+            <li><a href="TabTrialsChapter/TabSelfControlChapter/SelfControlSystemPart.html" data-nav="SelfControlSystem">Самоконтроль системы</a>
+                — проверка оборудования в составе системы.</li>
+        </ul>
+
+        <h2>Тесты</h2>
+        <ul>
+            <li><a href="TabTrialsChapter/TabTestsChapter/TabTestSIPart.html" data-nav="TabTestSI">Сопротивление изоляции (СИ)</a>
+                — метод узла и групповой метод.</li>
+            <li><a href="TabTrialsChapter/TabTestsChapter/TabTestPIPart.html" data-nav="TabTestPI">Прочность изоляции (ПИ)</a>
+                — метод узла и групповой метод, отдельно для DCW и ACW.</li>
+            <li><a href="TabTrialsChapter/TabTestsChapter/CrossTestMkrPart.html" data-nav="CrossTestMkr">Перекрёстный тест МКР</a>.</li>
+            <li><a href="TabTrialsChapter/TabTestsChapter/RkommTestMkrPart.html" data-nav="RkommTestMkr">Сопротивление коммутатора</a>.</li>
+        </ul>
+
+        <h2>Порядок работы</h2>
+        <ol>
+            <li>Выберите раздел и нужный режим в меню «Испытания».</li>
+            <li>Во вкладке режима выберите оборудование и задайте необходимые параметры.</li>
+            <li>Запустите выполнение средствами этой вкладки.</li>
+            <li>Следите за сообщениями и результатами в протоколе выбранного режима.</li>
+        </ol>
+        <p>Набор оборудования и полей ввода зависит от выбранного режима и конфигурации системы.</p>
+
+        <h2>Доступность</h2>
+        <p>Меню доступно ролям «Администратор» и «Наладчик».
+            Для роли «Разработчик ПК» оно не отображается.</p>
+        <section class="note">
+            <p>Выбор пункта меню открывает рабочую вкладку. Само измерение или самоконтроль
+                начинается после отдельного запуска в этой вкладке.</p>
+        </section>
     </main>
 </body>
 </html>

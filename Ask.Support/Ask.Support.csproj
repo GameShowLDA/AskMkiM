@@ -833,6 +833,11 @@
 	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabExecutionChapter\RunPK_StepByStepModePart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabExecutionChapter\FuncRunAskMkiPart.html" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabExecutionChapter\translationExample.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabExecutionChapter\translationMenu.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabExecutionChapter\runLegacyMenu.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabExecutionChapter\runMenu.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
 	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabExecutionChapter\TranslationPKPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
@@ -905,6 +910,10 @@
 	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabArchiveChapter\createArchiveButtonImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabArchiveChapter\exportArchivesMenu.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabArchiveChapter\exportArchivesContextMenu.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabArchiveChapter\importArchiveMenu.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabArchiveChapter\importArchiveContextMenu.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
 	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabArchiveChapter\createArchiveContextMenuImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
@@ -1040,6 +1049,17 @@
 	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\FuncOpenPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\buttonOpenMenu.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\buttonCreateMenu.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\buttonConvertMenu.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\buttonExitMenu.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\buttonSearchMenu.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\buttonSaveMenu.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\buttonSaveAsMenu.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\buttonOpenFolderMenu.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\buttonPrintMenu.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\buttonCompareMenu.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\FuncComparePart.html" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
 	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\FuncPrintPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
@@ -1079,6 +1099,12 @@
 	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabArchiveChapter\windowAvailableArchivesImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabSettingsChapter\configurationOverview.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabSettingsChapter\configurationDeviceEditor.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabSettingsChapter\equipmentDelays.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabSettingsChapter\rolePasswordChange.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabSettingsChapter\SettingsDelaysPart.html" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabSettingsChapter\SettingsRolePasswordsPart.html" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
 	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabSettingsChapter\SettingsConfiguration1Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
@@ -1115,27 +1141,40 @@
 	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabSettingsChapter\SettingsProtocolPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabMetrologyChapter\UtilityModeKCMenu.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
 	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabMetrologyChapter\UtilityModeKCImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabMetrologyChapter\UtilityModeIEMenu.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
 	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabMetrologyChapter\UtilityModeIEImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabMetrologyChapter\UtilityModeSIMenu.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
 	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabMetrologyChapter\UtilityModeSIImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabMetrologyChapter\UtilityModePRMenu.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
 	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabMetrologyChapter\UtilityModePRImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabMetrologyChapter\UtilityModePIACWMenu.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabMetrologyChapter\UtilityModePIACWImage.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabMetrologyChapter\UtilityModePIDCWMenu.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabMetrologyChapter\UtilityModePIDCWImage.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
 	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabMetrologyChapter\UtilityModePI1Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabMetrologyChapter\UtilityModePI2Image.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabMetrologyChapter\UtilityModeKNACWMenu.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabMetrologyChapter\UtilityModeKNACWImage.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabMetrologyChapter\UtilityModeKNDCWMenu.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabMetrologyChapter\UtilityModeKNDCWImage.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
 	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabMetrologyChapter\UtilityModeKNImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabMetrologyChapter\UtilityModeEHTMenu.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
 	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabMetrologyChapter\ehtMetrologyPanelImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
@@ -1160,6 +1199,11 @@
 	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabMetrologyChapter\UtilityModeSIPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabSelfControlChapter\selfControlModuleMenu.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabSelfControlChapter\selfControlSystemMenu.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabSelfControlChapter\selfControlModuleCard.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabSelfControlChapter\selfControlDeviceListCard.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabSelfControlChapter\selfControlSystemCard.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
 	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabSelfControlChapter\part_selfControlModule.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
@@ -1175,12 +1219,22 @@
 	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabTestsChapter\CrossTestMkrPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabTestsChapter\CrossTestMkrMenu.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
 	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabTestsChapter\CrossTestMkrImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabTestsChapter\rkommTestMenu.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
 	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabTestsChapter\rkommTestPanelImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabTestsChapter\TabTestPIChapter\TestPINodeACWMenu.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabTestsChapter\TabTestPIChapter\TestPINodeACWImage.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabTestsChapter\TabTestPIChapter\TestPIGroupACWMenu.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabTestsChapter\TabTestPIChapter\TestPIGroupACWImage.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabTestsChapter\TabTestPIChapter\TestPINodeDCWMenu.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabTestsChapter\TabTestPIChapter\TestPINodeDCWImage.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabTestsChapter\TabTestPIChapter\TestPIGroupDCWMenu.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabTestsChapter\TabTestPIChapter\TestPIGroupDCWImage.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
 	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabTestsChapter\TabTestPIChapter\TestPINodeMethodImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
@@ -1193,9 +1247,11 @@
 	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabTestsChapter\TabTestPIChapter\TestPINodeMethodPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabTestsChapter\TabTestSIChapter\TestSINodeMethodMenu.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
 	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabTestsChapter\TabTestSIChapter\TestSINodeMethodImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabTestsChapter\TabTestSIChapter\TestSIGroupMethodMenu.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
 	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabTrialsChapter\TabTestsChapter\TabTestSIChapter\TestSIGroupMethodImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
@@ -1445,6 +1501,7 @@
 	  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\KeyErrorsChapter\ErrorKEY004_Part.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
+	  <Content Include="AppHelp\ru\Content\TranslatorChapter\image_TranslatorWindow-numbered.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
 	  <Content Include="AppHelp\ru\Content\TranslatorChapter\image_TranslatorWindow.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
@@ -2150,7 +2207,7 @@
 	  <PackageReference Include="Microsoft.AspNetCore.Server.Kestrel" Version="2.3.9" />
 	  <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.3.9" />
 	  <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.8" />
-	  <PackageReference Include="Photino.NET" Version="4.0.16" />
+	  <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3296.44" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -2180,6 +2237,22 @@
 	<ItemGroup>
 	  <Content Include="AppHelp\releases\*.json" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
 	  <Content Include="AppHelp\release-notes.js" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	  <Content Include="AppHelp\assets\theme-toggle\*" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	  <Content Include="AppHelp\vendor\lottie\*" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	  <Content Include="Styles\Semi.Avalonia.LICENSE.txt" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
 	</ItemGroup>
 
+  <ItemGroup>
+  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\CodeUNKNOWN_ERROR_Part.html" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\CodeWARNING_ERROR_Part.html" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\CodeWRNGEN001_Part.html" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\CodeWRNGEN003_Part.html" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\CodeWRNGEN004_Part.html" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\CodeWRNGEN006_Part.html" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\CodeWRNGEN007_Part.html" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\CodeWRNGEN008_Part.html" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\CodeWRNGEN009_Part.html" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\CodeWRNGEN011_Part.html" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\CodeWRNGEN012_Part.html" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
 </Project>
