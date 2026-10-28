@@ -13,6 +13,7 @@
 	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\APKWtoAPKconversionMenuImage.png" />
 	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabArchiveChapter\archiveButtonImage.png" />
 	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabArchiveChapter\archiveContextMenuImage.png" />
+	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\buttonCompareImage.png" />
 	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\buttonCreateImage.png" />
 	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\buttonExitImage.png" />
 	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabArchiveChapter\buttonOpenArchiveImage.png" />
