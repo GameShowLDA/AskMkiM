@@ -999,6 +999,12 @@ document.addEventListener('DOMContentLoaded', () => {
             closeImageViewer();
         }
     });
+    document.addEventListener('copy', event => {
+        if (imageLightbox && !imageLightbox.hidden) event.preventDefault();
+    });
+    imageLightbox?.addEventListener('selectstart', event => event.preventDefault());
+    imageLightbox?.addEventListener('dragstart', event => event.preventDefault());
+    imageLightboxImage?.addEventListener('contextmenu', event => event.preventDefault());
 
     function setNavigationWidth(width) {
         const minimum = parseFloat(getComputedStyle(primaryArea).minWidth);
