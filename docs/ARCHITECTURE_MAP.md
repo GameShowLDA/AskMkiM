@@ -57,6 +57,7 @@ Size/Foreground и анимации общей кнопки; лицензия с
 | Диапазоны напряжения ППУ, шаг и исключения | `Ask.Core/Shared/DTO/Devices/Breakdown/VoltageRange.cs`, `Ask.Device.Runtime/Device/GPT79904.cs` | [Диапазоны GPT](#breakdown-voltage-ranges), `VoltageManagment.cs`, `PiVoltageProcessor.cs`, `SiVoltageProcessor.cs`, `AppDbContext.Device.cs` |
 | Пробойная установка GPT | `Ask.Device.ResponseProcessor/BreakdownTester/`, `Ask.Core/Shared/Interfaces/DeviceInterfaces/BreakdownTester/` | `Ask.Device.Application/FunctionAdapters/GPT/`, `Ask.Device.Runtime/Function/GPT/`, `Ask.Device.Runtime/Device/GPT79904.cs` |
 | Источник напряжения/тока | `Ask.Core/Shared/Interfaces/DeviceInterfaces/PowerSourceModule/` | `Ask.Device.Application/FunctionAdapters/ModuleVoltageCurrent/`, `Ask.Device.Runtime/Function/ModuleVoltageCurrentSource/` |
+| Общий контракт программируемых источников питания | `Ask.Core/Shared/Interfaces/DeviceInterfaces/PowerSupply/IPowerSupply.cs` | `PowerSupply/Capabilities/`; [контракты](#programmable-power-supply-contracts); реализации пока отсутствуют |
 | Шасси и питание | `Ask.Core/Shared/Interfaces/DeviceInterfaces/Chassis/` | `Ask.Device.Runtime/Device/ManagerChassis.cs`, `Ask.Device.Runtime/Function/ManagerChassis/`, `Ask.Device.Emulator/Chassis/`, `UI/Components/PowerButton.xaml.cs` |
 | UPS | `Ask.Core/Shared/Interfaces/DeviceInterfaces/UninterruptiblePowerSupply/` | `Ask.Device.Application/FunctionAdapters/MikUps1101rRm/`, `Ask.Device.Runtime/Function/MikUps1101rRm/` |
 | COM | `Ask.Device.Runtime/Base/Device/DeviceWithCOM.cs` | `Ask.Device.Communication/Com/Protocols/ComProtocol.cs`, `Ask.Device.Communication/Com/Configuration/SerialPortCustom.cs` |
@@ -1903,6 +1904,28 @@ protocols to bounded `CommandHistoryService`.
 There are no separate concrete “Idle device” classes. Real and idle are branches
 inside application adapters, runtime managers and transports, all controlled by
 the global `ExecutionConfig`.
+
+### Programmable power supply contracts
+
+`Ask.Core/Shared/Interfaces/DeviceInterfaces/PowerSupply/IPowerSupply.cs` —
+общий контракт программируемого источника постоянного напряжения/тока, наследует `IDevice`.
+Namespace: `Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSupply`.
+Отдельные contracts в `PowerSupply/Capabilities/` (тот же namespace с `.Capabilities`):
+
+- `IVoltageManager` → `VoltageManager`: `MinVoltage`, `MaxVoltage`, `VoltageStep`,
+  `SetVoltageAsync` / `GetVoltageAsync` (вольты).
+- `ICurrentManager` → `CurrentManager`: `MinCurrent`, `MaxCurrent`, `CurrentStep`,
+  `SetCurrentAsync` / `GetCurrentAsync` (амперы, уставка ограничения тока).
+- `IOutputManager` → `OutputManager`: `SetOutputStateAsync` / `GetOutputStateAsync`.
+- `IMeasurementManager` → `MeasurementManager`: `MeasureVoltageAsync` / `MeasureCurrentAsync`.
+
+Уставки и измерения представлены `decimal`; все операции принимают `CancellationToken`.
+Шаг — программное ограничение уставок относительно минимума, не физическое разрешение выхода.
+Чтение уставки отделено от измерения фактического выхода. Общий интерфейс не требует шасси или DTO.
+Это пока только контракты: production implementations, DI, factories, Real/Idle и runtime call chains
+для `IPowerSupply` ещё отсутствуют. МиНТ продолжает использовать отдельный `IPowerSourceModule`;
+одноимённые `IVoltageManager`/`ICurrentManager` из `PowerSourceModule.Capabilities` имеют другой контракт.
+Прототип LAN/SCPI Б5-108 остаётся в `TestConsole/B5108/` и пока не реализует `IPowerSupply`.
 
 ### Device matrix
 
@@ -3775,6 +3798,9 @@ ErrorItem → translator/runner ErrorList
 
 | Type | Kind | Project | Responsibility | Section |
 | --- | --- | --- | --- | --- |
+| `IPowerSupply` | interface | Ask.Core | общий источник питания: отдельные менеджеры уставок напряжения/тока, выхода и измерений; пока без реализаций | [Power supply contracts](#programmable-power-supply-contracts) |
+| `PowerSupply.Capabilities.IVoltageManager`, `ICurrentManager` | interfaces | Ask.Core | программный шаг и диапазон, запись/чтение уставок в В/А | [Power supply contracts](#programmable-power-supply-contracts) |
+| `PowerSupply.Capabilities.IOutputManager`, `IMeasurementManager` | interfaces | Ask.Core | управление выходом и измерение фактических U/I | [Power supply contracts](#programmable-power-supply-contracts) |
 | `ReleaseNotesReader` | catalog reader | Ask.Support | чтение, строгая проверка JSON и числовая сортировка выпусков без запуска справки | [Release notes](#release-notes-catalog) |
 | `ReleaseNotesReadStateStore` | file storage | Ask.Support | атомарные отметки просмотренных версий по ролям, межпроцессный Mutex и Changed | [Release notes](#release-notes-catalog) |
 | `ReleaseNotesPrompt` | WPF control | Ask.UI | кнопка текущей версии пустого экрана до просмотра, синхронизация роли и отметок | [Release notes](#release-notes-catalog) |
