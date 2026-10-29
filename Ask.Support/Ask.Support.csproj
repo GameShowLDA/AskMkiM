@@ -1872,7 +1872,7 @@
 	  <Content Include="AppHelp\ru\Conservation\TestsAndUtilitiesChapter\Test_TestsMenuPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\FastMenuCommand.html">
+	  <Content Include="AppHelp\ru\FastMenuCommand.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\favicon.ico">

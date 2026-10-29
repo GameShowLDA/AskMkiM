@@ -184,9 +184,10 @@ namespace Ask.Support
     /// </summary>
     public static void OpenFastMenuCommand() 
     {
-      LogInformation($"Путь до старницы: /FastMenuCommand.html");
-      if (HelpViewerWindow._IsClose) HelpViewerWindow.LoadAndShow("/FastMenuCommand.html");
-      else HelpViewerWindow.Load("/FastMenuCommand.html");
+      const string url = "/ru/FastMenuCommand.html";
+      LogInformation($"Путь до старницы: {url}");
+      if (HelpViewerWindow._IsClose) HelpViewerWindow.LoadAndShow(url);
+      else HelpViewerWindow.Load(url);
     }
   }
 }

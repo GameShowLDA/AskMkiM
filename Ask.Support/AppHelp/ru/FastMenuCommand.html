@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Команды языка АСК - Справочное руководство</title>
+    <link rel="icon" href="../favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="../shell.css">
+    <link rel="stylesheet" href="../content.css">
+    <style>
+        body { overflow: hidden; }
+        .command-brand { cursor: default; }
+        .command-brand:hover { background: transparent; }
+
+        .command-page {
+            max-width: 1180px;
+            margin: 0 auto;
+            padding: 28px 40px 48px;
+        }
+
+        .command-page h1 { margin-bottom: 12px; }
+        .command-lead { max-width: 850px; margin: 0 0 28px; color: var(--muted); }
+
+        .command-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(240px, 1fr));
+            gap: 12px;
+        }
+
+        .command-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+            min-height: 68px;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            background: var(--sidebar);
+            color: var(--text);
+            text-align: left;
+            transition: background .15s ease, border-color .15s ease, transform .06s ease;
+        }
+
+        .command-card:hover { background: var(--hover); border-color: var(--accent); }
+        .command-card:active { transform: translateY(1px); }
+        .command-card:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+        .command-code {
+            display: grid;
+            flex: 0 0 48px;
+            place-items: center;
+            width: 48px;
+            height: 42px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            background: var(--selected);
+            color: var(--accent);
+            font-size: 17px;
+            font-weight: 700;
+        }
+
+        .command-name { display: grid; min-width: 0; gap: 2px; }
+        .command-name strong { overflow-wrap: anywhere; font-size: 14px; }
+        .command-name small { color: var(--muted); font-size: 12px; }
+
+        .command-toolbar[hidden], .nav-btn[hidden] { display: none; }
+        .command-toolbar .nav-buttons { width: 100%; justify-content: flex-end; }
+
+        #back-btn {
+            min-height: 40px;
+            gap: 8px;
+            padding: 0 16px 0 11px;
+            border-color: var(--border);
+            border-radius: 999px;
+            background: var(--surface);
+            color: var(--accent);
+            font-weight: 600;
+            box-shadow: 0 1px 2px rgba(34, 50, 70, .08);
+            transition: background .15s ease, border-color .15s ease, box-shadow .15s ease, transform .08s ease;
+        }
+
+        #back-btn:hover {
+            background: var(--selected);
+            border-color: var(--accent);
+            box-shadow: 0 3px 8px rgba(34, 50, 70, .14);
+            transform: translateX(-2px);
+        }
+
+        #back-btn:active { transform: translateX(-1px) scale(.98); }
+        #back-btn:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+        #back-btn svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+
+        .command-viewer[hidden] { display: none; }
+        .command-viewer { display: flex; flex: 1; min-height: 0; flex-direction: column; }
+        .command-viewer iframe { flex: 1; width: 100%; min-height: 0; border: 0; background: var(--surface); }
+
+        @media (max-width: 680px) {
+            .command-grid { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 600px) {
+            .command-page { padding: 20px 20px 32px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-main">
+            <span class="sidebar-toggle command-brand" aria-hidden="true">
+                <span class="sidebar-toggle-icon" aria-hidden="true">
+                    <span></span><span></span><span></span>
+                </span>
+            </span>
+            <div class="header-title">
+                <h1>Справочное руководство</h1>
+                <p>Программное обеспечение АСК-МКИ</p>
+            </div>
+        </div>
+        <div class="header-actions">
+            <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Включить темную тему">
+                <span class="theme-toggle-icon" aria-hidden="true">🌙</span>
+                <span class="theme-toggle-text">Темная тема</span>
+            </button>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="secondary-area">
+            <div class="nav-bar command-toolbar" id="command-toolbar" hidden>
+                <div class="nav-buttons">
+                    <button type="button" class="nav-btn" id="back-btn" aria-label="Вернуться к списку команд" title="Вернуться к списку команд">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14 6-6 6 6 6M8 12h12"/></svg>
+                        <span>К списку команд</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="content-area" id="command-list-area">
+                <main class="page-content command-page">
+                    <h1>Команды языка АСК</h1>
+                    <p class="command-lead">Выберите команду, чтобы открыть соответствующую статью справки. В списке оставлены команды, доступные в текущей версии транслятора и описанные в дереве справки.</p>
+
+                    <div class="command-grid" aria-label="Список команд">
+                        <button class="command-card" data-code="ОК" data-title="Команда ОК — Объект контроля" data-src="Content/LanguageControlProgramsChapter/ASK_MKIControlProgramLanguageChapter/CommandsOrganizingControlProcessChapter/CommandOK_Part.html">
+                            <span class="command-code">ОК</span><span class="command-name"><strong>Объект контроля</strong><small>Команда ОК</small></span>
+                        </button>
+                        <button class="command-card" data-code="СП" data-title="Команда СП — Схема подключения" data-src="Content/LanguageControlProgramsChapter/ASK_MKIControlProgramLanguageChapter/CommandsOrganizingControlProcessChapter/CommandSP_Part.html">
+                            <span class="command-code">СП</span><span class="command-name"><strong>Схема подключения</strong><small>Команда СП</small></span>
+                        </button>
+                        <button class="command-card" data-code="РМ" data-title="Команда РМ — Рабочее место" data-src="Content/LanguageControlProgramsChapter/ASK_MKIControlProgramLanguageChapter/CommandsOrganizingControlProcessChapter/CommandRM_Part.html">
+                            <span class="command-code">РМ</span><span class="command-name"><strong>Рабочее место</strong><small>Команда РМ</small></span>
+                        </button>
+                        <button class="command-card" data-code="ЦУ" data-title="Команда ЦУ — Сообщение оператору" data-src="Content/LanguageControlProgramsChapter/ASK_MKIControlProgramLanguageChapter/CommandsOrganizingControlProcessChapter/CommandTsU_Part.html">
+                            <span class="command-code">ЦУ</span><span class="command-name"><strong>Сообщение оператору</strong><small>Команда ЦУ</small></span>
+                        </button>
+                        <button class="command-card" data-code="УП" data-title="Команда УП — Условный переход" data-src="Content/LanguageControlProgramsChapter/ASK_MKIControlProgramLanguageChapter/CommandsOrganizingControlProcessChapter/CommandUP_Part.html">
+                            <span class="command-code">УП</span><span class="command-name"><strong>Условный переход</strong><small>Команда УП</small></span>
+                        </button>
+                        <button class="command-card" data-code="КЦ" data-title="Команда КЦ — Конец программы контроля" data-src="Content/LanguageControlProgramsChapter/ASK_MKIControlProgramLanguageChapter/CommandsOrganizingControlProcessChapter/CommandKTs_Part.html">
+                            <span class="command-code">КЦ</span><span class="command-name"><strong>Конец программы контроля</strong><small>Команда КЦ</small></span>
+                        </button>
+                        <button class="command-card" data-code="ПР" data-title="Команда ПР — Проверка релейная" data-src="Content/LanguageControlProgramsChapter/ASK_MKIControlProgramLanguageChapter/MeasurementCommandsChapter/CommandPR_Part.html">
+                            <span class="command-code">ПР</span><span class="command-name"><strong>Проверка релейная</strong><small>Команда ПР</small></span>
+                        </button>
+                        <button class="command-card" data-code="ЭТ" data-title="Команда ЭТ — Электронная 4-х-точка" data-src="Content/LanguageControlProgramsChapter/ASK_MKIControlProgramLanguageChapter/MeasurementCommandsChapter/CommandET_Part.html">
+                            <span class="command-code">ЭТ</span><span class="command-name"><strong>Электронная 4-х-точка</strong><small>Команда ЭТ</small></span>
+                        </button>
+                        <button class="command-card" data-code="СИ" data-title="Команда СИ — Сопротивление изоляции" data-src="Content/LanguageControlProgramsChapter/ASK_MKIControlProgramLanguageChapter/MeasurementCommandsChapter/CommandSI_Part.html">
+                            <span class="command-code">СИ</span><span class="command-name"><strong>Сопротивление изоляции</strong><small>Команда СИ</small></span>
+                        </button>
+                        <button class="command-card" data-code="ПИ" data-title="Команда ПИ — Прочность изоляции" data-src="Content/LanguageControlProgramsChapter/ASK_MKIControlProgramLanguageChapter/MeasurementCommandsChapter/CommandPI_Part.html">
+                            <span class="command-code">ПИ</span><span class="command-name"><strong>Прочность изоляции</strong><small>Команда ПИ</small></span>
+                        </button>
+                        <button class="command-card" data-code="КС" data-title="Команда КС — Контроль сопротивлений" data-src="Content/LanguageControlProgramsChapter/ASK_MKIControlProgramLanguageChapter/MeasurementCommandsChapter/CommandKC_Part.html">
+                            <span class="command-code">КС</span><span class="command-name"><strong>Контроль сопротивлений</strong><small>Команда КС</small></span>
+                        </button>
+                        <button class="command-card" data-code="НЭ" data-title="Команда НЭ — Нелинейные элементы" data-src="Content/LanguageControlProgramsChapter/ASK_MKIControlProgramLanguageChapter/MeasurementCommandsChapter/CommandNE_Part.html">
+                            <span class="command-code">НЭ</span><span class="command-name"><strong>Нелинейные элементы</strong><small>Команда НЭ</small></span>
+                        </button>
+                        <button class="command-card" data-code="ИЕ" data-title="Команда ИЕ — Измерение ёмкости" data-src="Content/LanguageControlProgramsChapter/ASK_MKIControlProgramLanguageChapter/MeasurementCommandsChapter/CommandIE_Part.html">
+                            <span class="command-code">ИЕ</span><span class="command-name"><strong>Измерение ёмкости</strong><small>Команда ИЕ</small></span>
+                        </button>
+                        <button class="command-card" data-code="ВШ" data-title="Команда ВШ — Включение шин коммутатора" data-src="Content/LanguageControlProgramsChapter/ASK_MKIControlProgramLanguageChapter/ASCDeviceManagementCommandsChapter/CommandVSh_Part.html">
+                            <span class="command-code">ВШ</span><span class="command-name"><strong>Включение шин коммутатора</strong><small>Команда ВШ</small></span>
+                        </button>
+                        <button class="command-card" data-code="ПТ" data-title="Команда ПТ — Подключение точек к шинам" data-src="Content/LanguageControlProgramsChapter/ASK_MKIControlProgramLanguageChapter/ASCDeviceManagementCommandsChapter/CommandPT_Part.html">
+                            <span class="command-code">ПТ</span><span class="command-name"><strong>Подключение точек к шинам</strong><small>Команда ПТ</small></span>
+                        </button>
+                        <button class="command-card" data-code="ОТ" data-title="Команда ОТ — Отключение точек от шин" data-src="Content/LanguageControlProgramsChapter/ASK_MKIControlProgramLanguageChapter/ASCDeviceManagementCommandsChapter/CommandOT_Part.html">
+                            <span class="command-code">ОТ</span><span class="command-name"><strong>Отключение точек от шин</strong><small>Команда ОТ</small></span>
+                        </button>
+                        <button class="command-card" data-code="СК" data-title="Команда СК — Сброс коммутатора" data-src="Content/LanguageControlProgramsChapter/ASK_MKIControlProgramLanguageChapter/ASCDeviceManagementCommandsChapter/CommandSK_Part.html">
+                            <span class="command-code">СК</span><span class="command-name"><strong>Сброс коммутатора</strong><small>Команда СК</small></span>
+                        </button>
+                        <button class="command-card" data-code="ОС" data-title="Команда ОС — Общий сброс" data-src="Content/LanguageControlProgramsChapter/ASK_MKIControlProgramLanguageChapter/ASCDeviceManagementCommandsChapter/CommandOS_Part.html">
+                            <span class="command-code">ОС</span><span class="command-name"><strong>Общий сброс</strong><small>Команда ОС</small></span>
+                        </button>
+                    </div>
+                </main>
+            </div>
+
+            <div class="command-viewer" id="command-viewer" hidden>
+                <iframe id="command-frame" title="Статья о команде" src=""></iframe>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">(c) Ижевский Мотозавод «Аксион-Холдинг», 2026</div>
+
+    <script src="../vendor/lottie/lottie_light.min.js"></script>
+    <script src="../assets/theme-toggle/dark-theme.js"></script>
+    <script>
+        (() => {
+            const themeToggle = document.getElementById('theme-toggle');
+            const themeIcon = themeToggle?.querySelector('.theme-toggle-icon');
+            const listArea = document.getElementById('command-list-area');
+            const viewer = document.getElementById('command-viewer');
+            const frame = document.getElementById('command-frame');
+            const commandToolbar = document.getElementById('command-toolbar');
+            const backButton = document.getElementById('back-btn');
+            const cards = [...document.querySelectorAll('.command-card')];
+            const themeKey = 'mki-help-theme';
+            const themeCookie = 'mki_help_theme';
+            let theme = 'light';
+            let themeAnimation = null;
+
+            function readCookie(name) {
+                const prefix = `${name}=`;
+                return document.cookie.split(';').map(value => value.trim())
+                    .find(value => value.startsWith(prefix))?.slice(prefix.length) || '';
+            }
+
+            function writeCookie(name, value) {
+                document.cookie = `${name}=${value}; path=/; max-age=31536000; SameSite=Lax`;
+            }
+
+            function updateThemeButton() {
+                const dark = theme === 'dark';
+                if (themeAnimation) {
+                    themeAnimation.resetSegments(true);
+                    themeAnimation.goToAndStop(dark ? 0 : 22, true);
+                } else if (themeIcon) {
+                    themeIcon.textContent = dark ? '☾' : '☀';
+                }
+                themeToggle?.setAttribute('aria-label', dark ? 'Включить светлую тему' : 'Включить темную тему');
+                themeToggle?.setAttribute('aria-pressed', String(dark));
+                if (themeToggle) themeToggle.title = themeToggle.getAttribute('aria-label');
+            }
+
+            function applyTheme(value) {
+                theme = value === 'dark' ? 'dark' : 'light';
+                document.body.classList.toggle('dark-theme', theme === 'dark');
+                window.chrome?.webview?.postMessage({ type: 'mki:theme', theme });
+                updateThemeButton();
+                frame.contentDocument?.body?.classList.toggle('dark-theme', theme === 'dark');
+            }
+
+            function readTheme() {
+                let stored = '';
+                try { stored = localStorage.getItem(themeKey) || ''; } catch { /* cookie fallback */ }
+                if (stored === 'dark' || stored === 'light') return stored;
+                return readCookie(themeCookie) === 'dark' ? 'dark' : 'light';
+            }
+
+            function showList(updateHistory = true) {
+                listArea.hidden = false;
+                viewer.hidden = true;
+                commandToolbar.hidden = true;
+                backButton.hidden = true;
+                frame.removeAttribute('src');
+                if (updateHistory && location.hash) history.pushState(null, document.title, `${location.pathname}${location.search}`);
+            }
+
+            function openCommand(card, updateHistory = true) {
+                if (!card?.dataset.src) return;
+                listArea.hidden = true;
+                viewer.hidden = false;
+                commandToolbar.hidden = false;
+                backButton.hidden = false;
+                frame.src = card.dataset.src;
+                if (updateHistory) location.hash = encodeURIComponent(card.dataset.code || '');
+            }
+
+            function openFromHash() {
+                const code = decodeURIComponent(location.hash || '').replace(/^#/, '');
+                const card = cards.find(item => item.dataset.code === code);
+                if (card) {
+                    openCommand(card, false);
+                    return true;
+                }
+                return false;
+            }
+
+            themeToggle?.addEventListener('click', () => {
+                const next = theme === 'dark' ? 'light' : 'dark';
+                try { localStorage.setItem(themeKey, next); } catch { /* cookie fallback */ }
+                writeCookie(themeCookie, next);
+                applyTheme(next);
+            });
+
+            cards.forEach(card => card.addEventListener('click', () => openCommand(card)));
+            backButton?.addEventListener('click', () => showList());
+            document.addEventListener('keydown', event => {
+                if ((event.key === 'Escape' || event.key === 'Esc') && !viewer.hidden) {
+                    event.preventDefault();
+                    showList();
+                }
+            });
+            frame.addEventListener('load', () => {
+                frame.contentDocument?.body?.classList.toggle('dark-theme', theme === 'dark');
+            });
+            window.addEventListener('hashchange', () => { if (!openFromHash()) showList(false); });
+            window.addEventListener('popstate', () => { if (!openFromHash()) showList(false); });
+
+            applyTheme(readTheme());
+            if (window.lottie && window.mkiHelpThemeAnimation && themeIcon) {
+                themeIcon.textContent = '';
+                themeAnimation = window.lottie.loadAnimation({
+                    container: themeIcon,
+                    renderer: 'svg',
+                    loop: false,
+                    autoplay: false,
+                    animationData: window.mkiHelpThemeAnimation
+                });
+                themeAnimation.setSpeed(2);
+                updateThemeButton();
+            }
+            if (!openFromHash()) showList(false);
+        })();
+    </script>
+</body>
+</html>
