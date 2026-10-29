@@ -13,6 +13,7 @@
 	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\APKWtoAPKconversionMenuImage.png" />
 	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabArchiveChapter\archiveButtonImage.png" />
 	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabArchiveChapter\archiveContextMenuImage.png" />
+	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\buttonCompareImage.png" />
 	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\buttonCreateImage.png" />
 	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\buttonExitImage.png" />
 	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabArchiveChapter\buttonOpenArchiveImage.png" />
@@ -35,6 +36,8 @@
 	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\enteringArchiveNameImage.png" />
 	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabArchiveChapter\exampleArchiveCatalogImage.png" />
 	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabArchiveChapter\fileManagementButtonsInArchiveImage.png" />
+	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\fileCompareMenuWindowImage.png" />
+	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\fileCompareMode.png" />
 	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\fileManagerReadModeImage.png" />
 	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabArchiveChapter\generalPlanOpenArchiveImage.png" />
 	  <None Remove="AppHelp\ru\Content\MainMenuChapter\TabArchiveChapter\listOfArchiveIfAvalibleImage.png" />
@@ -851,6 +854,9 @@
 	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabArchiveChapter\archiveContextMenuImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\buttonCompareImage.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
 	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\buttonConvertationImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
@@ -924,6 +930,12 @@
 	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabArchiveChapter\fileManagementButtonsInArchiveImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\fileCompareMenuWindowImage.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\fileCompareMode.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
 	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\findPanelImage.png">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
@@ -988,6 +1000,9 @@
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabArchiveChapter\openProgramControlInArchiveImage.png">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\FuncComparePart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\OPKtoPKconversionMenuImage.png">
@@ -1857,7 +1872,7 @@
 	  <Content Include="AppHelp\ru\Conservation\TestsAndUtilitiesChapter\Test_TestsMenuPart.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
-	  <Content Include="AppHelp\FastMenuCommand.html">
+	  <Content Include="AppHelp\ru\FastMenuCommand.html">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
 	  <Content Include="AppHelp\favicon.ico">

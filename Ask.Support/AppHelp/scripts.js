@@ -29,10 +29,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const contentFrame = $('#content-frame');
     const mainContent = $('.main-content');
     const themeToggle = $('#theme-toggle');
+    const sidebarToggle = $('#sidebar-toggle');
+    const imageLightbox = $('#image-lightbox');
+    const imageLightboxImage = $('#image-lightbox-image');
+    const imageLightboxClose = $('#image-lightbox-close');
 
     const FALLBACK_ID = 'GeneralInformation';
     const THEME_STORAGE_KEY = 'mki-help-theme';
     const THEME_COOKIE = 'mki_help_theme';
+    const SIDEBAR_STORAGE_KEY = 'mki-help-sidebar-collapsed';
     const BOOKMARKS_STORAGE_KEY = 'mki-help-bookmarks-v1';
     const LEGACY_BOOKMARKS_STORAGE_KEY = 'mki-bookmarks';
     const BOOKMARKS_COOKIE = 'mki_help_bookmarks';
@@ -83,6 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let pendingSelectionQuery = '';
     let pendingSelectionOptions = null;
     let currentTheme = 'light';
+    let activeImage = null;
     let frameObserver = null;
     let themeAnimation = null;
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -182,6 +188,91 @@ document.addEventListener('DOMContentLoaded', () => {
         const theme = getTheme() === 'dark' ? 'light' : 'dark';
         writeStoredTheme(theme);
         applyTheme(theme, true);
+    }
+
+    function openImageViewer(image) {
+        const rawSource = image?.getAttribute('src') || image?.src || image?.currentSrc;
+        let source = rawSource;
+
+        try {
+            source = rawSource
+                ? new URL(rawSource, image?.ownerDocument?.baseURI || location.href).href
+                : '';
+        } catch {
+            // Если URL нестандартный (например, data:), используем его как есть.
+        }
+
+        if (!source || !imageLightbox || !imageLightboxImage || !imageLightboxClose) return;
+
+        activeImage = image;
+        imageLightboxImage.src = source;
+        imageLightboxImage.alt = image.alt || 'Изображение из справки';
+        imageLightbox.scrollTop = 0;
+        imageLightbox.scrollLeft = 0;
+        imageLightbox.hidden = false;
+        document.body.classList.add('image-lightbox-open');
+        imageLightboxClose.focus();
+    }
+
+    function closeImageViewer() {
+        if (!imageLightbox || imageLightbox.hidden) return;
+
+        const imageToFocus = activeImage;
+        activeImage = null;
+        imageLightbox.hidden = true;
+        imageLightboxImage?.removeAttribute('src');
+        if (imageLightboxImage) imageLightboxImage.alt = '';
+        document.body.classList.remove('image-lightbox-open');
+
+        if (imageToFocus?.isConnected) imageToFocus.focus();
+    }
+
+    function handleContentImageDoubleClick(event) {
+        const image = event.target?.closest?.('img');
+        if (!image) return;
+
+        event.preventDefault();
+        openImageViewer(image);
+    }
+
+    function readSidebarCollapsed() {
+        try {
+            return localStorage.getItem(SIDEBAR_STORAGE_KEY) === 'true';
+        } catch {
+            return false;
+        }
+    }
+
+    function writeSidebarCollapsed(collapsed) {
+        try {
+            localStorage.setItem(SIDEBAR_STORAGE_KEY, String(collapsed));
+        } catch {
+            // При недоступном localStorage состояние всё равно работает до закрытия страницы.
+        }
+    }
+
+    function updateSidebarToggle(collapsed) {
+        if (!sidebarToggle) return;
+
+        sidebarToggle.setAttribute('aria-expanded', String(!collapsed));
+        sidebarToggle.setAttribute(
+            'aria-label',
+            collapsed ? 'Показать панель навигации' : 'Свернуть панель навигации'
+        );
+        sidebarToggle.title = collapsed ? 'Показать меню' : 'Свернуть меню';
+        sidebarToggle.dataset.collapsed = String(collapsed);
+    }
+
+    function applySidebarState(collapsed) {
+        mainContent.classList.toggle('sidebar-collapsed', collapsed);
+        updateSidebarToggle(collapsed);
+        requestAnimationFrame(fitFrame);
+    }
+
+    function toggleSidebar() {
+        const collapsed = !mainContent.classList.contains('sidebar-collapsed');
+        writeSidebarCollapsed(collapsed);
+        applySidebarState(collapsed);
     }
 
     function encodeBookmarks(ids) {
@@ -768,6 +859,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const doc = contentFrame.contentDocument;
         if (!doc) return;
 
+        doc.addEventListener('dblclick', handleContentImageDoubleClick);
         doc.addEventListener('keydown', focusSearchShortcut);
         frameObserver = new ResizeObserver(() => fitFrame());
         if (doc.body) frameObserver.observe(doc.body);
@@ -780,6 +872,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         $$('img', doc).forEach(img => {
+            img.style.cursor = 'zoom-in';
+            if (!img.title) img.title = 'Двойной щелчок для просмотра изображения в оригинальном размере';
+
             if (!img.complete) {
                 img.addEventListener('load', () => {
                     fitFrame();
@@ -893,6 +988,23 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     themeToggle?.addEventListener('click', toggleTheme);
+    sidebarToggle?.addEventListener('click', toggleSidebar);
+    imageLightboxClose?.addEventListener('click', event => {
+        event.preventDefault();
+        closeImageViewer();
+    });
+    document.addEventListener('keydown', event => {
+        if (event.key === 'Escape' && imageLightbox && !imageLightbox.hidden) {
+            event.preventDefault();
+            closeImageViewer();
+        }
+    });
+    document.addEventListener('copy', event => {
+        if (imageLightbox && !imageLightbox.hidden) event.preventDefault();
+    });
+    imageLightbox?.addEventListener('selectstart', event => event.preventDefault());
+    imageLightbox?.addEventListener('dragstart', event => event.preventDefault());
+    imageLightboxImage?.addEventListener('contextmenu', event => event.preventDefault());
 
     function setNavigationWidth(width) {
         const minimum = parseFloat(getComputedStyle(primaryArea).minWidth);
@@ -954,6 +1066,7 @@ document.addEventListener('DOMContentLoaded', () => {
     renderBookmarksTab();
     updateSearchPlaceholder();
     applyTheme(readStoredTheme());
+    applySidebarState(readSidebarCollapsed());
     if (window.lottie && window.mkiHelpThemeAnimation) {
         const icon = $('.theme-toggle-icon', themeToggle);
         icon.textContent = '';

@@ -1811,6 +1811,18 @@ PreStartupInitializer.InitializeHelpServer
 F1 → HelpProvider → HelpViewerWindow → HelpBrowserWindow (WPF/WebView2)
 ```
 
+Оболочка `AppHelp/ru/index.html` содержит левую панель навигации (вкладки «Меню»,
+«Поиск», «Закладки») и правую область содержимого. Кнопка `sidebar-toggle` в
+шапке переключает класс `main-content.sidebar-collapsed`: левая панель и разделитель
+скрываются, а правая область занимает всю ширину; повторное нажатие восстанавливает
+панель. Состояние `mki-help-sidebar-collapsed` хранится в `localStorage` и обновляет
+`aria-expanded`/подпись кнопки.
+Изображения в загруженном `content-frame` обрабатываются делегированным `dblclick`:
+исходный `src` (с разрешением относительно base URI iframe) открывается в
+родительском lightbox без ограничений размера, поэтому доступно прокручивание
+изображения в оригинальном разрешении.
+Ссылка «Закрыть просмотр (Esc)» и клавиша Escape закрывают lightbox.
+
 Дерево `AppHelp/ru/index.html` отражает верхний уровень меню из
 `MainWindow/MainWindow.xaml`: `TabFile` и `TabArchive` представлены отдельными
 темами. Команды меню `ArchiveMenu` маршрутизируются по своим `HelpProvider.HelpKey`
