@@ -118,6 +118,16 @@
                           BorderThickness="0"
                           Padding="0"
                           HorizontalContentAlignment="Stretch">
+                    <ToggleButton.Style>
+                        <Style TargetType="ToggleButton">
+                            <Setter Property="ToolTip" Value="Показать служебные сообщения операции"/>
+                            <Style.Triggers>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter Property="ToolTip" Value="Скрыть служебные сообщения операции"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ToggleButton.Style>
                     <ToggleButton.Template>
                         <ControlTemplate TargetType="ToggleButton">
                             <Grid Background="Transparent"
@@ -260,6 +270,7 @@
         </DataTemplate>
 
         <Style x:Key="ProtocolCommandHeaderToggleStyle" TargetType="ToggleButton">
+            <Setter Property="ToolTip" Value="Развернуть сообщения команды"/>
             <Setter Property="Focusable" Value="False"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Background" Value="Transparent"/>
@@ -373,6 +384,11 @@
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsChecked" Value="True">
+                    <Setter Property="ToolTip" Value="Свернуть сообщения команды"/>
+                </Trigger>
+            </Style.Triggers>
         </Style>
 
         <DataTemplate x:Key="ProtocolCommandHeaderTemplate">

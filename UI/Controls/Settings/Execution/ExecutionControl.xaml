@@ -60,7 +60,7 @@
 
                     <Icons:SuccessIconControlV2 
                         Grid.Column="1"
-                        x:Name="Success" 
+                        x:Name="Success" ToolTip="Сохранить изменения настроек выполнения"
                         Width="30"
                         Margin="10,0,0,0"
                         Height="30" 
@@ -70,7 +70,7 @@
                         />
 
                     <Icons:ErrorIconControlV2 
-                         x:Name="Error"
+                         x:Name="Error" ToolTip="Отменить изменения и восстановить сохранённые настройки выполнения"
                            Grid.Column="2"
                          Width="30"
                          Height="30" 
