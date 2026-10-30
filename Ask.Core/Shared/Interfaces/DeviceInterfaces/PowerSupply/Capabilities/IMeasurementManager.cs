@@ -1,3 +1,5 @@
+using Ask.Core.Shared.Interfaces.UiInterfaces;
+
 namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSupply.Capabilities
 {
   /// <summary>
@@ -9,14 +11,16 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSupply.Capabilities
     /// Измеряет выходное напряжение.
     /// </summary>
     /// <param name="cancellationToken">Токен отмены операции.</param>
+    /// <param name="userMessageService">Сервис взаимодействия с пользователем.</param>
     /// <returns>Измеренное напряжение в вольтах.</returns>
-    Task<decimal> MeasureVoltageAsync(CancellationToken cancellationToken = default);
+    Task<decimal> MeasureVoltageAsync(CancellationToken cancellationToken = default, IUserInteractionService? userMessageService = null);
 
     /// <summary>
     /// Измеряет выходной ток.
     /// </summary>
     /// <param name="cancellationToken">Токен отмены операции.</param>
+    /// <param name="userMessageService">Сервис взаимодействия с пользователем.</param>
     /// <returns>Измеренный ток в амперах.</returns>
-    Task<decimal> MeasureCurrentAsync(CancellationToken cancellationToken = default);
+    Task<decimal> MeasureCurrentAsync(CancellationToken cancellationToken = default, IUserInteractionService? userMessageService = null);
   }
 }

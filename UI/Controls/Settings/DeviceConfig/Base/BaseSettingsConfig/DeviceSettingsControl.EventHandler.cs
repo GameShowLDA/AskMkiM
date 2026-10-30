@@ -1,3 +1,4 @@
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSupply;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
@@ -117,6 +118,10 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
         {
           ShowFastMeterAdditionalSettings();
         }
+        else if (typeof(IPowerSupply).IsAssignableFrom(selectedType))
+        {
+          ShowPowerSupplyAdditionalSettings();
+        }
         else if (typeof(IBreakdownTester).IsAssignableFrom(selectedType))
         {
           ShowBreakdownTesterAdditionalSettings();
@@ -141,6 +146,7 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
 
     private void ResetSettingsForDeviceModelChange()
     {
+      _powerSupplyPortTextBox = null;
       AdditionalSettingsContainer.Content = null;
       _acwPpuDividerCoefficientPercentTextBox = null;
       _dcwPpuDividerCoefficientPercentTextBox = null;

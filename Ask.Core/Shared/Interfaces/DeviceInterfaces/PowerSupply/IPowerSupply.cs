@@ -1,11 +1,12 @@
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSupply.Capabilities;
+using Ask.Core.Shared.DTO.Devices.PowerSupply;
 
 namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSupply
 {
   /// <summary>
   /// Предоставляет управление программируемым источником постоянного напряжения и тока.
   /// </summary>
-  public interface IPowerSupply : IDevice
+  public interface IPowerSupply : IAttachableDevice, IDeviceToDtoConverter<PowerSupplyDto>
   {
     /// <summary>
     /// Управление уставкой напряжения.

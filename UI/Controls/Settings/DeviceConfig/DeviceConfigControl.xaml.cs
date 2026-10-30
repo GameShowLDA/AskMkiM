@@ -1,3 +1,5 @@
+using Ask.Core.Shared.DTO.Devices.PowerSupply;
+using UI.Controls.Settings.DeviceConfig.PowerSupply;
 using Ask.Core.Shared.DTO.Devices.Breakdown;
 using Ask.Core.Shared.DTO.Devices.Base;
 using Ask.Core.Shared.DTO.Devices.ChassisManager;
@@ -42,6 +44,7 @@ namespace UI.Controls.Settings.DeviceConfig
   public partial class DeviceConfigControl : UserControl
   {
     private const double DeviceConfigDrawerPanelWidth = 470d;
+    private readonly PowerSupplyDtoService _powerSupplyDtoService = new();
     private readonly BreakdownTesterDtoService _breakdownTesterDtoService = new();
     private readonly FastMeterDtoService _fastMeterDtoService = new();
     private readonly PowerSourceModuleDtoService _powerSourceModuleDtoService = new();
@@ -283,6 +286,19 @@ namespace UI.Controls.Settings.DeviceConfig
       await OpenWindowInDrawerAsync(window, "Редактирование устройства", "F4 - закрыть");
     }
 
+    private async void Devices_PowerSupplyEvent(IHeadUnit headUnit, IChassisManager system,
+      DeviceManagerControl devices, PowerSupplyDto? editingEntity = null)
+    {
+      if (!_isEditingEnabled) return;
+      var window = new PowerSupplyWindow();
+      window.SetSettings(headUnit, editingEntity);
+      window.RequestSave += async (_, dto) => await RefreshDeviceAsync(devices, system.Number, dto);
+      window.CloseActionOverride = () => DrawerHostService.Instance.Close();
+      var content = window.DetachSettingsControl();
+      await DrawerHostService.Instance.OpenContentAsync(content, "Источник питания", "F4 - закрыть",
+        panelWidth: DeviceConfigDrawerPanelWidth);
+    }
+
     private async void Devices_UninterruptiblePowerSupplyEvent(object? sender, IHeadUnit e, IChassisManager system, DeviceManagerControl devices)
     {
       if (!_isEditingEnabled)
@@ -497,6 +513,7 @@ namespace UI.Controls.Settings.DeviceConfig
     /// <param name="chassisNumber">Номер шасси.</param>
     private async Task DeleteDevicesForChassisAsync(int chassisNumber)
     {
+      var externalPowerSupplies = await _powerSupplyDtoService.GetDevicesByNumberChassisAsync(chassisNumber);
       var racks = (await Racks.GetAllAsync()).Where(rack => rack.NumberChassis == chassisNumber).ToList();
       var breakdownTesters = await _breakdownTesterDtoService.GetDevicesByNumberChassisAsync(chassisNumber);
       var fastMeters = await _fastMeterDtoService.GetDevicesByNumberChassisAsync(chassisNumber);
@@ -504,6 +521,9 @@ namespace UI.Controls.Settings.DeviceConfig
       var relaySwitchModules = await _relaySwitchModuleDtoService.GetDevicesByNumberChassisAsync(chassisNumber);
       var switchingDevices = await _switchingDeviceDtoService.GetDevicesByNumberChassisAsync(chassisNumber);
       var uninterruptiblePowerSupplies = await _uninterruptiblePowerSupplyDtoService.GetDevicesByNumberChassisAsync(chassisNumber);
+
+      foreach (var source in externalPowerSupplies)
+        await PowerSupplies.DeleteAsync(PowerSupplies.Build(source));
 
       foreach (var device in breakdownTesters)
       {
@@ -618,6 +638,8 @@ namespace UI.Controls.Settings.DeviceConfig
     private void ConfigureDeviceManagerControl(DeviceManagerControl devices, IChassisManager system)
     {
       devices.SetHeadUnit(system);
+      devices.PowerSupplyEvent += (_, headUnit) => Devices_PowerSupplyEvent(headUnit, system, devices);
+      devices.EditPowerSupplyEvent += (_, dto) => Devices_PowerSupplyEvent(system, system, devices, dto);
       devices.AddBreakdownEvent += (s, a) => Devices_AddBreakdownEvent(s, a, system, devices);
       devices.DeviceBusCommutationSelected += (s, a) => Devices_DeviceBusCommutationSelected(s, a, system, devices);
       devices.PowerModuleEvent += (s, a) => Devices_PowerModuleEvent(s, a, system, devices);
@@ -671,6 +693,7 @@ namespace UI.Controls.Settings.DeviceConfig
       int chassisNumber,
       CancellationToken cancellationToken)
     {
+      var externalPowerSuppliesTask = _powerSupplyDtoService.GetDevicesByNumberChassisAsync(chassisNumber, cancellationToken);
       var breakdownTask = _breakdownTesterDtoService.GetDevicesByNumberChassisAsync(chassisNumber, cancellationToken);
       var fastMetersTask = _fastMeterDtoService.GetDevicesByNumberChassisAsync(chassisNumber, cancellationToken);
       var powerSourcesTask = _powerSourceModuleDtoService.GetDevicesByNumberChassisAsync(chassisNumber, cancellationToken);
@@ -679,6 +702,7 @@ namespace UI.Controls.Settings.DeviceConfig
       var uninterruptiblePowerSuppliesTask = _uninterruptiblePowerSupplyDtoService.GetDevicesByNumberChassisAsync(chassisNumber, cancellationToken);
 
       await Task.WhenAll(
+        externalPowerSuppliesTask,
         breakdownTask,
         fastMetersTask,
         powerSourcesTask,
@@ -691,6 +715,7 @@ namespace UI.Controls.Settings.DeviceConfig
         return;
       }
 
+      AddDevices(devices, await externalPowerSuppliesTask);
       AddDevices(devices, await breakdownTask);
       AddDevices(devices, await fastMetersTask);
       AddDevices(devices, await powerSourcesTask);
@@ -708,6 +733,10 @@ namespace UI.Controls.Settings.DeviceConfig
 
       switch (device)
       {
+        case PowerSupplyDto powerSupply:
+          await RefreshDeviceListAsync(devices, powerSupply, _powerSupplyDtoService.GetDevicesByNumberChassisAsync(chassisNumber));
+          break;
+
         case BreakdownTesterDto breakdownTester:
           await RefreshDeviceListAsync(
             devices,

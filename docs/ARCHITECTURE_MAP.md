@@ -57,7 +57,9 @@ Size/Foreground и анимации общей кнопки; лицензия с
 | Диапазоны напряжения ППУ, шаг и исключения | `Ask.Core/Shared/DTO/Devices/Breakdown/VoltageRange.cs`, `Ask.Device.Runtime/Device/GPT79904.cs` | [Диапазоны GPT](#breakdown-voltage-ranges), `VoltageManagment.cs`, `PiVoltageProcessor.cs`, `SiVoltageProcessor.cs`, `AppDbContext.Device.cs` |
 | Пробойная установка GPT | `Ask.Device.ResponseProcessor/BreakdownTester/`, `Ask.Core/Shared/Interfaces/DeviceInterfaces/BreakdownTester/` | `Ask.Device.Application/FunctionAdapters/GPT/`, `Ask.Device.Runtime/Function/GPT/`, `Ask.Device.Runtime/Device/GPT79904.cs` |
 | Источник напряжения/тока | `Ask.Core/Shared/Interfaces/DeviceInterfaces/PowerSourceModule/` | `Ask.Device.Application/FunctionAdapters/ModuleVoltageCurrent/`, `Ask.Device.Runtime/Function/ModuleVoltageCurrentSource/` |
-| Общий контракт программируемых источников питания | `Ask.Core/Shared/Interfaces/DeviceInterfaces/PowerSupply/IPowerSupply.cs` | `PowerSupply/Capabilities/`; [контракты](#programmable-power-supply-contracts); реализации пока отсутствуют |
+| Внешний источник питания Б5-108, общий контракт источников | `Ask.Core/Shared/Interfaces/DeviceInterfaces/PowerSupply/IPowerSupply.cs`, `Ask.Device.Runtime/Device/B5108.cs` | `Ask.Device.Runtime/Function/B5108/`, `Ask.Device.Application/FunctionAdapters/B5108/`; [контракты и выполнение](#programmable-power-supply-contracts) |
+| БД и сервисный UI внешних источников питания | `Ask.DataBase.Engine/Static/Devices/PowerSupplies.cs`, `Ask.UI/Features/ServiceTools/PowerSupply/PowerSupplyControl.xaml(.cs)` | DTO/service/mapper, `AdminServices.GetPowerSuppliesAsync`, общая форма конфигурации; [полная цепочка](#programmable-power-supply-contracts) |
+| Добавление Б5-108 и IP-настройки выбранного тестера | `UI/Controls/Settings/DeviceConfig/PowerSupply/PowerSupplyWindow.xaml.cs` | общий `DeviceSettingsControl`, partial `.PowerSupply.cs`, `DeviceConfigControl`, `DeviceManagerControl`; [цепочки](#programmable-power-supply-contracts) |
 | Шасси и питание | `Ask.Core/Shared/Interfaces/DeviceInterfaces/Chassis/` | `Ask.Device.Runtime/Device/ManagerChassis.cs`, `Ask.Device.Runtime/Function/ManagerChassis/`, `Ask.Device.Emulator/Chassis/`, `UI/Components/PowerButton.xaml.cs` |
 | UPS | `Ask.Core/Shared/Interfaces/DeviceInterfaces/UninterruptiblePowerSupply/` | `Ask.Device.Application/FunctionAdapters/MikUps1101rRm/`, `Ask.Device.Runtime/Function/MikUps1101rRm/` |
 | COM | `Ask.Device.Runtime/Base/Device/DeviceWithCOM.cs` | `Ask.Device.Communication/Com/Protocols/ComProtocol.cs`, `Ask.Device.Communication/Com/Configuration/SerialPortCustom.cs` |
@@ -87,6 +89,8 @@ Size/Foreground и анимации общей кнопки; лицензия с
 | Встроенная справка и окно | `Ask.Support/HelpViewerWindow.cs`, `Ask.Support/HelpBrowserWindow.xaml(.cs)` | `Ask.Support/HelpServer.cs`, `Ask.Support/HelpProvider.cs`, `Ask.Support/AppHelp/` |
 
 ## Runtime Flow Index
+
+- [Внешний источник: БД → runtime → root-сервисная панель](#programmable-power-supply-contracts)
 
 - [Чтение JSON истории выпусков без UI](#release-notes-catalog)
 - [Подключаемый поиск и существующий поиск редактора](#pluggable-text-search)
@@ -1908,7 +1912,7 @@ the global `ExecutionConfig`.
 ### Programmable power supply contracts
 
 `Ask.Core/Shared/Interfaces/DeviceInterfaces/PowerSupply/IPowerSupply.cs` —
-общий контракт программируемого источника постоянного напряжения/тока, наследует `IDevice`.
+общий контракт внешнего программируемого источника постоянного напряжения/тока, наследует `IAttachableDevice`.
 Namespace: `Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSupply`.
 Отдельные contracts в `PowerSupply/Capabilities/` (тот же namespace с `.Capabilities`):
 
@@ -1921,17 +1925,166 @@ Namespace: `Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSupply`.
 
 Уставки и измерения представлены `decimal`; все операции принимают `CancellationToken`.
 Шаг — программное ограничение уставок относительно минимума, не физическое разрешение выхода.
-Чтение уставки отделено от измерения фактического выхода. Общий интерфейс не требует шасси или DTO.
-Это пока только контракты: production implementations, DI, factories, Real/Idle и runtime call chains
-для `IPowerSupply` ещё отсутствуют. МиНТ продолжает использовать отдельный `IPowerSourceModule`;
-одноимённые `IVoltageManager`/`ICurrentManager` из `PowerSourceModule.Capabilities` имеют другой контракт.
-Прототип LAN/SCPI Б5-108 остаётся в `TestConsole/B5108/` и пока не реализует `IPowerSupply`.
+Чтение уставки отделено от измерения фактического выхода. `IPowerSupply.NumberChassis` задаёт логическую принадлежность выбранному тестеру;
+источник остаётся внешним устройством, не модулем МиНТ. Также наследует `IDeviceToDtoConverter<PowerSupplyDto>`. `B5108.Convert()` сохраняет конфигурацию и TCP-порт.
+Внешние источники не объединяются с модулем МиНТ и его `IPowerSourceModule`.
+
+Runtime implementation: `Ask.Device.Runtime/Device/B5108.cs` (`Ask.Device.Runtime.Device.B5108`)
+наследует `DeviceWithTcpIp`. Конструктор задаёт тип `DeviceType.PowerSupply`, порт 80,
+timeout 3000 мс, команды `*IDN?` / `*RST`, ожидаемую модель `B5-108`.
+Адрес передаётся конструктору или через `ConnectionDetails`; IP не зашит в production-код.
+Значение enum добавлено после `Unknown`, прежняя нумерация сохранена.
+
+Конструктор создаёт отдельные `VoltageManager(this)`, `CurrentManager(this)`,
+`OutputManager(this)`, `MeasurementManager(this)` в `Ask.Device.Runtime/Function/B5108/`.
+Подключение — существующий `Function/Base/Connected/Transport(this)`.
+Общий TCP-транспорт получил ветку `IPowerSupply` в `TcpTransport`:
+идентификация через протокол, один канал вместо отдельного диагностического сокета,
+закрытие реального протокола при отключении, отправка `*RST` при сбросе.
+Другие устройства сохраняют свои существующие ветки подключения.
+
+Прикладная композиция: `Ask.Device.Application/Composition/DeviceApplicationComposer.cs`
+→ четыре отдельных adapters из `FunctionAdapters/B5108/`
+→ создание соответствующих runtime-менеджеров с устройством.
+Общая оболочка `EquipmentTrackingConnectable` продолжает регистрировать обращения к подключению.
+Для методов capability-интерфейсов после `CancellationToken` предусмотрен необязательный
+`IUserInteractionService`, передаваемый прикладным adapters в `UserActionHelper`.
+Runtime-менеджеры связывают токен аргумента с токенами `IUserInteractionService`
+и `EquipmentExecutionContext` до ожидания общей блокировки и передают его в TCP/Idle-запросы.
+Ветка источника в `TcpTransport` также связывает отмену UI и контекста выполнения.
+
+Call chains:
+
+- `ConnectableManager.ConnectAsync/InitializeAsync` → `Transport` → `UserActionHelper`
+  → `TcpTransport` → `DeviceProtocolEmulator.CreatePowerSupply` → `*IDN?`
+  → `PowerSupplyResponseProcessor.CheckInitialization` → `ConnectionInfo.IsConnected`
+  → `EquipmentMessages`.
+- `VoltageManagerAdapter.SetVoltageAsync` / `CurrentManagerAdapter.SetCurrentAsync`
+  → `UserActionHelper.RunWithUserRepeatAsync` → runtime `VoltageManager` / `CurrentManager`
+  → проверка диапазона 0–150 В / 0–5 А и шага 0.1 В / 0.001 А
+  → общий per-device `OperationLock` протокола из `CreatePowerSupply`
+  → `VOLT:LIM?` / `CURR:LIM?` → проверка текущего LIM
+  → `VOLT <value>` / `CURR <value>` без ожидания ответа
+  → `SYST:ERR?` → `PowerSupplyResponseProcessor.EnsureNoError`
+  → `VOLT?` / `CURR?` → `EnsureSetpoint` → публикация результата adapter.
+- `OutputManagerAdapter` → `UserActionHelper` → runtime `OutputManager`
+  → общая блокировка → `OUTP ON/OFF` → `SYST:ERR?` → `OUTP?` → проверка readback.
+  Getter возвращает `false` для выключенного выхода как успешный результат операции.
+- Getters уставок → `VOLT?/CURR?`; `MeasurementManager` → `MEAS:VOLT?/MEAS:CURR?`
+  → `PowerSupplyResponseProcessor.ParseNumber` / `ParseOutputState`.
+- Общая Real/Idle-подцепочка: `Ask.Device.Emulator/DeviceProtocolEmulator.cs`
+  → `CreatePowerSupply` (ConditionalWeakTable по IPowerSupply, общая блокировка транзакций)
+  → существующий `ModeSelectingDeviceProtocol` с отменой из `EquipmentExecutionContext`
+  → Real: `device.DeviceProtocol` → `TcpProtocol`
+  → `EnsureConnectionAsync` → `TcpClient.ConnectAsync`
+  → `SendCommandAsync` → ASCII + LF / `NetworkStream.WriteAsync`
+  → `NetworkStream.ReadAsync` до LF (фрагментированные ответы, максимум 8192 символа).
+  Ограничение длительности Real-операции обеспечивает готовый `ModeSelectingDeviceProtocol`.
+  Числа SCPI представлены `decimal` и invariant culture.
+- Idle: тот же поток SCPI-команд → `Ask.Device.Emulator/PowerSupply/PowerSupplyEmulatorProtocol.cs`.
+  Эмулятор хранит U/I и выход; сетевых обращений нет. Измеренное напряжение равно уставке при
+  включённом выходе, иначе 0; ток равен 0 (нагрузка не моделируется).
+  `IdleHardwareErrorSimulator` создаёт `DeviceException`; переключение режима не переносит
+  Idle-уставки в физический источник.
+- `Transport.DisconnectAsync` → `TcpTransport` → блокировка общего протокола
+  → dispose реального протокола → закрытие сокета → IsConnected=false.
+  `ResetAsync` → `*RST` через Real/Idle → закрытие канала → IsConnected=false → `IsReset`.
+  Real-сброс перезапускает прибор; его состояние после старта зависит от сохранённых настроек.
+
+Ответы разбирает `Ask.Device.ResponseProcessor/PowerSupply/PowerSupplyResponseProcessor.cs`.
+Разбор системной ошибки переиспользует существующий SCPI checker мультиметра.
+Диапазон/шаг/LIM → `ArgumentOutOfRangeException`; ошибка SCPI/readback/формата → `DeviceException`;
+нет ответа → существующий `DeviceNoResponseException`, пользовательская отмена распространяется.
+Adapters публикуют аппаратные ошибки и передают их существующему `UserActionHelper` для Retry/Abort.
+`EquipmentMessages.PublishPowerSupplyOperationResultAsync` → `EquipmentMessageBuilder`
+→ `EquipmentMessagePublisher`; внешний источник отображается без фиктивного адреса шасси.
+Общие сообщения подключения/инициализации/отключения/сброса также поддерживают `IPowerSupply`.
+Setters не включают выход, не меняют LIM и не вызывают `*SAV`.
+
+`TcpProtocol` сохраняет исходный двухаргументный конструктор и режим чтения остальных устройств;
+третий аргумент включает чтение до LF. `Dispose` закрывает текущий канал, следующий запрос может
+открыть новый. При отмене LF-чтения канал закрывается во избежание позднего ответа следующей команде.
+В LF-режиме ошибки отправки не скрываются: I/O/socket → `DeviceTransportException` для setters;
+ошибки чтения → `DeviceNoResponseException`. Legacy-ветки остальных устройств не изменены.
+
+Проверки: `Ask.Engine.UnitTests/DeviceRuntime/B5108Tests.cs` — раздельные менеджеры/композиция,
+валидация, readback/errors, Idle, отмена, сериализация параллельных U/I и loopback TCP.
+Отдельно проверена отмена из UI во время уже выполняющегося запроса измерения.
+БД: `Ask.Core/Shared/DTO/Devices/PowerSupply/PowerSupplyDto.cs` → отдельная таблица `PowerSupplies`
+в `AppDbContext.Device.cs`. Поля AttachableDeviceDto (включая NumberChassis) + TCP `Port` (по умолчанию 80).
+Текущие U/I и включение выхода в БД не сохраняются.
+`Ask.DataBase.Provider/Services/Devices/PowerSupplyDtoService.cs` использует существующий `CrudService<T>`.
+`Ask.DataBase.Engine/Static/Devices/PowerSupplies.cs` → `DeviceRuntime` → ветки `IPowerSupply` в `DeviceEngine`
+→ DTO service → `PowerSupplyMapper` / `DeviceMapperRegistry` → `DeviceBuilder`
+→ `DeviceApplicationComposer` → runtime с отдельными прикладными adapters.
+Поддержаны Create/CreateRange/GetById/GetAll/GetByNumber/Update/Delete/DeleteAll, а также
+GetDevicesByNumberChassis/GetDeviceByNumberChassis. Номер источника уникален внутри выбранного тестера. Маппер переносит общие поля через ReflectionMapper и порт в ConnectedProfile.
+При удалении/замене записи DeviceCache освобождает `B5108.Dispose` → TCP-протокол.
+
+Схема: миграции `20261029090000_AddExternalPowerSupplies`, `20261029100000_AddPowerSupplyChassis` и snapshot,
+общий SQL `Ask.DataBase.Provider/Services/Devices/PowerSupplyStorageSql.cs`.
+`DatabaseInitializationService.InitializeAsync` после применения/принятия схемы вызывает
+`EnsurePowerSupplyStorageAsync`: CREATE TABLE IF NOT EXISTS нужен также для legacy-БД,
+миграции которых принимаются как уже применённые. Существующие строки не меняются;
+настроенные устройства автоматически не создаются. Новая колонка NumberChassis добавляется
+также в legacy-таблицу; старые записи без принадлежности сохраняют NumberChassis=0,
+тестер за пользователя не выбирается. В root-редакторе БД таблица видна через reflection DbSet.
+Проверки: `Ask.Engine.UnitTests/DataBase/PowerSupplyStorageTests.cs` — миграции новой базы,
+идемпотентное добавление таблицы и сохранение старых данных, CRUD и восстановление LAN-конфигурации.
+
+Конфигурация UI (общий список устройств выбранного тестера):
+`UI/Controls/Settings/DeviceConfig/DeviceManager/DeviceManagerControl.xaml(.cs)`
+содержит отдельный `DeviceListControl` с заголовком «Источник питания».
+`PopulateDevicesAsync` в `DeviceConfigControl.xaml.cs` загружает DTO только по NumberChassis
+выбранного тестера; события PowerSupplyEvent/EditPowerSupplyEvent открывают
+`UI/Controls/Settings/DeviceConfig/PowerSupply/PowerSupplyWindow.xaml(.cs)` в существующем DrawerHost.
+
+Добавление/редактирование:
+`PowerSupplyWindow.SetSettings(headUnit, editingDto)` → общий `DeviceSettingsControl`
+→ `LoadDeviceModels<IPowerSupply>` → ReflectionHelper → B5108
+→ определение DeviceWithIP → общий блок IP, общая валидация и синхронизация номера с последним октетом.
+Дополнительные параметры TCP находятся в partial `DeviceSettingsControl.PowerSupply.cs`:
+поле TCP-порта, default 80, допустимы 1–65535. `LoadFromDevice` восстанавливает порт и IP.
+`SaveEvent` → `DeviceSettingsProcessorBase.ProcessDevice<PowerSupplyDto>`
+(общий номер, IP и NumberChassis) → порт → DeviceBuilder → PowerSupplies.Create/Update
+→ RequestSave → RefreshDeviceListAsync по текущему тестеру.
+Удаление → `DeviceListControl.RemoveDeviceFromDatabaseAsync` → PowerSupplies.Delete;
+удаление тестера также удаляет его источники через DeleteDevicesForChassisAsync.
+Права редактирования секции наследуют общий SetEditingEnabled, отдельного root-ограничения
+на конфигурацию источника нет.
+
+Экспорт/импорт/печать:
+`UI/Controls/Settings/Configuration/DeviceConfigurationFileModel.cs` содержит PowerSupplies;
+DeviceConfigurationService экспортирует NumberChassis/IP/Port, проверяет принадлежность тестеру,
+дубликаты в пределах тестера и TCP-порт; импорт включает источники в существующую транзакционную
+полную замену конфигурации. Старые JSON без раздела читаются с пустым списком, как остальные секции.
+DeviceConfigurationPrintService выводит раздел «Источник питания» у соответствующего тестера и TCP-порт.
+
+Сервисное управление UI:
+root → Администрирование → Сервисные утилиты → «Источники питания».
+`AdminServices.GetPowerSuppliesAsync` → PowerSupplies.GetAllAsync
+→ `ServiceUtilitiesControl` → `Ask.UI/Features/ServiceTools/PowerSupply/PowerSupplyControl.xaml(.cs)`.
+Здесь только выбор уже настроенного источника и ручное управление, без сохранения LAN и создания записей.
+Список показывает модель, номер тестера и номер источника; справа остаётся общая консоль SetCommand.
+Уставки редактируются через NumericComboBox: U в В с шагом 0.1 В, I в мА с шагом 1 мА,
+перед CurrentManager значение переводится в амперы.
+Подключение → ConnectableManager.InitializeAsync → чтение уставок/выхода/измерений, без включения выхода.
+Отключение связи не является выключением выхода; выключение выхода доступно и при непроставленном IsConnected.
+Выход и измерения вызывают отдельные managers; polling отсутствует.
+Операции защищены ExecutionRunGuard, текущей ролью Root и отменой при Unloaded/кнопке отмены.
+Ошибки выводятся в StatusText и общий журнал, светлая/тёмная темы используют существующие resources.
+Root-сервисные функции не добавляются в пользовательскую справку.
+Проверки UI: `Ask.UI.UnitTests/Features/ServiceTools/PowerSupplyControlTests.cs`
+и `PowerSupplyConfigurationTests.cs`: общий IP-редактор и TCP-порт, секция списка, привязка
+к тестеру в JSON, root-сервисное управление и рендер тематических состояний.
+Независимый исследовательский прототип остаётся в `TestConsole/B5108/`.
 
 ### Device matrix
 
 | Interface | Runtime implementation | Managers/adapters | Protocol/transport | DB facade |
 | --- | --- | --- | --- | --- |
 | `IChassisManager` | `ManagerChassis` | runtime `PowerManager`; no application adapter | `ChassisQueryExecutor` → Real UDP / stateful Idle emulator | `ChassisManagers` |
+| `IPowerSupply` | `B5108` | отдельные Voltage/Current/Output/Measurement managers, общий Transport + application adapters | Real TCP:80 / PowerSupplyEmulatorProtocol | `PowerSupplies` |
 | `IRelaySwitchModule` | `ModuleRelayControl` | adapters for Point/Bus/Meter; runtime SelfTest | `ModuleRelayControlQueryExecutor` → Real UDP / stateful Idle emulator | `RelaySwitchModules` |
 | `IPowerSourceModule` | `ModuleVoltageCurrentSource` | adapters for Voltage/Current/Bus; runtime SelfTest | `Transport` → UDP | `PowerSourceModules` |
 | `ISwitchingDevice` | `DeviceBusCommutation` | adapters for Connector/Relay/Resistor/Capacitor; runtime SelfTest | `DeviceBusCommutationQueryExecutor` → Real UDP / Idle emulator | `SwitchingDevices` |
@@ -3798,7 +3951,10 @@ ErrorItem → translator/runner ErrorList
 
 | Type | Kind | Project | Responsibility | Section |
 | --- | --- | --- | --- | --- |
-| `IPowerSupply` | interface | Ask.Core | общий источник питания: отдельные менеджеры уставок напряжения/тока, выхода и измерений; пока без реализаций | [Power supply contracts](#programmable-power-supply-contracts) |
+| `IPowerSupply` | interface | Ask.Core | внешний источник питания: отдельные менеджеры уставок напряжения/тока, выхода и измерений | [Power supply contracts](#programmable-power-supply-contracts) |
+| `PowerSupplyDto`, `PowerSupplyDtoService`, `PowerSupplyMapper`, `PowerSupplies` | DTO / CRUD / mapper / facade | Ask.Core / Ask.DataBase.Provider / Ask.DataBase.Engine | сохранение и восстановление внешних источников выбранного тестера | [Power supplies](#programmable-power-supply-contracts) |
+| `PowerSupplyControl` | WPF service control | Ask.UI | root-управление настроенным источником: уставки, выход и измерения | [Power supplies](#programmable-power-supply-contracts) |
+| `B5108`, менеджеры `Function.B5108` | device / managers | Ask.Device.Runtime | Б5-108: LAN/SCPI, последовательные операции, программный шаг, readback и Idle | [Power supply contracts](#programmable-power-supply-contracts) |
 | `PowerSupply.Capabilities.IVoltageManager`, `ICurrentManager` | interfaces | Ask.Core | программный шаг и диапазон, запись/чтение уставок в В/А | [Power supply contracts](#programmable-power-supply-contracts) |
 | `PowerSupply.Capabilities.IOutputManager`, `IMeasurementManager` | interfaces | Ask.Core | управление выходом и измерение фактических U/I | [Power supply contracts](#programmable-power-supply-contracts) |
 | `ReleaseNotesReader` | catalog reader | Ask.Support | чтение, строгая проверка JSON и числовая сортировка выпусков без запуска справки | [Release notes](#release-notes-catalog) |

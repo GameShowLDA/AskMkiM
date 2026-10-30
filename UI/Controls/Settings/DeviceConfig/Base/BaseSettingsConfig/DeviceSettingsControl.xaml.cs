@@ -1,3 +1,4 @@
+using Ask.Core.Shared.DTO.Devices.PowerSupply;
 using Ask.Core.Shared.DTO.Devices.Base;
 using Ask.Core.Shared.DTO.Devices.Breakdown;
 using Ask.Core.Shared.DTO.Devices.FastMeter;
@@ -267,6 +268,9 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
       {
         SetSystemInsulationResistanceGOhm(breakdownTesterDevice.SystemInsulationResistanceGOhm);
       }
+
+      if (device is PowerSupplyDto powerSupply && _powerSupplyPortTextBox != null)
+        _powerSupplyPortTextBox.Text = powerSupply.Port.ToString(System.Globalization.CultureInfo.InvariantCulture);
 
       ApplyConnectionDetails(device.ConnectionDetails);
     }

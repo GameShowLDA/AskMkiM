@@ -12,7 +12,7 @@ namespace Ask.Device.Communication.Ethernet.Tcp.Protocols
   /// <summary>
   /// Реализует универсальный транспортный протокол обмена с устройствами по TCP.
   /// </summary>
-  public class TcpProtocol : IDeviceProtocol
+  public class TcpProtocol : IDeviceProtocol, IDisposable
   {
     /// <summary>
     /// Устройство, для которого выполняется обмен.
@@ -23,6 +23,7 @@ namespace Ask.Device.Communication.Ethernet.Tcp.Protocols
     /// Порт подключения по умолчанию.
     /// </summary>
     private readonly int _defaultPort;
+    private readonly bool _readUntilNewline;
 
     /// <summary>
     /// Текущий TCP-клиент подключения.
@@ -54,10 +55,21 @@ namespace Ask.Device.Communication.Ethernet.Tcp.Protocols
     /// </summary>
     /// <param name="device">Устройство, использующее протокол.</param>
     /// <param name="defaultPort">Порт подключения по умолчанию.</param>
-    public TcpProtocol(IDevice device, int defaultPort)
+    public TcpProtocol(IDevice device, int defaultPort) : this(device, defaultPort, false)
+    {
+    }
+
+    /// <summary>
+    /// Создаёт TCP-протокол с заданным способом чтения ответа.
+    /// </summary>
+    /// <param name="device">Устройство, использующее протокол.</param>
+    /// <param name="defaultPort">Порт подключения по умолчанию.</param>
+    /// <param name="readUntilNewline">Признак чтения полного ответа до символа LF.</param>
+    public TcpProtocol(IDevice device, int defaultPort, bool readUntilNewline)
     {
       _device = device ?? throw new ArgumentNullException(nameof(device));
       _defaultPort = defaultPort;
+      _readUntilNewline = readUntilNewline;
       OperationLock = new SemaphoreSlim(1, 1);
     }
 
@@ -114,8 +126,26 @@ namespace Ask.Device.Communication.Ethernet.Tcp.Protocols
           using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
           timeoutCts.CancelAfter(timeout);
 
-          int bytesRead = await _stream.ReadAsync(buffer, timeoutCts.Token).ConfigureAwait(false);
-          string answer = Encoding.ASCII.GetString(buffer, 0, bytesRead).Trim();
+          string answer;
+          if (_readUntilNewline)
+          {
+            var line = new StringBuilder();
+            byte[] character = new byte[1];
+            while (true)
+            {
+              int count = await _stream.ReadAsync(character, timeoutCts.Token).ConfigureAwait(false);
+              if (count == 0) throw new IOException("TCP-соединение закрыто до окончания ответа.");
+              if (character[0] == '\n') break;
+              if (line.Length >= 8192) throw new IOException("Ответ TCP превышает 8192 символа.");
+              line.Append((char)character[0]);
+            }
+            answer = line.ToString().Trim();
+          }
+          else
+          {
+            int bytesRead = await _stream.ReadAsync(buffer, timeoutCts.Token).ConfigureAwait(false);
+            answer = Encoding.ASCII.GetString(buffer, 0, bytesRead).Trim();
+          }
           if (string.IsNullOrWhiteSpace(answer))
           {
             throw new DeviceNoResponseException(_device, command, timeout);
@@ -135,6 +165,7 @@ namespace Ask.Device.Communication.Ethernet.Tcp.Protocols
           CloseConnection();
           LogException(ioEx, isDeviceLog: true);
           if (timeout > 0) throw new DeviceNoResponseException(_device, command, timeout, ioEx);
+          if (_readUntilNewline) throw new DeviceTransportException($"Не удалось отправить команду {_device.Name}: {command}", ioEx);
           return string.Empty;
         }
         catch (SocketException socketEx)
@@ -142,10 +173,12 @@ namespace Ask.Device.Communication.Ethernet.Tcp.Protocols
           CloseConnection();
           LogException(socketEx, isDeviceLog: true);
           if (timeout > 0) throw new DeviceNoResponseException(_device, command, timeout, socketEx);
+          if (_readUntilNewline) throw new DeviceTransportException($"Не удалось отправить команду {_device.Name}: {command}", socketEx);
           return string.Empty;
         }
         catch (OperationCanceledException)
         {
+          if (_readUntilNewline) CloseConnection();
           throw;
         }
         catch (DeviceNoResponseException)
@@ -156,6 +189,7 @@ namespace Ask.Device.Communication.Ethernet.Tcp.Protocols
         catch (Exception ex)
         {
           LogException(ex, isDeviceLog: true);
+          if (_readUntilNewline) throw;
           return string.Empty;
         }
       }
@@ -247,5 +281,10 @@ namespace Ask.Device.Communication.Ethernet.Tcp.Protocols
       _connectedHost = string.Empty;
       _connectedPort = 0;
     }
+
+    /// <summary>
+    /// Закрывает текущее TCP-соединение.
+    /// </summary>
+    public void Dispose() => CloseConnection();
   }
 }
