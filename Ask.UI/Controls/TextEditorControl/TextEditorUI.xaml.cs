@@ -691,6 +691,8 @@ namespace Ask.UI.Controls.TextEditorControl
       EnsureLineNumbersForeground();
 
       textEditor.PreviewKeyDown += TextEditor_PreviewKeyDown;
+      textEditor.TextArea.InputBindings.Add(new KeyBinding(ApplicationCommands.Undo, Key.Back, ModifierKeys.Alt));
+      textEditor.TextArea.InputBindings.Add(new KeyBinding(ApplicationCommands.Redo, Key.Back, ModifierKeys.Alt | ModifierKeys.Shift));
       textEditor.PreviewMouseDown += (_, _) => ResetIssueSelectionBrush();
 
       if (_executionMargin == null)

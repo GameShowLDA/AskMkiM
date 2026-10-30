@@ -29,6 +29,7 @@ Size/Foreground и анимации общей кнопки; лицензия с
 
 | Нужно изменить | Сначала смотреть | Затем смотреть |
 | --- | --- | --- |
+| Undo/Redo редактора и Alt+Backspace / Alt+Shift+Backspace | Конструкторы обоих `TextEditorUI.xaml.cs` в `UI/Controls/TextEditorControl/` и `Ask.UI/Controls/TextEditorControl/` | `TextArea.InputBindings` → `ApplicationCommands.Undo/Redo` → штатная история AvalonEdit; `TextEditorUI.Hotkeys.cs` сохраняет Ctrl+Shift+Z; `Ask.UI.UnitTests/Controls/TextEditorControl/UndoRedoShortcutTests.cs` |
 | Зависание после закрытия исполнителя / перетаскивания протокола | [Расследование и воспроизведение](investigations/docking-freeze-2026-10-29.md) | `UI/Controls/Runner/RunControl.xaml.cs`, `UI/Windows/WpfDocking/Windows/Docking/Primitives/DockManager.WindowHandler.cs`, `MainWindow/App.xaml.cs`, `Ask.Diagnostics/Infrastructure/JsonFileWriter.cs` |
 | Модель и чтение истории выпусков JSON | `Ask.Support/ReleaseNotes/ReleaseNotesReader.cs` | `ReleaseNotesModel.cs`, `ReleaseChangeModel.cs`, `ReleaseChangeCategory.cs` в той же папке; [история выпусков](#release-notes-catalog) |
 | «Что нового» в меню и справке, HTML истории | `MainWindow/ViewModels/SettingsViewModel.cs`, `Ask.Support/ReleaseNotes/ReleaseNotesHtmlRenderer.cs` | `SettingsService.HelpOpenReleaseNotes`, `HelpProvider.ShowHelp`, middleware `HelpServer`, узел ReleaseNotes в `AppHelp/ru/index.html`; [история выпусков](#release-notes-catalog) |
