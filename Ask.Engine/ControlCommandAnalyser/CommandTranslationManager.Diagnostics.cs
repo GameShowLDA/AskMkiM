@@ -87,6 +87,7 @@ public partial class CommandTranslationManager
       int end = modelIndex + 1 < models.Count ? models[modelIndex + 1].StartLineNumber - 1 : lines.Count;
       end = Math.Clamp(end, first + 1, lines.Count);
 
+      var mappedIssues = new List<(IDisplayIssue Issue, int Target, IssueSelectionHint Hint, bool Found)>();
       foreach (var issue in model.Errors.Cast<IDisplayIssue>().Concat(model.Warnings))
       {
         int target = issue.SourceLineNumber - 1;
@@ -105,10 +106,59 @@ public partial class CommandTranslationManager
             break;
           }
         }
+        mappedIssues.Add((issue, target, hint, found));
+      }
+
+      var resolvedError = mappedIssues.FirstOrDefault(item => !item.Issue.IsWarning && item.Found);
+      foreach (var mapping in mappedIssues)
+      {
+        var issue = mapping.Issue;
+        int target = mapping.Target;
+        IssueSelectionHint hint = mapping.Hint;
+        bool found = mapping.Found;
+
+        // A parser can report a specific token error and a secondary generic
+        // "cannot parse" error for the same command. Keep both messages, but
+        // attach the generic one to the already resolved syntax span instead
+        // of expanding the underline to the whole command.
+        if (!found && !issue.IsWarning && resolvedError.Issue != null)
+        {
+          target = resolvedError.Target;
+          hint = resolvedError.Hint;
+          found = true;
+        }
+
         if (!found)
         {
-          // Some legacy diagnostics identify only the command, without a source token.
-          // In that case underline the complete command, including continuation lines.
+          // A malformed command header has no regular mnemonic span. Prefer
+          // its invalid first token so the diagnostic remains on the actual
+          // syntax error.
+          if (!issue.IsWarning && TryResolveMalformedCommandHeader(lines[target].Code, out hint))
+          {
+            found = true;
+          }
+        }
+
+        if (!found)
+        {
+          // Missing-value and structural syntax errors do not always have a
+          // source token. Underline the command mnemonic as the smallest
+          // stable source span available instead of the complete command.
+          if (!issue.IsWarning && TryResolveCommandHeader(lines[target].Code, out hint))
+          {
+            found = true;
+          }
+        }
+
+        if (!found && !issue.IsWarning && TryResolveLastSourceToken(lines[target].Code, out hint))
+        {
+          found = true;
+        }
+
+        if (!found)
+        {
+          // Style diagnostics and legacy diagnostics without a source token
+          // retain the command range so their existing behavior is preserved.
           int last = end - 1;
           while (last > first && string.IsNullOrWhiteSpace(lines[last].Code)) last--;
           var firstCode = lines[first].Code;
@@ -129,5 +179,53 @@ public partial class CommandTranslationManager
       }
     }
     return diagnostics.Distinct().OrderBy(d => d.Offset).ThenBy(d => d.IsWarning).ToArray();
+  }
+
+  private static bool TryResolveCommandHeader(string line, out IssueSelectionHint hint)
+  {
+    var match = System.Text.RegularExpressions.Regex.Match(
+      line,
+      @"^\s*\d+\s+(?<mnemonic>[\p{L}_]+)(?=\s|$)");
+    if (match.Success)
+    {
+      var mnemonic = match.Groups["mnemonic"];
+      hint = new IssueSelectionHint(mnemonic.Index, mnemonic.Length);
+      return true;
+    }
+
+    hint = default;
+    return false;
+  }
+
+  private static bool TryResolveMalformedCommandHeader(string line, out IssueSelectionHint hint)
+  {
+    var match = System.Text.RegularExpressions.Regex.Match(
+      line,
+      @"^\s*(?<token>\d+[\p{L}_][^\s]*)");
+    if (match.Success)
+    {
+      var token = match.Groups["token"];
+      hint = new IssueSelectionHint(token.Index, token.Length);
+      return true;
+    }
+
+    hint = default;
+    return false;
+  }
+
+  private static bool TryResolveLastSourceToken(string line, out IssueSelectionHint hint)
+  {
+    int end = line.TrimEnd().Length;
+    int start = end;
+    while (start > 0 && !char.IsWhiteSpace(line[start - 1])) start--;
+
+    if (start < end)
+    {
+      hint = new IssueSelectionHint(start, end - start);
+      return true;
+    }
+
+    hint = default;
+    return false;
   }
 }

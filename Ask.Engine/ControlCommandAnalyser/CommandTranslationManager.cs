@@ -21,6 +21,7 @@ namespace Ask.Engine.ControlCommandAnalyser
   public partial class CommandTranslationManager
   {
     private static readonly Regex CommandHeaderRegex = new(@"^\s*(\d+)\s+([\p{L}_]+)(?=\s|$)", RegexOptions.Compiled);
+    private static readonly Regex MalformedCommandHeaderRegex = new(@"^\s*(?<token>\d+[\p{L}_][^\s]*)", RegexOptions.Compiled);
     private readonly List<ICommandParser> _parsers;
     private readonly List<ICommandFormatter> _formatters;
     private readonly List<ICommandBody> _commandBodyBuilders;
@@ -393,7 +394,8 @@ namespace Ask.Engine.ControlCommandAnalyser
         string line = kvp.Value;
 
         var match = CommandHeaderRegex.Match(line);
-        if (match.Success)
+        var malformedHeaderMatch = !match.Success ? MalformedCommandHeaderRegex.Match(line) : Match.Empty;
+        if (match.Success || malformedHeaderMatch.Success)
         {
           // --- закрываем предыдущую команду ---
           if (commandLines.Count > 0 && commandNumber != null && mnemonic != null)
@@ -422,13 +424,40 @@ namespace Ask.Engine.ControlCommandAnalyser
               return commands;
           }
 
-          // --- начинаем новую команду ---
-          commandNumber = match.Groups[1].Value;
-          mnemonic = NormalizeCommandMnemonic(match.Groups[2].Value);
-          commandLines = new List<string> { NormalizeCommandLineMnemonic(line, match) };
-          sourceLineNumbers = new List<int> { lineNumber + 1 };
-          currentStartLine = lineNumber;
-          lastCommandLine = lineNumber;
+          if (match.Success)
+          {
+            // --- начинаем новую команду ---
+            commandNumber = match.Groups[1].Value;
+            mnemonic = NormalizeCommandMnemonic(match.Groups[2].Value);
+            commandLines = new List<string> { NormalizeCommandLineMnemonic(line, match) };
+            sourceLineNumbers = new List<int> { lineNumber + 1 };
+            currentStartLine = lineNumber;
+            lastCommandLine = lineNumber;
+          }
+          else
+          {
+            // Токен, начинающийся с цифр и продолжающийся буквами (например,
+            // "1sfv90"), не может быть продолжением предыдущей команды.
+            // Сохраняем его отдельной моделью, чтобы ошибка привязалась к этому
+            // токену, а не к заголовку предыдущей команды.
+            var malformedToken = malformedHeaderMatch.Groups["token"].Value;
+            var invalid = new UnknownCommandModel
+            {
+              Mnemonic = malformedToken,
+              StartLineNumber = lineNumber + 1,
+              SourceLines = new List<string> { line },
+            };
+            invalid.Errors.Add(GeneralErrors.UnknownCommand(malformedToken, lineNumber + 1, malformedToken));
+            commands.Add(invalid);
+            CommandsModel.CommandModels.Add(invalid);
+
+            commandNumber = null;
+            mnemonic = null;
+            commandLines = new List<string>();
+            sourceLineNumbers = new List<int>();
+            currentStartLine = -1;
+            lastCommandLine = lineNumber;
+          }
         }
         else if (commandLines.Count > 0)
         {
