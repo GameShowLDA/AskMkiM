@@ -346,13 +346,13 @@
                 </TextBlock>
               </Grid>
             </ContentControl>
-            <Button x:Name="ReplaceButton" Click="Replace_Click" Grid.Column="1" Style="{StaticResource SettingsAction}" Content="Заменить" Margin="0,0,6,0"/>
-            <Button x:Name="ReplaceAllButton" Click="ReplaceAll_Click" Grid.Column="2" Style="{StaticResource SettingsAction}" Content="Заменить всё"/>
+            <Button x:Name="ReplaceButton" ToolTip="Заменить текущее совпадение указанным текстом" Click="Replace_Click" Grid.Column="1" Style="{StaticResource SettingsAction}" Content="Заменить" Margin="0,0,6,0"/>
+            <Button x:Name="ReplaceAllButton" ToolTip="Заменить все совпадения в выбранной области поиска" Click="ReplaceAll_Click" Grid.Column="2" Style="{StaticResource SettingsAction}" Content="Заменить всё"/>
           </Grid>
           <Grid Height="30" Margin="0,6,0,0">
             <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/><ColumnDefinition Width="1.3*"/></Grid.ColumnDefinitions>
-            <ToggleButton x:Name="MatchCaseOption" Style="{StaticResource SearchOption}" Content="Aa   Регистр" Margin="0,0,5,0" AutomationProperties.Name="Учитывать регистр"/>
-            <ToggleButton x:Name="WholeWordOption" Grid.Column="1" Style="{StaticResource SearchOption}" Content="ab   Целое слово" Margin="0,0,5,0"/>
+            <ToggleButton x:Name="MatchCaseOption" ToolTip="Различать прописные и строчные буквы при поиске" Style="{StaticResource SearchOption}" Content="Aa   Регистр" Margin="0,0,5,0" AutomationProperties.Name="Учитывать регистр"/>
+            <ToggleButton x:Name="WholeWordOption" ToolTip="Искать только целые слова, исключая части слов" Grid.Column="1" Style="{StaticResource SearchOption}" Content="ab   Целое слово" Margin="0,0,5,0"/>
             <ToggleButton x:Name="RegexOption" ToolTip="Регулярные выражения .NET. В замене: $1, ${имя}, $$" Grid.Column="2" Style="{StaticResource SearchOption}" Content=".*   Регулярное выражение"/>
           </Grid>
           <Grid Height="28" Margin="0,6,0,0">
@@ -416,7 +416,7 @@
                 </ControlTemplate.Triggers>
               </ControlTemplate></CheckBox.Template>
             </CheckBox>
-            <Button x:Name="ResetSettingsButton" search:SearchPanelChrome.CornerRadius="12" Content="Сбросить" Click="ResetSettings_Click" Style="{StaticResource SettingsAction}" HorizontalAlignment="Right" Width="74"/>
+            <Button x:Name="ResetSettingsButton" ToolTip="Очистить текст замены и вернуть исходные параметры поиска" search:SearchPanelChrome.CornerRadius="12" Content="Сбросить" Click="ResetSettings_Click" Style="{StaticResource SettingsAction}" HorizontalAlignment="Right" Width="74"/>
           </Grid>
         </StackPanel>
       </Border>

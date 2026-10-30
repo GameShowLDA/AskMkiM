@@ -29,6 +29,7 @@ Size/Foreground и анимации общей кнопки; лицензия с
 
 | Нужно изменить | Сначала смотреть | Затем смотреть |
 | --- | --- | --- |
+| Подсказки оконных кнопок, выполнения, поиска и раскрытия разделов | `UI/Style.xaml` — общий тематический ToolTip; целевая XAML-разметка | `MainWindow/MainWindow.xaml` (WindowState), `Ask.UI/Components/ProtocolListBox/ProtocolListBoxUI.xaml` (IsChecked), оба `ArrowButton.xaml` в `UI/Icon/` и `Ask.UI/Shared/Components/Icons/` (IsArrowUp=True означает скрытый раздел); локальный ToolTip компонента имеет приоритет над его стилем |
 | Undo/Redo редактора и Alt+Backspace / Alt+Shift+Backspace | Конструкторы обоих `TextEditorUI.xaml.cs` в `UI/Controls/TextEditorControl/` и `Ask.UI/Controls/TextEditorControl/` | `TextArea.InputBindings` → `ApplicationCommands.Undo/Redo` → штатная история AvalonEdit; `TextEditorUI.Hotkeys.cs` сохраняет Ctrl+Shift+Z; `Ask.UI.UnitTests/Controls/TextEditorControl/UndoRedoShortcutTests.cs` |
 | Зависание после закрытия исполнителя / перетаскивания протокола | [Расследование и воспроизведение](investigations/docking-freeze-2026-10-29.md) | `UI/Controls/Runner/RunControl.xaml.cs`, `UI/Windows/WpfDocking/Windows/Docking/Primitives/DockManager.WindowHandler.cs`, `MainWindow/App.xaml.cs`, `Ask.Diagnostics/Infrastructure/JsonFileWriter.cs` |
 | Модель и чтение истории выпусков JSON | `Ask.Support/ReleaseNotes/ReleaseNotesReader.cs` | `ReleaseNotesModel.cs`, `ReleaseChangeModel.cs`, `ReleaseChangeCategory.cs` в той же папке; [история выпусков](#release-notes-catalog) |

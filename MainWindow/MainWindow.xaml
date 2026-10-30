@@ -383,6 +383,7 @@
                     </Button>
 
                     <Button x:Name="minimizeButton"
+                        ToolTip="Свернуть окно на панель задач"
                         Style="{StaticResource WindowActionButtonStyle}"
                         Width="{Binding ActualHeight, ElementName=File}"
                         Height="{Binding ActualHeight, ElementName=File}"
@@ -393,10 +394,19 @@
                     </Button>
 
                     <Button x:Name="maximizeButton"
-                        Style="{StaticResource WindowActionButtonStyle}"
                         Width="{Binding ActualHeight, ElementName=File}"
                         Height="{Binding ActualHeight, ElementName=File}"
                         Command="{Binding Window.MaximizeCommand}">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource WindowActionButtonStyle}">
+                                <Setter Property="ToolTip" Value="Развернуть окно на весь экран"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ElementName=MainWinApp, Path=WindowState}" Value="Maximized">
+                                        <Setter Property="ToolTip" Value="Восстановить прежний размер окна"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
                         <Grid Width="18" Height="18">
                             <askUiIcons:WindowMaximizeIcon Size="14"
                                 IsHovering="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=IsMouseOver}"
@@ -430,6 +440,7 @@
                     </Button>
 
                     <Button x:Name="exitButton"
+                        ToolTip="Завершить работу приложения"
                         Style="{StaticResource WindowActionButtonStyle}"
                         Width="{Binding ActualHeight, ElementName=File}"
                         Height="{Binding ActualHeight, ElementName=File}"
