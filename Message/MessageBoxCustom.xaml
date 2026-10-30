@@ -160,7 +160,7 @@
                                    Margin="16,2,0,0"
                                    Foreground="{StaticResource TextPrimaryBrush}"
                                    FontFamily="Segoe UI"
-                                   FontSize="18"
+                                   FontSize="20"
                                    TextWrapping="Wrap"
                                    MaxWidth="620"/>
                     </Grid>
