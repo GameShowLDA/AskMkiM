@@ -55,7 +55,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
     private static MessageBoxResult ShowQuestionDialog(string message)
     {
       return MessageBoxCustom.Show(
-        $"{message}\r\n\r\nКоманда ЦУ: Yes-Да No-Нет Esc-Временный останов ПК",
+        $"{message}",
         "ПОДТВЕРДИТЬ?",
         MessageBoxButton.YesNoCancel,
         MessageBoxImage.Question);

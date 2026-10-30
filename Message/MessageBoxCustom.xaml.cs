@@ -131,7 +131,6 @@ namespace Message
          var previousEffect = _mainWindow?.Effect;
          var previousOpacity = _mainWindow?.Opacity ?? 1.0;
 
-         // можно настроить текст и заголовок, если нужно
          window.Header.Text = title;
          if (titleFontSize.HasValue)
          {
