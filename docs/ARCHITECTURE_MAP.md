@@ -29,6 +29,7 @@ Size/Foreground и анимации общей кнопки; лицензия с
 
 | Нужно изменить | Сначала смотреть | Затем смотреть |
 | --- | --- | --- |
+| Зависание после закрытия исполнителя / перетаскивания протокола | [Расследование и воспроизведение](investigations/docking-freeze-2026-10-29.md) | `UI/Controls/Runner/RunControl.xaml.cs`, `UI/Windows/WpfDocking/Windows/Docking/Primitives/DockManager.WindowHandler.cs`, `MainWindow/App.xaml.cs`, `Ask.Diagnostics/Infrastructure/JsonFileWriter.cs` |
 | Модель и чтение истории выпусков JSON | `Ask.Support/ReleaseNotes/ReleaseNotesReader.cs` | `ReleaseNotesModel.cs`, `ReleaseChangeModel.cs`, `ReleaseChangeCategory.cs` в той же папке; [история выпусков](#release-notes-catalog) |
 | «Что нового» в меню и справке, HTML истории | `MainWindow/ViewModels/SettingsViewModel.cs`, `Ask.Support/ReleaseNotes/ReleaseNotesHtmlRenderer.cs` | `SettingsService.HelpOpenReleaseNotes`, `HelpProvider.ShowHelp`, middleware `HelpServer`, узел ReleaseNotes в `AppHelp/ru/index.html`; [история выпусков](#release-notes-catalog) |
 | Кнопка «Что нового» на главном экране и отметки просмотра | `Ask.UI/Features/ReleaseNotes/Views/ReleaseNotesPrompt.xaml(.cs)` | `Ask.Support/ReleaseNotes/ReleaseNotesReadStateStore.cs`, `AppHelp/release-notes.js`, POST middleware `HelpServer`; [история выпусков](#release-notes-catalog) |
@@ -3597,8 +3598,17 @@ moved to `.damaged_<timestamp>` before recreation.
 ### Global errors
 
 `App` registers WPF dispatcher, AppDomain and TaskScheduler handlers. Crash package
-creation has a 30-second timeout and falls back to a plain log file if diagnostics
-services are unavailable.
+creation passes a 30-second cancellation token and falls back to a plain log file
+if diagnostics services are unavailable. This is cooperative cancellation, not a
+hard bound on synchronous waiting: `App.CreateCrashPackage` blocks with
+`GetAwaiter().GetResult()`, including on the Dispatcher thread. `JsonFileWriter`
+has an implicit context-capturing await in `await using`; `ScreenshotCollector`
+also needs the Dispatcher. These can block crash reporting and freeze the UI.
+[Confirmed reproduction and call chains](investigations/docking-freeze-2026-10-29.md)
+are maintained with the isolated `tools/DockingFreezeRepro` harness. No production
+fix is included in that investigation. A separate confirmed UI lifetime defect
+leaves a child NativeFloatingWindow alive after closing a DockItem hosting RunControl;
+dragging it calls PointToScreen on the disconnected child DockControl.
 
 ## Events and Callbacks
 
