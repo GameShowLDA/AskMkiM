@@ -6,6 +6,17 @@ namespace Ask.Engine.UnitTests.ControlCommandAnalyser.RmTranslation;
 
 public class ControlAddressTranslationEngineTests
 {
+  [Fact]
+  public void Translate_WithConnectorRange_MapsContactsAcrossBlocks()
+  {
+    var result = new ControlAddressTranslationEngine().Translate("К1-К6/1 =1.6.1-6");
+
+    AssertSuccess(result);
+    Assert.Equal(6, result.Entries.Count);
+    for (var i = 1; i <= 6; i++)
+      AssertEntry(result.Entries[i - 1], $"К{i}/1", $"1.{i}.1");
+  }
+
   [Theory(DisplayName = "Движок РМ: одиночные примеры из документации разбираются без ошибок")]
   [InlineData("X1/A1-A30=1.1.1-1.1.30", 30, "X1/A1", "1.1.1", "X1/A30", "1.1.30")]
   [InlineData("X1/B1-B31=1.1.31-1.1.61", 31, "X1/B1", "1.1.31", "X1/B31", "1.1.61")]

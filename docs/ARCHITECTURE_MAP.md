@@ -769,6 +769,12 @@ error-list controls.
 - `Ask.Engine/ControlCommandAnalyser/Formatter/`
 - `Ask.Engine/ControlCommandAnalyser/RmTranslation/`
 
+`PointParser.SplitTokens` раскрывает перечисление контактов `х57/[2,11]` внутри
+цепи. `AddressExpansionService` раскрывает диапазон имён разъёмов перед `/`.
+`ControlAddressTranslationEngine` для согласованной записи `К1-К6/1=1.6.1-6`
+связывает контакт 1 разъёмов К1…К6 с адресами `1.1.1`…`1.6.1`;
+обычные диапазоны машинных контактов сохраняют прежнее раскрытие.
+
 ### Execution Engine
 
 #### Purpose
