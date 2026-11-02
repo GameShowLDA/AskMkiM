@@ -97,8 +97,6 @@ body.resizing-navigation iframe { pointer-events: none; }
 .tree-item.active { background: var(--selected); color: var(--accent); font-weight: 600; }
 .tree-item.active::before { position: absolute; top: 5px; bottom: 5px; left: 0; width: 3px; border-radius: 2px; background: var(--accent); content: ''; }
 .tree-item > span:last-child { min-width: 0; overflow-wrap: anywhere; }
-.tree-item[data-src]:not([data-reviewed="true"]) { padding-right: 32px; }
-.tree-item[data-src]:not([data-reviewed="true"])::after { display: flex; position: absolute; top: 9px; right: 8px; align-items: center; justify-content: center; width: 16px; height: 16px; border-radius: 50%; background: #ffcf33; color: #332500; content: '!'; font-size: 12px; font-weight: 800; line-height: 1; }
 .toggle { flex: 0 0 12px; margin: 3px 5px 0 0; color: var(--muted); font-size: 9px; }
 .tree-item .icon { flex: 0 0 15px; width: 15px; height: 16px; margin: 2px 8px 0 0; color: var(--muted); font-size: 0; }
 .tree-item .icon::before { display: block; width: 10px; height: 13px; border: 1px solid currentColor; border-radius: 1px; background: linear-gradient(currentColor,currentColor) 2px 4px / 6px 1px no-repeat, linear-gradient(currentColor,currentColor) 2px 7px / 6px 1px no-repeat; content: ''; }

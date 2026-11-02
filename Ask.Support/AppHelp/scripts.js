@@ -68,12 +68,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.mkiHelp = { ...(window.mkiHelp || {}), resolvePageId };
 
-    pages.filter(page => page.el.dataset.reviewed !== 'true').forEach(page => {
-        const reviewStatus = 'Ещё не проверено и не переработано';
-        page.el.title = reviewStatus;
-        page.el.setAttribute('aria-description', reviewStatus);
-    });
-
     let currentPage = null;
     let activeItem = null;
     let resizePointerId = null;
