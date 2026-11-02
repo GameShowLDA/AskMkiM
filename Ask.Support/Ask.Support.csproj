@@ -2256,4 +2256,7 @@
   <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\CodeWRNGEN011_Part.html" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   <Content Include="AppHelp\ru\Content\TranslatorChapter\ErrorListChapter\CodeWRNGEN012_Part.html" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="AppHelp\ru\Content\MainMenuChapter\TabFileChapter\FuncReplacePart.html" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
 </Project>
