@@ -177,8 +177,64 @@ public partial class CommandTranslationManager
           diagnostics.Add(new SourceDiagnostic(lines[target].Offset + hint.StartIndex, hint.Length,
             target + 1, issue.IsWarning, issue.Description, issue.CodeString));
       }
+
+      // When a malformed command header is found, the parser cannot select a
+      // command-specific parser and therefore reports only the malformed first
+      // token. Keep that diagnostic on the header, but also mark every remaining
+      // non-separator fragment in the same command so one bad header does not
+      // hide the other syntax errors from the editor.
+      if (model is UnknownCommandModel && model.Errors.Count > 0)
+      {
+        AddUnknownCommandFragmentDiagnostics(lines, first, end, diagnostics);
+      }
     }
     return diagnostics.Distinct().OrderBy(d => d.Offset).ThenBy(d => d.IsWarning).ToArray();
+  }
+
+  private static void AddUnknownCommandFragmentDiagnostics(
+    IReadOnlyList<(int Offset, string Code)> lines,
+    int first,
+    int end,
+    ICollection<SourceDiagnostic> diagnostics)
+  {
+    for (int lineIndex = first; lineIndex < end; lineIndex++)
+    {
+      var line = lines[lineIndex];
+      int bodyStart = lineIndex == first ? FindUnknownCommandBodyStart(line.Code) : 0;
+      if (bodyStart >= line.Code.Length) continue;
+
+      foreach (System.Text.RegularExpressions.Match match in
+        System.Text.RegularExpressions.Regex.Matches(line.Code[bodyStart..], @"[^,\s*]+"))
+      {
+        int offset = line.Offset + bodyStart + match.Index;
+        int length = match.Length;
+        if (diagnostics.Any(d => d.Offset <= offset && d.Offset + d.Length >= offset + length))
+          continue;
+
+        string fragment = match.Value;
+        diagnostics.Add(new SourceDiagnostic(
+          offset,
+          length,
+          lineIndex + 1,
+          false,
+          $"Не удалось разобрать фрагмент: {fragment}",
+          ErrorCode.Gen_UnrecognizedParameters.ToString()));
+      }
+    }
+  }
+
+  private static int FindUnknownCommandBodyStart(string line)
+  {
+    var regularHeader = System.Text.RegularExpressions.Regex.Match(
+      line,
+      @"^\s*\d+\s+[\p{L}_]+(?=\s|$)");
+    if (regularHeader.Success)
+      return regularHeader.Length;
+
+    var malformedHeader = System.Text.RegularExpressions.Regex.Match(
+      line,
+      @"^\s*\d+[\p{L}_][^\s]*");
+    return malformedHeader.Success ? malformedHeader.Length : 0;
   }
 
   private static bool TryResolveCommandHeader(string line, out IssueSelectionHint hint)
