@@ -22,6 +22,10 @@ namespace Ask.Engine.ControlCommandAnalyser
   {
     private static readonly Regex CommandHeaderRegex = new(@"^\s*(\d+)\s+([\p{L}_]+)(?=\s|$)", RegexOptions.Compiled);
     private static readonly Regex MalformedCommandHeaderRegex = new(@"^\s*(?<token>\d+[\p{L}_][^\s]*)", RegexOptions.Compiled);
+    private static readonly Regex EmbeddedCommandNumberRegex = new(
+      @"(?<![\p{L}\p{N}_])(?<number>\d+)\s+",
+      RegexOptions.Compiled);
+    private static readonly Regex NonWhitespaceTokenRegex = new(@"\S+", RegexOptions.Compiled);
     private readonly List<ICommandParser> _parsers;
     private readonly List<ICommandFormatter> _formatters;
     private readonly List<ICommandBody> _commandBodyBuilders;
@@ -441,15 +445,40 @@ namespace Ask.Engine.ControlCommandAnalyser
             // Сохраняем его отдельной моделью, чтобы ошибка привязалась к этому
             // токену, а не к заголовку предыдущей команды.
             var malformedToken = malformedHeaderMatch.Groups["token"].Value;
-            var invalid = new UnknownCommandModel
+            if (CommandsModel.IsAnalysisScope &&
+                TryFindRecoverableEmbeddedHeader(
+                  line,
+                  malformedHeaderMatch.Index + malformedHeaderMatch.Length,
+                  out var recovery))
             {
-              Mnemonic = malformedToken,
-              StartLineNumber = lineNumber + 1,
-              SourceLines = new List<string> { line },
-            };
-            invalid.Errors.Add(GeneralErrors.UnknownCommand(malformedToken, lineNumber + 1, malformedToken));
-            commands.Add(invalid);
-            CommandsModel.CommandModels.Add(invalid);
+              var recoveredLines = new List<string> { BuildRecoveredSourceLine(line, recovery) };
+              var recovered = ParseSourceCommand(
+                recovery.CommandNumber,
+                recovery.Mnemonic,
+                lineNumber + 1,
+                recoveredLines,
+                new List<int> { lineNumber + 1 });
+              recovered.StartLineNumber = lineNumber + 1;
+              AddRecoveryErrors(
+                recovered,
+                GeneralErrors.InvalidCommandHeader(malformedToken, lineNumber + 1, malformedToken),
+                recovery,
+                lineNumber + 1);
+              commands.Add(recovered);
+              CommandsModel.CommandModels.Add(recovered);
+            }
+            else
+            {
+              var invalid = new UnknownCommandModel
+              {
+                Mnemonic = malformedToken,
+                StartLineNumber = lineNumber + 1,
+                SourceLines = new List<string> { line },
+              };
+              invalid.Errors.Add(GeneralErrors.InvalidCommandHeader(malformedToken, lineNumber + 1, malformedToken));
+              commands.Add(invalid);
+              CommandsModel.CommandModels.Add(invalid);
+            }
 
             commandNumber = null;
             mnemonic = null;
@@ -582,6 +611,34 @@ namespace Ask.Engine.ControlCommandAnalyser
           return parser.Parse(commandNumber, mnemonic, lineNumber, lines);
         }
 
+      // Live diagnostics may recover a known command that starts later in the
+      // same physical line. This lets its regular parser report precise body
+      // errors even when an earlier unknown header would otherwise hide them.
+      // Normal translation remains strict and never enters this recovery path.
+      if (CommandsModel.IsAnalysisScope && lines.Count > 0)
+      {
+        var sourceHeader = CommandHeaderRegex.Match(lines[0]);
+        int searchStart = sourceHeader.Success ? sourceHeader.Index + sourceHeader.Length : 0;
+        if (TryFindRecoverableEmbeddedHeader(lines[0], searchStart, out var recovery))
+        {
+          var recoveredLines = new List<string>(lines)
+          {
+            [0] = BuildRecoveredSourceLine(lines[0], recovery)
+          };
+          var recovered = ParseSingle(
+            recovery.CommandNumber,
+            recovery.Mnemonic,
+            lineNumber,
+            recoveredLines);
+          AddRecoveryErrors(
+            recovered,
+            GeneralErrors.UnknownCommand(mnemonic, lineNumber, $"{commandNumber} {mnemonic}"),
+            recovery,
+            lineNumber);
+          return recovered;
+        }
+      }
+
       var unknownCommandModel = new UnknownCommandModel
       {
         CommandNumber = commandNumber,
@@ -603,6 +660,93 @@ namespace Ask.Engine.ControlCommandAnalyser
 
       return unknownCommandModel;
     }
+
+    private bool TryFindRecoverableEmbeddedHeader(
+      string line,
+      int searchStart,
+      out RecoveredCommandHeader recovery)
+    {
+      recovery = default;
+      if (string.IsNullOrWhiteSpace(line) || searchStart >= line.Length)
+        return false;
+
+      for (var numberMatch = EmbeddedCommandNumberRegex.Match(line, Math.Max(0, searchStart));
+           numberMatch.Success;
+           numberMatch = numberMatch.NextMatch())
+      {
+        int mnemonicStart = numberMatch.Index + numberMatch.Length;
+        var mnemonic = new StringBuilder();
+        int tokenCount = 0;
+
+        for (var tokenMatch = NonWhitespaceTokenRegex.Match(line, mnemonicStart);
+             tokenMatch.Success && tokenCount < 4;
+             tokenMatch = tokenMatch.NextMatch())
+        {
+          tokenCount++;
+          if (tokenMatch.Value.Any(character => !char.IsLetter(character) && character != '_'))
+            break;
+
+          foreach (char character in tokenMatch.Value)
+          {
+            if (IsCyrillicLetter(character) || character == '_')
+              mnemonic.Append(char.ToUpperInvariant(character));
+          }
+
+          string candidate = mnemonic.ToString();
+          if (candidate.Length > 0 && _parsers.Any(parser => parser.CanParse(candidate)))
+          {
+            int mnemonicEnd = tokenMatch.Index + tokenMatch.Length;
+            recovery = new RecoveredCommandHeader(
+              numberMatch.Groups["number"].Value,
+              candidate,
+              line[mnemonicStart..mnemonicEnd].Trim(),
+              mnemonicEnd);
+            return true;
+          }
+
+          // Production mnemonics are short. Once four Cyrillic characters have
+          // accumulated without a parser match, continuing into the command body
+          // would make recovery increasingly ambiguous.
+          if (mnemonic.Length >= 4)
+            break;
+        }
+      }
+
+      return false;
+    }
+
+    private static string BuildRecoveredSourceLine(string line, RecoveredCommandHeader recovery)
+    {
+      return $"{recovery.CommandNumber} {recovery.Mnemonic}{line[recovery.SourceMnemonicEnd..]}";
+    }
+
+    private static void AddRecoveryErrors(
+      BaseCommandModel model,
+      ErrorItem leadingError,
+      RecoveredCommandHeader recovery,
+      int lineNumber)
+    {
+      model.Errors.Insert(0, leadingError);
+      if (string.Equals(recovery.SourceMnemonic, recovery.Mnemonic, StringComparison.OrdinalIgnoreCase))
+        return;
+
+      model.Errors.Insert(1, GeneralErrors.InvalidCommandMnemonic(
+        recovery.SourceMnemonic,
+        recovery.Mnemonic,
+        lineNumber,
+        $"{recovery.CommandNumber} {recovery.Mnemonic}"));
+    }
+
+    private static bool IsCyrillicLetter(char character)
+    {
+      return char.IsLetter(character) && character is >= '\u0400' and <= '\u052F';
+    }
+
+    private readonly record struct RecoveredCommandHeader(
+      string CommandNumber,
+      string Mnemonic,
+      string SourceMnemonic,
+      int SourceMnemonicEnd);
 
     private static string NormalizeCommandMnemonic(string mnemonic)
     {

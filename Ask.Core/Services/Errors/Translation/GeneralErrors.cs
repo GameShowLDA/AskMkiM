@@ -235,6 +235,21 @@ namespace Ask.Core.Services.Errors.Translation
     };
 
     /// <summary>
+    /// Возвращает ошибку для слитно записанных номера и мнемоники команды.
+    /// </summary>
+    public static ErrorItem InvalidCommandHeader(string token, int lineNumber, string command,
+      [CallerMemberName] string callerName = "",
+      [CallerFilePath] string callerFile = "",
+      [CallerLineNumber] int callerLine = 0) => new()
+      {
+        SourceLineNumber = lineNumber,
+        Command = command,
+        Description = $"Некорректный заголовок команды '{token}'. Между номером команды и мнемоникой должен быть пробел.",
+        DebugInfo = $"{Path.GetFileName(callerFile)} → {callerName} (строка {callerLine})",
+        Code = ErrorCode.Gen_UnknownCommand
+      };
+
+    /// <summary>
     /// Возвращает ошибку, если ключ нельзя использовать для указанной команды.
     /// </summary>
     /// <param name="mnemonic">Мнемоника неизвестной команды.</param>
@@ -271,6 +286,39 @@ namespace Ask.Core.Services.Errors.Translation
       DebugInfo = $"{Path.GetFileName(callerFile)} → {callerName} (строка {callerLine})",
       Description = $"Обнаружены нераспознанные параметры: {unparsed}"
     };
+
+    /// <summary>
+    /// Возвращает резервную синтаксическую ошибку, когда транслятор не смог
+    /// отнести фрагмент к более точному виду ошибки.
+    /// </summary>
+    public static ErrorItem CannotParseFragment(string fragment, int lineNumber, string command,
+      [CallerMemberName] string callerName = "",
+      [CallerFilePath] string callerFile = "",
+      [CallerLineNumber] int callerLine = 0) => new()
+      {
+        SourceLineNumber = lineNumber,
+        Command = command,
+        Code = ErrorCode.Gen_UnrecognizedParameters,
+        DebugInfo = $"{Path.GetFileName(callerFile)} → {callerName} (строка {callerLine})",
+        Description = $"Не удалось разобрать фрагмент: {fragment}"
+      };
+
+    /// <summary>
+    /// Возвращает ошибку для испорченной мнемоники, из которой удалось однозначно
+    /// восстановить мнемонику штатного парсера.
+    /// </summary>
+    public static ErrorItem InvalidCommandMnemonic(string sourceMnemonic, string recoveredMnemonic,
+      int lineNumber, string command,
+      [CallerMemberName] string callerName = "",
+      [CallerFilePath] string callerFile = "",
+      [CallerLineNumber] int callerLine = 0) => new()
+      {
+        SourceLineNumber = lineNumber,
+        Command = command,
+        Code = ErrorCode.Gen_UnknownCommand,
+        DebugInfo = $"{Path.GetFileName(callerFile)} → {callerName} (строка {callerLine})",
+        Description = $"Мнемоника команды '{sourceMnemonic}' записана некорректно. Предположено: {recoveredMnemonic}."
+      };
 
     public static ErrorItem CommaStarError(int lineNumber, string command, [CallerMemberName] string callerName = "", [CallerFilePath] string callerFile = "", [CallerLineNumber] int callerLine = 0) => new()
     {

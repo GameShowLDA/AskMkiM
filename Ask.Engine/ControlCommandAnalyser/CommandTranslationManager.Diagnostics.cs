@@ -1,4 +1,5 @@
 using Ask.Core.Services.Errors.Models;
+using Ask.Core.Services.Errors.Translation;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Parser;
@@ -185,7 +186,12 @@ public partial class CommandTranslationManager
       // hide the other syntax errors from the editor.
       if (model is UnknownCommandModel && model.Errors.Count > 0)
       {
-        AddUnknownCommandFragmentDiagnostics(lines, first, end, diagnostics);
+        AddUnknownCommandFragmentDiagnostics(
+          lines,
+          first,
+          end,
+          $"{model.CommandNumber} {model.Mnemonic}".Trim(),
+          diagnostics);
       }
     }
     return diagnostics.Distinct().OrderBy(d => d.Offset).ThenBy(d => d.IsWarning).ToArray();
@@ -195,6 +201,7 @@ public partial class CommandTranslationManager
     IReadOnlyList<(int Offset, string Code)> lines,
     int first,
     int end,
+    string command,
     ICollection<SourceDiagnostic> diagnostics)
   {
     for (int lineIndex = first; lineIndex < end; lineIndex++)
@@ -212,13 +219,17 @@ public partial class CommandTranslationManager
           continue;
 
         string fragment = match.Value;
+        var issue = GeneralErrors.CannotParseFragment(
+          fragment,
+          lineIndex + 1,
+          command);
         diagnostics.Add(new SourceDiagnostic(
           offset,
           length,
           lineIndex + 1,
           false,
-          $"Не удалось разобрать фрагмент: {fragment}",
-          ErrorCode.Gen_UnrecognizedParameters.ToString()));
+          issue.Description,
+          issue.CodeString));
       }
     }
   }
