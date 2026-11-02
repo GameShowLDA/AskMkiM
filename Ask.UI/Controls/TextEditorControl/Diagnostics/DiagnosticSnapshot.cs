@@ -72,8 +72,46 @@ internal sealed class DiagnosticSnapshot
     }
   }
 
-  internal IEnumerable<TextSegment> GetUnderlines(int offset, int length, bool warnings) =>
-    (warnings ? _warnings : _errors).FindOverlappingSegments(offset, length);
+  internal IEnumerable<TextSegment> GetUnderlines(int offset, int length, bool warnings,
+    bool suppressWarningsUnderErrors = true)
+  {
+    if (!warnings || !suppressWarningsUnderErrors)
+    {
+      var segments = warnings ? _warnings : _errors;
+      return segments.FindOverlappingSegments(offset, length);
+    }
+
+    return GetWarningsOutsideErrors(offset, length);
+  }
+
+  private IEnumerable<TextSegment> GetWarningsOutsideErrors(int offset, int length)
+  {
+    // A later red draw call cannot fully hide a yellow squiggle when their
+    // ranges begin at different columns: the wave phases do not coincide.
+    // Split warning ranges around errors so no yellow geometry exists under
+    // any red diagnostic in the first place.
+    foreach (var warning in _warnings.FindOverlappingSegments(offset, length))
+    {
+      int cursor = warning.StartOffset;
+      int warningEnd = warning.EndOffset;
+
+      foreach (var error in _errors.FindOverlappingSegments(warning.StartOffset, warning.Length))
+      {
+        if (error.EndOffset <= cursor) continue;
+        if (error.StartOffset >= warningEnd) break;
+
+        int errorStart = Math.Max(error.StartOffset, warning.StartOffset);
+        if (errorStart > cursor)
+          yield return new TextSegment { StartOffset = cursor, Length = errorStart - cursor };
+
+        cursor = Math.Max(cursor, Math.Min(error.EndOffset, warningEnd));
+        if (cursor >= warningEnd) break;
+      }
+
+      if (cursor < warningEnd)
+        yield return new TextSegment { StartOffset = cursor, Length = warningEnd - cursor };
+    }
+  }
 
   internal IEnumerable<DiagnosticGroup> GetGroups(int offset, int length) =>
     _groups.FindOverlappingSegments(offset, length);
