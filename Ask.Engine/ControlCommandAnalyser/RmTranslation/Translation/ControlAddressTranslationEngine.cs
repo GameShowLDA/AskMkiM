@@ -57,7 +57,24 @@ public sealed class ControlAddressTranslationEngine
     {
       var binding = BindExpressions(mapping);
       var objectResult = expansionService.ExpandObjectExpression(binding.ObjectExpression);
-      var machineResult = expansionService.ExpandMachineExpression(mapping.Machine);
+      var machineExpression = mapping.Machine;
+      var connectorRange = System.Text.RegularExpressions.Regex.Match(
+        binding.ObjectExpression.Text, @"^(?<prefix>[\p{L}]+)1-\k<prefix>(?<count>\d+)/(?<contact>\d+)$");
+      var blockRange = System.Text.RegularExpressions.Regex.Match(
+        mapping.Machine.Text, @"^(?<rack>\d+)\.(?<count>\d+)\.(?<contact>\d+)-\k<count>$");
+      if (connectorRange.Success && blockRange.Success
+        && connectorRange.Groups["count"].Value == blockRange.Groups["count"].Value
+        && connectorRange.Groups["contact"].Value == blockRange.Groups["contact"].Value)
+      {
+        var rack = blockRange.Groups["rack"].Value;
+        var contact = blockRange.Groups["contact"].Value;
+        machineExpression = mapping.Machine with
+        {
+          Text = string.Join(",", Enumerable.Range(1, int.Parse(blockRange.Groups["count"].Value))
+            .Select(block => $"{rack}.{block}.{contact}"))
+        };
+      }
+      var machineResult = expansionService.ExpandMachineExpression(machineExpression);
       diagnostics.AddRange(objectResult.Diagnostics);
       diagnostics.AddRange(machineResult.Diagnostics);
 

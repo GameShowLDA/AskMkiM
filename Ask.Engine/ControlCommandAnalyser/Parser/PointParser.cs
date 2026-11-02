@@ -323,7 +323,9 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
          .ToList();
 
     private static List<string> SplitTokens(string part) =>
-      part.Split(',', StringSplitOptions.RemoveEmptyEntries)
+      Regex.Replace(part, @"([^,#\[\]]+/)\[([^\[\]]+)\]", match =>
+        string.Join(",", match.Groups[2].Value.Split(',').Select(contact => match.Groups[1].Value + contact)))
+          .Split(',', StringSplitOptions.RemoveEmptyEntries)
           .Select(CleanToken)
           .Where(x => !string.IsNullOrEmpty(x))
           .ToList();
