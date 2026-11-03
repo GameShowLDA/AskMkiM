@@ -13,6 +13,34 @@ namespace Ask.UI.Controls.ProtocolNew;
 public partial class SavedExecutionProtocolUI : UserControl
 {
   private readonly string? _sourceText;
+  private string? _filePath;
+  public string? FilePath
+  {
+    get => _filePath;
+    set
+    {
+      _filePath = value;
+      ActionPanel.Visibility = string.IsNullOrWhiteSpace(value)
+        ? System.Windows.Visibility.Collapsed : System.Windows.Visibility.Visible;
+    }
+  }
+
+  private string GetOutputText() => string.Join(Environment.NewLine,
+    Protocol.GetMessagesSnapshot().Select(ExecutionProtocolLineFormatter.Format));
+
+  private async void PrintButton_Click(object sender, System.Windows.RoutedEventArgs e)
+  {
+    var text = GetOutputText();
+    if (!string.IsNullOrWhiteSpace(text))
+      await Ask.UI.Services.Notifications.PrintOperationNotificationService.PrintTextAsync(text, "Протокол выполнения");
+  }
+
+  private void ExportPdfButton_Click(object sender, System.Windows.RoutedEventArgs e)
+  {
+    var text = GetOutputText();
+    if (!string.IsNullOrWhiteSpace(FilePath) && !string.IsNullOrWhiteSpace(text))
+      EventAggregator.Publish(new FileInteractionEvents.ExportProtocolPdf(FilePath, text));
+  }
 
   public SavedExecutionProtocolUI(string sourceText)
   {

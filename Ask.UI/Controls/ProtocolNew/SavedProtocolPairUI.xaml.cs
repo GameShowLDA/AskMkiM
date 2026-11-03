@@ -11,6 +11,12 @@ namespace Ask.UI.Controls.ProtocolNew
   {
     public event Action<string>? ExportPdfRequested;
 
+    public void SetExecutionProtocolFilePath(string path)
+    {
+      if (StructuredExecutionProtocol.Content is SavedExecutionProtocolUI viewer)
+        viewer.FilePath = path;
+    }
+
     private async void PrintButton_Click(object sender, System.Windows.RoutedEventArgs e)
     {
       if (!string.IsNullOrWhiteSpace(ResultProtocolEditor.Text))

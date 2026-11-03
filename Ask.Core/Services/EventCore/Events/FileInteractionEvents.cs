@@ -14,6 +14,7 @@ namespace Ask.Core.Services.EventCore.Events
   /// </remarks>
   public static class FileInteractionEvents
   {
+    public sealed record ExportProtocolPdf(string FilePath, string Text) : IEvent;
     /// <summary>
     /// Событие, генерируемое при необходимости открыть новый OPK-файл.
     /// </summary>

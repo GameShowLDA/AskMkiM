@@ -571,6 +571,22 @@ namespace Ask.UI.Controls.ProtocolNew
 
     public string? InspectionProtocolFilePath => _protocolStorage.ResolveLatestInspectionProtocolPath();
 
+    private void ExportExecutionPdfButton_Click(object sender, RoutedEventArgs e)
+    {
+      var path = _protocolStorage.ResolveLatestExecutionProtocolPath();
+      var text = string.Join(Environment.NewLine,
+        GetShowMessageModels().Select(Ask.Core.Services.Protocols.ExecutionProtocolLineFormatter.Format));
+      if (!string.IsNullOrWhiteSpace(text))
+        EventAggregator.Publish(new FileInteractionEvents.ExportProtocolPdf(path ?? "Протокол.asktrace", text));
+    }
+
+    private void ExportInspectionPdfButton_Click(object sender, RoutedEventArgs e)
+    {
+      if (!string.IsNullOrWhiteSpace(_protocolStorage.InspectionProtocolText))
+        EventAggregator.Publish(new FileInteractionEvents.ExportProtocolPdf(
+          InspectionProtocolFilePath ?? "Протокол.askresult", _protocolStorage.InspectionProtocolText));
+    }
+
     private void OpenInspectionFileButton_Click(object sender, RoutedEventArgs e)
       => OpenInspectionProtocolInEditor();
 
