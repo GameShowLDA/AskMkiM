@@ -11,6 +11,28 @@ namespace Ask.Engine.UnitTests.ControlCommandAnalyser.Parser;
 
 public class PrCommandSlashLetterPointTests : IDisposable
 {
+  [Theory]
+  [InlineData("*х57/[2,11]*")]
+  [InlineData("*х57/2,х57/11*")]
+  [InlineData("*х57/[2-3],х57/11*")]
+  public void ParsePoints_WithContactEnumeration_ExpandsContacts(string expression)
+  {
+    var rm = new RmCommandModel();
+    rm.PointsMap["х57/2"] = "1.1.2";
+    rm.PointsMap["х57/3"] = "1.1.3";
+    rm.PointsMap["х57/11"] = "1.1.11";
+
+    var (scheme, errors) = PointParser.ParsePoints(expression, new PrCommandModel(), rm);
+
+    Assert.Empty(errors);
+    Assert.NotNull(scheme);
+    var points = scheme.GroupModels.SelectMany(group => group.ChainModels)
+      .SelectMany(chain => chain.PointModels).Select(point => point.ToString()).ToArray();
+    Assert.Equal(expression.Contains("2-3")
+      ? new[] { "1.1.2", "1.1.3", "1.1.11" }
+      : new[] { "1.1.2", "1.1.11" }, points);
+  }
+
   [Fact(DisplayName = "Парсер ключей: ключ С не удаляет контактную букву из точек ПР")]
   public void ParseKeys_WithKeyCAndSlashLetterPoints_KeepsContactLetterC()
   {
