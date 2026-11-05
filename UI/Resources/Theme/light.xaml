@@ -11,6 +11,28 @@
     <sys:Double x:Key="TopPanelButtonHighlightOpacity">0.12</sys:Double>
     <SolidColorBrush x:Key="TopPanelButtonBevelBrush" Color="Transparent"/>
 
+    <!-- Docking guide surfaces use the opposite theme palette. -->
+    <LinearGradientBrush x:Key="DockGuideShellBrush" StartPoint="0,0" EndPoint="0.35,1">
+        <GradientStop Color="#354355" Offset="0" />
+        <GradientStop Color="#19222D" Offset="0.6" />
+        <GradientStop Color="#141B24" Offset="1" />
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="DockGuideTileBrush" StartPoint="0,0" EndPoint="0.35,1">
+        <GradientStop Color="#3B495D" Offset="0" />
+        <GradientStop Color="#25303C" Offset="0.6" />
+        <GradientStop Color="#1C2530" Offset="1" />
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="DockGuideOutlineBrush" StartPoint="0,0" EndPoint="0.35,1">
+        <GradientStop Color="#7284A0" Offset="0" />
+        <GradientStop Color="#46546B" Offset="1" />
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="DockGuideShellRimBrush" StartPoint="0,0" EndPoint="0.35,1">
+        <GradientStop Color="#8192AD" Offset="0" />
+        <GradientStop Color="#405069" Offset="1" />
+    </LinearGradientBrush>
+    <SolidColorBrush x:Key="DockGuideGlyphBrush" Color="#EAF0F7" />
+    <SolidColorBrush x:Key="DockGuideActiveBrush" Color="#273443" />
+
     <Color x:Key="ModernDataGridBackgroundColor">#FBFCFD</Color>
     <Color x:Key="ModernDataGridSurfaceColor">#F4F7FA</Color>
     <Color x:Key="ModernDataGridSurfaceSecondaryColor">#EEF2F6</Color>

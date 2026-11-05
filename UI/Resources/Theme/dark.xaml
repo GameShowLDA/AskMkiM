@@ -15,6 +15,28 @@
         <GradientStop Color="#10B4C3D7" Offset="1"/>
     </LinearGradientBrush>
 
+    <!-- Docking guide surfaces use the opposite theme palette. -->
+    <LinearGradientBrush x:Key="DockGuideShellBrush" StartPoint="0,0" EndPoint="0.35,1">
+        <GradientStop Color="#FBFCFD" Offset="0" />
+        <GradientStop Color="#E6EBF1" Offset="0.6" />
+        <GradientStop Color="#D6DEE7" Offset="1" />
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="DockGuideTileBrush" StartPoint="0,0" EndPoint="0.35,1">
+        <GradientStop Color="#FFFFFF" Offset="0" />
+        <GradientStop Color="#F4F7FA" Offset="0.6" />
+        <GradientStop Color="#E6EBF1" Offset="1" />
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="DockGuideOutlineBrush" StartPoint="0,0" EndPoint="0.35,1">
+        <GradientStop Color="#A8B6CA" Offset="0" />
+        <GradientStop Color="#879BB4" Offset="1" />
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="DockGuideShellRimBrush" StartPoint="0,0" EndPoint="0.35,1">
+        <GradientStop Color="#FBFCFD" Offset="0" />
+        <GradientStop Color="#A8B6CA" Offset="1" />
+    </LinearGradientBrush>
+    <SolidColorBrush x:Key="DockGuideGlyphBrush" Color="#223246" />
+    <SolidColorBrush x:Key="DockGuideActiveBrush" Color="#DCE6F4" />
+
     <Color x:Key="ModernDataGridBackgroundColor">#1A2029</Color>
     <Color x:Key="ModernDataGridSurfaceColor">#141B24</Color>
     <Color x:Key="ModernDataGridSurfaceSecondaryColor">#1C2530</Color>
