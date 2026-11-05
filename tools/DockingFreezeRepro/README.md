@@ -18,6 +18,7 @@ pwsh -File tools/DockingFreezeRepro/Verify.ps1
 
 ```powershell
 dotnet Bin/DockingFreezeRepro/DockingFreezeRepro.dll close-runner
+dotnet Bin/DockingFreezeRepro/DockingFreezeRepro.dll protocol-layout
 ```
 
 `Verify.ps1 -SkipBuild` использует уже собранный стенд. Сборка следует общему
@@ -29,7 +30,8 @@ dotnet Bin/DockingFreezeRepro/DockingFreezeRepro.dll close-runner
 | --- | --- | --- |
 | `detach` | Создать плавающее окно и удалить его DockControl из visual tree | Окно остаётся видимым; BeginDrag выбрасывает InvalidOperationException в BeginDragNative |
 | `collapse` | Только скрыть DockControl через Collapsed | PresentationSource сохраняется; BeginDrag не выбрасывает исключение |
-| `close-runner` | Настоящий RunControl.ShowInspectionProtocol → вынести протокол в плавающее окно → закрыть родительский DockItem | Дочернее окно переживает RunControl; BeginDrag выбрасывает то же исключение |
+| `close-runner` | Настоящий RunControl.ShowInspectionProtocol → вынести протокол в плавающее окно → закрыть родительский DockItem | Регрессионная проверка исправления: все DockItem и плавающие окна исполнителя закрываются вместе с владельцем |
+| `protocol-layout` | 200 строк настоящего ProtocolListBoxUI в четырёх вложенных SplitContainer и 15 обновлений | UI доходит до ApplicationIdle, невидимые строки виртуализируются; watchdog завершает только стенд при задержке более 30 секунд |
 | `blocking` | CreateAsync(...).GetAwaiter().GetResult() в Dispatcher, как в App.CreateCrashPackage | Захвачено продолжение JsonFileWriter; heartbeat не исполняется; watchdog завершает стенд с кодом 2 |
 | `blocking-worker` | Task.Run(CreateAsync) с сохранением GetResult в Dispatcher | ScreenshotCollector ждёт Dispatcher до отмены; интерфейс заблокирован примерно 3 секунды; архив не создаётся |
 | `async` | Асинхронный await того же CreateAsync | Создаётся ZIP; heartbeat исполняется |
