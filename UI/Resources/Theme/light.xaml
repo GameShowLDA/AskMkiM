@@ -677,6 +677,8 @@
 
     <!--#region Тектовый редактор -->
 
+    <SolidColorBrush x:Key="DockPreviewBackgroundBrush" Color="#E4E7EC" />
+
     <Style x:Key="StyleTextEditor" TargetType="avalonEdit:TextEditor">
         <Setter Property="Background" Value="#FFFFFF"/>
         <Setter Property="Foreground" Value="#000000"/>

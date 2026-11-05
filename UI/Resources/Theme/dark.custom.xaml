@@ -218,6 +218,8 @@
   <SolidColorBrush x:Key="SettingsInfoTabloBackgroundSolidColorBrush" Color="#5F7FAE"/>
   <SolidColorBrush x:Key="SettingsConfigDataInputTabloBackgroundSolidColorBrush" Color="#4B5566"/>
 
+  <SolidColorBrush x:Key="DockPreviewBackgroundBrush" Color="#0E141D" />
+
   <Style x:Key="StyleTextEditor" TargetType="avalonEdit:TextEditor">
     <Setter Property="Background" Value="#161D27"/>
     <Setter Property="Foreground" Value="#E6ECF5"/>
