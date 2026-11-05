@@ -677,6 +677,14 @@
 
     <!--#region Тектовый редактор -->
 
+    <LinearGradientBrush x:Key="WindowSwitcherSurfaceBrush" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="#EAF0FC" Offset="0" />
+        <GradientStop Color="#E6ECF8" Offset="1" />
+    </LinearGradientBrush>
+    <SolidColorBrush x:Key="WindowSwitcherRimBrush" Color="#B6C7E0" />
+    <SolidColorBrush x:Key="WindowSwitcherSelectionBrush" Color="#C1D4F3" />
+    <SolidColorBrush x:Key="WindowSwitcherPreviewBrush" Color="#F3F6FD" />
+
     <SolidColorBrush x:Key="DockPreviewBackgroundBrush" Color="#E4E7EC" />
 
     <Style x:Key="StyleTextEditor" TargetType="avalonEdit:TextEditor">
