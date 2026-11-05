@@ -71,14 +71,16 @@ namespace UI.Windows.WpfDocking.Windows.Docking.Primitives
       if (hotkey.Key == e.Key && (hotkey.Modifiers & Keyboard.Modifiers) == hotkey.Modifiers)
       {
         e.Handled = true;
-        s_current = new WindowSwitcher(dockControl);
+        bool keepOpen = hotkey.Key == Key.Tab && hotkey.Modifiers == ModifierKeys.Control &&
+          Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift);
+        s_current = new WindowSwitcher(dockControl, keepOpen);
         s_current.Show();
       }
     }
 
     private static void OnKeyUp(object sender, KeyEventArgs e)
     {
-      if (s_current == null || e.Handled)
+      if (s_current == null || s_current._keepOpen || e.Handled)
         return;
 
       KeyGesture hotkey = GetHotkey(s_current.DockControl);
@@ -90,13 +92,15 @@ namespace UI.Windows.WpfDocking.Windows.Docking.Primitives
     }
 
     private FloatingWindowAdorner _floatingWindowAdorner;
+    private readonly bool _keepOpen;
 
-    private WindowSwitcher(DockControl dockControl)
+    private WindowSwitcher(DockControl dockControl, bool keepOpen)
     {
       if (dockControl == null)
         throw new ArgumentNullException("dockControl");
 
       DockControl = dockControl;
+      _keepOpen = keepOpen;
     }
 
     /// <summary>Gets the <see cref="Docking.DockControl"/> object associated with this <see cref="WindowSwitcher"/>.
@@ -214,6 +218,18 @@ namespace UI.Windows.WpfDocking.Windows.Docking.Primitives
         FloatingWindowAdorner.Remove(DockControl, _floatingWindowAdorner);
       else
         Window.GetWindow(this).Close();
+    }
+
+    protected override void OnPreviewKeyDown(KeyEventArgs e)
+    {
+      if (_keepOpen && (e.Key == Key.Escape || e.Key == Key.Enter))
+      {
+        e.Handled = true;
+        Close();
+        return;
+      }
+
+      base.OnPreviewKeyDown(e);
     }
 
     /// <exclude/>

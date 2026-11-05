@@ -15,6 +15,28 @@
         <GradientStop Color="#10B4C3D7" Offset="1"/>
     </LinearGradientBrush>
 
+    <!-- Docking guide surfaces use the opposite theme palette. -->
+    <LinearGradientBrush x:Key="DockGuideShellBrush" StartPoint="0,0" EndPoint="0.35,1">
+        <GradientStop Color="#FBFCFD" Offset="0" />
+        <GradientStop Color="#E6EBF1" Offset="0.6" />
+        <GradientStop Color="#D6DEE7" Offset="1" />
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="DockGuideTileBrush" StartPoint="0,0" EndPoint="0.35,1">
+        <GradientStop Color="#FFFFFF" Offset="0" />
+        <GradientStop Color="#F4F7FA" Offset="0.6" />
+        <GradientStop Color="#E6EBF1" Offset="1" />
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="DockGuideOutlineBrush" StartPoint="0,0" EndPoint="0.35,1">
+        <GradientStop Color="#A8B6CA" Offset="0" />
+        <GradientStop Color="#879BB4" Offset="1" />
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="DockGuideShellRimBrush" StartPoint="0,0" EndPoint="0.35,1">
+        <GradientStop Color="#FBFCFD" Offset="0" />
+        <GradientStop Color="#A8B6CA" Offset="1" />
+    </LinearGradientBrush>
+    <SolidColorBrush x:Key="DockGuideGlyphBrush" Color="#223246" />
+    <SolidColorBrush x:Key="DockGuideActiveBrush" Color="#DCE6F4" />
+
     <Color x:Key="ModernDataGridBackgroundColor">#1A2029</Color>
     <Color x:Key="ModernDataGridSurfaceColor">#141B24</Color>
     <Color x:Key="ModernDataGridSurfaceSecondaryColor">#1C2530</Color>
@@ -666,6 +688,16 @@
     <!--#endregion-->
 
     <!--#region Тектовый редактор -->
+
+    <LinearGradientBrush x:Key="WindowSwitcherSurfaceBrush" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="#25324B" Offset="0" />
+        <GradientStop Color="#1C2530" Offset="1" />
+    </LinearGradientBrush>
+    <SolidColorBrush x:Key="WindowSwitcherRimBrush" Color="#60718C" />
+    <SolidColorBrush x:Key="WindowSwitcherSelectionBrush" Color="#344D75" />
+    <SolidColorBrush x:Key="WindowSwitcherPreviewBrush" Color="#19212D" />
+
+    <SolidColorBrush x:Key="DockPreviewBackgroundBrush" Color="#252C35" />
 
     <Style x:Key="StyleTextEditor" TargetType="avalonEdit:TextEditor">
         <Setter Property="Background" Value="#303843"/>

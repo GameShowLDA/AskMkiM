@@ -2561,6 +2561,34 @@ same path with gates enabled and performs real transport I/O.
 
 ## UI Architecture
 
+### Dock window switcher
+
+`UI/Windows/WpfDocking/Themes/Generic/DockControl.xaml` задаёт
+`WindowSwitcher.Hotkey`: Ctrl+Tab для Native floating strategy, Ctrl+1 для Wpf.
+`UI/Windows/WpfDocking/Windows/Docking/Primitives/WindowSwitcher.cs` регистрирует
+class handlers `DockItem.KeyDown → OnKeyDown → new WindowSwitcher → Show` и
+`UIElement.KeyUp → OnKeyUp → Close → DoClose`. Native показывает отдельное
+прозрачное окно с владельцем; Wpf использует `FloatingWindowAdorner`.
+`DoClose` активирует DockItem из DataContext сфокусированного элемента и удаляет
+окно/adorner. Потеря фокуса внутри switcher также вызывает Close.
+
+При штатном Ctrl+Tab отпускание Ctrl закрывает switcher. Ctrl+Shift+Tab при
+открытии устанавливает `_keepOpen`: `OnKeyUp` оставляет окно открытым для работы
+над оформлением. `OnPreviewKeyDown` закрывает этот режим по Enter или Esc через
+тот же Close; потеря фокуса сохраняет штатный путь закрытия. Дополнительный режим
+применяется только при Hotkey=Ctrl+Tab. Шаблон списка и предпросмотра находится в
+`UI/Windows/WpfDocking/Themes/Generic/WindowSwitcher.xaml`.
+Шаблон задаёт shell 520×390 DIP с заголовком выбранного документа, списками
+`ActiveDocuments`/`ActiveToolWindows` слева и живым VisualBrush-предпросмотром
+справа. Логический `FocusManager.FocusedElement.DataContext` связывает заголовок
+и предпросмотр с DockItem сфокусированной кнопки. Кнопки файлов сохраняют
+`DockCommands.Show` с `CommandTarget=DockItem`; отсутствующая группа служебных
+окон скрывается. Предпросмотр показывает верхний левый фрагмент 320×300 DIP
+через `VisualBrush.ViewboxUnits=Absolute`, масштабированный в карточку.
+Шапка содержит только значок документа и его имя. Палитра
+`WindowSwitcher*Brush` находится в `UI/Resources/Theme/dark.xaml` и `light.xaml`,
+custom-темы наследуют её. Текст и выделение также используют `ModernDataGrid*Brush`.
+
 > **Обязательное правило для новых изменений:** всю новую UI-функциональность —
 > окна, диалоги, controls, ViewModels и связанные UI-services — создавать в проекте
 > `Ask.UI`. Проект `UI` является legacy-слоем: добавлять в него новую функциональность
