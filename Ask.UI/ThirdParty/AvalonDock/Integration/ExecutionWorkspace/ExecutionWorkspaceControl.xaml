@@ -1,0 +1,20 @@
+<UserControl x:Class="Ask.UI.ThirdParty.Docking.Integration.ExecutionWorkspace.ExecutionWorkspaceControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:avalonDock="clr-namespace:AvalonDock;assembly=AvalonDock"
+             Background="{DynamicResource SettingsNestedGroupBackgroundSolidColorBrush}">
+    <UserControl.Resources>
+        <DataTemplate x:Key="AskMkiMAvalonDockHeaderTemplate">
+            <TextBlock Text="{Binding Title}"
+                       FontFamily="{DynamicResource Winston}"
+                       Foreground="{DynamicResource ForegrounfBrushes}"
+                       TextTrimming="CharacterEllipsis" />
+        </DataTemplate>
+    </UserControl.Resources>
+    <Grid>
+        <avalonDock:DockingManager x:Name="WorkspaceDockManager"
+                                   AnchorableHeaderTemplate="{StaticResource AskMkiMAvalonDockHeaderTemplate}"
+                                   DocumentHeaderTemplate="{StaticResource AskMkiMAvalonDockHeaderTemplate}"
+                                   Background="{DynamicResource SettingsNestedGroupBackgroundSolidColorBrush}" />
+    </Grid>
+</UserControl>

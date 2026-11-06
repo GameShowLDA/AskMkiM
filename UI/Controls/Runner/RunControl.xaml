@@ -14,6 +14,7 @@
              xmlns:docking="clr-namespace:UI.Windows.WpfDocking.Windows.Docking"
              xmlns:primitives="clr-namespace:UI.Windows.WpfDocking.Windows.Docking.Primitives"
              xmlns:SharedIcons="clr-namespace:Ask.UI.Shared.Components.Icons;assembly=Ask.UI"
+             xmlns:workspace="clr-namespace:Ask.UI.ThirdParty.Docking.Integration.ExecutionWorkspace;assembly=Ask.UI"
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
         <Style x:Key="RunnerSourceStyle" TargetType="{x:Type docking:DockItem}"
@@ -156,18 +157,5 @@
             </Setter>
         </Style>
     </UserControl.Resources>
-    <docking:DockControl x:Name="RunnerDockManager">
-        <docking:DockControl.DockItems>
-            <docking:DockItem x:Name="ProtocolPane" Title="Протокол исполнения" TabText="Протокол исполнения"
-                              HideOnPerformClose="False" primitives:DocumentTab.HideCloseButton="True">
-                <ContentControl x:Name="MainContent" />
-            </docking:DockItem>
-            <docking:DockItem x:Name="ErrorsPane" Title="Ошибки и точки остановки" TabText="Ошибки и точки остановки"
-                              HideOnPerformClose="False" primitives:DocumentTab.HideCloseButton="True">
-                <ErrorList:ErrorListControl x:Name="ErrorListBoxVertical"
-                                            MinHeight="60" StringsNumberVisible="Visible"
-                                            MeasureResultVisible="Visible" />
-            </docking:DockItem>
-        </docking:DockControl.DockItems>
-    </docking:DockControl>
+    <workspace:ExecutionWorkspaceControl x:Name="RunnerWorkspace" />
 </UserControl>

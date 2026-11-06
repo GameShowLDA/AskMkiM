@@ -1,0 +1,4062 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Input;
+using System.Windows.Interop;
+using System.Windows.Markup;
+using System.Windows.Threading;
+using AvalonDock.Controls;
+using AvalonDock.Layout;
+using AvalonDock.Themes;
+
+namespace AvalonDock
+{
+	/// <summary>
+	/// Represents the root control in the visual tree for AvalonDock.
+	/// </summary>
+	/// <seealso cref="Control"/>
+	/// <seealso cref="IOverlayWindowHost"/>
+	[ContentProperty(nameof(Layout))]
+	[TemplatePart(Name = "PART_AutoHideArea")]
+	[SuppressMessage("Maintainability", "CA1506:Avoid excessive class coupling")]
+	public class DockingManager : Control, IOverlayWindowHost, Core.Serialization.ISerializableDockingManager, Core.IDockingManager// , ILogicalChildrenContainer
+	{
+		/// <summary>
+		/// References the current theme resource dictionary when a <see cref="DictionaryTheme"/> is active.
+		/// </summary>
+		private ResourceDictionary currentThemeResourceDictionary;
+
+		/// <summary>
+		/// Manages the auto-hide window lifecycle for this docking manager.
+		/// </summary>
+		private AutoHideWindowManager _autoHideWindowManager;
+
+		/// <summary>
+		/// References the auto-hide area defined by the control template.
+		/// </summary>
+		private FrameworkElement _autohideArea;
+
+		/// <summary>
+		/// Stores the currently visible floating window controls.
+		/// </summary>
+		private readonly List<LayoutFloatingWindowControl> _fwList = new List<LayoutFloatingWindowControl>();
+
+		/// <summary>
+		/// Stores floating window controls that are temporarily hidden while the manager is unloaded.
+		/// </summary>
+		private readonly List<LayoutFloatingWindowControl> _fwHiddenList = new List<LayoutFloatingWindowControl>();
+
+		/// <summary>
+		/// References the overlay window used for drag-and-drop feedback.
+		/// </summary>
+		private OverlayWindow _overlayWindow = null;
+
+		/// <summary>
+		/// Caches the drop areas available for the active drag operation.
+		/// </summary>
+		private List<IDropArea> _areas = null;
+
+		/// <summary>
+		/// Indicates whether <see cref="InternalSetActiveContent"/> is currently updating the active content.
+		/// </summary>
+		private bool _insideInternalSetActiveContent = false;
+
+		/// <summary>
+		/// Stores the layout items attached to the current layout content elements.
+		/// </summary>
+		private readonly List<LayoutItem> _layoutItems = new List<LayoutItem>();
+
+		/// <summary>
+		/// Indicates whether layout item creation is temporarily suspended.
+		/// </summary>
+		private bool _suspendLayoutItemCreation = false;
+
+		/// <summary>
+		/// Tracks the pending dispatcher operation that removes deleted layout items.
+		/// </summary>
+		private DispatcherOperation _collectLayoutItemsOperations = null;
+
+		/// <summary>
+		/// References the navigator window shown for keyboard-based document navigation.
+		/// </summary>
+		private NavigatorWindow _navigatorWindow = null;
+
+		/// <summary>
+		/// The layout engine used for layout tree operations.
+		/// </summary>
+		private readonly ILayoutEngine _layoutEngine = new DefaultLayoutEngine();
+
+		/// <summary>
+		/// Gets the <see cref="ILayoutEngine"/> used by this manager for layout tree operations.
+		/// Override in subclasses to provide a specialized engine.
+		/// </summary>
+		public virtual ILayoutEngine LayoutEngine => _layoutEngine;
+		
+		/// <summary>
+		/// Gets or sets a value indicating whether document source binding is suspended during deserialization.
+		/// </summary>
+		public bool SuspendDocumentsSourceBinding { get; set; }
+
+		/// <summary>
+		/// Gets or sets a value indicating whether anchorable source binding is suspended during deserialization.
+		/// </summary>
+		public bool SuspendAnchorablesSourceBinding { get; set; }
+
+		/// <summary>Gets or sets the serializable layout root.</summary>
+		Core.Serialization.ISerializableLayoutRoot Core.Serialization.ISerializableDockingManager.Layout
+		{
+			get => Layout;
+			set => Layout = (Layout.LayoutRoot)value;
+		}
+
+		/// <summary>Gets or sets a value indicating whether document source binding is suspended during deserialization.</summary>
+		bool Core.Serialization.ISerializableDockingManager.SuspendDocumentsSourceBinding
+		{
+			get => SuspendDocumentsSourceBinding;
+			set => SuspendDocumentsSourceBinding = value;
+		}
+
+		/// <summary>Gets or sets a value indicating whether anchorable source binding is suspended during deserialization.</summary>
+		bool Core.Serialization.ISerializableDockingManager.SuspendAnchorablesSourceBinding
+		{
+			get => SuspendAnchorablesSourceBinding;
+			set => SuspendAnchorablesSourceBinding = value;
+		}
+
+		/// <inheritdoc/>
+		Core.Serialization.ILayoutDtoMapper Core.Serialization.ISerializableDockingManager.DtoMapper => _dtoMapper;
+
+		private readonly Core.Serialization.ILayoutDtoMapper _dtoMapper = new Serialization.LayoutDtoMapper();
+
+		/// <summary>
+		/// Backs the <see cref="Core.IDockingManager.DocumentClosing"/> event.
+		/// </summary>
+		private event EventHandler<Core.Events.DocumentCancelEventArgs> _coreDocumentClosing;
+
+		/// <summary>
+		/// Backs the <see cref="Core.IDockingManager.DocumentClosed"/> event.
+		/// </summary>
+		private event EventHandler<Core.Events.DocumentEventArgs> _coreDocumentClosed;
+
+		/// <summary>
+		/// Backs the <see cref="Core.IDockingManager.AnchorableClosing"/> event.
+		/// </summary>
+		private event EventHandler<Core.Events.AnchorableCancelEventArgs> _coreAnchorableClosing;
+
+		/// <summary>
+		/// Backs the <see cref="Core.IDockingManager.AnchorableClosed"/> event.
+		/// </summary>
+		private event EventHandler<Core.Events.AnchorableEventArgs> _coreAnchorableClosed;
+
+		/// <summary>
+		/// Backs the <see cref="Core.IDockingManager.AnchorableHiding"/> event.
+		/// </summary>
+		private event EventHandler<Core.Events.AnchorableCancelEventArgs> _coreAnchorableHiding;
+
+		/// <summary>
+		/// Backs the <see cref="Core.IDockingManager.AnchorableHidden"/> event.
+		/// </summary>
+		private event EventHandler<Core.Events.AnchorableEventArgs> _coreAnchorableHidden;
+
+		/// <summary>
+		/// Backs the <see cref="Core.IDockingManager.ContentFloating"/> event.
+		/// </summary>
+		private event EventHandler<Core.Events.ContentCancelEventArgs> _coreContentFloating;
+
+		/// <summary>
+		/// Backs the <see cref="Core.IDockingManager.ContentFloated"/> event.
+		/// </summary>
+		private event EventHandler<Core.Events.ContentEventArgs> _coreContentFloated;
+
+		/// <summary>
+		/// Backs the <see cref="Core.IDockingManager.ContentDocking"/> event.
+		/// </summary>
+		private event EventHandler<Core.Events.ContentCancelEventArgs> _coreContentDocking;
+
+		/// <summary>
+		/// Backs the <see cref="Core.IDockingManager.ContentDocked"/> event.
+		/// </summary>
+		private event EventHandler<Core.Events.ContentEventArgs> _coreContentDocked;
+
+		/// <summary>Occurs when a document is closing.</summary>
+		event EventHandler<Core.Events.DocumentCancelEventArgs> Core.IDockingManager.DocumentClosing
+		{
+			add => _coreDocumentClosing += value;
+			remove => _coreDocumentClosing -= value;
+		}
+
+		/// <summary>Occurs when a document has closed.</summary>
+		event EventHandler<Core.Events.DocumentEventArgs> Core.IDockingManager.DocumentClosed
+		{
+			add => _coreDocumentClosed += value;
+			remove => _coreDocumentClosed -= value;
+		}
+
+		/// <summary>Occurs when an anchorable is closing.</summary>
+		event EventHandler<Core.Events.AnchorableCancelEventArgs> Core.IDockingManager.AnchorableClosing
+		{
+			add => _coreAnchorableClosing += value;
+			remove => _coreAnchorableClosing -= value;
+		}
+
+		/// <summary>Occurs when an anchorable has closed.</summary>
+		event EventHandler<Core.Events.AnchorableEventArgs> Core.IDockingManager.AnchorableClosed
+		{
+			add => _coreAnchorableClosed += value;
+			remove => _coreAnchorableClosed -= value;
+		}
+
+		/// <summary>Occurs when an anchorable is hiding.</summary>
+		event EventHandler<Core.Events.AnchorableCancelEventArgs> Core.IDockingManager.AnchorableHiding
+		{
+			add => _coreAnchorableHiding += value;
+			remove => _coreAnchorableHiding -= value;
+		}
+
+		/// <summary>Occurs when an anchorable has been hidden.</summary>
+		event EventHandler<Core.Events.AnchorableEventArgs> Core.IDockingManager.AnchorableHidden
+		{
+			add => _coreAnchorableHidden += value;
+			remove => _coreAnchorableHidden -= value;
+		}
+
+		/// <summary>Occurs when content is floating.</summary>
+		event EventHandler<Core.Events.ContentCancelEventArgs> Core.IDockingManager.ContentFloating
+		{
+			add => _coreContentFloating += value;
+			remove => _coreContentFloating -= value;
+		}
+
+		/// <summary>Occurs when content has floated.</summary>
+		event EventHandler<Core.Events.ContentEventArgs> Core.IDockingManager.ContentFloated
+		{
+			add => _coreContentFloated += value;
+			remove => _coreContentFloated -= value;
+		}
+
+		/// <summary>Occurs when content is docking.</summary>
+		event EventHandler<Core.Events.ContentCancelEventArgs> Core.IDockingManager.ContentDocking
+		{
+			add => _coreContentDocking += value;
+			remove => _coreContentDocking -= value;
+		}
+
+		/// <summary>Occurs when content has docked.</summary>
+		event EventHandler<Core.Events.ContentEventArgs> Core.IDockingManager.ContentDocked
+		{
+			add => _coreContentDocked += value;
+			remove => _coreContentDocked -= value;
+		}
+
+		/// <summary>Initializes static members of the <see cref="DockingManager"/> class.</summary>
+		static DockingManager()
+		{
+			DefaultStyleKeyProperty.OverrideMetadata(typeof(DockingManager), new FrameworkPropertyMetadata(typeof(DockingManager)));
+			FocusableProperty.OverrideMetadata(typeof(DockingManager), new FrameworkPropertyMetadata(false));
+			HwndSource.DefaultAcquireHwndFocusInMenuMode = false;
+		}
+
+		/// <summary>Initializes a new instance of the <see cref="DockingManager"/> class.</summary>
+		public DockingManager()
+		{
+			IsVirtualizingDocument = true;
+			IsVirtualizingAnchorable = true;
+
+#if !VS2008
+			Layout = new LayoutRoot { RootPanel = new LayoutPanel(new LayoutDocumentPaneGroup(new LayoutDocumentPane())) };
+#else
+		  this.SetCurrentValue( DockingManager.LayoutProperty, new LayoutRoot() { RootPanel = new LayoutPanel(new LayoutDocumentPaneGroup(new LayoutDocumentPane())) } );
+#endif
+			Loaded += DockingManager_Loaded;
+			Unloaded += DockingManager_Unloaded;
+		}
+
+		/// <summary>Event fired when <see cref="DockingManager.Layout"/> property changes.</summary>
+		/// <seealso cref="Layout"/>
+		public event EventHandler LayoutChanged;
+
+		/// <summary>Event fired when <see cref="DockingManager.Layout"/> property is about to be changed.</summary>
+		/// <seealso cref="Layout"/>
+		public event EventHandler LayoutChanging;
+
+		/// <summary>Event fired when a document is about to be closed.</summary>
+		/// <remarks>Subscribers have the opportunity to cancel the operation.</remarks>
+		public event EventHandler<DocumentClosingEventArgs> DocumentClosing;
+
+		/// <summary>Event fired after a document is closed.</summary>
+		public event EventHandler<DocumentClosedEventArgs> DocumentClosed;
+
+		/// <summary>Event fired when an anchorable is about to be closed.</summary>
+		/// <remarks>Subscribers have the opportuniy to cancel the operation.</remarks>
+		public event EventHandler<AnchorableClosingEventArgs> AnchorableClosing;
+
+		/// <summary>Event fired after an anchorable is closed</summary>
+		public event EventHandler<AnchorableClosedEventArgs> AnchorableClosed;
+
+		/// <summary>Event fired when an anchorable is about to be hidden.</summary>
+		/// <remarks>Subscribers have the opportuniy to cancel the operation.</remarks>
+		public event EventHandler<AnchorableHidingEventArgs> AnchorableHiding;
+
+		/// <summary>Event fired after an anchorable is hidden</summary>
+		public event EventHandler<AnchorableHiddenEventArgs> AnchorableHidden;
+
+		/// <summary>Event is raised when <see cref="ActiveContent"/> changes.</summary>
+		/// <seealso cref="ActiveContent"/>
+		public event EventHandler ActiveContentChanged;
+
+		/// <summary>
+		/// Event is raised when LayoutFloatingWindowControl created
+		/// </summary>
+		public event EventHandler<LayoutFloatingWindowControlCreatedEventArgs> LayoutFloatingWindowControlCreated;
+
+		/// <summary>
+		/// Event is raised when LayoutFloatingWindowControl closed
+		/// </summary>
+		public event EventHandler<LayoutFloatingWindowControlClosedEventArgs> LayoutFloatingWindowControlClosed;
+
+		/// <summary>Event fired before content is floated (undocked to floating window).</summary>
+		/// <remarks>Subscribers can cancel the operation by setting <see cref="System.ComponentModel.CancelEventArgs.Cancel"/> to true.</remarks>
+		public event EventHandler<ContentFloatingEventArgs> ContentFloating;
+
+		/// <summary>Event fired after content has been floated.</summary>
+		public event EventHandler<ContentFloatedEventArgs> ContentFloated;
+
+		/// <summary>Event fired before content is docked (re-docked from floating).</summary>
+		/// <remarks>Subscribers can cancel the operation by setting <see cref="System.ComponentModel.CancelEventArgs.Cancel"/> to true.</remarks>
+		public event EventHandler<ContentDockingEventArgs> ContentDocking;
+
+		/// <summary>Event fired after content has been docked.</summary>
+		public event EventHandler<ContentDockedEventArgs> ContentDocked;
+
+		/// <summary><see cref="Layout"/> dependency property.</summary>
+		public static readonly DependencyProperty LayoutProperty = DependencyProperty.Register(nameof(Layout), typeof(LayoutRoot), typeof(DockingManager),
+				new FrameworkPropertyMetadata(null, OnLayoutChanged, CoerceLayoutValue));
+
+		/// <summary>Gets or sets the layout root of the layout tree managed in this framework.</summary>
+		[Bindable(true)]
+		[Description("Gets or sets the layout root of the layout tree managed in this framework.")]
+		[Category("Layout")]
+		public LayoutRoot Layout
+		{
+			get => (LayoutRoot)GetValue(LayoutProperty);
+			set => SetValue(LayoutProperty, value);
+		}
+
+		/// <summary>Coerces the <see cref="Layout"/> value.</summary>
+		private static object CoerceLayoutValue(DependencyObject d, object value)
+		{
+			if (value == null) return new LayoutRoot { RootPanel = new LayoutPanel(new LayoutDocumentPaneGroup(new LayoutDocumentPane())) };
+			((DockingManager)d).OnLayoutChanging(value as LayoutRoot);
+			return value;
+		}
+
+		/// <summary>Handles changes to the <see cref="Layout"/> property.</summary>
+		private static void OnLayoutChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) => ((DockingManager)d).OnLayoutChanged(e.OldValue as LayoutRoot, e.NewValue as LayoutRoot);
+
+		/// <summary><see cref="DockLayout"/> dependency property.</summary>
+		public static readonly DependencyProperty DockLayoutProperty = DependencyProperty.Register(
+			nameof(DockLayout),
+			typeof(Core.IRootDock),
+			typeof(DockingManager),
+			new FrameworkPropertyMetadata(null, OnDockLayoutChanged));
+
+		/// <summary>
+		/// Gets or sets the MVVM layout model. When set, the docking manager
+		/// syncs this ViewModel tree with the internal WPF layout automatically.
+		/// If null, the docking manager operates in classic (v4.x) mode.
+		/// </summary>
+		[Bindable(true)]
+		[Description("Gets or sets the MVVM layout model for ViewModel-driven docking.")]
+		[Category("Layout")]
+		[CLSCompliant(false)]
+		public Core.IRootDock DockLayout
+		{
+			get => (Core.IRootDock)GetValue(DockLayoutProperty);
+			set => SetValue(DockLayoutProperty, value);
+		}
+
+		/// <summary>Synchronizes the MVVM dock layout with the AvalonDock layout.</summary>
+		private LayoutSyncBridge _syncBridge;
+
+		/// <summary>Tracks the alignment strategy installed by the base DockingManager so it can be cleaned up.</summary>
+		private ILayoutUpdateStrategy _installedAlignmentStrategy;
+
+		private static void OnDockLayoutChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+		{
+			((DockingManager)d).OnDockLayoutChanged(e.OldValue as Core.IRootDock, e.NewValue as Core.IRootDock);
+		}
+
+		/// <summary>
+		/// Called when the <see cref="DockLayout"/> property changes.
+		/// Creates/destroys the <see cref="LayoutSyncBridge"/> and installs a
+		/// <see cref="DockAlignmentStrategy"/> when no custom strategy is set.
+		/// </summary>
+		/// <param name="oldValue">The previous root dock, or null.</param>
+		/// <param name="newValue">The new root dock, or null.</param>
+		protected virtual void OnDockLayoutChanged(Core.IRootDock oldValue, Core.IRootDock newValue)
+		{
+			_syncBridge?.Detach();
+			_syncBridge = null;
+
+			if (newValue != null)
+			{
+				_syncBridge = new LayoutSyncBridge(this, newValue);
+				_syncBridge.Attach();
+
+				if (LayoutUpdateStrategy == null)
+				{
+					_installedAlignmentStrategy = new DockAlignmentStrategy(_syncBridge.ContentToSideMap);
+					LayoutUpdateStrategy = _installedAlignmentStrategy;
+				}
+			}
+			else
+			{
+				if (_installedAlignmentStrategy != null && LayoutUpdateStrategy == _installedAlignmentStrategy)
+				{
+					LayoutUpdateStrategy = null;
+				}
+
+				_installedAlignmentStrategy = null;
+			}
+		}
+
+		/// <summary>Provides derived classes an opportunity to handle changes to the <see cref="Layout"/> property.</summary>
+		/// <param name="oldLayout">The previous layout.</param>
+		/// <param name="newLayout">The new layout.</param>
+		protected virtual void OnLayoutChanged(LayoutRoot oldLayout, LayoutRoot newLayout)
+		{
+			if (oldLayout != null)
+			{
+				oldLayout.PropertyChanged -= OnLayoutRootPropertyChanged;
+				oldLayout.Updated -= OnLayoutRootUpdated;
+				DiscardDetachedWindowsOfReplacedLayout();
+			}
+
+			foreach (var fwc in _fwList.ToArray())
+			{
+				fwc.KeepContentVisibleOnClose = true;
+				fwc.InternalClose();
+			}
+
+			_fwList.Clear();
+
+			foreach (var fwc in _fwHiddenList.ToArray())
+			{
+				fwc.InternalClose();
+			}
+
+			_fwHiddenList.Clear();
+			DetachDocumentsSource(oldLayout, DocumentsSource);
+			DetachAnchorablesSource(oldLayout, AnchorablesSource);
+
+			if (oldLayout != null && oldLayout.Manager == this)
+				oldLayout.Manager = null;
+
+			ClearLogicalChildrenList();
+			DetachLayoutItems();
+
+			Layout.Manager = this;
+
+			AttachLayoutItems();
+			AttachDocumentsSource(newLayout, DocumentsSource);
+			AttachAnchorablesSource(newLayout, AnchorablesSource);
+
+			// A layout saved while floating was allowed still carries its floating windows. Dock them
+			// before any window is created for them, so loading a layout cannot bring the feature back.
+			if (!AllowFloatingWindows) DockAllFloatingWindows();
+
+			if (IsLoaded)
+			{
+				LayoutRootPanel = CreateUIElementForModel(Layout.RootPanel) as LayoutPanelControl;
+				LeftSidePanel = CreateUIElementForModel(Layout.LeftSide) as LayoutAnchorSideControl;
+				TopSidePanel = CreateUIElementForModel(Layout.TopSide) as LayoutAnchorSideControl;
+				RightSidePanel = CreateUIElementForModel(Layout.RightSide) as LayoutAnchorSideControl;
+				BottomSidePanel = CreateUIElementForModel(Layout.BottomSide) as LayoutAnchorSideControl;
+
+				foreach (var fw in Layout.FloatingWindows.Where(x => x.IsValid).ToArray())
+				{
+					CreateUIElementForModel(fw);
+				}
+
+				foreach (var fw in _fwList.ToArray())
+				{
+					if (fw.Model is LayoutAnchorableFloatingWindow window && window.RootPanel.IsMaximized)
+					{
+						fw.WindowState = WindowState.Normal;
+						fw.Show();
+						fw.WindowState = WindowState.Maximized;
+					}
+					else
+					{
+						if (fw.Content != null || (fw.Model as LayoutAnchorableFloatingWindow)?.IsVisible == true)
+							fw.Show();
+						else
+							fw.Hide();
+					}
+
+					// fw.Owner = Window.GetWindow(this);
+					// fw.SetParentToMainWindowOf(this);
+				}
+
+				// In order to prevent resource leaks, unsubscribe from SizeChanged event for case when user call loading of Layout Settigns.
+				SizeChanged -= OnSizeChanged;
+				SizeChanged += OnSizeChanged;
+			}
+
+			if (newLayout != null)
+			{
+				newLayout.PropertyChanged += OnLayoutRootPropertyChanged;
+				newLayout.Updated += OnLayoutRootUpdated;
+			}
+
+			LayoutChanged?.Invoke(this, EventArgs.Empty);
+			// Layout?.CollectGarbage();
+			CommandManager.InvalidateRequerySuggested();
+
+			RestoreDetachedAnchorables(newLayout);
+		}
+
+		/// <summary>
+		/// Closes the standalone windows that belong to a layout which is being replaced.
+		/// </summary>
+		/// <remarks>
+		/// Their anchorables are about to leave the manager, so a surviving window would host content
+		/// whose model is no longer part of any layout - unreachable, and impossible to dock back.
+		/// </remarks>
+		private void DiscardDetachedWindowsOfReplacedLayout()
+		{
+			CloseDetachedWindows(returnToLayout: true, keepDetachedFlag: true);
+		}
+
+		/// <summary>
+		/// Recreates the standalone windows of anchorables that were detached when the layout was saved.
+		/// </summary>
+		/// <param name="layout">The layout that has just been applied, may be <see langword="null"/>.</param>
+		/// <remarks>
+		/// Deferred to <see cref="DispatcherPriority.Loaded"/> because detaching moves the presenter of
+		/// an anchorable out of the visual tree, which cannot happen while that tree is still being built.
+		/// </remarks>
+		private void RestoreDetachedAnchorables(LayoutRoot layout)
+		{
+			if (layout == null) return;
+
+			var toDetach = layout.Descendents().OfType<LayoutAnchorable>().Where(a => a.IsDetached).ToList();
+			if (toDetach.Count == 0) return;
+
+			// The flag is re-applied by DetachAnchorableToWindow; clear it so a failed restore cannot
+			// leave the model claiming to be detached without a window.
+			foreach (var anchorable in toDetach)
+				anchorable.IsDetached = false;
+
+			// A layout saved while standalone windows were allowed still asks for them. Leaving the
+			// anchorables docked is the whole point of the switch, and the flags cleared above already
+			// put the models back in agreement with that.
+			if (!AllowDetachedWindows) return;
+
+			Dispatcher.BeginInvoke(
+				DispatcherPriority.Loaded,
+				new Action(() =>
+				{
+					foreach (var anchorable in toDetach)
+					{
+						if (anchorable.Root == layout) DetachAnchorableToWindow(anchorable);
+					}
+				}));
+		}
+
+		/// <summary><see cref="LayoutUpdateStrategy"/> dependency property.</summary>
+		public static readonly DependencyProperty LayoutUpdateStrategyProperty = DependencyProperty.Register(nameof(LayoutUpdateStrategy), typeof(ILayoutUpdateStrategy), typeof(DockingManager),
+				new FrameworkPropertyMetadata((ILayoutUpdateStrategy)null));
+
+		/// <summary>
+		/// Gets or sets the layout strategy class that can be to called by the framework when it needs to position a <see cref="LayoutAnchorable"/> inside an existing layout.
+		/// </summary>
+		/// <remarks>Sometimes it's impossible to automatically insert an anchorable in the layout without specifing the target parent pane.
+		/// Set this property to an object that will be asked to insert the anchorable to the desidered position.</remarks>
+		[Bindable(true)]
+		[Description("Gets or sets the layout strategy class that can be to called by the framework when it needs to position a LayoutAnchorable inside an existing layout.")]
+		[Category("Layout")]
+		public ILayoutUpdateStrategy LayoutUpdateStrategy
+		{
+			get => (ILayoutUpdateStrategy)GetValue(LayoutUpdateStrategyProperty);
+			set => SetValue(LayoutUpdateStrategyProperty, value);
+		}
+
+		/// <summary><see cref="DocumentPaneTemplate"/> dependency property.</summary>
+		public static readonly DependencyProperty DocumentPaneTemplateProperty = DependencyProperty.Register(nameof(DocumentPaneTemplate), typeof(ControlTemplate), typeof(DockingManager),
+				new FrameworkPropertyMetadata(null, OnDocumentPaneTemplateChanged));
+
+		/// <summary>Gets or sets the <see cref="ControlTemplate"/> that can be used to render the <see cref="LayoutDocumentPaneControl"/>.</summary>
+		[Bindable(true)]
+		[Description("Gets or sets the ControlTemplate´that can be used to render the LayoutDocumentPaneControl.")]
+		[Category("Document")]
+		public ControlTemplate DocumentPaneTemplate
+		{
+			get => (ControlTemplate)GetValue(DocumentPaneTemplateProperty);
+			set => SetValue(DocumentPaneTemplateProperty, value);
+		}
+
+		/// <summary>Handles changes to the <see cref="DocumentPaneTemplate"/> property.</summary>
+		private static void OnDocumentPaneTemplateChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+		{
+			((DockingManager)d).OnDocumentPaneTemplateChanged(e);
+		}
+
+		/// <summary>Provides derived classes an opportunity to handle changes to the <see cref="DocumentPaneTemplate"/> property.</summary>
+		/// <param name="e">The event data for the property change.</param>
+		protected virtual void OnDocumentPaneTemplateChanged(DependencyPropertyChangedEventArgs e)
+		{
+		}
+
+		/// <summary>
+		/// <see cref="AnchorablePaneTemplate"/> dependency property
+		/// </summary>
+		public static readonly DependencyProperty AnchorablePaneTemplateProperty = DependencyProperty.Register(nameof(AnchorablePaneTemplate), typeof(ControlTemplate), typeof(DockingManager),
+				new FrameworkPropertyMetadata(null, OnAnchorablePaneTemplateChanged));
+
+		/// <summary>Gets or sets the <see cref="ControlTemplate"/> used to render <see cref="LayoutAnchorablePaneControl"/>.</summary>
+		[Bindable(true)]
+		[Description("Gets or sets the ControlTemplate used to render LayoutAnchorablePaneControl")]
+		[Category("Anchorable")]
+		public ControlTemplate AnchorablePaneTemplate
+		{
+			get => (ControlTemplate)GetValue(AnchorablePaneTemplateProperty);
+			set => SetValue(AnchorablePaneTemplateProperty, value);
+		}
+
+		/// <summary>Handles changes to the <see cref="AnchorablePaneTemplate"/> property.</summary>
+		private static void OnAnchorablePaneTemplateChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) => ((DockingManager)d).OnAnchorablePaneTemplateChanged(e);
+
+		/// <summary>Provides derived classes an opportunity to handle changes to the <see cref="AnchorablePaneTemplate"/> property.</summary>
+		/// <param name="e">The event data for the property change.</param>
+		protected virtual void OnAnchorablePaneTemplateChanged(DependencyPropertyChangedEventArgs e)
+		{
+		}
+
+		/// <summary>The <see cref="AnchorSideTemplate"/> dependency property.</summary>
+		public static readonly DependencyProperty AnchorSideTemplateProperty = DependencyProperty.Register(nameof(AnchorSideTemplate), typeof(ControlTemplate), typeof(DockingManager),
+				new FrameworkPropertyMetadata((ControlTemplate)null));
+
+		/// <summary>Gets or sets the <see cref="ControlTemplate"/> used to render <see cref="LayoutAnchorSideControl"/>.</summary>
+		[Bindable(true)]
+		[Description("Gets or sets the ControlTemplate used to render LayoutAnchorSideControl.")]
+		[Category("Anchor")]
+		public ControlTemplate AnchorSideTemplate
+		{
+			get => (ControlTemplate)GetValue(AnchorSideTemplateProperty);
+			set => SetValue(AnchorSideTemplateProperty, value);
+		}
+
+		/// <summary><see cref="AnchorGroupTemplate"/> dependency property.</summary>
+		public static readonly DependencyProperty AnchorGroupTemplateProperty = DependencyProperty.Register(nameof(AnchorGroupTemplate), typeof(ControlTemplate), typeof(DockingManager),
+				new FrameworkPropertyMetadata((ControlTemplate)null));
+
+		/// <summary>Gets or sets the <see cref="ControlTemplate"/> used to render the <see cref="LayoutAnchorGroupControl"/>.</summary>
+		[Bindable(true)]
+		[Description("Gets or sets the ControlTemplate used to render LayoutAnchorGroupControl.")]
+		[Category("Anchor")]
+		public ControlTemplate AnchorGroupTemplate
+		{
+			get => (ControlTemplate)GetValue(AnchorGroupTemplateProperty);
+			set => SetValue(AnchorGroupTemplateProperty, value);
+		}
+
+		/// <summary><see cref="AnchorTemplate"/> dependency property.</summary>
+		public static readonly DependencyProperty AnchorTemplateProperty = DependencyProperty.Register(nameof(AnchorTemplate), typeof(ControlTemplate), typeof(DockingManager),
+				new FrameworkPropertyMetadata((ControlTemplate)null));
+
+		/// <summary>Gets or sets the <see cref="ControlTemplate"/> used to render a <see cref="LayoutAnchorControl"/>.</summary>
+		[Bindable(true)]
+		[Description("Gets or sets the ControlTemplate used to render a LayoutAnchorControl.")]
+		[Category("Anchor")]
+		public ControlTemplate AnchorTemplate
+		{
+			get => (ControlTemplate)GetValue(AnchorTemplateProperty);
+			set => SetValue(AnchorTemplateProperty, value);
+		}
+
+		/// <summary><see cref="DocumentPaneControlStyle"/> dependency property.</summary>
+		public static readonly DependencyProperty DocumentPaneControlStyleProperty = DependencyProperty.Register(nameof(DocumentPaneControlStyle), typeof(Style), typeof(DockingManager),
+				new FrameworkPropertyMetadata(null, OnDocumentPaneControlStyleChanged));
+
+		/// <summary>Gets or sets the style of a <see cref="LayoutDocumentPaneControl"/>.</summary>
+		[Bindable(true)]
+		[Description("Gets or sets the style of a LayoutDocumentPaneControl.")]
+		[Category("Document")]
+		public Style DocumentPaneControlStyle
+		{
+			get => (Style)GetValue(DocumentPaneControlStyleProperty);
+			set => SetValue(DocumentPaneControlStyleProperty, value);
+		}
+
+		/// <summary>Handles changes to the DocumentPaneControlStyle property.</summary>
+		private static void OnDocumentPaneControlStyleChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) => ((DockingManager)d).OnDocumentPaneControlStyleChanged(e);
+
+		/// <summary>Provides derived classes an opportunity to handle changes to the <see cref="DocumentPaneControlStyle"/> property.</summary>
+		/// <param name="e">The event data for the property change.</param>
+		protected virtual void OnDocumentPaneControlStyleChanged(DependencyPropertyChangedEventArgs e)
+		{
+		}
+
+		/// <summary><see cref="AnchorablePaneControlStyle"/> dependency property.</summary>
+		public static readonly DependencyProperty AnchorablePaneControlStyleProperty = DependencyProperty.Register(nameof(AnchorablePaneControlStyle), typeof(Style), typeof(DockingManager),
+				new FrameworkPropertyMetadata(null, OnAnchorablePaneControlStyleChanged));
+
+		/// <summary>Gets or sets the <see cref="Style"/> to apply to <see cref="LayoutAnchorablePaneControl"/>.</summary>
+		[Bindable(true)]
+		[Description("Gets or sets the Style to apply to LayoutAnchorablePaneControl.")]
+		[Category("Anchorable")]
+		public Style AnchorablePaneControlStyle
+		{
+			get => (Style)GetValue(AnchorablePaneControlStyleProperty);
+			set => SetValue(AnchorablePaneControlStyleProperty, value);
+		}
+
+		/// <summary>Handles changes to the <see cref="AnchorablePaneControlStyle"/> property.</summary>
+		private static void OnAnchorablePaneControlStyleChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) => ((DockingManager)d).OnAnchorablePaneControlStyleChanged(e);
+
+		/// <summary>Provides derived classes an opportunity to handle changes to the <see cref="AnchorablePaneControlStyle"/> property.</summary>
+		/// <param name="e">The event data for the property change.</param>
+		protected virtual void OnAnchorablePaneControlStyleChanged(DependencyPropertyChangedEventArgs e)
+		{
+		}
+
+		/// <summary><see cref="DocumentHeaderTemplate"/> dependency property.</summary>
+		public static readonly DependencyProperty DocumentHeaderTemplateProperty = DependencyProperty.Register(nameof(DocumentHeaderTemplate), typeof(DataTemplate), typeof(DockingManager),
+				new FrameworkPropertyMetadata((DataTemplate)null, OnDocumentHeaderTemplateChanged, CoerceDocumentHeaderTemplateValue));
+
+		/// <summary>Gets or sets the <see cref="DataTemplate"/> to use for document headers.</summary>
+		[Bindable(true)]
+		[Description("Gets or sets the DataTemplate to use for document headers.")]
+		[Category("Document")]
+		public DataTemplate DocumentHeaderTemplate
+		{
+			get => (DataTemplate)GetValue(DocumentHeaderTemplateProperty);
+			set => SetValue(DocumentHeaderTemplateProperty, value);
+		}
+
+		/// <summary>Handles changes to the <see cref="DocumentHeaderTemplate"/> property.</summary>
+		private static void OnDocumentHeaderTemplateChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) => ((DockingManager)d).OnDocumentHeaderTemplateChanged(e);
+
+		/// <summary>Provides derived classes an opportunity to handle changes to the <see cref="DocumentHeaderTemplate"/> property.</summary>
+		/// <param name="e">The event data for the property change.</param>
+		protected virtual void OnDocumentHeaderTemplateChanged(DependencyPropertyChangedEventArgs e)
+		{
+		}
+
+		/// <summary>Coerces the <see cref="DocumentHeaderTemplate"/> value.</summary>
+		private static object CoerceDocumentHeaderTemplateValue(DependencyObject d, object value)
+		{
+			if (value != null && d.GetValue(DocumentHeaderTemplateSelectorProperty) != null)
+				return null;
+			return value;
+		}
+
+		/// <summary><see cref="DocumentHeaderTemplateSelector"/> dependency property.</summary>
+		public static readonly DependencyProperty DocumentHeaderTemplateSelectorProperty = DependencyProperty.Register(nameof(DocumentHeaderTemplateSelector), typeof(DataTemplateSelector), typeof(DockingManager),
+				new FrameworkPropertyMetadata(null, OnDocumentHeaderTemplateSelectorChanged, CoerceDocumentHeaderTemplateSelectorValue));
+
+		/// <summary>Gets or sets the <see cref="DataTemplateSelector"/> that can be used for selecting a <see cref="DataTemplate"/> for a document header.</summary>
+		[Bindable(true)]
+		[Description("Gets or sets the DataTemplateSelector that can be used for selecting a DataTemplates for a document header.")]
+		[Category("Document")]
+		public DataTemplateSelector DocumentHeaderTemplateSelector
+		{
+			get => (DataTemplateSelector)GetValue(DocumentHeaderTemplateSelectorProperty);
+			set => SetValue(DocumentHeaderTemplateSelectorProperty, value);
+		}
+
+		/// <summary>Handles changes to the <see cref="DocumentHeaderTemplateSelector"/> property.</summary>
+		private static void OnDocumentHeaderTemplateSelectorChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) => ((DockingManager)d).OnDocumentHeaderTemplateSelectorChanged(e);
+
+		/// <summary>Provides derived classes an opportunity to handle changes to the <see cref="DocumentHeaderTemplateSelector"/> property.</summary>
+		/// <param name="e">The event data for the property change.</param>
+		protected virtual void OnDocumentHeaderTemplateSelectorChanged(DependencyPropertyChangedEventArgs e)
+		{
+			if (e.NewValue != null && DocumentHeaderTemplate != null)
+				DocumentHeaderTemplate = null;
+			if (DocumentPaneMenuItemHeaderTemplateSelector == null)
+				DocumentPaneMenuItemHeaderTemplateSelector = DocumentHeaderTemplateSelector;
+		}
+
+		/// <summary>Coerces the <see cref="DocumentHeaderTemplateSelector"/> value.</summary>
+		private static object CoerceDocumentHeaderTemplateSelectorValue(DependencyObject d, object value) => value;
+
+		/// <summary><see cref="DocumentTitleTemplate"/> dependency property.</summary>
+		public static readonly DependencyProperty DocumentTitleTemplateProperty = DependencyProperty.Register(nameof(DocumentTitleTemplate), typeof(DataTemplate), typeof(DockingManager),
+				new FrameworkPropertyMetadata(null, OnDocumentTitleTemplateChanged, CoerceDocumentTitleTemplateValue));
+
+		/// <summary>Gets or sets the <see cref="DataTemplate"/> to use for displaying the title of a document.</summary>
+		[Bindable(true)]
+		[Description("Gets or sets the DataTemplate to use for displaying the title of a document.")]
+		[Category("Document")]
+		public DataTemplate DocumentTitleTemplate
+		{
+			get => (DataTemplate)GetValue(DocumentTitleTemplateProperty);
+			set => SetValue(DocumentTitleTemplateProperty, value);
+		}
+
+		/// <summary>Handles changes to the <see cref="DocumentTitleTemplate"/> property.</summary>
+		private static void OnDocumentTitleTemplateChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) => ((DockingManager)d).OnDocumentTitleTemplateChanged(e);
+
+		/// <summary>Provides derived classes an opportunity to handle changes to the <see cref="DocumentTitleTemplate"/> property.</summary>
+		/// <param name="e">The event data for the property change.</param>
+		protected virtual void OnDocumentTitleTemplateChanged(DependencyPropertyChangedEventArgs e)
+		{
+		}
+
+		/// <summary>Coerces the <see cref="DocumentTitleTemplate"/> value.</summary>
+		private static object CoerceDocumentTitleTemplateValue(DependencyObject d, object value)
+		{
+			if (value != null && d.GetValue(DocumentTitleTemplateSelectorProperty) != null)
+				return null;
+			return value;
+		}
+
+		/// <summary><see cref="DocumentTitleTemplateSelector"/> dependency property.</summary>
+		public static readonly DependencyProperty DocumentTitleTemplateSelectorProperty = DependencyProperty.Register(nameof(DocumentTitleTemplateSelector), typeof(DataTemplateSelector), typeof(DockingManager),
+				new FrameworkPropertyMetadata(null, OnDocumentTitleTemplateSelectorChanged, CoerceDocumentTitleTemplateSelectorValue));
+
+		/// <summary>Gets or sets the <see cref="DataTemplateSelector"/> to use for displaying the <see cref="DataTemplate"/> of a document's title.</summary>
+		[Bindable(true)]
+		[Description("Gets or sets the DataTemplateSelector to use for displaying the DataTemplate of a document's title.")]
+		[Category("Document")]
+		public DataTemplateSelector DocumentTitleTemplateSelector
+		{
+			get => (DataTemplateSelector)GetValue(DocumentTitleTemplateSelectorProperty);
+			set => SetValue(DocumentTitleTemplateSelectorProperty, value);
+		}
+
+		/// <summary>Handles changes to the <see cref="DocumentTitleTemplateSelector"/> property.</summary>
+		private static void OnDocumentTitleTemplateSelectorChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) => ((DockingManager)d).OnDocumentTitleTemplateSelectorChanged(e);
+
+		/// <summary>Provides derived classes an opportunity to handle changes to the <see cref="DocumentTitleTemplateSelector"/> property.</summary>
+		/// <param name="e">The event data for the property change.</param>
+		protected virtual void OnDocumentTitleTemplateSelectorChanged(DependencyPropertyChangedEventArgs e)
+		{
+			if (e.NewValue != null)
+				DocumentTitleTemplate = null;
+		}
+
+		/// <summary>Coerces the <see cref="DocumentTitleTemplateSelector"/> value.</summary>
+		private static object CoerceDocumentTitleTemplateSelectorValue(DependencyObject d, object value) => value;
+
+		/// <summary><see cref="AnchorableTitleTemplate"/> dependency property.</summary>
+		public static readonly DependencyProperty AnchorableTitleTemplateProperty = DependencyProperty.Register(nameof(AnchorableTitleTemplate), typeof(DataTemplate), typeof(DockingManager),
+				new FrameworkPropertyMetadata((DataTemplate)null, OnAnchorableTitleTemplateChanged, CoerceAnchorableTitleTemplateValue));
+
+		/// <summary>Gets or sets the <see cref="DataTemplate"/> to use for the title of an anchorable.</summary>
+		[Bindable(true)]
+		[Description("Gets or sets the DataTemplate to use for the title of an anchorable.")]
+		[Category("Anchorable")]
+		public DataTemplate AnchorableTitleTemplate
+		{
+			get => (DataTemplate)GetValue(AnchorableTitleTemplateProperty);
+			set => SetValue(AnchorableTitleTemplateProperty, value);
+		}
+
+		/// <summary>Handles changes to the <see cref="AnchorableTitleTemplate"/> property.</summary>
+		private static void OnAnchorableTitleTemplateChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) => ((DockingManager)d).OnAnchorableTitleTemplateChanged(e);
+
+		/// <summary>Provides derived classes an opportunity to handle changes to the <see cref="AnchorableTitleTemplate"/> property.</summary>
+		/// <param name="e">The event data for the property change.</param>
+		protected virtual void OnAnchorableTitleTemplateChanged(DependencyPropertyChangedEventArgs e)
+		{
+		}
+
+		/// <summary>Coerces the <see cref="AnchorableTitleTemplate"/> value.</summary>
+		private static object CoerceAnchorableTitleTemplateValue(DependencyObject d, object value)
+		{
+			if (value != null && d.GetValue(AnchorableTitleTemplateSelectorProperty) != null)
+				return null;
+			return value;
+		}
+
+		/// <summary><see cref="AnchorableTitleTemplateSelector"/> dependency property.</summary>
+		public static readonly DependencyProperty AnchorableTitleTemplateSelectorProperty = DependencyProperty.Register(nameof(AnchorableTitleTemplateSelector), typeof(DataTemplateSelector), typeof(DockingManager),
+				new FrameworkPropertyMetadata(null, OnAnchorableTitleTemplateSelectorChanged));
+
+		/// <summary>Gets or sets the <see cref="DataTemplateSelector"/> to use when selecting a <see cref="DataTemplate"/> for the title of an anchorable.</summary>
+		[Bindable(true)]
+		[Description("Gets or sets the DataTemplateSelector to use when selecting a DataTemplate for the title of an anchorable.")]
+		[Category("Anchorable")]
+		public DataTemplateSelector AnchorableTitleTemplateSelector
+		{
+			get => (DataTemplateSelector)GetValue(AnchorableTitleTemplateSelectorProperty);
+			set => SetValue(AnchorableTitleTemplateSelectorProperty, value);
+		}
+
+		/// <summary>Handles changes to the <see cref="AnchorableTitleTemplateSelector"/> property.</summary>
+		private static void OnAnchorableTitleTemplateSelectorChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) => ((DockingManager)d).OnAnchorableTitleTemplateSelectorChanged(e);
+
+		/// <summary>Provides derived classes an opportunity to handle changes to the <see cref="AnchorableTitleTemplateSelector"/> property.</summary>
+		/// <param name="e">The event data for the property change.</param>
+		protected virtual void OnAnchorableTitleTemplateSelectorChanged(DependencyPropertyChangedEventArgs e)
+		{
+			if (e.NewValue != null && AnchorableTitleTemplate != null)
+				AnchorableTitleTemplate = null;
+		}
+
+		/// <summary><see cref="AnchorableHeaderTemplate"/> dependency property.</summary>
+		public static readonly DependencyProperty AnchorableHeaderTemplateProperty = DependencyProperty.Register(nameof(AnchorableHeaderTemplate), typeof(DataTemplate), typeof(DockingManager),
+				new FrameworkPropertyMetadata(null, OnAnchorableHeaderTemplateChanged, CoerceAnchorableHeaderTemplateValue));
+
+		/// <summary>Gets or sets the <see cref="DataTemplate"/> to use for a header of an anchorable.</summary>
+		[Bindable(true)]
+		[Description("Gets or sets the DataTemplate to use for a header of an anchorable")]
+		[Category("Anchorable")]
+		public DataTemplate AnchorableHeaderTemplate
+		{
+			get => (DataTemplate)GetValue(AnchorableHeaderTemplateProperty);
+			set => SetValue(AnchorableHeaderTemplateProperty, value);
+		}
+
+		/// <summary>Handles changes to the <see cref="AnchorableHeaderTemplate"/> property.</summary>
+		private static void OnAnchorableHeaderTemplateChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) => ((DockingManager)d).OnAnchorableHeaderTemplateChanged(e);
+
+		/// <summary>Provides derived classes an opportunity to handle changes to the <see cref="AnchorableHeaderTemplate"/> property.</summary>
+		/// <param name="e">The event data for the property change.</param>
+		protected virtual void OnAnchorableHeaderTemplateChanged(DependencyPropertyChangedEventArgs e)
+		{
+		}
+
+		/// <summary>Coerces the <see cref="AnchorableHeaderTemplate"/> value.</summary>
+		private static object CoerceAnchorableHeaderTemplateValue(DependencyObject d, object value)
+		{
+			if (value != null && d.GetValue(AnchorableHeaderTemplateSelectorProperty) != null)
+				return null;
+			return value;
+		}
+
+		/// <summary><see cref="AnchorableHeaderTemplateSelector"/> dependency property.</summary>
+		public static readonly DependencyProperty AnchorableHeaderTemplateSelectorProperty = DependencyProperty.Register(nameof(AnchorableHeaderTemplateSelector), typeof(DataTemplateSelector), typeof(DockingManager),
+				new FrameworkPropertyMetadata((DataTemplateSelector)null, OnAnchorableHeaderTemplateSelectorChanged));
+
+		/// <summary>Gets or sets the <see cref="DataTemplateSelector"/> to use for selecting the <see cref="DataTemplate"/> for the header of an anchorable.</summary>
+		[Bindable(true)]
+		[Description("Gets or sets the DataTemplateSelector to use for selecting the DataTemplate for the header of an anchorable.")]
+		[Category("Anchorable")]
+		public DataTemplateSelector AnchorableHeaderTemplateSelector
+		{
+			get => (DataTemplateSelector)GetValue(AnchorableHeaderTemplateSelectorProperty);
+			set => SetValue(AnchorableHeaderTemplateSelectorProperty, value);
+		}
+
+		/// <summary>Handles changes to the <see cref="AnchorableHeaderTemplateSelector"/> property.</summary>
+		private static void OnAnchorableHeaderTemplateSelectorChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) => ((DockingManager)d).OnAnchorableHeaderTemplateSelectorChanged(e);
+
+		/// <summary>Provides derived classes an opportunity to handle changes to the <see cref="AnchorableHeaderTemplateSelector"/> property.</summary>
+		/// <param name="e">The event data for the property change.</param>
+		protected virtual void OnAnchorableHeaderTemplateSelectorChanged(DependencyPropertyChangedEventArgs e)
+		{
+			if (e.NewValue != null)
+				AnchorableHeaderTemplate = null;
+		}
+
+		/// <summary><see cref="LayoutRootPanel"/> dependency property.</summary>
+		public static readonly DependencyProperty LayoutRootPanelProperty = DependencyProperty.Register(nameof(LayoutRootPanel), typeof(LayoutPanelControl), typeof(DockingManager),
+				new FrameworkPropertyMetadata(null, OnLayoutRootPanelChanged));
+
+		/// <summary>Gets or sets the layout <see cref="LayoutPanelControl"/> which is attached to the Layout.Root property.</summary>
+		[Bindable(true)]
+		[Description("Gets or sets the layout LayoutPanelControl which is attached to the Layout.Root property.")]
+		[Category("Layout")]
+		public LayoutPanelControl LayoutRootPanel
+		{
+			get => (LayoutPanelControl)GetValue(LayoutRootPanelProperty);
+			set => SetValue(LayoutRootPanelProperty, value);
+		}
+
+		/// <summary>Handles changes to the <see cref="LayoutRootPanel"/> property.</summary>
+		private static void OnLayoutRootPanelChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) => ((DockingManager)d).OnLayoutRootPanelChanged(e);
+
+		/// <summary>Provides derived classes an opportunity to handle changes to the <see cref="LayoutRootPanel"/> property.</summary>
+		/// <param name="e">The event data for the property change.</param>
+		protected virtual void OnLayoutRootPanelChanged(DependencyPropertyChangedEventArgs e)
+		{
+			if (e.OldValue != null)
+				InternalRemoveLogicalChild(e.OldValue);
+			if (e.NewValue != null)
+				InternalAddLogicalChild(e.NewValue);
+		}
+
+		/// <summary><see cref="RightSidePanel"/> dependency property.</summary>
+		public static readonly DependencyProperty RightSidePanelProperty = DependencyProperty.Register(nameof(RightSidePanel), typeof(LayoutAnchorSideControl), typeof(DockingManager),
+				new FrameworkPropertyMetadata(null, OnRightSidePanelChanged));
+
+		/// <summary>Gets or sets the <see cref="LayoutAnchorSideControl"/> that is displayed as right side panel control.</summary>
+		[Bindable(true)]
+		[Description("Gets or sets the LayoutAnchorSideControl that is displayed as right side panel control.")]
+		[Category("Side Panel")]
+		public LayoutAnchorSideControl RightSidePanel
+		{
+			get => (LayoutAnchorSideControl)GetValue(RightSidePanelProperty);
+			set => SetValue(RightSidePanelProperty, value);
+		}
+
+		/// <summary>Handles changes to the <see cref="RightSidePanel"/> property.</summary>
+		private static void OnRightSidePanelChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) => ((DockingManager)d).OnRightSidePanelChanged(e);
+
+		/// <summary>Provides derived classes an opportunity to handle changes to the <see cref="RightSidePanel"/> property.</summary>
+		/// <param name="e">The event data for the property change.</param>
+		protected virtual void OnRightSidePanelChanged(DependencyPropertyChangedEventArgs e)
+		{
+			if (e.OldValue != null)
+				InternalRemoveLogicalChild(e.OldValue);
+			if (e.NewValue != null)
+				InternalAddLogicalChild(e.NewValue);
+		}
+
+		/// <summary><see cref="LeftSidePanel"/> dependency property.</summary>
+		public static readonly DependencyProperty LeftSidePanelProperty = DependencyProperty.Register(nameof(LeftSidePanel), typeof(LayoutAnchorSideControl), typeof(DockingManager),
+				new FrameworkPropertyMetadata(null, OnLeftSidePanelChanged));
+
+		/// <summary>Gets or sets the <see cref="LayoutAnchorSideControl"/> that is displayed as left side panel control.</summary>
+		[Bindable(true)]
+		[Description("Gets or sets the LayoutAnchorSideControl that is displayed as left side panel control.")]
+		[Category("Side Panel")]
+		public LayoutAnchorSideControl LeftSidePanel
+		{
+			get => (LayoutAnchorSideControl)GetValue(LeftSidePanelProperty);
+			set => SetValue(LeftSidePanelProperty, value);
+		}
+
+		/// <summary>Handles changes to the <see cref="LeftSidePanel"/> property.</summary>
+		private static void OnLeftSidePanelChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) => ((DockingManager)d).OnLeftSidePanelChanged(e);
+
+		/// <summary>Provides derived classes an opportunity to handle changes to the <see cref="LeftSidePanel"/> property.</summary>
+		/// <param name="e">The event data for the property change.</param>
+		protected virtual void OnLeftSidePanelChanged(DependencyPropertyChangedEventArgs e)
+		{
+			if (e.OldValue != null)
+				InternalRemoveLogicalChild(e.OldValue);
+			if (e.NewValue != null)
+				InternalAddLogicalChild(e.NewValue);
+		}
+
+		/// <summary><see cref="TopSidePanel"/> dependency property.</summary>
+		public static readonly DependencyProperty TopSidePanelProperty = DependencyProperty.Register(nameof(TopSidePanel), typeof(LayoutAnchorSideControl), typeof(DockingManager),
+				new FrameworkPropertyMetadata(null, OnTopSidePanelChanged));
+
+		/// <summary>Gets or sets the <see cref="LayoutAnchorSideControl"/> that is displayed as top side panel control.</summary>
+		[Bindable(true)]
+		[Description("Gets or sets the LayoutAnchorSideControl that is displayed as top side panel control.")]
+		[Category("Side Panel")]
+		public LayoutAnchorSideControl TopSidePanel
+		{
+			get => (LayoutAnchorSideControl)GetValue(TopSidePanelProperty);
+			set => SetValue(TopSidePanelProperty, value);
+		}
+
+		/// <summary>Handles changes to the <see cref="TopSidePanel"/> property.</summary>
+		private static void OnTopSidePanelChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) => ((DockingManager)d).OnTopSidePanelChanged(e);
+
+		/// <summary>Provides derived classes an opportunity to handle changes to the <see cref="TopSidePanel"/> property.</summary>
+		/// <param name="e">The event data for the property change.</param>
+		protected virtual void OnTopSidePanelChanged(DependencyPropertyChangedEventArgs e)
+		{
+			if (e.OldValue != null)
+				InternalRemoveLogicalChild(e.OldValue);
+			if (e.NewValue != null)
+				InternalAddLogicalChild(e.NewValue);
+		}
+
+		/// <summary><see cref="BottomSidePanel"/> dependency property. </summary>
+		public static readonly DependencyProperty BottomSidePanelProperty = DependencyProperty.Register(nameof(BottomSidePanel), typeof(LayoutAnchorSideControl), typeof(DockingManager),
+				new FrameworkPropertyMetadata(null, OnBottomSidePanelChanged));
+
+		/// <summary>Gets or sets the <see cref="LayoutAnchorSideControl"/> that is displayed as bottom side panel control.</summary>
+		[Bindable(true)]
+		[Description("Gets or sets the LayoutAnchorSideControl that is displayed as bottom side panel control.")]
+		[Category("Side Panel")]
+		public LayoutAnchorSideControl BottomSidePanel
+		{
+			get => (LayoutAnchorSideControl)GetValue(BottomSidePanelProperty);
+			set => SetValue(BottomSidePanelProperty, value);
+		}
+
+		/// <summary>Handles changes to the <see cref="BottomSidePanel"/> property.</summary>
+		private static void OnBottomSidePanelChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) => ((DockingManager)d).OnBottomSidePanelChanged(e);
+
+		/// <summary>Provides derived classes an opportunity to handle changes to the <see cref="BottomSidePanel"/> property.</summary>
+		/// <param name="e">The event data for the property change.</param>
+		protected virtual void OnBottomSidePanelChanged(DependencyPropertyChangedEventArgs e)
+		{
+			if (e.OldValue != null)
+				InternalRemoveLogicalChild(e.OldValue);
+			if (e.NewValue != null)
+				InternalAddLogicalChild(e.NewValue);
+		}
+
+		/// <summary><see cref="AutoHideWindow"/> Read-Only dependency property.</summary>
+		private static readonly DependencyPropertyKey AutoHideWindowPropertyKey = DependencyProperty.RegisterReadOnly(nameof(AutoHideWindow), typeof(LayoutAutoHideWindowControl), typeof(DockingManager),
+				new FrameworkPropertyMetadata(null, OnAutoHideWindowChanged));
+
+		/// <summary><see cref="AutoHideWindow"/> dependency property.</summary>
+		public static readonly DependencyProperty AutoHideWindowProperty = AutoHideWindowPropertyKey.DependencyProperty;
+
+		/// <summary>Gets the <see cref="LayoutAutoHideWindowControl"/> that is currently shown as autohide window.</summary>
+		[Bindable(true)]
+		[Description("Gets the LayoutAutoHideWindowControl that is currently shown as autohide window.")]
+		[Category("AutoHideWindow")]
+		public LayoutAutoHideWindowControl AutoHideWindow => (LayoutAutoHideWindowControl)GetValue(AutoHideWindowProperty);
+
+		/// <summary>
+		/// Provides a secure method for setting the <see cref="AutoHideWindow"/> property.
+		/// This dependency property indicates the currently shown autohide window.
+		/// </summary>
+		/// <param name="value">The new value for the property.</param>
+		protected void SetAutoHideWindow(LayoutAutoHideWindowControl value) => SetValue(AutoHideWindowPropertyKey, value);
+
+		/// <summary>Handles changes to the <see cref="AutoHideWindow"/> property.</summary>
+		private static void OnAutoHideWindowChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) => ((DockingManager)d).OnAutoHideWindowChanged(e);
+
+		/// <summary>Provides derived classes an opportunity to handle changes to the <see cref="AutoHideWindow"/> property.</summary>
+		/// <param name="e">The event data for the property change.</param>
+		protected virtual void OnAutoHideWindowChanged(DependencyPropertyChangedEventArgs e)
+		{
+			if (e.OldValue != null)
+				InternalRemoveLogicalChild(e.OldValue);
+			if (e.NewValue != null)
+				InternalAddLogicalChild(e.NewValue);
+		}
+
+		/// <summary>
+		/// Implements the backing store of the <see cref="AutoHideDelay"/> dependency property.
+		/// </summary>
+		public static readonly DependencyProperty AutoHideDelayProperty =
+			DependencyProperty.Register("AutoHideDelay", typeof(int), typeof(DockingManager),
+										new UIPropertyMetadata(500));
+
+		/// <summary>
+		/// Gets or sets the wait time in milliseconds that is applicable when the system AutoHides
+		/// a <see cref="LayoutAnchorableControl"/> (reduces it to a side anchor) after the user:
+		///
+		/// 1) clicks on a <see cref="LayoutAnchorControl "/> that is anchored in one of the <see cref="Layout"/>
+		/// property sides (top, right, left, or bottom) and
+		///
+		/// 2) clicks somewhere else into a focusable element (different document).
+		///
+		/// Expected behavior: The system waits for the configured time and reduces the <see cref="LayoutAnchorableControl"/> (into its side anchor).
+		/// Recommended configuration value range should be between 0 and 1500 milliseconds.
+		/// </summary>
+		[Bindable(true)]
+		[Description("Gets or sets the wait time in milliseconds that is applicable when the system AutoHides a LayoutAnchorableControl (reduces it to a side anchor).")]
+		[Category("AutoHideWindow")]
+		public int AutoHideDelay
+		{
+			get => (int)GetValue(AutoHideDelayProperty);
+			set => SetValue(AutoHideDelayProperty, value);
+		}
+
+		/// <summary>
+		/// Gets or sets a value indicating whether auto-hidden anchorables are presented in the classic
+		/// auto-hide flyout that slides out of the side anchor panels.
+		/// Derived managers that present auto-hidden content differently override this
+		/// with <see langword="false"/> to prevent the flyout from being shown.
+		/// </summary>
+		[Bindable(false)]
+		[Description("Gets whether auto-hidden anchorables are presented in the classic auto-hide flyout.")]
+		[Category("AutoHideWindow")]
+		public bool SupportsAutoHideFlyout { get; protected set; } = true;
+
+		/// <summary>Gets all <see cref="LayoutFloatingWindowControl"/> instances managed by this framework.</summary>
+		[Bindable(false)]
+		[Description("Enumerates all LayoutFloatingWindowControls managed by this framework.")]
+		[Category("FloatingWindow")]
+		public IEnumerable<LayoutFloatingWindowControl> FloatingWindows => _fwList;
+
+		/// <summary>
+		/// Docks the content of every floating window back into the layout and closes the windows.
+		/// </summary>
+		/// <remarks>
+		/// <para>
+		/// Each piece of content goes back to the pane it was floated from, the same way the Dock command
+		/// of a single floating window does. Content that no longer knows that pane - it was created
+		/// inside a floating window, or the pane it came from was collected when it left - is placed the
+		/// way a newly added anchorable or document is.
+		/// </para>
+		/// <para>
+		/// This runs automatically when <see cref="AllowFloatingWindows"/> is turned off, which is what
+		/// makes that switch retroactive; it is public because emptying the desktop of floating windows
+		/// is also useful on its own, for a "reset windows" menu entry, say.
+		/// </para>
+		/// </remarks>
+		public void DockAllFloatingWindows()
+		{
+			var layout = Layout;
+			if (layout == null) return;
+
+			// Materialised before anything moves: docking mutates both the floating window collection and
+			// the trees hanging off it.
+			var floatingContents = layout.FloatingWindows
+				.SelectMany(fw => fw.Descendents().OfType<LayoutContent>())
+				.ToArray();
+
+			foreach (var content in floatingContents)
+			{
+				// Docking one piece of content can carry others with it, so only what is still floating
+				// is worth moving - and only that still has a Root for Dock to work with.
+				if (content.Root != layout) continue;
+				if (content.FindParent<LayoutFloatingWindow>() == null) continue;
+
+				if (HasDockablePreviousContainer(content))
+					content.Dock();
+				else
+					DockOutsideFloatingWindows(content);
+			}
+
+			layout.CollectGarbage();
+			CloseEmptiedFloatingWindows(layout);
+
+			// Runs again because closing the windows disconnects the panes that content may still name as
+			// the one to float back into, and those references have to go with them.
+			layout.CollectGarbage();
+		}
+
+		/// <summary>
+		/// Gets a value indicating whether <see cref="LayoutContent.Dock"/> can be trusted to take the
+		/// given content out of its floating window.
+		/// </summary>
+		/// <param name="content">The floating content to test.</param>
+		/// <returns><see langword="true"/> when the content still knows a pane to go back to.</returns>
+		/// <remarks>
+		/// <see cref="LayoutContent.Dock"/> returns content to the pane it was floated from when that
+		/// pane is still known. Without one it searches the layout instead, and that search does not
+		/// exclude the panes inside floating windows, so it can put the content straight back into the
+		/// window it is being taken out of. That happens whenever floating emptied the pane the content
+		/// came from and garbage collection then removed it - in a layout with a single pane, always.
+		/// </remarks>
+		private static bool HasDockablePreviousContainer(LayoutContent content) =>
+			((ILayoutPreviousContainer)content).PreviousContainer is ILayoutElement previous
+			&& previous.Root == content.Root
+			&& previous.FindParent<LayoutFloatingWindow>() == null;
+
+		/// <summary>
+		/// Moves content out of its floating window and into a pane of the main layout by hand.
+		/// </summary>
+		/// <param name="content">The content to place.</param>
+		/// <remarks>
+		/// Used by <see cref="DockAllFloatingWindows"/> for content that no longer knows where it was
+		/// floated from. The pane is chosen the way the layout chooses one for newly added content, only
+		/// with the panes inside floating windows barred, and one is created when the layout has none
+		/// left to offer.
+		/// </remarks>
+		private void DockOutsideFloatingWindows(LayoutContent content)
+		{
+			var layout = Layout;
+			if (layout == null) return;
+
+			var wasFloating = content.IsFloating;
+
+			if (content is LayoutAnchorable anchorable)
+			{
+				var anchorablePane = layout.Descendents().OfType<LayoutAnchorablePane>()
+					.FirstOrDefault(pane => pane.FindParent<LayoutFloatingWindow>() == null);
+
+				if (anchorablePane == null)
+				{
+					anchorablePane = new LayoutAnchorablePane { DockWidth = new GridLength(200.0, GridUnitType.Pixel) };
+					EnsureRootPanel(layout).Children.Add(anchorablePane);
+				}
+
+				content.Parent?.RemoveChild(content);
+				anchorablePane.Children.Add(anchorable);
+			}
+			else
+			{
+				var documentPane = layout.Descendents().OfType<LayoutDocumentPane>()
+					.FirstOrDefault(pane => pane.FindParent<LayoutFloatingWindow>() == null);
+
+				if (documentPane == null)
+				{
+					documentPane = new LayoutDocumentPane();
+					EnsureRootPanel(layout).Children.Add(new LayoutDocumentPaneGroup(documentPane));
+				}
+
+				content.Parent?.RemoveChild(content);
+				documentPane.Children.Add(content);
+			}
+
+			// The pane it came from is inside a window that is about to close, so it is no place to
+			// float back into.
+			((ILayoutPreviousContainer)content).PreviousContainer = null;
+			content.PreviousContainerIndex = -1;
+			content.IsSelected = true;
+
+			// Docking through LayoutContent.Dock raises this, and callers must not be able to tell which
+			// of the two routes a piece of content took.
+			if (wasFloating && !content.IsFloating) RaiseContentDocked(content);
+		}
+
+		/// <summary>Returns the root panel of the layout, creating it when the layout has none.</summary>
+		/// <param name="layout">The layout to inspect.</param>
+		/// <returns>The root panel.</returns>
+		/// <remarks>
+		/// A layout that was never given a root panel has none, and there is nothing to add a pane to.
+		/// </remarks>
+		private static LayoutPanel EnsureRootPanel(LayoutRoot layout)
+		{
+			if (layout.RootPanel != null) return layout.RootPanel;
+
+			var panel = new LayoutPanel { Orientation = Orientation.Horizontal };
+			layout.RootPanel = panel;
+			return panel;
+		}
+
+		/// <summary>Closes the floating windows that no longer hold any content.</summary>
+		/// <param name="layout">The layout the windows belong to.</param>
+		/// <remarks>
+		/// <see cref="LayoutRoot.CollectGarbage"/> deliberately keeps an emptied floating window when a
+		/// content still names its pane as the one to float back into - that is what lets a docked
+		/// anchorable be floated again into the same window. Here that would leave the caller with the
+		/// very windows it asked to be rid of, so they are closed explicitly.
+		/// </remarks>
+		private void CloseEmptiedFloatingWindows(LayoutRoot layout)
+		{
+			foreach (var fwc in _fwList.ToArray())
+			{
+				if (fwc.Model == null || fwc.Model.Descendents().OfType<LayoutContent>().Any()) continue;
+				fwc.InternalClose();
+			}
+
+			// Models without a control of their own - a layout can be loaded with floating windows while
+			// AllowFloatingWindows is off, in which case no control was ever created for them.
+			foreach (var fw in layout.FloatingWindows.ToArray())
+			{
+				if (fw.Descendents().OfType<LayoutContent>().Any()) continue;
+				layout.FloatingWindows.Remove(fw);
+			}
+		}
+
+		/// <summary><see cref="LayoutItemTemplate"/> dependency property.</summary>
+		public static readonly DependencyProperty LayoutItemTemplateProperty = DependencyProperty.Register(nameof(LayoutItemTemplate), typeof(DataTemplate), typeof(DockingManager),
+				new FrameworkPropertyMetadata((DataTemplate)null, OnLayoutItemTemplateChanged));
+
+		/// <summary>Gets or sets the <see cref="DataTemplate"/> used to render anchorable and document content.</summary>
+		[Bindable(true)]
+		[Description("Gets or sets the DataTemplate used to render anchorable and document content.")]
+		[Category("Layout")]
+		public DataTemplate LayoutItemTemplate
+		{
+			get => (DataTemplate)GetValue(LayoutItemTemplateProperty);
+			set => SetValue(LayoutItemTemplateProperty, value);
+		}
+
+		/// <summary>Handles changes to the <see cref="LayoutItemTemplate"/> property.</summary>
+		private static void OnLayoutItemTemplateChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) => ((DockingManager)d).OnLayoutItemTemplateChanged(e);
+
+		/// <summary>Provides derived classes an opportunity to handle changes to the <see cref="LayoutItemTemplate"/> property.</summary>
+		/// <param name="e">The event data for the property change.</param>
+		protected virtual void OnLayoutItemTemplateChanged(DependencyPropertyChangedEventArgs e)
+		{
+		}
+
+		/// <summary><see cref="LayoutItemTemplateSelector"/> dependency property.</summary>
+		public static readonly DependencyProperty LayoutItemTemplateSelectorProperty = DependencyProperty.Register(nameof(LayoutItemTemplateSelector), typeof(DataTemplateSelector), typeof(DockingManager),
+				new FrameworkPropertyMetadata(null, OnLayoutItemTemplateSelectorChanged));
+
+		/// <summary>Gets or sets the <see cref="DataTemplateSelector"/> to select a <see cref="DataTemplate"/> of an anchorable.</summary>
+		[Bindable(true)]
+		[Description("Gets or sets the DataTemplateSelector to select a DataTemplate of an anchorable.")]
+		[Category("Layout")]
+		public DataTemplateSelector LayoutItemTemplateSelector
+		{
+			get => (DataTemplateSelector)GetValue(LayoutItemTemplateSelectorProperty);
+			set => SetValue(LayoutItemTemplateSelectorProperty, value);
+		}
+
+		/// <summary>Handles changes to the <see cref="LayoutItemTemplateSelector"/> property.</summary>
+		private static void OnLayoutItemTemplateSelectorChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) => ((DockingManager)d).OnLayoutItemTemplateSelectorChanged(e);
+
+		/// <summary>Provides derived classes an opportunity to handle changes to the <see cref="LayoutItemTemplateSelector"/> property.</summary>
+		/// <param name="e">The event data for the property change.</param>
+		protected virtual void OnLayoutItemTemplateSelectorChanged(DependencyPropertyChangedEventArgs e)
+		{
+		}
+
+		/// <summary><see cref="DocumentsSource"/> dependency property.</summary>
+		public static readonly DependencyProperty DocumentsSourceProperty = DependencyProperty.Register(nameof(DocumentsSource), typeof(IEnumerable), typeof(DockingManager),
+				new FrameworkPropertyMetadata(null, OnDocumentsSourceChanged));
+
+		/// <summary>Gets or sets the source collection of <see cref="LayoutDocument"/> objects.</summary>
+		[Bindable(true)]
+		[Description("Gets or sets the source collection of LayoutDocument objects.")]
+		[Category("Document")]
+		public IEnumerable DocumentsSource
+		{
+			get => (IEnumerable)GetValue(DocumentsSourceProperty);
+			set => SetValue(DocumentsSourceProperty, value);
+		}
+
+		/// <summary>Handles changes to the <see cref="DocumentsSource"/> property.</summary>
+		private static void OnDocumentsSourceChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) => ((DockingManager)d).OnDocumentsSourceChanged(e);
+
+		/// <summary>Provides derived classes an opportunity to handle changes to the <see cref="DocumentsSource"/> property.</summary>
+		/// <param name="e">The event data for the property change.</param>
+		protected virtual void OnDocumentsSourceChanged(DependencyPropertyChangedEventArgs e)
+		{
+			DetachDocumentsSource(Layout, e.OldValue as IEnumerable);
+			AttachDocumentsSource(Layout, e.NewValue as IEnumerable);
+		}
+
+		/// <summary><see cref="DocumentContextMenu"/> dependency property.</summary>
+		public static readonly DependencyProperty DocumentContextMenuProperty = DependencyProperty.Register(nameof(DocumentContextMenu), typeof(ContextMenu), typeof(DockingManager),
+				new FrameworkPropertyMetadata((ContextMenu)null, OnContextMenuPropertyChanged));
+
+		/// <summary>Gets or sets the <see cref="ContextMenu"/> to show for a document.</summary>
+		[Bindable(true)]
+		[Description("Gets or sets the ContextMenu to show for a document.")]
+		[Category("Document")]
+		public ContextMenu DocumentContextMenu
+		{
+			get => (ContextMenu)GetValue(DocumentContextMenuProperty);
+			set => SetValue(DocumentContextMenuProperty, value);
+		}
+
+		/// <summary><see cref="AnchorablesSource"/> dependency property.</summary>
+		public static readonly DependencyProperty AnchorablesSourceProperty = DependencyProperty.Register(nameof(AnchorablesSource), typeof(IEnumerable), typeof(DockingManager),
+				new FrameworkPropertyMetadata(null, OnAnchorablesSourceChanged));
+
+		/// <summary>Gets or sets the source collection for all <see cref="LayoutAnchorable"/> objects managed in this framework.</summary>
+		[Bindable(true)]
+		[Description("Gets or sets the source collection for all LayoutAnchorable objects managed in this framework.")]
+		[Category("Anchorable")]
+		public IEnumerable AnchorablesSource
+		{
+			get => (IEnumerable)GetValue(AnchorablesSourceProperty);
+			set => SetValue(AnchorablesSourceProperty, value);
+		}
+
+		/// <summary>Handles changes to the <see cref="AnchorablesSource"/> property.</summary>
+		private static void OnAnchorablesSourceChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) => ((DockingManager)d).OnAnchorablesSourceChanged(e);
+
+		/// <summary>Provides derived classes an opportunity to handle changes to the <see cref="AnchorablesSource"/> property.</summary>
+		/// <param name="e">The event data for the property change.</param>
+		protected virtual void OnAnchorablesSourceChanged(DependencyPropertyChangedEventArgs e)
+		{
+			DetachAnchorablesSource(Layout, e.OldValue as IEnumerable);
+			AttachAnchorablesSource(Layout, e.NewValue as IEnumerable);
+		}
+
+		/// <summary><see cref="ActiveContent"/> dependency property.</summary>
+		public static readonly DependencyProperty ActiveContentProperty = DependencyProperty.Register(nameof(ActiveContent), typeof(object), typeof(DockingManager),
+				new FrameworkPropertyMetadata(null, OnActiveContentChanged));
+
+		/// <summary>Gets or sets the content that is currently active (document,anchoreable, or null).</summary>
+		[Bindable(true)]
+		[Description("Gets or sets the content that is currently active (document,anchoreable, or null).")]
+		[Category("Other")]
+		public object ActiveContent
+		{
+			get => (object)GetValue(ActiveContentProperty);
+			set => SetValue(ActiveContentProperty, value);
+		}
+
+		/// <summary>Handles changes to the <see cref="ActiveContent"/> property.</summary>
+		private static void OnActiveContentChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+		{
+			((DockingManager)d).InternalSetActiveContent(e.NewValue);
+			((DockingManager)d).OnActiveContentChanged(e);
+		}
+
+		/// <summary>Provides derived classes an opportunity to handle changes to the <see cref="ActiveContent"/> property.</summary>
+		/// <param name="e">The event data for the property change.</param>
+		protected virtual void OnActiveContentChanged(DependencyPropertyChangedEventArgs e) => ActiveContentChanged?.Invoke(this, EventArgs.Empty);
+
+		/// <summary><see cref="AnchorableContextMenu"/> dependency property.</summary>
+		public static readonly DependencyProperty AnchorableContextMenuProperty = DependencyProperty.Register(nameof(AnchorableContextMenu), typeof(ContextMenu), typeof(DockingManager),
+				new FrameworkPropertyMetadata((ContextMenu)null, OnContextMenuPropertyChanged));
+
+		/// <summary>Gets or sets the <see cref="ContextMenu"/> to show on an anchorable.</summary>
+		[Bindable(true)]
+		[Description("Gets or sets the ContextMenu to show on an anchorable.")]
+		[Category("Anchorable")]
+		public ContextMenu AnchorableContextMenu
+		{
+			get => (ContextMenu)GetValue(AnchorableContextMenuProperty);
+			set => SetValue(AnchorableContextMenuProperty, value);
+		}
+
+		/// <summary><see cref="AllowAnchorDoubleClickDock"/> dependency property.</summary>
+		public static readonly DependencyProperty AllowAnchorDoubleClickDockProperty = DependencyProperty.Register(nameof(AllowAnchorDoubleClickDock), typeof(bool), typeof(DockingManager),
+				new FrameworkPropertyMetadata(false));
+
+		/// <summary>Gets or sets a value indicating whether double-clicking an auto-hide anchor tab toggles the docked (pinned) state.</summary>
+		[Bindable(true)]
+		[Description("Gets or sets a value indicating whether double-clicking an auto-hide anchor tab toggles the docked (pinned) state.")]
+		[Category("Anchor")]
+		public bool AllowAnchorDoubleClickDock
+		{
+			get => (bool)GetValue(AllowAnchorDoubleClickDockProperty);
+			set => SetValue(AllowAnchorDoubleClickDockProperty, value);
+		}
+
+		/// <summary><see cref="AllowAnchorRightClickContextMenu"/> dependency property.</summary>
+		public static readonly DependencyProperty AllowAnchorRightClickContextMenuProperty = DependencyProperty.Register(nameof(AllowAnchorRightClickContextMenu), typeof(bool), typeof(DockingManager),
+				new FrameworkPropertyMetadata(false));
+
+		/// <summary>Gets or sets a value indicating whether right-clicking an auto-hide anchor tab shows the anchorable context menu.</summary>
+		[Bindable(true)]
+		[Description("Gets or sets a value indicating whether right-clicking an auto-hide anchor tab shows the anchorable context menu.")]
+		[Category("Anchor")]
+		public bool AllowAnchorRightClickContextMenu
+		{
+			get => (bool)GetValue(AllowAnchorRightClickContextMenuProperty);
+			set => SetValue(AllowAnchorRightClickContextMenuProperty, value);
+		}
+
+		/// <summary><see cref="Theme"/> dependency property.</summary>
+		public static readonly DependencyProperty ThemeProperty = DependencyProperty.Register(nameof(Theme), typeof(Theme), typeof(DockingManager),
+				new FrameworkPropertyMetadata(null, OnThemeChanged));
+
+		/// <summary>Gets or sets the <see cref="Theme"/> to be used for the controls in this framework.</summary>
+		[Bindable(true)]
+		[Description("Gets or sets the Theme to be used for the controls in this framework.")]
+		[Category("Other")]
+		public Theme Theme
+		{
+			get => (Theme)GetValue(ThemeProperty);
+			set => SetValue(ThemeProperty, value);
+		}
+
+		/// <summary>Handles changes to the <see cref="Theme"/> property.</summary>
+		private static void OnThemeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) => ((DockingManager)d).OnThemeChanged(e);
+
+		/// <summary>Provides derived classes an opportunity to handle changes to the <see cref="Theme"/> property.</summary>
+		/// <param name="e">The event data for the property change.</param>
+		protected virtual void OnThemeChanged(DependencyPropertyChangedEventArgs e)
+		{
+			var oldTheme = e.OldValue as Theme;
+			var resources = Resources;
+
+			// Detached windows are roots of their own visual tree and do not pick the theme up implicitly.
+			foreach (var entry in _detachedAnchorables.Values)
+				entry.Window.UpdateThemeResources(oldTheme, e.NewValue as Theme);
+
+			if (oldTheme != null) // remove old theme from resource dictionary if present
+			{
+				if (oldTheme is DictionaryTheme) // We are using AvalonDock's own DictionaryTheme class
+				{
+					if (currentThemeResourceDictionary != null)
+					{
+						resources.MergedDictionaries.Remove(currentThemeResourceDictionary);
+						currentThemeResourceDictionary = null;
+					}
+				}
+				else // We are using standard ResourceDictionaries
+				{ // Lockup the old theme and remove it from resource dictionary
+					var resourceDictionaryToRemove =
+						resources.MergedDictionaries.FirstOrDefault(r => r.Source == oldTheme.GetResourceUri());
+					if (resourceDictionaryToRemove != null)
+					{
+						resources.MergedDictionaries.Remove(
+							resourceDictionaryToRemove);
+					}
+				}
+			}
+
+			if (e.NewValue as Theme != null) // Add new theme into resource dictionary if present
+			{
+				if (e.NewValue as Theme is DictionaryTheme theme)
+				{
+					currentThemeResourceDictionary = theme.ThemeResourceDictionary;
+					resources.MergedDictionaries.Add(currentThemeResourceDictionary);
+				}
+				else // We are using standard ResourceDictionaries -> Add new theme resource
+				{
+					resources.MergedDictionaries.Add(new ResourceDictionary { Source = (e.NewValue as Theme).GetResourceUri() });
+				}
+			}
+
+			foreach (var fwc in _fwList) // Update theme resources in floating window controls
+				fwc.UpdateThemeResources(oldTheme);
+
+			_navigatorWindow?.UpdateThemeResources();  // Update theme resources in related AvalonDock controls
+			_overlayWindow?.UpdateThemeResources();
+		}
+
+		/// <summary><see cref="GridSplitterWidth"/> dependency property.</summary>
+		public static readonly DependencyProperty GridSplitterWidthProperty = DependencyProperty.Register(nameof(GridSplitterWidth), typeof(double), typeof(DockingManager),
+				new FrameworkPropertyMetadata(6.0));
+
+		/// <summary>Gets or sets the width of a grid splitter.</summary>
+		[Bindable(true)]
+		[Description("Gets or sets the width of a grid splitter")]
+		[Category("Other")]
+		public double GridSplitterWidth
+		{
+			get => (double)GetValue(GridSplitterWidthProperty);
+			set => SetValue(GridSplitterWidthProperty, value);
+		}
+
+		/// <summary><see cref="GridSplitterHeight"/> dependency property.</summary>
+		public static readonly DependencyProperty GridSplitterHeightProperty = DependencyProperty.Register(nameof(GridSplitterHeight), typeof(double), typeof(DockingManager),
+				new FrameworkPropertyMetadata(6.0));
+
+		/// <summary>Gets or sets the height of a grid splitter.</summary>
+		[Bindable(true)]
+		[Description("Gets or sets the height of a grid splitter")]
+		[Category("Other")]
+		public double GridSplitterHeight
+		{
+			get => (double)GetValue(GridSplitterHeightProperty);
+			set => SetValue(GridSplitterHeightProperty, value);
+		}
+
+		/// <summary>
+		/// GridSplitterVerticalStyle Dependency Property
+		/// </summary>
+		public static readonly DependencyProperty GridSplitterVerticalStyleProperty = DependencyProperty.Register("GridSplitterVerticalStyle", typeof(Style), typeof(DockingManager),
+				new FrameworkPropertyMetadata((Style)null));
+
+		/// <summary>
+		/// Gets or sets the GridSplitterVerticalStyle property.  This dependency property
+		/// indicates the style to apply to the LayoutGridResizerControl when displayed vertically.
+		/// </summary>
+		public Style GridSplitterVerticalStyle
+		{
+			get
+			{
+				return (Style)GetValue(GridSplitterVerticalStyleProperty);
+			}
+			set
+			{
+				SetValue(GridSplitterVerticalStyleProperty, value);
+			}
+		}
+
+		/// <summary>
+		/// GridSplitterHorizontalStyle Dependency Property
+		/// </summary>
+		public static readonly DependencyProperty GridSplitterHorizontalStyleProperty = DependencyProperty.Register("GridSplitterHorizontalStyle", typeof(Style), typeof(DockingManager),
+				new FrameworkPropertyMetadata((Style)null));
+
+		/// <summary>
+		/// Gets or sets the GridSplitterHorizontalStyle property.  This dependency property
+		/// indicates the style to apply to the LayoutGridResizerControl when displayed horizontally.
+		/// </summary>
+		public Style GridSplitterHorizontalStyle
+		{
+			get
+			{
+				return (Style)GetValue(GridSplitterHorizontalStyleProperty);
+			}
+			set
+			{
+				SetValue(GridSplitterHorizontalStyleProperty, value);
+			}
+		}
+
+		/// <summary><see cref="DocumentPaneMenuItemHeaderTemplate"/> dependency property.</summary>
+		public static readonly DependencyProperty DocumentPaneMenuItemHeaderTemplateProperty = DependencyProperty.Register(nameof(DocumentPaneMenuItemHeaderTemplate), typeof(DataTemplate), typeof(DockingManager),
+				new FrameworkPropertyMetadata(null, OnDocumentPaneMenuItemHeaderTemplateChanged, CoerceDocumentPaneMenuItemHeaderTemplateValue));
+
+		/// <summary>Gets or sets the <see cref="DataTemplate"/> for the header to display menu dropdown items on a document pane.</summary>
+		[Bindable(true)]
+		[Description("Gets or sets the DataTemplate for the header to display menu dropdown items on a document pane.")]
+		[Category("Other")]
+		public DataTemplate DocumentPaneMenuItemHeaderTemplate
+		{
+			get => (DataTemplate)GetValue(DocumentPaneMenuItemHeaderTemplateProperty);
+			set => SetValue(DocumentPaneMenuItemHeaderTemplateProperty, value);
+		}
+
+		/// <summary>Handles changes to the <see cref="DocumentPaneMenuItemHeaderTemplate"/> property.</summary>
+		private static void OnDocumentPaneMenuItemHeaderTemplateChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) => ((DockingManager)d).OnDocumentPaneMenuItemHeaderTemplateChanged(e);
+
+		/// <summary>Provides derived classes an opportunity to handle changes to the <see cref="DocumentPaneMenuItemHeaderTemplate"/> property.</summary>
+		/// <param name="e">The event data for the property change.</param>
+		protected virtual void OnDocumentPaneMenuItemHeaderTemplateChanged(DependencyPropertyChangedEventArgs e)
+		{
+		}
+
+		/// <summary>Coerces the <see cref="DocumentPaneMenuItemHeaderTemplate"/> value.</summary>
+		private static object CoerceDocumentPaneMenuItemHeaderTemplateValue(DependencyObject d, object value)
+		{
+			if (value != null && d.GetValue(DocumentPaneMenuItemHeaderTemplateSelectorProperty) != null)
+				return null;
+			return value ?? d.GetValue(DocumentHeaderTemplateProperty);
+		}
+
+		/// <summary><see cref="DocumentPaneMenuItemHeaderTemplateSelector"/> dependency property.</summary>
+		public static readonly DependencyProperty DocumentPaneMenuItemHeaderTemplateSelectorProperty = DependencyProperty.Register(nameof(DocumentPaneMenuItemHeaderTemplateSelector), typeof(DataTemplateSelector), typeof(DockingManager),
+				new FrameworkPropertyMetadata(null, OnDocumentPaneMenuItemHeaderTemplateSelectorChanged, CoerceDocumentPaneMenuItemHeaderTemplateSelectorValue));
+
+		/// <summary>Gets or sets the <see cref="DataTemplateSelector"/> to select a <see cref="DataTemplate"/> for the menu items shown when user selects the <see cref="LayoutDocumentPaneControl"/> context menu switch.</summary>
+		[Bindable(true)]
+		[Description("Gets or sets the DataTemplateSelector to select a DataTemplate for the menu items shown when user selects the LayoutDocumentPaneControl context menu switch.")]
+		[Category("Document")]
+		public DataTemplateSelector DocumentPaneMenuItemHeaderTemplateSelector
+		{
+			get => (DataTemplateSelector)GetValue(DocumentPaneMenuItemHeaderTemplateSelectorProperty);
+			set => SetValue(DocumentPaneMenuItemHeaderTemplateSelectorProperty, value);
+		}
+
+		/// <summary>Handles changes to the <see cref="DocumentPaneMenuItemHeaderTemplateSelector"/> property.</summary>
+		private static void OnDocumentPaneMenuItemHeaderTemplateSelectorChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) => ((DockingManager)d).OnDocumentPaneMenuItemHeaderTemplateSelectorChanged(e);
+
+		/// <summary>Provides derived classes an opportunity to handle changes to the <see cref="DocumentPaneMenuItemHeaderTemplateSelector"/> property.</summary>
+		/// <param name="e">The event data for the property change.</param>
+		protected virtual void OnDocumentPaneMenuItemHeaderTemplateSelectorChanged(DependencyPropertyChangedEventArgs e)
+		{
+			if (e.NewValue != null && DocumentPaneMenuItemHeaderTemplate != null)
+				DocumentPaneMenuItemHeaderTemplate = null;
+		}
+
+		/// <summary>Coerces the <see cref="DocumentPaneMenuItemHeaderTemplateSelector"/> value.</summary>
+		private static object CoerceDocumentPaneMenuItemHeaderTemplateSelectorValue(DependencyObject d, object value) => value;
+
+		/// <summary><see cref="IconContentTemplate"/> dependency property.</summary>
+		public static readonly DependencyProperty IconContentTemplateProperty = DependencyProperty.Register(nameof(IconContentTemplate), typeof(DataTemplate), typeof(DockingManager),
+				new FrameworkPropertyMetadata((DataTemplate)null));
+
+		/// <summary>Gets or sets the <see cref="DataTemplate"/> to use on the icon extracted from the layout model.</summary>
+		[Bindable(true)]
+		[Description("Gets or sets the DataTemplate to use on the icon extracted from the layout model.")]
+		[Category("Other")]
+		public DataTemplate IconContentTemplate
+		{
+			get => (DataTemplate)GetValue(IconContentTemplateProperty);
+			set => SetValue(IconContentTemplateProperty, value);
+		}
+
+		/// <summary><see cref="IconContentTemplateSelector"/> dependency property.</summary>
+		public static readonly DependencyProperty IconContentTemplateSelectorProperty = DependencyProperty.Register(nameof(IconContentTemplateSelector), typeof(DataTemplateSelector), typeof(DockingManager),
+				new FrameworkPropertyMetadata((DataTemplateSelector)null));
+
+		/// <summary>Gets or sets the <see cref="DataTemplateSelector"/> to select a <see cref="DataTemplate"/> for a content icon.</summary>
+		[Bindable(true)]
+		[Description("Gets or sets the DataTemplateSelector to select a DataTemplate for a content icon.")]
+		[Category("Other")]
+		public DataTemplateSelector IconContentTemplateSelector
+		{
+			get => (DataTemplateSelector)GetValue(IconContentTemplateSelectorProperty);
+			set => SetValue(IconContentTemplateSelectorProperty, value);
+		}
+
+		/// <summary><see cref="LayoutItemContainerStyle"/> dependency property.</summary>
+		public static readonly DependencyProperty LayoutItemContainerStyleProperty = DependencyProperty.Register(nameof(LayoutItemContainerStyle), typeof(Style), typeof(DockingManager),
+				new FrameworkPropertyMetadata(null, OnLayoutItemContainerStyleChanged));
+
+		/// <summary>Gets or sets the <see cref="Style"/> to apply to a <see cref="LayoutDocumentItem"/> object.</summary>
+		[Bindable(true)]
+		[Description("Gets or sets the Style to apply to a LayoutDocumentItem object.")]
+		[Category("Layout")]
+		public Style LayoutItemContainerStyle
+		{
+			get => (Style)GetValue(LayoutItemContainerStyleProperty);
+			set => SetValue(LayoutItemContainerStyleProperty, value);
+		}
+
+		/// <summary>Handles changes to the <see cref="LayoutItemContainerStyle"/> property.</summary>
+		private static void OnLayoutItemContainerStyleChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) => ((DockingManager)d).OnLayoutItemContainerStyleChanged(e);
+
+		/// <summary>Provides derived classes an opportunity to handle changes to the <see cref="LayoutItemContainerStyle"/> property.</summary>
+		/// <param name="e">The event data for the property change.</param>
+		protected virtual void OnLayoutItemContainerStyleChanged(DependencyPropertyChangedEventArgs e) => AttachLayoutItems();
+
+		/// <summary><see cref="LayoutItemContainerStyleSelector"/> dependency property.</summary>
+		public static readonly DependencyProperty LayoutItemContainerStyleSelectorProperty = DependencyProperty.Register(nameof(LayoutItemContainerStyleSelector), typeof(StyleSelector), typeof(DockingManager),
+				new FrameworkPropertyMetadata(null, OnLayoutItemContainerStyleSelectorChanged));
+
+		/// <summary>Gets or sets the <see cref="StyleSelector"/> to select the <see cref="Style"/> for a <see cref="LayoutDocumentItem"/>.</summary>
+		[Bindable(true)]
+		[Description("Gets or sets the StyleSelector to select the Style for a LayoutDocumentItem.")]
+		[Category("Layout")]
+		public StyleSelector LayoutItemContainerStyleSelector
+		{
+			get => (StyleSelector)GetValue(LayoutItemContainerStyleSelectorProperty);
+			set => SetValue(LayoutItemContainerStyleSelectorProperty, value);
+		}
+
+		/// <summary>Handles changes to the <see cref="LayoutItemContainerStyleSelector"/> property.</summary>
+		private static void OnLayoutItemContainerStyleSelectorChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) => ((DockingManager)d).OnLayoutItemContainerStyleSelectorChanged(e);
+
+		/// <summary>Provides derived classes an opportunity to handle changes to the <see cref="LayoutItemContainerStyleSelector"/> property.</summary>
+		/// <param name="e">The event data for the property change.</param>
+		protected virtual void OnLayoutItemContainerStyleSelectorChanged(DependencyPropertyChangedEventArgs e) => AttachLayoutItems();
+
+		/// <summary><see cref="ShowSystemMenu"/> dependency property.</summary>
+		public static readonly DependencyProperty ShowSystemMenuProperty = DependencyProperty.Register(nameof(ShowSystemMenu), typeof(bool), typeof(DockingManager),
+				new FrameworkPropertyMetadata(true));
+
+		/// <summary>Gets or sets a value indicating whether floating windows should show the system menu when a custom context menu is not defined.</summary>
+		[Bindable(true)]
+		[Description("Gets or sets a value indicating whether floating windows should show the system menu when a custom context menu is not defined.")]
+		[Category("FloatingWindow")]
+		public bool ShowSystemMenu
+		{
+			get => (bool)GetValue(ShowSystemMenuProperty);
+			set => SetValue(ShowSystemMenuProperty, value);
+		}
+
+		/// <summary><see cref="AllowMixedOrientation"/> dependency property.</summary>
+		public static readonly DependencyProperty AllowMixedOrientationProperty = DependencyProperty.Register(nameof(AllowMixedOrientation), typeof(bool), typeof(DockingManager),
+				new FrameworkPropertyMetadata(false));
+
+		/// <summary>Gets or sets a value indicating whether the DockingManager should allow mixed orientation for document panes.</summary>
+		[Bindable(true)]
+		[Description("Gets or sets a value indicating whether the DockingManager should allow mixed orientation for document panes.")]
+		[Category("Other")]
+		public bool AllowMixedOrientation
+		{
+			get => (bool)GetValue(AllowMixedOrientationProperty);
+			set => SetValue(AllowMixedOrientationProperty, value);
+		}
+
+		/// <summary>Gets or sets a value indicating whether the <see cref="LayoutDocumentPaneControl"/> virtualizes its tabbed child controls.</summary>
+		[Bindable(false)]
+		[Description("Gets or sets a value indicating whether the LayoutDocumentPaneControl is virtualizing its tabbed item child controls or not.")]
+		[Category("Document")]
+		public bool IsVirtualizingDocument { get; set; }
+
+		/// <summary>Gets or sets a value indicating whether the <see cref="LayoutAnchorablePaneControl"/> virtualizes its tabbed child controls.</summary>
+		[Bindable(false)]
+		[Description("Gets or sets a value indicating whether the LayoutAnchorablePaneControl is virtualizing its tabbed item child controls or not.")]
+		[Category("Anchorable")]
+		public bool IsVirtualizingAnchorable { get; set; }
+
+		/// <summary><see cref="IgnoreTabControlKeyBindings"/> dependency property.</summary>
+		public static readonly DependencyProperty IgnoreTabControlKeyBindingsProperty = DependencyProperty.Register(nameof(IgnoreTabControlKeyBindings), typeof(bool), typeof(DockingManager),
+					new FrameworkPropertyMetadata(null));
+
+		/// <summary>Gets or sets a value indicating whether the standard tab control key bindings are ignored or not.</summary>
+		[Bindable(true)]
+		[Description("Gets or sets a value indicating whether the standard tab control key bindings are ignored or not.")]
+		[Category("Document")]
+		public bool IgnoreTabControlKeyBindings
+		{
+			get => (bool)GetValue(IgnoreTabControlKeyBindingsProperty);
+			set => SetValue(IgnoreTabControlKeyBindingsProperty, value);
+		}
+
+		/// <summary>
+		/// Gets or sets a value indicating whether the floating window size of a <see cref="LayoutFloatingWindowControl"/> is determined automatically when the window is opened.
+		/// If true, the minimum size of the content and its margins determine the initial floating window size.
+		/// </summary>
+		[Bindable(true)]
+		[Description("Gets or sets a value indicating whether the floating window is auto sized when it is dragged out.")]
+		[Category("FloatingWindow")]
+		public bool AutoWindowSizeWhenOpened
+		{
+			get { return (bool)GetValue(AutoWindowSizeWhenOpenedProperty); }
+			set { SetValue(AutoWindowSizeWhenOpenedProperty, value); }
+		}
+
+		/// <summary><see cref="AutoWindowSizeWhenOpened"/> dependency property.</summary>
+		public static readonly DependencyProperty AutoWindowSizeWhenOpenedProperty =
+			DependencyProperty.Register("AutoWindowSizeWhenOpened", typeof(bool), typeof(DockingManager), new PropertyMetadata(false));
+
+		/// <summary><see cref="AllowMovingFloatingWindowWithKeyboard"/> dependency property.</summary>
+		public static readonly DependencyProperty AllowMovingFloatingWindowWithKeyboardProperty =
+			DependencyProperty.Register(nameof(AllowMovingFloatingWindowWithKeyboard), typeof(bool), typeof(DockingManager), new PropertyMetadata(false));
+
+		/// <summary>Gets or sets a value indicating whether floating windows can be moved by using the arrow keys when focused.</summary>
+		[Bindable(true)]
+		[Description("Gets or sets a value indicating whether floating windows can be moved using arrow keys when focused.")]
+		[Category("FloatingWindow")]
+		public bool AllowMovingFloatingWindowWithKeyboard
+		{
+			get { return (bool)GetValue(AllowMovingFloatingWindowWithKeyboardProperty); }
+			set { SetValue(AllowMovingFloatingWindowWithKeyboardProperty, value); }
+		}
+
+		/// <summary><see cref="AllowFloatingWindows"/> dependency property.</summary>
+		public static readonly DependencyProperty AllowFloatingWindowsProperty = DependencyProperty.Register(nameof(AllowFloatingWindows), typeof(bool), typeof(DockingManager),
+				new FrameworkPropertyMetadata(true, OnAllowFloatingWindowsChanged));
+
+		/// <summary>
+		/// Gets or sets a value indicating whether content may be torn off into floating windows.
+		/// </summary>
+		/// <remarks>
+		/// <para>
+		/// This is the global switch for the whole feature, as opposed to
+		/// <see cref="LayoutContent.CanFloat"/>, which decides it for a single piece of content. While it
+		/// is <see langword="false"/> no floating window is created at all: dragging a tab or a tool
+		/// window title out of its pane, the Float command and <see cref="LayoutContent.Float"/> all do
+		/// nothing, and the command is reported as unavailable so the menu entries offering it are
+		/// disabled.
+		/// </para>
+		/// <para>
+		/// Setting it to <see langword="false"/> while floating windows are open docks their content
+		/// back into the layout, and a layout that is loaded afterwards is treated the same way, so the
+		/// setting cannot be circumvented by restoring a layout that was saved with floating windows in
+		/// it. Turning it back on does not reopen them.
+		/// </para>
+		/// </remarks>
+		[Bindable(true)]
+		[Description("Gets or sets a value indicating whether content can be torn off into floating windows.")]
+		[Category("FloatingWindow")]
+		public bool AllowFloatingWindows
+		{
+			get => (bool)GetValue(AllowFloatingWindowsProperty);
+			set => SetValue(AllowFloatingWindowsProperty, value);
+		}
+
+		/// <summary>Handles changes to the <see cref="AllowFloatingWindows"/> property.</summary>
+		private static void OnAllowFloatingWindowsChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) => ((DockingManager)d).OnAllowFloatingWindowsChanged(e);
+
+		/// <summary>Provides derived classes an opportunity to handle changes to the <see cref="AllowFloatingWindows"/> property.</summary>
+		/// <param name="e">The event data for the property change.</param>
+		protected virtual void OnAllowFloatingWindowsChanged(DependencyPropertyChangedEventArgs e)
+		{
+			if (!(bool)e.NewValue) DockAllFloatingWindows();
+
+			// The Float command reports itself unavailable while this is off, so every menu that offers
+			// it has to be asked again.
+			CommandManager.InvalidateRequerySuggested();
+		}
+
+		/// <summary><see cref="AllowDetachedWindows"/> dependency property.</summary>
+		public static readonly DependencyProperty AllowDetachedWindowsProperty = DependencyProperty.Register(nameof(AllowDetachedWindows), typeof(bool), typeof(DockingManager),
+				new FrameworkPropertyMetadata(true, OnAllowDetachedWindowsChanged));
+
+		/// <summary>
+		/// Gets or sets a value indicating whether anchorables may be moved into standalone top level
+		/// windows - the "Window" view mode that IDEs offer for their tool windows.
+		/// </summary>
+		/// <remarks>
+		/// <para>
+		/// Unlike a floating window, a standalone <see cref="DetachedAnchorableWindow"/> is an ordinary
+		/// operating system window: it owns a taskbar entry, minimizes on its own and may be moved behind
+		/// the main window. While this is <see langword="false"/>,
+		/// <see cref="DetachAnchorableToWindow(LayoutAnchorable)"/> does nothing and
+		/// <see cref="LayoutAnchorableItem.DetachToWindowCommand"/> is reported as unavailable, so the
+		/// menu entry offering the mode is disabled.
+		/// </para>
+		/// <para>
+		/// Setting it to <see langword="false"/> returns every anchorable that is already in a standalone
+		/// window to the layout, and a layout that is loaded afterwards has its detached anchorables
+		/// restored docked rather than in windows.
+		/// </para>
+		/// </remarks>
+		[Bindable(true)]
+		[Description("Gets or sets a value indicating whether anchorables can be moved into standalone top level windows.")]
+		[Category("Anchorable")]
+		public bool AllowDetachedWindows
+		{
+			get => (bool)GetValue(AllowDetachedWindowsProperty);
+			set => SetValue(AllowDetachedWindowsProperty, value);
+		}
+
+		/// <summary>Handles changes to the <see cref="AllowDetachedWindows"/> property.</summary>
+		private static void OnAllowDetachedWindowsChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) => ((DockingManager)d).OnAllowDetachedWindowsChanged(e);
+
+		/// <summary>Provides derived classes an opportunity to handle changes to the <see cref="AllowDetachedWindows"/> property.</summary>
+		/// <param name="e">The event data for the property change.</param>
+		protected virtual void OnAllowDetachedWindowsChanged(DependencyPropertyChangedEventArgs e)
+		{
+			if (!(bool)e.NewValue) ReattachAllDetachedAnchorables();
+
+			CommandManager.InvalidateRequerySuggested();
+		}
+
+		/// <summary><see cref="ShowNavigator"/> dependency property.</summary>
+		public static readonly DependencyProperty ShowNavigatorProperty = DependencyProperty.Register(nameof(ShowNavigator), typeof(bool), typeof(DockingManager),
+				new FrameworkPropertyMetadata(true));
+
+		/// <summary>Gets or sets a value indicating whether the navigator window is shown when the user presses Control+Tab.</summary>
+		[Bindable(true)]
+		[Description("Gets or sets a value indicating whether the navigator window should be shown when the user presses Control + Tab.")]
+		[Category("FloatingWindow")]
+		public bool ShowNavigator
+		{
+			get => (bool)GetValue(ShowNavigatorProperty);
+			set => SetValue(ShowNavigatorProperty, value);
+		}
+
+		/// <summary>
+		/// Stores weak references to the logical children maintained by the docking manager.
+		/// </summary>
+		private readonly List<WeakReference> _logicalChildren = new List<WeakReference>();
+
+		/// <inheritdoc/>
+		protected override IEnumerator LogicalChildren => GetOrderedLogicalChildren().GetEnumerator();
+
+		/// <summary>Gets the logical children enumerator for external access.</summary>
+		public IEnumerator LogicalChildrenPublic => LogicalChildren;
+
+		/// <summary>
+		/// Returns the live logical children of this <see cref="DockingManager"/> ordered by descending
+		/// visual tree depth, so that a logical child which is nested inside the visual tree of another
+		/// logical child is always enumerated first.
+		/// </summary>
+		/// <remarks>
+		/// <para>
+		/// Most logical children of the <see cref="DockingManager"/> (the <c>Layout*Control</c> instances,
+		/// every <see cref="LayoutItem.View"/> and the content of every <see cref="LayoutContent"/>) have a
+		/// visual parent that differs from their logical parent, and several of them are reachable from the
+		/// <see cref="DockingManager"/> through two different paths: once as a direct logical child and once
+		/// through the visual tree of another logical child.
+		/// </para>
+		/// <para>
+		/// WPF walks the logical children of a node before its visual children and visits any node at most
+		/// once (see <c>System.Windows.DescendentsWalker</c>). A node that is reached through the visual tree
+		/// first is skipped by <c>System.Windows.TreeWalkHelper.OnInheritablePropertyChanged</c>, because its
+		/// visual parent differs from its logical parent, and is then ignored on the second - logical - visit
+		/// because it has already been seen. Both chances to propagate the value are lost and inheritable
+		/// dependency properties (<c>FontSize</c>, <c>DataContext</c>, ...) never reach that node.
+		/// </para>
+		/// <para>
+		/// Enumerating the deepest elements first guarantees that such a node is always reached through the
+		/// logical tree first - a visual ancestor always has a smaller visual tree depth than its descendants -
+		/// which is the path that actually applies the new value.
+		/// </para>
+		/// </remarks>
+		/// <returns>The ordered, non <c>null</c> logical children of this docking manager.</returns>
+		private IReadOnlyList<object> GetOrderedLogicalChildren()
+		{
+			var children = new List<object>(_logicalChildren.Count);
+			foreach (var weakReference in _logicalChildren)
+			{
+				var child = weakReference.GetValueOrDefault<object>();
+				if (child != null)
+					children.Add(child);
+			}
+
+			if (children.Count < 2)
+				return children;
+
+			// OrderByDescending is a stable sort, so children of equal depth keep their insertion order.
+			return children.OrderByDescending(GetVisualTreeDepth).ToList();
+		}
+
+		/// <summary>Gets the number of visual ancestors of <paramref name="element"/>.</summary>
+		/// <param name="element">The element to measure. May be any object, including non visual ones.</param>
+		/// <returns>The visual tree depth of <paramref name="element"/>, or <c>0</c> when it is not a visual or has no visual parent.</returns>
+		private static int GetVisualTreeDepth(object element)
+		{
+			var depth = 0;
+			var current = element as DependencyObject;
+			while (current is System.Windows.Media.Visual || current is System.Windows.Media.Media3D.Visual3D)
+			{
+				current = System.Windows.Media.VisualTreeHelper.GetParent(current);
+				if (current != null)
+					depth++;
+			}
+
+			return depth;
+		}
+
+		/// <summary>Adds an element to the logical children collection maintained by the docking manager.</summary>
+		/// <param name="element">The element to add.</param>
+		internal void InternalAddLogicalChild(object element)
+		{
+#if DEBUG
+			if (_logicalChildren.Select(ch => ch.GetValueOrDefault<object>()).Contains(element))
+				throw new InvalidOperationException();
+#endif
+			if (_logicalChildren.Select(ch => ch.GetValueOrDefault<object>()).Contains(element))
+				return;
+
+			_logicalChildren.Add(new WeakReference(element));
+			AddLogicalChild(element);
+		}
+
+		/// <summary>Removes an element from the logical children collection maintained by the docking manager.</summary>
+		/// <param name="element">The element to remove.</param>
+		internal void InternalRemoveLogicalChild(object element)
+		{
+			var wrToRemove = _logicalChildren.FirstOrDefault(ch => ch.GetValueOrDefault<object>() == element);
+			if (wrToRemove != null)
+				_logicalChildren.Remove(wrToRemove);
+			RemoveLogicalChild(element);
+		}
+
+		private void ClearLogicalChildrenList()
+		{
+			foreach (var child in _logicalChildren.Select(ch => ch.GetValueOrDefault<object>()).ToArray())
+				RemoveLogicalChild(child);
+			_logicalChildren.Clear();
+		}
+
+		private bool IsNavigatorWindowActive => _navigatorWindow != null;
+
+		private bool CanShowNavigatorWindow => ShowNavigator && _layoutItems.Any();
+
+		/// <inheritdoc/>
+		bool IOverlayWindowHost.HitTestScreen(Point dragPoint)
+		{
+			return HitTest(this.TransformToDeviceDPI(dragPoint));
+		}
+
+		bool HitTest(Point dragPoint)
+		{
+			try
+			{
+				var detectionRect = new Rect(this.PointToScreenDPIWithoutFlowDirection(new Point()), this.TransformActualSizeToAncestor());
+				return detectionRect.Contains(dragPoint);
+			}
+			catch
+			{
+				// Silently swallow exception that may occur if DockingManager is not visible (because its hidden by a tab)
+			}
+
+			return false;
+		}
+
+		/// <inheritdoc/>
+		DockingManager IOverlayWindowHost.Manager => this;
+
+		/// <inheritdoc/>
+		IOverlayWindow IOverlayWindowHost.ShowOverlayWindow(LayoutFloatingWindowControl draggingWindow)
+		{
+			CreateOverlayWindow(draggingWindow);
+			_overlayWindow.EnableDropTargets();
+			_overlayWindow.Show();
+			return _overlayWindow;
+		}
+
+		/// <inheritdoc/>
+		void IOverlayWindowHost.HideOverlayWindow()
+		{
+			_areas = null;
+
+			// The overlay window is hidden and kept for the next drag instead of being closed, so that a
+			// drag which never reports its end cannot leave a growing number of empty windows behind
+			// (issue #587). It is closed together with this manager in DestroyOverlayWindow.
+			_overlayWindow?.HideOverlay();
+		}
+
+		/// <summary>
+		/// Takes every overlay window of this manager and of its floating windows off the screen.
+		/// </summary>
+		/// <remarks>
+		/// A drag ends by a message of the window being dragged, and that message does not always arrive -
+		/// a drag across monitors of different DPI can end the modal move loop of Windows without one.
+		/// Every start and every end of a drag therefore clears the overlay windows of all hosts, and not
+		/// only the one of the host the drag happens to know about (issue #587).
+		/// </remarks>
+		internal void HideAllOverlayWindows()
+		{
+			((IOverlayWindowHost)this).HideOverlayWindow();
+
+			foreach (var host in _fwList.OfType<IOverlayWindowHost>().ToArray())
+				host.HideOverlayWindow();
+		}
+
+		/// <inheritdoc/>
+		IEnumerable<IDropArea> IOverlayWindowHost.GetDropAreas(LayoutFloatingWindowControl draggingWindow)
+		{
+			if (_areas != null) return _areas;
+			_areas = new List<IDropArea>();
+			var isDraggingDocuments = draggingWindow.Model is LayoutDocumentFloatingWindow;
+			if (!isDraggingDocuments)
+			{
+				_areas.Add(new DropArea<DockingManager>(this, DropAreaType.DockingManager));
+				foreach (var areaHost in this.FindVisualChildren<LayoutAnchorablePaneControl>())
+					if (areaHost.Model.Descendents().Any()) _areas.Add(new DropArea<LayoutAnchorablePaneControl>(areaHost, DropAreaType.AnchorablePane));
+			}
+
+			// Determine if floatingWindow is configured to dock as document or not
+			var dockAsDocument = true;
+			if (!isDraggingDocuments)
+			{
+				if (draggingWindow.Model is LayoutAnchorableFloatingWindow toolWindow)
+				{
+					foreach (var item in GetAnchorableInFloatingWindow(draggingWindow))
+					{
+						if (item.CanDockAsTabbedDocument != false) continue;
+						dockAsDocument = false;
+						break;
+					}
+				}
+			}
+
+			// Dock only documents and tools in DocumentPane if configuration does allow that
+			if (dockAsDocument)
+			{
+				foreach (var areaHost in this.FindVisualChildren<LayoutDocumentPaneControl>())
+					_areas.Add(new DropArea<LayoutDocumentPaneControl>(areaHost, DropAreaType.DocumentPane));
+
+				foreach (var areaHost in this.FindVisualChildren<LayoutDocumentPaneGroupControl>())
+				{
+					var documentGroupModel = areaHost.Model as LayoutDocumentPaneGroup;
+					if (!documentGroupModel.Children.Any(c => c.IsVisible))
+						_areas.Add(new DropArea<LayoutDocumentPaneGroupControl>(areaHost, DropAreaType.DocumentPaneGroup));
+				}
+			}
+
+			return _areas;
+		}
+
+		/// <summary>
+		/// Finds all <see cref="LayoutAnchorable"/> objects (tool windows) within a
+		/// <see cref="LayoutFloatingWindow"/> (if any) and return them.
+		/// </summary>
+		/// <param name="draggingWindow">The floating window being inspected.</param>
+		/// <returns>The anchorables hosted by the floating window.</returns>
+		private IEnumerable<LayoutAnchorable> GetAnchorableInFloatingWindow(LayoutFloatingWindowControl draggingWindow)
+		{
+			if (!(draggingWindow.Model is LayoutAnchorableFloatingWindow layoutAnchorableFloatingWindow)) yield break;
+			// big part of code for getting type
+			if (layoutAnchorableFloatingWindow.SinglePane is LayoutAnchorablePane layoutAnchorablePane && (layoutAnchorableFloatingWindow.IsSinglePane && layoutAnchorablePane.SelectedContent != null))
+			{
+				var layoutAnchorable = ((LayoutAnchorablePane)layoutAnchorableFloatingWindow.SinglePane).SelectedContent as LayoutAnchorable;
+				yield return layoutAnchorable;
+			}
+			else
+			{
+				foreach (var item in GetLayoutAnchorable(layoutAnchorableFloatingWindow.RootPanel))
+					yield return item;
+			}
+		}
+
+		/// <summary>
+		/// Finds all <see cref="LayoutAnchorable"/> objects (toolwindows) within a
+		/// <see cref="LayoutAnchorablePaneGroup"/> (if any) and return them.
+		/// </summary>
+		/// <param name="layoutAnchPaneGroup">The pane group to inspect.</param>
+		/// <returns>All the anchorable items found.</returns>
+		/// <seealso cref="LayoutAnchorable"/>
+		/// <seealso cref="LayoutAnchorablePaneGroup"/>
+		internal IEnumerable<LayoutAnchorable> GetLayoutAnchorable(LayoutAnchorablePaneGroup layoutAnchPaneGroup)
+		{
+			if (layoutAnchPaneGroup == null) yield break;
+			foreach (var anchorable in layoutAnchPaneGroup.Descendents().OfType<LayoutAnchorable>())
+				yield return anchorable;
+		}
+
+		/// <summary>Return the LayoutItem wrapper for the content passed as argument.</summary>
+		/// <param name="content">LayoutContent to search</param>
+		/// <returns>Either a <see cref="LayoutAnchorableItem"/> or <see cref="LayoutDocumentItem"/> which contains the <see cref="LayoutContent"/> passed as argument.</returns>
+		public LayoutItem GetLayoutItemFromModel(LayoutContent content)
+		{
+			return _layoutItems.FirstOrDefault(item => item.LayoutElement == content);
+		}
+
+		/// <summary>Creates a floating window control for the specified layout content.</summary>
+		/// <param name="contentModel">The layout content to host in the floating window.</param>
+		/// <param name="isContentImmutable">if set to <c>true</c>, the content cannot be changed while floating.</param>
+		/// <returns>The created floating window control, or <see langword="null"/> if no floating window can be created.</returns>
+		/// <remarks>Returns <see langword="null"/> while <see cref="AllowFloatingWindows"/> is <see langword="false"/>.</remarks>
+		public LayoutFloatingWindowControl CreateFloatingWindow(LayoutContent contentModel, bool isContentImmutable)
+		{
+			if (!AllowFloatingWindows) return null;
+
+			if (contentModel is LayoutAnchorable anchorable)
+			{
+				if (!(contentModel.Parent is ILayoutPane))
+				{
+					var pane = new LayoutAnchorablePane(anchorable)
+					{
+						FloatingTop = contentModel.FloatingTop,
+						FloatingLeft = contentModel.FloatingLeft,
+						FloatingWidth = contentModel.FloatingWidth,
+						FloatingHeight = contentModel.FloatingHeight
+					};
+					return CreateFloatingWindowForLayoutAnchorableWithoutParent(pane, isContentImmutable);
+				}
+			}
+
+			return CreateFloatingWindowCore(contentModel, isContentImmutable);
+		}
+
+		/// <summary>
+		/// Method is invoked to create the actual visible UI element from a given layout model. It is invoked when:
+		///
+		/// 1. New UI items are created and layed out or
+		/// 2. Layout is deserialized, and the previous UI items are restored to the screen
+		///    (using the model who's information was serialized to XML).
+		/// </summary>
+		/// <param name="model">The layout element.</param>
+		/// <returns>The UI element created for the specified model, or <see langword="null"/> when no element can be created.</returns>
+		[SuppressMessage("Maintainability", "CA1506:Avoid excessive class coupling")]
+		internal UIElement CreateUIElementForModel(ILayoutElement model)
+		{
+			if (model is LayoutPanel)
+				return new LayoutPanelControl(model as LayoutPanel);
+			if (model is LayoutAnchorablePaneGroup)
+				return new LayoutAnchorablePaneGroupControl(model as LayoutAnchorablePaneGroup);
+			if (model is LayoutDocumentPaneGroup)
+				return new LayoutDocumentPaneGroupControl(model as LayoutDocumentPaneGroup);
+
+			if (model is LayoutAnchorSide)
+			{
+				var templateModelView = new LayoutAnchorSideControl(model as LayoutAnchorSide);
+				templateModelView.SetBinding(TemplateProperty, new Binding(AnchorSideTemplateProperty.Name) { Source = this });
+				return templateModelView;
+			}
+
+			if (model is LayoutAnchorGroup)
+			{
+				var templateModelView = new LayoutAnchorGroupControl(model as LayoutAnchorGroup);
+				templateModelView.SetBinding(TemplateProperty, new Binding(AnchorGroupTemplateProperty.Name) { Source = this });
+				return templateModelView;
+			}
+
+			if (model is LayoutDocumentPane)
+			{
+				var templateModelView = new LayoutDocumentPaneControl(model as LayoutDocumentPane, IsVirtualizingDocument, IgnoreTabControlKeyBindings);
+				templateModelView.SetBinding(StyleProperty, new Binding(DocumentPaneControlStyleProperty.Name) { Source = this });
+				return templateModelView;
+			}
+
+			if (model is LayoutAnchorablePane)
+			{
+				var templateModelView = new LayoutAnchorablePaneControl(model as LayoutAnchorablePane, IsVirtualizingAnchorable);
+				templateModelView.SetBinding(StyleProperty, new Binding(AnchorablePaneControlStyleProperty.Name) { Source = this });
+				return templateModelView;
+			}
+
+			if (model is LayoutAnchorableFloatingWindow)
+			{
+				if (DesignerProperties.GetIsInDesignMode(this)) return null;
+				if (!AllowFloatingWindows) return null;
+				var modelFW = model as LayoutAnchorableFloatingWindow;
+				var newFW = new LayoutAnchorableFloatingWindowControl(modelFW)
+				{
+					// Owner = Window.GetWindow(this)
+				};
+
+				newFW.UpdateOwnership();
+
+				// Fill list before calling Show (issue #254)
+				_fwList.Add(newFW);
+
+				// Floating Window can also contain only Pane Groups at its base (issue #27) so we check for
+				// RootPanel (which is a LayoutAnchorablePaneGroup) and make sure the window is positioned back
+				// in current (or nearest) monitor
+				var panegroup = modelFW.RootPanel;
+				if (panegroup != null)
+				{
+					panegroup.KeepInsideNearestMonitor();  // Check position is valid in current setup
+
+					newFW.Left = panegroup.FloatingLeft;   // Position the window to previous or nearest valid position
+					newFW.Top = panegroup.FloatingTop;
+					newFW.Width = panegroup.FloatingWidth;
+					newFW.Height = panegroup.FloatingHeight;
+				}
+
+				newFW.ShowInTaskbar = false;
+
+				Dispatcher.BeginInvoke(
+					new Action(() =>
+				{
+					if (newFW.Content != null || (newFW.Model as LayoutAnchorableFloatingWindow)?.IsVisible == true)
+						newFW.Show();
+					else
+						newFW.Hide();
+	  
+					if (panegroup != null && panegroup.IsMaximized)
+						newFW.WindowState = WindowState.Maximized;
+				}), DispatcherPriority.Send);
+
+				return newFW;
+			}
+
+			if (model is LayoutDocumentFloatingWindow)
+			{
+				if (DesignerProperties.GetIsInDesignMode(this))
+					return null;
+				if (!AllowFloatingWindows) return null;
+				var modelFW = model as LayoutDocumentFloatingWindow;
+				var newFW = new LayoutDocumentFloatingWindowControl(modelFW)
+				{
+					// Owner = Window.GetWindow(this)
+				};
+
+				newFW.UpdateOwnership();
+
+				// Fill list before calling Show (issue #254)
+				_fwList.Add(newFW);
+
+				var paneForExtensions = modelFW.RootPanel;
+				if (paneForExtensions != null)
+				{
+					// ensure that floating window position is inside current (or nearest) monitor
+					paneForExtensions.KeepInsideNearestMonitor();
+
+					newFW.Left = paneForExtensions.FloatingLeft;
+					newFW.Top = paneForExtensions.FloatingTop;
+					newFW.Width = paneForExtensions.FloatingWidth;
+					newFW.Height = paneForExtensions.FloatingHeight;
+				}
+
+				newFW.ShowInTaskbar = false;
+				newFW.Show();
+				// Do not set the WindowState before showing or it will be lost
+				if (paneForExtensions != null && paneForExtensions.IsMaximized)
+					newFW.WindowState = WindowState.Maximized;
+				return newFW;
+			}
+
+			if (model is LayoutDocument layoutDocument)
+			{
+				var templateModelView = new LayoutDocumentControl { Model = layoutDocument };
+				return templateModelView;
+			}
+
+			return null;
+		}
+
+		/// <summary>Method is invoked to pop put an Anchorable that was in AutoHide mode.</summary>
+		/// <param name="anchor"><see cref="LayoutAnchorControl"/> to pop out of the side panel.</param>
+		internal void ShowAutoHideWindow(LayoutAnchorControl anchor)
+		{
+			_autoHideWindowManager.ShowAutoHideWindow(anchor);
+		}
+
+		/// <summary>Hides the auto-hide window for the specified anchor.</summary>
+		/// <param name="anchor">The anchor whose auto-hide window should be hidden.</param>
+		internal void HideAutoHideWindow(LayoutAnchorControl anchor) => _autoHideWindowManager.HideAutoWindow(anchor);
+
+		/// <summary>Gets the framework element that hosts auto-hide content.</summary>
+		/// <returns>The element that hosts auto-hide content.</returns>
+		internal FrameworkElement GetAutoHideAreaElement() => _autohideArea;
+
+		/// <summary>
+		/// Executes when the user starts to drag a <see cref="LayoutDocument"/> or
+		/// <see cref="LayoutAnchorable"/> by dragging its TabItem Header.
+		/// </summary>
+		/// <param name="contentModel">The layout content to float.</param>
+		/// <param name="startDrag">if set to <c>true</c>, dragging starts immediately after the window is created.</param>
+		internal virtual void StartDraggingFloatingWindowForContent(LayoutContent contentModel, bool startDrag = true)
+		{
+			// Ensure window can float only if corresponding property is set accordingly
+			if (contentModel == null) return;
+			if (!AllowFloatingWindows) return;
+			if (!contentModel.CanFloat) return;
+
+			var floatingArgs = new ContentFloatingEventArgs(contentModel);
+			ContentFloating?.Invoke(this, floatingArgs);
+			if (floatingArgs.Cancel)
+				return;
+
+			var coreFloatArgs1 = new Core.Events.ContentCancelEventArgs(contentModel);
+			_coreContentFloating?.Invoke(this, coreFloatArgs1);
+			if (coreFloatArgs1.Cancel)
+				return;
+
+			LayoutFloatingWindowControl fwc = null;
+
+			// For last document re-use floating window
+			if (contentModel.Parent.ChildrenCount == 1)
+			{
+				foreach (var fw in _fwList)
+				{
+					var found = fw.Model.Descendents().OfType<LayoutDocument>().Any(doc => doc == contentModel);
+					if (!found) continue;
+					if (fw.Model.Descendents().OfType<LayoutDocument>().Count() + fw.Model.Descendents().OfType<LayoutAnchorable>().Count() == 1)
+						fwc = fw;
+					break;
+				}
+			}
+
+			var show = fwc == null; // Do not show already visible floating window
+			if (fwc == null)
+			{
+				fwc = CreateFloatingWindow(contentModel, false);
+
+				LayoutFloatingWindowControlCreated?.Invoke(this, new LayoutFloatingWindowControlCreatedEventArgs(fwc));
+			}
+
+			if (fwc != null)
+			{
+				var content = contentModel;
+				Dispatcher.BeginInvoke(
+					new Action(() =>
+				{
+					// Activate only inactive document
+					if (startDrag) fwc.AttachDrag();
+
+					// Content can be floated before the window hosting this DockingManager has been shown,
+					// in which case the floating window is only shown once the hosting window is (issue #618).
+					fwc.ShowWhenHostWindowIsShown();
+					ContentFloated?.Invoke(this, new ContentFloatedEventArgs(content));
+					_coreContentFloated?.Invoke(this, new Core.Events.ContentEventArgs(content));
+				}), DispatcherPriority.Send);
+			}
+		}
+
+		/// <summary>
+		/// Executes when the user starts to drag a docked <see cref="LayoutAnchorable"/> (tool window)
+		/// by dragging its title bar (top header of a tool window).
+		/// </summary>
+		/// <param name="paneModel">The pane to float.</param>
+		internal virtual void StartDraggingFloatingWindowForPane(LayoutAnchorablePane paneModel)
+		{
+			if (!AllowFloatingWindows) return;
+
+			var firstContent = paneModel.Children.FirstOrDefault();
+			if (firstContent != null)
+			{
+				var floatingArgs = new ContentFloatingEventArgs(firstContent);
+				ContentFloating?.Invoke(this, floatingArgs);
+				if (floatingArgs.Cancel)
+					return;
+
+				var coreFloatArgs2 = new Core.Events.ContentCancelEventArgs(firstContent);
+				_coreContentFloating?.Invoke(this, coreFloatArgs2);
+				if (coreFloatArgs2.Cancel)
+					return;
+			}
+
+			var fwc = CreateFloatingWindowForLayoutAnchorableWithoutParent(paneModel, false);
+			if (fwc == null) return;
+
+			LayoutFloatingWindowControlCreated?.Invoke(this, new LayoutFloatingWindowControlCreatedEventArgs(fwc));
+
+			fwc.AttachDrag();
+			fwc.Show();
+
+			if (firstContent != null)
+			{
+				ContentFloated?.Invoke(this, new ContentFloatedEventArgs(firstContent));
+				_coreContentFloated?.Invoke(this, new Core.Events.ContentEventArgs(firstContent));
+			}
+		}
+
+		/// <summary>Enumerates floating windows in z-order.</summary>
+		/// <returns>The floating windows ordered by z-order.</returns>
+		internal IEnumerable<LayoutFloatingWindowControl> GetFloatingWindowsByZOrder()
+		{
+			var parentWindow = Window.GetWindow(this);
+			var windowParentHandle = parentWindow != null ? new WindowInteropHelper(parentWindow).Handle : Process.GetCurrentProcess().MainWindowHandle;
+			var currentHandle = Win32Helper.GetWindow(windowParentHandle, (uint)Win32Helper.GetWindow_Cmd.GW_HWNDFIRST);
+			while (currentHandle != IntPtr.Zero)
+			{
+				var ctrl = _fwList.FirstOrDefault(fw => new WindowInteropHelper(fw).Handle == currentHandle);
+				if (ctrl != null && ctrl.Model.Root != null && ctrl.Model.Root.Manager == this)
+					yield return ctrl;
+
+				currentHandle = Win32Helper.GetWindow(currentHandle, (uint)Win32Helper.GetWindow_Cmd.GW_HWNDNEXT);
+			}
+		}
+
+		/// <summary>Builds the ordered list of overlay window hosts for drag-and-drop operations.</summary>
+		/// <param name="overlayWindowHosts">The collection to populate with overlay window hosts.</param>
+		/// <param name="dragFloatingWindow">The floating window currently being dragged.</param>
+		internal void GetOverlayWindowHostsByZOrder(ref List<IOverlayWindowHost> overlayWindowHosts, LayoutFloatingWindowControl dragFloatingWindow)
+		{
+			overlayWindowHosts.Clear();
+
+			var topFloatingWindows = new List<IOverlayWindowHost>();
+			var bottomFloatingWindows = new List<IOverlayWindowHost>();
+
+			var parentWindow = Window.GetWindow(this);
+			var windowParentHandle = parentWindow != null ? new WindowInteropHelper(parentWindow).Handle : Process.GetCurrentProcess().MainWindowHandle;
+			var b = Win32Helper.GetWindowZOrder(windowParentHandle, out var mainWindow_z);
+			var currentHandle = Win32Helper.GetWindow(windowParentHandle, (uint)Win32Helper.GetWindow_Cmd.GW_HWNDFIRST);
+			while (currentHandle != IntPtr.Zero)
+			{
+				for (int i = 0; i < _fwList.Count; i++)
+				{
+					var fw = _fwList[i];
+					if (fw is IOverlayWindowHost host && fw != dragFloatingWindow && fw.IsVisible)
+					{
+						var fw_hwnd = new WindowInteropHelper(fw).Handle;
+						if (currentHandle == fw_hwnd && fw.Model.Root != null && fw.Model.Root.Manager == this)
+						{
+							if (fw.OwnedByDockingManagerWindow || (Win32Helper.GetWindowZOrder(fw_hwnd, out var fw_z) && fw_z > mainWindow_z))
+								topFloatingWindows.Add(host);
+							else
+								bottomFloatingWindows.Add(host);
+							break;
+						}
+					}
+				}
+
+				currentHandle = Win32Helper.GetWindow(currentHandle, (uint)Win32Helper.GetWindow_Cmd.GW_HWNDNEXT);
+			}
+
+			overlayWindowHosts.AddRange(topFloatingWindows);
+			overlayWindowHosts.Add(this);
+			overlayWindowHosts.AddRange(bottomFloatingWindows);
+		}
+
+		/// <summary>Removes a floating window from the manager.</summary>
+		/// <param name="floatingWindow">The floating window to remove.</param>
+		internal void RemoveFloatingWindow(LayoutFloatingWindowControl floatingWindow)
+		{
+			_fwList.Remove(floatingWindow);
+
+			LayoutFloatingWindowControlClosed?.Invoke(this, new LayoutFloatingWindowControlClosedEventArgs(floatingWindow));
+		}
+
+		/// <summary>Closes all documents except the selected content.</summary>
+		/// <param name="contentSelected">The document to keep open.</param>
+		internal void ExecuteCloseAllButThisCommand(LayoutContent contentSelected)
+		{
+			foreach (var contentToClose in Layout.Descendents().OfType<LayoutContent>().Where(d => d != contentSelected && (d.Parent is LayoutDocumentPane || d.Parent is LayoutDocumentFloatingWindow)).ToArray())
+				Close(contentToClose);
+		}
+
+		/// <summary>Closes all docked and floating documents.</summary>
+		/// <param name="contentSelected">The content that initiated the command.</param>
+		internal void ExecuteCloseAllCommand(LayoutContent contentSelected)
+		{
+			foreach (var contentToClose in Layout.Descendents().OfType<LayoutContent>().Where(d => (d.Parent is LayoutDocumentPane || d.Parent is LayoutDocumentFloatingWindow)).ToArray())
+				Close(contentToClose);
+		}
+
+		/// <summary>Closes the specified anchorable.</summary>
+		/// <param name="anchorable">The anchorable to close.</param>
+		internal virtual void ExecuteCloseCommand(LayoutAnchorable anchorable)
+		{
+			// Closing removes the anchorable from the layout; its content has to be back in the layout
+			// first, otherwise a standalone window would keep the only reference to it.
+			ReattachAnchorable(anchorable);
+
+			if (!(anchorable is LayoutAnchorable model)) return;
+
+			AnchorableClosingEventArgs closingArgs = null;
+			AnchorableClosing?.Invoke(this, closingArgs = new AnchorableClosingEventArgs(model));
+			if (closingArgs?.Cancel == true)
+				return;
+
+			var coreClosingArgs = new Core.Events.AnchorableCancelEventArgs(model);
+			_coreAnchorableClosing?.Invoke(this, coreClosingArgs);
+			if (coreClosingArgs.Cancel)
+				return;
+
+			if (model.CloseAnchorable())
+			{
+				RemoveViewFromLogicalChild(model);
+				AnchorableClosed?.Invoke(this, new AnchorableClosedEventArgs(model));
+				_coreAnchorableClosed?.Invoke(this, new Core.Events.AnchorableEventArgs(model));
+			}
+		}
+
+		/// <summary>Closes the specified document.</summary>
+		/// <param name="document">The document to close.</param>
+		internal void ExecuteCloseCommand(LayoutDocument document)
+		{
+			if (DocumentClosing != null)
+			{
+				var argsClosing = new DocumentClosingEventArgs(document);
+				DocumentClosing(this, argsClosing);
+				if (argsClosing.Cancel) return;
+			}
+
+			var coreClosingArgs = new Core.Events.DocumentCancelEventArgs(document);
+			_coreDocumentClosing?.Invoke(this, coreClosingArgs);
+			if (coreClosingArgs.Cancel) return;
+
+			// Get the document to activate after the close.
+			LayoutDocument documentToActivate = GetDocumentToActivate(document);
+
+			if (!document.CloseDocument()) return;
+
+			RemoveViewFromLogicalChild(document);
+			if (document.Content is UIElement uIElement)
+				RemoveLogicalChild(uIElement);
+			DocumentClosed?.Invoke(this, new DocumentClosedEventArgs(document));
+			_coreDocumentClosed?.Invoke(this, new Core.Events.DocumentEventArgs(document));
+
+			// get rid of the closed document content
+			document.Content = null;
+
+			// Activate the document determined to be the next active document.
+			// This doesn't only update the layout, but also all related (dependency) properties.
+			if (documentToActivate != null)
+			{
+				documentToActivate.IsActive = true;
+			}
+		}
+
+		private LayoutDocument GetDocumentToActivate(LayoutDocument previousDocument)
+		{
+			ILayoutContainer parentContainer = previousDocument.Parent;
+			IEnumerable<LayoutDocument> siblingDocuments = parentContainer?.Children.OfType<LayoutDocument>() ?? Enumerable.Empty<LayoutDocument>();
+
+			foreach (var childPair in siblingDocuments.Zip(siblingDocuments.Skip(1), Tuple.Create))
+			{
+				if (childPair.Item2 == previousDocument)
+				{
+					return childPair.Item1;
+				}
+			}
+
+			foreach (LayoutDocument document in this.Layout.Descendents().OfType<LayoutDocument>())
+			{
+				if (document.IsSelected)
+				{
+					return document;
+				}
+			}
+
+			return null;
+		}
+
+		/// <summary>Hides the specified anchorable.</summary>
+		/// <param name="anchorable">The anchorable to hide.</param>
+		internal virtual void ExecuteHideCommand(LayoutAnchorable anchorable)
+		{
+			ReattachAnchorable(anchorable);
+
+			if (!(anchorable is LayoutAnchorable model)) return;
+
+			AnchorableHidingEventArgs hidingArgs = null;
+			AnchorableHiding?.Invoke(this, hidingArgs = new AnchorableHidingEventArgs(model));
+			if (hidingArgs?.CloseInsteadOfHide == true)
+			{
+				ExecuteCloseCommand(model);
+				return;
+			}
+
+			if (hidingArgs?.Cancel == true) return;
+
+			var coreHidingArgs = new Core.Events.AnchorableCancelEventArgs(model);
+			_coreAnchorableHiding?.Invoke(this, coreHidingArgs);
+			if (coreHidingArgs.CloseInsteadOfHide)
+			{
+				ExecuteCloseCommand(model);
+				return;
+			}
+
+			if (coreHidingArgs.Cancel) return;
+
+			if (model.HideAnchorable(true))
+			{
+				AnchorableHidden?.Invoke(this, new AnchorableHiddenEventArgs(model));
+				_coreAnchorableHidden?.Invoke(this, new Core.Events.AnchorableEventArgs(model));
+			}
+		}
+
+		/// <summary>Toggles auto-hide for the specified anchorable.</summary>
+		/// <param name="_anchorable">The anchorable whose auto-hide state should be toggled.</param>
+		internal virtual void ExecuteAutoHideCommand(LayoutAnchorable _anchorable)
+		{
+			ReattachAnchorable(_anchorable);
+			_anchorable.ToggleAutoHide();
+		}
+
+		/// <summary>
+		/// Method executes when the user clicks the Float button in the context menu of an <see cref="LayoutAnchorable"/>.
+		///
+		/// This removes the content from the docked <see cref="LayoutAnchorable"/> and inserts it into a
+		/// draggable <see cref="LayoutFloatingWindowControl"/>.
+		/// </summary>
+		/// <param name="contentToFloat">The content to float.</param>
+		internal void ExecuteFloatCommand(LayoutContent contentToFloat)
+		{
+			ReattachAnchorable(contentToFloat as LayoutAnchorable);
+
+			var floatingArgs = new ContentFloatingEventArgs(contentToFloat);
+			ContentFloating?.Invoke(this, floatingArgs);
+			if (floatingArgs.Cancel)
+				return;
+
+			var coreFloatingArgs = new Core.Events.ContentCancelEventArgs(contentToFloat);
+			_coreContentFloating?.Invoke(this, coreFloatingArgs);
+			if (coreFloatingArgs.Cancel)
+				return;
+
+			contentToFloat.Float();
+			ContentFloated?.Invoke(this, new ContentFloatedEventArgs(contentToFloat));
+			_coreContentFloated?.Invoke(this, new Core.Events.ContentEventArgs(contentToFloat));
+		}
+
+		/// <summary>Docks the specified anchorable.</summary>
+		/// <param name="anchorable">The anchorable to dock.</param>
+		internal void ExecuteDockCommand(LayoutAnchorable anchorable)
+		{
+			ReattachAnchorable(anchorable);
+
+			if (!RaiseContentDocking(anchorable))
+				return;
+
+			anchorable.Dock();
+		}
+
+		/// <summary>Docks the specified content as a document.</summary>
+		/// <param name="content">The content to dock as a document.</param>
+		internal void ExecuteDockAsDocumentCommand(LayoutContent content)
+		{
+			ReattachAnchorable(content as LayoutAnchorable);
+
+			if (!RaiseContentDocking(content))
+				return;
+
+			content.DockAsDocument();
+		}
+
+		/// <summary>
+		/// Raises the <see cref="ContentDocking"/> event (and its core counterpart) for the specified content.
+		/// This must run before any layout mutation starts, since it is the only point where the operation
+		/// can still be cancelled atomically. The matching <see cref="ContentDocked"/> is raised by the code
+		/// that performs the mutation once it has settled: <see cref="LayoutContent.Dock"/> and
+		/// <see cref="LayoutContent.DockAsDocument"/> for the command/API paths, and the drag-and-drop
+		/// <see cref="Controls.DropTarget{T}"/> for drops.
+		/// </summary>
+		/// <param name="content">The content that is about to be docked.</param>
+		/// <returns><c>false</c> if a handler cancelled the operation; otherwise <c>true</c>.</returns>
+		internal bool RaiseContentDocking(LayoutContent content)
+		{
+			var dockingArgs = new ContentDockingEventArgs(content);
+			ContentDocking?.Invoke(this, dockingArgs);
+			if (dockingArgs.Cancel)
+				return false;
+
+			var coreDockingArgs = new Core.Events.ContentCancelEventArgs(content);
+			_coreContentDocking?.Invoke(this, coreDockingArgs);
+			return !coreDockingArgs.Cancel;
+		}
+
+		/// <summary>Raises the <see cref="ContentDocked"/> event (and its core counterpart) for the specified content.</summary>
+		/// <param name="content">The content that has just been docked.</param>
+		internal void RaiseContentDocked(LayoutContent content)
+		{
+			ContentDocked?.Invoke(this, new ContentDockedEventArgs(content));
+			_coreContentDocked?.Invoke(this, new Core.Events.ContentEventArgs(content));
+		}
+
+		/// <summary>Activates the specified layout content.</summary>
+		/// <param name="content">The content to activate.</param>
+		internal void ExecuteContentActivateCommand(LayoutContent content) => content.IsActive = true;
+
+		/// <summary>
+		/// The anchorables that are currently detached into a standalone <see cref="DetachedAnchorableWindow"/>,
+		/// mapped to the state needed to return them to the layout.
+		/// </summary>
+		private readonly Dictionary<LayoutAnchorable, DetachedEntry> _detachedAnchorables =
+			new Dictionary<LayoutAnchorable, DetachedEntry>();
+
+		/// <summary>Set once the host window has been hooked, so detached windows are cleaned up on shutdown.</summary>
+		private bool _hostWindowHooked;
+
+		/// <summary>Gets the anchorables that are currently detached into a standalone window.</summary>
+		public IEnumerable<LayoutAnchorable> DetachedAnchorables => _detachedAnchorables.Keys.ToList();
+
+		/// <summary>
+		/// Gets a value indicating whether the given anchorable is currently hosted by a standalone window.
+		/// </summary>
+		/// <param name="anchorable">The anchorable to test, may be <see langword="null"/>.</param>
+		/// <returns><see langword="true"/> when the anchorable is detached; otherwise <see langword="false"/>.</returns>
+		public bool IsDetached(LayoutAnchorable anchorable) =>
+			anchorable != null && _detachedAnchorables.ContainsKey(anchorable);
+
+		/// <summary>
+		/// Moves the content of the given anchorable out of the docking layout and into a standalone,
+		/// independent top level window.
+		/// </summary>
+		/// <param name="anchorable">The anchorable to detach.</param>
+		/// <remarks>
+		/// <para>
+		/// Only the presenter that owns the user supplied content is moved into the new window, because a
+		/// WPF element can only ever have one parent. Where the anchorable itself goes while its content
+		/// lives elsewhere is decided by <see cref="DetachFromLayout"/>, which derived managers override.
+		/// </para>
+		/// <para>
+		/// Closing the window returns the anchorable to the layout, as does
+		/// <see cref="ReattachAnchorable(LayoutAnchorable)"/>.
+		/// </para>
+		/// <para>Does nothing while <see cref="AllowDetachedWindows"/> is <see langword="false"/>.</para>
+		/// </remarks>
+		public void DetachAnchorableToWindow(LayoutAnchorable anchorable)
+		{
+			if (!AllowDetachedWindows) return;
+			if (anchorable == null || IsDetached(anchorable)) return;
+			if (!(GetLayoutItemFromModel(anchorable) is LayoutAnchorableItem layoutItem)) return;
+
+			// Resolved before the anchorable leaves the layout: without a presenter there is nothing to
+			// hand to a window, and taking it out of the layout first would leave it hidden with no
+			// window to bring it back from.
+			var view = layoutItem.View;
+			if (view == null) return;
+
+			var restoreState = DetachFromLayout(anchorable);
+
+			// The presenter is a logical child of this manager and may still be held by the visual tree of
+			// the pane it was shown in. Both links have to go before another window can take ownership.
+			DisconnectFromVisualParent(view);
+			InternalRemoveLogicalChild(view);
+
+			var window = new DetachedAnchorableWindow(anchorable, view, CreateDetachedWindowHeader(anchorable));
+			window.UpdateThemeResources(null, Theme);
+			window.Closed += OnDetachedWindowClosed;
+
+			_detachedAnchorables[anchorable] = new DetachedEntry(window, restoreState);
+			anchorable.IsDetached = true;
+
+			HookHostWindow();
+			window.Show();
+
+			OnDetachedAnchorablesChanged(anchorable);
+		}
+
+		/// <summary>
+		/// Closes the standalone window of the given anchorable and returns its content to the layout.
+		/// </summary>
+		/// <param name="anchorable">The anchorable to return, may be <see langword="null"/>.</param>
+		public void ReattachAnchorable(LayoutAnchorable anchorable) =>
+			ReattachAnchorableCore(anchorable, returnToLayout: true, keepDetachedFlag: false);
+
+		/// <summary>Closes the standalone window of an anchorable and optionally returns its content.</summary>
+		/// <param name="anchorable">The anchorable to return, may be <see langword="null"/>.</param>
+		/// <param name="returnToLayout">
+		/// Whether the anchorable should be put back into the layout. Skipped while the layout is being
+		/// torn down, where inserting into a dying tree achieves nothing.
+		/// </param>
+		/// <param name="keepDetachedFlag">
+		/// Whether <see cref="LayoutAnchorable.IsDetached"/> stays set. Keeping it lets a manager that is
+		/// only temporarily unloaded - a tab switch, say - recreate the window when it comes back.
+		/// </param>
+		private void ReattachAnchorableCore(LayoutAnchorable anchorable, bool returnToLayout, bool keepDetachedFlag)
+		{
+			if (anchorable == null || !_detachedAnchorables.TryGetValue(anchorable, out var entry)) return;
+
+			// Remove the bookkeeping first: ReturnToLayout below must not take the detached branch, and
+			// closing the window must not re-enter through OnDetachedWindowClosed.
+			_detachedAnchorables.Remove(anchorable);
+			if (!keepDetachedFlag) anchorable.IsDetached = false;
+			entry.Window.Closed -= OnDetachedWindowClosed;
+
+			var view = entry.Window.ReleaseView();
+			if (view != null) InternalAddLogicalChild(view);
+
+			// Guarded because this also runs from the Closed event of that very window, and WPF rejects
+			// Close on a window that is already closing.
+			if (!entry.Window.IsClosed) entry.Window.Close();
+
+			// Returning the anchorable rebuilds the control whose template binds to LayoutItem.View, so
+			// the presenter is picked up again automatically.
+			if (returnToLayout) ReturnToLayout(anchorable, entry.RestoreState);
+
+			OnDetachedAnchorablesChanged(anchorable);
+		}
+
+		/// <summary>Returns every detached anchorable to the layout.</summary>
+		public void ReattachAllDetachedAnchorables()
+		{
+			foreach (var anchorable in _detachedAnchorables.Keys.ToList())
+				ReattachAnchorable(anchorable);
+		}
+
+		/// <summary>
+		/// Takes the given anchorable out of the layout in preparation for hosting its content in a
+		/// standalone window.
+		/// </summary>
+		/// <param name="anchorable">The anchorable being detached.</param>
+		/// <returns>
+		/// State that <see cref="ReturnToLayout"/> needs in order to put the anchorable back where it
+		/// came from, or <see langword="null"/> when none is needed.
+		/// </returns>
+		/// <remarks>
+		/// The default implementation hides the anchorable, which records its previous container and
+		/// index on the model so that <see cref="LayoutAnchorable.Show"/> restores the exact position.
+		/// </remarks>
+		protected virtual object DetachFromLayout(LayoutAnchorable anchorable)
+		{
+			anchorable?.HideAnchorable(false);
+			return null;
+		}
+
+		/// <summary>Puts a previously detached anchorable back into the layout.</summary>
+		/// <param name="anchorable">The anchorable being returned.</param>
+		/// <param name="restoreState">The state produced by <see cref="DetachFromLayout"/>.</param>
+		protected virtual void ReturnToLayout(LayoutAnchorable anchorable, object restoreState)
+		{
+			if (anchorable != null && anchorable.IsHidden) anchorable.Show();
+		}
+
+		/// <summary>Creates the header shown at the top of a detached window.</summary>
+		/// <param name="anchorable">The anchorable the window hosts.</param>
+		/// <returns>The header element, or <see langword="null"/> for a window without a header.</returns>
+		/// <remarks>
+		/// The default is the same title control that a floating window uses, so a detached window offers
+		/// the familiar caption, context menu and close button.
+		/// </remarks>
+		protected virtual FrameworkElement CreateDetachedWindowHeader(LayoutAnchorable anchorable) =>
+			new AnchorablePaneTitle { Model = anchorable };
+
+		/// <summary>Called after an anchorable was detached or returned, for derived managers to react.</summary>
+		/// <param name="anchorable">The anchorable whose detached state just changed.</param>
+		/// <remarks>
+		/// Raised once the bookkeeping is complete, so <see cref="IsDetached"/> already reports the new
+		/// state when this runs.
+		/// </remarks>
+		protected virtual void OnDetachedAnchorablesChanged(LayoutAnchorable anchorable)
+		{
+		}
+
+		/// <summary>Brings the standalone window of the given anchorable to the front.</summary>
+		/// <param name="anchorable">The detached anchorable.</param>
+		protected void ActivateDetachedWindow(LayoutAnchorable anchorable)
+		{
+			if (anchorable == null || !_detachedAnchorables.TryGetValue(anchorable, out var entry)) return;
+			if (entry.Window.WindowState == WindowState.Minimized) entry.Window.WindowState = WindowState.Normal;
+			entry.Window.Activate();
+		}
+
+		/// <summary>
+		/// Detaches the given presenter from whatever currently parents it in the visual tree, so that it
+		/// can be handed to another window.
+		/// </summary>
+		/// <param name="view">The presenter to disconnect.</param>
+		/// <remarks>
+		/// Removing an anchorable from a pane leaves the template presenter that showed it orphaned but
+		/// still holding the view as its visual child, so the link has to be cut explicitly. The binding is
+		/// cleared as well, because a plain assignment would otherwise be overwritten by the binding.
+		/// </remarks>
+		private static void DisconnectFromVisualParent(ContentPresenter view)
+		{
+			var parent = System.Windows.Media.VisualTreeHelper.GetParent(view);
+
+			switch (parent)
+			{
+				case ContentPresenter presenter when ReferenceEquals(presenter.Content, view):
+					BindingOperations.ClearBinding(presenter, ContentPresenter.ContentProperty);
+					presenter.Content = null;
+					break;
+
+				case ContentControl control when ReferenceEquals(control.Content, view):
+					BindingOperations.ClearBinding(control, ContentControl.ContentProperty);
+					control.Content = null;
+					break;
+
+				case Decorator decorator when ReferenceEquals(decorator.Child, view):
+					decorator.Child = null;
+					break;
+
+				case Panel panel:
+					panel.Children.Remove(view);
+					break;
+			}
+		}
+
+		/// <summary>Returns the anchorable to the layout when the user closes its standalone window.</summary>
+		/// <param name="sender">The window that was closed.</param>
+		/// <param name="e">The event arguments.</param>
+		private void OnDetachedWindowClosed(object sender, EventArgs e)
+		{
+			if (sender is DetachedAnchorableWindow window) ReattachAnchorable(window.Model);
+		}
+
+		/// <summary>Makes sure detached windows are returned when the host window closes.</summary>
+		/// <remarks>
+		/// A detached window has no owner, so it would otherwise stay alive - and keep the process alive
+		/// under <see cref="System.Windows.ShutdownMode.OnLastWindowClose"/> - after the main window is gone.
+		/// </remarks>
+		private void HookHostWindow()
+		{
+			if (_hostWindowHooked) return;
+
+			var hostWindow = Window.GetWindow(this);
+			if (hostWindow == null) return;
+
+			hostWindow.Closed += OnHostWindowClosed;
+			_hostWindowHooked = true;
+		}
+
+		/// <summary>Returns every detached anchorable when the host window goes away.</summary>
+		/// <param name="sender">The host window.</param>
+		/// <param name="e">The event arguments.</param>
+		private void OnHostWindowClosed(object sender, EventArgs e)
+		{
+			if (sender is Window hostWindow) hostWindow.Closed -= OnHostWindowClosed;
+			_hostWindowHooked = false;
+
+			// The layout is being destroyed, so putting anchorables back into it would achieve nothing.
+			// What matters is that no ownerless window survives to keep the process alive.
+			CloseDetachedWindows(returnToLayout: false, keepDetachedFlag: true);
+		}
+
+		/// <summary>Closes every standalone window, optionally returning its content to the layout.</summary>
+		/// <param name="returnToLayout">Whether each anchorable should be put back into the layout.</param>
+		/// <param name="keepDetachedFlag">Whether the anchorables stay marked as detached.</param>
+		private void CloseDetachedWindows(bool returnToLayout, bool keepDetachedFlag)
+		{
+			foreach (var anchorable in _detachedAnchorables.Keys.ToList())
+				ReattachAnchorableCore(anchorable, returnToLayout, keepDetachedFlag);
+		}
+
+		/// <summary>Tracks one anchorable that is currently hosted by a standalone window.</summary>
+		private sealed class DetachedEntry
+		{
+			/// <summary>Initializes a new instance of the <see cref="DetachedEntry"/> class.</summary>
+			/// <param name="window">The window hosting the content.</param>
+			/// <param name="restoreState">The state needed to return the anchorable to the layout.</param>
+			public DetachedEntry(DetachedAnchorableWindow window, object restoreState)
+			{
+				Window = window;
+				RestoreState = restoreState;
+			}
+
+			/// <summary>Gets the window that hosts the content of the anchorable.</summary>
+			public DetachedAnchorableWindow Window { get; }
+
+			/// <summary>Gets the state needed to return the anchorable to the layout.</summary>
+			public object RestoreState { get; }
+		}
+
+		/// <inheritdoc/>
+		public override void OnApplyTemplate()
+		{
+			base.OnApplyTemplate();
+			_autohideArea = GetTemplateChild("PART_AutoHideArea") as FrameworkElement;
+		}
+
+		/// <inheritdoc/>
+		protected override Size ArrangeOverride(Size arrangeBounds)
+		{
+			_areas = null;
+			return base.ArrangeOverride(arrangeBounds);
+		}
+
+		/// <inheritdoc/>
+		protected override void OnPropertyChanged(DependencyPropertyChangedEventArgs e)
+		{
+			base.OnPropertyChanged(e);
+
+			// Floating windows are top level windows and can never become part of the logical tree of this
+			// DockingManager, because WPF requires a Window to be the root of its own tree. Inheritable
+			// dependency properties therefore never flow into a floating window and its chrome (its title in
+			// particular) and have to be mirrored onto the floating windows explicitly.
+			if (_fwList.Count == 0 && _fwHiddenList.Count == 0)
+				return;
+
+			if (!(e.Property.GetMetadata(this) is FrameworkPropertyMetadata metadata) || !metadata.Inherits)
+				return;
+
+			foreach (var floatingWindow in _fwList.Concat(_fwHiddenList).ToArray())
+				floatingWindow.SyncInheritedProperty(e.Property);
+		}
+
+		/// <inheritdoc/>
+		protected override void OnPreviewKeyDown(KeyEventArgs e)
+		{
+			if (Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl))
+			{
+				if (e.IsDown && e.Key == Key.Tab)
+				{
+					if (CanShowNavigatorWindow && !IsNavigatorWindowActive)
+					{
+						ShowNavigatorWindow();
+						e.Handled = true;
+					}
+				}
+			}
+
+			base.OnPreviewKeyDown(e);
+		}
+
+		/// <summary>Updates a context menu so it uses the docking manager resources.</summary>
+		/// <param name="d">The dependency object that owns the context menu.</param>
+		/// <param name="e">The event data for the property change.</param>
+		private static void OnContextMenuPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+		{
+			if (e.NewValue is ContextMenu contextMenu)
+			{
+				contextMenu.Resources = ((DockingManager)d).Resources;
+			}
+		}
+
+		private void OnLayoutRootPropertyChanged(object sender, PropertyChangedEventArgs e)
+		{
+			switch (e.PropertyName)
+			{
+				case nameof(LayoutRoot.RootPanel):
+					{
+						if (IsInitialized)
+						{
+							var layoutRootPanel = CreateUIElementForModel(Layout.RootPanel) as LayoutPanelControl;
+							LayoutRootPanel = layoutRootPanel;
+						}
+
+						break;
+					}
+
+				case nameof(LayoutRoot.ActiveContent):
+					{
+						// set focus on active element only after a layout pass is completed
+						// it's possible that it is not yet visible in the visual tree
+						// if (_setFocusAsyncOperation == null)
+						// {
+						//    _setFocusAsyncOperation = Dispatcher.BeginInvoke(new Action(() =>
+						// {
+						if (Layout.ActiveContent != null)
+							FocusElementManager.SetFocusOnLastElement(Layout.ActiveContent);
+						// _setFocusAsyncOperation = null;
+						//  } ), DispatcherPriority.Input );
+						// }
+						if (!_insideInternalSetActiveContent)
+							ActiveContent = Layout.ActiveContent?.Content;
+						break;
+					}
+			}
+		}
+
+		private static void OnLayoutRootUpdated(object sender, EventArgs e) => CommandManager.InvalidateRequerySuggested();
+
+		private void OnLayoutChanging(LayoutRoot newLayout) => LayoutChanging?.Invoke(this, EventArgs.Empty);
+
+		private void DockingManager_Loaded(object sender, RoutedEventArgs e)
+		{
+			if (DesignerProperties.GetIsInDesignMode(this)) return;
+			if (Layout.Manager == this)
+			{
+				LayoutRootPanel = CreateUIElementForModel(Layout.RootPanel) as LayoutPanelControl;
+				LeftSidePanel = CreateUIElementForModel(Layout.LeftSide) as LayoutAnchorSideControl;
+				TopSidePanel = CreateUIElementForModel(Layout.TopSide) as LayoutAnchorSideControl;
+				RightSidePanel = CreateUIElementForModel(Layout.RightSide) as LayoutAnchorSideControl;
+				BottomSidePanel = CreateUIElementForModel(Layout.BottomSide) as LayoutAnchorSideControl;
+
+				// In order to prevent resource leaks, unsubscribe from SizeChanged event for case when we have no stored Layout settings.
+				SizeChanged -= OnSizeChanged;
+				SizeChanged += OnSizeChanged;
+			}
+
+			SetupAutoHideWindow();
+
+			foreach (var fwc in _fwHiddenList.ToArray())
+			{
+				fwc.EnableBindings();
+				if (fwc.KeepContentVisibleOnClose)
+				{
+					fwc.UpdateOwnership();
+					fwc.Show();
+					fwc.KeepContentVisibleOnClose = false;
+				}
+
+				_fwList.Add(fwc);
+			}
+
+			_fwHiddenList.Clear();
+
+			// load floating windows not already loaded! (issue #59 & #254 & #426)
+			foreach (var fw in Layout.FloatingWindows.Where(fw => !_fwList.Any(fwc => fwc.Model == fw)).ToArray())
+				CreateUIElementForModel(fw);
+
+			// create the overlaywindow if it's possible
+			if (IsVisible)
+				CreateOverlayWindow();
+			FocusElementManager.SetupFocusManagement(this);
+		}
+
+		/// <summary>Method executes when the <see cref="DockingManager"/> control has changed its height and/or width.</summary>
+		/// <param name="sender">The source of the event.</param>
+		/// <param name="e">The size change event data.</param>
+		private void OnSizeChanged(object sender, SizeChangedEventArgs e)
+		{
+			// Panels may be null if the layout has not been loaded yet.
+			if (LayoutRootPanel == null || RightSidePanel == null || LeftSidePanel == null
+				|| TopSidePanel == null || BottomSidePanel == null)
+			{
+				return;
+			}
+
+			// Lets make sure this always remains non-negative to avoid crach in layout system
+			var width = Math.Max(ActualWidth - GridSplitterWidth - RightSidePanel.ActualWidth - LeftSidePanel.ActualWidth, 0);
+			var height = Math.Max(ActualHeight - GridSplitterHeight - TopSidePanel.ActualHeight - BottomSidePanel.ActualHeight, 0);
+
+			LayoutRootPanel.AdjustFixedChildrenPanelSizes(new Size(width, height));
+		}
+
+		private void DockingManager_Unloaded(object sender, RoutedEventArgs e)
+		{
+			SizeChanged -= OnSizeChanged;
+
+			if (DesignerProperties.GetIsInDesignMode(this)) return;
+
+			// Unloading is not necessarily the end - it also happens when the manager is switched away
+			// from, e.g. between tabs. A standalone window left open would keep the presenter that the
+			// rebuilt layout needs, so hand the content back and close it. IsDetached is kept so that
+			// RestoreDetachedAnchorables recreates the window when the manager is loaded again.
+			CloseDetachedWindows(returnToLayout: true, keepDetachedFlag: true);
+			_autoHideWindowManager?.HideAutoWindow();
+
+			AutoHideWindow?.Dispose();
+
+			foreach (var fw in _fwList.ToArray())
+			{
+				////fw.Owner = null;
+				// fw.SetParentWindowToNull();
+				// fw.KeepContentVisibleOnClose = true;
+				//// To avoid calling Close method multiple times.
+				// fw.InternalClose(true);
+
+				// Unloaded can occure not only after closing of the application, but after switching between tabs.
+				// For such case it's better to hide the floating windows instead of closing it.
+				// We clear bindings on visibility during the owner is unloaded.
+				if (fw.IsVisible)
+				{
+					fw.KeepContentVisibleOnClose = true;
+					fw.Hide();
+				}
+
+				fw.DisableBindings();
+				_fwHiddenList.Add(fw);
+			}
+
+			_fwList.Clear();
+
+			DestroyOverlayWindow();
+			FocusElementManager.FinalizeFocusManagement(this);
+		}
+
+		private void SetupAutoHideWindow()
+		{
+			if (_autoHideWindowManager != null)
+				_autoHideWindowManager.HideAutoWindow();
+			else
+				_autoHideWindowManager = new AutoHideWindowManager(this);
+
+			AutoHideWindow?.Dispose();
+			SetAutoHideWindow(new LayoutAutoHideWindowControl());
+		}
+
+		private void CreateOverlayWindow(LayoutFloatingWindowControl draggingWindow = null)
+		{
+			if (_overlayWindow == null)
+			{
+				_overlayWindow = new OverlayWindow(this);
+			}
+
+			// Usually, the overlay window is made a child of the main window. However, if the floating
+			// window being dragged isn't also a child of the main window (because OwnedByDockingManagerWindow
+			// is set to false to allow the parent window to be minimized independently of floating windows)
+			if (draggingWindow?.OwnedByDockingManagerWindow ?? true)
+				_overlayWindow.Owner = Window.GetWindow(this);
+			else
+				_overlayWindow.Owner = null;
+
+			var rectWindow = new Rect(this.PointToScreenDPIWithoutFlowDirection(new Point()), this.TransformActualSizeToAncestor());
+			_overlayWindow.Left = rectWindow.Left;
+			_overlayWindow.Top = rectWindow.Top;
+			_overlayWindow.Width = rectWindow.Width;
+			_overlayWindow.Height = rectWindow.Height;
+		}
+
+		private void DestroyOverlayWindow()
+		{
+			if (_overlayWindow == null) return;
+			_overlayWindow.Close();
+			_overlayWindow = null;
+		}
+
+		private void AttachDocumentsSource(LayoutRoot layout, IEnumerable documentsSource)
+		{
+			if (documentsSource == null) return;
+			if (layout == null) return;
+
+			// if (layout.Descendents().OfType<LayoutDocument>().Any())
+			//    throw new InvalidOperationException("Unable to set the DocumentsSource property if LayoutDocument objects are already present in the model");
+			var documentsImported = layout.Descendents().OfType<LayoutDocument>().Select(d => d.Content).ToArray();
+			var documents = documentsSource as IEnumerable;
+			var listOfDocumentsToImport = new List<object>(documents.OfType<object>());
+
+			foreach (var document in listOfDocumentsToImport.ToArray())
+			{
+				if (documentsImported.Contains(document))
+					listOfDocumentsToImport.Remove(document);
+			}
+
+			LayoutDocumentPane documentPane = null;
+			if (layout.LastFocusedDocument != null)
+				documentPane = layout.LastFocusedDocument.Parent as LayoutDocumentPane;
+
+			if (documentPane == null)
+				documentPane = layout.Descendents().OfType<LayoutDocumentPane>().FirstOrDefault();
+
+			// if (documentPane == null)
+			//    throw new InvalidOperationException("Layout must contains at least one LayoutDocumentPane in order to host documents");
+			_suspendLayoutItemCreation = true;
+			foreach (var documentContentToImport in listOfDocumentsToImport)
+			{
+				// documentPane.Children.Add(new LayoutDocument() { Content = documentToImport });
+				var documentToImport = new LayoutDocument { Content = documentContentToImport };
+
+				var added = false;
+				if (LayoutUpdateStrategy != null)
+					added = LayoutUpdateStrategy.BeforeInsertDocument(layout, documentToImport, documentPane);
+
+				if (!added)
+				{
+					if (documentPane == null)
+						throw new InvalidOperationException("Layout must contains at least one LayoutDocumentPane in order to host documents");
+
+					documentPane.Children.Add(documentToImport);
+				}
+
+				LayoutUpdateStrategy?.AfterInsertDocument(layout, documentToImport);
+				CreateDocumentLayoutItem(documentToImport);
+			}
+
+			_suspendLayoutItemCreation = false;
+			if (documentsSource is INotifyCollectionChanged documentsSourceAsNotifier)
+				documentsSourceAsNotifier.CollectionChanged += DocumentsSourceElementsChanged;
+		}
+
+		private void DocumentsSourceElementsChanged(object sender, NotifyCollectionChangedEventArgs e)
+		{
+			if (Layout == null) return;
+			// When deserializing documents are created automatically by the deserializer
+			if (SuspendDocumentsSourceBinding) return;
+
+			// handle remove
+			if (e.Action == NotifyCollectionChangedAction.Remove ||
+				e.Action == NotifyCollectionChangedAction.Replace)
+			{
+				if (e.OldItems != null)
+				{
+					var documentsToRemove = Layout.Descendents().OfType<LayoutDocument>().Where(d => e.OldItems.Contains(d.Content)).ToArray();
+					foreach (var documentToRemove in documentsToRemove)
+					{
+						documentToRemove.Content = null;
+						documentToRemove.Parent?.RemoveChild(documentToRemove);
+						RemoveViewFromLogicalChild(documentToRemove);
+					}
+				}
+			}
+
+			// handle add
+			if (e.NewItems != null && (e.Action == NotifyCollectionChangedAction.Add || e.Action == NotifyCollectionChangedAction.Replace))
+			{
+				if (e.NewItems != null)
+				{
+					LayoutDocumentPane documentPane = null;
+					if (Layout.LastFocusedDocument != null)
+					{
+						documentPane = Layout.LastFocusedDocument.Parent as LayoutDocumentPane;
+					}
+
+					if (documentPane == null)
+					{
+						documentPane = Layout.Descendents().OfType<LayoutDocumentPane>().FirstOrDefault();
+					}
+
+					// if (documentPane == null)
+					//    throw new InvalidOperationException("Layout must contains at least one LayoutDocumentPane in order to host documents");
+					_suspendLayoutItemCreation = true;
+					foreach (var documentContentToImport in e.NewItems)
+					{
+						var documentToImport = new LayoutDocument
+						{
+							Content = documentContentToImport
+						};
+
+						var added = false;
+						if (LayoutUpdateStrategy != null)
+						{
+							added = LayoutUpdateStrategy.BeforeInsertDocument(Layout, documentToImport, documentPane);
+						}
+
+						if (!added)
+						{
+							if (documentPane == null)
+								throw new InvalidOperationException("Layout must contains at least one LayoutDocumentPane in order to host documents");
+
+							documentPane.Children.Add(documentToImport);
+							added = true;
+						}
+
+						LayoutUpdateStrategy?.AfterInsertDocument(Layout, documentToImport);
+						var root = documentToImport.Root;
+						if (root != null && root.Manager == this)
+						{
+							CreateDocumentLayoutItem(documentToImport);
+						}
+					}
+
+					_suspendLayoutItemCreation = false;
+				}
+			}
+
+			if (e.Action == NotifyCollectionChangedAction.Reset)
+			{
+				// Remove documents that are no longer in the DocumentSource.
+				var documentsToRemove = GetItemsToRemoveAfterReset<LayoutDocument>(DocumentsSource);
+				foreach (var documentToRemove in documentsToRemove)
+				{
+					(documentToRemove.Parent as ILayoutContainer)?.RemoveChild(
+						documentToRemove);
+					RemoveViewFromLogicalChild(documentToRemove);
+				}
+			}
+
+			Layout?.CollectGarbage();
+		}
+
+		/// <summary>
+		/// Iterate through source to find only the items that need to be removed.
+		/// </summary>
+		/// <remarks>
+		/// Previous implementations cleared all documents from the layout. The current
+		/// guidance is that the collection has changed signficantly, so only remove the
+		/// documents that are no longer in the DocumentSource.
+		/// </remarks>
+		/// <typeparam name="TLayoutType">The layout content type to inspect.</typeparam>
+		/// <param name="source">The current source collection, either <see cref="DocumentsSource"/> or <see cref="AnchorablesSource"/>.</param>
+		/// <returns>The layout items that are no longer present in the source collection.</returns>
+		private TLayoutType[] GetItemsToRemoveAfterReset<TLayoutType>(IEnumerable source)
+			where TLayoutType : LayoutContent
+		{
+			// Find remaining items in source
+			var itemsThatRemain = new HashSet<object>(source.Cast<object>(), ReferenceEqualityComparer.Default);
+			// Find the removed items that are not in the remaining collection
+			return Layout.Descendents()
+						 .OfType<TLayoutType>()
+						 .Where(x => !itemsThatRemain.Contains(x.Content))
+						 .ToArray();
+		}
+
+		private void DetachDocumentsSource(LayoutRoot layout, IEnumerable documentsSource)
+		{
+			if (documentsSource == null) return;
+			if (layout == null) return;
+
+			var documentsToRemove = layout.Descendents().OfType<LayoutDocument>()
+				.Where(d => documentsSource.Contains(d.Content)).ToArray();
+
+			foreach (var documentToRemove in documentsToRemove)
+			{
+				(documentToRemove.Parent as ILayoutContainer).RemoveChild(
+					documentToRemove);
+				RemoveViewFromLogicalChild(documentToRemove);
+			}
+
+			if (documentsSource is INotifyCollectionChanged documentsSourceAsNotifier)
+				documentsSourceAsNotifier.CollectionChanged -= DocumentsSourceElementsChanged;
+		}
+
+		private void Close(LayoutContent contentToClose)
+		{
+			if (!contentToClose.CanClose) return;
+
+			var layoutItem = GetLayoutItemFromModel(contentToClose);
+			if (layoutItem.CloseCommand != null)
+			{
+				if (layoutItem.CloseCommand.CanExecute(null))
+					layoutItem.CloseCommand.Execute(null);
+			}
+			else
+			{
+				if (contentToClose is LayoutDocument document)
+					ExecuteCloseCommand(document);
+				else if (contentToClose is LayoutAnchorable anchorable)
+					ExecuteCloseCommand(anchorable);
+			}
+		}
+
+		private void AttachAnchorablesSource(LayoutRoot layout, IEnumerable anchorablesSource)
+		{
+			if (anchorablesSource == null) return;
+			if (layout == null) return;
+
+			// if (layout.Descendents().OfType<LayoutAnchorable>().Any())
+			//    throw new InvalidOperationException("Unable to set the AnchorablesSource property if LayoutAnchorable objects are already present in the model");
+			var anchorablesImported = layout.Descendents().OfType<LayoutAnchorable>().Select(d => d.Content).ToArray();
+			var anchorables = anchorablesSource as IEnumerable;
+			var listOfAnchorablesToImport = new List<object>(anchorables.OfType<object>());
+
+			foreach (var document in listOfAnchorablesToImport.ToArray())
+			{
+				if (anchorablesImported.Contains(document))
+					listOfAnchorablesToImport.Remove(document);
+			}
+
+			LayoutAnchorablePane anchorablePane = null;
+			if (layout.ActiveContent != null)
+			{
+				// look for active content parent pane
+				anchorablePane = layout.ActiveContent.Parent as LayoutAnchorablePane;
+			}
+
+			if (anchorablePane == null)
+			{
+				// look for a pane on the right side
+				anchorablePane = layout.Descendents().OfType<LayoutAnchorablePane>().FirstOrDefault(pane => !pane.IsHostedInFloatingWindow && pane.GetSide() == AnchorSide.Right);
+			}
+
+			if (anchorablePane == null)
+			{
+				// look for an available pane
+				anchorablePane = layout.Descendents().OfType<LayoutAnchorablePane>().FirstOrDefault();
+			}
+
+			_suspendLayoutItemCreation = true;
+			foreach (var anchorableContentToImport in listOfAnchorablesToImport)
+			{
+				var anchorableToImport = new LayoutAnchorable { Content = anchorableContentToImport };
+				var added = false;
+				if (LayoutUpdateStrategy != null)
+					added = LayoutUpdateStrategy.BeforeInsertAnchorable(layout, anchorableToImport, anchorablePane);
+
+				if (!added)
+				{
+					if (anchorablePane == null)
+					{
+						var mainLayoutPanel = new LayoutPanel { Orientation = Orientation.Horizontal };
+						if (layout.RootPanel != null)
+						{
+							mainLayoutPanel.Children.Add(layout.RootPanel);
+						}
+
+						layout.RootPanel = mainLayoutPanel;
+						anchorablePane = new LayoutAnchorablePane { DockWidth = new GridLength(200.0, GridUnitType.Pixel) };
+						mainLayoutPanel.Children.Add(anchorablePane);
+					}
+
+					anchorablePane.Children.Add(anchorableToImport);
+					added = true;
+				}
+
+				LayoutUpdateStrategy?.AfterInsertAnchorable(layout, anchorableToImport);
+				CreateAnchorableLayoutItem(anchorableToImport);
+			}
+
+			_suspendLayoutItemCreation = false;
+			if (anchorablesSource is INotifyCollectionChanged anchorablesSourceAsNotifier)
+				anchorablesSourceAsNotifier.CollectionChanged += AnchorablesSourceElementsChanged;
+		}
+
+#pragma warning disable CA1502
+		private void AnchorablesSourceElementsChanged(object sender, NotifyCollectionChangedEventArgs e)
+#pragma warning restore CA1502
+		{
+			if (Layout == null) return;
+
+			// When deserializing documents are created automatically by the deserializer
+			if (SuspendAnchorablesSourceBinding) return;
+
+			// handle remove
+			if (e.Action == NotifyCollectionChangedAction.Remove || e.Action == NotifyCollectionChangedAction.Replace)
+			{
+				if (e.OldItems != null)
+				{
+					var anchorablesToRemove = Layout.Descendents().OfType<LayoutAnchorable>().Where(d => e.OldItems.Contains(d.Content)).ToArray();
+					foreach (var anchorableToRemove in anchorablesToRemove)
+					{
+						anchorableToRemove.Content = null;
+						anchorableToRemove.Parent.RemoveChild(anchorableToRemove);
+						RemoveViewFromLogicalChild(anchorableToRemove);
+					}
+				}
+			}
+
+			// handle add
+			if (e.NewItems != null && (e.Action == NotifyCollectionChangedAction.Add || e.Action == NotifyCollectionChangedAction.Replace))
+			{
+				if (e.NewItems != null)
+				{
+					LayoutAnchorablePane anchorablePane = null;
+					if (Layout.ActiveContent != null)
+					{
+						// look for active content parent pane
+						anchorablePane = Layout.ActiveContent.Parent as LayoutAnchorablePane;
+					}
+
+					if (anchorablePane == null)
+					{
+						// look for a pane on the right side
+						anchorablePane = Layout.Descendents().OfType<LayoutAnchorablePane>().FirstOrDefault(pane => !pane.IsHostedInFloatingWindow && pane.GetSide() == AnchorSide.Right);
+					}
+
+					if (anchorablePane == null)
+					{
+						// look for an available pane
+						anchorablePane = Layout.Descendents().OfType<LayoutAnchorablePane>().FirstOrDefault();
+					}
+
+					_suspendLayoutItemCreation = true;
+					foreach (var anchorableContentToImport in e.NewItems)
+					{
+						var anchorableToImport = new LayoutAnchorable { Content = anchorableContentToImport };
+						var added = false;
+						if (LayoutUpdateStrategy != null)
+							added = LayoutUpdateStrategy.BeforeInsertAnchorable(Layout, anchorableToImport, anchorablePane);
+						if (!added)
+						{
+							if (anchorablePane == null)
+							{
+								var mainLayoutPanel = new LayoutPanel { Orientation = Orientation.Horizontal };
+								if (Layout.RootPanel != null)
+								{
+									mainLayoutPanel.Children.Add(Layout.RootPanel);
+								}
+
+								Layout.RootPanel = mainLayoutPanel;
+								anchorablePane = new LayoutAnchorablePane { DockWidth = new GridLength(200.0, GridUnitType.Pixel) };
+								mainLayoutPanel.Children.Add(anchorablePane);
+							}
+
+							anchorablePane.Children.Add(anchorableToImport);
+							added = true;
+						}
+
+						LayoutUpdateStrategy?.AfterInsertAnchorable(Layout, anchorableToImport);
+						var root = anchorableToImport.Root;
+						if (root != null && root.Manager == this)
+							CreateAnchorableLayoutItem(anchorableToImport);
+					}
+
+					_suspendLayoutItemCreation = false;
+				}
+			}
+
+			if (e.Action == NotifyCollectionChangedAction.Reset)
+			{
+				// Remove anchorables that are no longer in the AnchorablesSource.
+				var anchorablesToRemove = GetItemsToRemoveAfterReset<LayoutAnchorable>(AnchorablesSource);
+				foreach (var anchorableToRemove in anchorablesToRemove)
+				{
+					(anchorableToRemove.Parent as ILayoutContainer).RemoveChild(
+						anchorableToRemove);
+					RemoveViewFromLogicalChild(anchorableToRemove);
+				}
+			}
+
+			Layout?.CollectGarbage();
+		}
+
+		private void DetachAnchorablesSource(LayoutRoot layout, IEnumerable anchorablesSource)
+		{
+			if (anchorablesSource == null) return;
+			if (layout == null) return;
+
+			var anchorablesToRemove = layout.Descendents().OfType<LayoutAnchorable>()
+				.Where(d => anchorablesSource.Contains(d.Content)).ToArray();
+
+			foreach (var anchorableToRemove in anchorablesToRemove)
+			{
+				anchorableToRemove.Parent.RemoveChild(anchorableToRemove);
+				RemoveViewFromLogicalChild(anchorableToRemove);
+			}
+
+			if (anchorablesSource is INotifyCollectionChanged anchorablesSourceAsNotifier)
+				anchorablesSourceAsNotifier.CollectionChanged -= AnchorablesSourceElementsChanged;
+		}
+
+		private void RemoveViewFromLogicalChild(LayoutContent layoutContent)
+		{
+			if (layoutContent == null) return;
+			var layoutItem = GetLayoutItemFromModel(layoutContent);
+			if (layoutItem == null) return;
+			if (layoutItem.IsViewExists()) InternalRemoveLogicalChild(layoutItem.View);
+		}
+
+		private void InternalSetActiveContent(object contentObject)
+		{
+			// BugFix for first issue in #59
+			var list = Layout.Descendents().OfType<LayoutContent>().ToList();
+			var layoutContent = list.FirstOrDefault(lc => lc == contentObject || lc.Content == contentObject);
+			_insideInternalSetActiveContent = true;
+			Layout.ActiveContent = layoutContent;
+			_insideInternalSetActiveContent = false;
+		}
+
+		/// <summary>
+		/// Implements the EventHandler for the <see cref="LayoutRoot.ElementRemoved"/> event.
+		/// </summary>
+		/// <param name="sender">The source of the event.</param>
+		/// <param name="e">The event data describing the removed element.</param>
+		private void Layout_ElementRemoved(object sender, LayoutElementEventArgs e)
+		{
+			if (_suspendLayoutItemCreation) return;
+			CollectLayoutItemsDeleted();
+		}
+
+		/// <summary>
+		/// Implements the EventHandler for the <see cref="LayoutRoot.ElementAdded"/> event.
+		/// </summary>
+		/// <param name="sender">The source of the event.</param>
+		/// <param name="e">The event data describing the added element.</param>
+		private void Layout_ElementAdded(object sender, LayoutElementEventArgs e)
+		{
+			if (_suspendLayoutItemCreation) return;
+			foreach (var content in Layout.Descendents().OfType<LayoutContent>().ToList())
+			{
+				if (content is LayoutDocument)
+					CreateDocumentLayoutItem(content as LayoutDocument);
+				else // if (content is LayoutAnchorable)
+					CreateAnchorableLayoutItem(content as LayoutAnchorable);
+			}
+
+			CollectLayoutItemsDeleted();
+		}
+
+		/// <summary>
+		/// Detach and remove all LayoutItems that are no longer part of the <see cref="LayoutRoot"/>.
+		/// </summary>
+		private void CollectLayoutItemsDeleted()
+		{
+			if (_collectLayoutItemsOperations != null) return;
+			_collectLayoutItemsOperations = Dispatcher.BeginInvoke(new Action(() =>
+			{
+				_collectLayoutItemsOperations = null;
+				foreach (var itemToRemove in _layoutItems.Where(item => item.LayoutElement.Root != Layout).ToArray())
+				{
+					itemToRemove.Detach();
+					_layoutItems.Remove(itemToRemove);
+				}
+			}));
+		}
+
+		/// <summary>
+		/// Detaches all LayoutItems from their content and clears the private collection of LayoutItems.
+		/// </summary>
+		private void DetachLayoutItems()
+		{
+			if (Layout == null) return;
+			_layoutItems.ForEach<LayoutItem>(i => i.Detach());
+			_layoutItems.Clear();
+			Layout.ElementAdded -= Layout_ElementAdded;
+			Layout.ElementRemoved -= Layout_ElementRemoved;
+		}
+
+		/// <summary>Attaches <see cref="LayoutDocumentItem"/> and <see cref="LayoutAnchorableItem"/> instances to the content elements in the current <see cref="LayoutRoot"/>.</summary>
+		private void AttachLayoutItems()
+		{
+			if (Layout == null) return;
+			foreach (var document in Layout.Descendents().OfType<LayoutDocument>().ToArray())
+				CreateDocumentLayoutItem(document);
+
+			foreach (var anchorable in Layout.Descendents().OfType<LayoutAnchorable>().ToArray())
+				CreateAnchorableLayoutItem(anchorable);
+
+			Layout.ElementAdded += Layout_ElementAdded;
+			Layout.ElementRemoved += Layout_ElementRemoved;
+		}
+
+		/// <summary>
+		/// Applies the corresponding style to a <see cref="LayoutItem"/> either from:
+		/// 1) <see cref="LayoutItemContainerStyle"/> property or
+		/// 2) <see cref="LayoutItemContainerStyleSelector"/> property
+		/// </summary>
+		/// <param name="layoutItem">The layout item to style.</param>
+		private void ApplyStyleToLayoutItem(LayoutItem layoutItem)
+		{
+			layoutItem._ClearDefaultBindings();
+			if (LayoutItemContainerStyle != null)
+				layoutItem.Style = LayoutItemContainerStyle;
+			else if (LayoutItemContainerStyleSelector != null)
+				layoutItem.Style = LayoutItemContainerStyleSelector.SelectStyle(layoutItem.Model, layoutItem);
+			layoutItem._SetDefaultBindings();
+		}
+
+		/// <summary>
+		/// Creates a <see cref="LayoutAnchorableItem"/> for each <see cref="LayoutAnchorable"/>
+		/// or returns the existing <see cref="LayoutAnchorableItem"/> if there is already one.
+		/// </summary>
+		/// <param name="contentToAttach">The anchorable content to attach.</param>
+		private void CreateAnchorableLayoutItem(LayoutAnchorable contentToAttach)
+		{
+			if (_layoutItems.Any(item => item.LayoutElement == contentToAttach))
+			{
+				foreach (var item in _layoutItems) ApplyStyleToLayoutItem(item);
+				return;
+			}
+
+			var layoutItem = new LayoutAnchorableItem();
+			layoutItem.Attach(contentToAttach);
+			_layoutItems.Add(layoutItem);
+			ApplyStyleToLayoutItem(layoutItem);
+			if (contentToAttach?.Content is UIElement) InternalAddLogicalChild(contentToAttach.Content);
+		}
+
+		/// <summary>
+		/// Creates a <see cref="LayoutDocumentItem"/> for each <see cref="LayoutDocument"/>
+		/// or returns the existing <see cref="LayoutDocument"/> if there is already one.
+		/// </summary>
+		/// <param name="contentToAttach">The document content to attach.</param>
+		private void CreateDocumentLayoutItem(LayoutDocument contentToAttach)
+		{
+			if (_layoutItems.Any(item => item.LayoutElement == contentToAttach))
+			{
+				foreach (var item in _layoutItems) ApplyStyleToLayoutItem(item);
+				return;
+			}
+
+			var layoutItem = new LayoutDocumentItem();
+			layoutItem.Attach(contentToAttach);
+			_layoutItems.Add(layoutItem);
+			ApplyStyleToLayoutItem(layoutItem);
+			if (contentToAttach?.Content is UIElement) InternalAddLogicalChild(contentToAttach.Content);
+		}
+
+		private void ShowNavigatorWindow()
+		{
+			if (_navigatorWindow == null)
+				_navigatorWindow = new NavigatorWindow(this) { Owner = Window.GetWindow(this), WindowStartupLocation = WindowStartupLocation.CenterOwner };
+			_navigatorWindow.ShowDialog();
+			_navigatorWindow = null;
+		}
+
+		private LayoutFloatingWindowControl CreateFloatingWindowForLayoutAnchorableWithoutParent(LayoutAnchorablePane paneModel, bool isContentImmutable)
+		{
+			if (!AllowFloatingWindows)
+				return null;
+			if (paneModel.Children.Any(c => !c.CanFloat))
+				return null;
+			var paneAsPositionableElement = paneModel as ILayoutPositionableElement;
+			var paneAsWithActualSize = paneModel as ILayoutPositionableElementWithActualSize;
+
+			var fwWidth = paneAsPositionableElement.FloatingWidth;
+			var fwHeight = paneAsPositionableElement.FloatingHeight;
+			var fwLeft = paneAsPositionableElement.FloatingLeft;
+			var fwTop = paneAsPositionableElement.FloatingTop;
+
+			if (fwWidth == 0.0)
+				fwWidth = paneAsWithActualSize.ActualWidth + 10;       // 10 includes BorderThickness and Margins inside LayoutAnchorableFloatingWindowControl.
+			if (fwHeight == 0.0)
+				fwHeight = paneAsWithActualSize.ActualHeight + 10;   // 10 includes BorderThickness and Margins inside LayoutAnchorableFloatingWindowControl.
+
+			var destPane = new LayoutAnchorablePane
+			{
+				DockWidth = paneAsPositionableElement.DockWidth,
+				DockHeight = paneAsPositionableElement.DockHeight,
+				DockMinHeight = paneAsPositionableElement.DockMinHeight,
+				DockMinWidth = paneAsPositionableElement.DockMinWidth,
+				FloatingLeft = paneAsPositionableElement.FloatingLeft,
+				FloatingTop = paneAsPositionableElement.FloatingTop,
+				FloatingWidth = paneAsPositionableElement.FloatingWidth,
+				FloatingHeight = paneAsPositionableElement.FloatingHeight,
+			};
+
+			var savePreviousContainer = paneModel.FindParent<LayoutFloatingWindow>() == null;
+			var currentSelectedContentIndex = paneModel.SelectedContentIndex;
+			while (paneModel.Children.Count > 0)
+			{
+				var contentModel = paneModel.Children[paneModel.Children.Count - 1];
+
+				if (savePreviousContainer)
+				{
+					((ILayoutPreviousContainer)contentModel).PreviousContainer = paneModel;
+					contentModel.PreviousContainerIndex = paneModel.Children.Count - 1;
+				}
+
+				paneModel.RemoveChildAt(paneModel.Children.Count - 1);
+				destPane.Children.Insert(0, contentModel);
+			}
+
+			if (destPane.Children.Count > 0) destPane.SelectedContentIndex = currentSelectedContentIndex;
+			LayoutFloatingWindow fw;
+			LayoutFloatingWindowControl fwc;
+			fw = new LayoutAnchorableFloatingWindow
+			{
+				RootPanel = new LayoutAnchorablePaneGroup(destPane)
+				{
+					DockHeight = destPane.DockHeight,
+					DockWidth = destPane.DockWidth,
+					DockMinHeight = destPane.DockMinHeight,
+					DockMinWidth = destPane.DockMinWidth,
+				}
+			};
+
+			Layout.FloatingWindows.Add(fw);
+
+			fwc = new LayoutAnchorableFloatingWindowControl((LayoutAnchorableFloatingWindow)fw, isContentImmutable)
+			{
+				Width = fwWidth,
+				Height = fwHeight,
+				Top = fwTop,
+				Left = fwLeft
+			};
+			// fwc.Owner = Window.GetWindow(this);
+			// fwc.SetParentToMainWindowOf(this);
+			_fwList.Add(fwc);
+			Layout.CollectGarbage();
+			InvalidateArrange();
+			return fwc;
+		}
+
+		private LayoutFloatingWindowControl CreateFloatingWindowCore(LayoutContent contentModel, bool isContentImmutable)
+		{
+			if (!AllowFloatingWindows) return null;
+			if (!contentModel.CanFloat) return null;
+			if (contentModel is LayoutAnchorable contentModelAsAnchorable && contentModelAsAnchorable.IsAutoHidden)
+				contentModelAsAnchorable.ToggleAutoHide();
+
+			var parentPane = contentModel.Parent as ILayoutPane;
+			var parentPaneAsPositionableElement = contentModel.Parent as ILayoutPositionableElement;
+			var parentPaneAsWithActualSize = contentModel.Parent as ILayoutPositionableElementWithActualSize;
+			var contentModelParentChildrenIndex = parentPane.Children.ToList().IndexOf(contentModel);
+
+			if (contentModel.FindParent<LayoutFloatingWindow>() == null)
+			{
+				((ILayoutPreviousContainer)contentModel).PreviousContainer = parentPane;
+				contentModel.PreviousContainerIndex = contentModelParentChildrenIndex;
+			}
+
+			parentPane.RemoveChildAt(contentModelParentChildrenIndex);
+
+			var fwWidth = contentModel.FloatingWidth;
+			var fwHeight = contentModel.FloatingHeight;
+
+			if (fwWidth == 0.0)
+				fwWidth = parentPaneAsPositionableElement.FloatingWidth;
+			if (fwHeight == 0.0)
+				fwHeight = parentPaneAsPositionableElement.FloatingHeight;
+
+			if (fwWidth == 0.0)
+				fwWidth = parentPaneAsWithActualSize.ActualWidth + 10;      // 10 includes BorderThickness and Margins inside LayoutDocumentFloatingWindowControl.
+			if (fwHeight == 0.0)
+				fwHeight = parentPaneAsWithActualSize.ActualHeight + 10;    // 10 includes BorderThickness and Margins inside LayoutDocumentFloatingWindowControl.
+
+			LayoutFloatingWindow fw;
+			LayoutFloatingWindowControl fwc;
+			if (contentModel is LayoutAnchorable)
+			{
+				var anchorableContent = contentModel as LayoutAnchorable;
+				fw = new LayoutAnchorableFloatingWindow
+				{
+					RootPanel = new LayoutAnchorablePaneGroup(new LayoutAnchorablePane(anchorableContent)
+					{
+						DockWidth = parentPaneAsPositionableElement.DockWidth,
+						DockHeight = parentPaneAsPositionableElement.DockHeight,
+						DockMinHeight = parentPaneAsPositionableElement.DockMinHeight,
+						DockMinWidth = parentPaneAsPositionableElement.DockMinWidth,
+						FloatingLeft = parentPaneAsPositionableElement.FloatingLeft,
+						FloatingTop = parentPaneAsPositionableElement.FloatingTop,
+						FloatingWidth = parentPaneAsPositionableElement.FloatingWidth,
+						FloatingHeight = parentPaneAsPositionableElement.FloatingHeight,
+					})
+				};
+
+				Layout.FloatingWindows.Add(fw);
+				fwc = new LayoutAnchorableFloatingWindowControl((LayoutAnchorableFloatingWindow)fw, isContentImmutable)
+				{
+					Width = fwWidth,
+					Height = fwHeight,
+					Left = contentModel.FloatingLeft,
+					Top = contentModel.FloatingTop
+				};
+			}
+			else
+			{
+				var anchorableDocument = contentModel as LayoutDocument;
+				fw = new LayoutDocumentFloatingWindow
+				{
+					RootPanel = new LayoutDocumentPaneGroup(new LayoutDocumentPane(anchorableDocument)
+					{
+						DockWidth = parentPaneAsPositionableElement.DockWidth,
+						DockHeight = parentPaneAsPositionableElement.DockHeight,
+						DockMinHeight = parentPaneAsPositionableElement.DockMinHeight,
+						DockMinWidth = parentPaneAsPositionableElement.DockMinWidth,
+						FloatingLeft = parentPaneAsPositionableElement.FloatingLeft,
+						FloatingTop = parentPaneAsPositionableElement.FloatingTop,
+						FloatingWidth = parentPaneAsPositionableElement.FloatingWidth,
+						FloatingHeight = parentPaneAsPositionableElement.FloatingHeight,
+					})
+				};
+
+				Layout.FloatingWindows.Add(fw);
+				fwc = new LayoutDocumentFloatingWindowControl((LayoutDocumentFloatingWindow)fw, isContentImmutable)
+				{
+					Width = fwWidth,
+					Height = fwHeight,
+					Left = contentModel.FloatingLeft,
+					Top = contentModel.FloatingTop
+				};
+			}
+
+			// fwc.Owner = Window.GetWindow(this);
+			// fwc.SetParentToMainWindowOf(this);
+			_fwList.Add(fwc);
+			Layout.CollectGarbage();
+			UpdateLayout();
+			return fwc;
+		}
+	}
+}
