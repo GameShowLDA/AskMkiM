@@ -18,6 +18,7 @@ pwsh -File tools/DockingFreezeRepro/Verify.ps1
 
 ```powershell
 dotnet Bin/DockingFreezeRepro/DockingFreezeRepro.dll close-runner
+dotnet Bin/DockingFreezeRepro/DockingFreezeRepro.dll stale-floating
 dotnet Bin/DockingFreezeRepro/DockingFreezeRepro.dll protocol-layout
 ```
 
@@ -30,6 +31,7 @@ dotnet Bin/DockingFreezeRepro/DockingFreezeRepro.dll protocol-layout
 | --- | --- | --- |
 | `detach` | Создать плавающее окно и удалить его DockControl из visual tree | Окно остаётся видимым; BeginDrag выбрасывает InvalidOperationException в BeginDragNative |
 | `collapse` | Только скрыть DockControl через Collapsed | PresentationSource сохраняется; BeginDrag не выбрасывает исключение |
+| `stale-floating` | Оставить модель плавающей панели после отсоединения её NativeFloatingWindow и начать drag другой панели | Отсоединённое окно пропускается; overlay создаётся и закрывается без InvalidOperationException |
 | `close-runner` | Настоящий RunControl.ShowInspectionProtocol → вынести протокол в плавающее окно → закрыть родительский DockItem → поздние ShowInspectionProtocol напрямую и через ProtocolUI | Все DockItem и плавающие окна закрываются вместе с владельцем; поздний callback не создаёт панели, закрытый исполнитель отклоняет запуск |
 | `shutdown-floating` | Вынести защищённую панель исполнителя, отправить SC_CLOSE и завершить WPF-приложение | Команда закрытия панели отклоняется; процесс завершается штатно, несмотря на оставшуюся плавающую панель |
 | `source-editor` | Исходник рядом с итоговым протоколом, обе темы, Save, предупреждение Yes/No, обновление на месте и передача ошибочного текста | Сохранение не снимает признак устаревшей трансляции; Yes обновляет и разрешает запуск, No оставляет старый результат; ошибка отменяет запуск; раскладка сохраняется |

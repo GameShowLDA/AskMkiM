@@ -29,9 +29,9 @@ internal static partial class Program
   private static int Main(string[] args)
   {
     var mode = args.FirstOrDefault() ?? "detach";
-    if (mode is not ("detach" or "collapse" or "close-runner" or "shutdown-floating" or "source-editor" or "runner-layout" or "inline-translation" or "protocol-layout" or "blocking" or "blocking-worker" or "async"))
+    if (mode is not ("detach" or "collapse" or "stale-floating" or "close-runner" or "shutdown-floating" or "source-editor" or "runner-layout" or "inline-translation" or "protocol-layout" or "blocking" or "blocking-worker" or "async"))
     {
-      Console.Error.WriteLine("Modes: detach | collapse | close-runner | shutdown-floating | source-editor | runner-layout | inline-translation <application.dll> | protocol-layout | blocking | blocking-worker | async");
+      Console.Error.WriteLine("Modes: detach | collapse | stale-floating | close-runner | shutdown-floating | source-editor | runner-layout | inline-translation <application.dll> | protocol-layout | blocking | blocking-worker | async");
       return 1;
     }
 
@@ -49,7 +49,7 @@ internal static partial class Program
     {
       try
       {
-        if (mode is "detach" or "collapse" or "close-runner" or "shutdown-floating")
+        if (mode is "detach" or "collapse" or "stale-floating" or "close-runner" or "shutdown-floating")
           await ReproduceDockingAsync(application, mode);
         else if (mode == "protocol-layout")
           await VerifyProtocolLayoutAsync(application);
@@ -213,6 +213,28 @@ internal static partial class Program
       Log($"before: loaded={dock.IsLoaded}; connected={PresentationSource.FromVisual(dock) != null}; floatingVisible={floating.IsVisible}");
       Require(dock.IsLoaded && PresentationSource.FromVisual(dock) != null && floating.IsVisible,
         "Initial dock/floating window state does not match the scenario");
+      if (mode == "stale-floating")
+      {
+        var staleItem = new DockItem { Title = "Disconnected floating window", Content = new TextBlock() };
+        staleItem.Show(dock, new Rect(200, 200, 300, 200));
+        await application.Dispatcher.InvokeAsync(() => { }, DispatcherPriority.ApplicationIdle);
+        var staleWindow = application.Windows.OfType<NativeFloatingWindow>().Single(window => window != floating);
+        staleWindow.Close();
+        await application.Dispatcher.InvokeAsync(() => { }, DispatcherPriority.ApplicationIdle);
+        Require(PresentationSource.FromVisual(staleWindow) == null && staleItem.DockPosition == DockPosition.Floating,
+          "The stale floating model must remain after its native visual disconnects");
+
+        var getWindowHandler = typeof(DockManager).GetMethod("GetWindowHandler", BindingFlags.Static | BindingFlags.NonPublic)!;
+        var windowHandler = getWindowHandler.Invoke(null, [dock])!;
+        var startMousePoint = windowHandler.GetType().GetField("_startMousePoint", BindingFlags.Instance | BindingFlags.NonPublic)!;
+        startMousePoint.SetValue(windowHandler, floating.PointToScreen(new Point(10, 10)));
+        var showOverlayWindow = windowHandler.GetType().GetMethod("ShowOverlayWindow", BindingFlags.Instance | BindingFlags.NonPublic)!;
+        var closeOverlayWindow = windowHandler.GetType().GetMethod("CloseOverlayWindow", BindingFlags.Instance | BindingFlags.NonPublic)!;
+        showOverlayWindow.Invoke(windowHandler, null);
+        closeOverlayWindow.Invoke(windowHandler, null);
+        Log("Disconnected floating window was skipped while starting drag");
+        return;
+      }
       if (mode == "shutdown-floating")
       {
         SendMessage(new System.Windows.Interop.WindowInteropHelper(floating).Handle, 0x0112, new IntPtr(0xF060), IntPtr.Zero);

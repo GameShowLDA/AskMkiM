@@ -35,6 +35,11 @@ namespace UI.Windows.WpfDocking.Windows.Docking.Primitives
         floatingWindow.SetValue(NativeFloatingWindowProperty, value);
     }
 
+    internal bool IsConnectedToPresentationSource
+    {
+      get { return PresentationSource.FromVisual(this) != null; }
+    }
+
     /// <summary>Identifies the <b>DoubleClickCommand</b> dependency property.</summary>
     public static readonly DependencyProperty DoubleClickCommandProperty = DependencyProperty.Register("DoubleClickCommand", typeof(System.Windows.Input.ICommand), typeof(NativeFloatingWindow));
 

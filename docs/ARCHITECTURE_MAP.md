@@ -3182,6 +3182,10 @@ NativeFloatingWindow направляет системную команду по
 FloatingWindow.PerformClose, где действуют правила закрытия вкладок.
 Прямой WM_CLOSE от Application.DoShutdown обрабатывает WPF, поэтому защищённая
 плавающая панель не удерживает процесс. Регрессия проверяется режимом shutdown-floating.
+При начале drag `DockManager.WindowHandler` обходит только те `NativeFloatingWindow`,
+которые ещё подключены к `PresentationSource`. Переходная модель с `IsVisible == true`
+и уже отсоединённым visual пропускается в инициализации координат и hit testing,
+поэтому `PointFromScreen` не падает. Регрессия проверяется режимом `stale-floating`.
 После Close флаг _closingDockLayout запрещает InitializeDockLayout,
 ShowRunnerDocument и ShowInspectionProtocol: позднее завершение протокола
 не создаёт новые панели и не обращается к уже удалённому ProtocolPane.FirstPane.

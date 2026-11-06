@@ -16,6 +16,7 @@ if (-not $SkipBuild) {
 $scenarios = @(
   @{ Mode = 'detach'; Exit = 0; Signature = 'BeginDrag exception:' },
   @{ Mode = 'collapse'; Exit = 0; Signature = 'BeginDrag returned without exception' },
+  @{ Mode = 'stale-floating'; Exit = 0; Signature = 'Disconnected floating window was skipped while starting drag' },
   @{ Mode = 'close-runner'; Exit = 0; Signature = 'Runner close regression passed:' },
   @{ Mode = 'shutdown-floating'; Exit = 0; Signature = 'Shutting down with a protected floating pane' },
   @{ Mode = 'source-editor'; Exit = 0; Signature = 'Source editor regression passed:' },
