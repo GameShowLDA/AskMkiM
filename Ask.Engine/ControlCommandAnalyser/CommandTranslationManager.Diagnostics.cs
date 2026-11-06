@@ -1,4 +1,5 @@
 using Ask.Core.Services.Errors.Models;
+using Ask.Core.Services.Errors.Translation;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Parser;
@@ -87,6 +88,7 @@ public partial class CommandTranslationManager
       int end = modelIndex + 1 < models.Count ? models[modelIndex + 1].StartLineNumber - 1 : lines.Count;
       end = Math.Clamp(end, first + 1, lines.Count);
 
+      var mappedIssues = new List<(IDisplayIssue Issue, int Target, IssueSelectionHint Hint, bool Found)>();
       foreach (var issue in model.Errors.Cast<IDisplayIssue>().Concat(model.Warnings))
       {
         int target = issue.SourceLineNumber - 1;
@@ -105,10 +107,59 @@ public partial class CommandTranslationManager
             break;
           }
         }
+        mappedIssues.Add((issue, target, hint, found));
+      }
+
+      var resolvedError = mappedIssues.FirstOrDefault(item => !item.Issue.IsWarning && item.Found);
+      foreach (var mapping in mappedIssues)
+      {
+        var issue = mapping.Issue;
+        int target = mapping.Target;
+        IssueSelectionHint hint = mapping.Hint;
+        bool found = mapping.Found;
+
+        // A parser can report a specific token error and a secondary generic
+        // "cannot parse" error for the same command. Keep both messages, but
+        // attach the generic one to the already resolved syntax span instead
+        // of expanding the underline to the whole command.
+        if (!found && !issue.IsWarning && resolvedError.Issue != null)
+        {
+          target = resolvedError.Target;
+          hint = resolvedError.Hint;
+          found = true;
+        }
+
         if (!found)
         {
-          // Some legacy diagnostics identify only the command, without a source token.
-          // In that case underline the complete command, including continuation lines.
+          // A malformed command header has no regular mnemonic span. Prefer
+          // its invalid first token so the diagnostic remains on the actual
+          // syntax error.
+          if (!issue.IsWarning && TryResolveMalformedCommandHeader(lines[target].Code, out hint))
+          {
+            found = true;
+          }
+        }
+
+        if (!found)
+        {
+          // Missing-value and structural syntax errors do not always have a
+          // source token. Underline the command mnemonic as the smallest
+          // stable source span available instead of the complete command.
+          if (!issue.IsWarning && TryResolveCommandHeader(lines[target].Code, out hint))
+          {
+            found = true;
+          }
+        }
+
+        if (!found && !issue.IsWarning && TryResolveLastSourceToken(lines[target].Code, out hint))
+        {
+          found = true;
+        }
+
+        if (!found)
+        {
+          // Style diagnostics and legacy diagnostics without a source token
+          // retain the command range so their existing behavior is preserved.
           int last = end - 1;
           while (last > first && string.IsNullOrWhiteSpace(lines[last].Code)) last--;
           var firstCode = lines[first].Code;
@@ -127,7 +178,121 @@ public partial class CommandTranslationManager
           diagnostics.Add(new SourceDiagnostic(lines[target].Offset + hint.StartIndex, hint.Length,
             target + 1, issue.IsWarning, issue.Description, issue.CodeString));
       }
+
+      // When a malformed command header is found, the parser cannot select a
+      // command-specific parser and therefore reports only the malformed first
+      // token. Keep that diagnostic on the header, but also mark every remaining
+      // non-separator fragment in the same command so one bad header does not
+      // hide the other syntax errors from the editor.
+      if (model is UnknownCommandModel && model.Errors.Count > 0)
+      {
+        AddUnknownCommandFragmentDiagnostics(
+          lines,
+          first,
+          end,
+          $"{model.CommandNumber} {model.Mnemonic}".Trim(),
+          diagnostics);
+      }
     }
     return diagnostics.Distinct().OrderBy(d => d.Offset).ThenBy(d => d.IsWarning).ToArray();
+  }
+
+  private static void AddUnknownCommandFragmentDiagnostics(
+    IReadOnlyList<(int Offset, string Code)> lines,
+    int first,
+    int end,
+    string command,
+    ICollection<SourceDiagnostic> diagnostics)
+  {
+    for (int lineIndex = first; lineIndex < end; lineIndex++)
+    {
+      var line = lines[lineIndex];
+      int bodyStart = lineIndex == first ? FindUnknownCommandBodyStart(line.Code) : 0;
+      if (bodyStart >= line.Code.Length) continue;
+
+      foreach (System.Text.RegularExpressions.Match match in
+        System.Text.RegularExpressions.Regex.Matches(line.Code[bodyStart..], @"[^,\s*]+"))
+      {
+        int offset = line.Offset + bodyStart + match.Index;
+        int length = match.Length;
+        if (diagnostics.Any(d => d.Offset <= offset && d.Offset + d.Length >= offset + length))
+          continue;
+
+        string fragment = match.Value;
+        var issue = GeneralErrors.CannotParseFragment(
+          fragment,
+          lineIndex + 1,
+          command);
+        diagnostics.Add(new SourceDiagnostic(
+          offset,
+          length,
+          lineIndex + 1,
+          false,
+          issue.Description,
+          issue.CodeString));
+      }
+    }
+  }
+
+  private static int FindUnknownCommandBodyStart(string line)
+  {
+    var regularHeader = System.Text.RegularExpressions.Regex.Match(
+      line,
+      @"^\s*\d+\s+[\p{L}_]+(?=\s|$)");
+    if (regularHeader.Success)
+      return regularHeader.Length;
+
+    var malformedHeader = System.Text.RegularExpressions.Regex.Match(
+      line,
+      @"^\s*\d+[\p{L}_][^\s]*");
+    return malformedHeader.Success ? malformedHeader.Length : 0;
+  }
+
+  private static bool TryResolveCommandHeader(string line, out IssueSelectionHint hint)
+  {
+    var match = System.Text.RegularExpressions.Regex.Match(
+      line,
+      @"^\s*\d+\s+(?<mnemonic>[\p{L}_]+)(?=\s|$)");
+    if (match.Success)
+    {
+      var mnemonic = match.Groups["mnemonic"];
+      hint = new IssueSelectionHint(mnemonic.Index, mnemonic.Length);
+      return true;
+    }
+
+    hint = default;
+    return false;
+  }
+
+  private static bool TryResolveMalformedCommandHeader(string line, out IssueSelectionHint hint)
+  {
+    var match = System.Text.RegularExpressions.Regex.Match(
+      line,
+      @"^\s*(?<token>\d+[\p{L}_][^\s]*)");
+    if (match.Success)
+    {
+      var token = match.Groups["token"];
+      hint = new IssueSelectionHint(token.Index, token.Length);
+      return true;
+    }
+
+    hint = default;
+    return false;
+  }
+
+  private static bool TryResolveLastSourceToken(string line, out IssueSelectionHint hint)
+  {
+    int end = line.TrimEnd().Length;
+    int start = end;
+    while (start > 0 && !char.IsWhiteSpace(line[start - 1])) start--;
+
+    if (start < end)
+    {
+      hint = new IssueSelectionHint(start, end - start);
+      return true;
+    }
+
+    hint = default;
+    return false;
   }
 }

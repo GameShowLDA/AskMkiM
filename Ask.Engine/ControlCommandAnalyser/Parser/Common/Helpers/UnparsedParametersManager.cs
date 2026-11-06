@@ -1,3 +1,4 @@
+using Ask.Core.Services.Errors.Models;
 using Ask.Core.Services.Errors.Translation;
 using Ask.Core.Shared.DTO.Executor;
 using System.Text.RegularExpressions;
@@ -51,12 +52,20 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
     {
       AddUnparsedParameters(model, numberLine, remainder);
 
-      // Валидация
-      if (string.IsNullOrWhiteSpace(model.LowerLimitResistanceSource) && string.IsNullOrWhiteSpace(model.HigherLimitResistanceSource))
+      bool hasRecognizedResistanceError = model.Errors.Any(
+        error => error.Code == ErrorCode.Eht_ResistanceLimitsConflict);
+
+      // Недопустимый диапазон уже распознан и имеет собственную диагностику.
+      // Отсутствие применённых значений в модели не означает ошибку разбора.
+      if (!hasRecognizedResistanceError
+        && string.IsNullOrWhiteSpace(model.LowerLimitResistanceSource)
+        && string.IsNullOrWhiteSpace(model.HigherLimitResistanceSource))
       {
         LogError($"Не удалось распознать параметры в строке: '{remainder}' (строка {numberLine})");
         model.Errors.Add(EhtErrors.CannotParseParameters(
-          $"сопротивление было неправильно задано, или неверно указаны границы сопроитвления", numberLine, $"{model.CommandNumber} {model.Mnemonic}"));
+          remainder ?? string.Empty,
+          numberLine,
+          $"{model.CommandNumber} {model.Mnemonic}"));
       }
     }
     /// <summary>
@@ -113,7 +122,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
       {
         LogError($"Не удалось распознать параметры в строке: '{remainder}' (строка {numberLine})");
         model.Errors.Add(NeErrors.CannotParseParameters(
-          $"Диапазон напряжения был неправильно задан или неверно указаны его границы",
+          remainder ?? string.Empty,
           model.StartLineNumber,
           $"{model.CommandNumber}   {model.Mnemonic}"));
       }
@@ -192,7 +201,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
       {
         LogError($"Не удалось распознать параметры в строке: '{remainder}' (строка {numberLine})");
         model.Errors.Add(PrErrors.CannotParseParameters(
-          $"Сопротивление было неправильно задано, или неверно указаны его границы",
+          remainder ?? string.Empty,
           model.StartLineNumber,
           $"{model.CommandNumber}   {model.Mnemonic}"));
       }

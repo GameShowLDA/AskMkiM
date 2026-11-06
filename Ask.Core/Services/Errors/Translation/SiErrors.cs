@@ -22,7 +22,8 @@ namespace Ask.Core.Services.Errors.Translation
         Command = command,
         Code = ErrorCode.Si_CannotParseExpression,
         DebugInfo = $"{Path.GetFileName(callerFile)} → {callerName} (строка {callerLine})",
-        Description = $"Не удалось распознать выражение: {expr}"
+        Description = $"Не удалось распознать выражение: {expr}",
+        SourceFragment = expr
       };
 
     /// <summary>
@@ -37,7 +38,8 @@ namespace Ask.Core.Services.Errors.Translation
         Command = command,
         Code = ErrorCode.Si_CannotParseParameters,
         DebugInfo = $"{Path.GetFileName(callerFile)} → {callerName} (строка {callerLine})",
-        Description = $"Не удалось распознать параметры: {parameters}"
+        Description = $"Не удалось распознать параметры: {parameters}",
+        SourceFragment = parameters
       };
 
     /// <summary>

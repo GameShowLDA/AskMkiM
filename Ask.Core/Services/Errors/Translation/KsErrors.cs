@@ -51,7 +51,8 @@ namespace Ask.Core.Services.Errors.Translation
         Command = command,
         Code = ErrorCode.Ks_CannotParseParameters,
         DebugInfo = $"{Path.GetFileName(callerFile)} → {callerName} (строка {callerLine})",
-        Description = $"Не удалось распознать параметры: {parameters}"
+        Description = $"Не удалось распознать параметры: {parameters}",
+        SourceFragment = parameters
       };
 
     /// <summary>
@@ -87,7 +88,7 @@ namespace Ask.Core.Services.Errors.Translation
     /// <summary>
     /// Ошибка: в команде КС список точек указан раньше диапазона сопротивления.
     /// </summary>
-    public static ErrorItem InvalidParameterOrder(int startLineNumber, string command,
+    public static ErrorItem InvalidParameterOrder(int startLineNumber, string command, string sourceFragment,
       [CallerMemberName] string callerName = "",
       [CallerFilePath] string callerFile = "",
       [CallerLineNumber] int callerLine = 0) => new()
@@ -95,6 +96,7 @@ namespace Ask.Core.Services.Errors.Translation
         SourceLineNumber = startLineNumber,
         Command = command,
         Code = ErrorCode.Ks_InvalidParameterOrder,
+        SourceFragment = sourceFragment,
         DebugInfo = $"{Path.GetFileName(callerFile)} → {callerName} (строка {callerLine})",
         Description = "Список точек в команде КС указан до диапазона сопротивления."
       };

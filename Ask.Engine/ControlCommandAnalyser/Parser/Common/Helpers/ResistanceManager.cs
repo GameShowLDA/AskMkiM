@@ -27,12 +27,20 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
     string cabelUnit,
     string commandNumber,
     string mnemonic,
-    int numberLine)
+    int numberLine,
+    string? sourceFragment = null)
     {
       var defaults = GetResistanceDefaults(MeasurementTypeCommand.EHT);
       var parsed = ParseResistanceInputs(lowerLimitResistance, higherLimitResistance, unit, defaults.DefaultUnit, cabelLimitResistance, cabelUnit);
 
-      if (!ValidateResistanceLimits(model, parsed, defaults, commandNumber, mnemonic, numberLine))
+      if (!ValidateResistanceLimits(
+        model,
+        parsed,
+        defaults,
+        commandNumber,
+        mnemonic,
+        numberLine,
+        sourceFragment))
       {
         return;
       }
@@ -110,7 +118,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
     /// Проверяет корректность диапазона сопротивления.
     /// </summary>
     private static bool ValidateResistanceLimits(BaseCommandModel model, ParsedResistance parsed, ResistanceDefaults defaults, 
-      string commandNumber, string mnemonic, int numberLine)
+      string commandNumber, string mnemonic, int numberLine, string? sourceFragment)
     {
       if (!parsed.Lower.HasValue || !parsed.Higher.HasValue)
         return true;
@@ -120,15 +128,15 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
 
       if (lower > higher)
         return AddError(model, numberLine, commandNumber, mnemonic,
-            "Нижняя граница больше верхней.");
+            "Нижняя граница больше верхней.", sourceFragment);
 
       if (lower < defaults.DefaultLower)
         return AddError(model, numberLine, commandNumber, mnemonic,
-            "Нижняя граница меньше минимально допустимой.");
+            "Нижняя граница меньше минимально допустимой.", sourceFragment);
 
       if (higher > defaults.DefaultHigher)
         return AddError(model, numberLine, commandNumber, mnemonic,
-            "Верхняя граница больше максимально допустимой.");
+            "Верхняя граница больше максимально допустимой.", sourceFragment);
 
       return true;
     }
@@ -240,7 +248,13 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
     /// <summary>
     /// Добавляет ошибку валидации сопротивления.
     /// </summary>
-    private static bool AddError(BaseCommandModel model, int numberLine, string commandNumber, string mnemonic, string message)
+    private static bool AddError(
+      BaseCommandModel model,
+      int numberLine,
+      string commandNumber,
+      string mnemonic,
+      string message,
+      string? sourceFragment)
     {
       LogWarning($"В команде {commandNumber} {mnemonic} (строка {numberLine}) {message}");
 
@@ -248,7 +262,8 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
           EhtErrors.ResistanceLimitsConflict(
               numberLine,
               $"{commandNumber} {mnemonic}",
-              message));
+              message,
+              sourceFragment));
 
       return false;
     }

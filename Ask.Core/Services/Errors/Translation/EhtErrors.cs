@@ -19,7 +19,8 @@ namespace Ask.Core.Services.Errors.Translation
         Command = command,
         Code = ErrorCode.Eht_CannotParseParameters,
         DebugInfo = $"{Path.GetFileName(callerFile)} → {callerName} (строка {callerLine})",
-        Description = $"Не удалось распознать параметры: {parameters}"
+        Description = $"Не удалось распознать параметры: {parameters}",
+        SourceFragment = parameters
       };
 
     /// <summary>
@@ -55,7 +56,11 @@ namespace Ask.Core.Services.Errors.Translation
     /// <summary>
     /// Ошибка: нижняя граница сопротивления больше верхней границы сопротивления.
     /// </summary>
-    public static ErrorItem ResistanceLimitsConflict(int startLineNumber, string command, string description,
+    public static ErrorItem ResistanceLimitsConflict(
+      int startLineNumber,
+      string command,
+      string description,
+      string? sourceFragment = null,
       [CallerMemberName] string callerName = "",
       [CallerFilePath] string callerFile = "",
       [CallerLineNumber] int callerLine = 0) => new()
@@ -63,6 +68,7 @@ namespace Ask.Core.Services.Errors.Translation
         SourceLineNumber = startLineNumber,
         Command = command,
         Code = ErrorCode.Eht_ResistanceLimitsConflict,
+        SourceFragment = sourceFragment,
         DebugInfo = $"{Path.GetFileName(callerFile)} → {callerName} (строка {callerLine})",
         Description = description
       };

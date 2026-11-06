@@ -348,11 +348,12 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
 
       int refNumber = int.Parse(match.Value.Substring(1));
 
-      var referenced = FindReferencedCommand(refNumber, current, allCommands, errors);
+      var referenced = FindReferencedCommand(
+        refNumber, current, allCommands, errors, match.Value);
       if (referenced == null)
         return expr;
 
-      if (!ValidateReferencedCommand(referenced, errors))
+      if (!ValidateReferencedCommand(referenced, errors, match.Value))
         return expr;
 
       // ВАЖНО: берём ИСХОДНОЕ выражение ССИРТ
@@ -365,7 +366,8 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
     int number,
     BaseCommandModel current,
     List<BaseCommandModel> allCommands,
-    List<ErrorItem> errors)
+    List<ErrorItem> errors,
+    string sourceReference)
     {
       var cmd = allCommands
           .Where(c => int.Parse(c.CommandNumber) == number)
@@ -377,7 +379,8 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
         errors.Add(new ErrorItem
         {
           Description = $"Команда с меткой {number} не найдена или находится ниже текущей.",
-          Code = ErrorCode.Gen_InvalidReference
+          Code = ErrorCode.Gen_InvalidReference,
+          SourceFragment = sourceReference
         });
         return null;
       }
@@ -387,12 +390,14 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
 
     private static bool ValidateReferencedCommand(
     BaseCommandModel cmd,
-    List<ErrorItem> errors)
+    List<ErrorItem> errors,
+    string sourceReference)
     {
       // 1. ССИРТ должен быть
       if (string.IsNullOrWhiteSpace(cmd.PointsSourse))
       {
-        AddRefError(errors, $"Команда {cmd.CommandNumber} не содержит ССИРТ.");
+        AddRefError(
+          errors, $"Команда {cmd.CommandNumber} не содержит ССИРТ.", sourceReference);
         return false;
       }
 
@@ -400,7 +405,8 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
       if (cmd.PointsSourse.Contains("^"))
       {
         AddRefError(errors,
-            $"Команда {cmd.CommandNumber} содержит ссылку на ССИРТ (цепочка ссылок запрещена).");
+            $"Команда {cmd.CommandNumber} содержит ссылку на ССИРТ (цепочка ссылок запрещена).",
+            sourceReference);
         return false;
       }
 
@@ -408,7 +414,8 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
       if (cmd.PointsSourse.StartsWith("~"))
       {
         AddRefError(errors,
-            $"Команда {cmd.CommandNumber} содержит исключения (~), нельзя использовать в ссылке.");
+            $"Команда {cmd.CommandNumber} содержит исключения (~), нельзя использовать в ссылке.",
+            sourceReference);
         return false;
       }
 
@@ -416,19 +423,22 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
       if (cmd.Errors.Count>0) // или аналогичное поле
       {
         AddRefError(errors,
-            $"Команда {cmd.CommandNumber} содержит ошибки и не может использоваться как ссылка.");
+            $"Команда {cmd.CommandNumber} содержит ошибки и не может использоваться как ссылка.",
+            sourceReference);
         return false;
       }
 
       return true;
     }
 
-    private static void AddRefError(List<ErrorItem> errors, string message)
+    private static void AddRefError(
+      List<ErrorItem> errors, string message, string sourceReference)
     {
       errors.Add(new ErrorItem
       {
         Description = message,
-        Code = ErrorCode.Gen_InvalidReference
+        Code = ErrorCode.Gen_InvalidReference,
+        SourceFragment = sourceReference
       });
     }
 
