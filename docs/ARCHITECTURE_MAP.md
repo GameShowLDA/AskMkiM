@@ -46,6 +46,9 @@ Size/Foreground и анимации общей кнопки; лицензия с
 | Трансляция программы контроля | `MainWindow/Services/TranslationServices.cs` | `Ask.Engine/ControlCommandAnalyser/CommandTranslationManager.cs`, `Ask.Engine/ControlCommandAnalyser/Parser/`, `Ask.Engine/ControlCommandAnalyser/Formatter/`, `Ask.Engine/ControlCommandAnalyser/Validation/` |
 | Диагностика текста при вводе | `Ask.UI/Controls/TextEditorControl/Diagnostics/LiveDiagnosticsController.cs` | `Ask.Engine/ControlCommandAnalyser/CommandTranslationManager.Diagnostics.cs`, `SourceDiagnostic.cs`, `Ask.UI/Controls/TextEditorControl/Diagnostics/DiagnosticUnderlineRenderer.cs`, оба `TextEditorUI.xaml.cs` |
 | Исполнение программы контроля | `UI/Controls/Runner/RunControl.xaml.cs` | `Ask.UI/Features/ProtocolNew/Execution/ActionExecutor.cs`, `Ask.Engine/ControlCommandExecutor/Execution/CommandExecutionManager.cs` |
+| Общая docking-область исполнителя | `UI/Controls/Runner/RunControl.xaml`, `RunControl.Docking.cs` | [Runner docking layout](#runner-docking-layout), `DockItem.Show`, `DockManager`, `RunnerDocumentStyle` |
+| Редактирование исходника в исполнителе, сохранение и повторная трансляция | `UI/Controls/Runner/RunControl.Source.cs`, `MainWindow/Services/TranslationServices.cs` | [Runner source editing](#runner-source-editing), `UI/Services/DockItemService.cs`, `UI/Components/MultiEditorMethods/SaveFileManager.cs` |
+| Нагрузка UI при заполнении протокола во вложенных панелях | `UI/Windows/WpfDocking/Windows/SplitContainer.cs` | [Docking layout measurement](#docking-layout-measurement), `SplitContainerMeasureTests`, режим `protocol-layout` в `tools/DockingFreezeRepro` |
 | Алгоритм конкретной команды | `Ask.Engine/ControlCommandExecutor/Executors/` | `Ask.Engine/ControlCommandExecutor/BaseStrategies/`, `Ask.Engine/ControlCommandExecutor/Execution/EquipmentService.cs` |
 | Пауза, шаг, остановка, переход к выбранной или следующей команде | `Ask.UI/Features/ProtocolNew/Execution/ActionExecutor.cs` | `Ask.Core/Services/App/StepControlManager.cs`, `Ask.Engine/ControlCommandExecutor/Execution/CommandExecutionManager.cs`, `Ask.Engine/ControlCommandExecutor/Execution/BreakpointHandler.cs`, `Ask.Engine/ControlCommandExecutor/Execution/CommandJumpService.cs` |
 | Горячие клавиши и диагностика кнопок выполнения | `Ask.UI/Features/ProtocolNew/Hotkeys/ProtocolHotkeyController.cs`, `MainWindow/HotkeyBindings/MenuHotkeyBinder.cs` | `Ask.UI/Controls/ProtocolNew/ProtocolUI.ButtonManager.cs`, `Ask.LogLib/LoggerUtility.cs`; отдельный `logs/yyyy-MM-dd/input.log` и сводный `all.log` |
@@ -1548,6 +1551,13 @@ lines are restored as `Info` while preserving their complete text and blank-line
 Error/Exception — OrangeRed, Warning — Goldenrod, Debug — Gray, Information — LightGray.
 Документ создаётся при раскрытии блока; Ctrl+A/C обрабатывает сам редактор журнала,
 а не внешний список протокола. Формат хранения и привязка логов к записям не изменяются.
+`ProtocolDisplayItem.AddServiceLog` всегда дополняет ServiceLogs, но уведомляет
+привязку ServiceLogText только для раскрытого блока. При раскрытии setter
+AreServiceLogsExpanded сначала уведомляет ServiceLogText, затем видимость блока,
+поэтому LogText получает все накопленные записи до отрисовки. Прямое чтение
+ServiceLogText всегда формирует полный актуальный текст. HasServiceLogs уведомляется
+при появлении первой записи. Это устраняет повторный string.Join всей накопленной
+истории для каждого скрытого сообщения; открытый блок обновляется после каждой записи.
 
 New saves use `#ASKM_PROTOCOL_V3_BR#`: `ExecutionProtocolHistoryService.SaveAsync` delegates to
 `ExecutionProtocolDiagnosticFormatter.FormatProtocolForStorage`, which writes readable protocol
@@ -3069,8 +3079,217 @@ Renderer выбирает индексированные диапазоны ви
 только в визуальный `DockItem.TabText`; чистый `DockItem.Title` остаётся ключом пути.
 `SaveFileManager` обновляет снимок и снимает индикатор после фактической записи,
 а неизменённый исходник `TranslatorItem` повторно не записывает и уведомление не показывает.
-В правой области `RunControl` панель действий документа отображается только для
-транслированного файла и итогового протокола; вкладка состояния оборудования её скрывает.
+Панель действий `RunControl` находится внутри каждой вкладки транслированного файла
+и итогового протокола; для состояния оборудования она отсутствует.
+
+### Runner docking layout
+
+`UI/Controls/Runner/RunControl.xaml` содержит один `RunnerDockManager`
+для всех областей исполнителя. `ProtocolPane` содержит `MainContent` с ProtocolUI,
+`ErrorsPane` — `ErrorListBoxVertical`. Транслированная программа, состояние
+оборудования, исходник и итоговый протокол создаются отдельными DockItem в этом же
+DockControl. Вложенный ChildTextEditorContainer и общий DocumentsPane удалены.
+Каждую вкладку можно объединить с протоколом/ошибками, расположить рядом с ними
+или вынести в floating window. DockItem.Content сохраняет исходные типы
+TranslatorEditor, DevicesStatus и ResultProtocolEditor.
+
+`RunControl` constructor → InitializeDocking → Loaded → InitializeDockLayout
+в `UI/Controls/Runner/RunControl.Docking.cs`. Начальная раскладка создаётся один раз:
+ProtocolPane.Show(Document) → ErrorsPane.Show(protocol.FirstPane, Dock.Bottom,
+savedHeight). ShowRunnerDocument размещает первый документ справа от левой
+области протокола/ошибок, остальные — вкладками рядом с существующим документом.
+Повторный Loaded сохраняет пользовательскую раскладку.
+
+RunControl.LayoutPersistence.cs сохраняет раскладку отдельно для учётной записи
+RoleAuthorizationConfig.CurrentRole, зафиксированной при создании исполнителя.
+RunnerLayoutStore хранит JSON в LocalAppData/AskMkiM/runner-layout/<role>.json.
+Закрытие вкладки или окна и CaptureWorkspaceSession сохраняют раскладку до
+удаления DockItems. DockLayoutAdapter.Save формирует порядок и действия размещения,
+исполнитель переводит фиксированные размеры видимых SplitContainer в веса Star
+по фактическим размерам детей и сохраняет уже заданные веса даже при временном
+ограничении размера окна. RestoreRunnerLayout сопоставляет постоянные ключи панелей с новыми
+DockItems и вызывает DockControl.Load. При ошибке используется исходная раскладка.
+Сторона действия ShowAsSidePaneAction определяется положением добавляемой панели
+в дереве, а IsSizeForTarget отдельно указывает, к какой стороне относится размер.
+RunnerLayoutStore мигрирует старые JSON без версии, где эти признаки были смешаны.
+Плавающие прямоугольники ограничиваются рабочей областью доступного монитора.
+При смене учётной записи RestoreWorkspaceSession скрывает плавающие документы
+уходящей сессии и показывает их при её повторном подключении.
+Итоговый протокол сохраняет свою панель в скрытом виде между запусками и
+заполняется новым текстом при поступлении результата. Содержимое документов в
+файл раскладки не записывается. Регрессия проверяется режимом runner-layout
+стенда tools/DockingFreezeRepro с временными файлами настроек.
+При первоначальном показе выбранной остаётся транслированная программа:
+SourceDocument добавляется с DockItemShowMethod.Deselect. StartTest выбирает
+вкладку TranslatorEditor через SelectRunnerDocument при начале каждого запуска.
+Если DockPosition ещё Unknown и RunnerDockManager не загружен, выбор выполняет
+штатный ShowDocuments на Loaded; Show(Select) для такой вкладки не вызывается.
+Выбор не размещает Unknown-документ даже во время инициализации загруженной
+области: это делает ShowDocuments. Размещённая вкладка выбирается через Show(Select).
+Инициализация завершается после создания обеих базовых панелей.
+Итоговый протокол, полученный до готовности раскладки, показывается после Loaded;
+очистка или замена до показа отменяет предыдущий результат.
+ApplySourceTranslation использует тот же путь выбора обновлённого документа;
+во время выполнения пользователь может переключать вкладки самостоятельно.
+
+SetLeftEditor закрывает только предыдущие документы, сохраняя ProtocolPane и
+ErrorsPane и SourceDocument. Отложенный обработчик DockControl.Loaded отписывается при первом
+вызове и проверяет наличие текущих DockItem, поэтому замена программы до Loaded
+и повторная загрузка не возвращают старые вкладки. ShowInspectionProtocol
+также использует ShowRunnerDocument. Открытие, PDF, печать и возврат к исходнику
+сохраняют прежние обработчики. `RunnerDocumentStyle` в RunControl.xaml задаёт
+DockItem.ControlTemplate с отдельной DocumentActionPanel над ContentPresenter.
+Стиль назначается только транслированной программе и итоговому протоколу, сохраняя
+исходный DockItem.Content. Текст шапки привязан к TabText конкретного DockItem,
+кнопки передают этот DockItem через Tag → GetActionDocument(sender), поэтому
+действие относится к документу своей панели независимо от фокуса в другой области.
+DockItem.Tag=FileType.InspectionProtocol включает кнопку экспорта PDF только
+в итоговом протоколе. Панель перемещается и выносится вместе со своей вкладкой.
+
+Фокус документов больше не перенаправляется в ProtocolUI через прежний LeftBox.
+Режим read-only транслированного редактора задаётся в UI.Services.TranslationService.
+Обработчики точек остановки находят редактор через GetTranslatorEditor независимо
+от выбранной вкладки. Переход из ошибок/точек остановки активирует нужный DockItem.
+
+DocumentTab.HideCloseButton=True, HideOnPerformClose=False и RunnerPane_Closing
+предотвращают закрытие двух обязательных панелей. Документы сохраняют прежнюю
+политику скрытия кнопок закрытия.
+
+Вместо BottomRow/GridSplitter используется `DockPaneSplit`. Событие
+`RunnerDockManager.DockItemStateChanged` обновляет подписку на SplitterDistance
+актуального вертикального split таблицы ошибок. Изменение размера запускает
+DispatcherTimer 250 мс → `ErrorListLayoutSettings.SaveHeight` и
+`ErrorListBoxVertical.RefreshLayoutFromHost`. `DesiredHeightChanged` меняет размер
+только самостоятельной вертикальной панели, когда SplitterDistance относится
+к ней и пользовательское изменение размера не ожидает завершения. Объединённые
+вкладки и горизонтальная компоновка автоматически по высоте не перестраиваются.
+После ручного изменения SplitterDistance `_errorHeightCustomized` сохраняет
+выбранную пользователем высоту до закрытия экземпляра исполнителя.
+Unloaded останавливает timer и снимает DependencyPropertyDescriptor-подписку.
+
+Loaded также находит внешний DockItem с `Content == RunControl` и подписывается
+на StateChanged. `Close → RunnerOwner_StateChanged` разрешает внутреннее закрытие,
+закрывает все DockItems единого RunnerDockManager и снимает подписки.
+Floating windows документов и панелей закрываются вместе с исполнителем.
+При окончательном закрытии RunControl отписывается от событий состояния, устройств,
+просмотра протокола и точек останова. TranslatorItem подписывается на точки останова
+на Loaded и отписывается на Unloaded. EventAggregator снимает снимок подписчиков
+под блокировкой списка и вызывает обработчики вне неё.
+Серия изменений docking объединяется в одно обновление таблицы ошибок через Dispatcher;
+закрытие и выгрузка отменяют отложенное обновление. Сохранение пропорций обходит
+визуальные панели только при наличии фиксированного разделителя и только в окнах этого исполнителя.
+NativeFloatingWindow направляет системную команду пользователя SC_CLOSE в
+FloatingWindow.PerformClose, где действуют правила закрытия вкладок.
+Прямой WM_CLOSE от Application.DoShutdown обрабатывает WPF, поэтому защищённая
+плавающая панель не удерживает процесс. Регрессия проверяется режимом shutdown-floating.
+После Close флаг _closingDockLayout запрещает InitializeDockLayout,
+ShowRunnerDocument и ShowInspectionProtocol: позднее завершение протокола
+не создаёт новые панели и не обращается к уже удалённому ProtocolPane.FirstPane.
+ApplySourceTranslation игнорирует результат для закрытого исполнителя;
+PrepareSourceForRunAsync и TranslateCurrentSourceAsync отклоняют запуск/трансляцию,
+а результат асинхронной трансляции повторно проверяется после await.
+Отменённое Closing не запускает очистку. Это также устраняет описанный в
+историческом расследовании orphan-window сценарий для такого владельца RunControl.
+
+### Runner source editing
+
+`MainWindow/Services/TranslationServices.RunAsync` получает живой исходный
+`TextEditorUI` из левой стороны `TranslatorItem` до удаления транслятора.
+`PrepareRun → RunControl.SetLeftEditor(translation) → SetSourceEditor(source)`
+переносит оба редактора в исполнитель. `RunControl.Source.cs` хранит
+`SourceDocument` с исходным `TextEditorUI`, моделью, кодировкой, SavedTextSnapshot
+и текущим текстом, отсоединяет старого визуального владельца. `RunnerSourceStyle`
+содержит собственные кнопки сохранения и трансляции. Исходник остаётся редактируемым;
+результат трансляции и итоговый протокол остаются только для чтения. SourceDocument
+входит в единый RunnerDockManager и показывается через ShowRunnerDocument.
+
+Сохранение: `SaveSourceButton_Click → SaveSourceFile` (delegate настраивает
+`DockItemService.ConfigureDockItemClosing`) → `SaveFileManager.SaveFile(SourceDocument)`
+→ путь TextEditorModel/FilePaths → SaveDataFromTextEditor → штатная кодировка,
+SavedTextSnapshot, UpdateModifiedIndicator. SaveFile/SaveFileAs внешнего RunControl
+также перенаправляются на SourceDocument. TextChanged обновляет звёздочку исходника;
+при закрытии подписка снимается. Обычное закрытие внешнего DockItem проверяет
+ConfirmClose(SourceDocument): Yes сохраняет, No создаёт штатную резервную копию,
+Cancel отменяет закрытие. ControlManager учитывает результат закрытия исполнителя,
+включая закрытие всего контейнера, до удаления его UI.
+
+Повторная трансляция: кнопка с существующим ExecutionPlayCircleIcon (молоточек)
+→ TranslateCurrentSourceAsync проверяет глобальный ExecutionRunGuard, запрещает
+повторный вход и временно отключает исполнитель → delegate TranslateSourceAsync,
+назначенный PrepareRun → TranslationServices.TranslateRunnerSourceAsync.
+Создаётся независимый редактор текущего текста с кодировкой, архивом и SavedTextSnapshot
+→ TryPrepareTextForTranslation → RunWithTranslationProgressAsync → BuildTranslationAsync
+→ CommandTranslationManager.BuildTranslation/SetSourseLines в Task.Run.
+При отсутствии ошибок создаётся read-only редактор результата, заполняются SourceLines,
+разрешённые строки и номера команд; RestoreBreakpoints сохраняет точки по номерам команд
+→ RunControl.ApplySourceTranslation заменяет редактор внутри существующего TranslatorEditor,
+обновляет TranslationModels и исполняемый ControlProgram, синхронизирует точки и выбирает
+вкладку результата. Панели, раскладка и итоговый протокол не пересоздаются.
+При ошибках вызывается CreateNewTranslator с preparedResult: повторной трансляции нет,
+открывается штатный TranslatorItem с диагностикой, исполнитель закрывается.
+Исключение/отмена подготовки не обновляют последний успешный результат.
+Запись на диск не требуется. OnLockedChanged отключает кнопку через SourceDocument.Tag.
+IsTransferringSource пропускает запрос сохранения при передаче текста.
+Отложенная очистка закрытого исполнителя в DockItemService сохраняет состояние
+активной программы при таком переходе, не отключая только что открытый транслятор.
+`UI/Services/TranslationService.AddTranslatorItem` сначала успешно создаёт
+TranslatorItem, затем закрывает контейнер исполнителя, включая floating-панели.
+До этого исходный редактор остаётся в исполнителе; при ошибке нового сценария
+CreateNewTranslator не открывает дисковую версию поверх несохранённого текста.
+Повторный запуск без трансляции получает прежний результат через
+`GetRunEditor → RunControl.GetTranslatedEditor` и переносит SourceEditor в новый
+RunControl без сохранения и потери правок. Выполняются прежние TranslationModels;
+правки исходника вступают в выполнение после новой трансляции.
+RunAsync отклоняет замену исполнителя при активном выполнении или передаче исходника.
+PrepareSourceForRunAsync отклоняет запуск во время трансляции до показа YesNo.
+
+Снимок последнего транслированного текста хранится отдельно от SavedTextSnapshot:
+CreateNewTranslator/EditExistingTranslator устанавливают TranslatorItem.TranslatedSourceText;
+RunAsync переносит его в RunControl.TranslatedSourceText (включая повторный запуск).
+ApplySourceTranslation обновляет снимок только после успешной трансляции.
+ProtocolUI.BeforeStartAsync → RunControl.PrepareSourceForRunAsync вызывается под
+защитой _isStartPending, до проверки питания, захвата execution guard и очистки протокола.
+При отличии исходника от снимка показывается YesNo: No запускает прежние модели,
+Yes вызывает TranslateCurrentSourceAsync и продолжает запуск только при успехе;
+ошибки открывают транслятор и возвращают false. Проверка действует для кнопки,
+горячих клавиш и StartAsync. Сохранение файла не снимает признак устаревшей трансляции.
+
+Проверка без оборудования: режим `source-editor` в `tools/DockingFreezeRepro`
+проверяет шесть вкладок, размещение исходника рядом с протоколом, обе темы,
+сохранение и snapshot, dirty indicator, Yes/No, обновление на месте, запрет трансляции при занятом guard,
+передачу несохранённого буфера через штатный UI TranslationService и закрытие панелей.
+Режим inline-translation с путём к отдельно собранному AskMkiM.dll проверяет
+фактический TranslateRunnerSourceAsync: обновление моделей и редактора, сохранение
+отключённых точек останова и открытие диагностического транслятора при ошибках.
+Требует свежего изолированного каталога стенда, где создаётся пустая тестовая БД.
+
+### Docking layout measurement
+
+`UI/Windows/WpfDocking/Windows/SplitContainer.cs` обслуживает раскладку всех
+DockPaneSplit/DockTreeSplit и вложенных docking-контейнеров. Runtime-цепочка
+`WPF layout → SplitContainer.MeasureOverride → GetRects → CalculateLengthes →
+Child.Measure(выделенная область)` вычисляет пиксельные и пропорциональные размеры.
+При конечных размерах родителя и заданном Pixel/Star расстоянии дочерние элементы
+измеряются сразу в своей области. Предварительное natural-size измерение нужно
+для AutoPixel/AutoStar только со стороны IsSplitterTopLeft, определяющей размер;
+поперечная ось ограничена доступной шириной/высотой. Если родитель передал
+бесконечность по одной из осей, естественные размеры измеряются для обеих сторон.
+`ArrangeOverride → GetRects` использует тот же расчёт для размещения и разделителя.
+
+Ранее оба Child на каждом проходе сначала измерялись с бесконечностью по обеим
+осям. Во вложенных контейнерах это умножало количество измерений и раскладывало
+невидимые строки ProtocolListBoxUI, включая TextBox/TextBlock форматирование.
+Дампы зависшего процесса 5 ноября 2026 подтвердили нагрузку UI-потока в этом пути.
+Изолированный сценарий с 200 сообщениями и четырьмя SplitContainer воспроизводил
+задержку более 30 секунд на прежней UI.dll; исправленная версия сохраняет
+виртуализацию строк и проходит обновления до DispatcherPriority.ApplicationIdle.
+
+Регрессия размеров, Auto-режимов, неограниченного родителя и вложенных измерений
+находится в `Ask.UI.UnitTests/Controls/Docking/SplitContainerMeasureTests.cs`.
+`tools/DockingFreezeRepro` в режиме `protocol-layout` использует настоящий
+`Ask.UI.Components.ProtocolListBox.ProtocolListBoxUI`, добавляет 200 строк и
+15 обновлений, проверяет число созданных ListBoxItem и завершение layout.
+Watchdog через 30 секунд завершает только процесс стенда с кодом 2 при зависании.
 
 Открытый `.asktrace` отображается через `SavedExecutionProtocolUI` и
 `ProtocolListBoxUI`; рядом с его штатной вертикальной прокруткой размещается
@@ -3079,6 +3298,12 @@ Renderer выбирает индексированные диапазоны ви
 распознаются новая метка оборудования `[ERR]` и legacy-метка `[БРАК]`.
 `AppendLineAsync → AddOverviewDiagnostic`
 индексирует только новое сообщение; `RefreshErrorOverview` пересоздаёт индекс после загрузки/удаления.
+`DisplayItems_CollectionChanged` дополняет `_visibleIndices` при добавлении в конец
+уже построенного индекса. Вставка, удаление, перенос, замена и Reset помечают индекс
+для полного пересчёта в RefreshOverviewPositions. Обычный поток добавления сохраняет
+индекс за O(1) на строку вместо повторного обхода всей коллекции. Регрессии привязок
+скрытых/раскрытых логов и индекса находятся в
+`Ask.UI.UnitTests/Components/ProtocolListBox/ProtocolRenderingOptimizationTests.cs`.
 `RequestOverviewUpdate` откладывает обновление полосы для обычных записей на один цикл
 `DispatcherTimer` (100 мс); ошибка и команда обновляют её сразу. После загрузки, удаления
 и очистки `RefreshErrorOverview` также выполняет обновление сразу. Прокрутка обновляет
@@ -3657,8 +3882,10 @@ also needs the Dispatcher. These can block crash reporting and freeze the UI.
 [Confirmed reproduction and call chains](investigations/docking-freeze-2026-10-29.md)
 are maintained with the isolated `tools/DockingFreezeRepro` harness. No production
 fix is included in that investigation. A separate confirmed UI lifetime defect
-leaves a child NativeFloatingWindow alive after closing a DockItem hosting RunControl;
-dragging it calls PointToScreen on the disconnected child DockControl.
+previously left a child NativeFloatingWindow alive after closing a DockItem hosting
+RunControl; dragging it called PointToScreen on the disconnected child DockControl.
+Current RunControl handles the owning DockItem's Close state and closes its unified
+docking layout; see [Runner docking layout](#runner-docking-layout).
 
 ## Events and Callbacks
 

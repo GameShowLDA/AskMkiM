@@ -131,6 +131,9 @@ namespace UI.Components
 
     public EditorWorkspaceSession CaptureWorkspaceSession()
     {
+      foreach (var runner in GetWorkspaceRunners())
+        runner.SaveRunnerLayout();
+
       return new EditorWorkspaceSession(
         fileManager.EditorWorkspaceModel.OpenPages,
         fileManager.EditorWorkspaceModel.UserControls,
@@ -140,6 +143,9 @@ namespace UI.Components
     public void RestoreWorkspaceSession(EditorWorkspaceSession session)
     {
       UnsubscribeWorkspaceCounts();
+
+      foreach (var runner in GetWorkspaceRunners())
+        runner.SuspendRunnerFloatingWindows();
 
       TopPanel.Children.Clear();
       ContentPanel.Children.Clear();
@@ -175,7 +181,15 @@ namespace UI.Components
       }
 
       controlManager.ShowControl(session.UserControls[activeIndex], activePage);
+      foreach (var runner in GetWorkspaceRunners())
+        runner.Dispatcher.BeginInvoke(new Action(runner.ResumeRunnerFloatingWindows),
+          System.Windows.Threading.DispatcherPriority.Loaded);
     }
+
+    private IEnumerable<UI.Controls.Runner.RunControl> GetWorkspaceRunners() =>
+      fileManager.EditorWorkspaceModel.UserControls.OfType<TextEditorContainer>()
+        .SelectMany(container => container.DockManager.DockItems)
+        .Select(item => item.Content).OfType<UI.Controls.Runner.RunControl>();
 
     private void SubscribeWorkspaceCounts()
     {

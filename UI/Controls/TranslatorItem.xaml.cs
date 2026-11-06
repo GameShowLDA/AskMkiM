@@ -45,6 +45,7 @@ namespace UI.Controls
     public string SecondFilePath { get; set; }
 
     public int ErrorCount { get; private set; } = 0;
+    public string? TranslatedSourceText { get; set; }
     public int WarningCount { get; private set; } = 0;
     public int GeneralCount => ErrorCount + WarningCount;
 
@@ -67,6 +68,7 @@ namespace UI.Controls
     {
       InitializeComponent();
       Loaded += TranslatorItem_Loaded;
+      Unloaded += TranslatorItem_Unloaded;
 
       ErrorListBoxVertical.ItemDoubleClicked += ErrorListBoxVertical_ErrorItemDoubleClicked;
       ErrorListBoxVertical.DesiredHeightChanged += ErrorListBoxVertical_DesiredHeightChanged;
@@ -75,17 +77,24 @@ namespace UI.Controls
       ErrorListBoxVertical.BreakpointItemDoubleClicked += ErrorListBoxVertical_BreakpointItemDoubleClicked;
       ErrorListBoxVertical.BreakpointEnabledChanged += ErrorListBoxVertical_BreakpointEnabledChanged;
 
-      // События брейкпоинтов
-      EventAggregator.Subscribe<BreakpointEvents.BreakpointSet>(e => BreakpointSet(e));
-      EventAggregator.Subscribe<BreakpointEvents.BreakpointRemoved>(e => BreakpointRemoved(e));
-      EventAggregator.Subscribe<BreakpointEvents.BreakpointOn>(e => BreakpointOn(e));
-      EventAggregator.Subscribe<BreakpointEvents.BreakpointOff>(e => BreakpointOff(e));
     }
 
     private void TranslatorItem_Loaded(object sender, RoutedEventArgs e)
     {
+      EventAggregator.Subscribe<BreakpointEvents.BreakpointSet>(BreakpointSet);
+      EventAggregator.Subscribe<BreakpointEvents.BreakpointRemoved>(BreakpointRemoved);
+      EventAggregator.Subscribe<BreakpointEvents.BreakpointOn>(BreakpointOn);
+      EventAggregator.Subscribe<BreakpointEvents.BreakpointOff>(BreakpointOff);
       ApplyErrorListHeight(ErrorListLayoutSettings.GetInitialHeight());
       ErrorListBoxVertical.RefreshLayoutFromHost();
+    }
+
+    private void TranslatorItem_Unloaded(object sender, RoutedEventArgs e)
+    {
+      EventAggregator.Unsubscribe<BreakpointEvents.BreakpointSet>(BreakpointSet);
+      EventAggregator.Unsubscribe<BreakpointEvents.BreakpointRemoved>(BreakpointRemoved);
+      EventAggregator.Unsubscribe<BreakpointEvents.BreakpointOn>(BreakpointOn);
+      EventAggregator.Unsubscribe<BreakpointEvents.BreakpointOff>(BreakpointOff);
     }
 
     private void ErrorListSplitter_DragStarted(object sender, System.Windows.Controls.Primitives.DragStartedEventArgs e)

@@ -66,7 +66,8 @@ namespace UI.Components.MultiEditorMethods
         else if (control is RunControl)
         {
           editorType = SetEditorType(tabButton);
-          CloseControl(tabButton, control, editorType);
+          if (!CloseControl(tabButton, control, editorType))
+            return;
           var container = fileManager.EditorWorkspaceModel.OpenPages.FirstOrDefault(textEditorContainer
                     => textEditorContainer.Text == editorType.ToString()); // находим вкладку контейнера, содержащую нужный контрол
           var containerIndex = fileManager.EditorWorkspaceModel.OpenPages.IndexOf(container);
@@ -112,7 +113,7 @@ namespace UI.Components.MultiEditorMethods
       }
     }
 
-    private void CloseControl(OpenFileButton tabButton, UserControl control, EditorType editorType)
+    private bool CloseControl(OpenFileButton tabButton, UserControl control, EditorType editorType)
     {
       var container = fileManager.EditorWorkspaceModel.OpenPages.FirstOrDefault(textEditorContainer
                     => textEditorContainer.Text == editorType.ToString()); // находим вкладку контейнера, содержащую нужный контрол
@@ -122,9 +123,10 @@ namespace UI.Components.MultiEditorMethods
         var foundDockItem = foundContainer.DockManager.DockItems.FirstOrDefault(dockItem => dockItem.Content == control);
         if (foundDockItem != null)
         {
-          CloseDockItem(tabButton, foundContainer, foundDockItem);
+          return CloseDockItem(tabButton, foundContainer, foundDockItem);
         }
       }
+      return false;
     }
 
     private bool CloseContainer(OpenFileButton tabButton, UserControl control, ref int index, ref EditorType editorType, TextEditorContainer foundContainer)
@@ -162,6 +164,13 @@ namespace UI.Components.MultiEditorMethods
       {
         foreach (var item in foundContainer.DockManager.DockItems.ToList())
         {
+          if (item.Content is RunControl)
+          {
+            if (!item.Close())
+              return false;
+            continue;
+          }
+
           if (!ShowSaveDialogForControl(item))
           {
             return false;
@@ -175,14 +184,14 @@ namespace UI.Components.MultiEditorMethods
       return true;
     }
 
-    private void CloseDockItem(OpenFileButton tabButton, TextEditorContainer foundContainer, DockItem foundDockItem)
+    private bool CloseDockItem(OpenFileButton tabButton, TextEditorContainer foundContainer, DockItem foundDockItem)
     {
-      if (!ShowSaveDialogForControl(foundDockItem))
+      if (foundDockItem.Content is not RunControl && !ShowSaveDialogForControl(foundDockItem))
       {
-        return;
+        return false;
       }
 
-      foundDockItem.PerformClose();
+      return foundDockItem.PerformClose();
     }
 
     private static EditorType SetEditorType(OpenFileButton tabButton)

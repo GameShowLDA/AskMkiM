@@ -86,15 +86,14 @@ namespace UI.Services
           _fileManager.ContainerService.RemoveEditorContainer(protocolContainer, EditorType.Protocol);
         }
 
-        TextEditorContainer executorContainer = _fileManager.ContainerService.GetEditorContainer(EditorType.Run);
-        if (executorContainer != null && executorContainer.DockManager.DockItems.Count > 0)
-        {
-          _fileManager.ContainerService.RemoveEditorContainer(executorContainer, EditorType.Run);
-
-        }
-
         var translationFileName = GetDisplayFileName(translateEditor.TextEditorModel?.FilePath, translateEditor.TextEditorModel?.FileName);
         var item = await _fileManager.DockItemService.ShowTranslatorDockItemAsync(translationFileName, textEditorContainer, editor, translateEditor);
+
+        TextEditorContainer executorContainer = _fileManager.ContainerService.GetEditorContainer(EditorType.Run);
+        if (item != null && executorContainer != null && executorContainer.DockManager.DockItems.Count > 0)
+        {
+          _fileManager.ContainerService.RemoveEditorContainer(executorContainer, EditorType.Run);
+        }
 
         _fileManager.ControlManagerService.ShowEditorContainer(textEditorContainer, EditorType.Translator);
         return item;

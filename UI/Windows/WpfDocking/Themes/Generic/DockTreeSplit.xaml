@@ -10,7 +10,7 @@
                 <Setter Property="SplitterTemplate">
                     <Setter.Value>
                         <DataTemplate>
-                            <primitives:DockTreeSplitter x:Name="splitter" Background="Transparent" />
+                            <primitives:DockTreeSplitter x:Name="splitter" Background="{DynamicResource VioletColorSolidColorBrush}" />
                             <DataTemplate.Triggers>
                                 <MultiDataTrigger>
                                     <MultiDataTrigger.Conditions>

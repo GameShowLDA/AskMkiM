@@ -8,6 +8,7 @@ using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Ask.UI.Controls.TextEditorControl;
 using Ask.UI.Services.Notifications;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
@@ -99,14 +100,26 @@ namespace Ask.UI.Components.ProtocolListBox
       };
       _overviewUpdateTimer.Tick += (_, _) => FlushOverviewUpdate();
       errorOverviewBar.SetPositionPreviewFactory(GetOverviewPreview);
-      DisplayItems.CollectionChanged += (_, _) =>
-      {
-        _visibleIndicesDirty = true;
-        RequestOverviewUpdate(diagnosticsChanged: true);
-      };
+      DisplayItems.CollectionChanged += DisplayItems_CollectionChanged;
       PreviewKeyDown += ProtocolListBoxUI_PreviewKeyDown;
       Loaded += ProtocolListBoxUI_Loaded;
       Unloaded += ProtocolListBoxUI_Unloaded;
+    }
+
+    private void DisplayItems_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+      if (!_visibleIndicesDirty && e.Action == NotifyCollectionChangedAction.Add &&
+          e.NewItems != null && e.NewStartingIndex == DisplayItems.Count - e.NewItems.Count)
+      {
+        for (int i = 0; i < e.NewItems.Count; i++)
+          _visibleIndices[(ProtocolDisplayItem)e.NewItems[i]!] = e.NewStartingIndex + i;
+      }
+      else
+      {
+        _visibleIndicesDirty = true;
+      }
+
+      RequestOverviewUpdate(diagnosticsChanged: true);
     }
 
     private void ProtocolListBoxUI_Loaded(object sender, RoutedEventArgs e)

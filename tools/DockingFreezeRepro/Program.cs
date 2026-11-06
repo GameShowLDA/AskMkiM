@@ -4,20 +4,23 @@ using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Threading;
 using Ask.Diagnostics.Abstractions;
 using Ask.Diagnostics.Configuration;
 using Ask.Diagnostics.Extensions;
 using Ask.Diagnostics.Models;
 using Ask.Diagnostics.Services;
+using Ask.Core.Shared.DTO.Protocol;
+using Ask.UI.Components.ProtocolListBox;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using UI.Controls.Runner;
-using UI.Controls.TextEditorControl;
+using UI.Windows.WpfDocking.Windows;
 using UI.Windows.WpfDocking.Windows.Docking;
 using UI.Windows.WpfDocking.Windows.Docking.Primitives;
 
-internal static class Program
+internal static partial class Program
 {
   private static readonly Stopwatch Clock = Stopwatch.StartNew();
   private static int _heartbeat;
@@ -26,9 +29,9 @@ internal static class Program
   private static int Main(string[] args)
   {
     var mode = args.FirstOrDefault() ?? "detach";
-    if (mode is not ("detach" or "collapse" or "close-runner" or "blocking" or "blocking-worker" or "async"))
+    if (mode is not ("detach" or "collapse" or "close-runner" or "shutdown-floating" or "source-editor" or "runner-layout" or "inline-translation" or "protocol-layout" or "blocking" or "blocking-worker" or "async"))
     {
-      Console.Error.WriteLine("Modes: detach | collapse | close-runner | blocking | blocking-worker | async");
+      Console.Error.WriteLine("Modes: detach | collapse | close-runner | shutdown-floating | source-editor | runner-layout | inline-translation <application.dll> | protocol-layout | blocking | blocking-worker | async");
       return 1;
     }
 
@@ -46,8 +49,16 @@ internal static class Program
     {
       try
       {
-        if (mode is "detach" or "collapse" or "close-runner")
+        if (mode is "detach" or "collapse" or "close-runner" or "shutdown-floating")
           await ReproduceDockingAsync(application, mode);
+        else if (mode == "protocol-layout")
+          await VerifyProtocolLayoutAsync(application);
+        else if (mode == "source-editor")
+          await VerifyRunnerSourceAsync(application, root);
+        else if (mode == "runner-layout")
+          await VerifyRunnerLayoutAsync(application, root);
+        else if (mode == "inline-translation")
+          await VerifyInlineTranslationAsync(application, root, args.ElementAtOrDefault(1)!);
         else
           await ReproduceDiagnosticsAsync(application, root, mode);
       }
@@ -64,6 +75,83 @@ internal static class Program
     application.Run();
     Log($"exit={exitCode}");
     return exitCode;
+  }
+
+  private static async Task VerifyProtocolLayoutAsync(Application application)
+  {
+    var completed = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+    _ = Task.Run(async () =>
+    {
+      if (await Task.WhenAny(completed.Task, Task.Delay(TimeSpan.FromSeconds(30))) != completed.Task)
+      {
+        Log("WATCHDOG: protocol layout did not finish in 30 seconds; terminating only this test process");
+        Environment.Exit(2);
+      }
+    });
+
+    Window? owner = null;
+    try
+    {
+      application.Resources.MergedDictionaries.Add(new ResourceDictionary
+      {
+        Source = new Uri("/UI;component/Style.xaml", UriKind.Relative)
+      });
+      application.Resources.MergedDictionaries.Add(new ResourceDictionary
+      {
+        Source = new Uri("/UI;component/Windows/WpfDocking/Themes/Generic.xaml", UriKind.Relative)
+      });
+      var protocol = new ProtocolListBoxUI();
+      for (var i = 0; i < 200; i++)
+        await protocol.AppendLineAsync(new ShowMessageModel($"Строка {i}: проверка цепи К1/51 → К1/55; подключение к шине [A]; результат 4,2 Ом. Текст для переноса строк."));
+
+      UIElement content = protocol;
+      for (var depth = 0; depth < 4; depth++)
+        content = new SplitContainer
+        {
+          Child1 = content,
+          Child2 = new TextBlock { Text = "Другая панель" },
+          Orientation = depth % 2 == 0 ? Orientation.Horizontal : Orientation.Vertical
+        };
+
+      owner = new Window
+      {
+        Content = content, Width = 1600, Height = 1000,
+        ShowActivated = false, ShowInTaskbar = false, Opacity = 0
+      };
+      var watch = Stopwatch.StartNew();
+      owner.Show();
+      await application.Dispatcher.InvokeAsync(() => { }, DispatcherPriority.ApplicationIdle);
+      Log($"Initial protocol layout: {watch.ElapsedMilliseconds} ms");
+      watch.Restart();
+      for (var i = 0; i < 15; i++)
+      {
+        await protocol.AppendLineAsync(new ShowMessageModel($"Новая строка {i}: измерение сопротивления. " + new string('x', 120)));
+        await application.Dispatcher.InvokeAsync(() => { }, DispatcherPriority.ApplicationIdle);
+      }
+
+      var realizedCount = CountVisualItems(protocol);
+      Log($"15 protocol updates: {watch.ElapsedMilliseconds} ms; realized containers={realizedCount}");
+      Require(realizedCount < 200, "The protocol must virtualize offscreen rows");
+    }
+    finally
+    {
+      owner?.Close();
+      completed.TrySetResult();
+    }
+  }
+
+  private static int CountVisualItems(DependencyObject parent)
+  {
+    var count = 0;
+    for (var i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+    {
+      var child = VisualTreeHelper.GetChild(parent, i);
+      if (child is ListBoxItem)
+        count++;
+      count += CountVisualItems(child);
+    }
+
+    return count;
   }
 
   private static async Task ReproduceDockingAsync(Application application, string mode)
@@ -88,7 +176,8 @@ internal static class Program
     };
 
     var dock = new DockControl();
-    RunControl? runner = mode == "close-runner" ? new RunControl() : null;
+    RunControl? runner = mode is "close-runner" or "shutdown-floating" ? new RunControl() : null;
+    bool leaveFloatingWindowForShutdown = false;
     var parentDock = runner == null ? dock : new DockControl();
     var parentItem = runner == null ? null : new DockItem { Title = "Runner", Content = runner };
     var host = new Grid();
@@ -108,9 +197,14 @@ internal static class Program
       {
         parentItem!.Show(parentDock, DockPosition.Document);
         await application.Dispatcher.InvokeAsync(() => { }, DispatcherPriority.ApplicationIdle);
-        dock = ((TextEditorContainer)runner.FindName("ChildTextEditorContainer")).GetDockControl();
-        runner.ShowInspectionProtocol("Isolated inspection protocol");
-        item = dock.DockItems.Single();
+        dock = (DockControl)runner.FindName("RunnerDockManager");
+        if (mode == "shutdown-floating")
+          item = (DockItem)runner.FindName("ProtocolPane");
+        else
+        {
+          runner.ShowInspectionProtocol("Isolated inspection protocol");
+          item = dock.DockItems.Single(document => document.TabText == "Итоговый протокол");
+        }
       }
       item.Show(dock, new Rect(100, 100, 350, 250));
       await application.Dispatcher.InvokeAsync(() => { }, DispatcherPriority.ApplicationIdle);
@@ -119,14 +213,48 @@ internal static class Program
       Log($"before: loaded={dock.IsLoaded}; connected={PresentationSource.FromVisual(dock) != null}; floatingVisible={floating.IsVisible}");
       Require(dock.IsLoaded && PresentationSource.FromVisual(dock) != null && floating.IsVisible,
         "Initial dock/floating window state does not match the scenario");
+      if (mode == "shutdown-floating")
+      {
+        SendMessage(new System.Windows.Interop.WindowInteropHelper(floating).Handle, 0x0112, new IntPtr(0xF060), IntPtr.Zero);
+        Require(floating.IsVisible && item.DockPosition == DockPosition.Floating,
+          "User close must respect the protected protocol pane");
+        leaveFloatingWindowForShutdown = true;
+        _ = Task.Run(async () =>
+        {
+          await Task.Delay(TimeSpan.FromSeconds(15));
+          Log("WATCHDOG: application shutdown is stuck on the protected floating pane");
+          Environment.Exit(2);
+        });
+        Log("Shutting down with a protected floating pane");
+        return;
+      }
       if (mode == "detach")
         host.Children.Remove(dock);
       else if (mode == "close-runner")
+      {
+        Require(CountEventSubscriptions(runner!) == 7, "Runner must subscribe to its seven events");
         parentItem!.Close();
+        Require(CountEventSubscriptions(runner!) == 0, "Closing the runner must remove global subscriptions");
+      }
       else
         dock.Visibility = Visibility.Collapsed;
       await application.Dispatcher.InvokeAsync(() => { }, DispatcherPriority.ApplicationIdle);
       Log($"after: loaded={dock.IsLoaded}; connected={PresentationSource.FromVisual(dock) != null}; floatingVisible={floating.IsVisible}; items={dock.DockItems.Count}");
+      if (mode == "close-runner")
+      {
+        Require(!floating.IsVisible && dock.DockItems.Count == 0,
+          "Closing the runner must close all floating documents and panels");
+        runner!.ShowInspectionProtocol("Late protocol callback after executor close");
+        ((Ask.UI.Controls.ProtocolNew.ProtocolUI)((ContentControl)runner.FindName("MainContent")).Content)
+          .ShowInspectionProtocol("Late protocol update through ProtocolUI");
+        runner.ClearInspectionProtocol();
+        Require(!await runner.PrepareSourceForRunAsync(), "A closed executor must reject a late start request");
+        await application.Dispatcher.InvokeAsync(() => { }, DispatcherPriority.ApplicationIdle);
+        Require(dock.DockItems.Count == 0, "A late protocol callback must not recreate closed executor panes");
+        Log("Runner close regression passed: no orphan floating windows");
+        return;
+      }
+
       Require(floating.IsVisible, "Expected the floating window to survive its container");
       Require((PresentationSource.FromVisual(dock) != null) == (mode == "collapse"),
         "Unexpected connection of the dock to PresentationSource");
@@ -153,9 +281,26 @@ internal static class Program
     finally
     {
       Mouse.Capture(null);
-      foreach (var dockItem in dock.DockItems.ToArray()) dockItem.Close();
-      owner.Close();
+      if (!leaveFloatingWindowForShutdown)
+      {
+        foreach (var dockItem in dock.DockItems.ToArray()) dockItem.Close();
+        owner.Close();
+      }
     }
+  }
+
+  [System.Runtime.InteropServices.DllImport("user32.dll", EntryPoint = "SendMessageW")]
+  private static extern IntPtr SendMessage(IntPtr hwnd, int message, IntPtr wParam, IntPtr lParam);
+
+  private static int CountEventSubscriptions(object target)
+  {
+    var subscribers = (System.Collections.Concurrent.ConcurrentDictionary<Type, List<Delegate>>)
+      typeof(Ask.Core.Services.EventCore.Services.EventAggregator)
+        .GetField("_subscribers", BindingFlags.Static | BindingFlags.NonPublic)!.GetValue(null)!;
+    return subscribers.Values.Sum(list =>
+    {
+      lock (list) return list.Count(handler => ReferenceEquals(handler.Target, target));
+    });
   }
 
   private static async Task ReproduceDiagnosticsAsync(Application application, string root, string mode)
