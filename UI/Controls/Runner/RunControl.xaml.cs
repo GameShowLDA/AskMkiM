@@ -468,8 +468,15 @@ namespace UI.Controls.Runner
         };
 
         DocumentTab.SetHideCloseButton(_inspectionProtocolDockItem, true);
-        ShowRunnerDocument(_inspectionProtocolDockItem);
+        ShowPendingInspectionProtocol();
       });
+    }
+
+    private void ShowPendingInspectionProtocol()
+    {
+      if (!_closingDockLayout && _dockLayoutInitialized && RunnerDockManager.IsLoaded
+        && _inspectionProtocolDockItem is { DockPosition: DockPosition.Unknown } document)
+        ShowRunnerDocument(document);
     }
 
     /// <inheritdoc />

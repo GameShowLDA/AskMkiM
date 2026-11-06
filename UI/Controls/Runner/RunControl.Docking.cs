@@ -20,6 +20,7 @@ namespace UI.Controls.Runner
     };
 
     private bool _dockLayoutInitialized;
+    private bool _initializingDockLayout;
     private bool _closingDockLayout;
     private bool _applyingErrorHeight;
     private bool _errorHeightCustomized;
@@ -31,21 +32,36 @@ namespace UI.Controls.Runner
       ProtocolPane.Closing += RunnerPane_Closing;
       ErrorsPane.Closing += RunnerPane_Closing;
       RunnerDockManager.DockItemStateChanged += RunnerDockManager_DockItemStateChanged;
+      RunnerDockManager.Loaded += (_, _) =>
+      {
+        InitializeDockLayout();
+        Dispatcher.BeginInvoke(new Action(ShowPendingInspectionProtocol), DispatcherPriority.Loaded);
+      };
       _errorResizeTimer.Tick += ErrorResizeTimer_Tick;
       Unloaded += RunControl_Unloaded;
     }
 
     private void InitializeDockLayout()
     {
-      if (_closingDockLayout)
+      if (_closingDockLayout || _initializingDockLayout || !RunnerDockManager.IsLoaded)
         return;
 
       if (!_dockLayoutInitialized)
       {
-        _dockLayoutInitialized = true;
-        ProtocolPane.Show(RunnerDockManager, DockPosition.Document);
-        ErrorsPane.Show(ProtocolPane.FirstPane, Dock.Bottom,
-          new SplitterDistance(ErrorListLayoutSettings.GetInitialHeight()));
+        _initializingDockLayout = true;
+        try
+        {
+          if (ProtocolPane.FirstPane == null)
+            ProtocolPane.Show(RunnerDockManager, DockPosition.Document);
+          if (ErrorsPane.FirstPane == null)
+            ErrorsPane.Show(ProtocolPane.FirstPane, Dock.Bottom,
+              new SplitterDistance(ErrorListLayoutSettings.GetInitialHeight()));
+          _dockLayoutInitialized = true;
+        }
+        finally
+        {
+          _initializingDockLayout = false;
+        }
       }
 
       UpdateErrorPaneSplit();
@@ -113,16 +129,8 @@ namespace UI.Controls.Runner
 
     private void SelectRunnerDocument(DockItem document)
     {
-      if (_closingDockLayout)
+      if (_closingDockLayout || document.DockPosition == DockPosition.Unknown)
         return;
-
-      if (document.DockPosition == DockPosition.Unknown)
-      {
-        // До Loaded транслированную программу выберет ShowDocuments после создания панелей.
-        if (RunnerDockManager.IsLoaded)
-          ShowRunnerDocument(document, DockItemShowMethod.Select);
-        return;
-      }
 
       document.Show(DockItemShowMethod.Select);
     }

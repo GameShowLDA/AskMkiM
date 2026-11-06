@@ -3104,8 +3104,11 @@ SourceDocument добавляется с DockItemShowMethod.Deselect. StartTest 
 вкладку TranslatorEditor через SelectRunnerDocument при начале каждого запуска.
 Если DockPosition ещё Unknown и RunnerDockManager не загружен, выбор выполняет
 штатный ShowDocuments на Loaded; Show(Select) для такой вкладки не вызывается.
-Для загруженной области Unknown-документ сначала размещается через ShowRunnerDocument;
-размещённая вкладка выбирается через Show(Select). Закрываемая область не восстанавливается.
+Выбор не размещает Unknown-документ даже во время инициализации загруженной
+области: это делает ShowDocuments. Размещённая вкладка выбирается через Show(Select).
+Инициализация завершается после создания обеих базовых панелей.
+Итоговый протокол, полученный до готовности раскладки, показывается после Loaded;
+очистка или замена до показа отменяет предыдущий результат.
 ApplySourceTranslation использует тот же путь выбора обновлённого документа;
 во время выполнения пользователь может переключать вкладки самостоятельно.
 
@@ -3206,6 +3209,8 @@ CreateNewTranslator не открывает дисковую версию пов
 `GetRunEditor → RunControl.GetTranslatedEditor` и переносит SourceEditor в новый
 RunControl без сохранения и потери правок. Выполняются прежние TranslationModels;
 правки исходника вступают в выполнение после новой трансляции.
+RunAsync отклоняет замену исполнителя при активном выполнении или передаче исходника.
+PrepareSourceForRunAsync отклоняет запуск во время трансляции до показа YesNo.
 
 Снимок последнего транслированного текста хранится отдельно от SavedTextSnapshot:
 CreateNewTranslator/EditExistingTranslator устанавливают TranslatorItem.TranslatedSourceText;

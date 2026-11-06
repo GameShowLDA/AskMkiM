@@ -57,6 +57,33 @@ internal static partial class Program
       runner.ShowInspectionProtocol("Existing final protocol");
       var dock = (DockControl)runner.FindName("RunnerDockManager");
       var oldPanels = dock.DockItems.ToArray();
+      var runMethod = serviceType.GetMethod("RunAsync")!;
+      var executionGuard = new Ask.UI.Features.ProtocolNew.Execution.ExecutionRunGuard();
+      var executionOwner = new object();
+      Require(executionGuard.TryAcquire("Runner audit", executionOwner, out _), "Execution guard must be available");
+      try
+      {
+        await (Task)runMethod.Invoke(translation, new object[] { false, true })!;
+        Require(oldPanels.All(item => dock.DockItems.Contains(item)),
+          "A repeat request during execution must preserve the current executor");
+      }
+      finally
+      {
+        executionGuard.Release(executionOwner);
+      }
+      runner.IsTransferringSource = true;
+      try
+      {
+        await (Task)runMethod.Invoke(translation, new object[] { false, true })!;
+        Require(!await runner.PrepareSourceForRunAsync(),
+          "The executor start button must reject a request during translation before prompting");
+      }
+      finally
+      {
+        runner.IsTransferringSource = false;
+      }
+      Require(oldPanels.All(item => dock.DockItems.Contains(item)),
+        "A run request during translation must preserve the current executor");
       var updated = await runner.TranslateCurrentSourceAsync();
       if (!updated)
       {

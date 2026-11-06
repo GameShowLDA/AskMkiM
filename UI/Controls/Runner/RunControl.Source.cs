@@ -37,11 +37,11 @@ namespace UI.Controls.Runner
 
     public async Task<bool> PrepareSourceForRunAsync()
     {
-      if (_closingDockLayout)
+      if (_closingDockLayout || IsTransferringSource)
         return false;
 
       if (!IsSourceTranslationOutdated)
-        return !IsTransferringSource;
+        return true;
 
       var result = MessageBoxCustom.Show(
         "Исходный файл изменён после последней трансляции. Транслировать его сейчас?",

@@ -552,6 +552,9 @@ namespace MainWindowProgram.Services
       {
         if (foundDockItem?.Content is RunControl run)
         {
+          if (run.IsTransferringSource || Ask.UI.Features.ProtocolNew.Execution.ExecutionRunGuard.GetActivity().IsBusy)
+            return;
+
           var actualTextEditor = GetRunEditor(run);
           if (actualTextEditor == null)
           {

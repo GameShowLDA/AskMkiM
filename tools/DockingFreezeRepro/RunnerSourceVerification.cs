@@ -48,10 +48,27 @@ internal static partial class Program
       Require(pendingProgram.DockPosition == DockPosition.Unknown, "Regression must begin before document layout");
       selectDocument.Invoke(runner, new object[] { pendingProgram });
       Require(pendingProgram.DockPosition == DockPosition.Unknown, "Selection before Loaded must wait for document layout");
+      runner.ShowInspectionProtocol("Early result");
+      runner.ClearInspectionProtocol();
+      runner.ShowInspectionProtocol("Latest result");
+      var protocolPane = (DockItem)runner.FindName("ProtocolPane");
+      var selectionDuringLayout = false;
+      protocolPane.StateChanging += (_, _) =>
+      {
+        if (!selectionDuringLayout)
+        {
+          selectionDuringLayout = true;
+          selectDocument.Invoke(runner, new object[] { pendingProgram });
+        }
+      };
       owner.Show();
       await files.RunControlService.AddRunItem(runner, EditorType.Run);
       await application.Dispatcher.InvokeAsync(() => { }, DispatcherPriority.ApplicationIdle);
       var initialDock = (DockControl)runner.FindName("RunnerDockManager");
+      Require(selectionDuringLayout, "Selection must also be exercised during initial pane creation");
+      var earlyResult = initialDock.DockItems.Single(item => item.TabText == "Итоговый протокол");
+      Require(((Ask.UI.Controls.TextEditorControl.TextEditorUI)earlyResult.Content).Text == "Latest result",
+        "Only the latest pending protocol must appear after loading");
       Require(initialDock.DockItems.Single(item => item.Content is UI.Controls.TranslatorEditor).IsSelected
         && !runner.SourceDocument!.IsSelected, "The translated program must be selected on startup");
       runner.SourceDocument!.Show(DockItemShowMethod.Select);
@@ -62,6 +79,15 @@ internal static partial class Program
       var dock = (DockControl)runner.FindName("RunnerDockManager");
       var final = dock.DockItems.Single(item => item.TabText == "Итоговый протокол");
       var sourceItem = runner.SourceDocument!;
+      foreach (var side in new[] { Dock.Top, Dock.Right, Dock.Bottom, Dock.Left })
+      {
+        sourceItem.Show(final.FirstPane, side, new SplitterDistance(1, SplitterUnitType.Star));
+        await application.Dispatcher.InvokeAsync(() => { }, DispatcherPriority.ApplicationIdle);
+        Require(sourceItem.FirstPane != final.FirstPane && dock.DockItems.Count == 6,
+          $"Docking to {side} must preserve all executor documents");
+        sourceItem.Show(final.FirstPane, final.FirstPane.Items.Count);
+        Require(sourceItem.FirstPane == final.FirstPane, $"Documents must regroup after docking to {side}");
+      }
       sourceItem.Show(final.FirstPane, Dock.Left, new SplitterDistance(1, SplitterUnitType.Star));
       await application.Dispatcher.InvokeAsync(() => { }, DispatcherPriority.ApplicationIdle);
       Require(sourceItem.FirstPane != final.FirstPane && !source.IsReadOnly && translated.IsReadOnly,
