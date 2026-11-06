@@ -92,6 +92,7 @@ namespace Ask.Core.Services.Errors.Translation
         SourceLineNumber = lineNumber,
         Command = command,
         Code = ErrorCode.Gen_DuplicateCommand,
+        SourceFragment = mnemonic,
         DebugInfo = $"{Path.GetFileName(callerFile)} → {callerName} (строка {callerLine})",
         Description = $"Команда {mnemonic} должна быть только одна"
       };
@@ -154,6 +155,7 @@ namespace Ask.Core.Services.Errors.Translation
         SourceLineNumber = lineNumber,
         Command = command,
         Code = ErrorCode.Gen_UnknownPoint,
+        SourceFragment = point,
         DebugInfo = $"{Path.GetFileName(callerFile)} → {callerName} (строка {callerLine})",
         Description = $"Точка '{point}' не найдена в RM"
       };
@@ -172,6 +174,7 @@ namespace Ask.Core.Services.Errors.Translation
       SourceLineNumber = lineNumber,
       Command = command,
       Code = ErrorCode.Gen_DuplicateDestination,
+      SourceFragment = point,
       DebugInfo = $"{Path.GetFileName(callerFile)} → {callerName} (строка {callerLine})",
       Description = $"Точка назначения '{point}' используется более одного раза"
     };
@@ -230,6 +233,7 @@ namespace Ask.Core.Services.Errors.Translation
       SourceLineNumber = lineNumber,
       Command = command,
       Description = $"Неизвестная команда {mnemonic}",
+      SourceFragment = mnemonic,
       DebugInfo = $"{Path.GetFileName(callerFile)} → {callerName} (строка {callerLine})",
       Code = ErrorCode.Gen_UnknownCommand
     };
@@ -245,6 +249,7 @@ namespace Ask.Core.Services.Errors.Translation
         SourceLineNumber = lineNumber,
         Command = command,
         Description = $"Некорректный заголовок команды '{token}'. Между номером команды и мнемоникой должен быть пробел.",
+        SourceFragment = token,
         DebugInfo = $"{Path.GetFileName(callerFile)} → {callerName} (строка {callerLine})",
         Code = ErrorCode.Gen_UnknownCommand
       };
@@ -265,6 +270,7 @@ namespace Ask.Core.Services.Errors.Translation
         SourceLineNumber = lineNumber,
         Command = command,
         Description = $"Для команды {mnemonic} недопустимо использование ключа {key}",
+        SourceFragment = key,
         DebugInfo = $"{Path.GetFileName(callerFile)} → {callerName} (строка {callerLine})",
         Code = ErrorCode.Gen_WrongKey
       };
@@ -284,7 +290,8 @@ namespace Ask.Core.Services.Errors.Translation
       Command = command,
       Code = ErrorCode.Gen_UnrecognizedParameters,
       DebugInfo = $"{Path.GetFileName(callerFile)} → {callerName} (строка {callerLine})",
-      Description = $"Обнаружены нераспознанные параметры: {unparsed}"
+      Description = $"Обнаружены нераспознанные параметры: {unparsed}",
+      SourceFragment = unparsed
     };
 
     /// <summary>
@@ -300,7 +307,8 @@ namespace Ask.Core.Services.Errors.Translation
         Command = command,
         Code = ErrorCode.Gen_UnrecognizedParameters,
         DebugInfo = $"{Path.GetFileName(callerFile)} → {callerName} (строка {callerLine})",
-        Description = $"Не удалось разобрать фрагмент: {fragment}"
+        Description = $"Не удалось разобрать фрагмент: {fragment}",
+        SourceFragment = fragment
       };
 
     /// <summary>
@@ -317,7 +325,8 @@ namespace Ask.Core.Services.Errors.Translation
         Command = command,
         Code = ErrorCode.Gen_UnknownCommand,
         DebugInfo = $"{Path.GetFileName(callerFile)} → {callerName} (строка {callerLine})",
-        Description = $"Мнемоника команды '{sourceMnemonic}' записана некорректно. Предположено: {recoveredMnemonic}."
+        Description = $"Мнемоника команды '{sourceMnemonic}' записана некорректно. Предположено: {recoveredMnemonic}.",
+        SourceFragment = sourceMnemonic
       };
 
     public static ErrorItem CommaStarError(int lineNumber, string command, [CallerMemberName] string callerName = "", [CallerFilePath] string callerFile = "", [CallerLineNumber] int callerLine = 0) => new()
@@ -326,7 +335,8 @@ namespace Ask.Core.Services.Errors.Translation
       Command = command,
       Code = ErrorCode.Gen_CommaStar,
       DebugInfo = $"{Path.GetFileName(callerFile)} → {callerName} (строка {callerLine})",
-      Description = $"Обнаружена недопустимая последовательность - \",*\""
+      Description = $"Обнаружена недопустимая последовательность - \",*\"",
+      SourceFragment = ",*"
     };
 
     /// <summary>
@@ -428,7 +438,8 @@ namespace Ask.Core.Services.Errors.Translation
     /// <returns>
     /// Объект <see cref="ErrorItem"/>, описывающий ошибку: команда не распознана.
     /// </returns>
-    public static ErrorItem InvalidParameterOrder(string mnemonic, int lineNumber, string command, string descr,
+    public static ErrorItem InvalidParameterOrder(
+      string mnemonic, int lineNumber, string command, string descr, string? sourceFragment,
       [CallerMemberName] string callerName = "",
       [CallerFilePath] string callerFile = "",
       [CallerLineNumber] int callerLine = 0) => new()
@@ -436,6 +447,7 @@ namespace Ask.Core.Services.Errors.Translation
         SourceLineNumber = lineNumber,
         Command = command,
         Description = $"{descr}",
+        SourceFragment = sourceFragment,
         DebugInfo = $"{Path.GetFileName(callerFile)} → {callerName} (строка {callerLine})",
         Code = ErrorCode.Gen_InvalidParameterOrder
       };

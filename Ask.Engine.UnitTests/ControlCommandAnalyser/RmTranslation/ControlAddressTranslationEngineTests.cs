@@ -135,11 +135,15 @@ public class ControlAddressTranslationEngineTests
       SynonymBindingMode.ObjectThenSynonym,
       mapper));
 
-    var result = engine.Translate("X1-X8=1.7.93-100 X9-X18=1.8.1-10 X19-X28=1.8.11-20");
+    const string input = "X1-X8=1.7.93-100 X9-X18=1.8.1-10 X19-X28=1.8.11-20";
+    var result = engine.Translate(input);
 
     var diagnostic = Assert.Single(result.Diagnostics, diagnostic => diagnostic.Code == RmDiagnosticCode.MachineAddressNotConfigured);
     Assert.Contains("Адреса с 1.8.1 по 1.8.20", diagnostic.Message);
-    Assert.Contains("RelaySwitchModules", diagnostic.Message);
+    Assert.Contains("конфигурации модулей релейного коммутатора", diagnostic.Message);
+    Assert.DoesNotContain("RelaySwitchModules", diagnostic.Message);
+    Assert.DoesNotContain("PointCount", diagnostic.Message);
+    Assert.Equal("1.8.1-10", input.Substring(diagnostic.Span.Start, diagnostic.Span.Length));
     Assert.Equal(new MachineAddress(1, 4, 350), result.Entries[^1].MachineAddress);
   }
 
@@ -154,9 +158,25 @@ public class ControlAddressTranslationEngineTests
   [Fact(DisplayName = "Движок РМ: разные длины диапазонов дают ошибку")]
   public void Translate_WithRangeLengthMismatch_ReturnsDiagnostic()
   {
-    var result = new ControlAddressTranslationEngine().Translate("X1/1-30=1.1.1-20");
+    const string input = "X1/1-30=1.1.1-20";
+    var result = new ControlAddressTranslationEngine().Translate(input);
 
-    Assert.Contains(result.Diagnostics, diagnostic => diagnostic.Code == RmDiagnosticCode.RangeLengthMismatch);
+    var diagnostic = Assert.Single(
+      result.Diagnostics,
+      item => item.Code == RmDiagnosticCode.RangeLengthMismatch);
+    Assert.Equal("X1/1-30", input.Substring(diagnostic.Span.Start, diagnostic.Span.Length));
+  }
+
+  [Fact(DisplayName = "Движок РМ: несовпадение длины синонимов указывает только диапазон синонимов")]
+  public void Translate_WithSynonymRangeLengthMismatch_SelectsSynonymRange()
+  {
+    const string input = "X1/1-2==S1-S3=1.1.1-2";
+    var result = new ControlAddressTranslationEngine().Translate(input);
+
+    var diagnostic = Assert.Single(
+      result.Diagnostics,
+      item => item.Code == RmDiagnosticCode.RangeLengthMismatch);
+    Assert.Equal("S1-S3", input.Substring(diagnostic.Span.Start, diagnostic.Span.Length));
   }
 
   [Fact(DisplayName = "Движок РМ: неправильный машинный адрес даёт ошибку")]

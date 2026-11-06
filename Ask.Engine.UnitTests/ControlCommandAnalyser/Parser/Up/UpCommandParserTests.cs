@@ -89,8 +89,9 @@ namespace Ask.Engine.UnitTests.ControlCommandAnalyser.Parser.Up
                 "130 УП 130"
               }));
 
-      Assert.Contains(model.Errors,
+      var error = Assert.Single(model.Errors,
           e => e.Code == ErrorCode.Up_SelfReferenceJump);
+      Assert.Equal("130", error.SourceFragment);
     }
 
     [Fact(DisplayName = "УП парсер: некорректная метка вызывает ошибку")]
@@ -108,8 +109,9 @@ namespace Ask.Engine.UnitTests.ControlCommandAnalyser.Parser.Up
                 "130 УП ABC"
               }));
 
-      Assert.Contains(model.Errors,
+      var error = Assert.Single(model.Errors,
           e => e.Code == ErrorCode.Up_MissingOrInvalidUpLabel);
+      Assert.Equal("ABC", error.SourceFragment);
     }
   }
 }

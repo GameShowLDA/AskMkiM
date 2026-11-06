@@ -76,6 +76,26 @@ public class RmCommandParserTests : IDisposable
     Assert.Contains("X2/1=1.4.1", model.PointsSourse);
   }
 
+  [Fact(DisplayName = "РМ парсер команд: ошибка машинного диапазона сохраняет точный исходный фрагмент")]
+  public void Parse_WithInvalidMachineRange_SelectsMachineExpression()
+  {
+    var model = ParseLines("30 РМ К1/1-100=1.8.101-1.6.200");
+
+    var error = Assert.Single(model.Errors);
+    Assert.Equal("1.8.101-1.6.200", error.SourceFragment);
+    Assert.DoesNotContain("InvalidRange", error.Description);
+  }
+
+  [Fact(DisplayName = "РМ парсер команд: разные длины диапазонов сохраняют диапазон ОК как исходный фрагмент")]
+  public void Parse_WithRangeLengthMismatch_SelectsObjectExpression()
+  {
+    var model = ParseLines("30 РМ К1/1-102=1.8.101-200");
+
+    var error = Assert.Single(model.Errors);
+    Assert.Equal("К1/1-102", error.SourceFragment);
+    Assert.DoesNotContain("RangeLengthMismatch", error.Description);
+  }
+
   [Fact(DisplayName = "РМ парсер команд: диапазоны разворачиваются в словари модели")]
   public void Parse_WithExpandedExpression_FillsAllMapsInOrder()
   {

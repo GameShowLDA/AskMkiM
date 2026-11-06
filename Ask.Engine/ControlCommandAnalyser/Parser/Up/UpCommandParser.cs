@@ -98,12 +98,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Up
       // Валидация
       if (string.IsNullOrWhiteSpace(targetLabel))
       {
-        model.Errors.Add(UpErrors.MissingOrInvalidLabel(numberLine, $"{commandNumber} {mnemonic}"));
-      }
-
-      // Валидация
-      if (string.IsNullOrWhiteSpace(targetLabel))
-      {
         model.Errors.Add(
           UpErrors.MissingOrInvalidLabel(
             numberLine,
@@ -113,15 +107,16 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Up
       {
         if (!int.TryParse(targetLabel, out int targetCommand))
         {
-          model.Errors.Add(
-            UpErrors.MissingOrInvalidLabel(
-              numberLine,
-              $"{commandNumber} {mnemonic}"));
+          model.Errors.Add(UpErrors.LabelIsNotNumber(
+            targetLabel,
+            numberLine,
+            $"{commandNumber} {mnemonic}"));
         }
         else if (targetLabel == commandNumber)
         {
           model.Errors.Add(
             UpErrors.SelfReferenceJump(
+              targetLabel,
               numberLine,
               $"{commandNumber} {mnemonic}"));
         }

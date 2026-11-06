@@ -396,7 +396,8 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
         errors.Add(new ErrorItem
         {
           Description = $"Нельзя указывать одиночную точку ({expanded[0]}).",
-          Code = ErrorCode.Gen_InvalidOnePointUse
+          Code = ErrorCode.Gen_InvalidOnePointUse,
+          SourceFragment = rawPart
         });
       }
     }
@@ -472,7 +473,8 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
           Description =
             $"Недопустимая запись диапазона: {token}. " +
             $"Используйте сокращённую форму: {left}-*{right.Replace(rightPrefix, "")}",
-          Code = ErrorCode.Gen_InvalidRange
+          Code = ErrorCode.Gen_InvalidRange,
+          SourceFragment = token
         });
       }
     }
@@ -490,7 +492,10 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
       {
         if (tok.Contains("-*"))
         {
-          AddRangeError(errors, $"В списке исключения ССИРТ недопустим разделитель разобщения: {tok}.");
+          AddRangeError(
+            errors,
+            $"В списке исключения ССИРТ недопустим разделитель разобщения: {tok}.",
+            tok);
         }
         else if (tok.Contains('-'))
         {
@@ -608,7 +613,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
 
       if (!TrySplitPrefixAndNumber(left, out prefix, out start))
       {
-        AddRangeError(errors, $"Неверное начало диапазона: {left} (в {token}).");
+        AddRangeError(errors, $"Неверное начало диапазона: {left} (в {token}).", token);
         return false;
       }
 
@@ -617,7 +622,8 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
         if (!AreRangePrefixesCompatible(prefix, rightPrefix))
         {
           AddRangeError(errors,
-            $"Несовместимые префиксы в диапазоне: {token} (\"{prefix}\" vs \"{rightPrefix}\").");
+            $"Несовместимые префиксы в диапазоне: {token} (\"{prefix}\" vs \"{rightPrefix}\").",
+            token);
           return false;
         }
         wasCompleted = IsRangeCompletion(left, right, prefix, rightPrefix);
@@ -625,7 +631,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
       }
       else if (!int.TryParse(right, out end))
       {
-        AddRangeError(errors, $"Неверный конец диапазона: {right} (в {token}).");
+        AddRangeError(errors, $"Неверный конец диапазона: {right} (в {token}).", token);
         return false;
       }
 
@@ -735,12 +741,14 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
       return result;
     }
 
-    private static void AddRangeError(List<ErrorItem> errors, string message)
+    private static void AddRangeError(
+      List<ErrorItem> errors, string message, string? sourceFragment = null)
     {
       errors.Add(new ErrorItem
       {
         Description = message,
-        Code = ErrorCode.Gen_InvalidRange
+        Code = ErrorCode.Gen_InvalidRange,
+        SourceFragment = sourceFragment
       });
     }
 
@@ -851,13 +859,13 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
       var parts = segment.Split(':');
       if (parts.Length != 2)
       {
-        AddBusError(errors, $"Неверный формат описания шины: {segment}");
+        AddBusError(errors, $"Неверный формат описания шины: {segment}", segment);
         return false;
       }
 
       if (!BusConverter.TryParseSwitchingBus(parts[0], out bus))
       {
-        AddBusError(errors, $"Неизвестная шина: {parts[0]}");
+        AddBusError(errors, $"Неизвестная шина: {parts[0]}", parts[0]);
         return false;
       }
 
@@ -906,7 +914,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
         var point = PointModel.ParsePointString(address);
         point.Mnemonic = token;
 
-        if (!TryValidateBusSupport(point, bus, errors))
+        if (!TryValidateBusSupport(point, bus, token, errors))
           continue;
 
         if (!buses.TryGetValue(bus, out var list))
@@ -922,7 +930,8 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
     /// <summary>
     /// Проверяет, поддерживает ли модуль указанную шину.
     /// </summary>
-    private static bool TryValidateBusSupport(PointModel point, SwitchingBus bus, List<ErrorItem> errors)
+    private static bool TryValidateBusSupport(
+      PointModel point, SwitchingBus bus, string sourceToken, List<ErrorItem> errors)
     {
       var module = RelaySwitchModules
           .GetDevicesByNumberChassisAsync(point.DeviceNumber)
@@ -933,7 +942,8 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
       if (module == null)
       {
         AddBusError(errors,
-          $"Модуль {point.DeviceNumber}.{point.ModuleNumber} не найден в конфигурации.");
+          $"Модуль {point.DeviceNumber}.{point.ModuleNumber} не найден в конфигурации.",
+          sourceToken);
         return false;
       }
 
@@ -942,19 +952,22 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
       if (bus != busA && bus != busB)
       {
         AddBusError(errors,
-          $"Модуль {module.NumberChassis}.{module.Number} не поддерживает шину {bus}");
+          $"Модуль {module.NumberChassis}.{module.Number} не поддерживает шину {bus}",
+          sourceToken);
         return false;
       }
 
       return true;
     }
 
-    private static void AddBusError(List<ErrorItem> errors, string message)
+    private static void AddBusError(
+      List<ErrorItem> errors, string message, string? sourceFragment = null)
     {
       errors.Add(new ErrorItem
       {
         Description = message,
-        Code = ErrorCode.Gen_InvalidRange
+        Code = ErrorCode.Gen_InvalidRange,
+        SourceFragment = sourceFragment
       });
     }
 

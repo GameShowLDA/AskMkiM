@@ -81,9 +81,15 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Ie
             remainder,
             model.AlgorithmKey,
             model.LowerLimitCapacity?.ToString(),
-            out string err))
+            out string err,
+            out string? sourceFragment))
       {
-        model.Errors.Add(GeneralErrors.InvalidParameterOrder(mnemonic, numberLine, $"{commandNumber} {mnemonic}", err));
+        model.Errors.Add(GeneralErrors.InvalidParameterOrder(
+          mnemonic,
+          numberLine,
+          $"{commandNumber} {mnemonic}",
+          err,
+          sourceFragment));
         LogWarning($"Ошибка порядка параметров (строка {numberLine}): {err}");
         return false;
       }

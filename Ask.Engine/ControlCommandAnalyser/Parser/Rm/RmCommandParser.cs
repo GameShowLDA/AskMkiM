@@ -95,7 +95,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Rm
         translationEngine ??= new ControlAddressTranslationEngine(CreateTranslationOptions());
         var translation = translationEngine.Translate(part.SourceText);
         foreach (var diagnostic in translation.Diagnostics)
-          AddDiagnostic(model, diagnostic);
+          AddDiagnostic(model, diagnostic, part.SourceText);
 
         var pairs = translation.Entries
           .Select(entry => new RmPairModel
@@ -262,13 +262,23 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Rm
         .Any(key => string.Equals(RmCommandModel.NormalizePointKey(key), normalizedKey, StringComparison.OrdinalIgnoreCase));
     }
 
-    private static void AddDiagnostic(RmCommandModel model, RmDiagnostic diagnostic)
+    private static void AddDiagnostic(
+      RmCommandModel model,
+      RmDiagnostic diagnostic,
+      string sourceText)
     {
       if (diagnostic.Severity != DiagnosticSeverity.Error)
         return;
 
-      model.Errors.Add(RmErrors.CannotParseExpression(
-        $"{diagnostic.Code}: {diagnostic.Message}",
+      string? sourceFragment = diagnostic.Span.Length > 0
+        && diagnostic.Span.Start >= 0
+        && diagnostic.Span.End <= sourceText.Length
+          ? sourceText[diagnostic.Span.Start..diagnostic.Span.End]
+          : null;
+
+      model.Errors.Add(RmErrors.TranslationDiagnostic(
+        diagnostic.Message,
+        sourceFragment,
         model.StartLineNumber,
         $"{model.CommandNumber} {model.Mnemonic}"));
     }

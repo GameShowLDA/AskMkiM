@@ -15,7 +15,8 @@ namespace Ask.Core.Services.Errors.Translation
       SourceLineNumber = startLineNumber,
       Command = command,
       Code = ErrorCode.Ok_CannotParseFirstLine,
-      Description = $"Не удалось разобрать первую строку команды ОК"
+      Description = $"Не удалось разобрать первую строку команды ОК",
+      SourceFragment = line
     };
 
     /// <summary>
@@ -59,7 +60,8 @@ namespace Ask.Core.Services.Errors.Translation
       SourceLineNumber = lineNumber,
       Command = command,
       Code = ErrorCode.Ok_CannotParseParameter,
-      Description = $"Не удалось разобрать параметр: {line}"
+      Description = $"Не удалось разобрать параметр: {line}",
+      SourceFragment = line
     };
 
     /// <summary>
@@ -70,18 +72,21 @@ namespace Ask.Core.Services.Errors.Translation
       SourceLineNumber = lineNumber,
       Command = command,
       Code = ErrorCode.Ok_ParameterKeyTooLong,
-      Description = $"Длина идентификатора параметра '{key}' превышает 39 символов."
+      Description = $"Длина идентификатора параметра '{key}' превышает 39 символов.",
+      SourceFragment = key
     };
 
     /// <summary>
     /// Ошибка: длина значения параметра превышает максимально допустимую.
     /// </summary>
-    public static ErrorItem ParameterValueTooLong(int lineNumber, string command, string key, int maxLength) => new()
+    public static ErrorItem ParameterValueTooLong(
+      int lineNumber, string command, string key, string value, int maxLength) => new()
     {
       SourceLineNumber = lineNumber,
       Command = command,
       Code = ErrorCode.Ok_ParameterValueTooLong,
-      Description = $"Значение параметра '{key}' превышает максимально допустимую длину {maxLength} символов."
+      Description = $"Значение параметра '{key}' превышает максимально допустимую длину {maxLength} символов.",
+      SourceFragment = value
     };
 
     /// <summary>
@@ -92,18 +97,20 @@ namespace Ask.Core.Services.Errors.Translation
       SourceLineNumber = lineNumber,
       Command = command,
       Code = ErrorCode.Ok_DuplicateKey,
-      Description = $"Повтор идентификатора параметра '{key}'. Допускается только для КД, ЦЕХ и ПРИМ/ПРИМЕЧ(АНИЕ)."
+      Description = $"Повтор идентификатора параметра '{key}'. Допускается только для КД, ЦЕХ и ПРИМ/ПРИМЕЧ(АНИЕ).",
+      SourceFragment = key
     };
 
     /// <summary>
     /// Ошибка: обозначение объекта контроля превышает 39 символов.
     /// </summary>
-    public static ErrorItem ObjectCodeTooLong(int startLineNumber, string command) => new()
+    public static ErrorItem ObjectCodeTooLong(int startLineNumber, string command, string objectCode) => new()
     {
       SourceLineNumber = startLineNumber,
       Command = command,
       Code = ErrorCode.Ok_ObjectCodeTooLong,
-      Description = "Обозначение объекта контроля превышает 39 символов."
+      Description = "Обозначение объекта контроля превышает 39 символов.",
+      SourceFragment = objectCode
     };
 
     /// <summary>

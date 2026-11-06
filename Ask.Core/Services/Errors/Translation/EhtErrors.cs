@@ -19,7 +19,8 @@ namespace Ask.Core.Services.Errors.Translation
         Command = command,
         Code = ErrorCode.Eht_CannotParseParameters,
         DebugInfo = $"{Path.GetFileName(callerFile)} → {callerName} (строка {callerLine})",
-        Description = $"Не удалось распознать параметры: {parameters}"
+        Description = $"Не удалось распознать параметры: {parameters}",
+        SourceFragment = parameters
       };
 
     /// <summary>

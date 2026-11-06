@@ -147,6 +147,9 @@ namespace Ask.Core.Services.Errors.Models
 
     private static IEnumerable<string> GetCandidates(IDisplayIssue issue)
     {
+      if (issue is ErrorItem { SourceFragment.Length: > 0 } error)
+        yield return error.SourceFragment;
+
       foreach (var candidate in GetQuotedCandidates(issue.Description))
         yield return candidate;
 

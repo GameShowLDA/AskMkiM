@@ -56,7 +56,9 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
       {
         LogError($"Не удалось распознать параметры в строке: '{remainder}' (строка {numberLine})");
         model.Errors.Add(EhtErrors.CannotParseParameters(
-          $"сопротивление было неправильно задано, или неверно указаны границы сопроитвления", numberLine, $"{model.CommandNumber} {model.Mnemonic}"));
+          remainder ?? string.Empty,
+          numberLine,
+          $"{model.CommandNumber} {model.Mnemonic}"));
       }
     }
     /// <summary>
@@ -113,7 +115,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
       {
         LogError($"Не удалось распознать параметры в строке: '{remainder}' (строка {numberLine})");
         model.Errors.Add(NeErrors.CannotParseParameters(
-          $"Диапазон напряжения был неправильно задан или неверно указаны его границы",
+          remainder ?? string.Empty,
           model.StartLineNumber,
           $"{model.CommandNumber}   {model.Mnemonic}"));
       }
@@ -192,7 +194,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Helpers
       {
         LogError($"Не удалось распознать параметры в строке: '{remainder}' (строка {numberLine})");
         model.Errors.Add(PrErrors.CannotParseParameters(
-          $"Сопротивление было неправильно задано, или неверно указаны его границы",
+          remainder ?? string.Empty,
           model.StartLineNumber,
           $"{model.CommandNumber}   {model.Mnemonic}"));
       }
