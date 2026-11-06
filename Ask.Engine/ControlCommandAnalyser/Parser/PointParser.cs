@@ -30,6 +30,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
     public static (SchemeModel?, List<ErrorItem>) ParsePoints(string expr, BaseCommandModel model, RmCommandModel rmCommandModel)
     {
       var errors = new List<ErrorItem>();
+      string sourceExpression = expr;
       if (!HasPointsMap(rmCommandModel))
       {
         errors.Add(GeneralErrors.MissingPointsMap(model.StartLineNumber, $"{model.CommandNumber} {model.Mnemonic}"));
@@ -66,6 +67,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
         chainModels.AddRange(groups);
       }
 
+      CommandPostAnalyzer.CollapseUnknownPointErrors(errors, sourceExpression);
       return (new SchemeModel(chainModels), errors);
     }
 
@@ -76,6 +78,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
     {
       var errors = new List<ErrorItem>();
       var points = new List<PointModel>();
+      string sourceExpression = expr;
 
       if (!HasPointsMap(rmCommandModel))
       {
@@ -100,6 +103,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
       if (pointModels != null)
         points.AddRange(pointModels);
 
+      CommandPostAnalyzer.CollapseUnknownPointErrors(errors, sourceExpression);
       return (points, errors);
     }
 
@@ -823,6 +827,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
 
       var errors = new List<ErrorItem>();
       var buses = new Dictionary<SwitchingBus, List<PointModel>>();
+      string sourceExpression = expr;
 
       expr = NormalizeExpression(expr);
       if (string.IsNullOrEmpty(expr))
@@ -839,6 +844,8 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
         ProcessBusTokens(tokens, bus, rmCommandModel, buses, errors, lineNumber, command);
       }
 
+      CommandPostAnalyzer.CollapseUnknownPointErrors(errors, sourceExpression);
+      CommandPostAnalyzer.CollapseBusPointErrors(errors, sourceExpression);
       return (buses, errors);
     }
 
@@ -914,7 +921,8 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
         var point = PointModel.ParsePointString(address);
         point.Mnemonic = token;
 
-        if (!TryValidateBusSupport(point, bus, token, errors))
+        if (!TryValidateBusSupport(
+          point, bus, token, errors, lineNumber, command))
           continue;
 
         if (!buses.TryGetValue(bus, out var list))
@@ -931,7 +939,12 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
     /// Проверяет, поддерживает ли модуль указанную шину.
     /// </summary>
     private static bool TryValidateBusSupport(
-      PointModel point, SwitchingBus bus, string sourceToken, List<ErrorItem> errors)
+      PointModel point,
+      SwitchingBus bus,
+      string sourceToken,
+      List<ErrorItem> errors,
+      int lineNumber,
+      string command)
     {
       var module = RelaySwitchModules
           .GetDevicesByNumberChassisAsync(point.DeviceNumber)
@@ -941,9 +954,11 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
 
       if (module == null)
       {
-        AddBusError(errors,
+        errors.Add(GeneralErrors.BusPointConfiguration(
           $"Модуль {point.DeviceNumber}.{point.ModuleNumber} не найден в конфигурации.",
-          sourceToken);
+          sourceToken,
+          lineNumber,
+          command));
         return false;
       }
 
@@ -951,9 +966,11 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
 
       if (bus != busA && bus != busB)
       {
-        AddBusError(errors,
-          $"Модуль {module.NumberChassis}.{module.Number} не поддерживает шину {bus}",
-          sourceToken);
+        errors.Add(GeneralErrors.BusPointConfiguration(
+          $"Модуль {module.NumberChassis}.{module.Number} не поддерживает шину {bus}.",
+          sourceToken,
+          lineNumber,
+          command));
         return false;
       }
 

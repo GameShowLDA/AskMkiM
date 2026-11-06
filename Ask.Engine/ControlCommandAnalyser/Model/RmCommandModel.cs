@@ -24,6 +24,13 @@ namespace Ask.Engine.ControlCommandAnalyser.Model
 
     public List<RmPairModel> Pairs { get; set; } = new();
 
+    /// <summary>
+    /// Машинные адреса, дублирование которых уже сообщено семантическим
+    /// валидатором текущей части РМ.
+    /// </summary>
+    internal HashSet<string> ReportedDuplicateDestinationPoints { get; } =
+      new(StringComparer.OrdinalIgnoreCase);
+
     public IEnumerable<string> ToExpandedLines()
     {
       foreach (var kv in PointsMap)

@@ -97,6 +97,13 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Rm
         foreach (var diagnostic in translation.Diagnostics)
           AddDiagnostic(model, diagnostic, part.SourceText);
 
+        foreach (var duplicate in translation.Entries
+          .GroupBy(entry => entry.MachineAddress)
+          .Where(group => group.Count() > 1))
+        {
+          model.ReportedDuplicateDestinationPoints.Add(duplicate.Key.ToString());
+        }
+
         var pairs = translation.Entries
           .Select(entry => new RmPairModel
           {

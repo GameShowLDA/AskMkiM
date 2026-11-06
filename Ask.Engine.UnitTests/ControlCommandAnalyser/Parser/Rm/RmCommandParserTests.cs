@@ -1,8 +1,10 @@
 ﻿using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Errors.Models;
 using Ask.Core.Services.Config.Base;
+using Ask.Core.Shared.DTO.Executor;
 using Ask.Engine.ControlCommandAnalyser.Formatter;
 using Ask.Engine.ControlCommandAnalyser.Model;
+using Ask.Engine.ControlCommandAnalyser.Parser;
 using Ask.Engine.ControlCommandAnalyser.Parser.Rm;
 using Ask.Engine.ControlCommandAnalyser.RmTranslation.Translation;
 
@@ -129,6 +131,28 @@ public class RmCommandParserTests : IDisposable
     AssertErrorCodes(model, ErrorCode.Rm_CannotParseExpression);
     Assert.Equal("1.2.1", model.SynonymMap["S1"]);
     Assert.Equal(2, model.PointsMap.Count);
+  }
+
+  [Fact(DisplayName = "РМ парсер команд: пост-анализатор не дублирует объединённую ошибку машинного диапазона")]
+  public void Parse_WithDuplicateMachineRange_PostAnalyzerDoesNotDuplicateErrors()
+  {
+    var rm = ParseLines(
+      "30 РМ X1/1-5=1.1.1-5 X2/1-5=1.1.3-7");
+    var semanticError = Assert.Single(rm.Errors);
+    Assert.Contains("1.1.3-1.1.5", semanticError.Description);
+    var models = new List<BaseCommandModel>
+    {
+      new OkCommandModel { CommandNumber = "10", StartLineNumber = 10 },
+      rm,
+      new KscCommandModel { CommandNumber = "40", StartLineNumber = 40 }
+    };
+
+    CommandPostAnalyzer.Analyze(models);
+
+    Assert.DoesNotContain(
+      rm.Errors,
+      error => error.Code == ErrorCode.Gen_DuplicateDestination);
+    Assert.Single(rm.Errors);
   }
 
   [Fact(DisplayName = "РМ парсер команд: некорректный формат точки АСК даёт ошибку")]

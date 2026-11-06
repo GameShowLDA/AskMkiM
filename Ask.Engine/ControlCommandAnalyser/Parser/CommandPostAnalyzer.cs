@@ -3,6 +3,7 @@ using Ask.Core.Services.Errors.Translation;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Engine.ControlCommandAnalyser.Model;
+using System.Text.RegularExpressions;
 
 namespace Ask.Engine.ControlCommandAnalyser.Parser
 {
@@ -74,18 +75,35 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
     /// </remarks>
     private static void CheckPointLinks(List<BaseCommandModel> models, Dictionary<string, string> pointsMap)
     {
-      var duplicateDestinations = pointsMap
-        .GroupBy(kv => kv.Value)
-        .Where(g => g.Count() > 1)
-        .Select(g => g.Key);
+      var rmModel = models.OfType<RmCommandModel>().FirstOrDefault();
+      if (rmModel == null)
+        return;
 
-      foreach (var dest in duplicateDestinations)
+      var duplicateDestinations = pointsMap
+        .GroupBy(kv => kv.Value, StringComparer.OrdinalIgnoreCase)
+        .Where(g => g.Count() > 1)
+        .Select(g => g.Key)
+        .Where(point => !rmModel.ReportedDuplicateDestinationPoints.Contains(point))
+        .ToList();
+
+      foreach (var group in GroupConsecutivePoints(duplicateDestinations))
       {
-        var rmModel = models.OfType<RmCommandModel>().FirstOrDefault();
-        if (rmModel != null)
+        if (group.Count == 1)
         {
-          rmModel.Errors.Add(GeneralErrors.DuplicateDestinationPoint(dest, rmModel.StartLineNumber, $"{rmModel.CommandNumber} {rmModel.Mnemonic}"));
+          rmModel.Errors.Add(GeneralErrors.DuplicateDestinationPoint(
+            group[0],
+            rmModel.StartLineNumber,
+            $"{rmModel.CommandNumber} {rmModel.Mnemonic}"));
+          continue;
         }
+
+        var (firstPoint, lastPoint) = OrderRangeEndpoints(group[0], group[^1]);
+        rmModel.Errors.Add(GeneralErrors.DuplicateDestinationPoints(
+          firstPoint,
+          lastPoint,
+          rmModel.StartLineNumber,
+          $"{rmModel.CommandNumber} {rmModel.Mnemonic}",
+          ResolveSourceFragment(rmModel.PointsSourse, group)));
       }
     }
 
@@ -125,6 +143,327 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser
       }
 
       return (error, pointModels);
+    }
+
+    /// <summary>
+    /// Объединяет ошибки соседних отсутствующих точек в диапазоны.
+    /// Несмежные точки остаются отдельными диагностическими сообщениями.
+    /// </summary>
+    internal static void CollapseUnknownPointErrors(
+      List<ErrorItem> errors,
+      string? sourceExpression)
+    {
+      var unknownErrors = errors
+        .Select((error, index) => (Error: error, Index: index))
+        .Where(item => item.Error.Code == ErrorCode.Gen_UnknownPoint
+          && !string.IsNullOrWhiteSpace(item.Error.SourceFragment))
+        .ToList();
+
+      if (unknownErrors.Count == 0)
+        return;
+
+      var pointGroups = GroupConsecutivePoints(unknownErrors
+        .Select(item => item.Error.SourceFragment!)
+        .ToList());
+
+      if (pointGroups.Count == 0)
+        return;
+
+      var firstError = unknownErrors[0].Error;
+      var replacements = pointGroups
+        .Select(group => CreateUnknownPointError(group, firstError, sourceExpression))
+        .ToList();
+
+      int insertionIndex = unknownErrors[0].Index;
+      var collapsedErrors = unknownErrors
+        .Select(item => item.Error)
+        .ToHashSet();
+      errors.RemoveAll(collapsedErrors.Contains);
+      errors.InsertRange(Math.Min(insertionIndex, errors.Count), replacements);
+    }
+
+    /// <summary>
+    /// Объединяет одинаковые ошибки конфигурации модуля для соседних точек
+    /// шинных команд ОТ/ПТ.
+    /// </summary>
+    internal static void CollapseBusPointErrors(
+      List<ErrorItem> errors,
+      string? sourceExpression)
+    {
+      var busErrors = errors
+        .Select((error, index) => (Error: error, Index: index))
+        .Where(item => item.Error.Code == ErrorCode.Gen_BusPointConfiguration
+          && !string.IsNullOrWhiteSpace(item.Error.SourceFragment))
+        .ToList();
+
+      if (busErrors.Count == 0)
+        return;
+
+      var groups = GroupConsecutiveBusErrors(
+        busErrors.Select(item => item.Error).ToList());
+      var replacements = groups
+        .Select(group => CreateBusPointError(group, sourceExpression))
+        .ToList();
+
+      int insertionIndex = busErrors[0].Index;
+      var collapsedErrors = busErrors
+        .Select(item => item.Error)
+        .ToHashSet();
+      errors.RemoveAll(collapsedErrors.Contains);
+      errors.InsertRange(Math.Min(insertionIndex, errors.Count), replacements);
+    }
+
+    private static List<List<ErrorItem>> GroupConsecutiveBusErrors(
+      IReadOnlyList<ErrorItem> errors)
+    {
+      var result = new List<List<ErrorItem>>();
+      if (errors.Count == 0)
+        return result;
+
+      var current = new List<ErrorItem> { errors[0] };
+      int direction = 0;
+      for (int i = 1; i < errors.Count; i++)
+      {
+        var previous = current[^1];
+        var next = errors[i];
+        string previousPrefix = string.Empty;
+        string nextPrefix = string.Empty;
+        int previousNumber = 0;
+        int nextNumber = 0;
+        bool consecutive = string.Equals(
+            previous.Description,
+            next.Description,
+            StringComparison.Ordinal)
+          && TryGetPointNumber(
+            previous.SourceFragment!, out previousPrefix, out previousNumber)
+          && TryGetPointNumber(
+            next.SourceFragment!, out nextPrefix, out nextNumber)
+          && string.Equals(previousPrefix, nextPrefix, StringComparison.OrdinalIgnoreCase)
+          && Math.Abs(nextNumber - previousNumber) == 1;
+        int nextDirection = consecutive
+          ? Math.Sign(nextNumber - previousNumber)
+          : 0;
+
+        if (consecutive && (direction == 0 || direction == nextDirection))
+        {
+          current.Add(next);
+          direction = nextDirection;
+          continue;
+        }
+
+        result.Add(current);
+        current = new List<ErrorItem> { next };
+        direction = 0;
+      }
+
+      result.Add(current);
+      return result;
+    }
+
+    private static ErrorItem CreateBusPointError(
+      IReadOnlyList<ErrorItem> errors,
+      string? sourceExpression)
+    {
+      if (errors.Count == 1)
+        return errors[0];
+
+      var template = errors[0];
+      var points = errors.Select(error => error.SourceFragment!).ToList();
+      var (firstPoint, lastPoint) = OrderRangeEndpoints(points[0], points[^1]);
+      string sourceFragment = ResolveSourceFragment(sourceExpression, points);
+
+      return GeneralErrors.BusPointsConfiguration(
+        template.Description,
+        firstPoint,
+        lastPoint,
+        template.SourceLineNumber,
+        template.Command,
+        sourceFragment);
+    }
+
+    private static ErrorItem CreateUnknownPointError(
+      IReadOnlyList<string> points,
+      ErrorItem template,
+      string? sourceExpression)
+    {
+      string sourceFragment = ResolveSourceFragment(sourceExpression, points);
+      if (points.Count == 1)
+      {
+        var error = GeneralErrors.UnknownPoint(
+          points[0], template.SourceLineNumber, template.Command);
+        error.SourceFragment = sourceFragment;
+        return error;
+      }
+
+      var (firstPoint, lastPoint) = OrderRangeEndpoints(points[0], points[^1]);
+      return GeneralErrors.UnknownPoints(
+        firstPoint,
+        lastPoint,
+        template.SourceLineNumber,
+        template.Command,
+        sourceFragment);
+    }
+
+    private static List<List<string>> GroupConsecutivePoints(IReadOnlyList<string> points)
+    {
+      var result = new List<List<string>>();
+      if (points.Count == 0)
+        return result;
+
+      var current = new List<string> { points[0] };
+      int direction = 0;
+
+      for (int i = 1; i < points.Count; i++)
+      {
+        bool previousParsed = TryGetPointNumber(
+          current[^1], out string previousPrefix, out int previousNumber);
+        bool currentParsed = TryGetPointNumber(
+          points[i], out string currentPrefix, out int currentNumber);
+        bool consecutive = previousParsed
+          && currentParsed
+          && string.Equals(previousPrefix, currentPrefix, StringComparison.OrdinalIgnoreCase)
+          && Math.Abs(currentNumber - previousNumber) == 1;
+
+        int nextDirection = consecutive
+          ? Math.Sign(currentNumber - previousNumber)
+          : 0;
+
+        if (consecutive && (direction == 0 || direction == nextDirection))
+        {
+          current.Add(points[i]);
+          direction = nextDirection;
+          continue;
+        }
+
+        result.Add(current);
+        current = new List<string> { points[i] };
+        direction = 0;
+      }
+
+      result.Add(current);
+      return result;
+    }
+
+    private static (string First, string Last) OrderRangeEndpoints(
+      string firstPoint,
+      string lastPoint)
+    {
+      if (TryGetPointNumber(firstPoint, out string firstPrefix, out int firstNumber)
+        && TryGetPointNumber(lastPoint, out string lastPrefix, out int lastNumber)
+        && string.Equals(firstPrefix, lastPrefix, StringComparison.OrdinalIgnoreCase)
+        && firstNumber > lastNumber)
+      {
+        return (lastPoint, firstPoint);
+      }
+
+      return (firstPoint, lastPoint);
+    }
+
+    private static string ResolveSourceFragment(
+      string? sourceExpression,
+      IReadOnlyList<string> points)
+    {
+      if (string.IsNullOrWhiteSpace(sourceExpression))
+        return points.Count == 1 ? points[0] : $"{points[0]}-{points[^1]}";
+
+      foreach (Match match in Regex.Matches(
+        sourceExpression,
+        @"[^\s,*#=~()]+-\*?[^\s,*#=~()]+"))
+      {
+        if (RangeContainsPoints(match.Value, points, out string matchingFragment))
+          return matchingFragment;
+      }
+
+      int firstIndex = sourceExpression.IndexOf(points[0], StringComparison.OrdinalIgnoreCase);
+      int lastIndex = sourceExpression.IndexOf(points[^1], StringComparison.OrdinalIgnoreCase);
+      if (firstIndex >= 0 && lastIndex >= 0)
+      {
+        int start = Math.Min(firstIndex, lastIndex);
+        int end = Math.Max(firstIndex + points[0].Length, lastIndex + points[^1].Length);
+        return sourceExpression[start..end];
+      }
+
+      return sourceExpression.Trim().Trim('*');
+    }
+
+    private static bool RangeContainsPoints(
+      string candidate,
+      IReadOnlyList<string> points,
+      out string matchingFragment)
+    {
+      if (RangeContainsPointsCore(candidate, points))
+      {
+        matchingFragment = candidate;
+        return true;
+      }
+
+      int colonIndex = candidate.IndexOf(':');
+      if (colonIndex >= 0)
+      {
+        string tail = candidate[(colonIndex + 1)..];
+        if (RangeContainsPointsCore(tail, points))
+        {
+          matchingFragment = tail;
+          return true;
+        }
+      }
+
+      matchingFragment = string.Empty;
+      return false;
+    }
+
+    private static bool RangeContainsPointsCore(
+      string candidate,
+      IReadOnlyList<string> points)
+    {
+      string normalized = candidate.Replace("-*", "-", StringComparison.Ordinal);
+      int dashIndex = normalized.IndexOf('-');
+      if (dashIndex <= 0 || dashIndex >= normalized.Length - 1)
+        return false;
+
+      string left = normalized[..dashIndex];
+      string right = normalized[(dashIndex + 1)..];
+      if (!TryGetPointNumber(left, out string leftPrefix, out int start)
+        || !TryGetPointNumber(right, out string rightPrefix, out int end))
+      {
+        return false;
+      }
+
+      if (string.IsNullOrEmpty(rightPrefix))
+        rightPrefix = leftPrefix;
+
+      if (!string.Equals(leftPrefix, rightPrefix, StringComparison.OrdinalIgnoreCase))
+        return false;
+
+      int min = Math.Min(start, end);
+      int max = Math.Max(start, end);
+      foreach (string point in points)
+      {
+        if (!TryGetPointNumber(point, out string pointPrefix, out int pointNumber)
+          || !string.Equals(pointPrefix, leftPrefix, StringComparison.OrdinalIgnoreCase)
+          || pointNumber < min
+          || pointNumber > max)
+        {
+          return false;
+        }
+      }
+
+      return true;
+    }
+
+    private static bool TryGetPointNumber(
+      string point,
+      out string prefix,
+      out int number)
+    {
+      prefix = string.Empty;
+      number = 0;
+      var match = Regex.Match(point ?? string.Empty, @"^(.*?)(\d+)$");
+      if (!match.Success || !int.TryParse(match.Groups[2].Value, out number))
+        return false;
+
+      prefix = match.Groups[1].Value;
+      return true;
     }
 
     /// <summary>

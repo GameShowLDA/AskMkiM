@@ -199,6 +199,57 @@ public class ControlAddressTranslationEngineTests
     Assert.Contains(result.Diagnostics, diagnostic => diagnostic.Code == expectedCode);
   }
 
+  [Fact(DisplayName = "Движок РМ: пересечение диапазонов ОК сворачивается в одну ошибку")]
+  public void Translate_WithOverlappingObjectAddressRanges_ReturnsSingleRangeDiagnostic()
+  {
+    const string input = "X1/1-5=1.1.1-5 X1/3-7=1.2.1-5";
+
+    var result = new ControlAddressTranslationEngine().Translate(input);
+
+    var diagnostic = Assert.Single(
+      result.Diagnostics,
+      item => item.Code == RmDiagnosticCode.DuplicateObjectAddress);
+    Assert.Equal("Повторяющиеся адреса ОК: X1/3-X1/5.", diagnostic.Message);
+    Assert.Equal(
+      "X1/3-7=1.2.1-5",
+      input.Substring(diagnostic.Span.Start, diagnostic.Span.Length));
+  }
+
+  [Fact(DisplayName = "Движок РМ: пересечение диапазонов машинных адресов сворачивается в одну ошибку")]
+  public void Translate_WithOverlappingMachineAddressRanges_ReturnsSingleRangeDiagnostic()
+  {
+    const string input = "X1/1-5=1.1.1-5 X2/1-5=1.1.3-7";
+
+    var result = new ControlAddressTranslationEngine().Translate(input);
+
+    var diagnostic = Assert.Single(
+      result.Diagnostics,
+      item => item.Code == RmDiagnosticCode.DuplicateMachineAddress);
+    Assert.Equal(
+      "Повторяющиеся машинные адреса: 1.1.3-1.1.5.",
+      diagnostic.Message);
+    Assert.Equal(
+      "X2/1-5=1.1.3-7",
+      input.Substring(diagnostic.Span.Start, diagnostic.Span.Length));
+  }
+
+  [Fact(DisplayName = "Движок РМ: пересечение диапазонов синонимов сворачивается в одну ошибку")]
+  public void Translate_WithOverlappingSynonymRanges_ReturnsSingleRangeDiagnostic()
+  {
+    const string input =
+      "X1/1-5==S1-S5=1.1.1-5 X2/1-5==S3-S7=1.2.1-5";
+
+    var result = new ControlAddressTranslationEngine().Translate(input);
+
+    var diagnostic = Assert.Single(
+      result.Diagnostics,
+      item => item.Code == RmDiagnosticCode.DuplicateSynonym);
+    Assert.Equal("Синонимы уже используются: S3-S5.", diagnostic.Message);
+    Assert.Equal(
+      "X2/1-5==S3-S7=1.2.1-5",
+      input.Substring(diagnostic.Span.Start, diagnostic.Span.Length));
+  }
+
   [Fact(DisplayName = "Движок РМ: недопустимый символ даёт ошибку лексера")]
   public void Translate_WithForbiddenCharacter_ReturnsDiagnostic()
   {
