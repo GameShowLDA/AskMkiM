@@ -152,6 +152,9 @@ namespace Ask.UI.Controls.ProtocolNew
     /// <returns>Задача, представляющая асинхронную операцию измерения.</returns>
     public Task StartAsync() => StartAsync(startStepByStep: false, isStepInto: true);
 
+    /// <summary>Проверка возможности запуска до подготовки протокола и обращения к оборудованию.</summary>
+    public Func<Task<bool>>? BeforeStartAsync { get; set; }
+
     /// <summary>
     /// Начинает выполнение с выбранным режимом пошагового запуска.
     /// </summary>
@@ -164,6 +167,9 @@ namespace Ask.UI.Controls.ProtocolNew
       _isStartPending = true;
       try
       {
+        if (BeforeStartAsync != null && !await BeforeStartAsync())
+          return;
+
         var actionSettings = _modeSettings.Current;
         bool simulatedPowerFailure = ExecutionConfig.GetIsIdleModeEnabled()
           && actionSettings.CheckType != CheckType.SelfTest

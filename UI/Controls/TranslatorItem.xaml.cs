@@ -45,6 +45,7 @@ namespace UI.Controls
     public string SecondFilePath { get; set; }
 
     public int ErrorCount { get; private set; } = 0;
+    public string? TranslatedSourceText { get; set; }
     public int WarningCount { get; private set; } = 0;
     public int GeneralCount => ErrorCount + WarningCount;
 

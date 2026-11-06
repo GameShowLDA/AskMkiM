@@ -98,6 +98,7 @@ namespace UI.Controls.Runner
       ProtocolUI = new ProtocolUI(true);
       ProtocolUI.SetRuntimeExecutionSettingsEnabled(true);
       ProtocolUI.InspectionProtocolHost = this;
+      ProtocolUI.BeforeStartAsync = PrepareSourceForRunAsync;
       ProtocolUI.ErrorListBoxVerticalVisibility = Visibility.Collapsed;
       MainContent.Content = ProtocolUI;
       ErrorListBoxVertical.ItemDoubleClicked += ErrorItemDoubleClicked;
@@ -131,7 +132,10 @@ namespace UI.Controls.Runner
     {
       Application.Current.Dispatcher.Invoke(() =>
       {
-        var translatorItem = RunnerDockManager.DockItems.FirstOrDefault(item => item.Content.GetType() is TranslatorEditor);
+        isLocked = newValue;
+        if (SourceDocument != null)
+          SourceDocument.Tag = !newValue;
+        var translatorItem = RunnerDockManager.DockItems.FirstOrDefault(item => item.Content is TranslatorEditor);
         if (translatorItem != null)
         {
           var translatorEditor = translatorItem.Content as TranslatorEditor;
@@ -302,7 +306,7 @@ namespace UI.Controls.Runner
 
       var dockManager = RunnerDockManager;
       ClearInspectionProtocolCore();
-      foreach (var dockItem in dockManager.DockItems.Where(item => item != ProtocolPane && item != ErrorsPane).ToArray())
+      foreach (var dockItem in dockManager.DockItems.Where(item => item != ProtocolPane && item != ErrorsPane && item != SourceDocument).ToArray())
       {
         dockItem.Close();
       }
@@ -348,6 +352,8 @@ namespace UI.Controls.Runner
         SystemStateManager.SetIsControlProgramActive(true);
         ShowRunnerDocument(dockItemDeviceState);
         ShowRunnerDocument(dockItemPk);
+        if (SourceDocument != null)
+          ShowRunnerDocument(SourceDocument, DockItemShowMethod.Deselect);
         Application.Current.Dispatcher.BeginInvoke(new Action(() =>
         {
           SyncBreakpointsFromEditor(textEditorUI);
@@ -439,6 +445,9 @@ namespace UI.Controls.Runner
     {
       Dispatcher.Invoke(() =>
       {
+        if (_closingDockLayout)
+          return;
+
         ClearInspectionProtocolCore();
 
         _inspectionProtocolEditor = new ResultProtocolEditor
@@ -499,6 +508,7 @@ namespace UI.Controls.Runner
         var dockItem = dockManager.DockItems.FirstOrDefault(di => di.Content is TranslatorEditor);
         if (dockItem != null)
         {
+          SelectRunnerDocument(dockItem);
           var translatorEditor = dockItem.Content as TranslatorEditor;
           editor = translatorEditor?.GetTextEditor();
         }

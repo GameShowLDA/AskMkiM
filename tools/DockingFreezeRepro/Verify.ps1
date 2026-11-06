@@ -16,7 +16,8 @@ if (-not $SkipBuild) {
 $scenarios = @(
   @{ Mode = 'detach'; Exit = 0; Signature = 'BeginDrag exception:' },
   @{ Mode = 'collapse'; Exit = 0; Signature = 'BeginDrag returned without exception' },
-  @{ Mode = 'close-runner'; Exit = 0; Signature = 'BeginDrag exception:' },
+  @{ Mode = 'close-runner'; Exit = 0; Signature = 'Runner close regression passed:' },
+  @{ Mode = 'source-editor'; Exit = 0; Signature = 'Source editor regression passed:' },
   @{ Mode = 'blocking'; Exit = 2; Signature = 'WATCHDOG:'; Continuation = 'JsonFileWriter+<WriteAsync>' },
   @{ Mode = 'blocking-worker'; Exit = 0; Signature = 'Crash collector failed: Screenshot:' },
   @{ Mode = 'async'; Exit = 0; Signature = 'Crash package created:' }

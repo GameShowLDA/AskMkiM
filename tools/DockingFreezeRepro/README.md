@@ -30,7 +30,9 @@ dotnet Bin/DockingFreezeRepro/DockingFreezeRepro.dll protocol-layout
 | --- | --- | --- |
 | `detach` | Создать плавающее окно и удалить его DockControl из visual tree | Окно остаётся видимым; BeginDrag выбрасывает InvalidOperationException в BeginDragNative |
 | `collapse` | Только скрыть DockControl через Collapsed | PresentationSource сохраняется; BeginDrag не выбрасывает исключение |
-| `close-runner` | Настоящий RunControl.ShowInspectionProtocol → вынести протокол в плавающее окно → закрыть родительский DockItem | Регрессионная проверка исправления: все DockItem и плавающие окна исполнителя закрываются вместе с владельцем |
+| `close-runner` | Настоящий RunControl.ShowInspectionProtocol → вынести протокол в плавающее окно → закрыть родительский DockItem → поздние ShowInspectionProtocol напрямую и через ProtocolUI | Все DockItem и плавающие окна закрываются вместе с владельцем; поздний callback не создаёт панели, закрытый исполнитель отклоняет запуск |
+| `source-editor` | Исходник рядом с итоговым протоколом, обе темы, Save, предупреждение Yes/No, обновление на месте и передача ошибочного текста | Сохранение не снимает признак устаревшей трансляции; Yes обновляет и разрешает запуск, No оставляет старый результат; ошибка отменяет запуск; раскладка сохраняется |
+| `inline-translation <application.dll>` | Фактический TranslationServices из проверяемой сборки приложения, корректная программа и программа с ошибкой | Корректная программа обновляет модели и редактор на месте, сохраняет отключённые точки останова; ошибки открывают транслятор без записи на диск |
 | `protocol-layout` | 200 строк настоящего ProtocolListBoxUI в четырёх вложенных SplitContainer и 15 обновлений | UI доходит до ApplicationIdle, невидимые строки виртуализируются; watchdog завершает только стенд при задержке более 30 секунд |
 | `blocking` | CreateAsync(...).GetAwaiter().GetResult() в Dispatcher, как в App.CreateCrashPackage | Захвачено продолжение JsonFileWriter; heartbeat не исполняется; watchdog завершает стенд с кодом 2 |
 | `blocking-worker` | Task.Run(CreateAsync) с сохранением GetResult в Dispatcher | ScreenshotCollector ждёт Dispatcher до отмены; интерфейс заблокирован примерно 3 секунды; архив не создаётся |
@@ -53,3 +55,9 @@ SynchronizationContext-обёртка только записывает тип �
 
 Полные журналы проверки находятся в каталоге, который печатает Verify.ps1.
 Каждый процесс дополнительно печатает собственный каталог `AskMkiM.DockingFreezeRepro/<id>` в TEMP.
+
+`inline-translation` запускается из свежего изолированного каталога с копией файлов стенда
+без `Resources/app.db`. Стенд создаёт там пустую тестовую схему SQLite для штатного
+транслятора и отказывается запускаться при наличии БД. Передайте абсолютный путь
+к собранному `AskMkiM.dll` вторым аргументом. Приложение и оборудование не запускаются;
+reflection связывает стенд с фактическим приватным orchestration приложения.

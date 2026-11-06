@@ -139,6 +139,9 @@ namespace UI.Components.MultiEditorMethods
     /// <returns><c>true</c>, если файл успешно сохранен, иначе <c>false</c>.</returns>
     public bool SaveFile(DockItem control)
     {
+      if (control?.Content is UI.Controls.Runner.RunControl runner)
+        return runner.SourceDocument != null && SaveFile(runner.SourceDocument);
+
       if (control != null)
       {
         var fileName = control.Title;
@@ -172,9 +175,8 @@ namespace UI.Components.MultiEditorMethods
         }
         else
         {
-          if (control.Content is TranslatorItem translator)
+          if (ExtractTextEditor(control) is TextEditorUI textEditor)
           {
-            var textEditor = translator.GetLeftBox().GetTextEditor();
             if (RequiresSaveAs(textEditor.TextEditorModel.FilePath))
             {
               return SaveFileAs(control);
@@ -218,6 +220,12 @@ namespace UI.Components.MultiEditorMethods
         }
         else
         {
+          if (control.Content is TextEditorUI sourceEditor)
+          {
+            SetBackup(sourceEditor.TextEditorModel.FileName, sourceEditor.Text);
+            return true;
+          }
+
           if (control.Content is TranslatorItem translator)
           {
             var leftTextEditor = translator.GetLeftBox();
@@ -261,6 +269,9 @@ namespace UI.Components.MultiEditorMethods
 
     public bool SaveFileAs(DockItem control)
     {
+      if (control?.Content is UI.Controls.Runner.RunControl runner)
+        return runner.SourceDocument != null && SaveFileAs(runner.SourceDocument);
+
       if (control == null)
       {
         return false;

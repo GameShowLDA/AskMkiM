@@ -37,6 +37,9 @@ namespace UI.Controls.Runner
 
     private void InitializeDockLayout()
     {
+      if (_closingDockLayout)
+        return;
+
       if (!_dockLayoutInitialized)
       {
         _dockLayoutInitialized = true;
@@ -89,20 +92,39 @@ namespace UI.Controls.Runner
         item.Close();
     }
 
-    private void ShowRunnerDocument(DockItem document)
+    private void ShowRunnerDocument(DockItem document, DockItemShowMethod showMethod = DockItemShowMethod.Activate)
     {
+      if (_closingDockLayout)
+        return;
+
       InitializeDockLayout();
       var anchor = RunnerDockManager.DockItems.FirstOrDefault(item =>
         item != document && item != ProtocolPane && item != ErrorsPane && item.FirstPane != null);
       if (anchor != null)
       {
-        document.Show(anchor.FirstPane, anchor.FirstPane.Items.Count);
+        document.Show(anchor.FirstPane, anchor.FirstPane.Items.Count, showMethod);
       }
       else
       {
         DockPaneNode leftArea = ProtocolPane.FirstPane.Parent ?? (DockPaneNode)ProtocolPane.FirstPane;
-        document.Show(leftArea, Dock.Right, new SplitterDistance(1, SplitterUnitType.Star));
+        document.Show(leftArea, false, Dock.Right, new SplitterDistance(1, SplitterUnitType.Star), false, showMethod);
       }
+    }
+
+    private void SelectRunnerDocument(DockItem document)
+    {
+      if (_closingDockLayout)
+        return;
+
+      if (document.DockPosition == DockPosition.Unknown)
+      {
+        // До Loaded транслированную программу выберет ShowDocuments после создания панелей.
+        if (RunnerDockManager.IsLoaded)
+          ShowRunnerDocument(document, DockItemShowMethod.Select);
+        return;
+      }
+
+      document.Show(DockItemShowMethod.Select);
     }
 
     private void RunControl_Unloaded(object sender, RoutedEventArgs e)

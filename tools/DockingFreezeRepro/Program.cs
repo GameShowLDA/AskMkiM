@@ -20,7 +20,7 @@ using UI.Windows.WpfDocking.Windows;
 using UI.Windows.WpfDocking.Windows.Docking;
 using UI.Windows.WpfDocking.Windows.Docking.Primitives;
 
-internal static class Program
+internal static partial class Program
 {
   private static readonly Stopwatch Clock = Stopwatch.StartNew();
   private static int _heartbeat;
@@ -29,9 +29,9 @@ internal static class Program
   private static int Main(string[] args)
   {
     var mode = args.FirstOrDefault() ?? "detach";
-    if (mode is not ("detach" or "collapse" or "close-runner" or "protocol-layout" or "blocking" or "blocking-worker" or "async"))
+    if (mode is not ("detach" or "collapse" or "close-runner" or "source-editor" or "inline-translation" or "protocol-layout" or "blocking" or "blocking-worker" or "async"))
     {
-      Console.Error.WriteLine("Modes: detach | collapse | close-runner | protocol-layout | blocking | blocking-worker | async");
+      Console.Error.WriteLine("Modes: detach | collapse | close-runner | source-editor | inline-translation <application.dll> | protocol-layout | blocking | blocking-worker | async");
       return 1;
     }
 
@@ -53,6 +53,10 @@ internal static class Program
           await ReproduceDockingAsync(application, mode);
         else if (mode == "protocol-layout")
           await VerifyProtocolLayoutAsync(application);
+        else if (mode == "source-editor")
+          await VerifyRunnerSourceAsync(application, root);
+        else if (mode == "inline-translation")
+          await VerifyInlineTranslationAsync(application, root, args.ElementAtOrDefault(1)!);
         else
           await ReproduceDiagnosticsAsync(application, root, mode);
       }
@@ -213,6 +217,13 @@ internal static class Program
       {
         Require(!floating.IsVisible && dock.DockItems.Count == 0,
           "Closing the runner must close all floating documents and panels");
+        runner!.ShowInspectionProtocol("Late protocol callback after executor close");
+        ((Ask.UI.Controls.ProtocolNew.ProtocolUI)((ContentControl)runner.FindName("MainContent")).Content)
+          .ShowInspectionProtocol("Late protocol update through ProtocolUI");
+        runner.ClearInspectionProtocol();
+        Require(!await runner.PrepareSourceForRunAsync(), "A closed executor must reject a late start request");
+        await application.Dispatcher.InvokeAsync(() => { }, DispatcherPriority.ApplicationIdle);
+        Require(dock.DockItems.Count == 0, "A late protocol callback must not recreate closed executor panes");
         Log("Runner close regression passed: no orphan floating windows");
         return;
       }

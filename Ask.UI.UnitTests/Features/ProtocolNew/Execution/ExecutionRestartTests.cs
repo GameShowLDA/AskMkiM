@@ -53,9 +53,14 @@ public sealed class ExecutionRestartTests
     try
     {
       await VerifyRejectedStartsAsync();
+      await VerifyBeforeStartAsync();
       foreach (var outcome in new[] { "success", "exception", "cancel", "stop", "finalizationException" })
       {
-        var protocol = new ProtocolUI { Header = "Restart regression " + outcome };
+        var protocol = new ProtocolUI
+        {
+          Header = "Restart regression " + outcome,
+          BeforeStartAsync = () => Task.FromResult(true),
+        };
         var buttons = (IProtocolButtonView)protocol;
         var preparationEntered = NewSignal();
         var continuePreparation = NewSignal();
@@ -205,6 +210,29 @@ public sealed class ExecutionRestartTests
   }
 
   private static TaskCompletionSource NewSignal() => new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+  private static async Task VerifyBeforeStartAsync()
+  {
+    var answer = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+    var checks = 0;
+    var protocol = new ProtocolUI
+    {
+      BeforeStartAsync = () => { checks++; return answer.Task; },
+    };
+    var message = new ShowMessageModel("Previous protocol must survive a rejected source translation");
+    await protocol.ShowMessageAsync(message, skipPause: true, SkipStepModeCheck: true, ignoreOutputValidation: true);
+    var start = protocol.StartAsync();
+    await protocol.StartAsync();
+    Assert.Equal(1, checks);
+    Assert.False(ExecutionRunGuard.GetActivity().IsBusy);
+    Assert.Contains(message, protocol.GetShowMessageModels());
+    answer.SetResult(false);
+    await start;
+    Assert.False(ExecutionRunGuard.GetActivity().IsBusy);
+    Assert.Contains(message, protocol.GetShowMessageModels());
+    await protocol.StartAsync();
+    Assert.Equal(2, checks);
+  }
 
   private static void ClickStart(ProtocolUI protocol)
   {

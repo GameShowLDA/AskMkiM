@@ -16,6 +16,50 @@
              xmlns:SharedIcons="clr-namespace:Ask.UI.Shared.Components.Icons;assembly=Ask.UI"
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
+        <Style x:Key="RunnerSourceStyle" TargetType="{x:Type docking:DockItem}"
+               BasedOn="{StaticResource {x:Type docking:DockItem}}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type docking:DockItem}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <Border Height="40" Margin="5" Padding="6,4"
+                                    Background="{DynamicResource SettingsNestedGroupBackgroundSolidColorBrush}"
+                                    Style="{DynamicResource SettingCardStyle}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Button x:Name="SaveSourceButton" Click="SaveSourceButton_Click"
+                                            ToolTip="Сохранить файл" Style="{StaticResource SaveButtonStyle}">
+                                        <SharedIcons:SaveIcon Size="16"
+                                            Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" />
+                                    </Button>
+                                    <Button x:Name="TranslateSourceButton" Grid.Column="1" Margin="8,0,0,0"
+                                            IsEnabled="{TemplateBinding Tag}"
+                                            Click="TranslateSourceButton_Click" ToolTip="Транслировать текущий текст"
+                                            Style="{StaticResource SaveButtonStyle}">
+                                        <SharedIcons:ExecutionPlayCircleIcon Size="16"
+                                            IsHovering="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=IsMouseOver}"
+                                            Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" />
+                                    </Button>
+                                    <TextBlock Grid.Column="2" Margin="12,0" VerticalAlignment="Center"
+                                               FontFamily="{DynamicResource WinstonBold}" FontSize="16"
+                                               Foreground="{DynamicResource ForegrounfBrushes}"
+                                               TextTrimming="CharacterEllipsis" Text="{TemplateBinding TabText}" />
+                                </Grid>
+                            </Border>
+                            <ContentPresenter Grid.Row="1" />
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
         <Style x:Key="RunnerDocumentStyle" TargetType="{x:Type docking:DockItem}"
                BasedOn="{StaticResource {x:Type docking:DockItem}}">
             <Setter Property="Template">

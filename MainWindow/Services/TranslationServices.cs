@@ -1,6 +1,7 @@
 using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.FileFormats;
 using Ask.Core.Shared.DTO.Executor;
+using Ask.Core.Shared.DTO.TextEditor;
 using Ask.Core.Shared.Metadata.Static;
 using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
 using Ask.Engine.ControlCommandAnalyser;
@@ -560,13 +561,24 @@ namespace MainWindowProgram.Services
 
           var runDockItem = runContainer?.GetDockControl().DockItems
             .FirstOrDefault(item => item.Content == run);
-          runDockItem?.PerformClose();
+          var sourceEditor = run.SourceEditor;
+          run.IsTransferringSource = true;
+          try
+          {
+            if (runDockItem?.Close() != true)
+              return;
+          }
+          finally
+          {
+            run.IsTransferringSource = false;
+          }
 
           var runControl = new RunControl
           {
             TranslationModels = run.TranslationModels,
+            TranslatedSourceText = run.TranslatedSourceText,
           };
-          await PrepareRun(runContainer, actualTextEditor, runControl, startStepByStep, isStepInto);
+          await PrepareRun(runContainer, actualTextEditor, runControl, startStepByStep, isStepInto, sourceEditor);
         }
         else
         {
@@ -607,19 +619,14 @@ namespace MainWindowProgram.Services
 
         RunControl runControl = new RunControl();
         runControl.TranslationModels = translator.TranslationModels;
-        await PrepareRun(runContainer, actualTextEditor, runControl, startStepByStep, isStepInto);
+        runControl.TranslatedSourceText = translator.TranslatedSourceText ?? sourceEditor.Text;
+        await PrepareRun(runContainer, actualTextEditor, runControl, startStepByStep, isStepInto, sourceEditor);
       }
     }
 
     private static TextEditorUI? GetRunEditor(RunControl runControl)
     {
-      return runControl.FindName("ChildTextEditorContainer") is not TextEditorContainer container
-        ? null
-        : container.GetDockControl().DockItems
-          .Select(item => item.Content)
-          .OfType<TranslatorEditor>()
-          .FirstOrDefault()
-          ?.GetTextEditor();
+      return runControl.GetTranslatedEditor();
     }
 
     /// <summary>
@@ -628,12 +635,14 @@ namespace MainWindowProgram.Services
     /// <param name="runContainer">Контейнер исполнения.</param>
     /// <param name="editor">Редактор, содержащий путь к файлу и исходные данные.</param>
     /// <param name="runControl">Контрол исполнения.</param>
+    /// <param name="sourceEditor">Редактор исходника с текущим текстом программы.</param>
     private async Task PrepareRun(
       TextEditorContainer runContainer,
       TextEditorUI editor,
       RunControl runControl,
       bool startStepByStep,
-      bool isStepInto)
+      bool isStepInto,
+      TextEditorUI? sourceEditor)
     {
       runControl.OpkFilePath = editor.TextEditorModel.FilePath;
       runControl.SourceArchiveName = editor.TextEditorModel.SourceArchiveName;
@@ -644,6 +653,11 @@ namespace MainWindowProgram.Services
         $"protocol{ProtocolFileExtensions.Trace}");
 
       runControl.SetLeftEditor(editor);
+      if (sourceEditor != null)
+      {
+        runControl.SetSourceEditor(sourceEditor);
+        runControl.TranslateSourceAsync = source => TranslateRunnerSourceAsync(runControl, source);
+      }
 
       if (runContainer == null)
       {
@@ -661,6 +675,59 @@ namespace MainWindowProgram.Services
       }
 
       await runControl.Start(runControl.TranslationModels, startStepByStep, isStepInto);
+    }
+
+    private async Task<bool> TranslateRunnerSourceAsync(RunControl runner, TextEditorUI source)
+    {
+      if (Ask.UI.Features.ProtocolNew.Execution.ExecutionRunGuard.GetActivity().IsBusy)
+        return false;
+
+      var model = source.TextEditorModel;
+      var copy = new TextEditorUI(source.FileType, new TextEditorModel(
+        model.FilePath, model.FileName, model.OriginalFileName, model.Encoding)
+      {
+        SourceArchiveName = model.SourceArchiveName,
+        SavedTextSnapshot = model.SavedTextSnapshot,
+      }) { Text = source.Text };
+      if (!TryPrepareTextForTranslation(copy, out var text))
+        return false;
+
+      try
+      {
+        TranslationBuildResult? result = null;
+        await RunWithTranslationProgressAsync(async progress => result = await BuildTranslationAsync(text, progress));
+        if (result == null)
+          return false;
+
+        if (result.Models.Any(command => command.Errors.Count > 0))
+        {
+          await CreateNewTranslator(copy, text, preserveSourceOnFailure: true, preparedResult: result);
+          return false;
+        }
+
+        var editor = _fileService.CreateTranslationFileAsync(model.FilePath);
+        if (editor is not TextEditorUI translated)
+          return false;
+
+        translated.TextEditorModel.SourceArchiveName = model.SourceArchiveName;
+        translated.Text = result.FormattedText;
+        foreach (var command in result.Models)
+          translated.TextEditorModel.SourceLines.AddRange(command.SourceLines);
+        var allowed = result.Models.Where(IsBreakpointAllowed).ToList();
+        translated.ConfigureBreakpoints(interactive: true, visible: true);
+        translated.RightBreakpoint = allowed.Select(command => command.FormattedStartLineNumber + 1).ToList();
+        translated.NumCommandWithMnemonic = BuildNumCommandWithMnemonic(allowed);
+        var preserved = runner.TranslationModels.Where(command => command.HasBreakpoint)
+          .ToDictionary(command => int.Parse(command.CommandNumber), command => command.IsBreakpointEnabled);
+        RestoreBreakpoints(result.Models, copy, translated, preserved);
+        runner.ApplySourceTranslation(translated, result.Models, text);
+        return true;
+      }
+      catch (Exception ex)
+      {
+        await ShowTranslationErrorAsync(ex, source, text, nameof(TranslateRunnerSourceAsync));
+        return false;
+      }
     }
 
     private static string GetDisplayFileName(string? filePath, string? fileName)
@@ -926,6 +993,7 @@ namespace MainWindowProgram.Services
                 90d);
 
             currentItem.ApplyTranslationModels(models, issuesSnapshot);
+            currentItem.TranslatedSourceText = text;
 
             await SetTranslationStageAsync(
                 progressWindow,
@@ -968,8 +1036,11 @@ namespace MainWindowProgram.Services
     /// </summary>
     /// <param name="editor">Редактор с исходным текстом.</param>
     /// <param name="text">Текст, подлежащий трансляции.</param>
+    /// <param name="preserveSourceOnFailure">Сохраняет исходник в исполнителе вместо открытия дисковой копии при ошибке.</param>
+    /// <param name="preparedResult">Готовый результат, позволяющий открыть диагностику без повторной трансляции.</param>
     /// <returns>Асинхронная задача создания компонента транслятора.</returns>
-    private async Task CreateNewTranslator(TextEditorUI editor, string text)
+    private async Task CreateNewTranslator(TextEditorUI editor, string text, bool preserveSourceOnFailure = false,
+      TranslationBuildResult? preparedResult = null)
     {
       TranslatorItem? createdItem = null;
       ITextEditorView? translateEditor = null;
@@ -1029,7 +1100,7 @@ namespace MainWindowProgram.Services
               "Создаём редактор для новой вкладки транслятора.",
               8d);
 
-          var translationResult = await BuildTranslationAsync(text, progressWindow);
+          var translationResult = preparedResult ?? await BuildTranslationAsync(text, progressWindow);
           var models = translationResult.Models;
           var allowed = models.Where(IsBreakpointAllowed).ToList();
 
@@ -1082,6 +1153,7 @@ namespace MainWindowProgram.Services
               90d);
 
           createdItem.ApplyTranslationModels(models, issuesSnapshot);
+          createdItem.TranslatedSourceText = text;
 
           await SetTranslationStageAsync(
               progressWindow,
@@ -1109,8 +1181,11 @@ namespace MainWindowProgram.Services
       {
         await ShowTranslationErrorAsync(ex, editor, text, nameof(CreateNewTranslator));
 
-        EditorEventAdapter.RaiseTextEditorActivated(editor);
-        _multiWindow.EditorDocumentService.OpenFile(editor.TextEditorModel.FilePath);
+        if (!preserveSourceOnFailure)
+        {
+          EditorEventAdapter.RaiseTextEditorActivated(editor);
+          _multiWindow.EditorDocumentService.OpenFile(editor.TextEditorModel.FilePath);
+        }
       }
       finally
       {
