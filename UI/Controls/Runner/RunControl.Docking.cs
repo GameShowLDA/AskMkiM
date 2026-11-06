@@ -26,6 +26,7 @@ namespace UI.Controls.Runner
     private bool _errorHeightCustomized;
     private DockPaneSplit? _errorPaneSplit;
     private DockItem? _runnerOwner;
+    private DispatcherOperation? _pendingErrorLayoutRefresh;
 
     private void InitializeDocking()
     {
@@ -35,6 +36,7 @@ namespace UI.Controls.Runner
       RunnerDockManager.Loaded += (_, _) =>
       {
         InitializeDockLayout();
+        ResumeRunnerFloatingWindows();
         Dispatcher.BeginInvoke(new Action(ShowPendingInspectionProtocol), DispatcherPriority.Loaded);
       };
       _errorResizeTimer.Tick += ErrorResizeTimer_Tick;
@@ -65,6 +67,14 @@ namespace UI.Controls.Runner
       }
 
       UpdateErrorPaneSplit();
+      var hostWindow = Window.GetWindow(this);
+      if (_layoutHostWindow != hostWindow)
+      {
+        DetachLayoutHost();
+        _layoutHostWindow = hostWindow;
+        if (_layoutHostWindow != null)
+          _layoutHostWindow.Closing += LayoutHost_Closing;
+      }
       for (DependencyObject? parent = VisualTreeHelper.GetParent(this); parent != null;
         parent = VisualTreeHelper.GetParent(parent))
       {
@@ -73,10 +83,14 @@ namespace UI.Controls.Runner
           if (_runnerOwner != owner)
           {
             if (_runnerOwner != null)
+            {
               _runnerOwner.StateChanged -= RunnerOwner_StateChanged;
+              _runnerOwner.Closing -= RunnerOwner_Closing;
+            }
 
             _runnerOwner = owner;
             _runnerOwner.StateChanged += RunnerOwner_StateChanged;
+            _runnerOwner.Closing += RunnerOwner_Closing;
           }
 
           break;
@@ -86,7 +100,13 @@ namespace UI.Controls.Runner
 
     private void RunnerPane_Closing(object? sender, CancelEventArgs e)
     {
-      e.Cancel = !_closingDockLayout;
+      e.Cancel = !_closingDockLayout && !_restoringRunnerLayout;
+    }
+
+    private void RunnerOwner_Closing(object? sender, CancelEventArgs e)
+    {
+      if (!e.Cancel)
+        SaveRunnerLayout();
     }
 
     private void RunnerOwner_StateChanged(object? sender, DockItemStateEventArgs e)
@@ -95,11 +115,15 @@ namespace UI.Controls.Runner
         return;
 
       _closingDockLayout = true;
+      UnsubscribeRunnerEvents();
+      _pendingErrorLayoutRefresh?.Abort();
+      DetachLayoutHost();
       _errorResizeTimer.Stop();
       DetachErrorPaneSplit();
       if (_runnerOwner != null)
       {
         _runnerOwner.StateChanged -= RunnerOwner_StateChanged;
+        _runnerOwner.Closing -= RunnerOwner_Closing;
         _runnerOwner = null;
       }
 
@@ -115,7 +139,7 @@ namespace UI.Controls.Runner
 
       InitializeDockLayout();
       var anchor = RunnerDockManager.DockItems.FirstOrDefault(item =>
-        item != document && item != ProtocolPane && item != ErrorsPane && item.FirstPane != null);
+        item != document && item != ProtocolPane && item != ErrorsPane && item.FirstPane != null && !item.IsHidden);
       if (anchor != null)
       {
         document.Show(anchor.FirstPane, anchor.FirstPane.Items.Count, showMethod);
@@ -137,17 +161,30 @@ namespace UI.Controls.Runner
 
     private void RunControl_Unloaded(object sender, RoutedEventArgs e)
     {
+      _pendingErrorLayoutRefresh?.Abort();
+      _pendingErrorLayoutRefresh = null;
+      DetachLayoutHost();
       _errorResizeTimer.Stop();
       DetachErrorPaneSplit();
     }
 
     private void RunnerDockManager_DockItemStateChanged(object? sender, DockItemStateEventArgs e)
     {
-      if (!IsLoaded || _closingDockLayout)
+      if (!IsLoaded || _closingDockLayout || _restoringRunnerLayout)
         return;
 
-      UpdateErrorPaneSplit();
-      Dispatcher.BeginInvoke(new Action(ErrorListBoxVertical.RefreshLayoutFromHost), DispatcherPriority.Loaded);
+      if (_pendingErrorLayoutRefresh != null)
+        return;
+
+      _pendingErrorLayoutRefresh = Dispatcher.BeginInvoke(DispatcherPriority.Loaded, new Action(() =>
+      {
+        _pendingErrorLayoutRefresh = null;
+        if (!IsLoaded || _closingDockLayout)
+          return;
+
+        UpdateErrorPaneSplit();
+        ErrorListBoxVertical.RefreshLayoutFromHost();
+      }));
     }
 
     private void UpdateErrorPaneSplit()
@@ -187,7 +224,8 @@ namespace UI.Controls.Runner
     private void ErrorResizeTimer_Tick(object? sender, EventArgs e)
     {
       _errorResizeTimer.Stop();
-      ErrorListLayoutSettings.SaveHeight(ErrorListBoxVertical.ActualHeight);
+      if (_runnerLayoutPath == null)
+        ErrorListLayoutSettings.SaveHeight(ErrorListBoxVertical.ActualHeight);
       ErrorListBoxVertical.RefreshLayoutFromHost();
     }
 

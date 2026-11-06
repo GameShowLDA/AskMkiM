@@ -29,9 +29,9 @@ internal static partial class Program
   private static int Main(string[] args)
   {
     var mode = args.FirstOrDefault() ?? "detach";
-    if (mode is not ("detach" or "collapse" or "close-runner" or "source-editor" or "inline-translation" or "protocol-layout" or "blocking" or "blocking-worker" or "async"))
+    if (mode is not ("detach" or "collapse" or "close-runner" or "shutdown-floating" or "source-editor" or "runner-layout" or "inline-translation" or "protocol-layout" or "blocking" or "blocking-worker" or "async"))
     {
-      Console.Error.WriteLine("Modes: detach | collapse | close-runner | source-editor | inline-translation <application.dll> | protocol-layout | blocking | blocking-worker | async");
+      Console.Error.WriteLine("Modes: detach | collapse | close-runner | shutdown-floating | source-editor | runner-layout | inline-translation <application.dll> | protocol-layout | blocking | blocking-worker | async");
       return 1;
     }
 
@@ -49,12 +49,14 @@ internal static partial class Program
     {
       try
       {
-        if (mode is "detach" or "collapse" or "close-runner")
+        if (mode is "detach" or "collapse" or "close-runner" or "shutdown-floating")
           await ReproduceDockingAsync(application, mode);
         else if (mode == "protocol-layout")
           await VerifyProtocolLayoutAsync(application);
         else if (mode == "source-editor")
           await VerifyRunnerSourceAsync(application, root);
+        else if (mode == "runner-layout")
+          await VerifyRunnerLayoutAsync(application, root);
         else if (mode == "inline-translation")
           await VerifyInlineTranslationAsync(application, root, args.ElementAtOrDefault(1)!);
         else
@@ -174,7 +176,8 @@ internal static partial class Program
     };
 
     var dock = new DockControl();
-    RunControl? runner = mode == "close-runner" ? new RunControl() : null;
+    RunControl? runner = mode is "close-runner" or "shutdown-floating" ? new RunControl() : null;
+    bool leaveFloatingWindowForShutdown = false;
     var parentDock = runner == null ? dock : new DockControl();
     var parentItem = runner == null ? null : new DockItem { Title = "Runner", Content = runner };
     var host = new Grid();
@@ -195,8 +198,13 @@ internal static partial class Program
         parentItem!.Show(parentDock, DockPosition.Document);
         await application.Dispatcher.InvokeAsync(() => { }, DispatcherPriority.ApplicationIdle);
         dock = (DockControl)runner.FindName("RunnerDockManager");
-        runner.ShowInspectionProtocol("Isolated inspection protocol");
-        item = dock.DockItems.Single(document => document.TabText == "Итоговый протокол");
+        if (mode == "shutdown-floating")
+          item = (DockItem)runner.FindName("ProtocolPane");
+        else
+        {
+          runner.ShowInspectionProtocol("Isolated inspection protocol");
+          item = dock.DockItems.Single(document => document.TabText == "Итоговый протокол");
+        }
       }
       item.Show(dock, new Rect(100, 100, 350, 250));
       await application.Dispatcher.InvokeAsync(() => { }, DispatcherPriority.ApplicationIdle);
@@ -205,10 +213,29 @@ internal static partial class Program
       Log($"before: loaded={dock.IsLoaded}; connected={PresentationSource.FromVisual(dock) != null}; floatingVisible={floating.IsVisible}");
       Require(dock.IsLoaded && PresentationSource.FromVisual(dock) != null && floating.IsVisible,
         "Initial dock/floating window state does not match the scenario");
+      if (mode == "shutdown-floating")
+      {
+        SendMessage(new System.Windows.Interop.WindowInteropHelper(floating).Handle, 0x0112, new IntPtr(0xF060), IntPtr.Zero);
+        Require(floating.IsVisible && item.DockPosition == DockPosition.Floating,
+          "User close must respect the protected protocol pane");
+        leaveFloatingWindowForShutdown = true;
+        _ = Task.Run(async () =>
+        {
+          await Task.Delay(TimeSpan.FromSeconds(15));
+          Log("WATCHDOG: application shutdown is stuck on the protected floating pane");
+          Environment.Exit(2);
+        });
+        Log("Shutting down with a protected floating pane");
+        return;
+      }
       if (mode == "detach")
         host.Children.Remove(dock);
       else if (mode == "close-runner")
+      {
+        Require(CountEventSubscriptions(runner!) == 7, "Runner must subscribe to its seven events");
         parentItem!.Close();
+        Require(CountEventSubscriptions(runner!) == 0, "Closing the runner must remove global subscriptions");
+      }
       else
         dock.Visibility = Visibility.Collapsed;
       await application.Dispatcher.InvokeAsync(() => { }, DispatcherPriority.ApplicationIdle);
@@ -254,9 +281,26 @@ internal static partial class Program
     finally
     {
       Mouse.Capture(null);
-      foreach (var dockItem in dock.DockItems.ToArray()) dockItem.Close();
-      owner.Close();
+      if (!leaveFloatingWindowForShutdown)
+      {
+        foreach (var dockItem in dock.DockItems.ToArray()) dockItem.Close();
+        owner.Close();
+      }
     }
+  }
+
+  [System.Runtime.InteropServices.DllImport("user32.dll", EntryPoint = "SendMessageW")]
+  private static extern IntPtr SendMessage(IntPtr hwnd, int message, IntPtr wParam, IntPtr lParam);
+
+  private static int CountEventSubscriptions(object target)
+  {
+    var subscribers = (System.Collections.Concurrent.ConcurrentDictionary<Type, List<Delegate>>)
+      typeof(Ask.Core.Services.EventCore.Services.EventAggregator)
+        .GetField("_subscribers", BindingFlags.Static | BindingFlags.NonPublic)!.GetValue(null)!;
+    return subscribers.Values.Sum(list =>
+    {
+      lock (list) return list.Count(handler => ReferenceEquals(handler.Target, target));
+    });
   }
 
   private static async Task ReproduceDiagnosticsAsync(Application application, string root, string mode)

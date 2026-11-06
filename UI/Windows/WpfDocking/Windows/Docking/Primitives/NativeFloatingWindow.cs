@@ -119,7 +119,8 @@ namespace UI.Windows.WpfDocking.Windows.Docking.Primitives
 
     private HwndSource _hwndSource;
     private HwndSourceHook _wndProcHandler;
-    private const int WM_CLOSE = 0x0010;
+    private const int WM_SYSCOMMAND = 0x0112;
+    private const int SC_CLOSE = 0xF060;
     private const int WM_NCLBUTTONDOWN = 0xA1;
     private const int WM_NCLBUTTONUP = 0xA2;
     private const int WM_NCLBUTTONDBLCLK = 0xA3;
@@ -146,7 +147,8 @@ namespace UI.Windows.WpfDocking.Windows.Docking.Primitives
     {
       switch (msg)
       {
-        case WM_CLOSE:
+        // WPF отправляет WM_CLOSE напрямую при завершении приложения.
+        case WM_SYSCOMMAND when (wParam.ToInt64() & 0xFFF0) == SC_CLOSE:
           if (FloatingWindow != null && FloatingWindow.DockControl != null)
           {
             PerformClose();

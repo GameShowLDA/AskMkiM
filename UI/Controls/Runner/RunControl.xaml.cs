@@ -105,8 +105,8 @@ namespace UI.Controls.Runner
       ErrorListBoxVertical.DesiredHeightChanged += ErrorListBoxVertical_DesiredHeightChanged;
       devicesStatus = new DevicesStatus();
 
-      EventAggregator.Subscribe<SystemStateEvents.LockedChanged>(e => OnLockedChanged(e.IsLocked));
-      EventAggregator.Subscribe<ExecutionEvents.ActiveDeviceChanged>(e => devicesStatus.LoadDevices(e.Devices));
+      EventAggregator.Subscribe<SystemStateEvents.LockedChanged>(OnRunnerLockedChanged);
+      EventAggregator.Subscribe<ExecutionEvents.ActiveDeviceChanged>(OnRunnerActiveDeviceChanged);
       EventAggregator.Subscribe<FileInteractionEvents.ViewProtocol>(OnViewProtocol);
 
       InitializeDocking();
@@ -118,10 +118,25 @@ namespace UI.Controls.Runner
       ErrorListBoxVertical.BreakpointToggleRequested += BreakpointToggleRequested;
 
       // События брейкпоинтов, чтобы вкладка обновлялась в Run
-      EventAggregator.Subscribe<BreakpointEvents.BreakpointSet>(e => OnBreakpointSet(e));
-      EventAggregator.Subscribe<BreakpointEvents.BreakpointRemoved>(e => OnBreakpointRemoved(e));
-      EventAggregator.Subscribe<BreakpointEvents.BreakpointOn>(e => OnBreakpointOn(e));
-      EventAggregator.Subscribe<BreakpointEvents.BreakpointOff>(e => OnBreakpointOff(e));
+      EventAggregator.Subscribe<BreakpointEvents.BreakpointSet>(OnBreakpointSet);
+      EventAggregator.Subscribe<BreakpointEvents.BreakpointRemoved>(OnBreakpointRemoved);
+      EventAggregator.Subscribe<BreakpointEvents.BreakpointOn>(OnBreakpointOn);
+      EventAggregator.Subscribe<BreakpointEvents.BreakpointOff>(OnBreakpointOff);
+    }
+
+    private void OnRunnerLockedChanged(SystemStateEvents.LockedChanged e) => OnLockedChanged(e.IsLocked);
+
+    private void OnRunnerActiveDeviceChanged(ExecutionEvents.ActiveDeviceChanged e) => devicesStatus.LoadDevices(e.Devices);
+
+    private void UnsubscribeRunnerEvents()
+    {
+      EventAggregator.Unsubscribe<SystemStateEvents.LockedChanged>(OnRunnerLockedChanged);
+      EventAggregator.Unsubscribe<ExecutionEvents.ActiveDeviceChanged>(OnRunnerActiveDeviceChanged);
+      EventAggregator.Unsubscribe<FileInteractionEvents.ViewProtocol>(OnViewProtocol);
+      EventAggregator.Unsubscribe<BreakpointEvents.BreakpointSet>(OnBreakpointSet);
+      EventAggregator.Unsubscribe<BreakpointEvents.BreakpointRemoved>(OnBreakpointRemoved);
+      EventAggregator.Unsubscribe<BreakpointEvents.BreakpointOn>(OnBreakpointOn);
+      EventAggregator.Unsubscribe<BreakpointEvents.BreakpointOff>(OnBreakpointOff);
     }
     /// <summary>
     /// Обрабатывает событие изменения состояния блокировки интерфейса.
@@ -354,6 +369,7 @@ namespace UI.Controls.Runner
         ShowRunnerDocument(dockItemPk);
         if (SourceDocument != null)
           ShowRunnerDocument(SourceDocument, DockItemShowMethod.Deselect);
+        RestoreRunnerLayout(dockItemDeviceState, dockItemPk);
         Application.Current.Dispatcher.BeginInvoke(new Action(() =>
         {
           SyncBreakpointsFromEditor(textEditorUI);
@@ -458,16 +474,8 @@ namespace UI.Controls.Runner
         _inspectionProtocolEditor.WordWrap = true;
         _inspectionProtocolEditor.Text = protocolText ?? string.Empty;
 
-        _inspectionProtocolDockItem = new DockItem
-        {
-          Title = "Итоговый протокол",
-          TabText = "Итоговый протокол",
-          Content = _inspectionProtocolEditor,
-          Style = (Style)FindResource("RunnerDocumentStyle"),
-          Tag = FileType.InspectionProtocol,
-        };
-
-        DocumentTab.SetHideCloseButton(_inspectionProtocolDockItem, true);
+        _inspectionProtocolDockItem ??= CreateInspectionProtocolDockItem();
+        _inspectionProtocolDockItem.Content = _inspectionProtocolEditor;
         ShowPendingInspectionProtocol();
       });
     }
@@ -475,8 +483,26 @@ namespace UI.Controls.Runner
     private void ShowPendingInspectionProtocol()
     {
       if (!_closingDockLayout && _dockLayoutInitialized && RunnerDockManager.IsLoaded
-        && _inspectionProtocolDockItem is { DockPosition: DockPosition.Unknown } document)
-        ShowRunnerDocument(document);
+        && _inspectionProtocolEditor != null && _inspectionProtocolDockItem is { } document)
+      {
+        if (document.FirstPane == null)
+          ShowRunnerDocument(document);
+        else if (document.IsHidden)
+          document.Show(DockItemShowMethod.Activate);
+      }
+    }
+
+    private DockItem CreateInspectionProtocolDockItem()
+    {
+      var document = new DockItem
+      {
+        Title = "Итоговый протокол",
+        TabText = "Итоговый протокол",
+        Style = (Style)FindResource("RunnerDocumentStyle"),
+        Tag = FileType.InspectionProtocol,
+      };
+      DocumentTab.SetHideCloseButton(document, true);
+      return document;
     }
 
     /// <inheritdoc />
@@ -492,16 +518,16 @@ namespace UI.Controls.Runner
         _inspectionProtocolEditor.Text = string.Empty;
       }
 
-      if (_inspectionProtocolDockItem != null)
+      if (_inspectionProtocolDockItem is { } document)
       {
-        var dockManager = RunnerDockManager;
-        if (dockManager.DockItems.Contains(_inspectionProtocolDockItem))
+        if (document.FirstPane != null && !document.IsHidden)
         {
-          _inspectionProtocolDockItem.Close();
+          RememberResultSplitSizes(document.FirstPane);
+          document.Hide();
         }
+        document.Content = null;
       }
 
-      _inspectionProtocolDockItem = null;
       _inspectionProtocolEditor = null;
     }
 

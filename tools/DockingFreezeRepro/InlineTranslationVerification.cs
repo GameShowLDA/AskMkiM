@@ -124,6 +124,13 @@ internal static partial class Program
         && failedTranslation.TranslatedSourceText == failedTranslation.GetLeftBox().GetTextEditor().Text,
         "The translator must show diagnostics for the current unsaved source");
       Require(File.ReadAllText(path) == text, "Translation must not write unsaved source to disk");
+      Require(CountEventSubscriptions(failedTranslation) == 4, "Loaded translator must have one subscription per breakpoint event");
+      owner.Content = null;
+      await application.Dispatcher.InvokeAsync(() => { }, DispatcherPriority.ApplicationIdle);
+      Require(CountEventSubscriptions(failedTranslation) == 0, "Detached translator must release its subscriptions");
+      owner.Content = multi;
+      await application.Dispatcher.InvokeAsync(() => { }, DispatcherPriority.ApplicationIdle);
+      Require(CountEventSubscriptions(failedTranslation) == 4, "Reloading the translator must restore subscriptions without duplicates");
       Log("Inline translation regression passed: production translator, in-place result, error handoff");
     }
     finally
