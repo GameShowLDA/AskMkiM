@@ -3018,7 +3018,21 @@ ApplyMessage → InfoBlock.Text/Foreground`. `GuiInitializer.Apply` связыв
 `MainWindow/Resources/MainMenuStyles.xaml` и применяет `ShellContextMenuStyle`: скруглённая
 панель с тенью, ограничение высоты и MenuScrollViewer; строки используют существующий
 `StyleMenuItem` с компактными отступами. Состав списка и обработчики выбора кодировки
-сохранены. Видимость блока сохраняет `EditorEvents.TranslatorActive`.
+сохранены. `ToggleEncodingCommandImpl.Execute` выбирает UTF-8/CP866 по
+`TextEditorModel.Encoding` активной вкладки. Ручное переоткрытие использует выбранную
+кодировку без автоопределения BOM. Видимость блока сохраняет
+`EditorEvents.TranslatorActive`.
+
+Открытие файлов в редакторе через `UI/Services/FileManager/FileOpenService.cs`
+(`ReadRawFileContent`) и просмотр связанных протоколов через
+`MainWindow/Services/FileService.cs` (`ReadSavedProtocolText`) используют
+`UI/Services/EncodingService.cs` (`ReadFile` → `Decode`).
+Зашифрованные протоколы передают детектору расшифрованные байты. Детектор проверяет
+BOM UTF-8/16/32, строго валидирует UTF-8, учитывает каталог резервных копий,
+сравнивает признаки искажённого текста и при неоднозначности использует кодировку
+по умолчанию для расширения. Выбранная кодировка передаётся в `OpenNewFile` →
+`TextEditorModel.Encoding` → строка состояния и сохранение форматов, которые
+используют кодировку документа. `SaveFileManager.SetBackup` пишет UTF-8 без BOM.
 Индикатор раскладки `UI/Components/KeyboardLayoutComponent.xaml` — кнопка 44×32 с
 `WindowActionButtonStyle`, шрифтом Manrope и общими состояниями наведения/нажатия.
 `LayoutButton.Click → LayoutButton_Click → SwitchToNextInputLanguage → ActivateLanguage`

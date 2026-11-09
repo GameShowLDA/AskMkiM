@@ -25,7 +25,7 @@ namespace UI.Services.FileManager
   /// Основные функции:
   /// <list type="bullet">
   ///   <item>Открывает указанный файл и загружает его содержимое в редактор.</item>
-  ///   <item>Определяет кодировку и тип содержимого по расширению.</item>
+  ///   <item>Определяет кодировку по содержимому и типу файла.</item>
   ///   <item>Создаёт новый редактор для файла или активирует уже открытый экземпляр.</item>
   ///   <item>Обрабатывает ошибки и уведомляет пользователя при сбоях.</item>
   /// </list>
@@ -270,21 +270,13 @@ namespace UI.Services.FileManager
         encoding = Encoding.GetEncoding(866);
       }
 
-      var content = ReadTextFile(path, encoding, extention)
+      bool encrypted = IsProtocolFileExtension(extention) && FileEncryptionManager.IsFileEncrypted(path);
+      var (text, detectedEncoding) = EncodingService.ReadFile(path, encoding, encrypted);
+      var content = text
         .Replace("\r\n", "\n")
         .Replace('\r', '\n');
 
-      return (content, encoding);
-    }
-
-    private static string ReadTextFile(string path, Encoding encoding, string extension)
-    {
-      if (IsProtocolFileExtension(extension) && FileEncryptionManager.IsFileEncrypted(path))
-      {
-        return FileEncryptionManager.ReadEncryptedFileText(path, encoding);
-      }
-
-      return File.ReadAllText(path, encoding);
+      return (content, detectedEncoding);
     }
 
     private static bool IsProtocolFileExtension(string extension)
