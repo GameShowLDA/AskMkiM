@@ -38,6 +38,13 @@ namespace Ask.Device.Application.Composition
 
       switch (device)
       {
+        case B5108 powerSupply:
+          powerSupply.VoltageManager = new FunctionAdapters.B5108.VoltageManagerAdapter(powerSupply);
+          powerSupply.CurrentManager = new FunctionAdapters.B5108.CurrentManagerAdapter(powerSupply);
+          powerSupply.OutputManager = new FunctionAdapters.B5108.OutputManagerAdapter(powerSupply);
+          powerSupply.MeasurementManager = new FunctionAdapters.B5108.MeasurementManagerAdapter(powerSupply);
+          break;
+
         case GPT79904 gpt:
           gpt.AcwManger = new GptAcwModeAdapter(gpt);
           gpt.DcwManger = new GptDcwModeAdapter(gpt);

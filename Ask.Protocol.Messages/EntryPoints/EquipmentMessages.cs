@@ -15,6 +15,27 @@ namespace Ask.Protocol.Messages.EntryPoints;
 public static class EquipmentMessages
 {
   /// <summary>
+  /// Публикует результат операции внешнего источника питания.
+  /// </summary>
+  /// <param name="device">Внешний источник питания.</param>
+  /// <param name="operation">Название операции.</param>
+  /// <param name="isSuccessful">Признак успешного выполнения.</param>
+  /// <param name="details">Параметры или описание результата.</param>
+  /// <param name="outputService">Сервис вывода сообщений.</param>
+  /// <param name="callerName">Имя вызывающего метода.</param>
+  /// <param name="callerFile">Путь вызывающего файла.</param>
+  /// <param name="callerLine">Номер вызывающей строки.</param>
+  /// <returns>Задача публикации результата.</returns>
+  public static Task PublishPowerSupplyOperationResultAsync(IDevice device, string operation,
+    bool isSuccessful, string? details = null, IMessageOutputService? outputService = null,
+    [CallerMemberName] string callerName = "", [CallerFilePath] string callerFile = "", [CallerLineNumber] int callerLine = 0)
+  {
+    if (!DeviceDisplayConfig.ShouldDisplayOperationResult(isSuccessful)) return Task.CompletedTask;
+    var message = EquipmentMessageBuilder.BuildPowerSupplyOperationResult(device, operation, isSuccessful, details);
+    return EquipmentMessagePublisher.PublishAsync(message, outputService, callerName, callerFile, callerLine);
+  }
+
+  /// <summary>
   /// Публикует заголовок проверки работоспособности устройства.
   /// </summary>
   /// <param name="device">Проверяемое устройство.</param>
@@ -62,6 +83,9 @@ public static class EquipmentMessages
     [CallerFilePath] string callerFile = "",
     [CallerLineNumber] int callerLine = 0)
   {
+    if (device is Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSupply.IPowerSupply)
+      return PublishPowerSupplyOperationResultAsync(device, "Подключение", isSuccessful, details, outputService);
+
     if (device is IAttachableDevice attachableDevice
         && DeviceDisplayConfig.ShouldDisplayOperationResult(isSuccessful))
     {
@@ -92,6 +116,9 @@ public static class EquipmentMessages
     [CallerFilePath] string callerFile = "",
     [CallerLineNumber] int callerLine = 0)
   {
+    if (device is Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSupply.IPowerSupply)
+      return PublishPowerSupplyOperationResultAsync(device, "Отключение", isSuccessful, details, outputService);
+
     if (device is IAttachableDevice attachableDevice
         && DeviceDisplayConfig.ShouldDisplayOperationResult(isSuccessful))
     {
@@ -124,6 +151,9 @@ public static class EquipmentMessages
     [CallerLineNumber] int callerLine = 0,
     int attempt = 1)
   {
+    if (device is Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSupply.IPowerSupply)
+      return PublishPowerSupplyOperationResultAsync(device, "Инициализация", isSuccessful, details, outputService);
+
     if (device is IAttachableDevice attachableDevice
         && DeviceDisplayConfig.ShouldDisplayOperationResult(isSuccessful))
     {
@@ -156,6 +186,9 @@ public static class EquipmentMessages
     [CallerFilePath] string callerFile = "",
     [CallerLineNumber] int callerLine = 0)
   {
+    if (device is Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSupply.IPowerSupply)
+      return PublishPowerSupplyOperationResultAsync(device, "Настройка", isSuccessful, details, outputService);
+
     if (device is IAttachableDevice attachableDevice
         && DeviceDisplayConfig.ShouldDisplayOperationResult(isSuccessful))
     {
@@ -186,6 +219,9 @@ public static class EquipmentMessages
     [CallerFilePath] string callerFile = "",
     [CallerLineNumber] int callerLine = 0)
   {
+    if (device is Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSupply.IPowerSupply)
+      return PublishPowerSupplyOperationResultAsync(device, "Сброс устройства", isSuccessful, details, outputService);
+
     if (device is IAttachableDevice attachableDevice
         && DeviceDisplayConfig.ShouldDisplayOperationResult(isSuccessful))
     {

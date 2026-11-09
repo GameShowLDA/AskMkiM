@@ -209,6 +209,10 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
     /// <param name="issues">Список обнаруженных ошибок обязательных параметров.</param>
     private void AddAdditionalSettingsIssues(List<RequiredParameterIssue> issues)
     {
+      AddIssueIf(issues, _powerSupplyPortTextBox != null && GetPowerSupplyPort() == 0,
+        "TCP-порт источника питания (1–65535)", AdditionalSettingsContainer,
+        _powerSupplyPortTextBox ?? (FrameworkElement)AdditionalSettingsContainer);
+
       AddIssueIf(
         issues,
         _acwPpuDividerCoefficientPercentTextBox != null && !DeviceRequiredParameterValidator.IsPositiveNumber(_acwPpuDividerCoefficientPercentTextBox.Text),

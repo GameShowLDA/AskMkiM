@@ -6,6 +6,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Mode;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Runtime.Base.Device;
 using Ask.Device.Runtime.Function.Base.Connected;
+using Ask.Device.Runtime.Function.GPT;
 using System.IO.Ports;
 using static Ask.LogLib.LoggerUtility;
 
@@ -35,14 +36,14 @@ namespace Ask.Device.Runtime.Device
 
       ApplyDefaultComPortSettings();
 
-      AcwManger = new Function.GPT.AcwMode(this);
-      DcwManger = new Function.GPT.DcwMode(this);
-      IrManger = new Function.GPT.IrMode(this);
-      SystemManger = new Function.GPT.SystemSettings(this);
+      AcwManger = new AcwMode(this);
+      DcwManger = new DcwMode(this);
+      IrManger = new IrMode(this);
+      SystemManger = new SystemSettings(this);
       ConnectableManager = new Transport(this);
       SelfTestManager = new Function.GPT.SelfCheck.SelfTestManager();
-      Time = new Function.GPT.TimeManager(this);
-      LimitManager = new Function.GPT.LimitManager(this);
+      Time = new TimeManager(this);
+      LimitManager = new LimitManager(this);
 
       LogWarning($"[{GetType().Name}] ctor вызван. Hash={GetHashCode()}", isDeviceLog: true);
       Mode = BreakdownTypeMode.None;

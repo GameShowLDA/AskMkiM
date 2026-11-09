@@ -115,6 +115,13 @@ public static class DeviceConfigurationPrintService
 
       devicesPrinted += AppendDeviceSection(
         sb,
+        "Источник питания",
+        configuration.PowerSupplies.Where(x => x.NumberChassis == chassis.Number),
+        insertSectionSeparator: devicesPrinted > 0,
+        appendAdditional: (builder, source) => AppendField(builder, "TCP-порт", source.Port, 4));
+
+      devicesPrinted += AppendDeviceSection(
+        sb,
         "Измеритель (быстрый)",
         configuration.FastMeters.Where(x => x.NumberChassis == chassis.Number),
         insertSectionSeparator: devicesPrinted > 0);

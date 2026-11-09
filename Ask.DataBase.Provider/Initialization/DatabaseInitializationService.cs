@@ -81,6 +81,7 @@ public static class DatabaseInitializationService
     await EnsureBreakdownTesterVoltageColumnsAsync(databasePath, report, progress, cancellationToken);
     await EnsureBreakdownTesterSystemInsulationResistanceColumnAsync(databasePath, report, progress, cancellationToken);
     await EnsureLegacyMkiHardwareProfilesStorageAsync(databasePath, report, progress, cancellationToken);
+    await EnsurePowerSupplyStorageAsync(databasePath, cancellationToken);
     await EnsureDefaultDataAsync(databasePath, report, progress, cancellationToken);
 
     TraceInfo(
@@ -745,6 +746,23 @@ public static class DatabaseInitializationService
     var databasePath = DbPathResolver.Resolve();
     EnsureDirectoryExists(databasePath);
     await EnsureLegacyMkiHardwareProfilesStorageAsync(databasePath, null, null, cancellationToken);
+  }
+
+  /// <summary>
+  /// Создаёт таблицу внешних источников питания, в том числе после принятия legacy-схемы.
+  /// </summary>
+  /// <param name="databasePath">Путь к SQLite-файлу приложения.</param>
+  /// <param name="cancellationToken">Токен отмены операции.</param>
+  /// <returns>Задача проверки таблицы.</returns>
+  internal static async Task EnsurePowerSupplyStorageAsync(string databasePath, CancellationToken cancellationToken = default)
+  {
+    await using var connection = new SqliteConnection($"Data Source={databasePath}");
+    await connection.OpenAsync(cancellationToken);
+    await using var command = connection.CreateCommand();
+    command.CommandText = Ask.DataBase.Provider.Services.Devices.PowerSupplyStorageSql.CreateTableSql;
+    await command.ExecuteNonQueryAsync(cancellationToken);
+    await EnsureColumnAsync(connection, "PowerSupplies", "NumberChassis", "INTEGER NOT NULL DEFAULT 0",
+      new DatabaseInitializationReport(), null, cancellationToken);
   }
 
   /// <summary>

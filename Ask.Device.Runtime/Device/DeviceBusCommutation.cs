@@ -5,6 +5,7 @@ using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Runtime.Base.Device;
 using Ask.Device.Runtime.Commands;
 using Ask.Device.Runtime.Function.Base.Connected;
+using Ask.Device.Runtime.Function.DeviceBusCommutation;
 using Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck;
 
 namespace Ask.Device.Runtime.Device
@@ -27,10 +28,10 @@ namespace Ask.Device.Runtime.Device
       ConnectedProfile.Reset = new DeviceCommand(2, 1, 0, 0).ToString();
 
       ConnectableManager = new Transport(this);
-      ConnectorManager = new Function.DeviceBusCommutation.ConnectorManager(this);
-      CapacitorManager = new Function.DeviceBusCommutation.CapacitorManager(this);
-      RelayManager = new Function.DeviceBusCommutation.RelayManager(this);
-      ResistorManager = new Function.DeviceBusCommutation.ResistorManager(this);
+      ConnectorManager = new ConnectorManager(this);
+      CapacitorManager = new CapacitorManager(this);
+      RelayManager = new RelayManager(this);
+      ResistorManager = new ResistorManager(this);
       SelfTestManager = new SelfTestManager(this);
     }
 
