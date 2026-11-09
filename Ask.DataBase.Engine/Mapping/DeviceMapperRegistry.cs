@@ -1,3 +1,5 @@
+using Ask.Core.Shared.DTO.Devices.PowerSupply;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSupply;
 using Ask.Core.Shared.DTO.Devices.Breakdown;
 using Ask.Core.Shared.DTO.Devices.ChassisManager;
 using Ask.Core.Shared.DTO.Devices.FastMeter;
@@ -27,6 +29,7 @@ public static class DeviceMapperRegistry
 {
   private static readonly Dictionary<Type, Action<IDevice, object>> MapActions = new()
   {
+    { typeof(IPowerSupply), (device, dto) => PowerSupplyMapper.ApplyDto((IPowerSupply)device, (PowerSupplyDto)dto) },
     { typeof(IBreakdownTester), (device, dto) => BreakdownTesterMapper.ApplyDto((IBreakdownTester)device, (BreakdownTesterDto)dto) },
     { typeof(IMultimeter), (device, dto) => FastMeterMapper.ApplyDto((IMultimeter)device, (FastMeterDto)dto) },
     { typeof(IRelaySwitchModule), (device, dto) => RelaySwitchModuleMapper.ApplyDto((IRelaySwitchModule)device, (RelaySwitchModuleDto)dto) },

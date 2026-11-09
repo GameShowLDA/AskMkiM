@@ -1,4 +1,5 @@
-﻿using Ask.Core.Shared.Metadata.Enums.UiEnums;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSupply;
+using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
@@ -87,8 +88,17 @@ namespace MainWindowProgram.Services
           GetSwitchingDeviceAsync,
           GetRelaySwitchModulesAsync,
           GetMultimetersAsync,
-          GetChassisAsync),
+          GetChassisAsync,
+          GetPowerSuppliesAsync),
         TypeWindow.Settings);
+
+    /// <summary>
+    /// Возвращает сохранённые внешние источники питания.
+    /// </summary>
+    /// <param name="token">Токен отмены загрузки.</param>
+    /// <returns>Настроенные внешние источники.</returns>
+    private static async Task<IReadOnlyList<IPowerSupply>> GetPowerSuppliesAsync(CancellationToken token)
+      => await PowerSupplies.GetAllAsync(token);
 
     /// <summary>
     /// Возвращает пробойную установку, настроенную для первого шасси.
