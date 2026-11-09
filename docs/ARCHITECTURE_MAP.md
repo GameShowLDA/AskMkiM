@@ -46,7 +46,8 @@ Size/Foreground и анимации общей кнопки; лицензия с
 | Трансляция программы контроля | `MainWindow/Services/TranslationServices.cs` | `Ask.Engine/ControlCommandAnalyser/CommandTranslationManager.cs`, `Ask.Engine/ControlCommandAnalyser/Parser/`, `Ask.Engine/ControlCommandAnalyser/Formatter/`, `Ask.Engine/ControlCommandAnalyser/Validation/` |
 | Диагностика текста при вводе | `Ask.UI/Controls/TextEditorControl/Diagnostics/LiveDiagnosticsController.cs` | `Ask.Engine/ControlCommandAnalyser/CommandTranslationManager.Diagnostics.cs`, `SourceDiagnostic.cs`, `Ask.UI/Controls/TextEditorControl/Diagnostics/DiagnosticUnderlineRenderer.cs`, оба `TextEditorUI.xaml.cs` |
 | Исполнение программы контроля | `UI/Controls/Runner/RunControl.xaml.cs` | `Ask.UI/Features/ProtocolNew/Execution/ActionExecutor.cs`, `Ask.Engine/ControlCommandExecutor/Execution/CommandExecutionManager.cs` |
-| Общая docking-область исполнителя | `UI/Controls/Runner/RunControl.xaml`, `RunControl.Docking.cs` | [Runner docking layout](#runner-docking-layout), `DockItem.Show`, `DockManager`, `RunnerDocumentStyle` |
+| Общая docking-область исполнителя | `UI/Controls/Runner/RunControl.xaml`, `RunControl.Docking.cs` | [Runner docking layout](#runner-docking-layout), `Ask.UI/ThirdParty/AvalonDock/Integration/ExecutionWorkspace/`, `RunnerDocumentStyle` |
+| AvalonDock и его интеграционный слой | `Ask.UI/ThirdParty/AvalonDock/Integration/ExecutionWorkspace/ExecutionWorkspaceControl.xaml(.cs)` | [AvalonDock execution workspace](#avalondock-execution-workspace), `tools/ExecutionWorkspacePrototype/`, `Ask.UI/ThirdParty/AvalonDock/source/` |
 | Редактирование исходника в исполнителе, сохранение и повторная трансляция | `UI/Controls/Runner/RunControl.Source.cs`, `MainWindow/Services/TranslationServices.cs` | [Runner source editing](#runner-source-editing), `UI/Services/DockItemService.cs`, `UI/Components/MultiEditorMethods/SaveFileManager.cs` |
 | Нагрузка UI при заполнении протокола во вложенных панелях | `UI/Windows/WpfDocking/Windows/SplitContainer.cs` | [Docking layout measurement](#docking-layout-measurement), `SplitContainerMeasureTests`, режим `protocol-layout` в `tools/DockingFreezeRepro` |
 | Алгоритм конкретной команды | `Ask.Engine/ControlCommandExecutor/Executors/` | `Ask.Engine/ControlCommandExecutor/BaseStrategies/`, `Ask.Engine/ControlCommandExecutor/Execution/EquipmentService.cs` |
@@ -205,7 +206,7 @@ startup-загрузка общей UI-модели не зависит от п�
 | --- | --- | --- | --- |
 | `MainWindowProgram` | `MainWindow/MainWindowProgram.csproj` | WPF entry point, shell, startup, ручная композиция UI; `MainWindowProgram.*` | `Ask.Diagnostics`, `Ask.DataBase.Engine`, `Ask.Support`, `Ask.UI`, `ConsoleUI`, `Message`, `UI` |
 | `UI` | `UI/UI.csproj` | Legacy WPF workspace, editor, runner, settings, protocol/file services; `UI.*` | `Ask.Core`, `Ask.DataBase.Provider`, `Ask.Engine`, `Ask.Support`, `Ask.UI`, `Message`, `Ask.Device.Runtime` |
-| `Ask.UI` | `Ask.UI/Ask.UI.csproj` | Новые reusable WPF features: protocol, archive, notifications, role UI, executor controls, сервисное управление GPT; `Ask.UI.*` | `Ask.Core`, `Ask.Engine`, `Ask.Support`, `Message`, `Ask.Device.Runtime`, `Ask.LogLib` |
+| `Ask.UI` | `Ask.UI/Ask.UI.csproj` | Новые reusable WPF features, executor workspace и слой интеграции AvalonDock; `Ask.UI.*` | `Ask.Core`, `Ask.Engine`, `Ask.Support`, `Message`, `Ask.Device.Runtime`, `Ask.LogLib`, локальные `AvalonDock`, `AvalonDock.Serializer.Json`, `AvalonDock.Themes.Arc` |
 | `Ask.Engine` | `Ask.Engine/Ask.Engine.csproj` | Parser/formatter, command execution, strategies, metrology and hardware-test algorithms; `Ask.Engine.*` | `Ask.Core`, `Ask.DataBase.Engine`, `Ask.LogLib`, `Ask.Protocol.Messages`, `Message` |
 | `Ask.Core` | `Ask.Core/Ask.Core.csproj` | Shared contracts, DTO, enums, events, config state, errors, file formats; `Ask.Core.*` | `Ask.LogLib` |
 | `Ask.Protocol.Messages` | `Ask.Protocol.Messages/Ask.Protocol.Messages.csproj` | Формирование, device-логирование и вывод унифицированных `ShowMessageModel`; содержит фасады и builders для executor-команд, блоков проверки, оборудования и измерений | `Ask.Core`, `Ask.LogLib`; потребители — `Ask.Device.Runtime`, `Ask.Engine` |
@@ -767,6 +768,12 @@ Parser/validators add `ErrorItem`/`WarningItem` from
 `Ask.Core/Services/Errors/Translation`. `CriticalTranslationErrorClassifier`
 определяет блокирующие ошибки. UI отображает snapshot через `TranslatorItem` и
 error-list controls.
+Модели, созданные для ошибок разбора до определения номера команды, могут иметь
+`BaseCommandModel.CommandNumber == null`. `TranslationServices.IsBreakpointAllowed`,
+`BuildNumCommandWithMnemonic` и `BuildBreakpointState` исключают такие модели только из навигации и сохранения точек
+останова; сама модель остаётся в `TranslatorItem.TranslationModels` и таблице диагностики.
+Поэтому ошибочная программа открывается в трансляторе с ошибками и не прерывает создание
+вкладки через `int.Parse`.
 
 #### Files
 
@@ -3260,8 +3267,46 @@ Renderer выбирает индексированные диапазоны ви
 
 ### Runner docking layout
 
-`UI/Controls/Runner/RunControl.xaml` содержит один `RunnerDockManager`
-для всех областей исполнителя. `ProtocolPane` содержит `MainContent` с ProtocolUI,
+Текущий production-путь: `UI/Controls/Runner/RunControl.xaml` содержит
+`ExecutionWorkspaceControl` на AvalonDock. Шесть панелей (протокол, ошибки,
+оборудование, транслированная программа, исходник и итоговый протокол) размещаются,
+объединяются и выносятся в floating windows через AvalonDock. Прежние `DockItem`
+сохраняются только как оболочки содержимого и панелей действий; они больше не входят
+во внутренний `DockControl` исполнителя.
+
+Call chain: `RunControl` constructor → `InitializeWorkspaceDocuments`
+→ `ExecutionWorkspaceControl.SetContent` → `InitializeDocking` → `Loaded`
+→ `InitializeDockLayout` → `RestoreRunnerLayout`. `SetLeftEditor` создаёт оболочки
+`TranslatorEditor`/`DevicesStatus`, а `ShowRunnerDocument` сопоставляет их с
+`ExecutionWorkspacePane` и вызывает `SetContent`/`SetTitle`/`ShowPane`.
+`SourceDocument` и итоговый протокол подключаются тем же путём. Выбор при старте и
+переходе из ошибок: `SelectRunnerDocument → ActivatePane`.
+
+`RunControl.LayoutPersistence.cs` сохраняет JSON отдельно для роли по пути
+`RunnerLayoutStore.GetCurrentPath()` с расширением `.avalondock.json`.
+`JsonLayoutSerializer` хранит геометрию, вкладки и floating windows; содержимое
+повторно связывается по постоянным `ContentId`. Повреждённая/неполная раскладка
+заменяется исходной. При закрытии внешнего `DockItem`, содержащего `RunControl`,
+раскладка сохраняется, floating windows закрываются, подписки снимаются, а поздние
+показы блокирует `_closingDockLayout`.
+
+`RunnerDocumentStyle`/`RunnerSourceStyle` сохраняют кнопки открытия, папки, PDF,
+печати, сохранения и трансляции. Изменение `DockItem.TabText` синхронизируется с
+заголовком AvalonDock через `DependencyPropertyDescriptor`.
+Высотой панели ошибок управляет AvalonDock; `RunControl` не подписывается на
+`ErrorListControl.DesiredHeightChanged`, чтобы не создавать цикл
+`RefreshCurrentPage → DesiredHeightChanged → RefreshLayoutFromHost`.
+
+#### Historical custom docking implementation (до AvalonDock)
+
+Следующее описание относится к предыдущей реализации и оставлено для навигации по
+собственной библиотеке `UI/Windows/WpfDocking`, которая всё ещё используется внешним
+workspace приложения, но больше не управляет внутренними панелями `RunControl`.
+`DockPaneManager.Focus` запускает вложенный Dispatcher frame только для
+`DockPosition.Floating`: обычные document-вкладки (включая внешний `RunControl`)
+не ожидают создание нативного floating window и не могут зависнуть в `DoEvents`.
+Ранее `UI/Controls/Runner/RunControl.xaml` содержал один `RunnerDockManager`.
+`ProtocolPane` содержал `MainContent` с ProtocolUI,
 `ErrorsPane` — `ErrorListBoxVertical`. Транслированная программа, состояние
 оборудования, исходник и итоговый протокол создаются отдельными DockItem в этом же
 DockControl. Вложенный ChildTextEditorContainer и общий DocumentsPane удалены.
@@ -3371,6 +3416,42 @@ PrepareSourceForRunAsync и TranslateCurrentSourceAsync отклоняют за�
 Отменённое Closing не запускает очистку. Это также устраняет описанный в
 историческом расследовании orphan-window сценарий для такого владельца RunControl.
 
+### AvalonDock execution workspace
+
+`Ask.UI/ThirdParty/AvalonDock/Integration/ExecutionWorkspace/ExecutionWorkspaceControl.xaml(.cs)` —
+production-оболочка docking-области исполнителя на AvalonDock 5.0.1. Она не зависит
+от execution logic; `UI.Controls.Runner.RunControl` передаёт готовое содержимое и
+управляет его жизненным циклом.
+
+Компонент программно создаёт шесть независимых `LayoutAnchorable` с постоянными
+`ContentId`: протокол, ошибки, состояние оборудования, транслированная программа,
+исходная программа и итоговый протокол. Все панели запрещено закрывать и скрывать,
+но разрешено перемещать, объединять во вкладки, стыковать как документы и выносить
+в floating windows. `SetContent(ExecutionWorkspacePane, object)` связывает существующий
+production-контрол с панелью без зависимости AvalonDock от execution logic;
+`ActivatePane` отвечает только за выбор вкладки.
+
+`SaveLayout` атомарно сохраняет JSON через `JsonLayoutSerializer` во временный файл
+и затем заменяет целевой. `TryRestoreLayout` сопоставляет содержимое по `ContentId`;
+неполная или повреждённая раскладка отклоняется с возвратом к исходной. `ResetLayout`
+создаёт начальную схему: протокол над ошибками слева, четыре документные вкладки справа.
+`ThemeSettings.CurrentTheme/ThemeChanged` переключает `ArcDarkTheme`/`ArcLightTheme`;
+подписка действует только между `Loaded` и `Unloaded`. Фон контейнера берётся из
+тематического ресурса AskMkiM `SettingsNestedGroupBackgroundSolidColorBrush`.
+
+Исходники официального релиза зафиксированы в `Ask.UI/ThirdParty/AvalonDock/source/`
+по Ms-PL; `Ask.UI/ThirdParty/AvalonDock/source/Directory.Build.props` локально собирает WPF-проекты для
+`net8.0-windows`, поскольку официальный NuGet 5.0.1 не содержит этой target framework.
+`Ask.UI/ThirdParty/AvalonDock/source/Directory.Build.targets` отключает strong-name
+для локально поставляемых сборок, чтобы ALINK не подписывал satellite resources в Visual Studio.
+`Ask.UI/Ask.UI.csproj` исключает upstream-дерево из собственных default items и
+ссылается на `AvalonDock`, `AvalonDock.Serializer.Json` и `AvalonDock.Themes.Arc`
+как на source projects. Собственный integration-код и стили лежат рядом, но вне
+`source`, чтобы обновление upstream не смешивалось с кодом AskMkiM.
+Интерактивный изолированный стенд —
+`tools/ExecutionWorkspacePrototype/`; регрессии JSON и повреждённой раскладки —
+`Ask.UI.UnitTests/Controls/ExecutionWorkspace/ExecutionWorkspaceControlTests.cs`.
+
 ### Runner source editing
 
 `MainWindow/Services/TranslationServices.RunAsync` получает живой исходный
@@ -3381,7 +3462,7 @@ PrepareSourceForRunAsync и TranslateCurrentSourceAsync отклоняют за�
 и текущим текстом, отсоединяет старого визуального владельца. `RunnerSourceStyle`
 содержит собственные кнопки сохранения и трансляции. Исходник остаётся редактируемым;
 результат трансляции и итоговый протокол остаются только для чтения. SourceDocument
-входит в единый RunnerDockManager и показывается через ShowRunnerDocument.
+показывается в панели AvalonDock через `ShowRunnerDocument`.
 
 Сохранение: `SaveSourceButton_Click → SaveSourceFile` (delegate настраивает
 `DockItemService.ConfigureDockItemClosing`) → `SaveFileManager.SaveFile(SourceDocument)`
@@ -3485,15 +3566,31 @@ Watchdog через 30 секунд завершает только процес
 скрытых/раскрытых логов и индекса находятся в
 `Ask.UI.UnitTests/Components/ProtocolListBox/ProtocolRenderingOptimizationTests.cs`.
 `RequestOverviewUpdate` откладывает обновление полосы для обычных записей на один цикл
-`DispatcherTimer` (100 мс); ошибка и команда обновляют её сразу. После загрузки, удаления
-и очистки `RefreshErrorOverview` также выполняет обновление сразу. Прокрутка обновляет
-только видимую область, без повторной классификации сообщений.
+`DispatcherTimer` (100 мс); потоковое добавление команд и ошибок использует тот же пакетный
+цикл, чтобы серия сообщений не перестраивала геометрию карты несколько раз за кадр.
+После загрузки, удаления и очистки `RefreshErrorOverview` выполняет обновление сразу.
+Прокрутка обновляет только видимую область, без повторной классификации сообщений;
+изменения scrollbar и viewport объединяются `RequestScrollMetricsUpdate` в один проход
+`DispatcherPriority.Render`.
 `RefreshErrorOverviewViewport` задаёт видимый диапазон через `VerticalOffset/ExtentHeight`
 и `(VerticalOffset + ViewportHeight)/ExtentHeight`; от наличия штатного ScrollBar/Thumb он не зависит.
 Автопрокрутка `AppendLineAsync → RequestScrollToEnd` следует за хвостом, пока пользователь
 не прокрутил список вверх. `ProtocolScrollViewer_ScrollChanged` отличает пользовательское
-смещение от изменения `ExtentHeight`; при росте содержимого удерживает хвост, не делая
-принудительный `InvalidateMeasure` на каждую запись. `ClearAsync` возобновляет слежение.
+смещение от изменения `ExtentHeight`; удержание хвоста выполняет только отложенный
+`RequestScrollToEnd`, поэтому одно добавление не запускает второй переход в конец из
+`ScrollChanged`. Принудительный `InvalidateMeasure` на каждую запись не используется.
+`ClearAsync` возобновляет слежение.
+Синхронизация ширины верхних панелей execution/inspection с разделителем основной области
+выполняется `ProtocolUI.UpdateProtocolManagerLayout` только при `SizeChanged` панелей и
+`IsVisibleChanged` разделителя. Она не подписана на общий WPF `LayoutUpdated`: добавление
+строки протокола не должно повторно выполнять `TranslatePoint` и менять ширины колонок.
+`AppendLineAsync` применяет запись синхронно, когда вызов уже находится в UI-потоке,
+не создавая отдельную Dispatcher-операцию и возможность layout-прохода между соседними
+сообщениями. Для фонового потока сохраняется `DispatcherPriority.DataBind` и ожидание
+фактического добавления. Шаблон использует непосредственно `ListBoxItem.ContentTemplate`
+и `ContentPresenter`, без двух промежуточных `ContentControl` на каждую реализованную строку.
+Прозрачный `ProtocolSelectableTextBox` сохраняет посимвольное выделение, но не создаёт
+дублирующий AutomationPeer: доступный текст уже представлен видимыми TextBlock строки.
 Кнопки и счётчик находятся в общей верхней строке над списком и полосой.
 `RefreshOverviewPositions → ProjectOverviewOffset → ErrorOverviewBar.SetLinePositions`
 проецирует маркеры в пиксельную шкалу: реализованные контейнеры дают измеренные границы,

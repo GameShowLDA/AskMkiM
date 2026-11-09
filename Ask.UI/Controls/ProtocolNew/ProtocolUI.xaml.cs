@@ -169,7 +169,9 @@ namespace Ask.UI.Controls.ProtocolNew
 
       loaded = true;
       InitializeComponent();
-      LayoutUpdated += ProtocolUI_LayoutUpdated;
+      ProtocolManager.SizeChanged += ProtocolManager_SizeChanged;
+      InspectionProtocolPanel.SizeChanged += ProtocolManager_SizeChanged;
+      InspectionProtocolSplitter.IsVisibleChanged += ProtocolManager_IsVisibleChanged;
       _protocolStorage = new ProtocolStorageService();
       _inspectionProtocolAreaController = new InspectionProtocolAreaController(_protocolStorage, this);
       inspectionProtocolTextBox.SetFileType(FileType.InspectionProtocol);
@@ -216,7 +218,12 @@ namespace Ask.UI.Controls.ProtocolNew
       UpdateProtocolManagerLayout();
     }
 
-    private void ProtocolUI_LayoutUpdated(object? sender, EventArgs e)
+    private void ProtocolManager_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+      UpdateProtocolManagerLayout();
+    }
+
+    private void ProtocolManager_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
     {
       UpdateProtocolManagerLayout();
     }

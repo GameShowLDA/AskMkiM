@@ -25,7 +25,7 @@ namespace UI.Controls.Runner
       if (_closingDockLayout)
         return;
 
-      var item = RunnerDockManager.DockItems.First(document => document.Content is UI.Controls.TranslatorEditor);
+      var item = _runnerDocuments.First(document => document.Content is UI.Controls.TranslatorEditor);
       ((UI.Controls.TranslatorEditor)item.Content).SetEditor(editor);
       TranslationModels = models;
       ControlProgram = models;
@@ -71,9 +71,9 @@ namespace UI.Controls.Runner
       };
       DocumentTab.SetHideCloseButton(SourceDocument, true);
       SourceDocument.Closing += RunnerPane_Closing;
-      RunnerDockManager.DockItems.Add(SourceDocument);
+      _runnerDocuments.Add(SourceDocument);
       editor.ConfigureBreakpoints(interactive: false, visible: false);
-      if (RunnerDockManager.IsLoaded)
+      if (RunnerWorkspace.IsLoaded)
         ShowRunnerDocument(SourceDocument, DockItemShowMethod.Deselect);
     }
 

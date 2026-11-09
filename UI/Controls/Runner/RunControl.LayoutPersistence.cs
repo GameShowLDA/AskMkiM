@@ -1,60 +1,26 @@
+using Ask.UI.ThirdParty.Docking.Integration.ExecutionWorkspace;
+using System.IO;
 using System.ComponentModel;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Media;
-using UI.Windows.WpfDocking.Windows;
 using UI.Windows.WpfDocking.Windows.Docking;
 
 namespace UI.Controls.Runner;
 
 public partial class RunControl
 {
-  private readonly string? _runnerLayoutPath = RunnerLayoutStore.GetCurrentPath();
+  private readonly string? _runnerLayoutPath = BuildAvalonLayoutPath();
   private bool _restoringRunnerLayout;
   private bool _runnerDocumentsReady;
   private Window? _layoutHostWindow;
   private DockItem? _equipmentLayoutItem;
   private DockItem? _translationLayoutItem;
-  private DockItem[] _suspendedFloatingItems = Array.Empty<DockItem>();
-  private readonly Dictionary<DockPaneSplit, SplitterDistance> _hiddenResultSplits = new();
 
-  internal void SuspendRunnerFloatingWindows()
-  {
-    if (_suspendedFloatingItems.Length != 0)
-      return;
-
-    _suspendedFloatingItems = RunnerDockManager.DockItems
-      .Where(item => item.DockPosition == DockPosition.Floating).ToArray();
-    foreach (var item in _suspendedFloatingItems)
-      item.Hide();
-  }
+  internal void SuspendRunnerFloatingWindows() => RunnerWorkspace.SetFloatingWindowsVisible(false);
 
   internal void ResumeRunnerFloatingWindows()
   {
-    if (_closingDockLayout || !RunnerDockManager.IsLoaded || PresentationSource.FromVisual(this) == null)
-      return;
-
-    var items = _suspendedFloatingItems;
-    _suspendedFloatingItems = Array.Empty<DockItem>();
-    foreach (var item in items)
-      if (item.DockControl == RunnerDockManager && item.IsHidden)
-        item.Show(DockItemShowMethod.Select);
-  }
-
-  private Dictionary<string, DockItem> GetLayoutItems()
-  {
-    var items = new Dictionary<string, DockItem>
-    {
-      ["protocol"] = ProtocolPane,
-      ["errors"] = ErrorsPane,
-      ["equipment"] = _equipmentLayoutItem!,
-      ["translation"] = _translationLayoutItem!,
-    };
-    if (SourceDocument != null)
-      items.Add("source", SourceDocument);
-    if (_inspectionProtocolDockItem != null)
-      items.Add("result", _inspectionProtocolDockItem);
-    return items;
+    if (!_closingDockLayout && RunnerWorkspace.IsLoaded)
+      RunnerWorkspace.SetFloatingWindowsVisible(true);
   }
 
   private void RestoreRunnerLayout(DockItem equipment, DockItem translation)
@@ -63,142 +29,62 @@ public partial class RunControl
     _translationLayoutItem = translation;
     if (_runnerDocumentsReady)
       return;
+
     _runnerDocumentsReady = true;
     if (_runnerLayoutPath == null)
       return;
 
-    var items = GetLayoutItems();
-    if (!items.ContainsKey("result"))
-      items.Add("result", CreateInspectionProtocolDockItem());
-
+    _restoringRunnerLayout = true;
     try
     {
-      var saved = RunnerLayoutStore.Load(_runnerLayoutPath, items, VisualTreeHelper.GetDpi(this));
-      if (saved == null)
-        return;
-
-      var previousItems = RunnerDockManager.DockItems.ToArray();
-      var fallback = RunnerDockManager.Save();
-      for (var i = 0; i < previousItems.Length; i++)
-        fallback.DockItems[i].Target = previousItems[i];
-
-      _restoringRunnerLayout = true;
-      try
-      {
-        ReplaceRunnerLayout(saved);
-        if (ProtocolPane.FirstPane == null || ErrorsPane.FirstPane == null
-          || equipment.FirstPane == null || translation.FirstPane == null)
-          throw new InvalidOperationException("В сохранённой раскладке отсутствует обязательная панель.");
-
-        if (items["result"].FirstPane != null)
-        {
-          if (_inspectionProtocolEditor == null)
-            items["result"].Hide();
-          else if (items["result"].IsHidden)
-            items["result"].Show(DockItemShowMethod.Select);
-        }
-        if (SourceDocument is { FirstPane: null } source)
-          ShowRunnerDocument(source, DockItemShowMethod.Deselect);
-        SelectRunnerDocument(translation);
-        if (items["result"].FirstPane != null)
-          _inspectionProtocolDockItem = items["result"];
-        _errorHeightCustomized = true;
-      }
-      catch
-      {
-        ReplaceRunnerLayout(fallback);
-        throw;
-      }
-      finally
-      {
-        _restoringRunnerLayout = false;
-        UpdateErrorPaneSplit();
-      }
+      RunnerWorkspace.TryRestoreLayout(_runnerLayoutPath);
+      RebindWorkspaceContents();
+      SelectRunnerDocument(translation);
     }
     catch (Exception exception)
     {
-      Ask.LogLib.LoggerUtility.LogException("Не удалось восстановить раскладку исполнителя.", exception);
+      Ask.LogLib.LoggerUtility.LogException("Не удалось восстановить раскладку AvalonDock исполнителя.", exception);
+      RunnerWorkspace.ResetLayout();
+      RebindWorkspaceContents();
+    }
+    finally
+    {
+      _restoringRunnerLayout = false;
     }
   }
 
-  private void ReplaceRunnerLayout(DockLayout layout)
+  private void RebindWorkspaceContents()
   {
-    foreach (var item in RunnerDockManager.DockItems.ToArray())
-      item.Close();
-    RunnerDockManager.Load(layout, target => (DockItem)target);
+    RunnerWorkspace.SetContent(ExecutionWorkspacePane.Protocol, ProtocolPane);
+    RunnerWorkspace.SetContent(ExecutionWorkspacePane.Errors, ErrorsPane);
+    if (_equipmentLayoutItem != null)
+      ShowRunnerDocument(_equipmentLayoutItem, DockItemShowMethod.Deselect);
+    if (_translationLayoutItem != null)
+      ShowRunnerDocument(_translationLayoutItem, DockItemShowMethod.Deselect);
+    if (SourceDocument != null)
+      ShowRunnerDocument(SourceDocument, DockItemShowMethod.Deselect);
+    else
+      RunnerWorkspace.HidePane(ExecutionWorkspacePane.Source);
+    if (_inspectionProtocolDockItem != null && _inspectionProtocolEditor != null)
+      ShowRunnerDocument(_inspectionProtocolDockItem, DockItemShowMethod.Deselect);
+    else
+      RunnerWorkspace.HidePane(ExecutionWorkspacePane.Result);
   }
 
-  internal void SaveRunnerLayout()
+  internal void SaveRunnerLayout(bool allowClosing = false)
   {
-    if (_runnerLayoutPath == null || !_runnerDocumentsReady || _closingDockLayout
-      || _restoringRunnerLayout || _suspendedFloatingItems.Length != 0)
-      return;
-
-    var documents = GetLayoutItems();
-    var keys = RunnerDockManager.DockItems.Select(item =>
-      documents.FirstOrDefault(entry => entry.Value == item).Key).ToArray();
-    if (keys.Any(key => key == null) || !new[] { "protocol", "errors", "equipment", "translation" }.All(keys.Contains))
+    if (_runnerLayoutPath == null || !_runnerDocumentsReady || _restoringRunnerLayout
+      || (_closingDockLayout && !allowClosing))
       return;
 
     try
     {
-      Dictionary<DockPaneSplit, SplitterDistance>? sizes = null;
-      var layout = DockLayoutAdapter.Save(RunnerDockManager,
-        split =>
-        {
-          // Сохраняем заданную пропорцию, даже если минимальный размер панели временно её ограничил.
-          if (split.SplitterDistance.IsStar)
-            return split.SplitterDistance;
-          sizes ??= MeasureRunnerSplits();
-          return sizes.TryGetValue(split, out var size) || _hiddenResultSplits.TryGetValue(split, out size)
-            ? size : split.SplitterDistance;
-        });
-      RunnerLayoutStore.Save(_runnerLayoutPath, layout, keys);
+      RunnerWorkspace.SaveLayout(_runnerLayoutPath);
     }
     catch (Exception exception)
     {
-      Ask.LogLib.LoggerUtility.LogException("Не удалось сохранить раскладку исполнителя.", exception);
+      Ask.LogLib.LoggerUtility.LogException("Не удалось сохранить раскладку AvalonDock исполнителя.", exception);
     }
-  }
-
-  private Dictionary<DockPaneSplit, SplitterDistance> MeasureRunnerSplits()
-  {
-    var sizes = new Dictionary<DockPaneSplit, SplitterDistance>();
-    MeasureLayoutSplits(RunnerDockManager, sizes);
-    foreach (Window window in Application.Current.Windows)
-      if (window is UI.Windows.WpfDocking.Windows.Docking.Primitives.NativeFloatingWindow
-        { DataContext: FloatingWindow floating } && floating.DockControl == RunnerDockManager)
-        MeasureLayoutSplits(window, sizes);
-    return sizes;
-  }
-
-  private void RememberResultSplitSizes(DockPane pane)
-  {
-    if (_runnerLayoutPath == null)
-      return;
-
-    _hiddenResultSplits.Clear();
-    var sizes = MeasureRunnerSplits();
-    for (var split = pane.Parent; split != null; split = split.Parent)
-      if (sizes.TryGetValue(split, out var size))
-        _hiddenResultSplits.Add(split, size);
-  }
-
-  private static void MeasureLayoutSplits(DependencyObject visual, IDictionary<DockPaneSplit, SplitterDistance> sizes)
-  {
-    if (visual is SplitContainer { DataContext: DockPaneSplit split, Child1: FrameworkElement first,
-      Child2: FrameworkElement second })
-    {
-      var firstLength = split.Orientation == Orientation.Horizontal ? first.ActualWidth : first.ActualHeight;
-      var secondLength = split.Orientation == Orientation.Horizontal ? second.ActualWidth : second.ActualHeight;
-      if (firstLength > 0 && secondLength > 0)
-      {
-        var ratio = split.IsSplitterTopLeft ? firstLength / secondLength : secondLength / firstLength;
-        sizes[split] = new SplitterDistance(ratio, SplitterUnitType.Star);
-      }
-    }
-    for (var i = 0; i < VisualTreeHelper.GetChildrenCount(visual); i++)
-      MeasureLayoutSplits(VisualTreeHelper.GetChild(visual, i), sizes);
   }
 
   private void LayoutHost_Closing(object? sender, CancelEventArgs e) => SaveRunnerLayout();
@@ -208,5 +94,11 @@ public partial class RunControl
     if (_layoutHostWindow != null)
       _layoutHostWindow.Closing -= LayoutHost_Closing;
     _layoutHostWindow = null;
+  }
+
+  private static string? BuildAvalonLayoutPath()
+  {
+    var legacyPath = RunnerLayoutStore.GetCurrentPath();
+    return legacyPath == null ? null : Path.ChangeExtension(legacyPath, ".avalondock.json");
   }
 }

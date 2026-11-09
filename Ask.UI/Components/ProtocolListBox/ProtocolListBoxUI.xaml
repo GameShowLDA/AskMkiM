@@ -192,10 +192,11 @@
                     </local:ProtocolServiceLogsBox.Style>
                 </local:ProtocolServiceLogsBox>
 
-                <TextBox x:Name="PART_SelectableText"
+                <local:ProtocolSelectableTextBox x:Name="PART_SelectableText"
                      Grid.RowSpan="2"
                      Text="{Binding SelectableText, Mode=OneWay}"
                      IsReadOnly="True"
+                     IsUndoEnabled="False"
                      IsReadOnlyCaretVisible="False"
                      AcceptsReturn="True"
                      TextWrapping="Wrap"
@@ -252,9 +253,9 @@
                         BorderThickness="0"
                         Padding="0"
                         HorizontalAlignment="Stretch">
-                    <ContentControl Content="{Binding}"
-                                    HorizontalAlignment="Stretch"
-                                    ContentTemplate="{StaticResource ProtocolLineContentTemplate}"/>
+                    <ContentPresenter Content="{Binding}"
+                                      HorizontalAlignment="Stretch"
+                                      ContentTemplate="{StaticResource ProtocolLineContentTemplate}"/>
                 </Border>
             </Grid>
 
@@ -441,32 +442,6 @@
                      VirtualizingPanel.CacheLength="1"
                      VirtualizingPanel.CacheLengthUnit="Page">
 
-                    <ListBox.ItemTemplate>
-                        <DataTemplate>
-                            <ContentControl Content="{Binding}"
-                                        Margin="0"
-                                        HorizontalAlignment="Stretch">
-                                <ContentControl.Style>
-                                    <Style TargetType="ContentControl">
-                                        <Setter Property="ContentTemplate"
-                                            Value="{StaticResource ProtocolLineTemplate}"/>
-
-                                        <Style.Triggers>
-                                            <MultiDataTrigger>
-                                                <MultiDataTrigger.Conditions>
-                                                    <Condition Binding="{Binding IsCommandHeader}" Value="True"/>
-                                                    <Condition Binding="{Binding HasChildItems}" Value="True"/>
-                                                </MultiDataTrigger.Conditions>
-                                                <Setter Property="ContentTemplate"
-                                                    Value="{StaticResource ProtocolCommandHeaderTemplate}"/>
-                                            </MultiDataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </ContentControl.Style>
-                            </ContentControl>
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-
                     <ListBox.ItemContainerStyle>
                         <Style TargetType="ListBoxItem">
                             <Setter Property="OverridesDefaultStyle" Value="True"/>
@@ -476,6 +451,7 @@
                             <Setter Property="Background" Value="Transparent"/>
                             <Setter Property="Padding" Value="5,0,0,0"/>
                             <Setter Property="Margin" Value="0"/>
+                            <Setter Property="ContentTemplate" Value="{StaticResource ProtocolLineTemplate}"/>
                             <Setter Property="Template">
                                 <Setter.Value>
                                     <ControlTemplate TargetType="ListBoxItem">
@@ -492,6 +468,14 @@
                                 </Setter.Value>
                             </Setter>
                             <Style.Triggers>
+                                <MultiDataTrigger>
+                                    <MultiDataTrigger.Conditions>
+                                        <Condition Binding="{Binding IsCommandHeader}" Value="True"/>
+                                        <Condition Binding="{Binding HasChildItems}" Value="True"/>
+                                    </MultiDataTrigger.Conditions>
+                                    <Setter Property="ContentTemplate"
+                                            Value="{StaticResource ProtocolCommandHeaderTemplate}"/>
+                                </MultiDataTrigger>
                                 <Trigger Property="IsSelected" Value="True">
                                     <Setter Property="Background" Value="#663A78A1"/>
                                 </Trigger>

@@ -1,0 +1,14 @@
+<Project>
+  <PropertyGroup>
+    <ComponentTargetFrameworks>net8.0-windows</ComponentTargetFrameworks>
+    <LangVersion>latest</LangVersion>
+    <VersionPrefix>5.0.1</VersionPrefix>
+    <AssemblyVersion>$(VersionPrefix).0</AssemblyVersion>
+    <FileVersion>$(VersionPrefix).0</FileVersion>
+    <Company>Open Source</Company>
+    <Product>Dirkster.AvalonDock</Product>
+    <Copyright>2017-2026</Copyright>
+    <Description>This assembly implements a docking layout system for WPF.</Description>
+    <PackageLicenseSourceFile>$(MSBuildThisFileDirectory)..\LICENSE</PackageLicenseSourceFile>
+  </PropertyGroup>
+</Project>
