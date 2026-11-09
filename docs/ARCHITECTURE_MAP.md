@@ -3313,6 +3313,14 @@ AvalonDock-раскладку.
 внешней панели. `RunnerDocumentStyle` сохраняет отдельные действия итогового
 протокола, включая экспорт PDF. Изменение `DockItem.TabText` синхронизируется с
 заголовком AvalonDock через `DependencyPropertyDescriptor`.
+Сброс раскладки находится в `Настройки → Интерфейс`:
+`UiSettingsControl.ResetRunnerLayoutButton_Click` → подтверждение
+→ `RunnerLayoutStore.DeleteCurrentAvalonLayout` удаляет JSON и companion-файл
+текущей роли → `ExecutionEvents.RunnerLayoutResetRequested(RoleType)`.
+Активные `RunControl` только этой роли получают событие, вызывают
+`ExecutionWorkspaceControl.ResetLayout`, повторно связывают документы, активируют
+транслированную программу и сохраняют стандартную раскладку. Если исполнитель не
+открыт, отсутствие файлов даёт стандартную раскладку при следующем запуске.
 Высотой панели ошибок управляет AvalonDock; `RunControl` не подписывается на
 `ErrorListControl.DesiredHeightChanged`, чтобы не создавать цикл
 `RefreshCurrentPage → DesiredHeightChanged → RefreshLayoutFromHost`.

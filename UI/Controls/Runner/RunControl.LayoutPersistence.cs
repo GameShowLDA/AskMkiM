@@ -3,12 +3,17 @@ using System.IO;
 using System.ComponentModel;
 using System.Windows;
 using UI.Windows.WpfDocking.Windows.Docking;
+using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.EventCore.Events;
+using Ask.Core.Services.EventCore.Services;
+using Ask.Core.Shared.Metadata.Enums.RoleEnums;
 
 namespace UI.Controls.Runner;
 
 public partial class RunControl
 {
   private readonly string? _runnerLayoutPath = BuildAvalonLayoutPath();
+  private readonly RoleType? _runnerLayoutRole = RoleAuthorizationConfig.CurrentRole;
   private bool _restoringRunnerLayout;
   private bool _runnerDocumentsReady;
   private Window? _layoutHostWindow;
@@ -100,5 +105,22 @@ public partial class RunControl
   {
     var legacyPath = RunnerLayoutStore.GetCurrentPath();
     return legacyPath == null ? null : Path.ChangeExtension(legacyPath, ".avalondock.json");
+  }
+
+  private void OnRunnerLayoutResetRequested(ExecutionEvents.RunnerLayoutResetRequested request)
+  {
+    if (_closingDockLayout || request.Role != _runnerLayoutRole)
+      return;
+
+    Dispatcher.Invoke(() =>
+    {
+      RunnerWorkspace.ResetLayout();
+      RebindWorkspaceContents();
+      if (_translationLayoutItem != null)
+        SelectRunnerDocument(_translationLayoutItem);
+      else
+        RunnerWorkspace.ActivatePane(ExecutionWorkspacePane.Protocol);
+      SaveRunnerLayout();
+    });
   }
 }

@@ -113,6 +113,7 @@ namespace UI.Controls.Runner
 
       EventAggregator.Subscribe<SystemStateEvents.LockedChanged>(OnRunnerLockedChanged);
       EventAggregator.Subscribe<ExecutionEvents.ActiveDeviceChanged>(OnRunnerActiveDeviceChanged);
+      EventAggregator.Subscribe<ExecutionEvents.RunnerLayoutResetRequested>(OnRunnerLayoutResetRequested);
       EventAggregator.Subscribe<FileInteractionEvents.ViewProtocol>(OnViewProtocol);
 
       InitializeDocking();
@@ -171,6 +172,7 @@ namespace UI.Controls.Runner
     {
       EventAggregator.Unsubscribe<SystemStateEvents.LockedChanged>(OnRunnerLockedChanged);
       EventAggregator.Unsubscribe<ExecutionEvents.ActiveDeviceChanged>(OnRunnerActiveDeviceChanged);
+      EventAggregator.Unsubscribe<ExecutionEvents.RunnerLayoutResetRequested>(OnRunnerLayoutResetRequested);
       EventAggregator.Unsubscribe<FileInteractionEvents.ViewProtocol>(OnViewProtocol);
       EventAggregator.Unsubscribe<BreakpointEvents.BreakpointSet>(OnBreakpointSet);
       EventAggregator.Unsubscribe<BreakpointEvents.BreakpointRemoved>(OnBreakpointRemoved);

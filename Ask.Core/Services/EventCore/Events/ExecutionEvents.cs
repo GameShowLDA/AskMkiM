@@ -2,6 +2,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.EventInterfaces;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Metadata.Enums.HotkeysEnums;
+using Ask.Core.Shared.Metadata.Enums.RoleEnums;
 
 namespace Ask.Core.Services.EventCore.Events
 {
@@ -16,6 +17,12 @@ namespace Ask.Core.Services.EventCore.Events
   /// </remarks>
   public static class ExecutionEvents
   {
+    /// <summary>
+    /// Запрашивает сброс раскладки исполнителя для указанной роли.
+    /// </summary>
+    /// <param name="Role">Роль, для которой сбрасывается раскладка.</param>
+    public sealed record RunnerLayoutResetRequested(RoleType Role) : IEvent;
+
     /// <summary>
     /// Событие изменения состояния пошагового режима выполнения.
     /// </summary>
