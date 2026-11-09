@@ -42,6 +42,7 @@ public sealed class ExecutionWorkspaceControlTests
     finally
     {
       File.Delete(path);
+      File.Delete(FloatingWindowPlacementStore.GetCompanionPath(path));
     }
   });
 
@@ -60,12 +61,74 @@ public sealed class ExecutionWorkspaceControlTests
       control.SaveLayout(recoveredPath);
       Assert.Contains("runner.protocol", File.ReadAllText(recoveredPath), StringComparison.Ordinal);
       File.Delete(recoveredPath);
+      File.Delete(FloatingWindowPlacementStore.GetCompanionPath(recoveredPath));
     }
     finally
     {
       File.Delete(path);
     }
   });
+
+  [Fact]
+  public void HiddenPaneWithoutContent_DoesNotInvalidateSavedLayout() => RunInSta(() =>
+  {
+    var path = Path.Combine(Path.GetTempPath(), $"askmkim-layout-{Guid.NewGuid():N}.json");
+    try
+    {
+      var control = new ExecutionWorkspaceControl();
+      foreach (var pane in Enum.GetValues<ExecutionWorkspacePane>())
+        control.SetContent(pane, new Border { Tag = pane });
+      control.HidePane(ExecutionWorkspacePane.Result);
+      control.SaveLayout(path);
+
+      control.SetContent(ExecutionWorkspacePane.Result, null);
+      control.ResetLayout();
+
+      Assert.True(control.TryRestoreLayout(path));
+      Assert.False(control.IsPaneVisible(ExecutionWorkspacePane.Result));
+    }
+    finally
+    {
+      File.Delete(path);
+      File.Delete(FloatingWindowPlacementStore.GetCompanionPath(path));
+    }
+  });
+
+  [Fact]
+  public void FloatingPlacement_RestoresProportionsOnDifferentMonitorSize()
+  {
+    var placement = new FloatingPlacement
+    {
+      ContentId = "runner.protocol",
+      Left = 0.1,
+      Top = 0.2,
+      Width = 0.5,
+      Height = 0.4,
+    };
+    var monitor = new DisplayMonitor(0, "test", new System.Windows.Rect(0, 0, 2560, 1440), 1, 1, true);
+
+    var result = FloatingWindowPlacementStore.RestoreBounds(placement, monitor);
+
+    Assert.Equal(new System.Windows.Rect(256, 288, 1280, 576), result);
+  }
+
+  [Fact]
+  public void FloatingPlacement_UsesLogicalUnitsForScaledMonitor()
+  {
+    var placement = new FloatingPlacement
+    {
+      ContentId = "runner.protocol",
+      Left = 0.25,
+      Top = 0.25,
+      Width = 0.5,
+      Height = 0.5,
+    };
+    var monitor = new DisplayMonitor(0, "test", new System.Windows.Rect(0, 0, 3000, 2000), 1.5, 1.5, true);
+
+    var result = FloatingWindowPlacementStore.RestoreBounds(placement, monitor);
+
+    Assert.Equal(new System.Windows.Rect(500, 333.3333333333333, 1000, 666.6666666666666), result);
+  }
 
   private static void RunInSta(Action action)
   {
