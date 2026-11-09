@@ -240,7 +240,15 @@ namespace UI.Controls.Runner
     }
 
     private DockItem? GetActionDocument(object sender) =>
-      (sender as FrameworkElement)?.Tag as DockItem;
+      ResolveActionDocument((sender as FrameworkElement)?.Tag as DockItem);
+
+    private DockItem? ResolveActionDocument(DockItem? document)
+    {
+      if (document != SourceDocument)
+        return document;
+
+      return _runnerDocuments.FirstOrDefault(item => item.Content is TranslatorEditor);
+    }
 
     private void OpenActiveDocumentButton_Click(object sender, RoutedEventArgs e)
     {
@@ -386,7 +394,7 @@ namespace UI.Controls.Runner
         Title = fileName,
         TabText = fileName,
         Content = rightEditor,
-        Style = (Style)FindResource("RunnerDocumentStyle"),
+        Style = (Style)FindResource("RunnerTranslationStyle"),
       };
 
       var dockItemDeviceState = new DockItem

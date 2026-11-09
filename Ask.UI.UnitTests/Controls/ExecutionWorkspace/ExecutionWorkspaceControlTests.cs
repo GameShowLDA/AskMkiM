@@ -2,11 +2,25 @@ using System.IO;
 using System.Runtime.ExceptionServices;
 using System.Windows.Controls;
 using Ask.UI.ThirdParty.Docking.Integration.ExecutionWorkspace;
+using AvalonDock;
+using AvalonDock.Controls;
 
 namespace Ask.UI.UnitTests.Controls.ExecutionWorkspace;
 
 public sealed class ExecutionWorkspaceControlTests
 {
+  [Fact]
+  public void Splitters_UseExplicitWorkspaceStyle() => RunInSta(() =>
+  {
+    var control = new ExecutionWorkspaceControl();
+    var root = Assert.IsType<Grid>(control.Content);
+    var dockingManager = Assert.IsType<DockingManager>(Assert.Single(root.Children));
+
+    Assert.NotNull(dockingManager.GridSplitterHorizontalStyle);
+    Assert.Same(dockingManager.GridSplitterHorizontalStyle, dockingManager.GridSplitterVerticalStyle);
+    Assert.Equal(typeof(LayoutGridResizerControl), dockingManager.GridSplitterHorizontalStyle.TargetType);
+  });
+
   [Fact]
   public void Layout_RoundTripsWithAllContents() => RunInSta(() =>
   {

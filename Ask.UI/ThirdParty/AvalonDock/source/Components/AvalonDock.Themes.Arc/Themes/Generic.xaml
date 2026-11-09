@@ -348,12 +348,9 @@
 
                                     <!--  Document Well : Tab / Selected, active  -->
                                     <DataTrigger Binding="{Binding IsActive}" Value="True">
-                                        <Setter TargetName="Bd" Property="Background">
-                                            <Setter.Value>
-                                                <SolidColorBrush Color="#3574F0" Opacity="0.3" />
-                                            </Setter.Value>
-                                        </Setter>
-                                        <Setter Property="Foreground" Value="{DynamicResource {x:Static reskeys:ResourceKeys.DocumentWellTabSelectedActiveText}}" />
+                                        <Setter TargetName="Bd" Property="Background" Value="{DynamicResource VioletColorSolidColorBrush}" />
+                                        <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource VioletColorSolidColorBrush}" />
+                                        <Setter Property="Foreground" Value="White" />
                                         <Setter Property="Panel.ZIndex" Value="1" />
                                     </DataTrigger>
 
@@ -515,8 +512,8 @@
                                             <Condition Binding="{Binding IsSelected}" Value="True" />
                                             <Condition Binding="{Binding IsActive}" Value="True" />
                                         </MultiDataTrigger.Conditions>
-                                        <Setter Property="Background" Value="{DynamicResource {x:Static reskeys:ResourceKeys.ToolWindowTabSelectedActiveBackground}}" />
-                                        <Setter Property="Foreground" Value="{DynamicResource {x:Static reskeys:ResourceKeys.ToolWindowTabSelectedActiveText}}" />
+                                        <Setter Property="Background" Value="{DynamicResource VioletColorSolidColorBrush}" />
+                                        <Setter Property="Foreground" Value="White" />
                                     </MultiDataTrigger>
 
                                     <!--  Tool Window : Tab / Selected, inactive  -->
@@ -1406,11 +1403,12 @@
 
     <!--  LayoutGridResizerControl  -->
     <Style x:Key="{x:Type avalonDockControls:LayoutGridResizerControl}" TargetType="{x:Type avalonDockControls:LayoutGridResizerControl}">
-        <Setter Property="Background" Value="{DynamicResource {x:Static reskeys:ResourceKeys.Background}}" />
+        <Setter Property="Background" Value="{DynamicResource VioletColorSolidColorBrush}" />
+        <Setter Property="BackgroundWhileDragging" Value="{DynamicResource VioletColorSolidColorBrush}" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type avalonDockControls:LayoutGridResizerControl}">
-                    <Border Background="{DynamicResource {x:Static reskeys:ResourceKeys.Background}}" />
+                    <Border Background="{TemplateBinding Background}" />
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
