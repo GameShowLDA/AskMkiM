@@ -66,7 +66,8 @@ namespace MainWindowProgram.Services
     /// <see langword="true"/>, если команда поддерживает точки остановки; иначе <see langword="false"/>.
     /// </returns>
     private static bool IsBreakpointAllowed(BaseCommandModel m) =>
-        m.Mnemonic != "СП"
+        int.TryParse(m.CommandNumber, out _)
+        && m.Mnemonic != "СП"
         && m.Mnemonic != "ЦУ"
         && m.Mnemonic != "КЦ"
         && m.Mnemonic != "РМ"
@@ -81,17 +82,34 @@ namespace MainWindowProgram.Services
     private static Dictionary<int, string> BuildNumCommandWithMnemonic(IEnumerable<BaseCommandModel> models)
     {
       var result = new Dictionary<int, string>();
-      int commandNumber;
 
       foreach (var model in models)
       {
-        commandNumber = int.Parse(model.CommandNumber);
-        if (result.ContainsKey(commandNumber))
+        if (!int.TryParse(model.CommandNumber, out int commandNumber))
         {
           continue;
         }
 
-        result.Add(commandNumber, model.Mnemonic);
+        result.TryAdd(commandNumber, model.Mnemonic);
+      }
+
+      return result;
+    }
+
+    /// <summary>
+    /// Формирует состояние точек останова только для моделей с корректным номером команды.
+    /// </summary>
+    /// <param name="models">Модели команд исходной трансляции.</param>
+    /// <returns>Состояние точек останова по номерам команд.</returns>
+    private static Dictionary<int, bool> BuildBreakpointState(IEnumerable<BaseCommandModel> models)
+    {
+      var result = new Dictionary<int, bool>();
+      foreach (var model in models)
+      {
+        if (model.HasBreakpoint && int.TryParse(model.CommandNumber, out int commandNumber))
+        {
+          result.TryAdd(commandNumber, model.IsBreakpointEnabled);
+        }
       }
 
       return result;
@@ -521,9 +539,18 @@ namespace MainWindowProgram.Services
         container = runContainer;
       }
 
-      if (!isRunContainerActive && !container.Equals(actualContainer) && actualContainer != null)
+      if (!isRunContainerActive && actualContainer != null && !ReferenceEquals(container, actualContainer))
       {
         container = actualContainer;
+      }
+
+      if (container == null)
+      {
+        MessageBoxCustom.Show(
+          "Не удалось найти окно транслятора или исполнителя.",
+          "Ошибка запуска программы контроля",
+          image: MessageBoxImage.Error);
+        return;
       }
 
       var dockManager = container.GetDockControl();
@@ -720,8 +747,7 @@ namespace MainWindowProgram.Services
         translated.ConfigureBreakpoints(interactive: true, visible: true);
         translated.RightBreakpoint = allowed.Select(command => command.FormattedStartLineNumber + 1).ToList();
         translated.NumCommandWithMnemonic = BuildNumCommandWithMnemonic(allowed);
-        var preserved = runner.TranslationModels.Where(command => command.HasBreakpoint)
-          .ToDictionary(command => int.Parse(command.CommandNumber), command => command.IsBreakpointEnabled);
+        var preserved = BuildBreakpointState(runner.TranslationModels);
         RestoreBreakpoints(result.Models, copy, translated, preserved);
         runner.ApplySourceTranslation(translated, result.Models, text);
         return true;
@@ -933,9 +959,7 @@ namespace MainWindowProgram.Services
 
       var currentItem = foundDockItem.Content as TranslatorItem;
       Dictionary<int, bool> preservedBreakpoints = currentItem != null
-          ? currentItem.TranslationModels
-              .Where(x => x.HasBreakpoint)
-              .ToDictionary(x => int.Parse(x.CommandNumber), x => x.IsBreakpointEnabled)
+          ? BuildBreakpointState(currentItem.TranslationModels)
           : new Dictionary<int, bool>();
 
       SetDeferredVisibility(currentItem, false);

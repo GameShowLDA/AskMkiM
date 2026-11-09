@@ -109,7 +109,6 @@ namespace UI.Controls.Runner
       ProtocolUI.ErrorListBoxVerticalVisibility = Visibility.Collapsed;
       MainContent.Content = ProtocolUI;
       ErrorListBoxVertical.ItemDoubleClicked += ErrorItemDoubleClicked;
-      ErrorListBoxVertical.DesiredHeightChanged += ErrorListBoxVertical_DesiredHeightChanged;
       devicesStatus = new DevicesStatus();
 
       EventAggregator.Subscribe<SystemStateEvents.LockedChanged>(OnRunnerLockedChanged);

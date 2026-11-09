@@ -768,6 +768,12 @@ Parser/validators add `ErrorItem`/`WarningItem` from
 `Ask.Core/Services/Errors/Translation`. `CriticalTranslationErrorClassifier`
 определяет блокирующие ошибки. UI отображает snapshot через `TranslatorItem` и
 error-list controls.
+Модели, созданные для ошибок разбора до определения номера команды, могут иметь
+`BaseCommandModel.CommandNumber == null`. `TranslationServices.IsBreakpointAllowed`,
+`BuildNumCommandWithMnemonic` и `BuildBreakpointState` исключают такие модели только из навигации и сохранения точек
+останова; сама модель остаётся в `TranslatorItem.TranslationModels` и таблице диагностики.
+Поэтому ошибочная программа открывается в трансляторе с ошибками и не прерывает создание
+вкладки через `int.Parse`.
 
 #### Files
 
@@ -3287,12 +3293,18 @@ Call chain: `RunControl` constructor → `InitializeWorkspaceDocuments`
 `RunnerDocumentStyle`/`RunnerSourceStyle` сохраняют кнопки открытия, папки, PDF,
 печати, сохранения и трансляции. Изменение `DockItem.TabText` синхронизируется с
 заголовком AvalonDock через `DependencyPropertyDescriptor`.
+Высотой панели ошибок управляет AvalonDock; `RunControl` не подписывается на
+`ErrorListControl.DesiredHeightChanged`, чтобы не создавать цикл
+`RefreshCurrentPage → DesiredHeightChanged → RefreshLayoutFromHost`.
 
 #### Historical custom docking implementation (до AvalonDock)
 
 Следующее описание относится к предыдущей реализации и оставлено для навигации по
 собственной библиотеке `UI/Windows/WpfDocking`, которая всё ещё используется внешним
 workspace приложения, но больше не управляет внутренними панелями `RunControl`.
+`DockPaneManager.Focus` запускает вложенный Dispatcher frame только для
+`DockPosition.Floating`: обычные document-вкладки (включая внешний `RunControl`)
+не ожидают создание нативного floating window и не могут зависнуть в `DoEvents`.
 Ранее `UI/Controls/Runner/RunControl.xaml` содержал один `RunnerDockManager`.
 `ProtocolPane` содержал `MainContent` с ProtocolUI,
 `ErrorsPane` — `ErrorListBoxVertical`. Транслированная программа, состояние
@@ -3554,15 +3566,31 @@ Watchdog через 30 секунд завершает только процес
 скрытых/раскрытых логов и индекса находятся в
 `Ask.UI.UnitTests/Components/ProtocolListBox/ProtocolRenderingOptimizationTests.cs`.
 `RequestOverviewUpdate` откладывает обновление полосы для обычных записей на один цикл
-`DispatcherTimer` (100 мс); ошибка и команда обновляют её сразу. После загрузки, удаления
-и очистки `RefreshErrorOverview` также выполняет обновление сразу. Прокрутка обновляет
-только видимую область, без повторной классификации сообщений.
+`DispatcherTimer` (100 мс); потоковое добавление команд и ошибок использует тот же пакетный
+цикл, чтобы серия сообщений не перестраивала геометрию карты несколько раз за кадр.
+После загрузки, удаления и очистки `RefreshErrorOverview` выполняет обновление сразу.
+Прокрутка обновляет только видимую область, без повторной классификации сообщений;
+изменения scrollbar и viewport объединяются `RequestScrollMetricsUpdate` в один проход
+`DispatcherPriority.Render`.
 `RefreshErrorOverviewViewport` задаёт видимый диапазон через `VerticalOffset/ExtentHeight`
 и `(VerticalOffset + ViewportHeight)/ExtentHeight`; от наличия штатного ScrollBar/Thumb он не зависит.
 Автопрокрутка `AppendLineAsync → RequestScrollToEnd` следует за хвостом, пока пользователь
 не прокрутил список вверх. `ProtocolScrollViewer_ScrollChanged` отличает пользовательское
-смещение от изменения `ExtentHeight`; при росте содержимого удерживает хвост, не делая
-принудительный `InvalidateMeasure` на каждую запись. `ClearAsync` возобновляет слежение.
+смещение от изменения `ExtentHeight`; удержание хвоста выполняет только отложенный
+`RequestScrollToEnd`, поэтому одно добавление не запускает второй переход в конец из
+`ScrollChanged`. Принудительный `InvalidateMeasure` на каждую запись не используется.
+`ClearAsync` возобновляет слежение.
+Синхронизация ширины верхних панелей execution/inspection с разделителем основной области
+выполняется `ProtocolUI.UpdateProtocolManagerLayout` только при `SizeChanged` панелей и
+`IsVisibleChanged` разделителя. Она не подписана на общий WPF `LayoutUpdated`: добавление
+строки протокола не должно повторно выполнять `TranslatePoint` и менять ширины колонок.
+`AppendLineAsync` применяет запись синхронно, когда вызов уже находится в UI-потоке,
+не создавая отдельную Dispatcher-операцию и возможность layout-прохода между соседними
+сообщениями. Для фонового потока сохраняется `DispatcherPriority.DataBind` и ожидание
+фактического добавления. Шаблон использует непосредственно `ListBoxItem.ContentTemplate`
+и `ContentPresenter`, без двух промежуточных `ContentControl` на каждую реализованную строку.
+Прозрачный `ProtocolSelectableTextBox` сохраняет посимвольное выделение, но не создаёт
+дублирующий AutomationPeer: доступный текст уже представлен видимыми TextBlock строки.
 Кнопки и счётчик находятся в общей верхней строке над списком и полосой.
 `RefreshOverviewPositions → ProjectOverviewOffset → ErrorOverviewBar.SetLinePositions`
 проецирует маркеры в пиксельную шкалу: реализованные контейнеры дают измеренные границы,

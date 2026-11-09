@@ -12,7 +12,6 @@ public partial class RunControl
   private bool _dockLayoutInitialized;
   private bool _closingDockLayout;
   private DockItem? _runnerOwner;
-  private DispatcherOperation? _pendingErrorLayoutRefresh;
   private readonly Dictionary<DockItem, EventHandler> _workspaceTitleHandlers = [];
   private static readonly DependencyPropertyDescriptor TabTextDescriptor =
     DependencyPropertyDescriptor.FromProperty(DockItem.TabTextProperty, typeof(DockItem));
@@ -85,7 +84,6 @@ public partial class RunControl
     _closingDockLayout = true;
     SaveRunnerLayout(allowClosing: true);
     UnsubscribeRunnerEvents();
-    _pendingErrorLayoutRefresh?.Abort();
     DetachLayoutHost();
     RunnerWorkspace.CloseFloatingWindows();
     if (_runnerOwner != null)
@@ -159,11 +157,6 @@ public partial class RunControl
 
   private void RunControl_Unloaded(object sender, RoutedEventArgs e)
   {
-    _pendingErrorLayoutRefresh?.Abort();
-    _pendingErrorLayoutRefresh = null;
     DetachLayoutHost();
   }
-
-  private void ErrorListBoxVertical_DesiredHeightChanged(double height) =>
-    ErrorListBoxVertical.RefreshLayoutFromHost();
 }

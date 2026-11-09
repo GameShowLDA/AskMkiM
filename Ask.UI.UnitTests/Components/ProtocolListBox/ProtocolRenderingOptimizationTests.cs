@@ -123,6 +123,19 @@ public sealed class ProtocolRenderingOptimizationTests
     }
   });
 
+  [Fact]
+  public void AppendLine_OnUiThreadCompletesSynchronouslyAndPreservesMessage() => RunInSta(() =>
+  {
+    var control = new ProtocolListBoxUI();
+    var message = new ShowMessageModel("Строка протокола");
+
+    var appendTask = control.AppendLineAsync(message);
+
+    Assert.True(appendTask.IsCompletedSuccessfully);
+    Assert.Contains("Строка протокола", control.GetText());
+    Assert.Same(message, Assert.Single(control.DisplayItems).Message);
+  });
+
   private static void RunInSta(Action action)
   {
     Exception? failure = null;
