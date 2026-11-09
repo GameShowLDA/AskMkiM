@@ -1,6 +1,7 @@
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Interop;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using AvalonDock.Core;
@@ -21,6 +22,7 @@ public partial class ExecutionWorkspaceControl : UserControl
     private const string TranslationId = "runner.translation";
     private const string SourceId = "runner.source";
     private const string ResultId = "runner.result";
+    private static readonly object EmptyPaneContent = new();
 
     private readonly Dictionary<ExecutionWorkspacePane, object?> _contents = [];
     private readonly Dictionary<ExecutionWorkspacePane, LayoutAnchorable> _panes = [];
@@ -220,6 +222,9 @@ public partial class ExecutionWorkspaceControl : UserControl
         {
             new JsonLayoutSerializer(WorkspaceDockManager).Serialize(temporaryPath);
             File.Move(temporaryPath, fullPath, true);
+            FloatingWindowPlacementStore.Save(
+                FloatingWindowPlacementStore.GetCompanionPath(fullPath),
+                WorkspaceDockManager.FloatingWindows);
         }
         finally
         {
@@ -252,15 +257,25 @@ public partial class ExecutionWorkspaceControl : UserControl
             {
                 if (args.Model.ContentId is not null && contentsById.TryGetValue(args.Model.ContentId, out var content))
                 {
-                    args.Content = content;
+                    // AvalonDock removes an unresolved pane during fixup. Some runner panes are
+                    // intentionally empty until their content is produced, but their saved place
+                    // must survive restoration.
+                    args.Content = content ?? EmptyPaneContent;
                 }
             };
             serializer.Deserialize(filePath);
             IndexRestoredPanes();
+            var owner = Window.GetWindow(this);
+            FloatingWindowPlacementStore.Restore(
+                FloatingWindowPlacementStore.GetCompanionPath(filePath),
+                WorkspaceDockManager.Layout,
+                WorkspaceDockManager.FloatingWindows,
+                owner is null ? nint.Zero : new WindowInteropHelper(owner).Handle);
             return HasAllRequiredPanes();
         }
-        catch (Exception)
+        catch (Exception exception)
         {
+            System.Diagnostics.Trace.WriteLine(exception);
             ResetLayout();
             return false;
         }
@@ -340,7 +355,11 @@ public partial class ExecutionWorkspaceControl : UserControl
             if (TryGetPane(anchorable.ContentId, out var pane))
             {
                 _panes[pane] = anchorable;
-                _contents[pane] = anchorable.Content;
+                _contents[pane] = ReferenceEquals(anchorable.Content, EmptyPaneContent)
+                    ? null
+                    : anchorable.Content;
+                if (ReferenceEquals(anchorable.Content, EmptyPaneContent))
+                    anchorable.Content = null;
             }
         }
     }

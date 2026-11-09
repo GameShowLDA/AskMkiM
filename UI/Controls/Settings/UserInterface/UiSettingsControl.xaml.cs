@@ -11,6 +11,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using UI.Controls.Runner;
 using static Ask.LogLib.LoggerUtility;
 
 namespace UI.Controls.Settings.UserInterface
@@ -144,6 +145,32 @@ namespace UI.Controls.Settings.UserInterface
     private void SettingsCard_CheckedChanged(object? sender, bool e)
     {
       ValueChanged(sender, e);
+    }
+
+    private void ResetRunnerLayoutButton_Click(object sender, RoutedEventArgs e)
+    {
+      var role = RoleAuthorizationConfig.CurrentRole;
+      if (role is null)
+        return;
+
+      var result = MessageBoxCustom.Show(
+        LocalizationService.Get("settings.userinterface.runnerLayout.confirmation"),
+        LocalizationService.Get("settings.userinterface.runnerLayout.confirmationTitle"),
+        MessageBoxButton.YesNo,
+        MessageBoxImage.Question);
+      if (result != MessageBoxResult.Yes)
+        return;
+
+      try
+      {
+        RunnerLayoutStore.DeleteCurrentAvalonLayout();
+        EventAggregator.Publish(new ExecutionEvents.RunnerLayoutResetRequested(role.Value));
+      }
+      catch (Exception exception)
+      {
+        LogException("Ошибка сброса раскладки исполнителя", exception);
+        MessageBoxCustom.Show(exception.Message, image: MessageBoxImage.Error);
+      }
     }
 
     /// <summary>

@@ -657,6 +657,21 @@
   <data name="settings.userinterface.printFont.description" xml:space="preserve">
     <value>Единый вид печатных форм и PDF-документов.</value>
   </data>
+  <data name="settings.userinterface.runnerLayout.title" xml:space="preserve">
+    <value>Расположение панелей исполнителя</value>
+  </data>
+  <data name="settings.userinterface.runnerLayout.description" xml:space="preserve">
+    <value>Восстанавливает стандартное расположение и размеры панелей для текущего пользователя.</value>
+  </data>
+  <data name="settings.userinterface.runnerLayout.reset" xml:space="preserve">
+    <value>Сбросить расположение</value>
+  </data>
+  <data name="settings.userinterface.runnerLayout.confirmationTitle" xml:space="preserve">
+    <value>Сброс расположения панелей</value>
+  </data>
+  <data name="settings.userinterface.runnerLayout.confirmation" xml:space="preserve">
+    <value>Сбросить расположение и размеры панелей исполнителя для текущего пользователя?</value>
+  </data>
   <data name="settings.protocol.commandHeaders.title" xml:space="preserve">
     <value>Заголовки команд</value>
   </data>

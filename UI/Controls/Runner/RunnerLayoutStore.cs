@@ -18,6 +18,17 @@ internal static class RunnerLayoutStore
       "AskMkiM", "runner-layout", $"{role}.json")
     : null;
 
+  internal static void DeleteCurrentAvalonLayout()
+  {
+    var legacyPath = GetCurrentPath();
+    if (legacyPath is null)
+      return;
+
+    var layoutPath = Path.ChangeExtension(legacyPath, ".avalondock.json");
+    File.Delete(layoutPath);
+    File.Delete(layoutPath + ".display.xml");
+  }
+
   internal static void Save(string path, DockLayout layout, string[] keys)
   {
     var data = new Snapshot(keys, layout.ShowActions.Select(ActionData.FromAction).ToArray(),
