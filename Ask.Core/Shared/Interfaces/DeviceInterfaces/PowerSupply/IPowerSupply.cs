@@ -1,5 +1,5 @@
-using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSupply.Capabilities;
 using Ask.Core.Shared.DTO.Devices.PowerSupply;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSupply.Capabilities;
 
 namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSupply
 {
@@ -27,5 +27,10 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSupply
     /// Измерение выходного напряжения и тока.
     /// </summary>
     IMeasurementManager MeasurementManager { get; set; }
+
+    /// <summary>
+    /// Менеджер самоконтроля источника питания.
+    /// </summary>
+    ISelfTestCheckerPowerSupply SelfTestManager { get; set; }
   }
 }

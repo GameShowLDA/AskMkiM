@@ -65,6 +65,7 @@ Size/Foreground и анимации общей кнопки; лицензия с
 | Пробойная установка GPT | `Ask.Device.ResponseProcessor/BreakdownTester/`, `Ask.Core/Shared/Interfaces/DeviceInterfaces/BreakdownTester/` | `Ask.Device.Application/FunctionAdapters/GPT/`, `Ask.Device.Runtime/Function/GPT/`, `Ask.Device.Runtime/Device/GPT79904.cs` |
 | Источник напряжения/тока | `Ask.Core/Shared/Interfaces/DeviceInterfaces/PowerSourceModule/` | `Ask.Device.Application/FunctionAdapters/ModuleVoltageCurrent/`, `Ask.Device.Runtime/Function/ModuleVoltageCurrentSource/` |
 | Внешний источник питания Б5-108, общий контракт источников | `Ask.Core/Shared/Interfaces/DeviceInterfaces/PowerSupply/IPowerSupply.cs`, `Ask.Device.Runtime/Device/B5108.cs` | `Ask.Device.Runtime/Function/B5108/`, `Ask.Device.Application/FunctionAdapters/B5108/`; [контракты и выполнение](#programmable-power-supply-contracts) |
+| Самоконтроль напряжения Б5-108 | `Ask.Device.Runtime/Function/B5108/SelftTest/SelfTestManager.cs` | [самоконтроль Б5-108](#самоконтроль-б5-108), `Ask.Device.ResponseProcessor/PowerSupply/PowerSupplySelfTestMessages.cs` |
 | БД и сервисный UI внешних источников питания | `Ask.DataBase.Engine/Static/Devices/PowerSupplies.cs`, `Ask.UI/Features/ServiceTools/PowerSupply/PowerSupplyControl.xaml(.cs)` | DTO/service/mapper, `AdminServices.GetPowerSuppliesAsync`, общая форма конфигурации; [полная цепочка](#programmable-power-supply-contracts) |
 | Добавление Б5-108 и IP-настройки выбранного тестера | `UI/Controls/Settings/DeviceConfig/PowerSupply/PowerSupplyWindow.xaml.cs` | общий `DeviceSettingsControl`, partial `.PowerSupply.cs`, `DeviceConfigControl`, `DeviceManagerControl`; [цепочки](#programmable-power-supply-contracts) |
 | Шасси и питание | `Ask.Core/Shared/Interfaces/DeviceInterfaces/Chassis/` | `Ask.Device.Runtime/Device/ManagerChassis.cs`, `Ask.Device.Runtime/Function/ManagerChassis/`, `Ask.Device.Emulator/Chassis/`, `UI/Components/PowerButton.xaml.cs` |
@@ -2062,6 +2063,7 @@ Setters не включают выход, не меняют LIM и не вызы
 Проверки: `Ask.Engine.UnitTests/DeviceRuntime/B5108Tests.cs` — раздельные менеджеры/композиция,
 валидация, readback/errors, Idle, отмена, сериализация параллельных U/I и loopback TCP.
 Отдельно проверена отмена из UI во время уже выполняющегося запроса измерения.
+
 БД: `Ask.Core/Shared/DTO/Devices/PowerSupply/PowerSupplyDto.cs` → отдельная таблица `PowerSupplies`
 в `AppDbContext.Device.cs`. Поля AttachableDeviceDto (включая NumberChassis) + TCP `Port` (по умолчанию 80).
 Текущие U/I и включение выхода в БД не сохраняются.
@@ -2130,6 +2132,31 @@ Root-сервисные функции не добавляются в польз
 и `PowerSupplyConfigurationTests.cs`: общий IP-редактор и TCP-порт, секция списка, привязка
 к тестеру в JSON, root-сервисное управление и рендер тематических состояний.
 Независимый исследовательский прототип остаётся в `TestConsole/B5108/`.
+
+##### Самоконтроль Б5-108
+
+- `Ask.UI/Components/DeviceSelectorPanel/DeviceSelectorPanel.xaml.cs` загружает источники
+  через `PowerSupplies.GetAllAsync`, определяет `DeviceType.PowerSupply` и получает пункты
+  из `IPowerSupply.SelfTestManager.GetTestTypeEnum`. Доступна проверка напряжения.
+- `Ask.Engine/Tests/SelfControl/ModuleSelfExecutor.cs` → `GetFastMeterSafe`
+  (первый настроенный мультиметр) → `ISelfTestCheckerPowerSupply.StartSelfCheck`
+  → `B5108.SelfTestManager` → `Ask.Device.Runtime/Function/B5108/SelftTest/SelfTestManager.cs`.
+- `StartSelfCheck` добавляет `DeviceExecutionResult` / `TestExecutionResult`, инициализирует
+  источник и мультиметр через их `ConnectableManager.InitializeAsync`, выбирает DCV,
+  отключает выход, выставляет 0 В и включает выход. Для точек 0,1–0,9 В и 1–9 В
+  `CheckVoltagePointAsync` задаёт напряжение через `VoltageManager` → `VOLT`, затем
+  вызывает `IMultimeter.DcVoltageManager.MeasureDCVoltageAsync` → `DCVMeasurementBase`
+  → `MeasurementBase` → профиль мультиметра и Real/Idle адаптер. Допуск по уставке
+  ±(0,01 В + 1 %), обе границы включены. Брак записывается в `TestExecutionResult.Errors`.
+- `Ask.Device.ResponseProcessor/PowerSupply/PowerSupplySelfTestMessages.cs` →
+  `EquipmentMessages` / `SelfTestMessages` / `MeasurementMessages` → экранный протокол.
+  Ток имеет методы оформления точки, результата, погрешности и брака. Измерение
+  и команды установки тока в самоконтроле отсутствуют.
+- `finally` в менеджере → `EquipmentExecutionContext.EnterMandatoryFinalization`
+  → `OutputManager.SetOutputStateAsync(false)` → `OUTP OFF` с проверкой readback.
+  `Ask.UI/Features/ProtocolNew/Execution/ActionExecutor.cs` исключает `IPowerSupply` из
+  общего сброса самоконтроля, чтобы `*RST` не изменял предел тока. Источник остаётся
+  в учёте использованных устройств для протокола.
 
 ### Device matrix
 
