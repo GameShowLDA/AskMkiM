@@ -47,7 +47,6 @@ namespace Ask.Engine.Tests.SelfControl
 
       var dbc = (await SwitchingDevices.GetDevicesByNumberChassisAsync(managerShassi.Number)).FirstOrDefault();
       var mkr = await RelaySwitchModules.GetDevicesByNumberChassisAsync(managerShassi.Number);
-      var breakdownTester = (await BreakdownTesters.GetDevicesByNumberChassisAsync(managerShassi.Number)).FirstOrDefault();
 
       await dbc.SelfTestManager.StartSelfCheck(
         _messageService.GetCancellationToken(),
@@ -75,14 +74,18 @@ namespace Ask.Engine.Tests.SelfControl
       dbc,
       meter);
 
-      await breakdownTester.SelfTestManager.StartSelfCheck(
-        _messageService.GetCancellationToken(),
-        TypeConnector.FullCheck,
-        settings,
-        _messageService,
-        breakdownTester,
-        dbc,
-        meter);
+      var breakdownTester = (await BreakdownTesters.GetDevicesByNumberChassisAsync(managerShassi.Number)).FirstOrDefault();
+      if (breakdownTester != null)
+      {
+        await breakdownTester.SelfTestManager.StartSelfCheck(
+          _messageService.GetCancellationToken(),
+          TypeConnector.FullCheck,
+          settings,
+          _messageService,
+          breakdownTester,
+          dbc,
+          meter);
+      }
     }
   }
 }
