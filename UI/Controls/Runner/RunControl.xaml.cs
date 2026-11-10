@@ -697,14 +697,14 @@ namespace UI.Controls.Runner
     private void RightEditor_SaveToDiskRequestedAsync(object? sender, EventArgs e)
     {
       var rightEditor = sender as TranslatorEditor;
-      var translatedText = rightEditor?.GetTextEditor()?.TextEditorModel.SourceLines;
+      var translatedText = rightEditor?.GetTextEditor()?.Text;
       var sourceFilePath = rightEditor?.GetTextEditor()?.TextEditorModel?.FilePath;
       if (string.IsNullOrWhiteSpace(sourceFilePath))
       {
         sourceFilePath = OpkFilePath;
       }
 
-      _translatedFileSaveService.SaveToDisk(this, translatedText ?? new List<string>(), sourceFilePath);
+      _translatedFileSaveService.SaveToDisk(this, translatedText ?? string.Empty, sourceFilePath);
     }
 
     private bool CanSaveTranslatedFileToDisk()

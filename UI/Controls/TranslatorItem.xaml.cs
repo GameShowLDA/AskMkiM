@@ -312,8 +312,8 @@ namespace UI.Controls
 
       return _translatedFileSaveService.SaveToDisk(
         this,
-        rightTextEditor.TextEditorModel.SourceLines,
-        rightTextEditor.TextEditorModel.FilePath);
+        rightTextEditor.Text,
+        leftTextEditor?.TextEditorModel?.FilePath ?? rightTextEditor.TextEditorModel.FilePath);
     }
 
     private void RightEditor_BackRequestedAsync(object? sender, EventArgs e)
