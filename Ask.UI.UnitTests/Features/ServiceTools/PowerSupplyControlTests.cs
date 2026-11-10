@@ -14,33 +14,12 @@ using System.Windows.Threading;
 
 namespace Ask.UI.UnitTests.Features.ServiceTools;
 
-public sealed class PowerSupplyControlTests
+[Collection(nameof(WpfApplicationCollection))]
+public sealed class PowerSupplyControlTests(WpfApplicationFixture wpf)
 {
   [Fact]
-  public async Task RootPanel_ControlsConfiguredSource_AndSharedConfigurationEditsLan()
-  {
-    var completion = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-    async void Run()
-    {
-      try { await VerifyAsync(); completion.TrySetResult(); }
-      catch (Exception error) { completion.TrySetException(error); }
-    }
-    if (Application.Current is { } application)
-      _ = application.Dispatcher.InvokeAsync(Run);
-    else
-    {
-      var thread = new Thread(() =>
-      {
-        var app = new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown };
-        SynchronizationContext.SetSynchronizationContext(new DispatcherSynchronizationContext());
-        app.Dispatcher.InvokeAsync(Run);
-        Dispatcher.Run();
-      }) { IsBackground = true };
-      thread.SetApartmentState(ApartmentState.STA);
-      thread.Start();
-    }
-    await completion.Task.WaitAsync(TimeSpan.FromSeconds(30));
-  }
+  public Task RootPanel_ControlsConfiguredSource_AndSharedConfigurationEditsLan()
+    => wpf.RunAsync(VerifyAsync, TimeSpan.FromSeconds(30));
 
   private static async Task VerifyAsync()
   {
