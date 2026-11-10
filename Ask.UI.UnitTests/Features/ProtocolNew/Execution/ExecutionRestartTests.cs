@@ -12,36 +12,22 @@ using System.Windows.Threading;
 
 namespace Ask.UI.UnitTests.Features.ProtocolNew.Execution;
 
-public sealed class ExecutionRestartTests
+[Collection(nameof(WpfApplicationCollection))]
+public sealed class ExecutionRestartTests(WpfApplicationFixture wpf)
 {
   [Fact]
-  public async Task RejectedStartsPreserveProtocolAndReadyIsShownOnlyAfterFinalization()
-  {
-    var completion = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-    var thread = new Thread(() =>
+  public Task RejectedStartsPreserveProtocolAndReadyIsShownOnlyAfterFinalization()
+    => wpf.RunAsync(async () =>
     {
-      var application = new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown };
-      application.Resources.MergedDictionaries.Add(new ResourceDictionary
+      var dictionaries = Application.Current.Resources.MergedDictionaries;
+      var resources = new ResourceDictionary
       {
         Source = new Uri("/UI;component/Style.xaml", UriKind.Relative)
-      });
-      SynchronizationContext.SetSynchronizationContext(new DispatcherSynchronizationContext());
-      application.Dispatcher.InvokeAsync(async () =>
-      {
-        try
-        {
-          try { await VerifyRestartsAsync(); }
-          finally { application.Resources.MergedDictionaries.Clear(); }
-          completion.TrySetResult();
-        }
-        catch (Exception ex) { completion.TrySetException(ex); }
-      });
-      Dispatcher.Run();
-    }) { IsBackground = true };
-    thread.SetApartmentState(ApartmentState.STA);
-    thread.Start();
-    await completion.Task.WaitAsync(TimeSpan.FromSeconds(60));
-  }
+      };
+      dictionaries.Add(resources);
+      try { await VerifyRestartsAsync(); }
+      finally { dictionaries.Remove(resources); }
+    }, TimeSpan.FromSeconds(60));
 
   private static async Task VerifyRestartsAsync()
   {

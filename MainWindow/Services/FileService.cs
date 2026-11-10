@@ -321,10 +321,8 @@ namespace MainWindowProgram.Services
 
     private static string ReadSavedProtocolText(string filePath)
     {
-      var encoding = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
-      string text = FileEncryptionManager.IsFileEncrypted(filePath)
-        ? FileEncryptionManager.ReadEncryptedFileText(filePath, encoding)
-        : File.ReadAllText(filePath, encoding);
+      var (text, _) = UI.Services.EncodingService.ReadFile(
+        filePath, Encoding.UTF8, FileEncryptionManager.IsFileEncrypted(filePath));
 
       return text
         .Replace("\r\n", "\n")

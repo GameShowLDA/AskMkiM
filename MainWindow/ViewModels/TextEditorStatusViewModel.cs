@@ -63,7 +63,7 @@ namespace MainWindowProgram.ViewModels
     /// <summary>
     /// Текущая кодировка документа.
     /// </summary>
-    public Encoding CurrentEncoding { get; private set; } = Encoding.UTF8;
+    public Encoding CurrentEncoding => GetActiveEditor?.Invoke()?.TextEditorModel.Encoding ?? Encoding.UTF8;
 
     /// <summary>
     /// Команда смены кодировки документа на кодировку, выбранную из списка. 
@@ -88,6 +88,12 @@ namespace MainWindowProgram.ViewModels
 
     private void OnPropertyChanged(string propertyName) =>
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+
+    private static string ReadWithSelectedEncoding(string path, Encoding encoding)
+    {
+      using var reader = new StreamReader(path, encoding, detectEncodingFromByteOrderMarks: false);
+      return reader.ReadToEnd();
+    }
 
     /// <summary>
     /// Команда смены кодировки через контекстное меню по ПКМ.
@@ -138,10 +144,6 @@ namespace MainWindowProgram.ViewModels
           {
             var selectedEncoding = (Encoding)item.Tag;
 
-            // Обновим в ViewModel
-            _viewModel.CurrentEncoding = selectedEncoding;
-            _viewModel.EncodingName = selectedEncoding.WebName.ToUpperInvariant();
-
             // Получаем активный редактор
             var editor = _viewModel.GetActiveEditor?.Invoke();
             if (editor == null)
@@ -159,9 +161,10 @@ namespace MainWindowProgram.ViewModels
 
             try
             {
-              string content = File.ReadAllText(path, selectedEncoding);
+              string content = ReadWithSelectedEncoding(path, selectedEncoding);
               editor.TextEditorModel.Encoding = selectedEncoding;
               editor.TextEditor.Text = content;
+              _viewModel.EncodingName = selectedEncoding.WebName.ToUpperInvariant();
             }
             catch (Exception ex)
             {
@@ -200,9 +203,7 @@ namespace MainWindowProgram.ViewModels
           return;
         }
 
-        var current = _viewModel.CurrentEncoding.WebName.ToUpperInvariant();
-        var utfEncoding = Utf8.WebName.ToUpperInvariant();
-        var newEncoding = current == utfEncoding ? Dos866 : Utf8;
+        var newEncoding = editor.TextEditorModel.Encoding?.CodePage == Utf8.CodePage ? Dos866 : Utf8;
 
         var path = editor.TextEditorModel.FilePath;
         if (string.IsNullOrEmpty(path) || !File.Exists(path))
@@ -213,11 +214,10 @@ namespace MainWindowProgram.ViewModels
 
         try
         {
-          string content = File.ReadAllText(path, newEncoding);
+          string content = ReadWithSelectedEncoding(path, newEncoding);
           editor.TextEditorModel.Encoding = newEncoding;
           editor.TextEditor.Text = content;
 
-          _viewModel.CurrentEncoding = newEncoding;
           _viewModel.EncodingName = newEncoding.WebName.ToUpperInvariant();
         }
         catch (Exception ex)
