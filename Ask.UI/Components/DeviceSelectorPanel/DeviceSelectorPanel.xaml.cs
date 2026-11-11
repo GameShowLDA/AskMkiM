@@ -7,6 +7,8 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule.Capabilities;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSupply;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSupply.Capabilities;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule.Capabilities;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
@@ -95,6 +97,7 @@ namespace Ask.UI.Components.DeviceSelectorPanel
           DeviceType.PowerSourceModule => GetSelectedRelayDevice<IPowerSourceModule>(),
           DeviceType.BreakdownTester => GetSelectedRelayDevice<IBreakdownTester>(),
           DeviceType.FastMeter => GetSelectedRelayDevice<IMultimeter>(),
+          DeviceType.PowerSupply => GetSelectedRelayDevice<IPowerSupply>(),
           _ => null
         };
       }
@@ -141,6 +144,7 @@ namespace Ask.UI.Components.DeviceSelectorPanel
           IPowerSourceModule => DeviceType.PowerSourceModule,
           IBreakdownTester => DeviceType.BreakdownTester,
           IMultimeter => DeviceType.FastMeter,
+          IPowerSupply => DeviceType.PowerSupply,
           _ => DeviceType.Unknown
         };
       }
@@ -221,6 +225,12 @@ namespace Ask.UI.Components.DeviceSelectorPanel
         var enumType = checker5.GetTestTypeEnum();
         SetSelfControlEnum(enumType);
       }
+      else if (selectedDevice is IPowerSupply powerSupply && powerSupply.SelfTestManager is ISelfTestCheckerPowerSupply checker6)
+      {
+        var enumType = checker6.GetTestTypeEnum();
+        SetSelfControlEnum(enumType);
+      }
+
 
       _isHasDevice = true;
 
@@ -240,6 +250,7 @@ namespace Ask.UI.Components.DeviceSelectorPanel
       var switchingDevices = SwitchingDevices.GetAllAsync().GetAwaiter().GetResult();
       var breakdowns = BreakdownTesters.GetAllAsync().GetAwaiter().GetResult();
       var fastmeter = FastMeters.GetAllAsync().GetAwaiter().GetResult();
+      var powerSupply = PowerSupplies.GetAllAsync().GetAwaiter().GetResult();
 
       var sources = new List<IEnumerable<dynamic>>
       {
@@ -247,7 +258,8 @@ namespace Ask.UI.Components.DeviceSelectorPanel
         switchingDevices,
         relaySwitchModules,
         breakdowns,
-        fastmeter
+        fastmeter,
+        powerSupply
       };
 
       var combined = new List<object>();
@@ -304,6 +316,7 @@ namespace Ask.UI.Components.DeviceSelectorPanel
         DeviceType.PowerSourceModule when typeof(T) == typeof(IPowerSourceModule) => selected as T,
         DeviceType.BreakdownTester when typeof(T) == typeof(IBreakdownTester) => selected as T,
         DeviceType.FastMeter when typeof(T) == typeof(IMultimeter) => selected as T,
+        DeviceType.PowerSupply when typeof(T) == typeof(IPowerSupply) => selected as T,
         _ => null
       };
     }

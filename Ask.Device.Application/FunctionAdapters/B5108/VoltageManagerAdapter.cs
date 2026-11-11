@@ -17,14 +17,39 @@ internal sealed class VoltageManagerAdapter : IVoltageManager
   public VoltageManagerAdapter(Runtime.Device.B5108 device)
   {
     _device = device ?? throw new ArgumentNullException(nameof(device));
-    _manager = new Runtime.Function.B5108.VoltageManager(device);
+    if (device.VoltageManager is Runtime.Function.B5108.VoltageManager manager)
+    {
+      _manager = manager;
+    }
+    else
+    {
+      var current = device.VoltageManager;
+      _manager = new Runtime.Function.B5108.VoltageManager(device)
+      {
+        MinVoltage = current.MinVoltage,
+        MaxVoltage = current.MaxVoltage,
+        VoltageStep = current.VoltageStep,
+      };
+    }
   }
   /// <inheritdoc />
-  public decimal MinVoltage => _manager.MinVoltage;
+  public decimal MinVoltage
+  {
+    get => _manager.MinVoltage;
+    set => _manager.MinVoltage = value;
+  }
   /// <inheritdoc />
-  public decimal MaxVoltage => _manager.MaxVoltage;
+  public decimal MaxVoltage
+  {
+    get => _manager.MaxVoltage;
+    set => _manager.MaxVoltage = value;
+  }
   /// <inheritdoc />
-  public decimal VoltageStep => _manager.VoltageStep;
+  public decimal VoltageStep
+  {
+    get => _manager.VoltageStep;
+    set => _manager.VoltageStep = value;
+  }
 
   /// <inheritdoc />
   public async Task SetVoltageAsync(decimal voltage, CancellationToken cancellationToken = default, IUserInteractionService? userMessageService = null)

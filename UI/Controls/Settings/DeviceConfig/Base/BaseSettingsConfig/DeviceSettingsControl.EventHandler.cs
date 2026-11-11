@@ -146,7 +146,7 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
 
     private void ResetSettingsForDeviceModelChange()
     {
-      _powerSupplyPortTextBox = null;
+      _powerSupplySettingsControl = null;
       AdditionalSettingsContainer.Content = null;
       _acwPpuDividerCoefficientPercentTextBox = null;
       _dcwPpuDividerCoefficientPercentTextBox = null;

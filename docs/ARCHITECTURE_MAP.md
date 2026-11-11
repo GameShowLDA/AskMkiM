@@ -65,8 +65,9 @@ Size/Foreground и анимации общей кнопки; лицензия с
 | Пробойная установка GPT | `Ask.Device.ResponseProcessor/BreakdownTester/`, `Ask.Core/Shared/Interfaces/DeviceInterfaces/BreakdownTester/` | `Ask.Device.Application/FunctionAdapters/GPT/`, `Ask.Device.Runtime/Function/GPT/`, `Ask.Device.Runtime/Device/GPT79904.cs` |
 | Источник напряжения/тока | `Ask.Core/Shared/Interfaces/DeviceInterfaces/PowerSourceModule/` | `Ask.Device.Application/FunctionAdapters/ModuleVoltageCurrent/`, `Ask.Device.Runtime/Function/ModuleVoltageCurrentSource/` |
 | Внешний источник питания Б5-108, общий контракт источников | `Ask.Core/Shared/Interfaces/DeviceInterfaces/PowerSupply/IPowerSupply.cs`, `Ask.Device.Runtime/Device/B5108.cs` | `Ask.Device.Runtime/Function/B5108/`, `Ask.Device.Application/FunctionAdapters/B5108/`; [контракты и выполнение](#programmable-power-supply-contracts) |
+| Самоконтроль напряжения Б5-108 | `Ask.Device.Runtime/Function/B5108/SelftTest/SelfTestManager.cs` | [самоконтроль Б5-108](#самоконтроль-б5-108), `Ask.Device.ResponseProcessor/PowerSupply/PowerSupplySelfTestMessages.cs` |
 | БД и сервисный UI внешних источников питания | `Ask.DataBase.Engine/Static/Devices/PowerSupplies.cs`, `Ask.UI/Features/ServiceTools/PowerSupply/PowerSupplyControl.xaml(.cs)` | DTO/service/mapper, `AdminServices.GetPowerSuppliesAsync`, общая форма конфигурации; [полная цепочка](#programmable-power-supply-contracts) |
-| Добавление Б5-108 и IP-настройки выбранного тестера | `UI/Controls/Settings/DeviceConfig/PowerSupply/PowerSupplyWindow.xaml.cs` | общий `DeviceSettingsControl`, partial `.PowerSupply.cs`, `DeviceConfigControl`, `DeviceManagerControl`; [цепочки](#programmable-power-supply-contracts) |
+| Добавление Б5-108, IP и рабочие пределы U/I выбранного тестера | `Ask.UI/Features/EquipmentConfiguration/PowerSupply/PowerSupplySettingsControl.xaml(.cs)` | `PowerSupplyWindow`, общий `DeviceSettingsControl`, hosting partial `.PowerSupply.cs`, `PowerSupplyDto`, `PowerSupplyMapper`; [цепочки](#programmable-power-supply-contracts) |
 | Шасси и питание | `Ask.Core/Shared/Interfaces/DeviceInterfaces/Chassis/` | `Ask.Device.Runtime/Device/ManagerChassis.cs`, `Ask.Device.Runtime/Function/ManagerChassis/`, `Ask.Device.Emulator/Chassis/`, `UI/Components/PowerButton.xaml.cs` |
 | UPS | `Ask.Core/Shared/Interfaces/DeviceInterfaces/UninterruptiblePowerSupply/` | `Ask.Device.Application/FunctionAdapters/MikUps1101rRm/`, `Ask.Device.Runtime/Function/MikUps1101rRm/` |
 | COM | `Ask.Device.Runtime/Base/Device/DeviceWithCOM.cs` | `Ask.Device.Communication/Com/Protocols/ComProtocol.cs`, `Ask.Device.Communication/Com/Configuration/SerialPortCustom.cs` |
@@ -1968,9 +1969,9 @@ the global `ExecutionConfig`.
 Namespace: `Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSupply`.
 Отдельные contracts в `PowerSupply/Capabilities/` (тот же namespace с `.Capabilities`):
 
-- `IVoltageManager` → `VoltageManager`: `MinVoltage`, `MaxVoltage`, `VoltageStep`,
+- `IVoltageManager` → `VoltageManager`: настраиваемые `MinVoltage`, `MaxVoltage`, `VoltageStep`,
   `SetVoltageAsync` / `GetVoltageAsync` (вольты).
-- `ICurrentManager` → `CurrentManager`: `MinCurrent`, `MaxCurrent`, `CurrentStep`,
+- `ICurrentManager` → `CurrentManager`: настраиваемые `MinCurrent`, `MaxCurrent`, `CurrentStep`,
   `SetCurrentAsync` / `GetCurrentAsync` (амперы, уставка ограничения тока).
 - `IOutputManager` → `OutputManager`: `SetOutputStateAsync` / `GetOutputStateAsync`.
 - `IMeasurementManager` → `MeasurementManager`: `MeasureVoltageAsync` / `MeasureCurrentAsync`.
@@ -1978,7 +1979,8 @@ Namespace: `Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSupply`.
 Уставки и измерения представлены `decimal`; все операции принимают `CancellationToken`.
 Шаг — программное ограничение уставок относительно минимума, не физическое разрешение выхода.
 Чтение уставки отделено от измерения фактического выхода. `IPowerSupply.NumberChassis` задаёт логическую принадлежность выбранному тестеру;
-источник остаётся внешним устройством, не модулем МиНТ. Также наследует `IDeviceToDtoConverter<PowerSupplyDto>`. `B5108.Convert()` сохраняет конфигурацию и TCP-порт.
+источник остаётся внешним устройством, не модулем МиНТ. Также наследует `IDeviceToDtoConverter<PowerSupplyDto>`.
+`B5108.Convert()` сохраняет подключение и пользовательские диапазоны/шаги U/I; текущие уставки не сохраняются.
 Внешние источники не объединяются с модулем МиНТ и его `IPowerSourceModule`.
 
 Runtime implementation: `Ask.Device.Runtime/Device/B5108.cs` (`Ask.Device.Runtime.Device.B5108`)
@@ -1997,7 +1999,7 @@ timeout 3000 мс, команды `*IDN?` / `*RST`, ожидаемую моде�
 
 Прикладная композиция: `Ask.Device.Application/Composition/DeviceApplicationComposer.cs`
 → четыре отдельных adapters из `FunctionAdapters/B5108/`
-→ создание соответствующих runtime-менеджеров с устройством.
+→ оборачивание соответствующих runtime-менеджеров с сохранением загруженных диапазонов и шагов.
 Общая оболочка `EquipmentTrackingConnectable` продолжает регистрировать обращения к подключению.
 Для методов capability-интерфейсов после `CancellationToken` предусмотрен необязательный
 `IUserInteractionService`, передаваемый прикладным adapters в `UserActionHelper`.
@@ -2013,7 +2015,8 @@ Call chains:
   → `EquipmentMessages`.
 - `VoltageManagerAdapter.SetVoltageAsync` / `CurrentManagerAdapter.SetCurrentAsync`
   → `UserActionHelper.RunWithUserRepeatAsync` → runtime `VoltageManager` / `CurrentManager`
-  → проверка диапазона 0–150 В / 0–5 А и шага 0.1 В / 0.001 А
+  → проверка загруженного из конфигурации диапазона и шага
+  (defaults Б5-108: 0–150 В / 0–5 А и 0.1 В / 0.001 А)
   → общий per-device `OperationLock` протокола из `CreatePowerSupply`
   → `VOLT:LIM?` / `CURR:LIM?` → проверка текущего LIM
   → `VOLT <value>` / `CURR <value>` без ожидания ответа
@@ -2062,25 +2065,31 @@ Setters не включают выход, не меняют LIM и не вызы
 Проверки: `Ask.Engine.UnitTests/DeviceRuntime/B5108Tests.cs` — раздельные менеджеры/композиция,
 валидация, readback/errors, Idle, отмена, сериализация параллельных U/I и loopback TCP.
 Отдельно проверена отмена из UI во время уже выполняющегося запроса измерения.
+
 БД: `Ask.Core/Shared/DTO/Devices/PowerSupply/PowerSupplyDto.cs` → отдельная таблица `PowerSupplies`
-в `AppDbContext.Device.cs`. Поля AttachableDeviceDto (включая NumberChassis) + TCP `Port` (по умолчанию 80).
+в `AppDbContext.Device.cs`. Поля AttachableDeviceDto (включая NumberChassis), TCP `Port` (default 80),
+`MinVoltage`/`MaxVoltage`/`VoltageStep` в В (defaults 0/150/0.1) и
+`MinCurrent`/`MaxCurrent`/`CurrentStep` в А (defaults 0/5/0.001).
 Текущие U/I и включение выхода в БД не сохраняются.
 `Ask.DataBase.Provider/Services/Devices/PowerSupplyDtoService.cs` использует существующий `CrudService<T>`.
 `Ask.DataBase.Engine/Static/Devices/PowerSupplies.cs` → `DeviceRuntime` → ветки `IPowerSupply` в `DeviceEngine`
 → DTO service → `PowerSupplyMapper` / `DeviceMapperRegistry` → `DeviceBuilder`
 → `DeviceApplicationComposer` → runtime с отдельными прикладными adapters.
 Поддержаны Create/CreateRange/GetById/GetAll/GetByNumber/Update/Delete/DeleteAll, а также
-GetDevicesByNumberChassis/GetDeviceByNumberChassis. Номер источника уникален внутри выбранного тестера. Маппер переносит общие поля через ReflectionMapper и порт в ConnectedProfile.
+GetDevicesByNumberChassis/GetDeviceByNumberChassis. Номер источника уникален внутри выбранного тестера.
+Маппер переносит общие поля через ReflectionMapper, порт в ConnectedProfile, проверяет рабочие пределы
+и применяет их к runtime-менеджерам до `DeviceApplicationComposer`; adapters сохраняют эти значения.
 При удалении/замене записи DeviceCache освобождает `B5108.Dispose` → TCP-протокол.
 
-Схема: миграции `20261029090000_AddExternalPowerSupplies`, `20261029100000_AddPowerSupplyChassis` и snapshot,
+Схема: миграции `20261029090000_AddExternalPowerSupplies`, `20261029100000_AddPowerSupplyChassis`,
+`20261111090000_AddPowerSupplyOperatingLimits` и snapshot,
 общий SQL `Ask.DataBase.Provider/Services/Devices/PowerSupplyStorageSql.cs`.
 `DatabaseInitializationService.InitializeAsync` после применения/принятия схемы вызывает
 `EnsurePowerSupplyStorageAsync`: CREATE TABLE IF NOT EXISTS нужен также для legacy-БД,
 миграции которых принимаются как уже применённые. Существующие строки не меняются;
-настроенные устройства автоматически не создаются. Новая колонка NumberChassis добавляется
+настроенные устройства автоматически не создаются. NumberChassis и шесть колонок рабочих пределов добавляются
 также в legacy-таблицу; старые записи без принадлежности сохраняют NumberChassis=0,
-тестер за пользователя не выбирается. В root-редакторе БД таблица видна через reflection DbSet.
+тестер за пользователя не выбирается, а пределы получают defaults Б5-108. В root-редакторе БД таблица видна через reflection DbSet.
 Проверки: `Ask.Engine.UnitTests/DataBase/PowerSupplyStorageTests.cs` — миграции новой базы,
 идемпотентное добавление таблицы и сохранение старых данных, CRUD и восстановление LAN-конфигурации.
 
@@ -2095,10 +2104,17 @@ GetDevicesByNumberChassis/GetDeviceByNumberChassis. Номер источник�
 `PowerSupplyWindow.SetSettings(headUnit, editingDto)` → общий `DeviceSettingsControl`
 → `LoadDeviceModels<IPowerSupply>` → ReflectionHelper → B5108
 → определение DeviceWithIP → общий блок IP, общая валидация и синхронизация номера с последним октетом.
-Дополнительные параметры TCP находятся в partial `DeviceSettingsControl.PowerSupply.cs`:
-поле TCP-порта, default 80, допустимы 1–65535. `LoadFromDevice` восстанавливает порт и IP.
+Разметка дополнительных параметров вынесена в
+`Ask.UI/Features/EquipmentConfiguration/PowerSupply/PowerSupplySettingsControl.xaml`:
+TCP-порт (default 80, допустимы 1–65535), минимум/максимум/шаг напряжения в В и тока в мА.
+Code-behind этого контрола проверяет значения и преобразует ток в амперы перед записью DTO.
+Валидация требует неотрицательный минимум, максимум больше минимума и положительный шаг
+не больше диапазона. `UI/.../DeviceSettingsControl.PowerSupply.cs` только создаёт XAML-контрол,
+помещает его в `AdditionalSettingsContainer` и подключает поля к общей подсветке ошибок.
+`LoadFromDevice` восстанавливает порт, IP и пределы; ток из DTO переводится из А в мА для отображения.
 `SaveEvent` → `DeviceSettingsProcessorBase.ProcessDevice<PowerSupplyDto>`
-(общий номер, IP и NumberChassis) → порт → DeviceBuilder → PowerSupplies.Create/Update
+(общий номер, IP и NumberChassis) → `ApplyPowerSupplySettings` → DeviceBuilder
+→ `PowerSupplyMapper.ValidateOperatingLimits` → PowerSupplies.Create/Update
 → RequestSave → RefreshDeviceListAsync по текущему тестеру.
 Удаление → `DeviceListControl.RemoveDeviceFromDatabaseAsync` → PowerSupplies.Delete;
 удаление тестера также удаляет его источники через DeleteDevicesForChassisAsync.
@@ -2107,8 +2123,8 @@ GetDevicesByNumberChassis/GetDeviceByNumberChassis. Номер источник�
 
 Экспорт/импорт/печать:
 `UI/Controls/Settings/Configuration/DeviceConfigurationFileModel.cs` содержит PowerSupplies;
-DeviceConfigurationService экспортирует NumberChassis/IP/Port, проверяет принадлежность тестеру,
-дубликаты в пределах тестера и TCP-порт; импорт включает источники в существующую транзакционную
+DeviceConfigurationService экспортирует NumberChassis/IP/Port и рабочие пределы U/I, проверяет принадлежность тестеру,
+дубликаты в пределах тестера, TCP-порт и диапазоны/шаги; импорт включает источники в существующую транзакционную
 полную замену конфигурации. Старые JSON без раздела читаются с пустым списком, как остальные секции.
 DeviceConfigurationPrintService выводит раздел «Источник питания» у соответствующего тестера и TCP-порт.
 
@@ -2118,8 +2134,8 @@ root → Администрирование → Сервисные утилит�
 → `ServiceUtilitiesControl` → `Ask.UI/Features/ServiceTools/PowerSupply/PowerSupplyControl.xaml(.cs)`.
 Здесь только выбор уже настроенного источника и ручное управление, без сохранения LAN и создания записей.
 Список показывает модель, номер тестера и номер источника; справа остаётся общая консоль SetCommand.
-Уставки редактируются через NumericComboBox: U в В с шагом 0.1 В, I в мА с шагом 1 мА,
-перед CurrentManager значение переводится в амперы.
+Уставки редактируются через NumericComboBox: U в В, I в мА; минимум, максимум, шаг и подписи
+берутся из загруженных `IVoltageManager`/`ICurrentManager`, перед CurrentManager значение переводится в амперы.
 Подключение → ConnectableManager.InitializeAsync → чтение уставок/выхода/измерений, без включения выхода.
 Отключение связи не является выключением выхода; выключение выхода доступно и при непроставленном IsConnected.
 Выход и измерения вызывают отдельные managers; polling отсутствует.
@@ -2130,6 +2146,31 @@ Root-сервисные функции не добавляются в польз
 и `PowerSupplyConfigurationTests.cs`: общий IP-редактор и TCP-порт, секция списка, привязка
 к тестеру в JSON, root-сервисное управление и рендер тематических состояний.
 Независимый исследовательский прототип остаётся в `TestConsole/B5108/`.
+
+##### Самоконтроль Б5-108
+
+- `Ask.UI/Components/DeviceSelectorPanel/DeviceSelectorPanel.xaml.cs` загружает источники
+  через `PowerSupplies.GetAllAsync`, определяет `DeviceType.PowerSupply` и получает пункты
+  из `IPowerSupply.SelfTestManager.GetTestTypeEnum`. Доступна проверка напряжения.
+- `Ask.Engine/Tests/SelfControl/ModuleSelfExecutor.cs` → `GetFastMeterSafe`
+  (первый настроенный мультиметр) → `ISelfTestCheckerPowerSupply.StartSelfCheck`
+  → `B5108.SelfTestManager` → `Ask.Device.Runtime/Function/B5108/SelftTest/SelfTestManager.cs`.
+- `StartSelfCheck` добавляет `DeviceExecutionResult` / `TestExecutionResult`, инициализирует
+  источник и мультиметр через их `ConnectableManager.InitializeAsync`, выбирает DCV,
+  отключает выход, выставляет 0 В и включает выход. Для точек 0,1–0,9 В и 1–9 В
+  `CheckVoltagePointAsync` задаёт напряжение через `VoltageManager` → `VOLT`, затем
+  вызывает `IMultimeter.DcVoltageManager.MeasureDCVoltageAsync` → `DCVMeasurementBase`
+  → `MeasurementBase` → профиль мультиметра и Real/Idle адаптер. Допуск по уставке
+  ±(0,01 В + 1 %), обе границы включены. Брак записывается в `TestExecutionResult.Errors`.
+- `Ask.Device.ResponseProcessor/PowerSupply/PowerSupplySelfTestMessages.cs` →
+  `EquipmentMessages` / `SelfTestMessages` / `MeasurementMessages` → экранный протокол.
+  Ток имеет методы оформления точки, результата, погрешности и брака. Измерение
+  и команды установки тока в самоконтроле отсутствуют.
+- `finally` в менеджере → `EquipmentExecutionContext.EnterMandatoryFinalization`
+  → `OutputManager.SetOutputStateAsync(false)` → `OUTP OFF` с проверкой readback.
+  `Ask.UI/Features/ProtocolNew/Execution/ActionExecutor.cs` исключает `IPowerSupply` из
+  общего сброса самоконтроля, чтобы `*RST` не изменял предел тока. Источник остаётся
+  в учёте использованных устройств для протокола.
 
 ### Device matrix
 
@@ -4394,8 +4435,9 @@ ErrorItem → translator/runner ErrorList
 | Type | Kind | Project | Responsibility | Section |
 | --- | --- | --- | --- | --- |
 | `IPowerSupply` | interface | Ask.Core | внешний источник питания: отдельные менеджеры уставок напряжения/тока, выхода и измерений | [Power supply contracts](#programmable-power-supply-contracts) |
-| `PowerSupplyDto`, `PowerSupplyDtoService`, `PowerSupplyMapper`, `PowerSupplies` | DTO / CRUD / mapper / facade | Ask.Core / Ask.DataBase.Provider / Ask.DataBase.Engine | сохранение и восстановление внешних источников выбранного тестера | [Power supplies](#programmable-power-supply-contracts) |
+| `PowerSupplyDto`, `PowerSupplyDtoService`, `PowerSupplyMapper`, `PowerSupplies` | DTO / CRUD / mapper / facade | Ask.Core / Ask.DataBase.Provider / Ask.DataBase.Engine | сохранение и восстановление внешних источников выбранного тестера, включая настраиваемые пределы и шаги U/I | [Power supplies](#programmable-power-supply-contracts) |
 | `PowerSupplyControl` | WPF service control | Ask.UI | root-управление настроенным источником: уставки, выход и измерения | [Power supplies](#programmable-power-supply-contracts) |
+| `PowerSupplySettingsControl` | WPF configuration control | Ask.UI | XAML-форма TCP-порта и настраиваемых пределов U/I; отображает ток в мА и переносит в DTO в А | [Power supplies](#programmable-power-supply-contracts) |
 | `B5108`, менеджеры `Function.B5108` | device / managers | Ask.Device.Runtime | Б5-108: LAN/SCPI, последовательные операции, программный шаг, readback и Idle | [Power supply contracts](#programmable-power-supply-contracts) |
 | `PowerSupply.Capabilities.IVoltageManager`, `ICurrentManager` | interfaces | Ask.Core | программный шаг и диапазон, запись/чтение уставок в В/А | [Power supply contracts](#programmable-power-supply-contracts) |
 | `PowerSupply.Capabilities.IOutputManager`, `IMeasurementManager` | interfaces | Ask.Core | управление выходом и измерение фактических U/I | [Power supply contracts](#programmable-power-supply-contracts) |

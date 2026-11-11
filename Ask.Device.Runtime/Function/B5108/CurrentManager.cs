@@ -22,11 +22,11 @@ public sealed class CurrentManager : ICurrentManager
   public CurrentManager(Device.B5108 device) => _device = device ?? throw new ArgumentNullException(nameof(device));
 
   /// <inheritdoc />
-  public decimal MinCurrent => 0;
+  public decimal MinCurrent { get; set; } = 0m;
   /// <inheritdoc />
-  public decimal MaxCurrent => 5;
+  public decimal MaxCurrent { get; set; } = 5m;
   /// <inheritdoc />
-  public decimal CurrentStep => 0.001m;
+  public decimal CurrentStep { get; set; } = 0.001m;
 
   /// <inheritdoc />
   public async Task SetCurrentAsync(decimal current, CancellationToken cancellationToken = default, IUserInteractionService? userMessageService = null)

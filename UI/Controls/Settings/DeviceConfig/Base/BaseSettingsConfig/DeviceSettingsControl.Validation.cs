@@ -209,9 +209,13 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
     /// <param name="issues">Список обнаруженных ошибок обязательных параметров.</param>
     private void AddAdditionalSettingsIssues(List<RequiredParameterIssue> issues)
     {
-      AddIssueIf(issues, _powerSupplyPortTextBox != null && GetPowerSupplyPort() == 0,
+      AddIssueIf(issues, _powerSupplySettingsControl != null && GetPowerSupplyPort() == 0,
         "TCP-порт источника питания (1–65535)", AdditionalSettingsContainer,
-        _powerSupplyPortTextBox ?? (FrameworkElement)AdditionalSettingsContainer);
+        _powerSupplySettingsControl?.PortField ?? AdditionalSettingsContainer);
+
+      AddIssueIf(issues, _powerSupplySettingsControl != null && !_powerSupplySettingsControl.HasValidOperatingLimits(),
+        "Диапазоны и шаги источника питания", _powerSupplySettingsControl?.ValidationSection ?? AdditionalSettingsContainer,
+        _powerSupplySettingsControl?.OperatingLimitsField ?? AdditionalSettingsContainer);
 
       AddIssueIf(
         issues,

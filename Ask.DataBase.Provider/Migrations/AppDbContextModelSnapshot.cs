@@ -585,6 +585,9 @@ namespace Ask.DataBase.Provider.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<decimal>("CurrentStep")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -599,6 +602,18 @@ namespace Ask.DataBase.Provider.Migrations
                     b.Property<bool>("IsHardwareFailureSimulationEnabled")
                         .HasColumnType("INTEGER");
 
+                    b.Property<decimal>("MaxCurrent")
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("MaxVoltage")
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("MinCurrent")
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("MinVoltage")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -608,6 +623,9 @@ namespace Ask.DataBase.Provider.Migrations
 
                     b.Property<int>("Port")
                         .HasColumnType("INTEGER");
+
+                    b.Property<decimal>("VoltageStep")
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("NumberChassis")
                         .HasColumnType("INTEGER");

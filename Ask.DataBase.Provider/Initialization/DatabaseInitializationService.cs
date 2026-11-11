@@ -763,6 +763,18 @@ public static class DatabaseInitializationService
     await command.ExecuteNonQueryAsync(cancellationToken);
     await EnsureColumnAsync(connection, "PowerSupplies", "NumberChassis", "INTEGER NOT NULL DEFAULT 0",
       new DatabaseInitializationReport(), null, cancellationToken);
+    await EnsureColumnAsync(connection, "PowerSupplies", "MinVoltage", "TEXT NOT NULL DEFAULT '0.0'",
+      new DatabaseInitializationReport(), null, cancellationToken);
+    await EnsureColumnAsync(connection, "PowerSupplies", "MaxVoltage", "TEXT NOT NULL DEFAULT '150.0'",
+      new DatabaseInitializationReport(), null, cancellationToken);
+    await EnsureColumnAsync(connection, "PowerSupplies", "VoltageStep", "TEXT NOT NULL DEFAULT '0.1'",
+      new DatabaseInitializationReport(), null, cancellationToken);
+    await EnsureColumnAsync(connection, "PowerSupplies", "MinCurrent", "TEXT NOT NULL DEFAULT '0.0'",
+      new DatabaseInitializationReport(), null, cancellationToken);
+    await EnsureColumnAsync(connection, "PowerSupplies", "MaxCurrent", "TEXT NOT NULL DEFAULT '5.0'",
+      new DatabaseInitializationReport(), null, cancellationToken);
+    await EnsureColumnAsync(connection, "PowerSupplies", "CurrentStep", "TEXT NOT NULL DEFAULT '0.001'",
+      new DatabaseInitializationReport(), null, cancellationToken);
   }
 
   /// <summary>

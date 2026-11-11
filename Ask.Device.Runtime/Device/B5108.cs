@@ -7,6 +7,7 @@ using Ask.Device.Runtime.Function.B5108;
 using Ask.Device.Runtime.Function.Base.Connected;
 using System.Net;
 using Ask.Core.Shared.DTO.Devices.PowerSupply;
+using Ask.Device.Runtime.Function.B5108.SelftTest;
 
 namespace Ask.Device.Runtime.Device;
 
@@ -34,6 +35,7 @@ public sealed class B5108 : DeviceWithTcpIp, IPowerSupply, IDisposable
     OutputManager = new OutputManager(this);
     MeasurementManager = new MeasurementManager(this);
     ConnectableManager = new Transport(this);
+    SelfTestManager = new SelfTestManager();
   }
 
   /// <summary>
@@ -55,6 +57,9 @@ public sealed class B5108 : DeviceWithTcpIp, IPowerSupply, IDisposable
   public IMeasurementManager MeasurementManager { get; set; }
 
   /// <inheritdoc />
+  public ISelfTestCheckerPowerSupply SelfTestManager { get; set; }
+
+  /// <inheritdoc />
   public PowerSupplyDto Convert() => new()
   {
     Id = Id,
@@ -67,6 +72,12 @@ public sealed class B5108 : DeviceWithTcpIp, IPowerSupply, IDisposable
     DeviceType = DeviceType,
     IsHardwareFailureSimulationEnabled = IsHardwareFailureSimulationEnabled,
     Port = ConnectedProfile.Port,
+    MinVoltage = VoltageManager.MinVoltage,
+    MaxVoltage = VoltageManager.MaxVoltage,
+    VoltageStep = VoltageManager.VoltageStep,
+    MinCurrent = CurrentManager.MinCurrent,
+    MaxCurrent = CurrentManager.MaxCurrent,
+    CurrentStep = CurrentManager.CurrentStep,
   };
 
   /// <summary>

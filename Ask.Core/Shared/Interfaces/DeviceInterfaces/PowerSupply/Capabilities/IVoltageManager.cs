@@ -10,17 +10,17 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSupply.Capabilities
     /// <summary>
     /// Минимальная допустимая уставка напряжения в вольтах.
     /// </summary>
-    decimal MinVoltage { get; }
+    decimal MinVoltage { get; set; }
 
     /// <summary>
     /// Максимальная допустимая уставка напряжения в вольтах.
     /// </summary>
-    decimal MaxVoltage { get; }
+    decimal MaxVoltage { get; set; }
 
     /// <summary>
     /// Программный шаг уставки напряжения в вольтах, отсчитываемый от <see cref="MinVoltage"/>.
     /// </summary>
-    decimal VoltageStep { get; }
+    decimal VoltageStep { get; set; }
 
     /// <summary>
     /// Устанавливает напряжение в допустимом диапазоне с программным шагом.
