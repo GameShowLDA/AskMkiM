@@ -6,6 +6,7 @@ using Ask.Core.Services.Errors.Models;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Exceptions;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSupply;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.ExecutionEnums;
@@ -354,7 +355,7 @@ namespace Ask.UI.Features.ProtocolNew.Execution
         () => CancelProcessTaskAsync(actionSettings.StopDelegate, actionSettings.Name),
         () => ResetUsedEquipmentAsync(
           equipmentUsage,
-          ShouldShowTestCompletionHeader(actionSettings.CheckType)),
+          actionSettings.CheckType),
         ResetState,
         value => StartProcessing?.Invoke(value));
       }
@@ -385,17 +386,21 @@ namespace Ask.UI.Features.ProtocolNew.Execution
     /// Сбрасывает оборудование, использованное текущим запуском.
     /// </summary>
     /// <param name="equipmentUsage">Сеанс учёта использованного оборудования.</param>
-    /// <param name="showTestCompletionHeader">Признак вывода заголовка завершения теста.</param>
+    /// <param name="checkType">Тип завершённой проверки.</param>
     private async Task ResetUsedEquipmentAsync(
       EquipmentUsageSession? equipmentUsage,
-      bool showTestCompletionHeader)
+      CheckType checkType)
     {
-      var devices = equipmentUsage?.GetUsedDevices() ?? [];
+      var usedDevices = equipmentUsage?.GetUsedDevices() ?? [];
+      // Самоконтроль источника отключает выход сам. Команда *RST может изменить уставку тока.
+      var devices = checkType == CheckType.SelfTest
+        ? usedDevices.Where(device => device is not IPowerSupply)
+        : usedDevices;
       await DeviceResetService.ResetDevicesAsync(
         devices,
         ProtocolSelfCheck,
         CancellationToken.None,
-        showTestCompletionHeader);
+        ShouldShowTestCompletionHeader(checkType));
     }
 
     /// <summary>

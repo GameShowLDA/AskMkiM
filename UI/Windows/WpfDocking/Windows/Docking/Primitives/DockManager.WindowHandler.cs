@@ -167,6 +167,8 @@ namespace UI.Windows.WpfDocking.Windows.Docking.Primitives
         foreach (FloatingWindow floatingWindow in DockControl.FloatingWindows)
         {
           NativeFloatingWindow nativeWindow = NativeFloatingWindow.GetNativeFloatingWindow(floatingWindow);
+          if (nativeWindow == null || !nativeWindow.IsConnectedToPresentationSource)
+            continue;
           SetStartMousePosition(nativeWindow, nativeWindow.PointFromScreen(_startMousePoint));
         }
       }
@@ -233,6 +235,8 @@ namespace UI.Windows.WpfDocking.Windows.Docking.Primitives
           if (!floatingWindow.IsVisible)
             continue;
           NativeFloatingWindow nativeWindow = NativeFloatingWindow.GetNativeFloatingWindow(floatingWindow);
+          if (nativeWindow == null || !nativeWindow.IsConnectedToPresentationSource)
+            continue;
           Rect windowBounds = nativeWindow.GetPreviewBounds(_overlayWindow);
           stopHitTest = windowBounds.Contains(pt);
           if (stopHitTest)
@@ -346,6 +350,8 @@ namespace UI.Windows.WpfDocking.Windows.Docking.Primitives
           if (!floatingWindow.IsVisible)
             continue;
           NativeFloatingWindow nativeWindow = NativeFloatingWindow.GetNativeFloatingWindow(floatingWindow);
+          if (nativeWindow == null || !nativeWindow.IsConnectedToPresentationSource)
+            continue;
           Rect windowBounds = nativeWindow.GetPreviewBounds(_overlayWindow);
           if (windowBounds.Contains(pt))
           {

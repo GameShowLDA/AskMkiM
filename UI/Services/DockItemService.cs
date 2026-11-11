@@ -32,6 +32,7 @@ namespace UI.Services
   {
 
     private readonly UI.Components.MultiEditorMethods.FileManager _fileManager;
+    private readonly HashSet<DockItem> _documentsBeingTransferred = new(ReferenceEqualityComparer.Instance);
 
     /// <summary>
     /// Создаёт новый экземпляр сервиса управления вкладками редактора.
@@ -40,6 +41,25 @@ namespace UI.Services
     public DockItemService(UI.Components.MultiEditorMethods.FileManager fileManager)
     {
       _fileManager = fileManager;
+    }
+
+    /// <summary>
+    /// Закрывает исходную вкладку при переносе её редактора в другой контейнер.
+    /// </summary>
+    /// <param name="dockItem">Переносимая вкладка.</param>
+    /// <returns><see langword="true"/>, если вкладка закрыта; иначе <see langword="false"/>.</returns>
+    internal bool CloseForTransfer(DockItem dockItem)
+    {
+      ArgumentNullException.ThrowIfNull(dockItem);
+      _documentsBeingTransferred.Add(dockItem);
+      try
+      {
+        return dockItem.PerformClose();
+      }
+      finally
+      {
+        _documentsBeingTransferred.Remove(dockItem);
+      }
     }
 
     /// <summary>
@@ -284,20 +304,30 @@ namespace UI.Services
       bool removeFilePath)
     {
       dockItem.HideOnPerformClose = false;
-      var sourceEditor = ExtractSourceEditor(dockItem);
+      var runner = dockItem.Content as RunControl;
+      var document = runner?.SourceDocument ?? dockItem;
+      if (runner?.SourceDocument != null)
+      {
+        confirmBeforeClose = true;
+        runner.SaveSourceFile = _fileManager.FileService.SaveFileManager.SaveFile;
+      }
+      var sourceEditor = ExtractSourceEditor(document);
       EventHandler? textChangedHandler = null;
       if (confirmBeforeClose && sourceEditor != null)
       {
-        textChangedHandler = (_, _) => UpdateModifiedIndicator(dockItem);
+        textChangedHandler = (_, _) => UpdateModifiedIndicator(document);
         sourceEditor.TextChanged += textChangedHandler;
-        UpdateModifiedIndicator(dockItem);
+        UpdateModifiedIndicator(document);
       }
 
       dockItem.Closing += (sender, e) =>
       {
         LogDebug($"Закрытие файла {nameFile}.");
 
-        if (confirmBeforeClose && !_fileManager.FileService.SaveFileManager.ConfirmClose(dockItem))
+        if (confirmBeforeClose
+          && !_documentsBeingTransferred.Contains(dockItem)
+          && runner?.IsTransferringSource != true
+          && !_fileManager.FileService.SaveFileManager.ConfirmClose(document))
         {
           e.Cancel = true;
           return;
@@ -308,9 +338,10 @@ namespace UI.Services
           sourceEditor.TextChanged -= textChangedHandler;
         }
 
+        var transferringSource = runner?.IsTransferringSource == true;
         Application.Current.Dispatcher.BeginInvoke(
           DispatcherPriority.Background,
-          new Action(() => FinalizeDockItemClose(textEditorContainer, editorType, nameFile, dockItem, removeFilePath)));
+          new Action(() => FinalizeDockItemClose(textEditorContainer, editorType, nameFile, dockItem, removeFilePath, transferringSource)));
       };
     }
 
@@ -343,7 +374,8 @@ namespace UI.Services
       EditorType editorType,
       string nameFile,
       DockItem dockItem,
-      bool removeFilePath)
+      bool removeFilePath,
+      bool transferringSource)
     {
       if (removeFilePath)
       {
@@ -358,7 +390,8 @@ namespace UI.Services
         _fileManager.ContainerService.RemoveEditorContainer(textEditorContainer, editorType);
       }
 
-      SystemStateManager.SetIsControlProgramActive(false);
+      if (!transferringSource)
+        SystemStateManager.SetIsControlProgramActive(false);
     }
 
     private static string GetDisplayFileName(string? filePath, string? fileName)

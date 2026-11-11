@@ -26,7 +26,7 @@ namespace UI.Windows.WpfDocking.Windows.Docking
     {
     }
 
-    internal static DockLayout Save(DockControl dockControl)
+    internal static DockLayout Save(DockControl dockControl, Func<DockPaneSplit, SplitterDistance>? measureSplit = null)
     {
       DockLayout layout = new DockLayout();
       layout.DockTreeZOrder = dockControl.DockTreeZOrder;
@@ -45,7 +45,7 @@ namespace UI.Windows.WpfDocking.Windows.Docking
         layout.DockItems.Add(itemRef);
       }
 
-      Default.FillDockActions(dockControl, layout);
+      Default.FillDockActions(dockControl, layout, measureSplit);
 
       return layout;
     }
@@ -71,15 +71,15 @@ namespace UI.Windows.WpfDocking.Windows.Docking
         action.Run(dockControl);
     }
 
-    private void FillDockActions(DockControl dockControl, DockLayout layout)
+    private void FillDockActions(DockControl dockControl, DockLayout layout, Func<DockPaneSplit, SplitterDistance>? measureSplit)
     {
       lock (this)
       {
         foreach (DockItem item in GetDockItems(dockControl, delegate (DockItem item, DockPane pane) { return item.SecondPane == pane; }))
-          layout.ShowActions.Add(GetShowAction(item, item.SecondPane));
+          layout.ShowActions.Add(GetShowAction(item, item.SecondPane, measureSplit));
 
         foreach (DockItem item in GetDockItems(dockControl, delegate (DockItem item, DockPane pane) { return item.FirstPane == pane; }))
-          layout.ShowActions.Add(GetShowAction(item, item.FirstPane));
+          layout.ShowActions.Add(GetShowAction(item, item.FirstPane, measureSplit));
 
         _itemsCollections.Clear();
         _panes.Clear();
@@ -97,7 +97,7 @@ namespace UI.Windows.WpfDocking.Windows.Docking
       return _itemsCollections[_panes.IndexOf(pane)];
     }
 
-    private ShowAction GetShowAction(DockItem item, DockPane pane)
+    private ShowAction GetShowAction(DockItem item, DockPane pane, Func<DockPaneSplit, SplitterDistance>? measureSplit)
     {
       Debug.Assert(item != null);
       Debug.Assert(pane != null && pane.Items.Contains(item));
@@ -160,7 +160,7 @@ namespace UI.Windows.WpfDocking.Windows.Docking
             if (split.IsParentOf(split1) && split1.IsParentOf(targetPane))
               ancestorSplitLevel++;
           }
-          action = GetShowAsSidePaneAction(item, pane, targetPane, ancestorSplitLevel, split, showMethod);
+          action = GetShowAsSidePaneAction(item, pane, targetPane, ancestorSplitLevel, split, showMethod, measureSplit);
           _splits.Add(split);
         }
         _panes.Add(pane);
@@ -196,38 +196,26 @@ namespace UI.Windows.WpfDocking.Windows.Docking
       return true;
     }
 
-    private ShowAsSidePaneAction GetShowAsSidePaneAction(DockItem sourceItem, DockPane sourcePane, DockPane targetPane, int ancestorSplitLevel, DockPaneSplit split, DockItemShowMethod showMethod)
+    private ShowAsSidePaneAction GetShowAsSidePaneAction(DockItem sourceItem, DockPane sourcePane, DockPane targetPane, int ancestorSplitLevel, DockPaneSplit split, DockItemShowMethod showMethod, Func<DockPaneSplit, SplitterDistance>? measureSplit)
     {
       Debug.Assert(sourceItem != null);
       Debug.Assert(targetPane != null);
 
-      Dock side;
-      if (split.Orientation == Orientation.Horizontal)
-      {
-        if (split.IsSplitterTopLeft)
-          side = Dock.Left;
-        else
-          side = Dock.Right;
-      }
-      else
-      {
-        if (split.IsSplitterTopLeft)
-          side = Dock.Top;
-        else
-          side = Dock.Bottom;
-      }
-
-      SplitterDistance splitterDistance = split.SplitterDistance;
-
-      DockPaneSplit child1Split = split.Child1 as DockPaneSplit;
-      bool swapChildren = split.Child1 == targetPane || (child1Split != null && child1Split.IsParentOf(targetPane));
+      bool targetIsFirst = split.Child1 == targetPane
+        || (split.Child1 is DockPaneSplit child1Split && child1Split.IsParentOf(targetPane));
+      bool horizontal = split.Orientation == Orientation.Horizontal;
+      var side = targetIsFirst
+        ? (horizontal ? Dock.Right : Dock.Bottom)
+        : (horizontal ? Dock.Left : Dock.Top);
+      bool isSizeForTarget = split.IsSplitterTopLeft == targetIsFirst;
+      SplitterDistance splitterDistance = measureSplit?.Invoke(split) ?? split.SplitterDistance;
 
       int source = GetIndex(sourceItem);
       DockItem targetItem = GetItems(targetPane)[0];
       Debug.Assert(targetPane.Items.Contains(targetItem));
       int targetIndex = GetIndex(targetItem);
       bool isAutoHide = sourcePane.IsAutoHide;
-      return new ShowAsSidePaneAction(source, targetIndex, targetPane.IsFloating, ancestorSplitLevel, isAutoHide, side, splitterDistance, swapChildren, showMethod);
+      return new ShowAsSidePaneAction(source, targetIndex, targetPane.IsFloating, ancestorSplitLevel, isAutoHide, side, splitterDistance, isSizeForTarget, showMethod);
     }
 
     private static IEnumerable<DockItem> GetDockItems(DockControl dockControl, Func<DockItem, DockPane, bool> predicate)

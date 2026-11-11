@@ -23,4 +23,7 @@
     <LocalizeStrings:LocalizedString x:Key="Settings_UserInterface_CommandAutoCollapse_Description" Key="settings.userinterface.commandAutoCollapse.description" />
     <LocalizeStrings:LocalizedString x:Key="Settings_UserInterface_PrintFont_Title" Key="settings.userinterface.printFont.title" />
     <LocalizeStrings:LocalizedString x:Key="Settings_UserInterface_PrintFont_Description" Key="settings.userinterface.printFont.description" />
+    <LocalizeStrings:LocalizedString x:Key="Settings_UserInterface_RunnerLayout_Title" Key="settings.userinterface.runnerLayout.title" />
+    <LocalizeStrings:LocalizedString x:Key="Settings_UserInterface_RunnerLayout_Description" Key="settings.userinterface.runnerLayout.description" />
+    <LocalizeStrings:LocalizedString x:Key="Settings_UserInterface_RunnerLayout_Reset" Key="settings.userinterface.runnerLayout.reset" />
 </ResourceDictionary>

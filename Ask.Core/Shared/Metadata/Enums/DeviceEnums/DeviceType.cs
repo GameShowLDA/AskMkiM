@@ -51,5 +51,10 @@
     UninterruptiblePowerSupply,
 
     Unknown,
+
+    /// <summary>
+    /// Внешний программируемый источник питания.
+    /// </summary>
+    PowerSupply,
   }
 }

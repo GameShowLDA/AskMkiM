@@ -12,36 +12,22 @@ using System.Windows.Threading;
 
 namespace Ask.UI.UnitTests.Features.ProtocolNew.Execution;
 
-public sealed class ExecutionRestartTests
+[Collection(nameof(WpfApplicationCollection))]
+public sealed class ExecutionRestartTests(WpfApplicationFixture wpf)
 {
   [Fact]
-  public async Task RejectedStartsPreserveProtocolAndReadyIsShownOnlyAfterFinalization()
-  {
-    var completion = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-    var thread = new Thread(() =>
+  public Task RejectedStartsPreserveProtocolAndReadyIsShownOnlyAfterFinalization()
+    => wpf.RunAsync(async () =>
     {
-      var application = new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown };
-      application.Resources.MergedDictionaries.Add(new ResourceDictionary
+      var dictionaries = Application.Current.Resources.MergedDictionaries;
+      var resources = new ResourceDictionary
       {
         Source = new Uri("/UI;component/Style.xaml", UriKind.Relative)
-      });
-      SynchronizationContext.SetSynchronizationContext(new DispatcherSynchronizationContext());
-      application.Dispatcher.InvokeAsync(async () =>
-      {
-        try
-        {
-          try { await VerifyRestartsAsync(); }
-          finally { application.Resources.MergedDictionaries.Clear(); }
-          completion.TrySetResult();
-        }
-        catch (Exception ex) { completion.TrySetException(ex); }
-      });
-      Dispatcher.Run();
-    }) { IsBackground = true };
-    thread.SetApartmentState(ApartmentState.STA);
-    thread.Start();
-    await completion.Task.WaitAsync(TimeSpan.FromSeconds(60));
-  }
+      };
+      dictionaries.Add(resources);
+      try { await VerifyRestartsAsync(); }
+      finally { dictionaries.Remove(resources); }
+    }, TimeSpan.FromSeconds(60));
 
   private static async Task VerifyRestartsAsync()
   {
@@ -53,9 +39,14 @@ public sealed class ExecutionRestartTests
     try
     {
       await VerifyRejectedStartsAsync();
+      await VerifyBeforeStartAsync();
       foreach (var outcome in new[] { "success", "exception", "cancel", "stop", "finalizationException" })
       {
-        var protocol = new ProtocolUI { Header = "Restart regression " + outcome };
+        var protocol = new ProtocolUI
+        {
+          Header = "Restart regression " + outcome,
+          BeforeStartAsync = () => Task.FromResult(true),
+        };
         var buttons = (IProtocolButtonView)protocol;
         var preparationEntered = NewSignal();
         var continuePreparation = NewSignal();
@@ -205,6 +196,29 @@ public sealed class ExecutionRestartTests
   }
 
   private static TaskCompletionSource NewSignal() => new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+  private static async Task VerifyBeforeStartAsync()
+  {
+    var answer = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+    var checks = 0;
+    var protocol = new ProtocolUI
+    {
+      BeforeStartAsync = () => { checks++; return answer.Task; },
+    };
+    var message = new ShowMessageModel("Previous protocol must survive a rejected source translation");
+    await protocol.ShowMessageAsync(message, skipPause: true, SkipStepModeCheck: true, ignoreOutputValidation: true);
+    var start = protocol.StartAsync();
+    await protocol.StartAsync();
+    Assert.Equal(1, checks);
+    Assert.False(ExecutionRunGuard.GetActivity().IsBusy);
+    Assert.Contains(message, protocol.GetShowMessageModels());
+    answer.SetResult(false);
+    await start;
+    Assert.False(ExecutionRunGuard.GetActivity().IsBusy);
+    Assert.Contains(message, protocol.GetShowMessageModels());
+    await protocol.StartAsync();
+    Assert.Equal(2, checks);
+  }
 
   private static void ClickStart(ProtocolUI protocol)
   {

@@ -31,6 +31,7 @@ Size/Foreground и анимации общей кнопки; лицензия с
 | --- | --- | --- |
 | Подсказки оконных кнопок, выполнения, поиска и раскрытия разделов | `UI/Style.xaml` — общий тематический ToolTip; целевая XAML-разметка | `MainWindow/MainWindow.xaml` (WindowState), `Ask.UI/Components/ProtocolListBox/ProtocolListBoxUI.xaml` (IsChecked), оба `ArrowButton.xaml` в `UI/Icon/` и `Ask.UI/Shared/Components/Icons/` (IsArrowUp=True означает скрытый раздел); локальный ToolTip компонента имеет приоритет над его стилем |
 | Undo/Redo редактора и Alt+Backspace / Alt+Shift+Backspace | Конструкторы обоих `TextEditorUI.xaml.cs` в `UI/Controls/TextEditorControl/` и `Ask.UI/Controls/TextEditorControl/` | `TextArea.InputBindings` → `ApplicationCommands.Undo/Redo` → штатная история AvalonEdit; `TextEditorUI.Hotkeys.cs` сохраняет Ctrl+Shift+Z; `Ask.UI.UnitTests/Controls/TextEditorControl/UndoRedoShortcutTests.cs` |
+| Изменённость документа, сохранение и запрос при закрытии | `UI/Services/FileManager/DocumentTextState.cs`, `FileCompareService.cs` | `UI/Components/MultiEditorMethods/SaveFileManager.cs`, `UI/Services/DockItemService.cs`, `ControlManager.cs`, `MainWindow/Services/WindowService.cs`; [полная цепочка](#document-saving-and-close-confirmation) |
 | Зависание после закрытия исполнителя / перетаскивания протокола | [Расследование и воспроизведение](investigations/docking-freeze-2026-10-29.md) | `UI/Controls/Runner/RunControl.xaml.cs`, `UI/Windows/WpfDocking/Windows/Docking/Primitives/DockManager.WindowHandler.cs`, `MainWindow/App.xaml.cs`, `Ask.Diagnostics/Infrastructure/JsonFileWriter.cs` |
 | Модель и чтение истории выпусков JSON | `Ask.Support/ReleaseNotes/ReleaseNotesReader.cs` | `ReleaseNotesModel.cs`, `ReleaseChangeModel.cs`, `ReleaseChangeCategory.cs` в той же папке; [история выпусков](#release-notes-catalog) |
 | «Что нового» в меню и справке, HTML истории | `MainWindow/ViewModels/SettingsViewModel.cs`, `Ask.Support/ReleaseNotes/ReleaseNotesHtmlRenderer.cs` | `SettingsService.HelpOpenReleaseNotes`, `HelpProvider.ShowHelp`, middleware `HelpServer`, узел ReleaseNotes в `AppHelp/ru/index.html`; [история выпусков](#release-notes-catalog) |
@@ -46,6 +47,10 @@ Size/Foreground и анимации общей кнопки; лицензия с
 | Трансляция программы контроля | `MainWindow/Services/TranslationServices.cs` | `Ask.Engine/ControlCommandAnalyser/CommandTranslationManager.cs`, `Ask.Engine/ControlCommandAnalyser/Parser/`, `Ask.Engine/ControlCommandAnalyser/Formatter/`, `Ask.Engine/ControlCommandAnalyser/Validation/` |
 | Диагностика текста при вводе | `Ask.UI/Controls/TextEditorControl/Diagnostics/LiveDiagnosticsController.cs` | `Ask.Engine/ControlCommandAnalyser/CommandTranslationManager.Diagnostics.cs`, `SourceDiagnostic.cs`, `Ask.UI/Controls/TextEditorControl/Diagnostics/DiagnosticUnderlineRenderer.cs`, оба `TextEditorUI.xaml.cs` |
 | Исполнение программы контроля | `UI/Controls/Runner/RunControl.xaml.cs` | `Ask.UI/Features/ProtocolNew/Execution/ActionExecutor.cs`, `Ask.Engine/ControlCommandExecutor/Execution/CommandExecutionManager.cs` |
+| Общая docking-область исполнителя | `UI/Controls/Runner/RunControl.xaml`, `RunControl.Docking.cs` | [Runner docking layout](#runner-docking-layout), `Ask.UI/ThirdParty/AvalonDock/Integration/ExecutionWorkspace/`, `RunnerDocumentStyle` |
+| AvalonDock и его интеграционный слой | `Ask.UI/ThirdParty/AvalonDock/Integration/ExecutionWorkspace/ExecutionWorkspaceControl.xaml(.cs)` | [AvalonDock execution workspace](#avalondock-execution-workspace), `tools/ExecutionWorkspacePrototype/`, `Ask.UI/ThirdParty/AvalonDock/source/` |
+| Редактирование исходника в исполнителе, сохранение и повторная трансляция | `UI/Controls/Runner/RunControl.Source.cs`, `MainWindow/Services/TranslationServices.cs` | [Runner source editing](#runner-source-editing), `UI/Services/DockItemService.cs`, `UI/Components/MultiEditorMethods/SaveFileManager.cs` |
+| Нагрузка UI при заполнении протокола во вложенных панелях | `UI/Windows/WpfDocking/Windows/SplitContainer.cs` | [Docking layout measurement](#docking-layout-measurement), `SplitContainerMeasureTests`, режим `protocol-layout` в `tools/DockingFreezeRepro` |
 | Алгоритм конкретной команды | `Ask.Engine/ControlCommandExecutor/Executors/` | `Ask.Engine/ControlCommandExecutor/BaseStrategies/`, `Ask.Engine/ControlCommandExecutor/Execution/EquipmentService.cs` |
 | Пауза, шаг, остановка, переход к выбранной или следующей команде | `Ask.UI/Features/ProtocolNew/Execution/ActionExecutor.cs` | `Ask.Core/Services/App/StepControlManager.cs`, `Ask.Engine/ControlCommandExecutor/Execution/CommandExecutionManager.cs`, `Ask.Engine/ControlCommandExecutor/Execution/BreakpointHandler.cs`, `Ask.Engine/ControlCommandExecutor/Execution/CommandJumpService.cs` |
 | Горячие клавиши и диагностика кнопок выполнения | `Ask.UI/Features/ProtocolNew/Hotkeys/ProtocolHotkeyController.cs`, `MainWindow/HotkeyBindings/MenuHotkeyBinder.cs` | `Ask.UI/Controls/ProtocolNew/ProtocolUI.ButtonManager.cs`, `Ask.LogLib/LoggerUtility.cs`; отдельный `logs/yyyy-MM-dd/input.log` и сводный `all.log` |
@@ -60,6 +65,10 @@ Size/Foreground и анимации общей кнопки; лицензия с
 | Диапазоны напряжения ППУ, шаг и исключения | `Ask.Core/Shared/DTO/Devices/Breakdown/VoltageRange.cs`, `Ask.Device.Runtime/Device/GPT79904.cs` | [Диапазоны GPT](#breakdown-voltage-ranges), `VoltageManagment.cs`, `PiVoltageProcessor.cs`, `SiVoltageProcessor.cs`, `AppDbContext.Device.cs` |
 | Пробойная установка GPT | `Ask.Device.ResponseProcessor/BreakdownTester/`, `Ask.Core/Shared/Interfaces/DeviceInterfaces/BreakdownTester/` | `Ask.Device.Application/FunctionAdapters/GPT/`, `Ask.Device.Runtime/Function/GPT/`, `Ask.Device.Runtime/Device/GPT79904.cs` |
 | Источник напряжения/тока | `Ask.Core/Shared/Interfaces/DeviceInterfaces/PowerSourceModule/` | `Ask.Device.Application/FunctionAdapters/ModuleVoltageCurrent/`, `Ask.Device.Runtime/Function/ModuleVoltageCurrentSource/` |
+| Внешний источник питания Б5-108, общий контракт источников | `Ask.Core/Shared/Interfaces/DeviceInterfaces/PowerSupply/IPowerSupply.cs`, `Ask.Device.Runtime/Device/B5108.cs` | `Ask.Device.Runtime/Function/B5108/`, `Ask.Device.Application/FunctionAdapters/B5108/`; [контракты и выполнение](#programmable-power-supply-contracts) |
+| Самоконтроль напряжения Б5-108 | `Ask.Device.Runtime/Function/B5108/SelftTest/SelfTestManager.cs` | [самоконтроль Б5-108](#самоконтроль-б5-108), `Ask.Device.ResponseProcessor/PowerSupply/PowerSupplySelfTestMessages.cs` |
+| БД и сервисный UI внешних источников питания | `Ask.DataBase.Engine/Static/Devices/PowerSupplies.cs`, `Ask.UI/Features/ServiceTools/PowerSupply/PowerSupplyControl.xaml(.cs)` | DTO/service/mapper, `AdminServices.GetPowerSuppliesAsync`, общая форма конфигурации; [полная цепочка](#programmable-power-supply-contracts) |
+| Добавление Б5-108, IP и рабочие пределы U/I выбранного тестера | `Ask.UI/Features/EquipmentConfiguration/PowerSupply/PowerSupplySettingsControl.xaml(.cs)` | `PowerSupplyWindow`, общий `DeviceSettingsControl`, hosting partial `.PowerSupply.cs`, `PowerSupplyDto`, `PowerSupplyMapper`; [цепочки](#programmable-power-supply-contracts) |
 | Шасси и питание | `Ask.Core/Shared/Interfaces/DeviceInterfaces/Chassis/` | `Ask.Device.Runtime/Device/ManagerChassis.cs`, `Ask.Device.Runtime/Function/ManagerChassis/`, `Ask.Device.Emulator/Chassis/`, `UI/Components/PowerButton.xaml.cs` |
 | UPS | `Ask.Core/Shared/Interfaces/DeviceInterfaces/UninterruptiblePowerSupply/` | `Ask.Device.Application/FunctionAdapters/MikUps1101rRm/`, `Ask.Device.Runtime/Function/MikUps1101rRm/` |
 | COM | `Ask.Device.Runtime/Base/Device/DeviceWithCOM.cs` | `Ask.Device.Communication/Com/Protocols/ComProtocol.cs`, `Ask.Device.Communication/Com/Configuration/SerialPortCustom.cs` |
@@ -90,11 +99,14 @@ Size/Foreground и анимации общей кнопки; лицензия с
 
 ## Runtime Flow Index
 
+- [Внешний источник: БД → runtime → root-сервисная панель](#programmable-power-supply-contracts)
+
 - [Чтение JSON истории выпусков без UI](#release-notes-catalog)
 - [Подключаемый поиск и существующий поиск редактора](#pluggable-text-search)
 - [Calendar notes CRUD](#calendar-notes)
 - [Сравнение открытых файлов](#file-comparison-ui)
 - [Application startup](#application-startup-flow)
+- [Document saving and close confirmation](#document-saving-and-close-confirmation)
 - [Database initialization](#database-startup-flow)
 - [Translation](#translation-flow)
 - [Control-program execution](#control-program-execution-flow)
@@ -197,7 +209,7 @@ startup-загрузка общей UI-модели не зависит от п�
 | --- | --- | --- | --- |
 | `MainWindowProgram` | `MainWindow/MainWindowProgram.csproj` | WPF entry point, shell, startup, ручная композиция UI; `MainWindowProgram.*` | `Ask.Diagnostics`, `Ask.DataBase.Engine`, `Ask.Support`, `Ask.UI`, `ConsoleUI`, `Message`, `UI` |
 | `UI` | `UI/UI.csproj` | Legacy WPF workspace, editor, runner, settings, protocol/file services; `UI.*` | `Ask.Core`, `Ask.DataBase.Provider`, `Ask.Engine`, `Ask.Support`, `Ask.UI`, `Message`, `Ask.Device.Runtime` |
-| `Ask.UI` | `Ask.UI/Ask.UI.csproj` | Новые reusable WPF features: protocol, archive, notifications, role UI, executor controls, сервисное управление GPT; `Ask.UI.*` | `Ask.Core`, `Ask.Engine`, `Ask.Support`, `Message`, `Ask.Device.Runtime`, `Ask.LogLib` |
+| `Ask.UI` | `Ask.UI/Ask.UI.csproj` | Новые reusable WPF features, executor workspace и слой интеграции AvalonDock; `Ask.UI.*` | `Ask.Core`, `Ask.Engine`, `Ask.Support`, `Message`, `Ask.Device.Runtime`, `Ask.LogLib`, локальные `AvalonDock`, `AvalonDock.Serializer.Json`, `AvalonDock.Themes.Arc` |
 | `Ask.Engine` | `Ask.Engine/Ask.Engine.csproj` | Parser/formatter, command execution, strategies, metrology and hardware-test algorithms; `Ask.Engine.*` | `Ask.Core`, `Ask.DataBase.Engine`, `Ask.LogLib`, `Ask.Protocol.Messages`, `Message` |
 | `Ask.Core` | `Ask.Core/Ask.Core.csproj` | Shared contracts, DTO, enums, events, config state, errors, file formats; `Ask.Core.*` | `Ask.LogLib` |
 | `Ask.Protocol.Messages` | `Ask.Protocol.Messages/Ask.Protocol.Messages.csproj` | Формирование, device-логирование и вывод унифицированных `ShowMessageModel`; содержит фасады и builders для executor-команд, блоков проверки, оборудования и измерений | `Ask.Core`, `Ask.LogLib`; потребители — `Ask.Device.Runtime`, `Ask.Engine` |
@@ -759,6 +771,12 @@ Parser/validators add `ErrorItem`/`WarningItem` from
 `Ask.Core/Services/Errors/Translation`. `CriticalTranslationErrorClassifier`
 определяет блокирующие ошибки. UI отображает snapshot через `TranslatorItem` и
 error-list controls.
+Модели, созданные для ошибок разбора до определения номера команды, могут иметь
+`BaseCommandModel.CommandNumber == null`. `TranslationServices.IsBreakpointAllowed`,
+`BuildNumCommandWithMnemonic` и `BuildBreakpointState` исключают такие модели только из навигации и сохранения точек
+останова; сама модель остаётся в `TranslatorItem.TranslationModels` и таблице диагностики.
+Поэтому ошибочная программа открывается в трансляторе с ошибками и не прерывает создание
+вкладки через `int.Parse`.
 
 #### Files
 
@@ -1548,6 +1566,13 @@ lines are restored as `Info` while preserving their complete text and blank-line
 Error/Exception — OrangeRed, Warning — Goldenrod, Debug — Gray, Information — LightGray.
 Документ создаётся при раскрытии блока; Ctrl+A/C обрабатывает сам редактор журнала,
 а не внешний список протокола. Формат хранения и привязка логов к записям не изменяются.
+`ProtocolDisplayItem.AddServiceLog` всегда дополняет ServiceLogs, но уведомляет
+привязку ServiceLogText только для раскрытого блока. При раскрытии setter
+AreServiceLogsExpanded сначала уведомляет ServiceLogText, затем видимость блока,
+поэтому LogText получает все накопленные записи до отрисовки. Прямое чтение
+ServiceLogText всегда формирует полный актуальный текст. HasServiceLogs уведомляется
+при появлении первой записи. Это устраняет повторный string.Join всей накопленной
+истории для каждого скрытого сообщения; открытый блок обновляется после каждой записи.
 
 New saves use `#ASKM_PROTOCOL_V3_BR#`: `ExecutionProtocolHistoryService.SaveAsync` delegates to
 `ExecutionProtocolDiagnosticFormatter.FormatProtocolForStorage`, which writes readable protocol
@@ -1939,11 +1964,226 @@ There are no separate concrete “Idle device” classes. Real and idle are bran
 inside application adapters, runtime managers and transports, all controlled by
 the global `ExecutionConfig`.
 
+### Programmable power supply contracts
+
+`Ask.Core/Shared/Interfaces/DeviceInterfaces/PowerSupply/IPowerSupply.cs` —
+общий контракт внешнего программируемого источника постоянного напряжения/тока, наследует `IAttachableDevice`.
+Namespace: `Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSupply`.
+Отдельные contracts в `PowerSupply/Capabilities/` (тот же namespace с `.Capabilities`):
+
+- `IVoltageManager` → `VoltageManager`: настраиваемые `MinVoltage`, `MaxVoltage`, `VoltageStep`,
+  `SetVoltageAsync` / `GetVoltageAsync` (вольты).
+- `ICurrentManager` → `CurrentManager`: настраиваемые `MinCurrent`, `MaxCurrent`, `CurrentStep`,
+  `SetCurrentAsync` / `GetCurrentAsync` (амперы, уставка ограничения тока).
+- `IOutputManager` → `OutputManager`: `SetOutputStateAsync` / `GetOutputStateAsync`.
+- `IMeasurementManager` → `MeasurementManager`: `MeasureVoltageAsync` / `MeasureCurrentAsync`.
+
+Уставки и измерения представлены `decimal`; все операции принимают `CancellationToken`.
+Шаг — программное ограничение уставок относительно минимума, не физическое разрешение выхода.
+Чтение уставки отделено от измерения фактического выхода. `IPowerSupply.NumberChassis` задаёт логическую принадлежность выбранному тестеру;
+источник остаётся внешним устройством, не модулем МиНТ. Также наследует `IDeviceToDtoConverter<PowerSupplyDto>`.
+`B5108.Convert()` сохраняет подключение и пользовательские диапазоны/шаги U/I; текущие уставки не сохраняются.
+Внешние источники не объединяются с модулем МиНТ и его `IPowerSourceModule`.
+
+Runtime implementation: `Ask.Device.Runtime/Device/B5108.cs` (`Ask.Device.Runtime.Device.B5108`)
+наследует `DeviceWithTcpIp`. Конструктор задаёт тип `DeviceType.PowerSupply`, порт 80,
+timeout 3000 мс, команды `*IDN?` / `*RST`, ожидаемую модель `B5-108`.
+Адрес передаётся конструктору или через `ConnectionDetails`; IP не зашит в production-код.
+Значение enum добавлено после `Unknown`, прежняя нумерация сохранена.
+
+Конструктор создаёт отдельные `VoltageManager(this)`, `CurrentManager(this)`,
+`OutputManager(this)`, `MeasurementManager(this)` в `Ask.Device.Runtime/Function/B5108/`.
+Подключение — существующий `Function/Base/Connected/Transport(this)`.
+Общий TCP-транспорт получил ветку `IPowerSupply` в `TcpTransport`:
+идентификация через протокол, один канал вместо отдельного диагностического сокета,
+закрытие реального протокола при отключении, отправка `*RST` при сбросе.
+Другие устройства сохраняют свои существующие ветки подключения.
+
+Прикладная композиция: `Ask.Device.Application/Composition/DeviceApplicationComposer.cs`
+→ четыре отдельных adapters из `FunctionAdapters/B5108/`
+→ оборачивание соответствующих runtime-менеджеров с сохранением загруженных диапазонов и шагов.
+Общая оболочка `EquipmentTrackingConnectable` продолжает регистрировать обращения к подключению.
+Для методов capability-интерфейсов после `CancellationToken` предусмотрен необязательный
+`IUserInteractionService`, передаваемый прикладным adapters в `UserActionHelper`.
+Runtime-менеджеры связывают токен аргумента с токенами `IUserInteractionService`
+и `EquipmentExecutionContext` до ожидания общей блокировки и передают его в TCP/Idle-запросы.
+Ветка источника в `TcpTransport` также связывает отмену UI и контекста выполнения.
+
+Call chains:
+
+- `ConnectableManager.ConnectAsync/InitializeAsync` → `Transport` → `UserActionHelper`
+  → `TcpTransport` → `DeviceProtocolEmulator.CreatePowerSupply` → `*IDN?`
+  → `PowerSupplyResponseProcessor.CheckInitialization` → `ConnectionInfo.IsConnected`
+  → `EquipmentMessages`.
+- `VoltageManagerAdapter.SetVoltageAsync` / `CurrentManagerAdapter.SetCurrentAsync`
+  → `UserActionHelper.RunWithUserRepeatAsync` → runtime `VoltageManager` / `CurrentManager`
+  → проверка загруженного из конфигурации диапазона и шага
+  (defaults Б5-108: 0–150 В / 0–5 А и 0.1 В / 0.001 А)
+  → общий per-device `OperationLock` протокола из `CreatePowerSupply`
+  → `VOLT:LIM?` / `CURR:LIM?` → проверка текущего LIM
+  → `VOLT <value>` / `CURR <value>` без ожидания ответа
+  → `SYST:ERR?` → `PowerSupplyResponseProcessor.EnsureNoError`
+  → `VOLT?` / `CURR?` → `EnsureSetpoint` → публикация результата adapter.
+- `OutputManagerAdapter` → `UserActionHelper` → runtime `OutputManager`
+  → общая блокировка → `OUTP ON/OFF` → `SYST:ERR?` → `OUTP?` → проверка readback.
+  Getter возвращает `false` для выключенного выхода как успешный результат операции.
+- Getters уставок → `VOLT?/CURR?`; `MeasurementManager` → `MEAS:VOLT?/MEAS:CURR?`
+  → `PowerSupplyResponseProcessor.ParseNumber` / `ParseOutputState`.
+- Общая Real/Idle-подцепочка: `Ask.Device.Emulator/DeviceProtocolEmulator.cs`
+  → `CreatePowerSupply` (ConditionalWeakTable по IPowerSupply, общая блокировка транзакций)
+  → существующий `ModeSelectingDeviceProtocol` с отменой из `EquipmentExecutionContext`
+  → Real: `device.DeviceProtocol` → `TcpProtocol`
+  → `EnsureConnectionAsync` → `TcpClient.ConnectAsync`
+  → `SendCommandAsync` → ASCII + LF / `NetworkStream.WriteAsync`
+  → `NetworkStream.ReadAsync` до LF (фрагментированные ответы, максимум 8192 символа).
+  Ограничение длительности Real-операции обеспечивает готовый `ModeSelectingDeviceProtocol`.
+  Числа SCPI представлены `decimal` и invariant culture.
+- Idle: тот же поток SCPI-команд → `Ask.Device.Emulator/PowerSupply/PowerSupplyEmulatorProtocol.cs`.
+  Эмулятор хранит U/I и выход; сетевых обращений нет. Измеренное напряжение равно уставке при
+  включённом выходе, иначе 0; ток равен 0 (нагрузка не моделируется).
+  `IdleHardwareErrorSimulator` создаёт `DeviceException`; переключение режима не переносит
+  Idle-уставки в физический источник.
+- `Transport.DisconnectAsync` → `TcpTransport` → блокировка общего протокола
+  → dispose реального протокола → закрытие сокета → IsConnected=false.
+  `ResetAsync` → `*RST` через Real/Idle → закрытие канала → IsConnected=false → `IsReset`.
+  Real-сброс перезапускает прибор; его состояние после старта зависит от сохранённых настроек.
+
+Ответы разбирает `Ask.Device.ResponseProcessor/PowerSupply/PowerSupplyResponseProcessor.cs`.
+Разбор системной ошибки переиспользует существующий SCPI checker мультиметра.
+Диапазон/шаг/LIM → `ArgumentOutOfRangeException`; ошибка SCPI/readback/формата → `DeviceException`;
+нет ответа → существующий `DeviceNoResponseException`, пользовательская отмена распространяется.
+Adapters публикуют аппаратные ошибки и передают их существующему `UserActionHelper` для Retry/Abort.
+`EquipmentMessages.PublishPowerSupplyOperationResultAsync` → `EquipmentMessageBuilder`
+→ `EquipmentMessagePublisher`; внешний источник отображается без фиктивного адреса шасси.
+Общие сообщения подключения/инициализации/отключения/сброса также поддерживают `IPowerSupply`.
+Setters не включают выход, не меняют LIM и не вызывают `*SAV`.
+
+`TcpProtocol` сохраняет исходный двухаргументный конструктор и режим чтения остальных устройств;
+третий аргумент включает чтение до LF. `Dispose` закрывает текущий канал, следующий запрос может
+открыть новый. При отмене LF-чтения канал закрывается во избежание позднего ответа следующей команде.
+В LF-режиме ошибки отправки не скрываются: I/O/socket → `DeviceTransportException` для setters;
+ошибки чтения → `DeviceNoResponseException`. Legacy-ветки остальных устройств не изменены.
+
+Проверки: `Ask.Engine.UnitTests/DeviceRuntime/B5108Tests.cs` — раздельные менеджеры/композиция,
+валидация, readback/errors, Idle, отмена, сериализация параллельных U/I и loopback TCP.
+Отдельно проверена отмена из UI во время уже выполняющегося запроса измерения.
+
+БД: `Ask.Core/Shared/DTO/Devices/PowerSupply/PowerSupplyDto.cs` → отдельная таблица `PowerSupplies`
+в `AppDbContext.Device.cs`. Поля AttachableDeviceDto (включая NumberChassis), TCP `Port` (default 80),
+`MinVoltage`/`MaxVoltage`/`VoltageStep` в В (defaults 0/150/0.1) и
+`MinCurrent`/`MaxCurrent`/`CurrentStep` в А (defaults 0/5/0.001).
+Текущие U/I и включение выхода в БД не сохраняются.
+`Ask.DataBase.Provider/Services/Devices/PowerSupplyDtoService.cs` использует существующий `CrudService<T>`.
+`Ask.DataBase.Engine/Static/Devices/PowerSupplies.cs` → `DeviceRuntime` → ветки `IPowerSupply` в `DeviceEngine`
+→ DTO service → `PowerSupplyMapper` / `DeviceMapperRegistry` → `DeviceBuilder`
+→ `DeviceApplicationComposer` → runtime с отдельными прикладными adapters.
+Поддержаны Create/CreateRange/GetById/GetAll/GetByNumber/Update/Delete/DeleteAll, а также
+GetDevicesByNumberChassis/GetDeviceByNumberChassis. Номер источника уникален внутри выбранного тестера.
+Маппер переносит общие поля через ReflectionMapper, порт в ConnectedProfile, проверяет рабочие пределы
+и применяет их к runtime-менеджерам до `DeviceApplicationComposer`; adapters сохраняют эти значения.
+При удалении/замене записи DeviceCache освобождает `B5108.Dispose` → TCP-протокол.
+
+Схема: миграции `20261029090000_AddExternalPowerSupplies`, `20261029100000_AddPowerSupplyChassis`,
+`20261111090000_AddPowerSupplyOperatingLimits` и snapshot,
+общий SQL `Ask.DataBase.Provider/Services/Devices/PowerSupplyStorageSql.cs`.
+`DatabaseInitializationService.InitializeAsync` после применения/принятия схемы вызывает
+`EnsurePowerSupplyStorageAsync`: CREATE TABLE IF NOT EXISTS нужен также для legacy-БД,
+миграции которых принимаются как уже применённые. Существующие строки не меняются;
+настроенные устройства автоматически не создаются. NumberChassis и шесть колонок рабочих пределов добавляются
+также в legacy-таблицу; старые записи без принадлежности сохраняют NumberChassis=0,
+тестер за пользователя не выбирается, а пределы получают defaults Б5-108. В root-редакторе БД таблица видна через reflection DbSet.
+Проверки: `Ask.Engine.UnitTests/DataBase/PowerSupplyStorageTests.cs` — миграции новой базы,
+идемпотентное добавление таблицы и сохранение старых данных, CRUD и восстановление LAN-конфигурации.
+
+Конфигурация UI (общий список устройств выбранного тестера):
+`UI/Controls/Settings/DeviceConfig/DeviceManager/DeviceManagerControl.xaml(.cs)`
+содержит отдельный `DeviceListControl` с заголовком «Источник питания».
+`PopulateDevicesAsync` в `DeviceConfigControl.xaml.cs` загружает DTO только по NumberChassis
+выбранного тестера; события PowerSupplyEvent/EditPowerSupplyEvent открывают
+`UI/Controls/Settings/DeviceConfig/PowerSupply/PowerSupplyWindow.xaml(.cs)` в существующем DrawerHost.
+
+Добавление/редактирование:
+`PowerSupplyWindow.SetSettings(headUnit, editingDto)` → общий `DeviceSettingsControl`
+→ `LoadDeviceModels<IPowerSupply>` → ReflectionHelper → B5108
+→ определение DeviceWithIP → общий блок IP, общая валидация и синхронизация номера с последним октетом.
+Разметка дополнительных параметров вынесена в
+`Ask.UI/Features/EquipmentConfiguration/PowerSupply/PowerSupplySettingsControl.xaml`:
+TCP-порт (default 80, допустимы 1–65535), минимум/максимум/шаг напряжения в В и тока в мА.
+Code-behind этого контрола проверяет значения и преобразует ток в амперы перед записью DTO.
+Валидация требует неотрицательный минимум, максимум больше минимума и положительный шаг
+не больше диапазона. `UI/.../DeviceSettingsControl.PowerSupply.cs` только создаёт XAML-контрол,
+помещает его в `AdditionalSettingsContainer` и подключает поля к общей подсветке ошибок.
+`LoadFromDevice` восстанавливает порт, IP и пределы; ток из DTO переводится из А в мА для отображения.
+`SaveEvent` → `DeviceSettingsProcessorBase.ProcessDevice<PowerSupplyDto>`
+(общий номер, IP и NumberChassis) → `ApplyPowerSupplySettings` → DeviceBuilder
+→ `PowerSupplyMapper.ValidateOperatingLimits` → PowerSupplies.Create/Update
+→ RequestSave → RefreshDeviceListAsync по текущему тестеру.
+Удаление → `DeviceListControl.RemoveDeviceFromDatabaseAsync` → PowerSupplies.Delete;
+удаление тестера также удаляет его источники через DeleteDevicesForChassisAsync.
+Права редактирования секции наследуют общий SetEditingEnabled, отдельного root-ограничения
+на конфигурацию источника нет.
+
+Экспорт/импорт/печать:
+`UI/Controls/Settings/Configuration/DeviceConfigurationFileModel.cs` содержит PowerSupplies;
+DeviceConfigurationService экспортирует NumberChassis/IP/Port и рабочие пределы U/I, проверяет принадлежность тестеру,
+дубликаты в пределах тестера, TCP-порт и диапазоны/шаги; импорт включает источники в существующую транзакционную
+полную замену конфигурации. Старые JSON без раздела читаются с пустым списком, как остальные секции.
+DeviceConfigurationPrintService выводит раздел «Источник питания» у соответствующего тестера и TCP-порт.
+
+Сервисное управление UI:
+root → Администрирование → Сервисные утилиты → «Источники питания».
+`AdminServices.GetPowerSuppliesAsync` → PowerSupplies.GetAllAsync
+→ `ServiceUtilitiesControl` → `Ask.UI/Features/ServiceTools/PowerSupply/PowerSupplyControl.xaml(.cs)`.
+Здесь только выбор уже настроенного источника и ручное управление, без сохранения LAN и создания записей.
+Список показывает модель, номер тестера и номер источника; справа остаётся общая консоль SetCommand.
+Уставки редактируются через NumericComboBox: U в В, I в мА; минимум, максимум, шаг и подписи
+берутся из загруженных `IVoltageManager`/`ICurrentManager`, перед CurrentManager значение переводится в амперы.
+Подключение → ConnectableManager.InitializeAsync → чтение уставок/выхода/измерений, без включения выхода.
+Отключение связи не является выключением выхода; выключение выхода доступно и при непроставленном IsConnected.
+Выход и измерения вызывают отдельные managers; polling отсутствует.
+Операции защищены ExecutionRunGuard, текущей ролью Root и отменой при Unloaded/кнопке отмены.
+Ошибки выводятся в StatusText и общий журнал, светлая/тёмная темы используют существующие resources.
+Root-сервисные функции не добавляются в пользовательскую справку.
+Проверки UI: `Ask.UI.UnitTests/Features/ServiceTools/PowerSupplyControlTests.cs`
+и `PowerSupplyConfigurationTests.cs`: общий IP-редактор и TCP-порт, секция списка, привязка
+к тестеру в JSON, root-сервисное управление и рендер тематических состояний.
+Независимый исследовательский прототип остаётся в `TestConsole/B5108/`.
+
+##### Самоконтроль Б5-108
+
+- `Ask.UI/Components/DeviceSelectorPanel/DeviceSelectorPanel.xaml.cs` загружает источники
+  через `PowerSupplies.GetAllAsync`, определяет `DeviceType.PowerSupply` и получает пункты
+  из `IPowerSupply.SelfTestManager.GetTestTypeEnum`. Доступна проверка напряжения.
+- `Ask.Engine/Tests/SelfControl/ModuleSelfExecutor.cs` → `GetFastMeterSafe`
+  (первый настроенный мультиметр) → `ISelfTestCheckerPowerSupply.StartSelfCheck`
+  → `B5108.SelfTestManager` → `Ask.Device.Runtime/Function/B5108/SelftTest/SelfTestManager.cs`.
+- `StartSelfCheck` добавляет `DeviceExecutionResult` / `TestExecutionResult`, инициализирует
+  источник и мультиметр через их `ConnectableManager.InitializeAsync`, выбирает DCV,
+  отключает выход, выставляет 0 В и ограничение тока 0,10 А, затем включает выход.
+  Для точек 0,1–0,9 В и 1–9 В
+  `CheckVoltagePointAsync` задаёт напряжение через `VoltageManager` → `VOLT`, затем
+  вызывает `IMultimeter.DcVoltageManager.MeasureDCVoltageAsync` → `DCVMeasurementBase`
+  → `MeasurementBase` → профиль мультиметра и Real/Idle адаптер. Допуск по уставке
+  ±(0,01 В + 1 %), обе границы включены. Брак записывается в `TestExecutionResult.Errors`.
+- `Ask.Device.ResponseProcessor/PowerSupply/PowerSupplySelfTestMessages.cs` →
+  `EquipmentMessages` / `SelfTestMessages` / `MeasurementMessages` → экранный протокол.
+  Ток имеет методы оформления точки, результата, погрешности и брака; измерение тока
+  в самоконтроле отсутствует, а `CurrentManager.SetCurrentAsync(0.10m, ...)` задаёт
+  защитное ограничение перед включением выхода и после завершения измерений.
+- `finally` в менеджере → `EquipmentExecutionContext.EnterMandatoryFinalization`
+  → если выход ещё не был успешно отключён, `OutputManager.SetOutputStateAsync(false)`
+  → `OUTP OFF` с проверкой readback. При штатном завершении повторная команда отключения
+  не отправляется; при отмене или ошибке обязательная финализация отключает выход.
+  `Ask.UI/Features/ProtocolNew/Execution/ActionExecutor.cs` исключает `IPowerSupply` из
+  общего сброса самоконтроля, чтобы `*RST` не изменял предел тока. Источник остаётся
+  в учёте использованных устройств для протокола.
+
 ### Device matrix
 
 | Interface | Runtime implementation | Managers/adapters | Protocol/transport | DB facade |
 | --- | --- | --- | --- | --- |
 | `IChassisManager` | `ManagerChassis` | runtime `PowerManager`; no application adapter | `ChassisQueryExecutor` → Real UDP / stateful Idle emulator | `ChassisManagers` |
+| `IPowerSupply` | `B5108` | отдельные Voltage/Current/Output/Measurement managers, общий Transport + application adapters | Real TCP:80 / PowerSupplyEmulatorProtocol | `PowerSupplies` |
 | `IRelaySwitchModule` | `ModuleRelayControl` | adapters for Point/Bus/Meter; runtime SelfTest | `ModuleRelayControlQueryExecutor` → Real UDP / stateful Idle emulator | `RelaySwitchModules` |
 | `IPowerSourceModule` | `ModuleVoltageCurrentSource` | adapters for Voltage/Current/Bus; runtime SelfTest | `Transport` → UDP | `PowerSourceModules` |
 | `ISwitchingDevice` | `DeviceBusCommutation` | adapters for Connector/Relay/Resistor/Capacitor; runtime SelfTest | `DeviceBusCommutationQueryExecutor` → Real UDP / Idle emulator | `SwitchingDevices` |
@@ -2561,6 +2801,34 @@ same path with gates enabled and performs real transport I/O.
 
 ## UI Architecture
 
+### Dock window switcher
+
+`UI/Windows/WpfDocking/Themes/Generic/DockControl.xaml` задаёт
+`WindowSwitcher.Hotkey`: Ctrl+Tab для Native floating strategy, Ctrl+1 для Wpf.
+`UI/Windows/WpfDocking/Windows/Docking/Primitives/WindowSwitcher.cs` регистрирует
+class handlers `DockItem.KeyDown → OnKeyDown → new WindowSwitcher → Show` и
+`UIElement.KeyUp → OnKeyUp → Close → DoClose`. Native показывает отдельное
+прозрачное окно с владельцем; Wpf использует `FloatingWindowAdorner`.
+`DoClose` активирует DockItem из DataContext сфокусированного элемента и удаляет
+окно/adorner. Потеря фокуса внутри switcher также вызывает Close.
+
+При штатном Ctrl+Tab отпускание Ctrl закрывает switcher. Ctrl+Shift+Tab при
+открытии устанавливает `_keepOpen`: `OnKeyUp` оставляет окно открытым для работы
+над оформлением. `OnPreviewKeyDown` закрывает этот режим по Enter или Esc через
+тот же Close; потеря фокуса сохраняет штатный путь закрытия. Дополнительный режим
+применяется только при Hotkey=Ctrl+Tab. Шаблон списка и предпросмотра находится в
+`UI/Windows/WpfDocking/Themes/Generic/WindowSwitcher.xaml`.
+Шаблон задаёт shell 520×390 DIP с заголовком выбранного документа, списками
+`ActiveDocuments`/`ActiveToolWindows` слева и живым VisualBrush-предпросмотром
+справа. Логический `FocusManager.FocusedElement.DataContext` связывает заголовок
+и предпросмотр с DockItem сфокусированной кнопки. Кнопки файлов сохраняют
+`DockCommands.Show` с `CommandTarget=DockItem`; отсутствующая группа служебных
+окон скрывается. Предпросмотр показывает верхний левый фрагмент 320×300 DIP
+через `VisualBrush.ViewboxUnits=Absolute`, масштабированный в карточку.
+Шапка содержит только значок документа и его имя. Палитра
+`WindowSwitcher*Brush` находится в `UI/Resources/Theme/dark.xaml` и `light.xaml`,
+custom-темы наследуют её. Текст и выделение также используют `ModernDataGrid*Brush`.
+
 > **Обязательное правило для новых изменений:** всю новую UI-функциональность —
 > окна, диалоги, controls, ViewModels и связанные UI-services — создавать в проекте
 > `Ask.UI`. Проект `UI` является legacy-слоем: добавлять в него новую функциональность
@@ -2797,7 +3065,21 @@ ApplyMessage → InfoBlock.Text/Foreground`. `GuiInitializer.Apply` связыв
 `MainWindow/Resources/MainMenuStyles.xaml` и применяет `ShellContextMenuStyle`: скруглённая
 панель с тенью, ограничение высоты и MenuScrollViewer; строки используют существующий
 `StyleMenuItem` с компактными отступами. Состав списка и обработчики выбора кодировки
-сохранены. Видимость блока сохраняет `EditorEvents.TranslatorActive`.
+сохранены. `ToggleEncodingCommandImpl.Execute` выбирает UTF-8/CP866 по
+`TextEditorModel.Encoding` активной вкладки. Ручное переоткрытие использует выбранную
+кодировку без автоопределения BOM. Видимость блока сохраняет
+`EditorEvents.TranslatorActive`.
+
+Открытие файлов в редакторе через `UI/Services/FileManager/FileOpenService.cs`
+(`ReadRawFileContent`) и просмотр связанных протоколов через
+`MainWindow/Services/FileService.cs` (`ReadSavedProtocolText`) используют
+`UI/Services/EncodingService.cs` (`ReadFile` → `Decode`).
+Зашифрованные протоколы передают детектору расшифрованные байты. Детектор проверяет
+BOM UTF-8/16/32, строго валидирует UTF-8, учитывает каталог резервных копий,
+сравнивает признаки искажённого текста и при неоднозначности использует кодировку
+по умолчанию для расширения. Выбранная кодировка передаётся в `OpenNewFile` →
+`TextEditorModel.Encoding` → строка состояния и сохранение форматов, которые
+используют кодировку документа. `SaveFileManager.SetBackup` пишет UTF-8 без BOM.
 Индикатор раскладки `UI/Components/KeyboardLayoutComponent.xaml` — кнопка 44×32 с
 `WindowActionButtonStyle`, шрифтом Manrope и общими состояниями наведения/нажатия.
 `LayoutButton.Click → LayoutButton_Click → SwitchToNextInputLanguage → ActivateLanguage`
@@ -3036,13 +3318,397 @@ Renderer выбирает индексированные диапазоны ви
 редактировании, смене документа, прокрутке/изменении размера редактора, клике в редакторе/нажатии клавиши,
 деактивации/перемещении окна и `Unloaded`. Подписки на окно снимаются при `Unloaded`.
 `VisualLinesChanged` не закрывает карточку: создание Popup само может вызывать перерасчёт layout.
-`FileCompareService` сравнивает текст исходного редактора с `SavedTextSnapshot`.
-`DockItemService` подписывает редактируемые вкладки на `TextChanged` и добавляет `*`
-только в визуальный `DockItem.TabText`; чистый `DockItem.Title` остаётся ключом пути.
-`SaveFileManager` обновляет снимок и снимает индикатор после фактической записи,
-а неизменённый исходник `TranslatorItem` повторно не записывает и уведомление не показывает.
-В правой области `RunControl` панель действий документа отображается только для
-транслированного файла и итогового протокола; вкладка состояния оборудования её скрывает.
+### Document saving and close confirmation
+
+Единый признак несохранённых изменений строится по содержимому, а не по факту события
+`TextChanged`. `TextEditorService.CreateTextEditor` и `FileCreateService` фиксируют
+исходный `TextEditorModel.SavedTextSnapshot`; `DocumentTextState.IsModified` сравнивает
+его с текущим текстом после удаления начального BOM и нормализации `CRLF`/`CR` в `LF`.
+Поэтому открытие, переключение вкладок, UI-redraw и техническое представление переводов
+строк не делают документ изменённым. Штатные Undo/Redo AvalonEdit меняют текущий текст:
+возврат точно к снимку автоматически снимает modified-state, Redo снова его устанавливает.
+Если снимка нет, `FileCompareService` читает файл с `TextEditorModel.Encoding` и применяет
+то же сравнение; отсутствие файла считается изменением.
+
+Индикация:
+`TextEditorUI.TextChanged → DockItemService.UpdateModifiedIndicator
+→ FileCompareService.HasFileChanged → DocumentTextState.IsModified
+→ DockItem.TabText = Title + " *" / Title`. `DockItem.Title` не меняется и остаётся
+ключом `EditorWorkspaceModel.FilePaths`.
+
+Обычное сохранение:
+`FileViewModel.SaveFileCommand → MainWindow.Services.FileService.SaveFileAsync
+→ MultiWindowService.EditorDocumentService.SaveFile
+→ UI.Services.FileManager.FileService.SaveFile
+→ SaveFileManager.SaveFile(active DockItem)
+→ FileCompareService.HasFileChanged`; неизменённый документ не записывается.
+Изменённый документ проходит `SaveDataFromTextEditor
+→ WriteTextFileAtomically(temp рядом с целью, кодировка TextEditorModel.Encoding,
+опциональное шифрование протокола, File.Replace/File.Move)
+→ DocumentTextState.MarkSaved → UpdateModifiedIndicator`.
+Снимок меняется только после успешной замены целевого файла; ошибка записи оставляет
+прежний файл и modified-state. UTF-8 BOM/no-BOM и CP866 сохраняются выбранным экземпляром
+`Encoding`, полученным при автоопределении в `EncodingService` или смене кодировки UI.
+`SaveFileAs` после успешной записи дополнительно меняет `FilePath`, `FileName`, заголовок
+и словарь путей. Резервная копия при выборе «Нет» также пишется атомарно, UTF-8 без BOM.
+
+Закрытие одной вкладки имеет единственную точку подтверждения:
+`DocumentTab/Ctrl+F4/ControlManager → DockItem.PerformClose
+→ DockItem.Closing (подписка DockItemService.ConfigureDockItemClosing)
+→ SaveFileManager.ConfirmClose → FileCompareService.HasFileChanged
+→ Yes: SaveFile / No: SaveBackup / Cancel: e.Cancel=true`.
+`ControlManager` не выполняет предварительный `ConfirmClose`, поэтому один и тот же
+несохранённый буфер больше не запрашивается повторно. Закрытие контейнера вызывает
+`PerformClose` для каждого его DockItem и прекращается на первом Cancel/ошибке записи.
+
+Передача исходника в транслятор является перемещением того же редактора, а не закрытием
+документа: `TranslationServices.TryCreateNewTranslator
+→ MultiWindowService.RemoveActiveTextEditor(isTranslation: true)
+→ TextEditorService.CloseActiveTextEditor
+→ DockItemService.CloseForTransfer → DockItem.PerformClose`. На время этого вызова
+`DockItemService` подавляет только close-confirmation данного DockItem; буфер и его
+`SavedTextSnapshot` переходят в `TranslatorItem` без записи в основной файл или Backup.
+`TranslationInputNormalizer.Normalize` создаёт отдельный нормализованный вход транслятора
+(служебные символы, мнемоники, табуляция/отступы), не присваивая его `TextEditorUI.Text`.
+Исходник меняется только при явном согласии пользователя заменить латинские символы;
+`TranslatorItem.TranslatedSourceText` хранит фактический текст исходного редактора,
+поэтому техническая нормализация не создаёт ложный признак устаревшей трансляции.
+
+Завершение приложения:
+`Window/File Exit → MainWindow.Close → Window.ClosingCommand
+→ WindowService.HandleWindowClosingAsync
+→ IEditorDocumentService.ConfirmCloseAll
+→ UI FileService → SaveFileManager.ConfirmCloseAll`.
+Менеджер разворачивает `TextEditorContainer.DockItems`, для `RunControl` берёт
+`SourceDocument`, дедуплицирует документы по экземпляру исходного `TextEditorUI` и
+вызывает `ConfirmClose` не более одного раза на документ. Cancel или ошибка сохранения
+устанавливает `CancelEventArgs.Cancel` и оставляет приложение и буферы открытыми.
+
+Ключевые файлы: `UI/Services/FileManager/DocumentTextState.cs`,
+`UI/Services/FileManager/FileCompareService.cs`,
+`UI/Components/MultiEditorMethods/SaveFileManager.cs`,
+`UI/Services/DockItemService.cs`, `UI/Services/TranslationInputNormalizer.cs`,
+`UI/Components/MultiEditorMethods/ControlManager.cs`,
+`Ask.Core/Shared/Metadata/View/EditorHost/IEditorDocumentService.cs`,
+`MainWindow/Services/WindowService.cs`, `MainWindow/Services/TranslationServices.cs`.
+
+Панель действий итогового протокола находится внутри его вкладки. Для пары
+«исходная/транслированная программа» общие действия открытия, перехода к папке и
+печати находятся в панели исходника рядом с сохранением и трансляцией; отдельной
+внешней панели над транслированным представлением нет. Для состояния оборудования
+панель действий отсутствует.
+
+### Runner docking layout
+
+Текущий production-путь: `UI/Controls/Runner/RunControl.xaml` содержит
+`ExecutionWorkspaceControl` на AvalonDock. Шесть панелей (протокол, ошибки,
+оборудование, транслированная программа, исходник и итоговый протокол) размещаются,
+объединяются и выносятся в floating windows через AvalonDock. Прежние `DockItem`
+сохраняются только как оболочки содержимого и панелей действий; они больше не входят
+во внутренний `DockControl` исполнителя.
+
+Call chain: `RunControl` constructor → `InitializeWorkspaceDocuments`
+→ `ExecutionWorkspaceControl.SetContent` → `InitializeDocking` → `Loaded`
+→ `InitializeDockLayout` → `RestoreRunnerLayout`. `SetLeftEditor` создаёт оболочки
+`TranslatorEditor`/`DevicesStatus`, а `ShowRunnerDocument` сопоставляет их с
+`ExecutionWorkspacePane` и вызывает `SetContent`/`SetTitle`/`ShowPane`.
+`SourceDocument` и итоговый протокол подключаются тем же путём. Выбор при старте и
+переходе из ошибок: `SelectRunnerDocument → ActivatePane`.
+
+`RunControl.LayoutPersistence.cs` сохраняет JSON отдельно для роли по пути
+`RunnerLayoutStore.GetCurrentPath()` с расширением `.avalondock.json`.
+`JsonLayoutSerializer` хранит геометрию, вкладки и floating windows; содержимое
+повторно связывается по постоянным `ContentId`. Повреждённая/неполная раскладка
+заменяется исходной. При закрытии внешнего `DockItem`, содержащего `RunControl`,
+раскладка сохраняется, floating windows закрываются, подписки снимаются, а поздние
+показы блокирует `_closingDockLayout`.
+При fixup пустые панели (в частности ещё не сформированный итоговый протокол)
+временно получают sentinel-content: штатный AvalonDock иначе удаляет unresolved
+`LayoutAnchorable`, после чего вся сохранённая раскладка ошибочно считалась неполной.
+После индексации sentinel снимается, а скрытое состояние панели сохраняется.
+
+`FloatingWindowPlacementStore` сохраняет рядом файл `.display.xml` с координатами
+и размерами каждого floating window в долях рабочей области его монитора. При
+восстановлении монитор ищется по системному имени; если он недоступен, используется
+монитор окна приложения. Относительная геометрия пересчитывается под текущую рабочую
+область и DPI, ограничивается её границами и минимальным размером. Поэтому раскладка
+одной роли сохраняет пропорции при переходе между мониторами разного размера и
+масштаба. Отсутствующий или повреждённый companion-файл не отменяет основную
+AvalonDock-раскладку.
+
+`RunnerSourceStyle` содержит общую панель исходника: открыть, показать в папке,
+напечатать, сохранить и транслировать. Первые три действия через
+`ResolveActionDocument` направляются к связанному `TranslatorEditor`.
+`RunnerTranslationStyle` показывает транслированную программу без дублирующей
+внешней панели. `RunnerDocumentStyle` сохраняет отдельные действия итогового
+протокола, включая экспорт PDF. Изменение `DockItem.TabText` синхронизируется с
+заголовком AvalonDock через `DependencyPropertyDescriptor`.
+Сброс раскладки находится в `Настройки → Интерфейс`:
+`UiSettingsControl.ResetRunnerLayoutButton_Click` → подтверждение
+→ `RunnerLayoutStore.DeleteCurrentAvalonLayout` удаляет JSON и companion-файл
+текущей роли → `ExecutionEvents.RunnerLayoutResetRequested(RoleType)`.
+Активные `RunControl` только этой роли получают событие, вызывают
+`ExecutionWorkspaceControl.ResetLayout`, повторно связывают документы, активируют
+транслированную программу и сохраняют стандартную раскладку. Если исполнитель не
+открыт, отсутствие файлов даёт стандартную раскладку при следующем запуске.
+Высотой панели ошибок управляет AvalonDock; `RunControl` не подписывается на
+`ErrorListControl.DesiredHeightChanged`, чтобы не создавать цикл
+`RefreshCurrentPage → DesiredHeightChanged → RefreshLayoutFromHost`.
+
+#### Historical custom docking implementation (до AvalonDock)
+
+Следующее описание относится к предыдущей реализации и оставлено для навигации по
+собственной библиотеке `UI/Windows/WpfDocking`, которая всё ещё используется внешним
+workspace приложения, но больше не управляет внутренними панелями `RunControl`.
+`DockPaneManager.Focus` запускает вложенный Dispatcher frame только для
+`DockPosition.Floating`: обычные document-вкладки (включая внешний `RunControl`)
+не ожидают создание нативного floating window и не могут зависнуть в `DoEvents`.
+Ранее `UI/Controls/Runner/RunControl.xaml` содержал один `RunnerDockManager`.
+`ProtocolPane` содержал `MainContent` с ProtocolUI,
+`ErrorsPane` — `ErrorListBoxVertical`. Транслированная программа, состояние
+оборудования, исходник и итоговый протокол создаются отдельными DockItem в этом же
+DockControl. Вложенный ChildTextEditorContainer и общий DocumentsPane удалены.
+Каждую вкладку можно объединить с протоколом/ошибками, расположить рядом с ними
+или вынести в floating window. DockItem.Content сохраняет исходные типы
+TranslatorEditor, DevicesStatus и ResultProtocolEditor.
+
+`RunControl` constructor → InitializeDocking → Loaded → InitializeDockLayout
+в `UI/Controls/Runner/RunControl.Docking.cs`. Начальная раскладка создаётся один раз:
+ProtocolPane.Show(Document) → ErrorsPane.Show(protocol.FirstPane, Dock.Bottom,
+savedHeight). ShowRunnerDocument размещает первый документ справа от левой
+области протокола/ошибок, остальные — вкладками рядом с существующим документом.
+Повторный Loaded сохраняет пользовательскую раскладку.
+
+RunControl.LayoutPersistence.cs сохраняет раскладку отдельно для учётной записи
+RoleAuthorizationConfig.CurrentRole, зафиксированной при создании исполнителя.
+RunnerLayoutStore хранит JSON в LocalAppData/AskMkiM/runner-layout/<role>.json.
+Закрытие вкладки или окна и CaptureWorkspaceSession сохраняют раскладку до
+удаления DockItems. DockLayoutAdapter.Save формирует порядок и действия размещения,
+исполнитель переводит фиксированные размеры видимых SplitContainer в веса Star
+по фактическим размерам детей и сохраняет уже заданные веса даже при временном
+ограничении размера окна. RestoreRunnerLayout сопоставляет постоянные ключи панелей с новыми
+DockItems и вызывает DockControl.Load. При ошибке используется исходная раскладка.
+Сторона действия ShowAsSidePaneAction определяется положением добавляемой панели
+в дереве, а IsSizeForTarget отдельно указывает, к какой стороне относится размер.
+RunnerLayoutStore мигрирует старые JSON без версии, где эти признаки были смешаны.
+Плавающие прямоугольники ограничиваются рабочей областью доступного монитора.
+При смене учётной записи RestoreWorkspaceSession скрывает плавающие документы
+уходящей сессии и показывает их при её повторном подключении.
+Итоговый протокол сохраняет свою панель в скрытом виде между запусками и
+заполняется новым текстом при поступлении результата. Содержимое документов в
+файл раскладки не записывается. Регрессия проверяется режимом runner-layout
+стенда tools/DockingFreezeRepro с временными файлами настроек.
+При первоначальном показе выбранной остаётся транслированная программа:
+SourceDocument добавляется с DockItemShowMethod.Deselect. StartTest выбирает
+вкладку TranslatorEditor через SelectRunnerDocument при начале каждого запуска.
+Если DockPosition ещё Unknown и RunnerDockManager не загружен, выбор выполняет
+штатный ShowDocuments на Loaded; Show(Select) для такой вкладки не вызывается.
+Выбор не размещает Unknown-документ даже во время инициализации загруженной
+области: это делает ShowDocuments. Размещённая вкладка выбирается через Show(Select).
+Инициализация завершается после создания обеих базовых панелей.
+Итоговый протокол, полученный до готовности раскладки, показывается после Loaded;
+очистка или замена до показа отменяет предыдущий результат.
+ApplySourceTranslation использует тот же путь выбора обновлённого документа;
+во время выполнения пользователь может переключать вкладки самостоятельно.
+
+SetLeftEditor закрывает только предыдущие документы, сохраняя ProtocolPane и
+ErrorsPane и SourceDocument. Отложенный обработчик DockControl.Loaded отписывается при первом
+вызове и проверяет наличие текущих DockItem, поэтому замена программы до Loaded
+и повторная загрузка не возвращают старые вкладки. ShowInspectionProtocol
+также использует ShowRunnerDocument. Открытие, PDF, печать и возврат к исходнику
+сохраняют прежние обработчики. `RunnerDocumentStyle` в RunControl.xaml задаёт
+DockItem.ControlTemplate с отдельной DocumentActionPanel над ContentPresenter.
+Стиль назначается только транслированной программе и итоговому протоколу, сохраняя
+исходный DockItem.Content. Текст шапки привязан к TabText конкретного DockItem,
+кнопки передают этот DockItem через Tag → GetActionDocument(sender), поэтому
+действие относится к документу своей панели независимо от фокуса в другой области.
+DockItem.Tag=FileType.InspectionProtocol включает кнопку экспорта PDF только
+в итоговом протоколе. Панель перемещается и выносится вместе со своей вкладкой.
+
+Фокус документов больше не перенаправляется в ProtocolUI через прежний LeftBox.
+Режим read-only транслированного редактора задаётся в UI.Services.TranslationService.
+Обработчики точек остановки находят редактор через GetTranslatorEditor независимо
+от выбранной вкладки. Переход из ошибок/точек остановки активирует нужный DockItem.
+
+DocumentTab.HideCloseButton=True, HideOnPerformClose=False и RunnerPane_Closing
+предотвращают закрытие двух обязательных панелей. Документы сохраняют прежнюю
+политику скрытия кнопок закрытия.
+
+Вместо BottomRow/GridSplitter используется `DockPaneSplit`. Событие
+`RunnerDockManager.DockItemStateChanged` обновляет подписку на SplitterDistance
+актуального вертикального split таблицы ошибок. Изменение размера запускает
+DispatcherTimer 250 мс → `ErrorListLayoutSettings.SaveHeight` и
+`ErrorListBoxVertical.RefreshLayoutFromHost`. `DesiredHeightChanged` меняет размер
+только самостоятельной вертикальной панели, когда SplitterDistance относится
+к ней и пользовательское изменение размера не ожидает завершения. Объединённые
+вкладки и горизонтальная компоновка автоматически по высоте не перестраиваются.
+После ручного изменения SplitterDistance `_errorHeightCustomized` сохраняет
+выбранную пользователем высоту до закрытия экземпляра исполнителя.
+Unloaded останавливает timer и снимает DependencyPropertyDescriptor-подписку.
+
+Loaded также находит внешний DockItem с `Content == RunControl` и подписывается
+на StateChanged. `Close → RunnerOwner_StateChanged` разрешает внутреннее закрытие,
+закрывает все DockItems единого RunnerDockManager и снимает подписки.
+Floating windows документов и панелей закрываются вместе с исполнителем.
+При окончательном закрытии RunControl отписывается от событий состояния, устройств,
+просмотра протокола и точек останова. TranslatorItem подписывается на точки останова
+на Loaded и отписывается на Unloaded. EventAggregator снимает снимок подписчиков
+под блокировкой списка и вызывает обработчики вне неё.
+Серия изменений docking объединяется в одно обновление таблицы ошибок через Dispatcher;
+закрытие и выгрузка отменяют отложенное обновление. Сохранение пропорций обходит
+визуальные панели только при наличии фиксированного разделителя и только в окнах этого исполнителя.
+NativeFloatingWindow направляет системную команду пользователя SC_CLOSE в
+FloatingWindow.PerformClose, где действуют правила закрытия вкладок.
+Прямой WM_CLOSE от Application.DoShutdown обрабатывает WPF, поэтому защищённая
+плавающая панель не удерживает процесс. Регрессия проверяется режимом shutdown-floating.
+При начале drag `DockManager.WindowHandler` обходит только те `NativeFloatingWindow`,
+которые ещё подключены к `PresentationSource`. Переходная модель с `IsVisible == true`
+и уже отсоединённым visual пропускается в инициализации координат и hit testing,
+поэтому `PointFromScreen` не падает. Регрессия проверяется режимом `stale-floating`.
+После Close флаг _closingDockLayout запрещает InitializeDockLayout,
+ShowRunnerDocument и ShowInspectionProtocol: позднее завершение протокола
+не создаёт новые панели и не обращается к уже удалённому ProtocolPane.FirstPane.
+ApplySourceTranslation игнорирует результат для закрытого исполнителя;
+PrepareSourceForRunAsync и TranslateCurrentSourceAsync отклоняют запуск/трансляцию,
+а результат асинхронной трансляции повторно проверяется после await.
+Отменённое Closing не запускает очистку. Это также устраняет описанный в
+историческом расследовании orphan-window сценарий для такого владельца RunControl.
+
+### AvalonDock execution workspace
+
+`Ask.UI/ThirdParty/AvalonDock/Integration/ExecutionWorkspace/ExecutionWorkspaceControl.xaml(.cs)` —
+production-оболочка docking-области исполнителя на AvalonDock 5.0.1. Она не зависит
+от execution logic; `UI.Controls.Runner.RunControl` передаёт готовое содержимое и
+управляет его жизненным циклом.
+
+Компонент программно создаёт шесть независимых `LayoutAnchorable` с постоянными
+`ContentId`: протокол, ошибки, состояние оборудования, транслированная программа,
+исходная программа и итоговый протокол. Все панели запрещено закрывать и скрывать,
+но разрешено перемещать, объединять во вкладки, стыковать как документы и выносить
+в floating windows. `SetContent(ExecutionWorkspacePane, object)` связывает существующий
+production-контрол с панелью без зависимости AvalonDock от execution logic;
+`ActivatePane` отвечает только за выбор вкладки.
+
+`SaveLayout` атомарно сохраняет JSON через `JsonLayoutSerializer` во временный файл
+и затем заменяет целевой. `TryRestoreLayout` сопоставляет содержимое по `ContentId`;
+неполная или повреждённая раскладка отклоняется с возвратом к исходной. `ResetLayout`
+создаёт начальную схему: протокол над ошибками слева, четыре документные вкладки справа.
+`ThemeSettings.CurrentTheme/ThemeChanged` переключает `ArcDarkTheme`/`ArcLightTheme`;
+подписка действует только между `Loaded` и `Unloaded`. Фон контейнера берётся из
+тематического ресурса AskMkiM `SettingsNestedGroupBackgroundSolidColorBrush`.
+
+Исходники официального релиза зафиксированы в `Ask.UI/ThirdParty/AvalonDock/source/`
+по Ms-PL; `Ask.UI/ThirdParty/AvalonDock/source/Directory.Build.props` локально собирает WPF-проекты для
+`net8.0-windows`, поскольку официальный NuGet 5.0.1 не содержит этой target framework.
+`Ask.UI/ThirdParty/AvalonDock/source/Directory.Build.targets` отключает strong-name
+для локально поставляемых сборок, чтобы ALINK не подписывал satellite resources в Visual Studio.
+`Ask.UI/Ask.UI.csproj` исключает upstream-дерево из собственных default items и
+ссылается на `AvalonDock`, `AvalonDock.Serializer.Json` и `AvalonDock.Themes.Arc`
+как на source projects. Собственный integration-код и стили лежат рядом, но вне
+`source`, чтобы обновление upstream не смешивалось с кодом AskMkiM.
+Интерактивный изолированный стенд —
+`tools/ExecutionWorkspacePrototype/`; регрессии JSON и повреждённой раскладки —
+`Ask.UI.UnitTests/Controls/ExecutionWorkspace/ExecutionWorkspaceControlTests.cs`.
+
+### Runner source editing
+
+`MainWindow/Services/TranslationServices.RunAsync` получает живой исходный
+`TextEditorUI` из левой стороны `TranslatorItem` до удаления транслятора.
+`PrepareRun → RunControl.SetLeftEditor(translation) → SetSourceEditor(source)`
+переносит оба редактора в исполнитель. `RunControl.Source.cs` хранит
+`SourceDocument` с исходным `TextEditorUI`, моделью, кодировкой, SavedTextSnapshot
+и текущим текстом, отсоединяет старого визуального владельца. `RunnerSourceStyle`
+содержит собственные кнопки сохранения и трансляции. Исходник остаётся редактируемым;
+результат трансляции и итоговый протокол остаются только для чтения. SourceDocument
+показывается в панели AvalonDock через `ShowRunnerDocument`.
+
+Сохранение: `SaveSourceButton_Click → SaveSourceFile` (delegate настраивает
+`DockItemService.ConfigureDockItemClosing`) → `SaveFileManager.SaveFile(SourceDocument)`
+→ путь TextEditorModel/FilePaths → SaveDataFromTextEditor → штатная кодировка,
+SavedTextSnapshot, UpdateModifiedIndicator. SaveFile/SaveFileAs внешнего RunControl
+также перенаправляются на SourceDocument. TextChanged обновляет звёздочку исходника;
+при закрытии подписка снимается. Обычное закрытие внешнего DockItem проверяет
+ConfirmClose(SourceDocument): Yes сохраняет, No создаёт штатную резервную копию,
+Cancel отменяет закрытие. ControlManager учитывает результат закрытия исполнителя,
+включая закрытие всего контейнера, до удаления его UI.
+
+Повторная трансляция: кнопка с существующим ExecutionPlayCircleIcon (молоточек)
+→ TranslateCurrentSourceAsync проверяет глобальный ExecutionRunGuard, запрещает
+повторный вход и временно отключает исполнитель → delegate TranslateSourceAsync,
+назначенный PrepareRun → TranslationServices.TranslateRunnerSourceAsync.
+Создаётся независимый редактор текущего текста с кодировкой, архивом и SavedTextSnapshot
+→ TryPrepareTextForTranslation → RunWithTranslationProgressAsync → BuildTranslationAsync
+→ CommandTranslationManager.BuildTranslation/SetSourseLines в Task.Run.
+При отсутствии ошибок создаётся read-only редактор результата, заполняются SourceLines,
+разрешённые строки и номера команд; RestoreBreakpoints сохраняет точки по номерам команд
+→ RunControl.ApplySourceTranslation заменяет редактор внутри существующего TranslatorEditor,
+обновляет TranslationModels и исполняемый ControlProgram, синхронизирует точки и выбирает
+вкладку результата. Панели, раскладка и итоговый протокол не пересоздаются.
+При ошибках вызывается CreateNewTranslator с preparedResult: повторной трансляции нет,
+открывается штатный TranslatorItem с диагностикой, исполнитель закрывается.
+Исключение/отмена подготовки не обновляют последний успешный результат.
+Запись на диск не требуется. OnLockedChanged отключает кнопку через SourceDocument.Tag.
+IsTransferringSource пропускает запрос сохранения при передаче текста.
+Отложенная очистка закрытого исполнителя в DockItemService сохраняет состояние
+активной программы при таком переходе, не отключая только что открытый транслятор.
+`UI/Services/TranslationService.AddTranslatorItem` сначала успешно создаёт
+TranslatorItem, затем закрывает контейнер исполнителя, включая floating-панели.
+До этого исходный редактор остаётся в исполнителе; при ошибке нового сценария
+CreateNewTranslator не открывает дисковую версию поверх несохранённого текста.
+Повторный запуск без трансляции получает прежний результат через
+`GetRunEditor → RunControl.GetTranslatedEditor` и переносит SourceEditor в новый
+RunControl без сохранения и потери правок. Выполняются прежние TranslationModels;
+правки исходника вступают в выполнение после новой трансляции.
+RunAsync отклоняет замену исполнителя при активном выполнении или передаче исходника.
+PrepareSourceForRunAsync отклоняет запуск во время трансляции до показа YesNo.
+
+Снимок последнего транслированного текста хранится отдельно от SavedTextSnapshot:
+CreateNewTranslator/EditExistingTranslator устанавливают TranslatorItem.TranslatedSourceText;
+RunAsync переносит его в RunControl.TranslatedSourceText (включая повторный запуск).
+ApplySourceTranslation обновляет снимок только после успешной трансляции.
+ProtocolUI.BeforeStartAsync → RunControl.PrepareSourceForRunAsync вызывается под
+защитой _isStartPending, до проверки питания, захвата execution guard и очистки протокола.
+При отличии исходника от снимка показывается YesNo: No запускает прежние модели,
+Yes вызывает TranslateCurrentSourceAsync и продолжает запуск только при успехе;
+ошибки открывают транслятор и возвращают false. Проверка действует для кнопки,
+горячих клавиш и StartAsync. Сохранение файла не снимает признак устаревшей трансляции.
+
+Проверка без оборудования: режим `source-editor` в `tools/DockingFreezeRepro`
+проверяет шесть вкладок, размещение исходника рядом с протоколом, обе темы,
+сохранение и snapshot, dirty indicator, Yes/No, обновление на месте, запрет трансляции при занятом guard,
+передачу несохранённого буфера через штатный UI TranslationService и закрытие панелей.
+Режим inline-translation с путём к отдельно собранному AskMkiM.dll проверяет
+фактический TranslateRunnerSourceAsync: обновление моделей и редактора, сохранение
+отключённых точек останова и открытие диагностического транслятора при ошибках.
+Требует свежего изолированного каталога стенда, где создаётся пустая тестовая БД.
+
+### Docking layout measurement
+
+`UI/Windows/WpfDocking/Windows/SplitContainer.cs` обслуживает раскладку всех
+DockPaneSplit/DockTreeSplit и вложенных docking-контейнеров. Runtime-цепочка
+`WPF layout → SplitContainer.MeasureOverride → GetRects → CalculateLengthes →
+Child.Measure(выделенная область)` вычисляет пиксельные и пропорциональные размеры.
+При конечных размерах родителя и заданном Pixel/Star расстоянии дочерние элементы
+измеряются сразу в своей области. Предварительное natural-size измерение нужно
+для AutoPixel/AutoStar только со стороны IsSplitterTopLeft, определяющей размер;
+поперечная ось ограничена доступной шириной/высотой. Если родитель передал
+бесконечность по одной из осей, естественные размеры измеряются для обеих сторон.
+`ArrangeOverride → GetRects` использует тот же расчёт для размещения и разделителя.
+
+Ранее оба Child на каждом проходе сначала измерялись с бесконечностью по обеим
+осям. Во вложенных контейнерах это умножало количество измерений и раскладывало
+невидимые строки ProtocolListBoxUI, включая TextBox/TextBlock форматирование.
+Дампы зависшего процесса 5 ноября 2026 подтвердили нагрузку UI-потока в этом пути.
+Изолированный сценарий с 200 сообщениями и четырьмя SplitContainer воспроизводил
+задержку более 30 секунд на прежней UI.dll; исправленная версия сохраняет
+виртуализацию строк и проходит обновления до DispatcherPriority.ApplicationIdle.
+
+Регрессия размеров, Auto-режимов, неограниченного родителя и вложенных измерений
+находится в `Ask.UI.UnitTests/Controls/Docking/SplitContainerMeasureTests.cs`.
+`tools/DockingFreezeRepro` в режиме `protocol-layout` использует настоящий
+`Ask.UI.Components.ProtocolListBox.ProtocolListBoxUI`, добавляет 200 строк и
+15 обновлений, проверяет число созданных ListBoxItem и завершение layout.
+Watchdog через 30 секунд завершает только процесс стенда с кодом 2 при зависании.
 
 Открытый `.asktrace` отображается через `SavedExecutionProtocolUI` и
 `ProtocolListBoxUI`; рядом с его штатной вертикальной прокруткой размещается
@@ -3051,16 +3717,38 @@ Renderer выбирает индексированные диапазоны ви
 распознаются новая метка оборудования `[ERR]` и legacy-метка `[БРАК]`.
 `AppendLineAsync → AddOverviewDiagnostic`
 индексирует только новое сообщение; `RefreshErrorOverview` пересоздаёт индекс после загрузки/удаления.
+`DisplayItems_CollectionChanged` дополняет `_visibleIndices` при добавлении в конец
+уже построенного индекса. Вставка, удаление, перенос, замена и Reset помечают индекс
+для полного пересчёта в RefreshOverviewPositions. Обычный поток добавления сохраняет
+индекс за O(1) на строку вместо повторного обхода всей коллекции. Регрессии привязок
+скрытых/раскрытых логов и индекса находятся в
+`Ask.UI.UnitTests/Components/ProtocolListBox/ProtocolRenderingOptimizationTests.cs`.
 `RequestOverviewUpdate` откладывает обновление полосы для обычных записей на один цикл
-`DispatcherTimer` (100 мс); ошибка и команда обновляют её сразу. После загрузки, удаления
-и очистки `RefreshErrorOverview` также выполняет обновление сразу. Прокрутка обновляет
-только видимую область, без повторной классификации сообщений.
+`DispatcherTimer` (100 мс); потоковое добавление команд и ошибок использует тот же пакетный
+цикл, чтобы серия сообщений не перестраивала геометрию карты несколько раз за кадр.
+После загрузки, удаления и очистки `RefreshErrorOverview` выполняет обновление сразу.
+Прокрутка обновляет только видимую область, без повторной классификации сообщений;
+изменения scrollbar и viewport объединяются `RequestScrollMetricsUpdate` в один проход
+`DispatcherPriority.Render`.
 `RefreshErrorOverviewViewport` задаёт видимый диапазон через `VerticalOffset/ExtentHeight`
 и `(VerticalOffset + ViewportHeight)/ExtentHeight`; от наличия штатного ScrollBar/Thumb он не зависит.
 Автопрокрутка `AppendLineAsync → RequestScrollToEnd` следует за хвостом, пока пользователь
 не прокрутил список вверх. `ProtocolScrollViewer_ScrollChanged` отличает пользовательское
-смещение от изменения `ExtentHeight`; при росте содержимого удерживает хвост, не делая
-принудительный `InvalidateMeasure` на каждую запись. `ClearAsync` возобновляет слежение.
+смещение от изменения `ExtentHeight`; удержание хвоста выполняет только отложенный
+`RequestScrollToEnd`, поэтому одно добавление не запускает второй переход в конец из
+`ScrollChanged`. Принудительный `InvalidateMeasure` на каждую запись не используется.
+`ClearAsync` возобновляет слежение.
+Синхронизация ширины верхних панелей execution/inspection с разделителем основной области
+выполняется `ProtocolUI.UpdateProtocolManagerLayout` только при `SizeChanged` панелей и
+`IsVisibleChanged` разделителя. Она не подписана на общий WPF `LayoutUpdated`: добавление
+строки протокола не должно повторно выполнять `TranslatePoint` и менять ширины колонок.
+`AppendLineAsync` применяет запись синхронно, когда вызов уже находится в UI-потоке,
+не создавая отдельную Dispatcher-операцию и возможность layout-прохода между соседними
+сообщениями. Для фонового потока сохраняется `DispatcherPriority.DataBind` и ожидание
+фактического добавления. Шаблон использует непосредственно `ListBoxItem.ContentTemplate`
+и `ContentPresenter`, без двух промежуточных `ContentControl` на каждую реализованную строку.
+Прозрачный `ProtocolSelectableTextBox` сохраняет посимвольное выделение, но не создаёт
+дублирующий AutomationPeer: доступный текст уже представлен видимыми TextBlock строки.
 Кнопки и счётчик находятся в общей верхней строке над списком и полосой.
 `RefreshOverviewPositions → ProjectOverviewOffset → ErrorOverviewBar.SetLinePositions`
 проецирует маркеры в пиксельную шкалу: реализованные контейнеры дают измеренные границы,
@@ -3629,8 +4317,10 @@ also needs the Dispatcher. These can block crash reporting and freeze the UI.
 [Confirmed reproduction and call chains](investigations/docking-freeze-2026-10-29.md)
 are maintained with the isolated `tools/DockingFreezeRepro` harness. No production
 fix is included in that investigation. A separate confirmed UI lifetime defect
-leaves a child NativeFloatingWindow alive after closing a DockItem hosting RunControl;
-dragging it calls PointToScreen on the disconnected child DockControl.
+previously left a child NativeFloatingWindow alive after closing a DockItem hosting
+RunControl; dragging it called PointToScreen on the disconnected child DockControl.
+Current RunControl handles the owning DockItem's Close state and closes its unified
+docking layout; see [Runner docking layout](#runner-docking-layout).
 
 ## Events and Callbacks
 
@@ -3819,6 +4509,13 @@ ErrorItem → translator/runner ErrorList
 
 | Type | Kind | Project | Responsibility | Section |
 | --- | --- | --- | --- | --- |
+| `IPowerSupply` | interface | Ask.Core | внешний источник питания: отдельные менеджеры уставок напряжения/тока, выхода и измерений | [Power supply contracts](#programmable-power-supply-contracts) |
+| `PowerSupplyDto`, `PowerSupplyDtoService`, `PowerSupplyMapper`, `PowerSupplies` | DTO / CRUD / mapper / facade | Ask.Core / Ask.DataBase.Provider / Ask.DataBase.Engine | сохранение и восстановление внешних источников выбранного тестера, включая настраиваемые пределы и шаги U/I | [Power supplies](#programmable-power-supply-contracts) |
+| `PowerSupplyControl` | WPF service control | Ask.UI | root-управление настроенным источником: уставки, выход и измерения | [Power supplies](#programmable-power-supply-contracts) |
+| `PowerSupplySettingsControl` | WPF configuration control | Ask.UI | XAML-форма TCP-порта и настраиваемых пределов U/I; отображает ток в мА и переносит в DTO в А | [Power supplies](#programmable-power-supply-contracts) |
+| `B5108`, менеджеры `Function.B5108` | device / managers | Ask.Device.Runtime | Б5-108: LAN/SCPI, последовательные операции, программный шаг, readback и Idle | [Power supply contracts](#programmable-power-supply-contracts) |
+| `PowerSupply.Capabilities.IVoltageManager`, `ICurrentManager` | interfaces | Ask.Core | программный шаг и диапазон, запись/чтение уставок в В/А | [Power supply contracts](#programmable-power-supply-contracts) |
+| `PowerSupply.Capabilities.IOutputManager`, `IMeasurementManager` | interfaces | Ask.Core | управление выходом и измерение фактических U/I | [Power supply contracts](#programmable-power-supply-contracts) |
 | `ReleaseNotesReader` | catalog reader | Ask.Support | чтение, строгая проверка JSON и числовая сортировка выпусков без запуска справки | [Release notes](#release-notes-catalog) |
 | `ReleaseNotesReadStateStore` | file storage | Ask.Support | атомарные отметки просмотренных версий по ролям, межпроцессный Mutex и Changed | [Release notes](#release-notes-catalog) |
 | `ReleaseNotesPrompt` | WPF control | Ask.UI | кнопка текущей версии пустого экрана до просмотра, синхронизация роли и отметок | [Release notes](#release-notes-catalog) |
@@ -3832,6 +4529,10 @@ ErrorItem → translator/runner ErrorList
 | `MainWindow` | View/shell | MainWindowProgram | top-level UI and lifecycle | [UI Architecture](#ui-architecture) |
 | `MultiEditorControl` | workspace View | UI | editors/tabs/user controls | [UI Architecture](#ui-architecture) |
 | `FileManager` | service composer | UI | workspace services | [UI Architecture](#ui-architecture) |
+| `IEditorDocumentService` / `UI.Services.FileManager.FileService` | contract / document service | Ask.Core / UI | открытие, сохранение и единое подтверждение закрытия всех документов | [Document saving](#document-saving-and-close-confirmation) |
+| `DocumentTextState` / `FileCompareService` | state helper / service | UI | content-based modified-state с нормализацией BOM и переводов строк | [Document saving](#document-saving-and-close-confirmation) |
+| `SaveFileManager` | document persistence coordinator | UI | атомарная запись, снимок сохранённого текста, Save As, backup и подтверждение закрытия | [Document saving](#document-saving-and-close-confirmation) |
+| `TranslationInputNormalizer` | translation input helper | UI | создаёт технически нормализованную копию входа транслятора без изменения исходного редактора | [Document saving](#document-saving-and-close-confirmation) |
 | `FileCompareSelectionControl` | WPF control | Ask.UI | выбор открытых редакторов и отображение построчного diff через DiffPlex | [Сравнение файлов](#file-comparison-ui) |
 | `ITextSearchTarget` / `IReplaceTextSearchTarget` | contracts | Ask.Core | подключение чтения, подсветки, переходов и опциональной замены для произвольного компонента | [Поиск](#pluggable-text-search) |
 | `TextSearchEngine` / `TextSearchSession` | engine / session | Ask.Core | буквальный поиск по снимкам, отмена, навигация, обновление и замена | [Поиск](#pluggable-text-search) |

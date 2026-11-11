@@ -36,6 +36,15 @@ namespace Ask.Core.Shared.Metadata.View.EditorHost
     void SaveFileAs();
 
     /// <summary>
+    /// Подтверждает закрытие всех открытых документов и сохраняет выбранные пользователем изменения.
+    /// </summary>
+    /// <returns>
+    /// <see langword="true"/>, если приложение может продолжить закрытие;
+    /// иначе <see langword="false"/>.
+    /// </returns>
+    bool ConfirmCloseAll();
+
+    /// <summary>
     /// Выводит текущий документ на печать.
     /// </summary>
     void PrintFile();

@@ -15,11 +15,11 @@ using Ask.UI.Services.Notifications;
 using ResultProtocolEditor = Ask.UI.Controls.TextEditorControl.TextEditorUI;
 using Ask.UI.Features.Archive.Services;
 using Ask.UI.Shared.Formatting;
+using Ask.UI.ThirdParty.Docking.Integration.ExecutionWorkspace;
 using System.IO;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Threading;
 using UI.Controls.TextEditorControl;
@@ -45,9 +45,6 @@ namespace UI.Controls.Runner
 
     private List<BaseCommandModel> ControlProgram = null;
 
-    private bool _userResizing = false;
-    private bool _resizeRefreshQueued = false;
-
     public int ErrorCount { get; private set; } = 0;
     public int TranslationErrorCount { get; private set; } = 0;
 
@@ -65,6 +62,11 @@ namespace UI.Controls.Runner
     private readonly TranslatedFileSaveService _translatedFileSaveService = new TranslatedFileSaveService();
     private DockItem? _inspectionProtocolDockItem;
     private ResultProtocolEditor? _inspectionProtocolEditor;
+    private readonly List<DockItem> _runnerDocuments = [];
+    private DockItem ProtocolPane = null!;
+    private DockItem ErrorsPane = null!;
+    private ContentControl MainContent = null!;
+    private ErrorListControl ErrorListBoxVertical = null!;
 
     public List<BaseCommandModel> TranslationModels
     {
@@ -99,23 +101,23 @@ namespace UI.Controls.Runner
     public RunControl()
     {
       InitializeComponent();
+      InitializeWorkspaceDocuments();
       ProtocolUI = new ProtocolUI(true);
       ProtocolUI.SetRuntimeExecutionSettingsEnabled(true);
       ProtocolUI.InspectionProtocolHost = this;
+      ProtocolUI.BeforeStartAsync = PrepareSourceForRunAsync;
       ProtocolUI.ErrorListBoxVerticalVisibility = Visibility.Collapsed;
       MainContent.Content = ProtocolUI;
       ErrorListBoxVertical.ItemDoubleClicked += ErrorItemDoubleClicked;
-      ErrorListBoxVertical.DesiredHeightChanged += ErrorListBoxVertical_DesiredHeightChanged;
       devicesStatus = new DevicesStatus();
 
-      EventAggregator.Subscribe<SystemStateEvents.LockedChanged>(e => OnLockedChanged(e.IsLocked));
-      EventAggregator.Subscribe<ExecutionEvents.ActiveDeviceChanged>(e => devicesStatus.LoadDevices(e.Devices));
+      EventAggregator.Subscribe<SystemStateEvents.LockedChanged>(OnRunnerLockedChanged);
+      EventAggregator.Subscribe<ExecutionEvents.ActiveDeviceChanged>(OnRunnerActiveDeviceChanged);
+      EventAggregator.Subscribe<ExecutionEvents.RunnerLayoutResetRequested>(OnRunnerLayoutResetRequested);
       EventAggregator.Subscribe<FileInteractionEvents.ViewProtocol>(OnViewProtocol);
 
+      InitializeDocking();
       Loaded += RunControl_Loaded;
-      ChildTextEditorContainer.DockManager.ActiveItemChanged += RunnerDocument_ActiveChanged;
-      ChildTextEditorContainer.DockManager.ActiveDocumentChanged += RunnerDocument_ActiveChanged;
-      LeftBox.AddHandler(UIElement.PreviewGotKeyboardFocusEvent, new KeyboardFocusChangedEventHandler(LeftBox_PreviewGotKeyboardFocus), true);
 
       // Вкладка "Точки остановки"
       ErrorListBoxVertical.BreakpointItemDoubleClicked += BreakpointItemDoubleClicked;
@@ -123,10 +125,59 @@ namespace UI.Controls.Runner
       ErrorListBoxVertical.BreakpointToggleRequested += BreakpointToggleRequested;
 
       // События брейкпоинтов, чтобы вкладка обновлялась в Run
-      EventAggregator.Subscribe<BreakpointEvents.BreakpointSet>(e => OnBreakpointSet(e));
-      EventAggregator.Subscribe<BreakpointEvents.BreakpointRemoved>(e => OnBreakpointRemoved(e));
-      EventAggregator.Subscribe<BreakpointEvents.BreakpointOn>(e => OnBreakpointOn(e));
-      EventAggregator.Subscribe<BreakpointEvents.BreakpointOff>(e => OnBreakpointOff(e));
+      EventAggregator.Subscribe<BreakpointEvents.BreakpointSet>(OnBreakpointSet);
+      EventAggregator.Subscribe<BreakpointEvents.BreakpointRemoved>(OnBreakpointRemoved);
+      EventAggregator.Subscribe<BreakpointEvents.BreakpointOn>(OnBreakpointOn);
+      EventAggregator.Subscribe<BreakpointEvents.BreakpointOff>(OnBreakpointOff);
+    }
+
+    private void InitializeWorkspaceDocuments()
+    {
+      MainContent = new ContentControl();
+      ErrorListBoxVertical = new ErrorListControl
+      {
+        MinHeight = 60,
+        StringsNumberVisible = Visibility.Visible,
+        MeasureResultVisible = Visibility.Visible,
+      };
+      ProtocolPane = new DockItem
+      {
+        Title = "Протокол исполнения",
+        TabText = "Протокол исполнения",
+        Content = MainContent,
+        HideOnPerformClose = false,
+      };
+      ErrorsPane = new DockItem
+      {
+        Title = "Ошибки и точки остановки",
+        TabText = "Ошибки и точки остановки",
+        Content = ErrorListBoxVertical,
+        HideOnPerformClose = false,
+      };
+      DocumentTab.SetHideCloseButton(ProtocolPane, true);
+      DocumentTab.SetHideCloseButton(ErrorsPane, true);
+      _runnerDocuments.Add(ProtocolPane);
+      _runnerDocuments.Add(ErrorsPane);
+      RunnerWorkspace.SetContent(ExecutionWorkspacePane.Protocol, ProtocolPane);
+      RunnerWorkspace.SetContent(ExecutionWorkspacePane.Errors, ErrorsPane);
+      RunnerWorkspace.HidePane(ExecutionWorkspacePane.Source);
+      RunnerWorkspace.HidePane(ExecutionWorkspacePane.Result);
+    }
+
+    private void OnRunnerLockedChanged(SystemStateEvents.LockedChanged e) => OnLockedChanged(e.IsLocked);
+
+    private void OnRunnerActiveDeviceChanged(ExecutionEvents.ActiveDeviceChanged e) => devicesStatus.LoadDevices(e.Devices);
+
+    private void UnsubscribeRunnerEvents()
+    {
+      EventAggregator.Unsubscribe<SystemStateEvents.LockedChanged>(OnRunnerLockedChanged);
+      EventAggregator.Unsubscribe<ExecutionEvents.ActiveDeviceChanged>(OnRunnerActiveDeviceChanged);
+      EventAggregator.Unsubscribe<ExecutionEvents.RunnerLayoutResetRequested>(OnRunnerLayoutResetRequested);
+      EventAggregator.Unsubscribe<FileInteractionEvents.ViewProtocol>(OnViewProtocol);
+      EventAggregator.Unsubscribe<BreakpointEvents.BreakpointSet>(OnBreakpointSet);
+      EventAggregator.Unsubscribe<BreakpointEvents.BreakpointRemoved>(OnBreakpointRemoved);
+      EventAggregator.Unsubscribe<BreakpointEvents.BreakpointOn>(OnBreakpointOn);
+      EventAggregator.Unsubscribe<BreakpointEvents.BreakpointOff>(OnBreakpointOff);
     }
     /// <summary>
     /// Обрабатывает событие изменения состояния блокировки интерфейса.
@@ -137,7 +188,10 @@ namespace UI.Controls.Runner
     {
       Application.Current.Dispatcher.Invoke(() =>
       {
-        var translatorItem = ChildTextEditorContainer.DockManager.DockItems.FirstOrDefault(item => item.Content.GetType() is TranslatorEditor);
+        isLocked = newValue;
+        if (SourceDocument != null)
+          SourceDocument.Tag = !newValue;
+        var translatorItem = _runnerDocuments.FirstOrDefault(item => item.Content is TranslatorEditor);
         if (translatorItem != null)
         {
           var translatorEditor = translatorItem.Content as TranslatorEditor;
@@ -164,15 +218,16 @@ namespace UI.Controls.Runner
       {
         if (obj.SourceLineNumber >= 0)
         {
+          RunnerWorkspace.ActivatePane(ExecutionWorkspacePane.Protocol);
           await protocolUI.MoveToLineAsync(obj.SourceLineNumber);
         }
 
         if (obj.FormattedLineNumber >= 0)
         {
-          var dockManader = ChildTextEditorContainer.DockManager;
-          var dockItemPk = dockManader.DockItems.FirstOrDefault(di => di.TabText != "Состояние оборудования");
-          if (dockItemPk != null && dockItemPk.Content is TextEditorUI textEditor)
+          var dockItemPk = _runnerDocuments.FirstOrDefault(item => item.Content is TranslatorEditor);
+          if (dockItemPk?.Content is TranslatorEditor translator && translator.GetTextEditor() is TextEditorUI textEditor)
           {
+            SelectRunnerDocument(dockItemPk);
             textEditor.GoToIssue(obj, useFormattedLineNumber: true);
           }
         }
@@ -181,38 +236,25 @@ namespace UI.Controls.Runner
 
     private void RunControl_Loaded(object sender, RoutedEventArgs e)
     {
-      ApplyErrorListHeight(ErrorListLayoutSettings.GetInitialHeight());
+      InitializeDockLayout();
       ErrorListBoxVertical.RefreshLayoutFromHost();
-      UpdateDocumentActionPanel();
       FocusMainContent();
     }
 
-    private void RunnerDocument_ActiveChanged(object? sender, EventArgs e) =>
-      UpdateDocumentActionPanel();
+    private DockItem? GetActionDocument(object sender) =>
+      ResolveActionDocument((sender as FrameworkElement)?.Tag as DockItem);
 
-    private void UpdateDocumentActionPanel()
+    private DockItem? ResolveActionDocument(DockItem? document)
     {
-      var activeDocument = GetActiveRunnerDocument();
-      bool isTranslatedFile = activeDocument?.Content is TranslatorEditor;
-      bool isInspectionProtocol = activeDocument == _inspectionProtocolDockItem;
+      if (document != SourceDocument)
+        return document;
 
-      ExportPdfButton.Visibility = isInspectionProtocol ? Visibility.Visible : Visibility.Collapsed;
-
-      DocumentActionPanel.Visibility = isTranslatedFile || isInspectionProtocol
-        ? Visibility.Visible
-        : Visibility.Collapsed;
-      ActiveDocumentFileName.Text = DocumentActionPanel.Visibility == Visibility.Visible
-        ? activeDocument?.TabText ?? activeDocument?.Title ?? string.Empty
-        : string.Empty;
+      return _runnerDocuments.FirstOrDefault(item => item.Content is TranslatorEditor);
     }
-
-    private DockItem? GetActiveRunnerDocument() =>
-      ChildTextEditorContainer.DockManager.DockItems.FirstOrDefault(
-        item => item.IsActiveDocument || item.IsActiveItem || item.IsSelected);
 
     private void OpenActiveDocumentButton_Click(object sender, RoutedEventArgs e)
     {
-      var activeDocument = GetActiveRunnerDocument();
+      var activeDocument = GetActionDocument(sender);
       if (activeDocument == _inspectionProtocolDockItem)
       {
         ProtocolUI.OpenInspectionProtocolInEditor();
@@ -231,7 +273,7 @@ namespace UI.Controls.Runner
 
     private void OpenActiveDocumentFolderButton_Click(object sender, RoutedEventArgs e)
     {
-      var activeDocument = GetActiveRunnerDocument();
+      var activeDocument = GetActionDocument(sender);
       if (activeDocument == _inspectionProtocolDockItem)
       {
         ProtocolUI.OpenInspectionProtocolFolder();
@@ -250,7 +292,7 @@ namespace UI.Controls.Runner
 
     private void ExportActiveDocumentPdfButton_Click(object sender, RoutedEventArgs e)
     {
-      if (GetActiveRunnerDocument() == _inspectionProtocolDockItem &&
+      if (GetActionDocument(sender) == _inspectionProtocolDockItem &&
           !string.IsNullOrWhiteSpace(_inspectionProtocolEditor?.Text))
       {
         new UI.Services.ProtocolManager.PdfProtocolGenerator().ExportProtocolToPdf(
@@ -261,7 +303,7 @@ namespace UI.Controls.Runner
 
     private async void PrintActiveDocumentButton_Click(object sender, RoutedEventArgs e)
     {
-      var activeDocument = GetActiveRunnerDocument();
+      var activeDocument = GetActionDocument(sender);
       string? text = activeDocument switch
       {
         _ when activeDocument == _inspectionProtocolDockItem => _inspectionProtocolEditor?.Text,
@@ -275,11 +317,6 @@ namespace UI.Controls.Runner
           text,
           activeDocument?.TabText ?? "Печать документа");
       }
-    }
-    private void LeftBox_PreviewGotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
-    {
-      e.Handled = true;
-      FocusMainContent();
     }
     private void FocusMainContent()
     {
@@ -331,13 +368,12 @@ namespace UI.Controls.Runner
         decorator.Child = null;
       }
 
-      var dockManager = ChildTextEditorContainer.DockManager;
-      if (dockManager.DockItems.Count > 0)
+      ClearInspectionProtocolCore();
+      foreach (var dockItem in _runnerDocuments.Where(item => item != ProtocolPane && item != ErrorsPane && item != SourceDocument).ToArray())
       {
-        foreach (var dockItem in dockManager.DockItems.ToList())
-        {
-          dockManager.DockItems.Remove(dockItem);
-        }
+        StopTrackingWorkspaceTitle(dockItem);
+        dockItem.Close();
+        _runnerDocuments.Remove(dockItem);
       }
 
       var rightEditor = new TranslatorEditor();
@@ -360,6 +396,7 @@ namespace UI.Controls.Runner
         Title = fileName,
         TabText = fileName,
         Content = rightEditor,
+        Style = (Style)FindResource("RunnerTranslationStyle"),
       };
 
       var dockItemDeviceState = new DockItem
@@ -372,54 +409,46 @@ namespace UI.Controls.Runner
       DocumentTab.SetHideCloseButton(dockItemPk, true);
       DocumentTab.SetHideCloseButton(dockItemDeviceState, true);
 
-      dockManager.DockItems.Add(dockItemPk);
-      dockManager.DockItems.Add(dockItemDeviceState);
+      _runnerDocuments.Add(dockItemPk);
+      _runnerDocuments.Add(dockItemDeviceState);
 
-      LogInformation($"Попытка показать ChildTextEditorContainer.DockItem. Title: {dockItemPk.Title}, IsLoaded: {dockManager.IsLoaded}, DockItems.Count: {dockManager.DockItems.Count}");
-
-      if (!dockManager.IsLoaded)
+      void ShowDocuments()
       {
-        LogWarning("ChildTextEditorContainer.DockControl ещё не загружен. Подписка на Loaded...");
-
-        var capturedDockItem = dockItemPk;
-        dockManager.Loaded += (s, e) =>
-        {
-          try
-          {
-            LogInformation("ChildTextEditorContainer.DockControl загрузился. Показываем вкладку.");
-            LogInformation("ChildTextEditorContainer.DockItem отображён после загрузки.");
-            var isControlProgramActive = true;
-
-            SystemStateManager.SetIsControlProgramActive(isControlProgramActive);
-            dockItemDeviceState.Show(dockManager, DockPosition.Document);
-            capturedDockItem.Show(dockManager, DockPosition.Document);
-
-            Application.Current.Dispatcher.BeginInvoke(new Action(() =>
-            {
-              SyncBreakpointsFromEditor(textEditorUI);
-            }), System.Windows.Threading.DispatcherPriority.Loaded);
-          }
-          catch (Exception ex)
-          {
-            LogException("Ошибка при отображении ChildTextEditorContainer.DockItem после загрузки:", ex);
-          }
-        };
-      }
-      else
-      {
-        var isControlProgramActive = true;
-
-        SystemStateManager.SetIsControlProgramActive(isControlProgramActive);
-
-        dockItemDeviceState.Show(dockManager, DockPosition.Document);
-        dockItemPk.Show(dockManager, DockPosition.Document);
-
+        SystemStateManager.SetIsControlProgramActive(true);
+        ShowRunnerDocument(dockItemDeviceState);
+        ShowRunnerDocument(dockItemPk);
+        if (SourceDocument != null)
+          ShowRunnerDocument(SourceDocument, DockItemShowMethod.Deselect);
+        RestoreRunnerLayout(dockItemDeviceState, dockItemPk);
         Application.Current.Dispatcher.BeginInvoke(new Action(() =>
         {
           SyncBreakpointsFromEditor(textEditorUI);
-        }), System.Windows.Threading.DispatcherPriority.Loaded);
+        }), DispatcherPriority.Loaded);
+      }
 
-        LogInformation("ChildTextEditorContainer.DockItem отображён немедленно.");
+      if (!RunnerWorkspace.IsLoaded)
+      {
+        RoutedEventHandler? loadedHandler = null;
+        loadedHandler = (s, e) =>
+        {
+          RunnerWorkspace.Loaded -= loadedHandler;
+          if (!_runnerDocuments.Contains(dockItemPk) || !_runnerDocuments.Contains(dockItemDeviceState))
+            return;
+
+          try
+          {
+            ShowDocuments();
+          }
+          catch (Exception ex)
+          {
+            LogException("Ошибка при отображении документов исполнителя после загрузки:", ex);
+          }
+        };
+        RunnerWorkspace.Loaded += loadedHandler;
+      }
+      else
+      {
+        ShowDocuments();
       }
     }
 
@@ -482,9 +511,11 @@ namespace UI.Controls.Runner
     {
       Dispatcher.Invoke(() =>
       {
+        if (_closingDockLayout)
+          return;
+
         ClearInspectionProtocolCore();
 
-        var dockManager = ChildTextEditorContainer.DockManager;
         _inspectionProtocolEditor = new ResultProtocolEditor
         {
           IsReadOnly = true,
@@ -493,17 +524,33 @@ namespace UI.Controls.Runner
         _inspectionProtocolEditor.WordWrap = true;
         _inspectionProtocolEditor.Text = protocolText ?? string.Empty;
 
-        _inspectionProtocolDockItem = new DockItem
-        {
-          Title = "Итоговый протокол",
-          TabText = "Итоговый протокол",
-          Content = _inspectionProtocolEditor,
-        };
-
-        DocumentTab.SetHideCloseButton(_inspectionProtocolDockItem, true);
-        _inspectionProtocolDockItem.Show(dockManager, DockPosition.Document);
-        UpdateDocumentActionPanel();
+        _inspectionProtocolDockItem ??= CreateInspectionProtocolDockItem();
+        _inspectionProtocolDockItem.Content = _inspectionProtocolEditor;
+        ShowPendingInspectionProtocol();
       });
+    }
+
+    private void ShowPendingInspectionProtocol()
+    {
+      if (!_closingDockLayout && _dockLayoutInitialized && RunnerWorkspace.IsLoaded
+        && _inspectionProtocolEditor != null && _inspectionProtocolDockItem is { } document)
+      {
+        ShowRunnerDocument(document);
+      }
+    }
+
+    private DockItem CreateInspectionProtocolDockItem()
+    {
+      var document = new DockItem
+      {
+        Title = "Итоговый протокол",
+        TabText = "Итоговый протокол",
+        Style = (Style)FindResource("RunnerDocumentStyle"),
+        Tag = FileType.InspectionProtocol,
+      };
+      DocumentTab.SetHideCloseButton(document, true);
+      _runnerDocuments.Add(document);
+      return document;
     }
 
     /// <inheritdoc />
@@ -519,18 +566,14 @@ namespace UI.Controls.Runner
         _inspectionProtocolEditor.Text = string.Empty;
       }
 
-      if (_inspectionProtocolDockItem != null)
+      if (_inspectionProtocolDockItem is { } document)
       {
-        var dockManager = ChildTextEditorContainer.DockManager;
-        if (dockManager.DockItems.Contains(_inspectionProtocolDockItem))
-        {
-          _inspectionProtocolDockItem.Close();
-        }
+        RunnerWorkspace.HidePane(ExecutionWorkspacePane.Result);
+        document.Content = null;
+        RunnerWorkspace.SetContent(ExecutionWorkspacePane.Result, null);
       }
 
-      _inspectionProtocolDockItem = null;
       _inspectionProtocolEditor = null;
-      UpdateDocumentActionPanel();
     }
 
     private async Task StartTest(ActionSettings settings, IUserInteractionService _messageService, IInputFieldProvider inputFieldProvider, IInputHighlightService inputHighlightService, CancellationToken cancellationToken)
@@ -539,10 +582,10 @@ namespace UI.Controls.Runner
 
       Application.Current.Dispatcher.Invoke(() =>
       {
-        var dockManager = ChildTextEditorContainer.DockManager;
-        var dockItem = dockManager.DockItems.FirstOrDefault(di => di.Content is TranslatorEditor);
+        var dockItem = _runnerDocuments.FirstOrDefault(di => di.Content is TranslatorEditor);
         if (dockItem != null)
         {
+          SelectRunnerDocument(dockItem);
           var translatorEditor = dockItem.Content as TranslatorEditor;
           editor = translatorEditor?.GetTextEditor();
         }
@@ -600,7 +643,7 @@ namespace UI.Controls.Runner
     {
       Application.Current.Dispatcher?.Invoke(() =>
       {
-        var translatorEditor = ChildTextEditorContainer.DockManager.DockItems
+        var translatorEditor = _runnerDocuments
           .FirstOrDefault(item => item.Content is TranslatorEditor)?
           .Content as TranslatorEditor;
         if (translatorEditor != null)
@@ -613,9 +656,9 @@ namespace UI.Controls.Runner
 
     private void TranslatorEditor_BackRequested(object? sender, EventArgs e)
     {
-      var textEditorContainer = LeftBox.Children.Count > 0 ? LeftBox.Children[0] as TextEditorContainer : null;
+      var translatorEditor = GetTranslatorEditor();
       TranslatorNavigationService.TryOpenSourceFileFromTranslator(
-        textEditorContainer,
+        translatorEditor,
         onSourceOpened: () => EditorEventAdapter.RaiseCloseRunItem(this));
     }
 
@@ -664,90 +707,6 @@ namespace UI.Controls.Runner
       _translatedFileSaveService.SaveToDisk(this, translatedText ?? new List<string>(), sourceFilePath);
     }
 
-    private void BottomSplitter_OnDragStarted(object sender, DragStartedEventArgs e)
-    {
-      _userResizing = true;
-
-      ApplyErrorListBounds();
-      BottomRow.Height = new GridLength(ErrorListLayoutSettings.ClampHeight(ErrorListBoxVertical.ActualHeight));
-    }
-
-    private void BottomSplitter_OnDragDelta(object sender, DragDeltaEventArgs e)
-    {
-      ClampErrorListRowDuringResize();
-      QueueErrorListResizeRefresh();
-    }
-
-    private void BottomSplitter_OnDragCompleted(object sender, DragCompletedEventArgs e)
-    {
-      _userResizing = false;
-
-      var height = ErrorListLayoutSettings.ClampHeight(ErrorListBoxVertical.ActualHeight);
-      ApplyErrorListHeight(height);
-      ErrorListLayoutSettings.SaveHeight(height);
-      ErrorListBoxVertical.RefreshLayoutFromHost();
-    }
-
-    private void QueueErrorListResizeRefresh()
-    {
-      if (_resizeRefreshQueued)
-        return;
-
-      _resizeRefreshQueued = true;
-      Dispatcher.BeginInvoke(
-        new Action(() =>
-        {
-          _resizeRefreshQueued = false;
-          ErrorListBoxVertical.RefreshLayoutFromHost();
-        }),
-        DispatcherPriority.Render);
-    }
-
-    private void ErrorListBoxVertical_DesiredHeightChanged(double height)
-    {
-      if (_userResizing)
-        return;
-
-      ApplyErrorListHeight(height);
-    }
-
-    private void ApplyErrorListHeight(double height)
-    {
-      var clampedHeight = ErrorListLayoutSettings.ClampHeight(height);
-
-      ApplyErrorListBounds();
-      BottomRow.Height = new GridLength(clampedHeight);
-    }
-
-    private void ClampErrorListRowDuringResize()
-    {
-      var clampedHeight = ErrorListLayoutSettings.ClampHeight(BottomRow.ActualHeight);
-      if (Math.Abs(BottomRow.ActualHeight - clampedHeight) < 0.5)
-        return;
-
-      BottomRow.Height = new GridLength(clampedHeight);
-    }
-
-    private void ApplyErrorListBounds()
-    {
-      var minHeight = ErrorListLayoutSettings.GetMinHeight();
-      var maxHeight = ErrorListLayoutSettings.GetMaxHeight();
-
-      ErrorListBoxVertical.MinHeight = minHeight;
-      BottomRow.MinHeight = minHeight;
-
-      if (double.IsInfinity(maxHeight))
-      {
-        ErrorListBoxVertical.ClearValue(MaxHeightProperty);
-        BottomRow.ClearValue(RowDefinition.MaxHeightProperty);
-      }
-      else
-      {
-        ErrorListBoxVertical.MaxHeight = maxHeight;
-        BottomRow.MaxHeight = maxHeight;
-      }
-    }
-
     private bool CanSaveTranslatedFileToDisk()
     {
       return translationModels.Count > 0 && TranslationErrorCount == 0;
@@ -789,7 +748,7 @@ namespace UI.Controls.Runner
 
     private TranslatorEditor? GetTranslatorEditor()
     {
-      return ChildTextEditorContainer.DockManager.DockItems
+      return _runnerDocuments
         .FirstOrDefault(item => item.Content is TranslatorEditor)?
         .Content as TranslatorEditor;
     }
@@ -848,12 +807,17 @@ namespace UI.Controls.Runner
     /// </remarks>
     private void BreakpointItemDoubleClicked(BreakpointListItem bp)
     {
-      var editor = ChildTextEditorContainer.GetTextEditor();
+      var editor = GetTranslatorEditor()?.GetTextEditor();
       if (editor == null)
         return;
 
       if (bp.RightLine.HasValue && bp.RightLine.Value > 0)
+      {
+        var translationDocument = _runnerDocuments.FirstOrDefault(item => item.Content is TranslatorEditor);
+        if (translationDocument != null)
+          SelectRunnerDocument(translationDocument);
         editor.ScrollToLine(bp.RightLine.Value);
+      }
     }
 
     /// <summary>
@@ -865,7 +829,7 @@ namespace UI.Controls.Runner
     /// <remarks><see langword="true"/> для включения точки остановки.</remarks>
     private void BreakpointEnabledChanged(BreakpointListItem bp, bool enabled)
     {
-      var editor = ChildTextEditorContainer.GetTextEditor();
+      var editor = GetTranslatorEditor()?.GetTextEditor();
       if (editor == null)
         return;
 
@@ -883,8 +847,7 @@ namespace UI.Controls.Runner
 
     private void BreakpointToggleRequested(IDisplayIssue? issue)
     {
-      var editor = ChildTextEditorContainer.GetTextEditor()
-        ?? GetTranslatorEditor()?.GetTextEditor();
+      var editor = GetTranslatorEditor()?.GetTextEditor();
       if (editor == null)
         return;
 
@@ -912,7 +875,7 @@ namespace UI.Controls.Runner
     /// <param name="e">Аргументы события установки точки остановки.</param>
     private void OnBreakpointSet(BreakpointEvents.BreakpointSet e)
     {
-      var editor = ChildTextEditorContainer.GetTextEditor();
+      var editor = GetTranslatorEditor()?.GetTextEditor();
       if (editor == null)
         return;
 
@@ -938,7 +901,7 @@ namespace UI.Controls.Runner
     /// <param name="e">Аргументы события выключения точки остановки.</param>
     private void OnBreakpointOn(BreakpointEvents.BreakpointOn e)
     {
-      var editor = ChildTextEditorContainer.GetTextEditor();
+      var editor = GetTranslatorEditor()?.GetTextEditor();
       if (editor == null)
         return;
 
@@ -954,7 +917,7 @@ namespace UI.Controls.Runner
     /// <param name="e">Аргументы события выключения точки остановки.</param>
     private void OnBreakpointOff(BreakpointEvents.BreakpointOff e)
     {
-      var editor = ChildTextEditorContainer.GetTextEditor();
+      var editor = GetTranslatorEditor()?.GetTextEditor();
       if (editor == null)
         return;
 

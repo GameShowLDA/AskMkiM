@@ -1,3 +1,5 @@
+using Ask.Core.Shared.DTO.Devices.PowerSupply;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSupply;
 using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Shared.DTO.Devices.Base;
 using Ask.Core.Shared.DTO.Devices.Breakdown;
@@ -17,6 +19,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.DataBase.Engine.Static;
 using Ask.DataBase.Engine.Static.Devices;
+using Ask.DataBase.Engine.Mapping.Device;
 using Ask.DataBase.Provider.Context;
 using System.Globalization;
 using System.IO;
@@ -61,6 +64,7 @@ public static class DeviceConfigurationService
   /// </summary>
   public static async Task<DeviceConfigurationFileModel> BuildConfigurationFileAsync(CancellationToken cancellationToken = default)
   {
+    var externalPowerTask = PowerSupplies.GetAllAsync(cancellationToken);
     var chassisTask = ChassisManagers.GetAllAsync(cancellationToken);
     var racksTask = Racks.GetAllAsync(cancellationToken);
     var relayTask = RelaySwitchModules.GetAllAsync(cancellationToken);
@@ -69,10 +73,11 @@ public static class DeviceConfigurationService
     var fastMetersTask = FastMeters.GetAllAsync(cancellationToken);
     var breakdownTask = BreakdownTesters.GetAllAsync(cancellationToken);
 
-    await Task.WhenAll(chassisTask, racksTask, relayTask, switchingTask, powerTask, fastMetersTask, breakdownTask);
+    await Task.WhenAll(externalPowerTask, chassisTask, racksTask, relayTask, switchingTask, powerTask, fastMetersTask, breakdownTask);
 
     return new DeviceConfigurationFileModel
     {
+      PowerSupplies = (await externalPowerTask).OrderBy(x => x.NumberChassis).ThenBy(x => x.Number).Select(ToDto).ToList(),
       Version = 2,
       ExportedAtUtc = DateTime.UtcNow,
       Chassis = chassisTask.Result
@@ -139,6 +144,7 @@ public static class DeviceConfigurationService
     var model = JsonSerializer.Deserialize<DeviceConfigurationFileModel>(json, ImportJsonOptions)
       ?? throw new InvalidDataException("Не удалось прочитать JSON конфигурации.");
 
+    model.PowerSupplies ??= [];
     model.Chassis ??= [];
     model.Racks ??= [];
     model.RelaySwitchModules ??= [];
@@ -152,6 +158,22 @@ public static class DeviceConfigurationService
 
   internal static void ValidateImportedConfiguration(DeviceConfigurationFileModel model)
   {
+    EnsureNoDuplicates(model.PowerSupplies, device => $"{device.NumberChassis}:{device.Number}", "источники питания");
+    EnsureDeviceClassSet(model.PowerSupplies, item => item.DeviceClass, "источники питания");
+    if (model.PowerSupplies.Any(source => source.Port is < 1 or > 65535))
+      throw new InvalidDataException("TCP-порт источника питания должен быть от 1 до 65535.");
+    foreach (PowerSupplyDto source in model.PowerSupplies)
+    {
+      try
+      {
+        PowerSupplyMapper.ValidateOperatingLimits(source);
+      }
+      catch (ArgumentOutOfRangeException error)
+      {
+        throw new InvalidDataException(
+          $"Некорректные диапазоны или шаги источника питания №{source.Number}.", error);
+      }
+    }
     EnsureNoDuplicates(model.Chassis, chassis => chassis.Number.ToString(CultureInfo.InvariantCulture), "шасси");
     EnsureNoDuplicates(model.Racks, rack => $"{rack.NumberChassis}:{rack.Number}", "стойки");
     EnsureNoDuplicates(model.RelaySwitchModules, device => $"{device.NumberChassis}:{device.Number}", "модули коммутации реле");
@@ -173,6 +195,7 @@ public static class DeviceConfigurationService
       .ToHashSet();
 
     bool hasLinkedDevices =
+      model.PowerSupplies.Count > 0 ||
       model.Racks.Count > 0 ||
       model.RelaySwitchModules.Count > 0 ||
       model.SwitchingDevices.Count > 0 ||
@@ -190,6 +213,7 @@ public static class DeviceConfigurationService
       return;
     }
 
+    ValidateLinkedDevices(model.PowerSupplies.Select(source => source.NumberChassis), chassisNumbers, "источники питания");
     ValidateLinkedDevices(model.Racks.Select(rack => rack.NumberChassis), chassisNumbers, "стойки");
     ValidateLinkedDevices(model.RelaySwitchModules.Select(device => device.NumberChassis), chassisNumbers, "модули коммутации реле");
     ValidateLinkedDevices(model.SwitchingDevices.Select(device => device.NumberChassis), chassisNumbers, "устройства коммутации шин");
@@ -211,6 +235,7 @@ public static class DeviceConfigurationService
     await using var db = new AppDbContext();
     await using var transaction = await db.Database.BeginTransactionAsync(cancellationToken);
 
+    db.PowerSupplies.RemoveRange(db.PowerSupplies);
     db.FastMeters.RemoveRange(db.FastMeters);
     db.PowerSourceModules.RemoveRange(db.PowerSourceModules);
     db.RelaySwitchModules.RemoveRange(db.RelaySwitchModules);
@@ -220,6 +245,7 @@ public static class DeviceConfigurationService
     db.ChassisManagers.RemoveRange(db.ChassisManagers);
     await db.SaveChangesAsync(cancellationToken);
 
+    db.PowerSupplies.AddRange(model.PowerSupplies);
     db.Rack.AddRange(model.Racks);
     db.ChassisManagers.AddRange(model.Chassis);
     db.BreakdownTesters.AddRange(model.BreakdownTesters);
@@ -282,6 +308,8 @@ public static class DeviceConfigurationService
     throw new InvalidDataException(
       $"В разделе \"{sectionName}\" есть привязка к несуществующим шасси: {string.Join(", ", unknownChassis)}.");
   }
+
+  private static PowerSupplyDto ToDto(IPowerSupply item) => PreserveHardwareSimulation(item, item.Convert());
 
   private static ChassisManagerDto ToDto(IChassisManager item) => PreserveHardwareSimulation(item, item.Convert());
 

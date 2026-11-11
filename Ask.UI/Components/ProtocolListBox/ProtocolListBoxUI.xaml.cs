@@ -8,6 +8,7 @@ using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Ask.UI.Controls.TextEditorControl;
 using Ask.UI.Services.Notifications;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
@@ -49,6 +50,7 @@ namespace Ask.UI.Components.ProtocolListBox
     private readonly Dictionary<ProtocolDisplayItem, ProtocolCommandGroup> _itemGroups = new();
     private ProtocolDisplayItem? _lastMessageItem;
     private bool _scrollToEndRequested;
+    private bool _scrollMetricsUpdateRequested;
     private bool _followTail = true;
     private bool _settingsSubscribed;
     private bool _themeSubscribed;
@@ -99,14 +101,26 @@ namespace Ask.UI.Components.ProtocolListBox
       };
       _overviewUpdateTimer.Tick += (_, _) => FlushOverviewUpdate();
       errorOverviewBar.SetPositionPreviewFactory(GetOverviewPreview);
-      DisplayItems.CollectionChanged += (_, _) =>
-      {
-        _visibleIndicesDirty = true;
-        RequestOverviewUpdate(diagnosticsChanged: true);
-      };
+      DisplayItems.CollectionChanged += DisplayItems_CollectionChanged;
       PreviewKeyDown += ProtocolListBoxUI_PreviewKeyDown;
       Loaded += ProtocolListBoxUI_Loaded;
       Unloaded += ProtocolListBoxUI_Unloaded;
+    }
+
+    private void DisplayItems_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+      if (!_visibleIndicesDirty && e.Action == NotifyCollectionChangedAction.Add &&
+          e.NewItems != null && e.NewStartingIndex == DisplayItems.Count - e.NewItems.Count)
+      {
+        for (int i = 0; i < e.NewItems.Count; i++)
+          _visibleIndices[(ProtocolDisplayItem)e.NewItems[i]!] = e.NewStartingIndex + i;
+      }
+      else
+      {
+        _visibleIndicesDirty = true;
+      }
+
+      RequestOverviewUpdate(diagnosticsChanged: true);
     }
 
     private void ProtocolListBoxUI_Loaded(object sender, RoutedEventArgs e)
@@ -305,12 +319,24 @@ namespace Ask.UI.Components.ProtocolListBox
       {
         _followTail = IsScrolledToEnd();
       }
-      else if (e.ExtentHeightChange > 0 && _followTail)
+
+      RequestScrollMetricsUpdate();
+    }
+
+    private void RequestScrollMetricsUpdate()
+    {
+      if (_scrollMetricsUpdateRequested)
       {
-        _protocolScrollViewer?.ScrollToEnd();
+        return;
       }
-      RefreshVerticalScrollBar();
-      RefreshErrorOverviewViewport();
+
+      _scrollMetricsUpdateRequested = true;
+      Dispatcher.BeginInvoke(() =>
+      {
+        _scrollMetricsUpdateRequested = false;
+        RefreshVerticalScrollBar();
+        RefreshErrorOverviewViewport();
+      }, DispatcherPriority.Render);
     }
 
     private void RefreshVerticalScrollBar()
@@ -643,15 +669,15 @@ namespace Ask.UI.Components.ProtocolListBox
       });
     }
 
-    public async Task AppendLineAsync(ShowMessageModel showMessageModel, bool lastMessage = false)
+    public Task AppendLineAsync(ShowMessageModel showMessageModel, bool lastMessage = false)
     {
-      await Dispatcher.InvokeAsync(() =>
+      return InvokeOnUiAsync(() =>
       {
         _historyMessages.Add(showMessageModel);
         AppendVisibleMessage(showMessageModel);
         _messageIndices[showMessageModel] = _historyMessages.Count - 1;
         AddOverviewDiagnostic(showMessageModel, _historyMessages.Count);
-        RequestOverviewUpdate(immediate: GetOverviewSeverity(showMessageModel) != null);
+        RequestOverviewUpdate();
 
         if (lastMessage)
         {
@@ -663,6 +689,17 @@ namespace Ask.UI.Components.ProtocolListBox
           RequestScrollToEnd();
         }
       }, DispatcherPriority.DataBind);
+    }
+
+    private Task InvokeOnUiAsync(Action action, DispatcherPriority priority = DispatcherPriority.Normal)
+    {
+      if (Dispatcher.CheckAccess())
+      {
+        action();
+        return Task.CompletedTask;
+      }
+
+      return Dispatcher.InvokeAsync(action, priority).Task;
     }
 
     private void AppendVisibleMessage(ShowMessageModel model)

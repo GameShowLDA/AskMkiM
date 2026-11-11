@@ -1,0 +1,7 @@
+<Project>
+  <PropertyGroup>
+    <!-- Локальные сборки поставляются вместе с AskMkiM; strong-name создавал сбои ALINK в Visual Studio. -->
+    <SignAssembly>false</SignAssembly>
+    <DelaySign>false</DelaySign>
+  </PropertyGroup>
+</Project>

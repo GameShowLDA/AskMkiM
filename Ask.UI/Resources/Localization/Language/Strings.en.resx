@@ -654,6 +654,21 @@
   <data name="settings.userinterface.printFont.description" xml:space="preserve">
     <value>Unified appearance for printed forms and PDF documents.</value>
   </data>
+  <data name="settings.userinterface.runnerLayout.title" xml:space="preserve">
+    <value>Runner panel layout</value>
+  </data>
+  <data name="settings.userinterface.runnerLayout.description" xml:space="preserve">
+    <value>Restores the default panel positions and sizes for the current user.</value>
+  </data>
+  <data name="settings.userinterface.runnerLayout.reset" xml:space="preserve">
+    <value>Reset layout</value>
+  </data>
+  <data name="settings.userinterface.runnerLayout.confirmationTitle" xml:space="preserve">
+    <value>Reset panel layout</value>
+  </data>
+  <data name="settings.userinterface.runnerLayout.confirmation" xml:space="preserve">
+    <value>Reset the runner panel positions and sizes for the current user?</value>
+  </data>
   <data name="settings.protocol.commandHeaders.title" xml:space="preserve">
     <value>Command headers</value>
   </data>

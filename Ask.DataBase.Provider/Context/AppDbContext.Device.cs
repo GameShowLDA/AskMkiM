@@ -48,6 +48,11 @@ namespace Ask.DataBase.Provider.Context
     public DbSet<ChassisManagerDto> ChassisManagers { get; set; }
 
     /// <summary>
+    /// Таблица внешних источников питания.
+    /// </summary>
+    public DbSet<Ask.Core.Shared.DTO.Devices.PowerSupply.PowerSupplyDto> PowerSupplies { get; set; }
+
+    /// <summary>
     /// Таблица legacy-конфигураций аппаратуры АСК-МКИ.
     /// </summary>
     public DbSet<LegacyMkiHardwareProfileDto> LegacyMkiHardwareProfiles { get; set; }

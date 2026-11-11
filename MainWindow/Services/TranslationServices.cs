@@ -1,6 +1,7 @@
 using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.FileFormats;
 using Ask.Core.Shared.DTO.Executor;
+using Ask.Core.Shared.DTO.TextEditor;
 using Ask.Core.Shared.Metadata.Static;
 using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
 using Ask.Engine.ControlCommandAnalyser;
@@ -21,6 +22,7 @@ using UI.Components.SearchControls;
 using UI.Controls;
 using UI.Controls.Runner;
 using UI.Controls.TextEditorControl;
+using UI.Services;
 using UI.Windows.WpfDocking.Windows.Docking;
 using static Ask.LogLib.LoggerUtility;
 
@@ -33,7 +35,6 @@ namespace MainWindowProgram.Services
   public class TranslationServices
   {
     private static readonly Regex LatinLettersRegex = new("[A-Za-z]", RegexOptions.Compiled);
-    private static readonly Regex CommandHeaderRegex = new(@"^\s*\d+\s+\S+", RegexOptions.Compiled);
     private readonly LookalikeLatinToCyrillicNormalizer _lookalikeNormalizer = new(Encoding.UTF8);
     private readonly HashSet<string> _acceptedNormalizationSources = new(StringComparer.OrdinalIgnoreCase);
 
@@ -65,7 +66,8 @@ namespace MainWindowProgram.Services
     /// <see langword="true"/>, если команда поддерживает точки остановки; иначе <see langword="false"/>.
     /// </returns>
     private static bool IsBreakpointAllowed(BaseCommandModel m) =>
-        m.Mnemonic != "СП"
+        int.TryParse(m.CommandNumber, out _)
+        && m.Mnemonic != "СП"
         && m.Mnemonic != "ЦУ"
         && m.Mnemonic != "КЦ"
         && m.Mnemonic != "РМ"
@@ -80,17 +82,34 @@ namespace MainWindowProgram.Services
     private static Dictionary<int, string> BuildNumCommandWithMnemonic(IEnumerable<BaseCommandModel> models)
     {
       var result = new Dictionary<int, string>();
-      int commandNumber;
 
       foreach (var model in models)
       {
-        commandNumber = int.Parse(model.CommandNumber);
-        if (result.ContainsKey(commandNumber))
+        if (!int.TryParse(model.CommandNumber, out int commandNumber))
         {
           continue;
         }
 
-        result.Add(commandNumber, model.Mnemonic);
+        result.TryAdd(commandNumber, model.Mnemonic);
+      }
+
+      return result;
+    }
+
+    /// <summary>
+    /// Формирует состояние точек останова только для моделей с корректным номером команды.
+    /// </summary>
+    /// <param name="models">Модели команд исходной трансляции.</param>
+    /// <returns>Состояние точек останова по номерам команд.</returns>
+    private static Dictionary<int, bool> BuildBreakpointState(IEnumerable<BaseCommandModel> models)
+    {
+      var result = new Dictionary<int, bool>();
+      foreach (var model in models)
+      {
+        if (model.HasBreakpoint && int.TryParse(model.CommandNumber, out int commandNumber))
+        {
+          result.TryAdd(commandNumber, model.IsBreakpointEnabled);
+        }
       }
 
       return result;
@@ -520,9 +539,18 @@ namespace MainWindowProgram.Services
         container = runContainer;
       }
 
-      if (!isRunContainerActive && !container.Equals(actualContainer) && actualContainer != null)
+      if (!isRunContainerActive && actualContainer != null && !ReferenceEquals(container, actualContainer))
       {
         container = actualContainer;
+      }
+
+      if (container == null)
+      {
+        MessageBoxCustom.Show(
+          "Не удалось найти окно транслятора или исполнителя.",
+          "Ошибка запуска программы контроля",
+          image: MessageBoxImage.Error);
+        return;
       }
 
       var dockManager = container.GetDockControl();
@@ -551,6 +579,9 @@ namespace MainWindowProgram.Services
       {
         if (foundDockItem?.Content is RunControl run)
         {
+          if (run.IsTransferringSource || Ask.UI.Features.ProtocolNew.Execution.ExecutionRunGuard.GetActivity().IsBusy)
+            return;
+
           var actualTextEditor = GetRunEditor(run);
           if (actualTextEditor == null)
           {
@@ -560,13 +591,24 @@ namespace MainWindowProgram.Services
 
           var runDockItem = runContainer?.GetDockControl().DockItems
             .FirstOrDefault(item => item.Content == run);
-          runDockItem?.PerformClose();
+          var sourceEditor = run.SourceEditor;
+          run.IsTransferringSource = true;
+          try
+          {
+            if (runDockItem?.Close() != true)
+              return;
+          }
+          finally
+          {
+            run.IsTransferringSource = false;
+          }
 
           var runControl = new RunControl
           {
             TranslationModels = run.TranslationModels,
+            TranslatedSourceText = run.TranslatedSourceText,
           };
-          await PrepareRun(runContainer, actualTextEditor, runControl, startStepByStep, isStepInto);
+          await PrepareRun(runContainer, actualTextEditor, runControl, startStepByStep, isStepInto, sourceEditor);
         }
         else
         {
@@ -607,19 +649,14 @@ namespace MainWindowProgram.Services
 
         RunControl runControl = new RunControl();
         runControl.TranslationModels = translator.TranslationModels;
-        await PrepareRun(runContainer, actualTextEditor, runControl, startStepByStep, isStepInto);
+        runControl.TranslatedSourceText = translator.TranslatedSourceText ?? sourceEditor.Text;
+        await PrepareRun(runContainer, actualTextEditor, runControl, startStepByStep, isStepInto, sourceEditor);
       }
     }
 
     private static TextEditorUI? GetRunEditor(RunControl runControl)
     {
-      return runControl.FindName("ChildTextEditorContainer") is not TextEditorContainer container
-        ? null
-        : container.GetDockControl().DockItems
-          .Select(item => item.Content)
-          .OfType<TranslatorEditor>()
-          .FirstOrDefault()
-          ?.GetTextEditor();
+      return runControl.GetTranslatedEditor();
     }
 
     /// <summary>
@@ -628,12 +665,14 @@ namespace MainWindowProgram.Services
     /// <param name="runContainer">Контейнер исполнения.</param>
     /// <param name="editor">Редактор, содержащий путь к файлу и исходные данные.</param>
     /// <param name="runControl">Контрол исполнения.</param>
+    /// <param name="sourceEditor">Редактор исходника с текущим текстом программы.</param>
     private async Task PrepareRun(
       TextEditorContainer runContainer,
       TextEditorUI editor,
       RunControl runControl,
       bool startStepByStep,
-      bool isStepInto)
+      bool isStepInto,
+      TextEditorUI? sourceEditor)
     {
       runControl.OpkFilePath = editor.TextEditorModel.FilePath;
       runControl.SourceArchiveName = editor.TextEditorModel.SourceArchiveName;
@@ -644,6 +683,11 @@ namespace MainWindowProgram.Services
         $"protocol{ProtocolFileExtensions.Trace}");
 
       runControl.SetLeftEditor(editor);
+      if (sourceEditor != null)
+      {
+        runControl.SetSourceEditor(sourceEditor);
+        runControl.TranslateSourceAsync = source => TranslateRunnerSourceAsync(runControl, source);
+      }
 
       if (runContainer == null)
       {
@@ -661,6 +705,58 @@ namespace MainWindowProgram.Services
       }
 
       await runControl.Start(runControl.TranslationModels, startStepByStep, isStepInto);
+    }
+
+    private async Task<bool> TranslateRunnerSourceAsync(RunControl runner, TextEditorUI source)
+    {
+      if (Ask.UI.Features.ProtocolNew.Execution.ExecutionRunGuard.GetActivity().IsBusy)
+        return false;
+
+      var model = source.TextEditorModel;
+      var copy = new TextEditorUI(source.FileType, new TextEditorModel(
+        model.FilePath, model.FileName, model.OriginalFileName, model.Encoding)
+      {
+        SourceArchiveName = model.SourceArchiveName,
+        SavedTextSnapshot = model.SavedTextSnapshot,
+      }) { Text = source.Text };
+      if (!TryPrepareTextForTranslation(copy, out var text))
+        return false;
+
+      try
+      {
+        TranslationBuildResult? result = null;
+        await RunWithTranslationProgressAsync(async progress => result = await BuildTranslationAsync(text, progress));
+        if (result == null)
+          return false;
+
+        if (result.Models.Any(command => command.Errors.Count > 0))
+        {
+          await CreateNewTranslator(copy, text, preserveSourceOnFailure: true, preparedResult: result);
+          return false;
+        }
+
+        var editor = _fileService.CreateTranslationFileAsync(model.FilePath);
+        if (editor is not TextEditorUI translated)
+          return false;
+
+        translated.TextEditorModel.SourceArchiveName = model.SourceArchiveName;
+        translated.Text = result.FormattedText;
+        foreach (var command in result.Models)
+          translated.TextEditorModel.SourceLines.AddRange(command.SourceLines);
+        var allowed = result.Models.Where(IsBreakpointAllowed).ToList();
+        translated.ConfigureBreakpoints(interactive: true, visible: true);
+        translated.RightBreakpoint = allowed.Select(command => command.FormattedStartLineNumber + 1).ToList();
+        translated.NumCommandWithMnemonic = BuildNumCommandWithMnemonic(allowed);
+        var preserved = BuildBreakpointState(runner.TranslationModels);
+        RestoreBreakpoints(result.Models, copy, translated, preserved);
+        runner.ApplySourceTranslation(translated, result.Models, copy.Text);
+        return true;
+      }
+      catch (Exception ex)
+      {
+        await ShowTranslationErrorAsync(ex, source, text, nameof(TranslateRunnerSourceAsync));
+        return false;
+      }
     }
 
     private static string GetDisplayFileName(string? filePath, string? fileName)
@@ -863,9 +959,7 @@ namespace MainWindowProgram.Services
 
       var currentItem = foundDockItem.Content as TranslatorItem;
       Dictionary<int, bool> preservedBreakpoints = currentItem != null
-          ? currentItem.TranslationModels
-              .Where(x => x.HasBreakpoint)
-              .ToDictionary(x => int.Parse(x.CommandNumber), x => x.IsBreakpointEnabled)
+          ? BuildBreakpointState(currentItem.TranslationModels)
           : new Dictionary<int, bool>();
 
       SetDeferredVisibility(currentItem, false);
@@ -926,6 +1020,7 @@ namespace MainWindowProgram.Services
                 90d);
 
             currentItem.ApplyTranslationModels(models, issuesSnapshot);
+            currentItem.TranslatedSourceText = editor.Text;
 
             await SetTranslationStageAsync(
                 progressWindow,
@@ -968,8 +1063,11 @@ namespace MainWindowProgram.Services
     /// </summary>
     /// <param name="editor">Редактор с исходным текстом.</param>
     /// <param name="text">Текст, подлежащий трансляции.</param>
+    /// <param name="preserveSourceOnFailure">Сохраняет исходник в исполнителе вместо открытия дисковой копии при ошибке.</param>
+    /// <param name="preparedResult">Готовый результат, позволяющий открыть диагностику без повторной трансляции.</param>
     /// <returns>Асинхронная задача создания компонента транслятора.</returns>
-    private async Task CreateNewTranslator(TextEditorUI editor, string text)
+    private async Task CreateNewTranslator(TextEditorUI editor, string text, bool preserveSourceOnFailure = false,
+      TranslationBuildResult? preparedResult = null)
     {
       TranslatorItem? createdItem = null;
       ITextEditorView? translateEditor = null;
@@ -981,8 +1079,6 @@ namespace MainWindowProgram.Services
         {
           return;
         }
-
-        editor.TextArea.Document.Text = text;
 
         if (!editor.TextArea.TextView.LineTransformers.OfType<BracesCommentColorizer>().Any())
         {
@@ -1029,7 +1125,7 @@ namespace MainWindowProgram.Services
               "Создаём редактор для новой вкладки транслятора.",
               8d);
 
-          var translationResult = await BuildTranslationAsync(text, progressWindow);
+          var translationResult = preparedResult ?? await BuildTranslationAsync(text, progressWindow);
           var models = translationResult.Models;
           var allowed = models.Where(IsBreakpointAllowed).ToList();
 
@@ -1082,6 +1178,7 @@ namespace MainWindowProgram.Services
               90d);
 
           createdItem.ApplyTranslationModels(models, issuesSnapshot);
+          createdItem.TranslatedSourceText = editor.Text;
 
           await SetTranslationStageAsync(
               progressWindow,
@@ -1109,8 +1206,11 @@ namespace MainWindowProgram.Services
       {
         await ShowTranslationErrorAsync(ex, editor, text, nameof(CreateNewTranslator));
 
-        EditorEventAdapter.RaiseTextEditorActivated(editor);
-        _multiWindow.EditorDocumentService.OpenFile(editor.TextEditorModel.FilePath);
+        if (!preserveSourceOnFailure)
+        {
+          EditorEventAdapter.RaiseTextEditorActivated(editor);
+          _multiWindow.EditorDocumentService.OpenFile(editor.TextEditorModel.FilePath);
+        }
       }
       finally
       {
@@ -1120,15 +1220,7 @@ namespace MainWindowProgram.Services
 
     private bool TryPrepareTextForTranslation(TextEditorUI editor, out string text)
     {
-      text = editor.Text ?? string.Empty;
-      text = TextSanitizer.RemoveLegacyControlChars(text);
-      text = CommandTranslationManager.NormalizeCommandMnemonics(text);
-      text = NormalizeIndentationForEditor(text);
-
-      if (!string.Equals(text, editor.Text ?? string.Empty, StringComparison.Ordinal))
-      {
-        editor.Text = text;
-      }
+      text = TranslationInputNormalizer.Normalize(editor.Text);
 
       if (!LatinLettersRegex.IsMatch(text))
       {
@@ -1176,45 +1268,6 @@ namespace MainWindowProgram.Services
         MessageBoxImage.Warning);
 
       return true;
-    }
-
-    private static string NormalizeIndentationForEditor(string sourceText)
-    {
-      if (string.IsNullOrEmpty(sourceText))
-      {
-        return sourceText;
-      }
-
-      var lines = sourceText.Replace("\r\n", "\n").Replace('\r', '\n').Split('\n');
-      bool insideCommand = false;
-
-      for (int i = 0; i < lines.Length; i++)
-      {
-        var line = lines[i].Replace('\t', ' ');
-        if (string.IsNullOrWhiteSpace(line))
-        {
-          lines[i] = line;
-          continue;
-        }
-
-        var trimmedStart = line.TrimStart();
-        if (CommandHeaderRegex.IsMatch(line))
-        {
-          insideCommand = true;
-          lines[i] = trimmedStart;
-          continue;
-        }
-
-        if (!insideCommand || char.IsWhiteSpace(line[0]) || line.Trim() == "*")
-        {
-          lines[i] = line;
-          continue;
-        }
-
-        lines[i] = $" {line}";
-      }
-
-      return string.Join("\r\n", lines);
     }
 
     private static string GetNormalizationSourceKey(TextEditorUI editor)

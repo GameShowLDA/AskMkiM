@@ -24,6 +24,19 @@ namespace Ask.Device.Emulator
     private static readonly ConditionalWeakTable<IChassisManager, IDeviceProtocol> Chassis = new();
     private static readonly ConditionalWeakTable<IRelaySwitchModule, IDeviceProtocol> RelaySwitchModules = new();
     private static readonly ConditionalWeakTable<ISwitchingDevice, IDeviceProtocol> SwitchingDevices = new();
+    private static readonly ConditionalWeakTable<Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSupply.IPowerSupply, IDeviceProtocol> PowerSupplies = new();
+
+    /// <summary>
+    /// Возвращает общий переключатель Real/Idle для внешнего источника питания.
+    /// </summary>
+    /// <param name="device">Внешний источник питания.</param>
+    /// <returns>Протокол с общей блокировкой операций источника.</returns>
+    public static IDeviceProtocol CreatePowerSupply(Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSupply.IPowerSupply device)
+    {
+      ArgumentNullException.ThrowIfNull(device);
+      return PowerSupplies.GetValue(device, item => new ModeSelectingDeviceProtocol(
+        () => item.DeviceProtocol, new PowerSupply.PowerSupplyEmulatorProtocol(item), device: item));
+    }
 
     /// <summary>
     /// Создаёт протокол ППУ с единым логированием и автоматическим выбором Real/Idle.

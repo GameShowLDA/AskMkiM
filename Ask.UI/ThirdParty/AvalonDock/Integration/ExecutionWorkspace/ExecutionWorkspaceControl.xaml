@@ -1,0 +1,45 @@
+<UserControl x:Class="Ask.UI.ThirdParty.Docking.Integration.ExecutionWorkspace.ExecutionWorkspaceControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:avalonDock="clr-namespace:AvalonDock;assembly=AvalonDock"
+             xmlns:avalonDockControls="clr-namespace:AvalonDock.Controls;assembly=AvalonDock"
+             Background="{DynamicResource SettingsNestedGroupBackgroundSolidColorBrush}">
+    <UserControl.Resources>
+        <Style x:Key="AskMkiMGridSplitterStyle"
+               TargetType="{x:Type avalonDockControls:LayoutGridResizerControl}">
+            <Setter Property="Background" Value="{DynamicResource VioletColorSolidColorBrush}" />
+            <Setter Property="BackgroundWhileDragging" Value="{DynamicResource VioletColorSolidColorBrush}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type avalonDockControls:LayoutGridResizerControl}">
+                        <Border Background="{TemplateBinding Background}" />
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <DataTemplate x:Key="AskMkiMAvalonDockHeaderTemplate">
+            <TextBlock Text="{Binding Title}"
+                       FontFamily="{DynamicResource Winston}"
+                       TextTrimming="CharacterEllipsis">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes}" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsActive}" Value="True">
+                                <Setter Property="Foreground" Value="White" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+        </DataTemplate>
+    </UserControl.Resources>
+    <Grid>
+        <avalonDock:DockingManager x:Name="WorkspaceDockManager"
+                                   AnchorableHeaderTemplate="{StaticResource AskMkiMAvalonDockHeaderTemplate}"
+                                   DocumentHeaderTemplate="{StaticResource AskMkiMAvalonDockHeaderTemplate}"
+                                   GridSplitterHorizontalStyle="{StaticResource AskMkiMGridSplitterStyle}"
+                                   GridSplitterVerticalStyle="{StaticResource AskMkiMGridSplitterStyle}"
+                                   Background="{DynamicResource SettingsNestedGroupBackgroundSolidColorBrush}" />
+    </Grid>
+</UserControl>

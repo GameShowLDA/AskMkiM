@@ -1,6 +1,7 @@
+using Ask.Core.Services.FilesUtility;
+using Ask.Core.Shared.Metadata.Static;
 using System.IO;
 using System.Text;
-using System.Text.Unicode;
 using Ude;
 
 namespace UI.Services
@@ -9,15 +10,92 @@ namespace UI.Services
   /// Предоставляет методы для автоматического определения кодировки текстовых файлов.
   /// </summary>
   /// <remarks>
-  /// Класс использует библиотеку <see href="https://github.com/errepi/ude">Ude (Universal Detector)</see> —
-  /// порт детектора кодировок Mozilla Universal Charset Detector для .NET.
-  /// Подходит для определения кодировки текстовых файлов, полученных из неизвестных источников.
-  /// 
-  /// Если определить кодировку не удалось или она не поддерживается в среде выполнения,
-  /// возвращается кодировка по умолчанию — <see cref="Encoding.UTF8"/>.
+  /// При чтении редактор учитывает BOM, проверяет UTF-8 и сравнивает его с CP866.
+  /// Методы определения кодировки через Ude доступны для файлов из неизвестных источников.
   /// </remarks>
   public static class EncodingService
   {
+    private static readonly Encoding Utf8WithoutBom = new UTF8Encoding(false);
+    private static readonly Encoding StrictUtf8 = new UTF8Encoding(false, true);
+    private static readonly Encoding[] BomEncodings =
+    [
+      Encoding.UTF32, new UTF32Encoding(true, true), Encoding.UTF8, Encoding.Unicode, Encoding.BigEndianUnicode
+    ];
+
+    internal enum DetectionReason
+    {
+      ByteOrderMark,
+      InvalidUtf8,
+      Backup,
+      TextHeuristic,
+      FormatDefault
+    }
+
+    /// <summary>
+    /// Читает текстовый файл и определяет его кодировку.
+    /// </summary>
+    /// <param name="path">Путь к текстовому файлу.</param>
+    /// <param name="formatDefault">Кодировка формата на случай неоднозначности.</param>
+    /// <param name="encrypted">Признак зашифрованного протокола.</param>
+    /// <returns>Текст и выбранная кодировка.</returns>
+    public static (string Text, Encoding Encoding) ReadFile(string path, Encoding formatDefault, bool encrypted)
+    {
+      byte[] bytes = encrypted ? FileEncryptionManager.ReadEncryptedFileBytes(path) : File.ReadAllBytes(path);
+      var directory = Path.GetDirectoryName(Path.GetFullPath(path));
+      var backupDirectory = Path.GetFullPath(FileLocations.BackupDirectory);
+      var (text, encoding, _) = Decode(
+        bytes, formatDefault, string.Equals(directory, backupDirectory, StringComparison.OrdinalIgnoreCase));
+      return (text, encoding);
+    }
+
+    internal static (string Text, Encoding Encoding, DetectionReason Reason) Decode(
+      ReadOnlySpan<byte> bytes, Encoding formatDefault, bool isBackup = false)
+    {
+      foreach (var encoding in BomEncodings)
+      {
+        if (bytes.StartsWith(encoding.Preamble))
+        {
+          return (encoding.GetString(bytes[encoding.Preamble.Length..]), encoding, DetectionReason.ByteOrderMark);
+        }
+      }
+
+      Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+      var cp866 = Encoding.GetEncoding(866);
+      string utf8Text;
+      try
+      {
+        utf8Text = StrictUtf8.GetString(bytes);
+      }
+      catch (DecoderFallbackException)
+      {
+        return (cp866.GetString(bytes), cp866, DetectionReason.InvalidUtf8);
+      }
+
+      if (isBackup)
+      {
+        return (utf8Text, Utf8WithoutBom, DetectionReason.Backup);
+      }
+
+      var cp866Text = cp866.GetString(bytes);
+      if (utf8Text != cp866Text)
+      {
+        if (!utf8Text.Any(IsSuspiciousCharacter)
+          && cp866Text.Any(IsSuspiciousCharacter)
+          && utf8Text.Where(c => c > 127 && char.IsLetter(c)).Take(2).Count() == 2)
+        {
+          return (utf8Text, Utf8WithoutBom, DetectionReason.TextHeuristic);
+        }
+      }
+
+      return formatDefault.CodePage == cp866.CodePage
+        ? (cp866Text, cp866, DetectionReason.FormatDefault)
+        : (utf8Text, Utf8WithoutBom, DetectionReason.FormatDefault);
+    }
+
+    private static bool IsSuspiciousCharacter(char c)
+      => c is >= '\u2500' and <= '\u259F'
+        || (char.IsControl(c) && c is not '\r' and not '\n' and not '\t');
+
     /// <summary>
     /// Определяет кодировку указанного текстового файла.
     /// </summary>
