@@ -82,12 +82,22 @@ public sealed class HardwareWatchdogProtocol : IDeviceProtocol, IDisposable
     catch (TimeoutException ex)
     {
       await operationCancellation.CancelAsync().ConfigureAwait(false);
-      if (_device != null && timeout > 0)
+      ObserveFault(operation);
+      if (_device != null)
         throw new Ask.Core.Services.Errors.Device.DeviceNoResponseException(
           _device, command, (int)_timeout.TotalMilliseconds, ex);
       throw new TimeoutException(
         $"{_deviceName} не завершило команду \"{command}\" за {_timeout.TotalSeconds:0.###} с.",
         ex);
     }
+  }
+
+  private static void ObserveFault(Task task)
+  {
+    _ = task.ContinueWith(
+      static completedTask => _ = completedTask.Exception,
+      CancellationToken.None,
+      TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously,
+      TaskScheduler.Default);
   }
 }

@@ -21,6 +21,7 @@ public static class DeviceMessages
   /// <param name="indentLevel">Уровень отступа сообщения.</param>
   /// <param name="outputService">Сервис вывода сообщения в экранный протокол.</param>
   /// <param name="isStepCheckpoint">Признак контрольной точки пошагового режима.</param>
+  /// <param name="forceDisplay">Признак публикации без проверки настройки отображения операций.</param>
   /// <param name="callerName">Имя метода, вызвавшего публикацию.</param>
   /// <param name="callerFile">Путь к файлу, вызвавшему публикацию.</param>
   /// <param name="callerLine">Номер строки, вызвавшей публикацию.</param>
@@ -32,6 +33,7 @@ public static class DeviceMessages
     int indentLevel,
     IUserInteractionService? outputService = null,
     bool isStepCheckpoint = false,
+    bool forceDisplay = false,
     [CallerMemberName] string callerName = "",
     [CallerFilePath] string callerFile = "",
     [CallerLineNumber] int callerLine = 0)
@@ -44,6 +46,7 @@ public static class DeviceMessages
       indentLevel,
       outputService,
       isStepCheckpoint,
+      forceDisplay,
       callerName,
       callerFile,
       callerLine);
@@ -59,6 +62,7 @@ public static class DeviceMessages
   /// <param name="indentLevel">Уровень отступа сообщения.</param>
   /// <param name="outputService">Сервис вывода сообщения в экранный протокол.</param>
   /// <param name="isStepCheckpoint">Признак контрольной точки пошагового режима.</param>
+  /// <param name="forceDisplay">Признак публикации без проверки настройки отображения операций.</param>
   /// <param name="callerName">Имя метода, вызвавшего публикацию.</param>
   /// <param name="callerFile">Путь к файлу, вызвавшему публикацию.</param>
   /// <param name="callerLine">Номер строки, вызвавшей публикацию.</param>
@@ -71,11 +75,12 @@ public static class DeviceMessages
     int indentLevel,
     IUserInteractionService? outputService = null,
     bool isStepCheckpoint = false,
+    bool forceDisplay = false,
     [CallerMemberName] string callerName = "",
     [CallerFilePath] string callerFile = "",
     [CallerLineNumber] int callerLine = 0)
   {
-    if (outputService == null || !DeviceDisplayConfig.ShouldDisplayOperationResult(isSuccessful))
+    if (outputService == null || (!forceDisplay && !DeviceDisplayConfig.ShouldDisplayOperationResult(isSuccessful)))
     {
       return Task.CompletedTask;
     }
