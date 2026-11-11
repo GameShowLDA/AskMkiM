@@ -72,6 +72,12 @@ public sealed class B5108 : DeviceWithTcpIp, IPowerSupply, IDisposable
     DeviceType = DeviceType,
     IsHardwareFailureSimulationEnabled = IsHardwareFailureSimulationEnabled,
     Port = ConnectedProfile.Port,
+    MinVoltage = VoltageManager.MinVoltage,
+    MaxVoltage = VoltageManager.MaxVoltage,
+    VoltageStep = VoltageManager.VoltageStep,
+    MinCurrent = CurrentManager.MinCurrent,
+    MaxCurrent = CurrentManager.MaxCurrent,
+    CurrentStep = CurrentManager.CurrentStep,
   };
 
   /// <summary>

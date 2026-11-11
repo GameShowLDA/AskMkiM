@@ -19,6 +19,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.DataBase.Engine.Static;
 using Ask.DataBase.Engine.Static.Devices;
+using Ask.DataBase.Engine.Mapping.Device;
 using Ask.DataBase.Provider.Context;
 using System.Globalization;
 using System.IO;
@@ -161,6 +162,18 @@ public static class DeviceConfigurationService
     EnsureDeviceClassSet(model.PowerSupplies, item => item.DeviceClass, "источники питания");
     if (model.PowerSupplies.Any(source => source.Port is < 1 or > 65535))
       throw new InvalidDataException("TCP-порт источника питания должен быть от 1 до 65535.");
+    foreach (PowerSupplyDto source in model.PowerSupplies)
+    {
+      try
+      {
+        PowerSupplyMapper.ValidateOperatingLimits(source);
+      }
+      catch (ArgumentOutOfRangeException error)
+      {
+        throw new InvalidDataException(
+          $"Некорректные диапазоны или шаги источника питания №{source.Number}.", error);
+      }
+    }
     EnsureNoDuplicates(model.Chassis, chassis => chassis.Number.ToString(CultureInfo.InvariantCulture), "шасси");
     EnsureNoDuplicates(model.Racks, rack => $"{rack.NumberChassis}:{rack.Number}", "стойки");
     EnsureNoDuplicates(model.RelaySwitchModules, device => $"{device.NumberChassis}:{device.Number}", "модули коммутации реле");

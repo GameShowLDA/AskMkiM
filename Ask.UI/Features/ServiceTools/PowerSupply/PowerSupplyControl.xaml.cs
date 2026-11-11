@@ -67,6 +67,8 @@ public partial class PowerSupplyControl : UserControl
     CurrentInput.Minimum = (double)(source.CurrentManager.MinCurrent * 1000);
     CurrentInput.Maximum = (double)(source.CurrentManager.MaxCurrent * 1000);
     CurrentInput.Increment = (double)(source.CurrentManager.CurrentStep * 1000);
+    VoltageRangeText.Text = $"Напряжение, В · {source.VoltageManager.MinVoltage:0.######}–{source.VoltageManager.MaxVoltage:0.######} · шаг {source.VoltageManager.VoltageStep:0.######}";
+    CurrentRangeText.Text = $"Ограничение тока, мА · {source.CurrentManager.MinCurrent * 1000:0.###}–{source.CurrentManager.MaxCurrent * 1000:0.###} · шаг {source.CurrentManager.CurrentStep * 1000:0.###}";
     OutputText.Text = "Состояние выхода: не прочитано";
     SetpointsText.Text = "Уставки прибора: не прочитаны";
     MeasurementsText.Text = "Напряжение: — В    Ток: — мА";

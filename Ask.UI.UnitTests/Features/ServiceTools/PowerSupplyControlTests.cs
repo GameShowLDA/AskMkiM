@@ -3,10 +3,12 @@ using Ask.Core.Shared.DTO.Devices.PowerSupply;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSupply;
 using Ask.Core.Shared.Metadata.Enums.RoleEnums;
 using Ask.Device.Runtime.Device;
+using Ask.UI.Features.EquipmentConfiguration.PowerSupply;
 using Ask.UI.Features.ServiceTools.PowerSupply;
 using Ask.UI.Shared.Controls;
 using System.IO;
 using System.Windows;
+using System.Windows.Automation;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -130,12 +132,26 @@ public sealed class PowerSupplyControlTests(WpfApplicationFixture wpf)
     Assert.Equal(2, form.IpPart3Value);
     Assert.Equal(17, form.IpPart4Value);
     Assert.Equal(80, form.GetPowerSupplyPort());
+    Assert.Single(Descendants(form).OfType<PowerSupplySettingsControl>());
+    SetPowerSupplyField(form, "Минимальное напряжение, В", "2");
+    SetPowerSupplyField(form, "Максимальное напряжение, В", "102");
+    SetPowerSupplyField(form, "Шаг напряжения, В", "0,5");
+    SetPowerSupplyField(form, "Минимальный ток, мА", "10");
+    SetPowerSupplyField(form, "Максимальный ток, мА", "2010");
+    SetPowerSupplyField(form, "Шаг тока, мА", "10");
     var instance = Assert.IsType<B5108>(form.CreateSelectedDeviceInstance());
     var dto = new global::UI.Controls.Settings.DeviceConfig.Base.DeviceSettingsProcessorBase()
       .ProcessDevice<PowerSupplyDto>(instance, form);
+    form.ApplyPowerSupplySettings(dto);
     Assert.Equal(2, dto.NumberChassis);
     Assert.Equal("192.168.2.17", dto.ConnectionDetails);
     Assert.Equal(17, dto.Number);
+    Assert.Equal(2m, dto.MinVoltage);
+    Assert.Equal(102m, dto.MaxVoltage);
+    Assert.Equal(0.5m, dto.VoltageStep);
+    Assert.Equal(0.01m, dto.MinCurrent);
+    Assert.Equal(2.01m, dto.MaxCurrent);
+    Assert.Equal(0.01m, dto.CurrentStep);
     window.Close();
     var editing = new global::UI.Controls.Settings.DeviceConfig.PowerSupply.PowerSupplyWindow();
     dto.Id = 9;
@@ -145,6 +161,14 @@ public sealed class PowerSupplyControlTests(WpfApplicationFixture wpf)
     Assert.Equal(5080, editingForm.GetPowerSupplyPort());
     Assert.Equal(17, editingForm.IpPart4Value);
     Assert.Equal(17, editingForm.NumberDevice);
+    var roundTripped = new PowerSupplyDto();
+    editingForm.ApplyPowerSupplySettings(roundTripped);
+    Assert.Equal(dto.MinVoltage, roundTripped.MinVoltage);
+    Assert.Equal(dto.MaxVoltage, roundTripped.MaxVoltage);
+    Assert.Equal(dto.VoltageStep, roundTripped.VoltageStep);
+    Assert.Equal(dto.MinCurrent, roundTripped.MinCurrent);
+    Assert.Equal(dto.MaxCurrent, roundTripped.MaxCurrent);
+    Assert.Equal(dto.CurrentStep, roundTripped.CurrentStep);
     CaptureConfiguration(editingForm, "power-supply-settings.png", 470, 1000);
     editing.Close();
     var manager = new global::UI.Controls.Settings.DeviceConfig.DeviceManager.DeviceManagerControl();
@@ -175,6 +199,14 @@ public sealed class PowerSupplyControlTests(WpfApplicationFixture wpf)
     var encoder = new PngBitmapEncoder();
     encoder.Frames.Add(BitmapFrame.Create(bitmap));
     encoder.Save(file);
+  }
+
+  private static void SetPowerSupplyField(DependencyObject form, string name, string value)
+  {
+    var field = Descendants(form)
+      .OfType<TextBox>()
+      .Single(textBox => AutomationProperties.GetName(textBox) == name);
+    field.Text = value;
   }
 
   private static async Task ClickAsync(PowerSupplyControl panel, string title)

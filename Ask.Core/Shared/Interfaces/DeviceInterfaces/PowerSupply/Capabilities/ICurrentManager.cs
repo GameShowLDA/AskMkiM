@@ -10,17 +10,17 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSupply.Capabilities
     /// <summary>
     /// Минимальная допустимая уставка ограничения тока в амперах.
     /// </summary>
-    decimal MinCurrent { get; }
+    decimal MinCurrent { get; set; }
 
     /// <summary>
     /// Максимальная допустимая уставка ограничения тока в амперах.
     /// </summary>
-    decimal MaxCurrent { get; }
+    decimal MaxCurrent { get; set; }
 
     /// <summary>
     /// Программный шаг уставки тока в амперах, отсчитываемый от <see cref="MinCurrent"/>.
     /// </summary>
-    decimal CurrentStep { get; }
+    decimal CurrentStep { get; set; }
 
     /// <summary>
     /// Устанавливает ограничение тока в допустимом диапазоне с программным шагом.

@@ -58,7 +58,7 @@ public partial class PowerSupplyWindow : Window
         var selectedDevice = deviceSettingsWindow.CreateSelectedDeviceInstance() as IDevice
           ?? throw new InvalidOperationException("Выберите модель источника питания.");
         var dto = new DeviceSettingsProcessorBase().ProcessDevice<PowerSupplyDto>(selectedDevice, deviceSettingsWindow);
-        dto.Port = deviceSettingsWindow.GetPowerSupplyPort();
+        deviceSettingsWindow.ApplyPowerSupplySettings(dto);
         if (editingEntity != null)
         {
           dto.Id = editingEntity.Id;

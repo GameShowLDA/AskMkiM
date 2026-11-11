@@ -269,8 +269,8 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
         SetSystemInsulationResistanceGOhm(breakdownTesterDevice.SystemInsulationResistanceGOhm);
       }
 
-      if (device is PowerSupplyDto powerSupply && _powerSupplyPortTextBox != null)
-        _powerSupplyPortTextBox.Text = powerSupply.Port.ToString(System.Globalization.CultureInfo.InvariantCulture);
+      if (device is PowerSupplyDto powerSupply && _powerSupplySettingsControl != null)
+        LoadPowerSupplySettings(powerSupply);
 
       ApplyConnectionDetails(device.ConnectionDetails);
     }

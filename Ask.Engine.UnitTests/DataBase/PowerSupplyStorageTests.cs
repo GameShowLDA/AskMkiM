@@ -33,6 +33,12 @@ public sealed class PowerSupplyStorageTests
         IsHardwareFailureSimulationEnabled = true,
       };
       ((B5108)device).ConnectedProfile.Port = 5080;
+      device.VoltageManager.MinVoltage = 1m;
+      device.VoltageManager.MaxVoltage = 120m;
+      device.VoltageManager.VoltageStep = 0.5m;
+      device.CurrentManager.MinCurrent = 0.01m;
+      device.CurrentManager.MaxCurrent = 2.01m;
+      device.CurrentManager.CurrentStep = 0.01m;
       var created = await engine.CreateAsync(device);
       Assert.True(created.Id > 0);
       Assert.Equal("VoltageManagerAdapter", created.VoltageManager.GetType().Name);
@@ -45,8 +51,12 @@ public sealed class PowerSupplyStorageTests
       Assert.Equal("192.0.2.17", source.ConnectionDetails);
       Assert.Equal(5080, source.ConnectedProfile.Port);
       Assert.True(source.IsHardwareFailureSimulationEnabled);
-      Assert.Equal(0.1m, source.VoltageManager.VoltageStep);
-      Assert.Equal(0.001m, source.CurrentManager.CurrentStep);
+      Assert.Equal(1m, source.VoltageManager.MinVoltage);
+      Assert.Equal(120m, source.VoltageManager.MaxVoltage);
+      Assert.Equal(0.5m, source.VoltageManager.VoltageStep);
+      Assert.Equal(0.01m, source.CurrentManager.MinCurrent);
+      Assert.Equal(2.01m, source.CurrentManager.MaxCurrent);
+      Assert.Equal(0.01m, source.CurrentManager.CurrentStep);
       Assert.False(source.ConnectionInfo.IsConnected);
       Assert.Single(await engine.GetAllAsync<IPowerSupply>());
       var other = await engine.CreateAsync<IPowerSupply>(new B5108 { Number = 7, NumberChassis = 2, ConnectionDetails = "192.0.2.27" });
@@ -88,7 +98,14 @@ public sealed class PowerSupplyStorageTests
       context.PowerSupplies.Add(new PowerSupplyDto { Name = "Б5-108", Number = 1,
         ConnectionDetails = "192.0.2.17", DeviceClass = typeof(B5108).FullName! });
       await context.SaveChangesAsync();
-      Assert.Equal(80, (await context.PowerSupplies.SingleAsync()).Port);
+      var source = await context.PowerSupplies.SingleAsync();
+      Assert.Equal(80, source.Port);
+      Assert.Equal(0m, source.MinVoltage);
+      Assert.Equal(150m, source.MaxVoltage);
+      Assert.Equal(0.1m, source.VoltageStep);
+      Assert.Equal(0m, source.MinCurrent);
+      Assert.Equal(5m, source.MaxCurrent);
+      Assert.Equal(0.001m, source.CurrentStep);
       await using var verification = new SqliteConnection($"Data Source={path}");
       await verification.OpenAsync();
       await using var query = verification.CreateCommand();
@@ -107,7 +124,25 @@ public sealed class PowerSupplyStorageTests
     await using var context = new AppDbContext(options);
     await context.Database.MigrateAsync();
     Assert.Contains("20261029090000_AddExternalPowerSupplies", await context.Database.GetAppliedMigrationsAsync());
+    Assert.Contains("20261111090000_AddPowerSupplyOperatingLimits", await context.Database.GetAppliedMigrationsAsync());
     Assert.Empty(await context.PowerSupplies.ToListAsync());
+  }
+
+  [Fact]
+  public async Task ConfiguredLimits_AreUsedByRuntimeValidation()
+  {
+    var source = new B5108();
+    source.VoltageManager.MinVoltage = 10m;
+    source.VoltageManager.MaxVoltage = 20m;
+    source.VoltageManager.VoltageStep = 0.5m;
+    source.CurrentManager.MinCurrent = 0.1m;
+    source.CurrentManager.MaxCurrent = 1m;
+    source.CurrentManager.CurrentStep = 0.1m;
+
+    await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => source.VoltageManager.SetVoltageAsync(9.5m));
+    await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => source.VoltageManager.SetVoltageAsync(10.1m));
+    await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => source.CurrentManager.SetCurrentAsync(0.05m));
+    await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => source.CurrentManager.SetCurrentAsync(0.15m));
   }
 
   private sealed class SupplyService(DbContextOptions<AppDbContext> options) : PowerSupplyDtoService

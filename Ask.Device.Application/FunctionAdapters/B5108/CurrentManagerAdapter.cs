@@ -17,14 +17,39 @@ internal sealed class CurrentManagerAdapter : ICurrentManager
   public CurrentManagerAdapter(Runtime.Device.B5108 device)
   {
     _device = device ?? throw new ArgumentNullException(nameof(device));
-    _manager = new Runtime.Function.B5108.CurrentManager(device);
+    if (device.CurrentManager is Runtime.Function.B5108.CurrentManager manager)
+    {
+      _manager = manager;
+    }
+    else
+    {
+      var current = device.CurrentManager;
+      _manager = new Runtime.Function.B5108.CurrentManager(device)
+      {
+        MinCurrent = current.MinCurrent,
+        MaxCurrent = current.MaxCurrent,
+        CurrentStep = current.CurrentStep,
+      };
+    }
   }
   /// <inheritdoc />
-  public decimal MinCurrent => _manager.MinCurrent;
+  public decimal MinCurrent
+  {
+    get => _manager.MinCurrent;
+    set => _manager.MinCurrent = value;
+  }
   /// <inheritdoc />
-  public decimal MaxCurrent => _manager.MaxCurrent;
+  public decimal MaxCurrent
+  {
+    get => _manager.MaxCurrent;
+    set => _manager.MaxCurrent = value;
+  }
   /// <inheritdoc />
-  public decimal CurrentStep => _manager.CurrentStep;
+  public decimal CurrentStep
+  {
+    get => _manager.CurrentStep;
+    set => _manager.CurrentStep = value;
+  }
 
   /// <inheritdoc />
   public async Task SetCurrentAsync(decimal current, CancellationToken cancellationToken = default, IUserInteractionService? userMessageService = null)

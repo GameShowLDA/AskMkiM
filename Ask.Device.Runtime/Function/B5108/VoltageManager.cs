@@ -22,11 +22,11 @@ public sealed class VoltageManager : IVoltageManager
   public VoltageManager(Device.B5108 device) => _device = device ?? throw new ArgumentNullException(nameof(device));
 
   /// <inheritdoc />
-  public decimal MinVoltage => 0;
+  public decimal MinVoltage { get; set; } = 0m;
   /// <inheritdoc />
-  public decimal MaxVoltage => 150;
+  public decimal MaxVoltage { get; set; } = 150m;
   /// <inheritdoc />
-  public decimal VoltageStep => 0.1m;
+  public decimal VoltageStep { get; set; } = 0.1m;
 
   /// <inheritdoc />
   public async Task SetVoltageAsync(decimal voltage, CancellationToken cancellationToken = default, IUserInteractionService? userMessageService = null)
