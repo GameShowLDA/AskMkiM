@@ -10,6 +10,7 @@ using System.Windows.Forms;
 using UI.Components.Invoke;
 using UI.Controls;
 using UI.Controls.TextEditorControl;
+using UI.Services.FileManager;
 using UI.Windows.WpfDocking.Windows.Docking;
 using static Ask.LogLib.LoggerUtility;
 using Path = System.IO.Path;
@@ -29,51 +30,6 @@ namespace UI.Components.MultiEditorMethods
     /// Экзмепляр класса FileManager.
     /// </summary>
     internal FileManager fileManager { get; set; }
-
-    /// <summary>
-    /// Открывает диалоговое окно для подтверждения сохранения файла перед его закрытием.
-    /// </summary>
-    /// <param name="result">Результат выбора пользователя в диалоговом окне (Yes или No).</param>
-    /// <param name="saveFileResult">Результат сохранения файла. <c>true</c> если файл был успешно сохранен, иначе <c>false</c>.</param>
-    /// <param name="index">Индекс открытой страницы, для которой проверяется необходимость сохранения.</param>
-    public void SaveFileDialog(ref MessageBoxResult result, ref bool saveFileResult, DockItem control)
-    {
-      if (control == null)
-      {
-        result = MessageBoxResult.Cancel;
-        saveFileResult = false;
-        return;
-      }
-
-      if (!RequiresCloseConfirmation(control))
-      {
-        result = MessageBoxResult.No;
-        saveFileResult = true;
-        return;
-      }
-
-      if (fileManager.FileService.Comparison.HasFileChanged(control))
-      {
-        result = MessageBoxCustom.Show(
-            $"Сохранить файл {control.Title} перед закрытием?",
-            "Подтверждение",
-            MessageBoxButton.YesNoCancel,
-            MessageBoxImage.Question);
-        if (result == MessageBoxResult.Yes)
-        {
-          saveFileResult = SaveFile(control);
-        }
-        else if (result == MessageBoxResult.No)
-        {
-          saveFileResult = SaveBackup(control);
-        }
-
-        return;
-      }
-
-      result = MessageBoxResult.No;
-      saveFileResult = true;
-    }
 
     /// <summary>
     /// Подтверждает закрытие вкладки и при необходимости предлагает сохранить изменения.
@@ -104,6 +60,47 @@ namespace UI.Components.MultiEditorMethods
         MessageBoxResult.No => SaveBackup(control),
         _ => false,
       };
+    }
+
+    /// <summary>
+    /// Подтверждает закрытие всех открытых редактируемых документов.
+    /// </summary>
+    /// <returns>
+    /// <see langword="true"/>, если все документы можно закрыть; иначе <see langword="false"/>.
+    /// </returns>
+    public bool ConfirmCloseAll()
+    {
+      var documents = fileManager.EditorWorkspaceModel.UserControls
+        .OfType<TextEditorContainer>()
+        .SelectMany(container => container.DockManager.DockItems)
+        .Select(ResolveDocumentForClose);
+
+      return ConfirmCloseAll(documents, ConfirmClose);
+    }
+
+    internal static bool ConfirmCloseAll(
+      IEnumerable<DockItem> documents,
+      Func<DockItem, bool> confirmClose)
+    {
+      ArgumentNullException.ThrowIfNull(documents);
+      ArgumentNullException.ThrowIfNull(confirmClose);
+
+      var confirmedEditors = new HashSet<TextEditorUI>(ReferenceEqualityComparer.Instance);
+      foreach (var document in documents)
+      {
+        var editor = ExtractTextEditor(document);
+        if (editor == null || !confirmedEditors.Add(editor))
+        {
+          continue;
+        }
+
+        if (!confirmClose(document))
+        {
+          return false;
+        }
+      }
+
+      return true;
     }
 
     /// <summary>
@@ -206,36 +203,32 @@ namespace UI.Components.MultiEditorMethods
 
     public bool SaveBackup(DockItem control)
     {
-      if (control != null)
+      try
       {
-        var fileName = control.Title;
-        if (fileManager.EditorWorkspaceModel.FilePaths.ContainsKey(fileName))
+        var sourceEditor = ExtractTextEditor(control);
+        if (sourceEditor == null)
         {
-          if (control.Content is TextEditorUI)
-          {
-            var textEditor = control.Content as TextEditorUI;
-            SetBackup(textEditor.TextEditorModel.FileName, textEditor.Text);
-            return true;
-          }
+          return false;
         }
-        else
-        {
-          if (control.Content is TextEditorUI sourceEditor)
-          {
-            SetBackup(sourceEditor.TextEditorModel.FileName, sourceEditor.Text);
-            return true;
-          }
 
-          if (control.Content is TranslatorItem translator)
-          {
-            var leftTextEditor = translator.GetLeftBox();
-            var rightTextEditor = translator.GetRightBox();
-            var fullPath = SetBackup(leftTextEditor.GetTextEditor().TextEditorModel.FileName, leftTextEditor.Text);
-            rightTextEditor.GetTextEditor().TextEditorModel.FilePath = fullPath;
-            return true;
-          }
+        var fullPath = SetBackup(sourceEditor.TextEditorModel.FileName, sourceEditor.Text);
+        if (control.Content is TranslatorItem translator)
+        {
+          translator.GetRightBox().GetTextEditor().TextEditorModel.FilePath = fullPath;
         }
+
+        return true;
       }
+
+      catch (Exception ex)
+      {
+        LogException(ex, "Ошибка при создании резервной копии файла");
+        NotificationHostService.Instance.Show(
+          "Ошибка сохранения резервной копии",
+          ex.Message,
+          NotificationType.Error);
+      }
+
       return false;
     }
 
@@ -246,14 +239,11 @@ namespace UI.Components.MultiEditorMethods
       {
         Directory.CreateDirectory(Path.GetDirectoryName(fullPath));
       }
-      using var fs = new FileStream(
+      WriteTextFileAtomically(
         fullPath,
-        FileMode.Create,
-        FileAccess.Write,
-        FileShare.None);
-
-      using var sw = new StreamWriter(fs);
-      sw.Write(text);
+        text,
+        new UTF8Encoding(encoderShouldEmitUTF8Identifier: false),
+        encrypt: false);
       return fullPath;
     }
 
@@ -323,7 +313,7 @@ namespace UI.Components.MultiEditorMethods
       try
       {
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-        File.WriteAllText(filePath, fileData ?? string.Empty, Encoding.UTF8);
+        WriteTextFileAtomically(filePath, fileData ?? string.Empty, Encoding.UTF8, encrypt: false);
 
         LogInformation($"Файл {filePath} сохранен");
         if (ShouldShowSaveSuccessNotification(filePath))
@@ -459,24 +449,18 @@ namespace UI.Components.MultiEditorMethods
       try
       {
         var fileData = textEditor.Text;
-        if (filePath.EndsWith(".pkw", StringComparison.OrdinalIgnoreCase)
-            || filePath.EndsWith(".txt", StringComparison.OrdinalIgnoreCase)
-            || ProtocolFileExtensions.IsProtocol(Path.GetExtension(filePath)))
-        {
-          Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-          File.WriteAllText(filePath, fileData, Encoding.UTF8);
-          EncryptProtocolFileIfNeeded(filePath);
-        }
-        else
-        {
-          var encoding = textEditor.TextEditorModel.Encoding;
-          Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-          File.WriteAllText(filePath, fileData, encoding == null ? Encoding.GetEncoding(866) : encoding);
-        }
+        Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+        var encoding = textEditor.TextEditorModel.Encoding
+          ?? (filePath.EndsWith(".pkw", StringComparison.OrdinalIgnoreCase)
+              || filePath.EndsWith(".txt", StringComparison.OrdinalIgnoreCase)
+            ? Encoding.UTF8
+            : Encoding.GetEncoding(866));
+        bool encrypt = ProtocolFileExtensions.IsProtocol(Path.GetExtension(filePath));
+        WriteTextFileAtomically(filePath, fileData, encoding, encrypt);
 
         if (textEditor.TextEditorModel != null)
         {
-          textEditor.TextEditorModel.SavedTextSnapshot = fileData;
+          DocumentTextState.MarkSaved(textEditor.TextEditorModel, fileData);
         }
 
         LogInformation($"Файл {filePath} сохранен");
@@ -531,12 +515,40 @@ namespace UI.Components.MultiEditorMethods
       }
     }
 
-    private static void EncryptProtocolFileIfNeeded(string filePath)
+    internal static void WriteTextFileAtomically(string filePath, string text, Encoding encoding, bool encrypt)
     {
-      var extension = Path.GetExtension(filePath);
-      if (ProtocolFileExtensions.IsProtocol(extension))
+      ArgumentException.ThrowIfNullOrWhiteSpace(filePath);
+      ArgumentNullException.ThrowIfNull(encoding);
+
+      var fullPath = Path.GetFullPath(filePath);
+      var directory = Path.GetDirectoryName(fullPath)
+        ?? throw new InvalidOperationException("Не удалось определить каталог сохраняемого файла.");
+      Directory.CreateDirectory(directory);
+      var temporaryPath = Path.Combine(directory, $".{Path.GetFileName(fullPath)}.{Guid.NewGuid():N}.tmp");
+
+      try
       {
-        FileEncryptionManager.EncryptFile(filePath);
+        File.WriteAllText(temporaryPath, text ?? string.Empty, encoding);
+        if (encrypt)
+        {
+          FileEncryptionManager.EncryptFile(temporaryPath);
+        }
+
+        if (File.Exists(fullPath))
+        {
+          File.Replace(temporaryPath, fullPath, destinationBackupFileName: null, ignoreMetadataErrors: true);
+        }
+        else
+        {
+          File.Move(temporaryPath, fullPath);
+        }
+      }
+      finally
+      {
+        if (File.Exists(temporaryPath))
+        {
+          File.Delete(temporaryPath);
+        }
       }
     }
 
@@ -600,6 +612,11 @@ namespace UI.Components.MultiEditorMethods
 
       return control?.Content as TextEditorUI;
     }
+
+    private static DockItem ResolveDocumentForClose(DockItem control) =>
+      control?.Content is UI.Controls.Runner.RunControl { SourceDocument: not null } runner
+        ? runner.SourceDocument
+        : control;
 
     private static string GetDockItemName(DockItem control)
     {

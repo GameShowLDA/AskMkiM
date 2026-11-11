@@ -31,6 +31,7 @@ Size/Foreground и анимации общей кнопки; лицензия с
 | --- | --- | --- |
 | Подсказки оконных кнопок, выполнения, поиска и раскрытия разделов | `UI/Style.xaml` — общий тематический ToolTip; целевая XAML-разметка | `MainWindow/MainWindow.xaml` (WindowState), `Ask.UI/Components/ProtocolListBox/ProtocolListBoxUI.xaml` (IsChecked), оба `ArrowButton.xaml` в `UI/Icon/` и `Ask.UI/Shared/Components/Icons/` (IsArrowUp=True означает скрытый раздел); локальный ToolTip компонента имеет приоритет над его стилем |
 | Undo/Redo редактора и Alt+Backspace / Alt+Shift+Backspace | Конструкторы обоих `TextEditorUI.xaml.cs` в `UI/Controls/TextEditorControl/` и `Ask.UI/Controls/TextEditorControl/` | `TextArea.InputBindings` → `ApplicationCommands.Undo/Redo` → штатная история AvalonEdit; `TextEditorUI.Hotkeys.cs` сохраняет Ctrl+Shift+Z; `Ask.UI.UnitTests/Controls/TextEditorControl/UndoRedoShortcutTests.cs` |
+| Изменённость документа, сохранение и запрос при закрытии | `UI/Services/FileManager/DocumentTextState.cs`, `FileCompareService.cs` | `UI/Components/MultiEditorMethods/SaveFileManager.cs`, `UI/Services/DockItemService.cs`, `ControlManager.cs`, `MainWindow/Services/WindowService.cs`; [полная цепочка](#document-saving-and-close-confirmation) |
 | Зависание после закрытия исполнителя / перетаскивания протокола | [Расследование и воспроизведение](investigations/docking-freeze-2026-10-29.md) | `UI/Controls/Runner/RunControl.xaml.cs`, `UI/Windows/WpfDocking/Windows/Docking/Primitives/DockManager.WindowHandler.cs`, `MainWindow/App.xaml.cs`, `Ask.Diagnostics/Infrastructure/JsonFileWriter.cs` |
 | Модель и чтение истории выпусков JSON | `Ask.Support/ReleaseNotes/ReleaseNotesReader.cs` | `ReleaseNotesModel.cs`, `ReleaseChangeModel.cs`, `ReleaseChangeCategory.cs` в той же папке; [история выпусков](#release-notes-catalog) |
 | «Что нового» в меню и справке, HTML истории | `MainWindow/ViewModels/SettingsViewModel.cs`, `Ask.Support/ReleaseNotes/ReleaseNotesHtmlRenderer.cs` | `SettingsService.HelpOpenReleaseNotes`, `HelpProvider.ShowHelp`, middleware `HelpServer`, узел ReleaseNotes в `AppHelp/ru/index.html`; [история выпусков](#release-notes-catalog) |
@@ -105,6 +106,7 @@ Size/Foreground и анимации общей кнопки; лицензия с
 - [Calendar notes CRUD](#calendar-notes)
 - [Сравнение открытых файлов](#file-comparison-ui)
 - [Application startup](#application-startup-flow)
+- [Document saving and close confirmation](#document-saving-and-close-confirmation)
 - [Database initialization](#database-startup-flow)
 - [Translation](#translation-flow)
 - [Control-program execution](#control-program-execution-flow)
@@ -3312,11 +3314,80 @@ Renderer выбирает индексированные диапазоны ви
 редактировании, смене документа, прокрутке/изменении размера редактора, клике в редакторе/нажатии клавиши,
 деактивации/перемещении окна и `Unloaded`. Подписки на окно снимаются при `Unloaded`.
 `VisualLinesChanged` не закрывает карточку: создание Popup само может вызывать перерасчёт layout.
-`FileCompareService` сравнивает текст исходного редактора с `SavedTextSnapshot`.
-`DockItemService` подписывает редактируемые вкладки на `TextChanged` и добавляет `*`
-только в визуальный `DockItem.TabText`; чистый `DockItem.Title` остаётся ключом пути.
-`SaveFileManager` обновляет снимок и снимает индикатор после фактической записи,
-а неизменённый исходник `TranslatorItem` повторно не записывает и уведомление не показывает.
+### Document saving and close confirmation
+
+Единый признак несохранённых изменений строится по содержимому, а не по факту события
+`TextChanged`. `TextEditorService.CreateTextEditor` и `FileCreateService` фиксируют
+исходный `TextEditorModel.SavedTextSnapshot`; `DocumentTextState.IsModified` сравнивает
+его с текущим текстом после удаления начального BOM и нормализации `CRLF`/`CR` в `LF`.
+Поэтому открытие, переключение вкладок, UI-redraw и техническое представление переводов
+строк не делают документ изменённым. Штатные Undo/Redo AvalonEdit меняют текущий текст:
+возврат точно к снимку автоматически снимает modified-state, Redo снова его устанавливает.
+Если снимка нет, `FileCompareService` читает файл с `TextEditorModel.Encoding` и применяет
+то же сравнение; отсутствие файла считается изменением.
+
+Индикация:
+`TextEditorUI.TextChanged → DockItemService.UpdateModifiedIndicator
+→ FileCompareService.HasFileChanged → DocumentTextState.IsModified
+→ DockItem.TabText = Title + " *" / Title`. `DockItem.Title` не меняется и остаётся
+ключом `EditorWorkspaceModel.FilePaths`.
+
+Обычное сохранение:
+`FileViewModel.SaveFileCommand → MainWindow.Services.FileService.SaveFileAsync
+→ MultiWindowService.EditorDocumentService.SaveFile
+→ UI.Services.FileManager.FileService.SaveFile
+→ SaveFileManager.SaveFile(active DockItem)
+→ FileCompareService.HasFileChanged`; неизменённый документ не записывается.
+Изменённый документ проходит `SaveDataFromTextEditor
+→ WriteTextFileAtomically(temp рядом с целью, кодировка TextEditorModel.Encoding,
+опциональное шифрование протокола, File.Replace/File.Move)
+→ DocumentTextState.MarkSaved → UpdateModifiedIndicator`.
+Снимок меняется только после успешной замены целевого файла; ошибка записи оставляет
+прежний файл и modified-state. UTF-8 BOM/no-BOM и CP866 сохраняются выбранным экземпляром
+`Encoding`, полученным при автоопределении в `EncodingService` или смене кодировки UI.
+`SaveFileAs` после успешной записи дополнительно меняет `FilePath`, `FileName`, заголовок
+и словарь путей. Резервная копия при выборе «Нет» также пишется атомарно, UTF-8 без BOM.
+
+Закрытие одной вкладки имеет единственную точку подтверждения:
+`DocumentTab/Ctrl+F4/ControlManager → DockItem.PerformClose
+→ DockItem.Closing (подписка DockItemService.ConfigureDockItemClosing)
+→ SaveFileManager.ConfirmClose → FileCompareService.HasFileChanged
+→ Yes: SaveFile / No: SaveBackup / Cancel: e.Cancel=true`.
+`ControlManager` не выполняет предварительный `ConfirmClose`, поэтому один и тот же
+несохранённый буфер больше не запрашивается повторно. Закрытие контейнера вызывает
+`PerformClose` для каждого его DockItem и прекращается на первом Cancel/ошибке записи.
+
+Передача исходника в транслятор является перемещением того же редактора, а не закрытием
+документа: `TranslationServices.TryCreateNewTranslator
+→ MultiWindowService.RemoveActiveTextEditor(isTranslation: true)
+→ TextEditorService.CloseActiveTextEditor
+→ DockItemService.CloseForTransfer → DockItem.PerformClose`. На время этого вызова
+`DockItemService` подавляет только close-confirmation данного DockItem; буфер и его
+`SavedTextSnapshot` переходят в `TranslatorItem` без записи в основной файл или Backup.
+`TranslationInputNormalizer.Normalize` создаёт отдельный нормализованный вход транслятора
+(служебные символы, мнемоники, табуляция/отступы), не присваивая его `TextEditorUI.Text`.
+Исходник меняется только при явном согласии пользователя заменить латинские символы;
+`TranslatorItem.TranslatedSourceText` хранит фактический текст исходного редактора,
+поэтому техническая нормализация не создаёт ложный признак устаревшей трансляции.
+
+Завершение приложения:
+`Window/File Exit → MainWindow.Close → Window.ClosingCommand
+→ WindowService.HandleWindowClosingAsync
+→ IEditorDocumentService.ConfirmCloseAll
+→ UI FileService → SaveFileManager.ConfirmCloseAll`.
+Менеджер разворачивает `TextEditorContainer.DockItems`, для `RunControl` берёт
+`SourceDocument`, дедуплицирует документы по экземпляру исходного `TextEditorUI` и
+вызывает `ConfirmClose` не более одного раза на документ. Cancel или ошибка сохранения
+устанавливает `CancelEventArgs.Cancel` и оставляет приложение и буферы открытыми.
+
+Ключевые файлы: `UI/Services/FileManager/DocumentTextState.cs`,
+`UI/Services/FileManager/FileCompareService.cs`,
+`UI/Components/MultiEditorMethods/SaveFileManager.cs`,
+`UI/Services/DockItemService.cs`, `UI/Services/TranslationInputNormalizer.cs`,
+`UI/Components/MultiEditorMethods/ControlManager.cs`,
+`Ask.Core/Shared/Metadata/View/EditorHost/IEditorDocumentService.cs`,
+`MainWindow/Services/WindowService.cs`, `MainWindow/Services/TranslationServices.cs`.
+
 Панель действий итогового протокола находится внутри его вкладки. Для пары
 «исходная/транслированная программа» общие действия открытия, перехода к папке и
 печати находятся в панели исходника рядом с сохранением и трансляцией; отдельной
@@ -4454,6 +4525,10 @@ ErrorItem → translator/runner ErrorList
 | `MainWindow` | View/shell | MainWindowProgram | top-level UI and lifecycle | [UI Architecture](#ui-architecture) |
 | `MultiEditorControl` | workspace View | UI | editors/tabs/user controls | [UI Architecture](#ui-architecture) |
 | `FileManager` | service composer | UI | workspace services | [UI Architecture](#ui-architecture) |
+| `IEditorDocumentService` / `UI.Services.FileManager.FileService` | contract / document service | Ask.Core / UI | открытие, сохранение и единое подтверждение закрытия всех документов | [Document saving](#document-saving-and-close-confirmation) |
+| `DocumentTextState` / `FileCompareService` | state helper / service | UI | content-based modified-state с нормализацией BOM и переводов строк | [Document saving](#document-saving-and-close-confirmation) |
+| `SaveFileManager` | document persistence coordinator | UI | атомарная запись, снимок сохранённого текста, Save As, backup и подтверждение закрытия | [Document saving](#document-saving-and-close-confirmation) |
+| `TranslationInputNormalizer` | translation input helper | UI | создаёт технически нормализованную копию входа транслятора без изменения исходного редактора | [Document saving](#document-saving-and-close-confirmation) |
 | `FileCompareSelectionControl` | WPF control | Ask.UI | выбор открытых редакторов и отображение построчного diff через DiffPlex | [Сравнение файлов](#file-comparison-ui) |
 | `ITextSearchTarget` / `IReplaceTextSearchTarget` | contracts | Ask.Core | подключение чтения, подсветки, переходов и опциональной замены для произвольного компонента | [Поиск](#pluggable-text-search) |
 | `TextSearchEngine` / `TextSearchSession` | engine / session | Ask.Core | буквальный поиск по снимкам, отмена, навигация, обновление и замена | [Поиск](#pluggable-text-search) |

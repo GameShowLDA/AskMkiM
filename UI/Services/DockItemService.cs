@@ -32,6 +32,7 @@ namespace UI.Services
   {
 
     private readonly UI.Components.MultiEditorMethods.FileManager _fileManager;
+    private readonly HashSet<DockItem> _documentsBeingTransferred = new(ReferenceEqualityComparer.Instance);
 
     /// <summary>
     /// Создаёт новый экземпляр сервиса управления вкладками редактора.
@@ -40,6 +41,25 @@ namespace UI.Services
     public DockItemService(UI.Components.MultiEditorMethods.FileManager fileManager)
     {
       _fileManager = fileManager;
+    }
+
+    /// <summary>
+    /// Закрывает исходную вкладку при переносе её редактора в другой контейнер.
+    /// </summary>
+    /// <param name="dockItem">Переносимая вкладка.</param>
+    /// <returns><see langword="true"/>, если вкладка закрыта; иначе <see langword="false"/>.</returns>
+    internal bool CloseForTransfer(DockItem dockItem)
+    {
+      ArgumentNullException.ThrowIfNull(dockItem);
+      _documentsBeingTransferred.Add(dockItem);
+      try
+      {
+        return dockItem.PerformClose();
+      }
+      finally
+      {
+        _documentsBeingTransferred.Remove(dockItem);
+      }
     }
 
     /// <summary>
@@ -304,7 +324,9 @@ namespace UI.Services
       {
         LogDebug($"Закрытие файла {nameFile}.");
 
-        if (confirmBeforeClose && runner?.IsTransferringSource != true
+        if (confirmBeforeClose
+          && !_documentsBeingTransferred.Contains(dockItem)
+          && runner?.IsTransferringSource != true
           && !_fileManager.FileService.SaveFileManager.ConfirmClose(document))
         {
           e.Cancel = true;

@@ -22,6 +22,7 @@ using UI.Components.SearchControls;
 using UI.Controls;
 using UI.Controls.Runner;
 using UI.Controls.TextEditorControl;
+using UI.Services;
 using UI.Windows.WpfDocking.Windows.Docking;
 using static Ask.LogLib.LoggerUtility;
 
@@ -34,7 +35,6 @@ namespace MainWindowProgram.Services
   public class TranslationServices
   {
     private static readonly Regex LatinLettersRegex = new("[A-Za-z]", RegexOptions.Compiled);
-    private static readonly Regex CommandHeaderRegex = new(@"^\s*\d+\s+\S+", RegexOptions.Compiled);
     private readonly LookalikeLatinToCyrillicNormalizer _lookalikeNormalizer = new(Encoding.UTF8);
     private readonly HashSet<string> _acceptedNormalizationSources = new(StringComparer.OrdinalIgnoreCase);
 
@@ -749,7 +749,7 @@ namespace MainWindowProgram.Services
         translated.NumCommandWithMnemonic = BuildNumCommandWithMnemonic(allowed);
         var preserved = BuildBreakpointState(runner.TranslationModels);
         RestoreBreakpoints(result.Models, copy, translated, preserved);
-        runner.ApplySourceTranslation(translated, result.Models, text);
+        runner.ApplySourceTranslation(translated, result.Models, copy.Text);
         return true;
       }
       catch (Exception ex)
@@ -1020,7 +1020,7 @@ namespace MainWindowProgram.Services
                 90d);
 
             currentItem.ApplyTranslationModels(models, issuesSnapshot);
-            currentItem.TranslatedSourceText = text;
+            currentItem.TranslatedSourceText = editor.Text;
 
             await SetTranslationStageAsync(
                 progressWindow,
@@ -1079,8 +1079,6 @@ namespace MainWindowProgram.Services
         {
           return;
         }
-
-        editor.TextArea.Document.Text = text;
 
         if (!editor.TextArea.TextView.LineTransformers.OfType<BracesCommentColorizer>().Any())
         {
@@ -1180,7 +1178,7 @@ namespace MainWindowProgram.Services
               90d);
 
           createdItem.ApplyTranslationModels(models, issuesSnapshot);
-          createdItem.TranslatedSourceText = text;
+          createdItem.TranslatedSourceText = editor.Text;
 
           await SetTranslationStageAsync(
               progressWindow,
@@ -1222,15 +1220,7 @@ namespace MainWindowProgram.Services
 
     private bool TryPrepareTextForTranslation(TextEditorUI editor, out string text)
     {
-      text = editor.Text ?? string.Empty;
-      text = TextSanitizer.RemoveLegacyControlChars(text);
-      text = CommandTranslationManager.NormalizeCommandMnemonics(text);
-      text = NormalizeIndentationForEditor(text);
-
-      if (!string.Equals(text, editor.Text ?? string.Empty, StringComparison.Ordinal))
-      {
-        editor.Text = text;
-      }
+      text = TranslationInputNormalizer.Normalize(editor.Text);
 
       if (!LatinLettersRegex.IsMatch(text))
       {
@@ -1278,45 +1268,6 @@ namespace MainWindowProgram.Services
         MessageBoxImage.Warning);
 
       return true;
-    }
-
-    private static string NormalizeIndentationForEditor(string sourceText)
-    {
-      if (string.IsNullOrEmpty(sourceText))
-      {
-        return sourceText;
-      }
-
-      var lines = sourceText.Replace("\r\n", "\n").Replace('\r', '\n').Split('\n');
-      bool insideCommand = false;
-
-      for (int i = 0; i < lines.Length; i++)
-      {
-        var line = lines[i].Replace('\t', ' ');
-        if (string.IsNullOrWhiteSpace(line))
-        {
-          lines[i] = line;
-          continue;
-        }
-
-        var trimmedStart = line.TrimStart();
-        if (CommandHeaderRegex.IsMatch(line))
-        {
-          insideCommand = true;
-          lines[i] = trimmedStart;
-          continue;
-        }
-
-        if (!insideCommand || char.IsWhiteSpace(line[0]) || line.Trim() == "*")
-        {
-          lines[i] = line;
-          continue;
-        }
-
-        lines[i] = $" {line}";
-      }
-
-      return string.Join("\r\n", lines);
     }
 
     private static string GetNormalizationSourceKey(TextEditorUI editor)

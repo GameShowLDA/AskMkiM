@@ -10,3 +10,4 @@ using System.Windows;
 )]
 
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Ask.UI.UnitTests")]
+[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("AskMkiM")]
