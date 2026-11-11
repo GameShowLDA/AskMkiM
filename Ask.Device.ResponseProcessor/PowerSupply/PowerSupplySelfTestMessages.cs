@@ -52,7 +52,6 @@ public static class PowerSupplySelfTestMessages
   {
     await MeasurementMessages.PublishResultAsync(CheckType.SelfTest, unit,
       new MeasurementRange(measured, expected.LowerBound, expected.UpperBound), passed,
-      measurementTarget: $"Уставка {Format(expected.TargetValue, unit)}",
       executionErrorMessage: failure, outputService: outputService);
   }
 
