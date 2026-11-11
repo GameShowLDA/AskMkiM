@@ -509,6 +509,43 @@ public sealed class UserActionHelperTests
   }
 
   [Fact]
+  public async Task TimeoutErrorIsWrittenToProtocolBeforeUserAction()
+  {
+    await WpfTestHost.RunAsync(() => Task.CompletedTask);
+    var events = new List<string>();
+    var interaction = CreateInteractionService(requests: null, UserAction.None);
+    interaction
+      .Setup(service => service.ShowMessageAsync(
+        It.IsAny<ShowMessageModel>(),
+        It.IsAny<bool>(),
+        It.IsAny<bool>(),
+        It.IsAny<bool>(),
+        It.IsAny<bool>(),
+        It.IsAny<string>(),
+        It.IsAny<string>(),
+        It.IsAny<int>()))
+      .Callback<ShowMessageModel, bool, bool, bool, bool, string, string, int>(
+        (message, _, _, _, _, _, _, _) => events.Add($"message:{message.Message}"))
+      .Returns(Task.CompletedTask);
+    interaction
+      .Setup(service => service.WaitUserActionAsync(
+        It.IsAny<bool>(),
+        It.IsAny<bool>(),
+        It.IsAny<bool>()))
+      .Callback(() => events.Add("interaction"))
+      .ReturnsAsync(UserAction.None);
+
+    var error = await Assert.ThrowsAsync<TimeoutException>(
+      () => UserActionHelper.GetRunWithUserRepeatAsync(
+        () => Task.FromException<bool>(new TimeoutException("Прибор не ответил за 5 с.")),
+        interaction.Object,
+        deviceTask: true));
+
+    Assert.Equal("Прибор не ответил за 5 с.", error.Message);
+    Assert.Equal(new[] { "message:Прибор не ответил за 5 с.", "interaction" }, events);
+  }
+
+  [Fact]
   public async Task NoResponseInsideControlCommand_RequestsRetryWithoutContinueAndPreservesMessageKind()
   {
     await WpfTestHost.RunAsync(() => Task.CompletedTask);

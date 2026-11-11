@@ -113,7 +113,8 @@ namespace Ask.Device.Emulator.Protocols
       catch (TimeoutException ex)
       {
         await operationCancellation.CancelAsync().ConfigureAwait(false);
-        if (_device != null && responseTimeout > 0)
+        ObserveFault(queryTask);
+        if (_device != null)
           throw new DeviceNoResponseException(_device, command, (int)_hardwareOperationTimeout.TotalMilliseconds, ex);
         throw new TimeoutException(
           $"Оборудование не завершило команду \"{command}\" за {_hardwareOperationTimeout.TotalSeconds:0.###} с.",
@@ -127,6 +128,15 @@ namespace Ask.Device.Emulator.Protocols
         catch (Exception) when (cancellationToken.IsCancellationRequested) { }
         throw;
       }
+    }
+
+    private static void ObserveFault(Task task)
+    {
+      _ = task.ContinueWith(
+        static completedTask => _ = completedTask.Exception,
+        CancellationToken.None,
+        TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously,
+        TaskScheduler.Default);
     }
   }
 }

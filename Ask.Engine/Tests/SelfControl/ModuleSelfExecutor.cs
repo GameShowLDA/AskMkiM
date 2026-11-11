@@ -134,13 +134,16 @@ namespace Ask.Engine.Tests.SelfControl
             break;
 
           case DeviceType.PowerSupply when device is IPowerSupply powerSupply:
+            var numberPowerSupply = powerSupply.NumberChassis;
+            var switcher4 = (await SwitchingDevices.GetDevicesByNumberChassisAsync(numberPowerSupply)).FirstOrDefault();
             await powerSupply.SelfTestManager.StartSelfCheck(
               cancellationToken,
               part,
               settings,
               _messageService,
               powerSupply,
-              meter);
+              meter,
+              switcher4);
             break;
         }
       }

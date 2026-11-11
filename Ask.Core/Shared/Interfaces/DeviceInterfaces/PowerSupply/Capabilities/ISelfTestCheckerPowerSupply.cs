@@ -1,5 +1,6 @@
 ﻿using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 
 namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSupply.Capabilities
@@ -14,10 +15,11 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSupply.Capabilities
     /// <param name="settings">Параметры запуска и накопитель результатов самоконтроля.</param>
     /// <param name="userMessageService">Сервис вывода сообщений в протокол и взаимодействия с оператором.</param>
     /// <param name="powerSupply">Проверяемый источник питания.</param>
+    /// <param name="switchingDevice">Устройство коммутации шины.</param>
     /// <param name="meter">Мультиметр для измерения выходной величины.</param>
     /// <returns>Асинхронная задача выполнения проверки.</returns>
     Task StartSelfCheck(CancellationToken cancellationToken, Enum? selectedType, ActionSettings settings,
-      IUserInteractionService userMessageService, IPowerSupply powerSupply, IMultimeter meter);
+      IUserInteractionService userMessageService, IPowerSupply powerSupply, IMultimeter meter, ISwitchingDevice switchingDevice);
 
     /// <summary>
     /// Возвращает тип перечисления, используемый как тип проверки.

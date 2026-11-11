@@ -6,9 +6,12 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSupply;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSupply.Capabilities;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.ResponseProcessor.PowerSupply;
 using System.ComponentModel;
+using System.Runtime.ExceptionServices;
 using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.Device.Runtime.Function.B5108.SelftTest;
@@ -26,7 +29,7 @@ internal sealed class SelfTestManager : ISelfTestCheckerPowerSupply
 
   /// <inheritdoc />
   public async Task StartSelfCheck(CancellationToken cancellationToken, Enum? selectedType, ActionSettings settings,
-    IUserInteractionService userMessageService, IPowerSupply powerSupply, IMultimeter meter)
+    IUserInteractionService userMessageService, IPowerSupply powerSupply, IMultimeter meter, ISwitchingDevice switchingDevice)
   {
     if (selectedType is not TypeConnector.Voltage)
       throw new ArgumentException("Выберите проверку напряжения Б5-108.", nameof(selectedType));
@@ -42,16 +45,25 @@ internal sealed class SelfTestManager : ISelfTestCheckerPowerSupply
     await InitializeDeviceAsync(powerSupply, userMessageService);
     cancellationToken.ThrowIfCancellationRequested();
     await InitializeDeviceAsync(meter, userMessageService);
-
-    await PowerSupplySelfTestMessages.PublishInformationAsync(test.TestName, userMessageService);
-    if (!await meter.DcVoltageManager.SetDCVoltageModeAsync(userMessageService))
-      throw new DeviceException($"Не удалось установить режим измерения постоянного напряжения на {meter.Name}.");
-
     cancellationToken.ThrowIfCancellationRequested();
+    await InitializeDeviceAsync(switchingDevice, userMessageService);
+
     Exception? testFailure = null;
     bool outputDisabled = false;
+    bool multimeterConnectionAttempted = false;
+    bool pintConnectionAttempted = false;
     try
     {
+      multimeterConnectionAttempted = true;
+      await switchingDevice.ConnectorManager.ConnectMultimeter(SwitchingBusNew.AB2, userMessageService);
+      pintConnectionAttempted = true;
+      await switchingDevice.ConnectorManager.ConnectPINT(SwitchingBusNew.AB2, userMessageService);
+
+      await PowerSupplySelfTestMessages.PublishInformationAsync(test.TestName, userMessageService);
+      if (!await meter.DcVoltageManager.SetDCVoltageModeAsync(userMessageService))
+        throw new DeviceException($"Не удалось установить режим измерения постоянного напряжения на {meter.Name}.");
+
+      cancellationToken.ThrowIfCancellationRequested();
       await powerSupply.OutputManager.SetOutputStateAsync(false, cancellationToken, userMessageService);
       outputDisabled = true;
       await powerSupply.VoltageManager.SetVoltageAsync(0, cancellationToken, userMessageService);
@@ -70,9 +82,6 @@ internal sealed class SelfTestManager : ISelfTestCheckerPowerSupply
 
       await powerSupply.OutputManager.SetOutputStateAsync(false, cancellationToken, userMessageService);
       outputDisabled = true;
-      await powerSupply.VoltageManager.SetVoltageAsync(0, cancellationToken, userMessageService);
-      await powerSupply.CurrentManager.SetCurrentAsync(0.10m, cancellationToken, userMessageService);
-
     }
     catch (Exception ex)
     {
@@ -82,15 +91,51 @@ internal sealed class SelfTestManager : ISelfTestCheckerPowerSupply
     finally
     {
       using var finalization = EquipmentExecutionContext.EnterMandatoryFinalization();
-      try
+      Exception? finalizationFailure = null;
+
+      async Task FinalizeStepAsync(Func<Task> operation, string description)
       {
-        if (!outputDisabled)
-          await powerSupply.OutputManager.SetOutputStateAsync(false);
+        try
+        {
+          await operation();
+        }
+        catch (Exception ex)
+        {
+          finalizationFailure ??= ex;
+          LogException(ex, customMessage: description);
+        }
       }
-      catch (Exception ex) when (testFailure != null)
+
+      if (!outputDisabled)
       {
-        LogException(ex, customMessage: $"Не удалось выключить выход {powerSupply.Name} после сбоя самоконтроля.");
+        await FinalizeStepAsync(
+          () => powerSupply.OutputManager.SetOutputStateAsync(false),
+          $"Не удалось выключить выход {powerSupply.Name} после самоконтроля.");
       }
+
+      await FinalizeStepAsync(
+        () => powerSupply.VoltageManager.SetVoltageAsync(0),
+        $"Не удалось сбросить напряжение {powerSupply.Name} после самоконтроля.");
+      await FinalizeStepAsync(
+        () => powerSupply.CurrentManager.SetCurrentAsync(0.10m),
+        $"Не удалось восстановить ограничение тока {powerSupply.Name} после самоконтроля.");
+
+      if (multimeterConnectionAttempted)
+      {
+        await FinalizeStepAsync(
+          () => switchingDevice.ConnectorManager.DisconnectMultimeter(SwitchingBusNew.AB2, userMessageService),
+          "Не удалось отключить мультиметр от шины AB2 после самоконтроля.");
+      }
+
+      if (pintConnectionAttempted)
+      {
+        await FinalizeStepAsync(
+          () => switchingDevice.ConnectorManager.DisconnectPINT(SwitchingBusNew.AB2, userMessageService),
+          "Не удалось отключить ПИНТ от шины AB2 после самоконтроля.");
+      }
+
+      if (testFailure == null && finalizationFailure != null)
+        ExceptionDispatchInfo.Capture(finalizationFailure).Throw();
     }
   }
 

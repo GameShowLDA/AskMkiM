@@ -20,6 +20,21 @@ public sealed class ModeSelectingDeviceProtocolTests
     Assert.Contains("READ?", error.Message);
   }
 
+  [Fact]
+  public async Task RealWatchdogDeadline_DefaultCommandTimeout_IsNoResponse()
+  {
+    using var mode = new TestExecutionMode(idleMode: false);
+    var device = new Ask.Device.Runtime.Device.KeysightDevice { NumberChassis = 1, Number = 16 };
+    var protocol = new ModeSelectingDeviceProtocol(() => new HangingProtocol(),
+      new StubProtocol("IDLE"), TimeSpan.FromMilliseconds(50), device);
+
+    var error = await Assert.ThrowsAsync<Ask.Core.Services.Errors.Device.DeviceNoResponseException>(
+      () => protocol.QueryAsync("CONF:VOLT:DC 1000,0.001"));
+
+    Assert.Contains("CONF:VOLT:DC 1000,0.001", error.Message);
+    Assert.Contains("50", error.Message);
+  }
+
   private sealed class HangingProtocol : IDeviceProtocol
   {
     public SemaphoreSlim OperationLock { get; set; } = new(1, 1);

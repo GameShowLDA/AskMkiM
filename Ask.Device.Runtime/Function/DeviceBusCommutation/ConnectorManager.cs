@@ -1,4 +1,3 @@
-using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
@@ -108,7 +107,7 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
           numberConnector,
           busNumber,
           connect,
-          $"мультиметра {(connect ? "к" : "с")} шине [{bus}]",
+          connect ? $"мультиметра к шине [{bus}]" : $"мультиметра от шины [{bus}]",
           userMessageService);
       }
 
@@ -196,11 +195,11 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
     {
       foreach (var connected in connectionState.GetConnected(DeviceBusConnectionType.PINT))
       {
-        var disconnectResult = await DisconnectPINT(connected.Bus);
+        await DisconnectPINT(connected.Bus, userMessageService);
         connectionState.Set(DeviceBusConnectionType.PINT, connected.Bus, false);
       }
 
-      var result = await SetPINTState(true, bus);
+      var result = await SetPINTState(true, bus, userMessageService);
       if (result)
       {
         connectionState.Set(DeviceBusConnectionType.PINT, bus, true);
@@ -216,7 +215,7 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
     /// <inheritdoc />
     public async Task<bool> DisconnectPINT(SwitchingBusNew bus, IUserInteractionService? userMessageService = null)
     {
-      var result = await SetPINTState(false, bus);
+      var result = await SetPINTState(false, bus, userMessageService);
       connectionState.Set(DeviceBusConnectionType.PINT, bus, false);
       return result;
     }
@@ -232,26 +231,26 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
     /// <returns>
     /// <see langword="true"/>, если состояние ПИНТ изменено успешно; иначе — <see langword="false"/>.
     /// </returns>
-    /// <exception cref="Exception">Операция временно отключена.</exception>
     private async Task<bool> SetPINTState(bool connect, SwitchingBusNew bus, IUserInteractionService? userMessageService = null)
     {
-      throw new Exception("Временно откличли в Ask.Device.Runtime.Function.DeviceBusCommutation.ConnectorManager.SetPINTState");
-      //int numberConnector = (int)SwitchingDeviceTypeConnector.PINT;
-      //if (TryGetBusNumber(bus, out int busNumber) && busNumber >= 2 && busNumber <= 3)
-      //{
-      //  if (ExecutionConfig.GetIsIdleModeEnabled())
-      //  {
-      //    return !IdleHardwareErrorSimulator.ShouldSimulateHardwareError(_deviceBusCommutation);
-      //  }
+      int numberConnector = (int)SwitchingDeviceTypeConnector.PINT;
+      if (TryGetBusNumber(bus, out int busNumber) && busNumber >= 2 && busNumber <= 3)
+      {
+        var command = new DeviceCommand(5, numberConnector, busNumber, connect ? 1 : 2);
+        var answer = await queryExecutor.QueryAsync(command.ToString());
+        await Task.Delay(10);
+        return await DeviceBusCommutationResponseProcessor.CheckEquipmentOperationAsync(
+          answer,
+          _deviceBusCommutation,
+          numberConnector,
+          busNumber,
+          connect,
+          connect ? $"ПИНТ к шине [{bus}]" : $"ПИНТ от шины [{bus}]",
+          userMessageService);
+      }
 
-      //  var command = new DeviceCommand(5, numberConnector, busNumber, connect ? 1 : 2);
-      //  var answer = await _deviceBusCommutation.DeviceProtocol.QueryAsync(command.ToString(), timeout: 1000);
-      //  await Task.Delay(10);
-      //  return !string.IsNullOrWhiteSpace(answer) && answer.Contains(command.ToString());
-      //}
-
-      //LogError("Ошибка номера шины УКШ!", isDeviceLog: true);
-      //return false;
+      LogError("Ошибка номера шины УКШ!", isDeviceLog: true);
+      return false;
     }
 
     #endregion
