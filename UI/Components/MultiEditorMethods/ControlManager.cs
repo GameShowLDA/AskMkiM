@@ -171,13 +171,8 @@ namespace UI.Components.MultiEditorMethods
             continue;
           }
 
-          if (!ShowSaveDialogForControl(item))
-          {
+          if (!item.PerformClose())
             return false;
-          }
-
-          fileManager.EditorWorkspaceModel.FilePaths.Remove(item.Title);
-          EditorEventAdapter.RaiseTextEditorContainerClosing(true, item.Title);
         }
       }
 
@@ -186,11 +181,6 @@ namespace UI.Components.MultiEditorMethods
 
     private bool CloseDockItem(OpenFileButton tabButton, TextEditorContainer foundContainer, DockItem foundDockItem)
     {
-      if (foundDockItem.Content is not RunControl && !ShowSaveDialogForControl(foundDockItem))
-      {
-        return false;
-      }
-
       return foundDockItem.PerformClose();
     }
 
@@ -227,17 +217,6 @@ namespace UI.Components.MultiEditorMethods
         content = leftEditor.Text;
         foundDockItemType = EditorType.Translator;
       }
-    }
-
-    /// <summary>
-    /// Отображает диалоговое окно для сохранения файла, если это требуется.
-    /// </summary>
-    /// <param name="control">Элемент управления для проверки.</param>
-    /// <returns>Возвращает <c>true</c>, если файл был сохранен, <c>false</c> в противном случае.</returns>
-    private bool ShowSaveDialogForControl(DockItem control)
-    {
-      var saveFileManager = new SaveFileManager(fileManager);
-      return saveFileManager.ConfirmClose(control);
     }
 
     /// <summary>

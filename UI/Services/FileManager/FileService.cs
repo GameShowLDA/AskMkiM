@@ -69,6 +69,8 @@ namespace UI.Services.FileManager
       SaveFileManager.SaveFileAs();
     }
 
+    public bool ConfirmCloseAll() => SaveFileManager.ConfirmCloseAll();
+
     /// <summary>
     /// Выводит файл на печать.
     /// </summary>

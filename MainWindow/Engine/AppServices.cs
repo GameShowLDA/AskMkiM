@@ -30,7 +30,7 @@ namespace MainWindowProgram.Engine
       var admin = new AdminServices(window, multi);
       var test = new TestService(multi);
       var settings = new SettingsService(multi);
-      var windowService = new WindowService(window, () => window.IsLocked);
+      var windowService = new WindowService(window, () => window.IsLocked, multi.EditorDocumentService);
       var selfTest = new SelfTestServices(multi);
       var crashReporter = ServiceLocator.Services.GetRequiredService<IExceptionDiagnosticReporter>();
       var translation = new TranslationServices(multi, file, crashReporter);

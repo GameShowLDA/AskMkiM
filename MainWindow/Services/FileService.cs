@@ -654,7 +654,7 @@ namespace MainWindowProgram.Services
     /// </summary>
     public void ExitApplicationAsync()
     {
-      Application.Current.Shutdown();
+      _mainWindow.Close();
     }
 
 

@@ -49,11 +49,14 @@ internal sealed class SelfTestManager : ISelfTestCheckerPowerSupply
 
     cancellationToken.ThrowIfCancellationRequested();
     Exception? testFailure = null;
+    bool outputDisabled = false;
     try
     {
       await powerSupply.OutputManager.SetOutputStateAsync(false, cancellationToken, userMessageService);
+      outputDisabled = true;
       await powerSupply.VoltageManager.SetVoltageAsync(0, cancellationToken, userMessageService);
       await powerSupply.CurrentManager.SetCurrentAsync(0.10m, cancellationToken, userMessageService);
+      outputDisabled = false;
       await powerSupply.OutputManager.SetOutputStateAsync(true, cancellationToken, userMessageService);
 
       for (decimal voltage = 0.1m; voltage < 1m; voltage += 0.1m)
@@ -66,6 +69,7 @@ internal sealed class SelfTestManager : ISelfTestCheckerPowerSupply
         await CheckVoltagePointAsync(voltage, test, powerSupply, meter, userMessageService, cancellationToken);
 
       await powerSupply.OutputManager.SetOutputStateAsync(false, cancellationToken, userMessageService);
+      outputDisabled = true;
       await powerSupply.VoltageManager.SetVoltageAsync(0, cancellationToken, userMessageService);
       await powerSupply.CurrentManager.SetCurrentAsync(0.10m, cancellationToken, userMessageService);
 
@@ -80,7 +84,8 @@ internal sealed class SelfTestManager : ISelfTestCheckerPowerSupply
       using var finalization = EquipmentExecutionContext.EnterMandatoryFinalization();
       try
       {
-        await powerSupply.OutputManager.SetOutputStateAsync(false);
+        if (!outputDisabled)
+          await powerSupply.OutputManager.SetOutputStateAsync(false);
       }
       catch (Exception ex) when (testFailure != null)
       {
