@@ -88,11 +88,14 @@ public sealed class B5108SelfTestTests
           }
         })
         .Returns(Task.CompletedTask);
+      var current = new Mock<ICurrentManager>(MockBehavior.Strict);
+      current.Setup(x => x.SetCurrentAsync(0.10m, It.IsAny<CancellationToken>(), It.IsAny<IUserInteractionService>()))
+        .Returns(Task.CompletedTask);
       _device = new B5108
       {
         ConnectableManager = connection.Object,
         VoltageManager = Mock.Of<IVoltageManager>(),
-        CurrentManager = new Mock<ICurrentManager>(MockBehavior.Strict).Object,
+        CurrentManager = current.Object,
         OutputManager = output.Object,
       };
 

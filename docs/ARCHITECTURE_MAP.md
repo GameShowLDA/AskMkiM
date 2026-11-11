@@ -2159,17 +2159,21 @@ Root-сервисные функции не добавляются в польз
   → `B5108.SelfTestManager` → `Ask.Device.Runtime/Function/B5108/SelftTest/SelfTestManager.cs`.
 - `StartSelfCheck` добавляет `DeviceExecutionResult` / `TestExecutionResult`, инициализирует
   источник и мультиметр через их `ConnectableManager.InitializeAsync`, выбирает DCV,
-  отключает выход, выставляет 0 В и включает выход. Для точек 0,1–0,9 В и 1–9 В
+  отключает выход, выставляет 0 В и ограничение тока 0,10 А, затем включает выход.
+  Для точек 0,1–0,9 В и 1–9 В
   `CheckVoltagePointAsync` задаёт напряжение через `VoltageManager` → `VOLT`, затем
   вызывает `IMultimeter.DcVoltageManager.MeasureDCVoltageAsync` → `DCVMeasurementBase`
   → `MeasurementBase` → профиль мультиметра и Real/Idle адаптер. Допуск по уставке
   ±(0,01 В + 1 %), обе границы включены. Брак записывается в `TestExecutionResult.Errors`.
 - `Ask.Device.ResponseProcessor/PowerSupply/PowerSupplySelfTestMessages.cs` →
   `EquipmentMessages` / `SelfTestMessages` / `MeasurementMessages` → экранный протокол.
-  Ток имеет методы оформления точки, результата, погрешности и брака. Измерение
-  и команды установки тока в самоконтроле отсутствуют.
+  Ток имеет методы оформления точки, результата, погрешности и брака; измерение тока
+  в самоконтроле отсутствует, а `CurrentManager.SetCurrentAsync(0.10m, ...)` задаёт
+  защитное ограничение перед включением выхода и после завершения измерений.
 - `finally` в менеджере → `EquipmentExecutionContext.EnterMandatoryFinalization`
-  → `OutputManager.SetOutputStateAsync(false)` → `OUTP OFF` с проверкой readback.
+  → если выход ещё не был успешно отключён, `OutputManager.SetOutputStateAsync(false)`
+  → `OUTP OFF` с проверкой readback. При штатном завершении повторная команда отключения
+  не отправляется; при отмене или ошибке обязательная финализация отключает выход.
   `Ask.UI/Features/ProtocolNew/Execution/ActionExecutor.cs` исключает `IPowerSupply` из
   общего сброса самоконтроля, чтобы `*RST` не изменял предел тока. Источник остаётся
   в учёте использованных устройств для протокола.
