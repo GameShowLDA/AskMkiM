@@ -53,6 +53,7 @@ internal sealed class SelfTestManager : ISelfTestCheckerPowerSupply
     {
       await powerSupply.OutputManager.SetOutputStateAsync(false, cancellationToken, userMessageService);
       await powerSupply.VoltageManager.SetVoltageAsync(0, cancellationToken, userMessageService);
+      await powerSupply.CurrentManager.SetCurrentAsync(0.10m, cancellationToken, userMessageService);
       await powerSupply.OutputManager.SetOutputStateAsync(true, cancellationToken, userMessageService);
 
       for (decimal voltage = 0.1m; voltage < 1m; voltage += 0.1m)
@@ -60,6 +61,14 @@ internal sealed class SelfTestManager : ISelfTestCheckerPowerSupply
 
       for (decimal voltage = 1m; voltage < 10m; voltage++)
         await CheckVoltagePointAsync(voltage, test, powerSupply, meter, userMessageService, cancellationToken);
+
+      for (decimal voltage = 10m; voltage <= powerSupply.VoltageManager.MaxVoltage; voltage += 10m)
+        await CheckVoltagePointAsync(voltage, test, powerSupply, meter, userMessageService, cancellationToken);
+
+      await powerSupply.OutputManager.SetOutputStateAsync(false, cancellationToken, userMessageService);
+      await powerSupply.VoltageManager.SetVoltageAsync(0, cancellationToken, userMessageService);
+      await powerSupply.CurrentManager.SetCurrentAsync(0.10m, cancellationToken, userMessageService);
+
     }
     catch (Exception ex)
     {
