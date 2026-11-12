@@ -43,6 +43,7 @@ Size/Foreground и анимации общей кнопки; лицензия с
 | Заметки календаря | `UI/Controls/Calendar/CalendarControl.xaml.cs`, `CalendarControl.xaml` | `Ask.Core/Services/Calendar/CalendarNoteService.cs`, `CalendarNote.cs`; [заметки](#calendar-notes) |
 | Запуск приложения | `MainWindow/App.xaml.cs`, `MainWindow/Init/PreStartupInitializer.cs` | `MainWindow/Init/DatabaseInitializer.cs`, `MainWindow/Engine/AppServices.cs`, `MainWindow/MainWindow.xaml.cs` |
 | Версия, история коммитов и идентификация сборки | `Directory.Build.targets`, `Ask.Core/Services/App/ApplicationBuildInfo.cs` | `Ask.UI/Features/BuildDiagnostics/Views/BuildHistoryWindow.xaml`, `UI/Controls/EmptyWorkspace/EmptyWorkspaceView.xaml.cs`, `MainWindow/Init/PreStartupInitializer.cs`, `Ask.Diagnostics/Collectors/SystemInfoCollector.cs`, `Ask.Core/Services/Protocols/ExecutionProtocolHistoryService.cs` |
+| Автономное офлайн-обновление | `tools/AskMkiM.Updater.Builder/`, `tools/AskMkiM.Updater.Stub/` | `tools/AskMkiM.Updater.Core/`, `tools/AskMkiM.Updater.Core.Tests/`, `tools/AskMkiM.Updater/README.md`; [поток обновления](#offline-update-flow) |
 | DI и composition root | `MainWindow/Init/PreStartupInitializer.cs` | `Ask.Diagnostics/Extensions/ServiceCollectionExtensions.cs`, `Ask.Core/Services/App/ServiceLocator.cs`, `MainWindow/Engine/AppServices.cs` |
 | Трансляция программы контроля | `MainWindow/Services/TranslationServices.cs` | `Ask.Engine/ControlCommandAnalyser/CommandTranslationManager.cs`, `Ask.Engine/ControlCommandAnalyser/Parser/`, `Ask.Engine/ControlCommandAnalyser/Formatter/`, `Ask.Engine/ControlCommandAnalyser/Validation/` |
 | Диагностика текста при вводе | `Ask.UI/Controls/TextEditorControl/Diagnostics/LiveDiagnosticsController.cs` | `Ask.Engine/ControlCommandAnalyser/CommandTranslationManager.Diagnostics.cs`, `SourceDiagnostic.cs`, `Ask.UI/Controls/TextEditorControl/Diagnostics/DiagnosticUnderlineRenderer.cs`, оба `TextEditorUI.xaml.cs` |
@@ -198,6 +199,51 @@ startup-загрузка общей UI-модели не зависит от п�
 изоляция ролей, явный 0, перезагрузка модели) и
 `Ask.Engine.UnitTests/DataBase/UserInterfaceAutoLockStorageTests.cs` (migration, SQLite round trip,
 идемпотентный repair). `UiSettingsControl.Loaded` перечитывает модель текущей роли при восстановлении вкладки.
+
+## Offline Update Flow
+
+### Purpose
+
+Отдельный инструмент формирует один автономный EXE из опубликованной сборки AskMkiM
+и устанавливает его на закрытом компьютере без сети и прав администратора. Подсистема
+не входит в runtime основного приложения и не изменяет его composition root.
+
+### Projects and Entry Points
+
+- `tools/AskMkiM.Updater.Builder`: WPF-конструктор. Выбирает каталог опубликованной
+  сборки, читает `build-manifest.json`, использует готовый `AskMkiM.Updater.Stub.exe`
+  и создаёт автономный файл обновления.
+- `tools/AskMkiM.Updater.Stub`: self-contained single-file WPF-установщик для `win-x64`.
+  Читает присоединённый ZIP из собственного EXE, находит AskMkiM по сохранённому или
+  стандартному пути и предлагает выбрать `AskMkiM.exe`, если установка не найдена.
+- `tools/AskMkiM.Updater.Core`: общий манифест, SHA-256, безопасные пути, упаковка,
+  сравнение версий, резервное копирование, замена и автоматический откат.
+- `tools/AskMkiM.Updater/publish.ps1`: публикует конструктор и неизменяемую заготовку
+  установщика. Операционный порядок описан в `tools/AskMkiM.Updater/README.md`.
+
+### Package and Installation Flow
+
+```text
+published AskMkiM directory
+→ UpdateBuilder: version + protected-path filter + SHA-256 manifest + ZIP
+→ copy of self-contained Updater.Stub + appended ZIP/trailer
+→ one AskMkiM_Update_<version>.exe
+→ target selection and installed-version validation
+→ UpdateBackups/<timestamp>_<old>_to_<new>
+→ verified staging extraction
+→ atomic replacement of changed managed files
+→ .askmkim-installed-manifest.json
+→ optional start of updated AskMkiM
+```
+
+`Resources/app.db`, `Resources/role-auth.json`, `Settings`, `Archives`, `History`,
+`Backup`, `Saves`, `logs`, `CrashReports` и `UpdateBackups` защищаются одинаковой
+политикой при формировании и установке. База, данные ролей и `Settings` дополнительно
+копируются в snapshot резервной копии. Устаревшие файлы удаляются только после
+первой установки через этот механизм и только если они присутствовали в предыдущем
+управляемом манифесте. Ошибка после начала замены восстанавливает программные файлы;
+повреждённый пакет, совпадающая сборка, downgrade, запущенный AskMkiM и отсутствие
+прав записи останавливают обновление до изменения целевого каталога.
 
 ## Solution Structure
 
