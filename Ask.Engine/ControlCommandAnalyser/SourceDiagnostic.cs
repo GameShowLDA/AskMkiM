@@ -26,8 +26,14 @@ public sealed record SourceDiagnostic(
 /// <param name="Text">Текст, вставляемый в документ.</param>
 /// <param name="PreviewText">Текст, отображаемый как полупрозрачная подсказка.</param>
 /// <param name="PreviewOnNextLine">Признак отображения подсказки на виртуальной следующей строке.</param>
+/// <param name="ReplacementLength">Длина заменяемого фрагмента; ноль означает обычную вставку.</param>
+/// <param name="PreviewOffset">
+/// Отдельное смещение полупрозрачной подсказки или <see langword="null"/> для места правки.
+/// </param>
 public sealed record SourceTextSuggestion(
   int Offset,
   string Text,
   string PreviewText,
-  bool PreviewOnNextLine = false);
+  bool PreviewOnNextLine = false,
+  int ReplacementLength = 0,
+  int? PreviewOffset = null);

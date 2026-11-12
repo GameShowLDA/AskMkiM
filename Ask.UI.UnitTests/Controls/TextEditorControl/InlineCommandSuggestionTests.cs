@@ -49,6 +49,61 @@ public sealed class InlineCommandSuggestionTests
     Assert.Equal("30 РМ", editor.Text);
   });
 
+  [Fact]
+  public void HoverSuggestionInsertsPrAlgorithmKey() => RunInSta(() =>
+  {
+    const string source = "180 ПР Ом<5 *К1/11*";
+    int insertionOffset = source.IndexOf("ПР", StringComparison.Ordinal) + "ПР".Length;
+    var editor = new TextEditor { Text = source };
+    var controller = new InlineCommandSuggestionController(editor);
+    controller.UpdateFromDiagnostics(new[]
+    {
+      new SourceDiagnostic(
+        4,
+        2,
+        1,
+        true,
+        "Добавлен ключ ЗР.",
+        "Gen_KeyZR",
+        new SourceTextSuggestion(insertionOffset, " ЗР", " ЗР")),
+    });
+
+    Assert.True(controller.TryAcceptCurrentSuggestion());
+    Assert.Equal("180 ПР ЗР Ом<5 *К1/11*", editor.Text);
+  });
+
+  [Fact]
+  public void HoverSuggestionReplacesCorrectedSourceLineAsSingleUndoableEdit() => RunInSta(() =>
+  {
+    const string source = "180 ПР 10В, Ом<5 *К1/11*";
+    const string corrected = "180 ПР Ом<5 *К1/11*";
+    var editor = new TextEditor { Text = source };
+    editor.Document.UndoStack.ClearAll();
+    var controller = new InlineCommandSuggestionController(editor);
+    controller.UpdateFromDiagnostics(new[]
+    {
+      new SourceDiagnostic(
+        7,
+        3,
+        1,
+        true,
+        "Значение напряжения игнорируется.",
+        "Gen_IgnoreVoltage",
+        new SourceTextSuggestion(
+          0,
+          corrected,
+          $"  → {corrected}",
+          ReplacementLength: source.Length,
+          PreviewOffset: source.Length)),
+    });
+
+    Assert.True(controller.TryAcceptCurrentSuggestion());
+    Assert.Equal(corrected, editor.Text);
+
+    editor.Document.UndoStack.Undo();
+    Assert.Equal(source, editor.Text);
+  });
+
   private static void RunInSta(Action action)
   {
     Exception? exception = null;

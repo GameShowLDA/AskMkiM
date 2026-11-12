@@ -50,23 +50,27 @@ internal sealed class InlineCommandSuggestionController : IBackgroundRenderer
   public void Dismiss() => SetSuggestion(null);
 
   /// <summary>
-  /// Вставляет активное автодополнение в документ.
+  /// Применяет активное исправление к документу.
   /// </summary>
-  /// <returns><see langword="true"/>, если автодополнение было вставлено.</returns>
+  /// <returns><see langword="true"/>, если исправление было применено.</returns>
   internal bool TryAcceptCurrentSuggestion()
   {
-    if (_currentSuggestion is not { } suggestion || _editor.IsReadOnly)
+    if (_currentSuggestion is not { } suggestion
+      || _editor.IsReadOnly
+      || suggestion.Offset < 0
+      || suggestion.ReplacementLength < 0
+      || suggestion.Offset + suggestion.ReplacementLength > _editor.Document.TextLength)
     {
       return false;
     }
 
-    _editor.Document.Insert(suggestion.Offset, suggestion.Text);
+    _editor.Document.Replace(suggestion.Offset, suggestion.ReplacementLength, suggestion.Text);
     _editor.CaretOffset = suggestion.Offset + suggestion.Text.Length;
     return true;
   }
 
   /// <summary>
-  /// Рисует предложенную команду в месте её будущей вставки, не изменяя документ.
+  /// Рисует предложенное исправление, не изменяя документ.
   /// </summary>
   /// <param name="textView">Визуальное представление текста.</param>
   /// <param name="drawingContext">Контекст рисования слоя редактора.</param>
@@ -77,13 +81,19 @@ internal sealed class InlineCommandSuggestionController : IBackgroundRenderer
       return;
     }
 
-    var documentLine = _editor.Document.GetLineByOffset(suggestion.Offset);
+    int previewOffset = suggestion.PreviewOffset ?? suggestion.Offset;
+    if (previewOffset < 0 || previewOffset > _editor.Document.TextLength)
+    {
+      return;
+    }
+
+    var documentLine = _editor.Document.GetLineByOffset(previewOffset);
     if (textView.GetVisualLine(documentLine.LineNumber) == null)
     {
       return;
     }
 
-    var location = _editor.Document.GetLocation(suggestion.Offset);
+    var location = _editor.Document.GetLocation(previewOffset);
     var documentPosition = textView.GetVisualPosition(
       new TextViewPosition(location),
       VisualYPosition.TextTop);

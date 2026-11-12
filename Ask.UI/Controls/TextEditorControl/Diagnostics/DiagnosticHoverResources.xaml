@@ -7,7 +7,7 @@
         <TextBlock x:Name="Heading" Text="Ошибка" FontWeight="SemiBold" Margin="0,0,0,4" />
         <TextBlock Text="{Binding Description}" TextWrapping="Wrap" />
         <TextBlock x:Name="SuggestionHint"
-                   Text="Tab — добавить предложенную команду"
+                   Text="Tab — применить предложенное исправление"
                    Margin="0,6,0,0"
                    FontWeight="SemiBold"
                    Opacity="0.75" />

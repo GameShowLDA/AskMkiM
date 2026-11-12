@@ -1,7 +1,9 @@
 using Ask.Core.Shared.DTO.Executor;
+using Ask.Core.Services.Errors.Translation;
 using Ask.Core.Services.Translator;
 using Ask.Engine.ControlCommandAnalyser;
 using Ask.Engine.ControlCommandAnalyser.Model;
+using Ask.Engine.ControlCommandAnalyser.Model.Pr;
 using Ask.Engine.ControlCommandAnalyser.Parser;
 
 namespace Ask.Engine.UnitTests.ControlCommandAnalyser;
@@ -77,6 +79,38 @@ public sealed class VshSourceSuggestionTests
     Assert.True(suggestion.PreviewOnNextLine);
   }
 
+  [Theory]
+  [InlineData("180 ПР Ом<5 *К1/11*", "180 ПР ЗР Ом<5 *К1/11*")]
+  [InlineData("  180\tПР\tОм<5 *К1/11*", "  180\tПР ЗР\tОм<5 *К1/11*")]
+  [InlineData("180 ПР", "180 ПР ЗР")]
+  public void PrAlgorithmKeySuggestionIsInsertedAfterMnemonic(string source, string expected)
+  {
+    var model = new PrCommandModel { CommandNumber = "180", StartLineNumber = 1 };
+    var lines = new List<(int Offset, string Text)> { (0, source) };
+
+    var suggestion = CommandTranslationManager.CreatePrAlgorithmKeySuggestion(lines, model, "ЗР");
+
+    Assert.NotNull(suggestion);
+    Assert.Equal(expected, source.Insert(suggestion.Offset, suggestion.Text));
+    Assert.Equal(" ЗР", suggestion.PreviewText);
+  }
+
+  [Fact]
+  public void SourceAnalysisAttachesOwnKeySuggestionToEveryPrWarning()
+  {
+    const string text = "180 ПР Ом<5 *К1/11*\r\n190 ПР Ом<5 *К1/12*";
+    var manager = new CommandTranslationManager(new[] { new StubPrParser() });
+
+    var diagnostics = manager.AnalyzeSource(text)
+      .Where(item => item.Code == "Gen_KeyZR")
+      .ToArray();
+
+    Assert.Equal(2, diagnostics.Length);
+    Assert.All(diagnostics, diagnostic => Assert.NotNull(diagnostic.Suggestion));
+    Assert.Equal(text.IndexOf("ПР", StringComparison.Ordinal) + "ПР".Length, diagnostics[0].Suggestion!.Offset);
+    Assert.Equal(text.LastIndexOf("ПР", StringComparison.Ordinal) + "ПР".Length, diagnostics[1].Suggestion!.Offset);
+  }
+
   private sealed class StubRmParser : ICommandParser
   {
     public bool CanParse(MnemonicIdentifier mnemonic) => mnemonic.Mnemonic == "РМ";
@@ -91,5 +125,26 @@ public sealed class VshSourceSuggestionTests
         StartLineNumber = numberLine,
         SourceLines = lines,
       };
+  }
+
+  private sealed class StubPrParser : ICommandParser
+  {
+    public bool CanParse(MnemonicIdentifier mnemonic) => mnemonic.Mnemonic == "ПР";
+
+    public BaseCommandModel Parse(
+      string commandNumber,
+      string mnemonic,
+      int numberLine,
+      List<string> lines)
+    {
+      var model = new PrCommandModel
+      {
+        CommandNumber = commandNumber,
+        StartLineNumber = numberLine,
+        SourceLines = lines,
+      };
+      model.Warnings.Add(GeneralWarnings.KeyZR(numberLine, $"{commandNumber} {mnemonic}"));
+      return model;
+    }
   }
 }

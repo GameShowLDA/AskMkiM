@@ -2,6 +2,7 @@ using Ask.Core.Services.Errors.Models;
 using Ask.Core.Services.Errors.Translation;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Engine.ControlCommandAnalyser.Model;
+using Ask.Engine.ControlCommandAnalyser.Model.Pr;
 using Ask.Engine.ControlCommandAnalyser.Parser;
 using Ask.Engine.ControlCommandAnalyser.Validation;
 
@@ -55,6 +56,7 @@ public partial class CommandTranslationManager
     }
 
     var diagnostics = MapDiagnostics(text, sourceModels, cancellationToken);
+    diagnostics = AttachWarningSourceSuggestions(text, sourceModels, diagnostics);
     if (generatedVsh == null || vshInsertionRm == null)
     {
       return diagnostics;
@@ -67,6 +69,74 @@ public partial class CommandTranslationManager
         ? diagnostic with { Suggestion = suggestion }
         : diagnostic)
       .ToArray();
+  }
+
+  private static IReadOnlyList<SourceDiagnostic> AttachWarningSourceSuggestions(
+    string text,
+    IReadOnlyList<BaseCommandModel> sourceModels,
+    IReadOnlyList<SourceDiagnostic> diagnostics)
+  {
+    var lines = GetSourceLines(text);
+    var suggestions = sourceModels
+      .Select((model, index) => new
+      {
+        Model = model,
+        EndLineNumber = index + 1 < sourceModels.Count
+          ? sourceModels[index + 1].StartLineNumber - 1
+          : lines.Count,
+      })
+      .SelectMany(item => item.Model.Warnings.Select(warning =>
+        new
+        {
+          Key = (warning.SourceLineNumber, warning.CodeString, warning.Description),
+          Suggestion = WarningSourceSuggestionFactory.Create(
+            lines,
+            item.Model,
+            warning,
+            item.EndLineNumber),
+        }))
+      .Where(item => item.Suggestion != null)
+      .GroupBy(item => item.Key)
+      .ToDictionary(group => group.Key, group => group.First().Suggestion!);
+
+    if (suggestions.Count == 0)
+    {
+      return diagnostics;
+    }
+
+    return diagnostics
+      .Select(diagnostic => suggestions.TryGetValue(
+          (diagnostic.LineNumber, diagnostic.Code, diagnostic.Description),
+          out var suggestion)
+          ? diagnostic with { Suggestion = suggestion }
+          : diagnostic)
+      .ToArray();
+  }
+
+  internal static SourceTextSuggestion? CreatePrAlgorithmKeySuggestion(
+    IReadOnlyList<(int Offset, string Text)> lines,
+    PrCommandModel model,
+    string key)
+  {
+    int lineIndex = model.StartLineNumber - 1;
+    if (lineIndex < 0 || lineIndex >= lines.Count)
+    {
+      return null;
+    }
+
+    var line = lines[lineIndex];
+    var match = System.Text.RegularExpressions.Regex.Match(
+      line.Text,
+      @"^\s*\d+\s+(?<mnemonic>[\p{L}_]+)(?=\s|$)");
+    if (!match.Success
+      || !string.Equals(match.Groups["mnemonic"].Value, model.Mnemonic, StringComparison.OrdinalIgnoreCase))
+    {
+      return null;
+    }
+
+    int offset = line.Offset + match.Groups["mnemonic"].Index + match.Groups["mnemonic"].Length;
+    string insertion = $" {key}";
+    return new SourceTextSuggestion(offset, insertion, insertion);
   }
 
   internal static SourceTextSuggestion CreateVshSourceSuggestion(

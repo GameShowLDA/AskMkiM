@@ -47,7 +47,7 @@ Size/Foreground и анимации общей кнопки; лицензия с
 | DI и composition root | `MainWindow/Init/PreStartupInitializer.cs` | `Ask.Diagnostics/Extensions/ServiceCollectionExtensions.cs`, `Ask.Core/Services/App/ServiceLocator.cs`, `MainWindow/Engine/AppServices.cs` |
 | Трансляция программы контроля | `MainWindow/Services/TranslationServices.cs` | `Ask.Engine/ControlCommandAnalyser/CommandTranslationManager.cs`, `Ask.Engine/ControlCommandAnalyser/Parser/`, `Ask.Engine/ControlCommandAnalyser/Formatter/`, `Ask.Engine/ControlCommandAnalyser/Validation/` |
 | Диагностика текста при вводе | `Ask.UI/Controls/TextEditorControl/Diagnostics/LiveDiagnosticsController.cs` | `Ask.Engine/ControlCommandAnalyser/CommandTranslationManager.Diagnostics.cs`, `SourceDiagnostic.cs`, `Ask.UI/Controls/TextEditorControl/Diagnostics/DiagnosticUnderlineRenderer.cs`, оба `TextEditorUI.xaml.cs` |
-| Контекстное автодополнение команд | `Ask.UI/Controls/TextEditorControl/Suggestions/InlineCommandSuggestionController.cs` | `LiveDiagnosticsController`, `SourceDiagnostic`, оба `TextEditorUI.xaml.cs`; первая поддержанная команда — отсутствующая `ВШ` |
+| Контекстное исправление предупреждений | `Ask.UI/Controls/TextEditorControl/Suggestions/InlineCommandSuggestionController.cs` | `WarningSourceSuggestionFactory`, `LiveDiagnosticsController`, `SourceDiagnostic`, оба `TextEditorUI.xaml.cs` |
 | Исполнение программы контроля | `UI/Controls/Runner/RunControl.xaml.cs` | `Ask.UI/Features/ProtocolNew/Execution/ActionExecutor.cs`, `Ask.Engine/ControlCommandExecutor/Execution/CommandExecutionManager.cs` |
 | Общая docking-область исполнителя | `UI/Controls/Runner/RunControl.xaml`, `RunControl.Docking.cs` | [Runner docking layout](#runner-docking-layout), `Ask.UI/ThirdParty/AvalonDock/Integration/ExecutionWorkspace/`, `RunnerDocumentStyle` |
 | AvalonDock и его интеграционный слой | `Ask.UI/ThirdParty/AvalonDock/Integration/ExecutionWorkspace/ExecutionWorkspaceControl.xaml(.cs)` | [AvalonDock execution workspace](#avalondock-execution-workspace), `tools/ExecutionWorkspacePrototype/`, `Ask.UI/ThirdParty/AvalonDock/source/` |
@@ -804,13 +804,16 @@ TextEditorUI (UI / Ask.UI), новый документ или PK/PKW
 Обычная трансляция сохраняет остановку при критической структурной ошибке.
 
 Оба редактора исходной программы подключают `InlineCommandSuggestionController`.
-Фоновая диагностика прикладывает к предупреждению об отсутствующей ВШ точное
-изменение исходника: рассчитанную `CheckVshModel` полную команду и место после блока РМ.
-При наведении на подчёркнутое предупреждение контроллер показывает эту строку
-полупрозрачным текстом, не изменяя документ; `Tab` вставляет её одной операцией Undo,
-а `Esc` или закрытие диагностической карточки скрывает подсказку. Если пользователь
-её игнорирует, штатный `CheckVshModel` по-прежнему добавляет ВШ при трансляции
-и формирует предупреждение.
+Фоновая диагностика прикладывает к предупреждению точное изменение исходника, если
+результат можно получить без пользовательского решения. `WarningSourceSuggestionFactory`
+формирует вставку, замену или удаление для `ЗР`, дублирующихся ключей, игнорируемых
+напряжения и тока, значений по умолчанию СИ/ИЕ/времени, преобразования ПЭ в ПР и
+дополненного диапазона точек. Отсутствующая ВШ обрабатывается отдельно: используется
+рассчитанная `CheckVshModel` полная команда и место после блока РМ. При наведении
+контроллер показывает исправление полупрозрачным текстом, не изменяя документ;
+`Tab` применяет его одной операцией Undo, а `Esc` или закрытие диагностической карточки
+скрывает подсказку. Если пользователь игнорирует предложение, штатная трансляция
+сохраняет прежнее автоматическое поведение и предупреждение.
 
 `ParseSourceCommand` восстанавливает физические номера строк после удаления
 пустых строк и комментариев. Текст до первого корректного заголовка теперь
