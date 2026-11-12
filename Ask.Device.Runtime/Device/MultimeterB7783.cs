@@ -34,7 +34,7 @@ namespace Ask.Device.Runtime.Device
       SelfTestManager = new SelfTestManager();
       DeviceProtocol = new HardwareWatchdogProtocol(
         new UsbProtocol(this, new UsbCommandHandler()),
-        Name, device: this);
+        Name, TimeSpan.FromSeconds(7), this);
       ResistanceCommands = new ResistanceMeasurementProfile()
       {
         Measure = "READ?",

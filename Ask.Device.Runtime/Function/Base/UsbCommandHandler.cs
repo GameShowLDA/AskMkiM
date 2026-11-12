@@ -170,7 +170,7 @@ namespace Ask.Device.Runtime.Function.Base
       using var resourceManager = new ResourceManager();
       string resourceName = FindInstrumentResource(resourceManager, pattern, profile);
 
-      using IVisaSession session = OpenSessionWithRetry(resourceManager, resourceName, profile);
+      using IVisaSession session = OpenSessionWithRetry(resourceManager, resourceName, profile, timeout);
       if (session is not MessageBasedSession messageSession)
       {
         throw new InvalidOperationException($"VISA resource \"{resourceName}\" does not support message-based exchange.");
@@ -183,6 +183,7 @@ namespace Ask.Device.Runtime.Function.Base
 
       try
       {
+        messageSession.Clear();
         messageSession.RawIO.Write(profile.AppendLineEnding ? EnsureLineEnding(command) : command);
 
         if (!command.Contains('?', StringComparison.Ordinal))
@@ -446,6 +447,7 @@ namespace Ask.Device.Runtime.Function.Base
     /// <param name="resourceManager">Менеджер ресурсов VISA.</param>
     /// <param name="resourceName">Имя ресурса VISA.</param>
     /// <param name="profile">Профиль параметров USB-подключения.</param>
+    /// <param name="timeout">Максимальное время открытия сеанса, в миллисекундах.</param>
     /// <returns>Открытый сеанс VISA.</returns>
     /// <exception cref="InvalidOperationException">
     /// Выбрасывается, если не удалось открыть сеанс после всех попыток.
@@ -453,22 +455,28 @@ namespace Ask.Device.Runtime.Function.Base
     private static IVisaSession OpenSessionWithRetry(
       ResourceManager resourceManager,
       string resourceName,
-      UsbConnectedProfile profile)
+      UsbConnectedProfile profile,
+      int timeout)
     {
       Exception? lastError = null;
       int retryCount = profile.OpenRetryCount <= 0 ? 1 : profile.OpenRetryCount;
       int retryDelayMs = Math.Max(0, profile.OpenRetryDelayMs);
+      int openTimeout = timeout <= 0 ? DefaultTimeout : timeout;
 
       for (int attempt = 1; attempt <= retryCount; attempt++)
       {
         try
         {
-          return resourceManager.Open(resourceName);
+          return resourceManager.Open(resourceName, AccessModes.None, openTimeout);
         }
-        catch (Exception ex) when (IsRetryableVisaOpenException(ex) && attempt < retryCount)
+        catch (Exception ex) when (IsRetryableVisaOpenException(ex))
         {
           lastError = ex;
-          Thread.Sleep(retryDelayMs * attempt);
+
+          if (attempt < retryCount && retryDelayMs > 0)
+          {
+            Thread.Sleep(retryDelayMs * attempt);
+          }
         }
       }
 

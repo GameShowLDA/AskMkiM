@@ -5,7 +5,10 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSupply.Capabilities;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Runtime.Device;
 using Ask.Engine.UnitTests.Services.Config;
 using Moq;
@@ -42,6 +45,7 @@ public sealed class B5108SelfTestTests
     var test = Assert.Single(Assert.Single(run.Settings.DeviceResults).Tests);
     Assert.Contains("0,3 В", Assert.Single(test.Errors).Message);
     Assert.Equal(new[] { false, true, false }, run.OutputStates);
+    Assert.Equal(new[] { "DisconnectMultimeter", "DisconnectPINT" }, run.DisconnectOperations);
   }
 
   [Fact]
@@ -59,16 +63,19 @@ public sealed class B5108SelfTestTests
 
     Assert.Equal(new[] { false, true, false }, run.OutputStates);
     Assert.True(run.OutputDisabledDuringFinalization);
+    Assert.Equal(new[] { "DisconnectMultimeter", "DisconnectPINT" }, run.DisconnectOperations);
   }
 
   private sealed class SelfTestRun
   {
     private readonly B5108 _device;
     private readonly IMultimeter _meter;
+    private readonly ISwitchingDevice _switchingDevice;
     private readonly IUserInteractionService _messages = Mock.Of<IUserInteractionService>();
 
     public ActionSettings Settings { get; } = new() { StartDelegate = (_, _, _, _, _) => Task.CompletedTask };
     public List<bool> OutputStates { get; } = [];
+    public List<string> DisconnectOperations { get; } = [];
     public bool OutputDisabledDuringFinalization { get; private set; }
 
     public SelfTestRun(Func<MeasurementRange, double> measure)
@@ -107,13 +114,29 @@ public sealed class B5108SelfTestTests
       meter.SetupGet(x => x.ConnectableManager).Returns(connection.Object);
       meter.SetupGet(x => x.DcVoltageManager).Returns(voltage.Object);
       _meter = meter.Object;
+
+      var connector = new Mock<IConnectorDeviceBusCommutation>();
+      connector.Setup(x => x.ConnectMultimeter(SwitchingBusNew.AB2, It.IsAny<IUserInteractionService>()))
+        .ReturnsAsync(true);
+      connector.Setup(x => x.ConnectPINT(SwitchingBusNew.AB2, It.IsAny<IUserInteractionService>()))
+        .ReturnsAsync(true);
+      connector.Setup(x => x.DisconnectMultimeter(SwitchingBusNew.AB2, It.IsAny<IUserInteractionService>()))
+        .Callback(() => DisconnectOperations.Add("DisconnectMultimeter"))
+        .ReturnsAsync(true);
+      connector.Setup(x => x.DisconnectPINT(SwitchingBusNew.AB2, It.IsAny<IUserInteractionService>()))
+        .Callback(() => DisconnectOperations.Add("DisconnectPINT"))
+        .ReturnsAsync(true);
+      var switchingDevice = new Mock<ISwitchingDevice>();
+      switchingDevice.SetupGet(x => x.ConnectableManager).Returns(connection.Object);
+      switchingDevice.SetupGet(x => x.ConnectorManager).Returns(connector.Object);
+      _switchingDevice = switchingDevice.Object;
     }
 
     public Task StartAsync(CancellationToken cancellationToken = default)
     {
       var manager = _device.SelfTestManager;
       var testType = (Enum)Enum.GetValues(manager.GetTestTypeEnum()).GetValue(0)!;
-      return manager.StartSelfCheck(cancellationToken, testType, Settings, _messages, _device, _meter);
+      return manager.StartSelfCheck(cancellationToken, testType, Settings, _messages, _device, _meter, _switchingDevice);
     }
   }
 }

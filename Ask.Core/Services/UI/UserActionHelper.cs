@@ -227,9 +227,7 @@ namespace Ask.Core.Services.UI
           (hardwareException is DeviceNoResponseException ||
            messageService.GetLastLineNumber() != outputLineBeforeAttempt);
 
-        if (hardwareException is ModuleRelayControlProtocolException or DeviceTransportException &&
-            messageService != null &&
-            !attemptProducedOutput)
+        if (hardwareException != null && messageService != null && !attemptProducedOutput)
         {
           await ShowAttemptResultAsync(messageService, success: false, hardwareException);
           attemptProducedOutput = true;

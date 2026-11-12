@@ -43,6 +43,7 @@ Size/Foreground и анимации общей кнопки; лицензия с
 | Заметки календаря | `UI/Controls/Calendar/CalendarControl.xaml.cs`, `CalendarControl.xaml` | `Ask.Core/Services/Calendar/CalendarNoteService.cs`, `CalendarNote.cs`; [заметки](#calendar-notes) |
 | Запуск приложения | `MainWindow/App.xaml.cs`, `MainWindow/Init/PreStartupInitializer.cs` | `MainWindow/Init/DatabaseInitializer.cs`, `MainWindow/Engine/AppServices.cs`, `MainWindow/MainWindow.xaml.cs` |
 | Версия, история коммитов и идентификация сборки | `Directory.Build.targets`, `Ask.Core/Services/App/ApplicationBuildInfo.cs` | `Ask.UI/Features/BuildDiagnostics/Views/BuildHistoryWindow.xaml`, `UI/Controls/EmptyWorkspace/EmptyWorkspaceView.xaml.cs`, `MainWindow/Init/PreStartupInitializer.cs`, `Ask.Diagnostics/Collectors/SystemInfoCollector.cs`, `Ask.Core/Services/Protocols/ExecutionProtocolHistoryService.cs` |
+| Автономное офлайн-обновление | `tools/AskMkiM.Updater.Builder/`, `tools/AskMkiM.Updater.Stub/` | `tools/AskMkiM.Updater.Core/`, `tools/AskMkiM.Updater.Core.Tests/`, `tools/AskMkiM.Updater/README.md`; [поток обновления](#offline-update-flow) |
 | DI и composition root | `MainWindow/Init/PreStartupInitializer.cs` | `Ask.Diagnostics/Extensions/ServiceCollectionExtensions.cs`, `Ask.Core/Services/App/ServiceLocator.cs`, `MainWindow/Engine/AppServices.cs` |
 | Трансляция программы контроля | `MainWindow/Services/TranslationServices.cs` | `Ask.Engine/ControlCommandAnalyser/CommandTranslationManager.cs`, `Ask.Engine/ControlCommandAnalyser/Parser/`, `Ask.Engine/ControlCommandAnalyser/Formatter/`, `Ask.Engine/ControlCommandAnalyser/Validation/` |
 | Диагностика текста при вводе | `Ask.UI/Controls/TextEditorControl/Diagnostics/LiveDiagnosticsController.cs` | `Ask.Engine/ControlCommandAnalyser/CommandTranslationManager.Diagnostics.cs`, `SourceDiagnostic.cs`, `Ask.UI/Controls/TextEditorControl/Diagnostics/DiagnosticUnderlineRenderer.cs`, оба `TextEditorUI.xaml.cs` |
@@ -198,6 +199,51 @@ startup-загрузка общей UI-модели не зависит от п�
 изоляция ролей, явный 0, перезагрузка модели) и
 `Ask.Engine.UnitTests/DataBase/UserInterfaceAutoLockStorageTests.cs` (migration, SQLite round trip,
 идемпотентный repair). `UiSettingsControl.Loaded` перечитывает модель текущей роли при восстановлении вкладки.
+
+## Offline Update Flow
+
+### Purpose
+
+Отдельный инструмент формирует один автономный EXE из опубликованной сборки AskMkiM
+и устанавливает его на закрытом компьютере без сети и прав администратора. Подсистема
+не входит в runtime основного приложения и не изменяет его composition root.
+
+### Projects and Entry Points
+
+- `tools/AskMkiM.Updater.Builder`: WPF-конструктор. Выбирает каталог опубликованной
+  сборки, читает `build-manifest.json`, использует готовый `AskMkiM.Updater.Stub.exe`
+  и создаёт автономный файл обновления.
+- `tools/AskMkiM.Updater.Stub`: self-contained single-file WPF-установщик для `win-x64`.
+  Читает присоединённый ZIP из собственного EXE, находит AskMkiM по сохранённому или
+  стандартному пути и предлагает выбрать `AskMkiM.exe`, если установка не найдена.
+- `tools/AskMkiM.Updater.Core`: общий манифест, SHA-256, безопасные пути, упаковка,
+  сравнение версий, резервное копирование, замена и автоматический откат.
+- `tools/AskMkiM.Updater/publish.ps1`: публикует конструктор и неизменяемую заготовку
+  установщика. Операционный порядок описан в `tools/AskMkiM.Updater/README.md`.
+
+### Package and Installation Flow
+
+```text
+published AskMkiM directory
+→ UpdateBuilder: version + protected-path filter + SHA-256 manifest + ZIP
+→ copy of self-contained Updater.Stub + appended ZIP/trailer
+→ one AskMkiM_Update_<version>.exe
+→ target selection and installed-version validation
+→ UpdateBackups/<timestamp>_<old>_to_<new>
+→ verified staging extraction
+→ atomic replacement of changed managed files
+→ .askmkim-installed-manifest.json
+→ optional start of updated AskMkiM
+```
+
+`Resources/app.db`, `Resources/role-auth.json`, `Settings`, `Archives`, `History`,
+`Backup`, `Saves`, `logs`, `CrashReports` и `UpdateBackups` защищаются одинаковой
+политикой при формировании и установке. База, данные ролей и `Settings` дополнительно
+копируются в snapshot резервной копии. Устаревшие файлы удаляются только после
+первой установки через этот механизм и только если они присутствовали в предыдущем
+управляемом манифесте. Ошибка после начала замены восстанавливает программные файлы;
+повреждённый пакет, совпадающая сборка, downgrade, запущенный AskMkiM и отсутствие
+прав записи останавливают обновление до изменения целевого каталога.
 
 ## Solution Structure
 
@@ -2155,10 +2201,12 @@ Root-сервисные функции не добавляются в польз
   через `PowerSupplies.GetAllAsync`, определяет `DeviceType.PowerSupply` и получает пункты
   из `IPowerSupply.SelfTestManager.GetTestTypeEnum`. Доступна проверка напряжения.
 - `Ask.Engine/Tests/SelfControl/ModuleSelfExecutor.cs` → `GetFastMeterSafe`
-  (первый настроенный мультиметр) → `ISelfTestCheckerPowerSupply.StartSelfCheck`
+  (первый настроенный мультиметр) + `SwitchingDevices.GetDevicesByNumberChassisAsync`
+  (УКШ того же шасси) → `ISelfTestCheckerPowerSupply.StartSelfCheck`
   → `B5108.SelfTestManager` → `Ask.Device.Runtime/Function/B5108/SelftTest/SelfTestManager.cs`.
 - `StartSelfCheck` добавляет `DeviceExecutionResult` / `TestExecutionResult`, инициализирует
-  источник и мультиметр через их `ConnectableManager.InitializeAsync`, выбирает DCV,
+  источник, мультиметр и УКШ через их `ConnectableManager.InitializeAsync`, затем
+  `ConnectorManager.ConnectMultimeter(AB2)` + `ConnectPINT(AB2)`, выбирает DCV,
   отключает выход, выставляет 0 В и ограничение тока 0,10 А, затем включает выход.
   Для точек 0,1–0,9 В и 1–9 В
   `CheckVoltagePointAsync` задаёт напряжение через `VoltageManager` → `VOLT`, затем
@@ -2170,10 +2218,16 @@ Root-сервисные функции не добавляются в польз
   Ток имеет методы оформления точки, результата, погрешности и брака; измерение тока
   в самоконтроле отсутствует, а `CurrentManager.SetCurrentAsync(0.10m, ...)` задаёт
   защитное ограничение перед включением выхода и после завершения измерений.
-- `finally` в менеджере → `EquipmentExecutionContext.EnterMandatoryFinalization`
-  → если выход ещё не был успешно отключён, `OutputManager.SetOutputStateAsync(false)`
-  → `OUTP OFF` с проверкой readback. При штатном завершении повторная команда отключения
-  не отправляется; при отмене или ошибке обязательная финализация отключает выход.
+- `finally` в менеджере → `EquipmentExecutionContext.EnterMandatoryFinalization`.
+  Независимые шаги финализации выключают выход (если он ещё не отключён), сбрасывают
+  напряжение в 0 В и ток в 0,10 А, затем отключают мультиметр и ПИНТ от AB2. Ошибка
+  одного шага журналируется, но не препятствует следующим; при наличии основной ошибки
+  она сохраняется, а при штатном тесте первая ошибка финализации пробрасывается.
+  Коммутация ПИНТ проходит через `ConnectorManager.SetPINTState` →
+  `DeviceCommand(5, 5, bus, 1|2)` → `DeviceBusCommutationQueryExecutor` → Real/Idle
+  protocol → `DeviceBusCommutationResponseProcessor.CheckEquipmentOperationAsync`;
+  сервис вывода передаётся до response processor, поэтому подключение/отключение попадает
+  в экранный протокол согласно настройкам отображения соединений.
   `Ask.UI/Features/ProtocolNew/Execution/ActionExecutor.cs` исключает `IPowerSupply` из
   общего сброса самоконтроля, чтобы `*RST` не изменял предел тока. Источник остаётся
   в учёте использованных устройств для протокола.
@@ -2569,12 +2623,24 @@ IMultimeter.ConnectableManager.InitializeAsync()
 `HardwareWatchdogProtocol` оборачивает реальные COM/TCP/UDP/USB-протоколы при их создании
 в `DeviceWithCOM`, `DeviceWithIP`, `KeysightDevice`, `MultimeterB7783` и
 `MikUps1101rRmDevice`. Он запускает вызов `IDeviceProtocol.QueryAsync` вне вызывающего потока,
-ожидает не более 5 секунд, отменяет связанный `CancellationToken` и выбрасывает
-`TimeoutException`. Поэтому защищены как вызовы через `DeviceProtocolEmulator`, так и прямые
+ожидает не более 5 секунд и отменяет связанный `CancellationToken`. Если watchdog знает
+устройство, превышение границы всегда преобразуется в `DeviceNoResponseException`, в том
+числе для вызовов с protocol timeout `0`: этот timeout означает отсутствие внутреннего
+ожидания ответа, но не разрешает зависание самой операции. Без устройства сохраняется
+`TimeoutException`. Незавершённая нижележащая задача получает наблюдающий continuation,
+чтобы её позднее исключение не стало `TaskScheduler.UnobservedTaskException`.
+Поэтому защищены как вызовы через `DeviceProtocolEmulator`, так и прямые
 обращения к `device.DeviceProtocol`. `ModeSelectingDeviceProtocol` сохраняет вторую watchdog-
 границу для реальных обращений через Real/Idle-шлюз; холостой режим ей не ограничивается.
 Watchdog ограничивает ожидание вызывающего кода, но не может принудительно завершить уже
 зависший нативный вызов VISA внутри процесса.
+
+`UsbCommandHandler` использует ограниченный таймаутом синхронный VISA write/read. Для каждой
+команды открывается новый сеанс, перед обменом выполняется VISA `Clear`, а после завершения
+сеанс освобождается без автоматической повторной отправки SCPI-команды. Внешняя граница
+watchdog В7-78/3 составляет 7 секунд, поэтому внутренний пятсекундный VISA timeout успевает
+завершить I/O и освободить блокировку протокола. Зависший за пределами своего timeout нативный
+вызов VISA по-прежнему нельзя гарантированно остановить внутри процесса.
 
 Для команды `НЭ` токен `IUserInteractionService.GetCancellationToken()` проходит через
 `NeCommandExecutor → IDiodeMeasurement → DiodeMeasurementBase → MeasurementBase →
@@ -2783,7 +2849,8 @@ same path with gates enabled and performs real transport I/O.
   polls `ReadExisting`. `DeviceWithCOM` owns the resulting `SerialPort` and implements
   `IDisposable`: disposal closes and releases the port even when `Close` reports an error.
 - USB: `UsbProtocol` delegates discovery/commands to `IUsbCommandHandler`;
-  `UsbCommandHandler` includes B7783 and UPS/ViewPower branches.
+  `UsbCommandHandler` includes B7783 and UPS/ViewPower branches; VISA branch clears and recreates
+  its per-command session, while the B7783 watchdog leaves time for the inner VISA timeout.
 
 ### Equipment files
 
@@ -3932,8 +3999,9 @@ SettingsViewModel.SettingsCommand
     `ISwitchingDevice`; операции вызывают application adapters из properties
     устройства, обновляют программный список подключений, а исключения и
     отрицательные результаты записывают в постоянную консоль SetCommand;
-    ПИНТ показан как недоступный, поскольку его runtime-реализация намеренно
-    выбрасывает исключение;
+    ПИНТ в этом сервисном UI по-прежнему показан как временно недоступный, хотя
+    runtime `ConnectorManager` реализует команды ПИНТ для AB2/AB3; самоконтроль
+    Б5-108 вызывает runtime API напрямую;
   - `Ask.UI.Features.ServiceTools.RelaySwitchModule.RelaySwitchModuleControl` —
     сервисное управление выбранным МКР первого шасси: одиночные точки,
     операции с аппаратной проверкой, диапазоны, перевод точки между шинами,
@@ -4097,10 +4165,13 @@ and are displayed in translator/runner error lists.
 таймаутом. ViewPower/ИБП и МИНТ сохраняют прежний путь.
 
 Внешние пятисекундные защиты `HardwareWatchdogProtocol` и `ModeSelectingDeviceProtocol`
-также формируют `DeviceNoResponseException` для ожидаемого ответа, если им передан
+также формируют `DeviceNoResponseException` при превышении длительности операции, если им передан
 `device`. Фабрики эмуляторов передают МКР/УКШ/шасси/мультиметр/GPT; runtime watchdog
-передаёт Keysight/В7-78/3 и GPT. Существующие вызовы без `device` и команды без ожидания
-ответа сохраняют `TimeoutException` как превышение длительности операции.
+передаёт Keysight/В7-78/3 и GPT. Это относится и к protocol-вызовам с `timeout = 0`:
+внутренний транспорт может не ожидать ответ, но зависание вызова остаётся отсутствием
+завершения операции устройства. Вызовы watchdog без `device` сохраняют `TimeoutException`.
+После таймаута watchdog наблюдает позднее завершение нижележащей задачи, исключая вторичный
+`UnobservedTaskException` и дублирующий crash-report.
 
 Оба `AdapterMeasurementExecutor` (`Ask.Device.Runtime/Function/Base/Multimeter/Measurements/Common/AdapterMeasurementResult.cs`
 и `Ask.Device.Application/Execution/AdapterMeasurementResult.cs`) пропускают исключение без превращения в `-1` или
@@ -4164,10 +4235,11 @@ available only after the latest attempt produced a valid equipment response.
 Retries are unlimited, and each retry passes through the original adapter,
 logging, protocol output and driver chain.
 
-`DeviceTransportException` and `ModuleRelayControlProtocolException` are written
-to the execution protocol before the interaction if the failed attempt did not
-already produce output. This keeps the underlying socket/transport reason visible
-while preserving the same Repeat/Finish decision flow. UDP receive timeouts for
+Любое аппаратное исключение, дошедшее до `UserActionHelper`, записывается
+в execution-протокол до показа интерактивных действий, если неудачная попытка ещё
+не сформировала строку сама. Для `DeviceNoResponseException` сохраняется отдельный
+статус `NoResponse`; остальные типы публикуются как ошибка. Это делает причину видимой,
+сохраняя тот же Repeat/Finish flow. UDP receive timeouts for
 MKR/UKSh/chassis use the separate NoResponse path above; MINT retains the
 legacy warning-string contract. Automatic transport retry is intentionally
 limited to `10055` during send, because resending after an uncertain receive could
