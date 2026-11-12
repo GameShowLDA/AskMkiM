@@ -92,6 +92,7 @@ namespace Ask.Core.Services.Errors.Translation
         SourceLineNumber = lineNumber,
         Command = command,
         Code = ErrorCode.Gen_DuplicateCommand,
+        SourceFragment = mnemonic,
         DebugInfo = $"{Path.GetFileName(callerFile)} → {callerName} (строка {callerLine})",
         Description = $"Команда {mnemonic} должна быть только одна"
       };
@@ -138,13 +139,13 @@ namespace Ask.Core.Services.Errors.Translation
       };
 
     /// <summary>
-    /// Возвращает ошибку, если указанная точка не найдена в карте точек RM.
+    /// Возвращает ошибку, если указанная точка не найдена в карте точек РМ.
     /// </summary>
     /// <param name="point">Имя точки, не найденной в карте RM.</param>
     /// <param name="lineNumber">Номер строки, где была использована неизвестная точка.</param>
     /// <param name="command">Текст команды, содержащей неизвестную точку.</param>
     /// <returns>
-    /// Объект <see cref="ErrorItem"/>, описывающий ошибку отсутствия точки в RM.
+    /// Объект <see cref="ErrorItem"/>, описывающий ошибку отсутствия точки в РМ.
     /// </returns>
     public static ErrorItem UnknownPoint(string point, int lineNumber, string command,
       [CallerMemberName] string callerName = "",
@@ -154,8 +155,74 @@ namespace Ask.Core.Services.Errors.Translation
         SourceLineNumber = lineNumber,
         Command = command,
         Code = ErrorCode.Gen_UnknownPoint,
+        SourceFragment = point,
         DebugInfo = $"{Path.GetFileName(callerFile)} → {callerName} (строка {callerLine})",
-        Description = $"Точка '{point}' не найдена в RM"
+        Description = $"Точка '{point}' не найдена в РМ."
+      };
+
+    /// <summary>
+    /// Возвращает одну ошибку для последовательного диапазона точек,
+    /// отсутствующих в карте точек РМ.
+    /// </summary>
+    public static ErrorItem UnknownPoints(
+      string firstPoint,
+      string lastPoint,
+      int lineNumber,
+      string command,
+      string sourceFragment,
+      [CallerMemberName] string callerName = "",
+      [CallerFilePath] string callerFile = "",
+      [CallerLineNumber] int callerLine = 0) => new()
+      {
+        SourceLineNumber = lineNumber,
+        Command = command,
+        Code = ErrorCode.Gen_UnknownPoint,
+        SourceFragment = sourceFragment,
+        DebugInfo = $"{Path.GetFileName(callerFile)} → {callerName} (строка {callerLine})",
+        Description = $"Точки {firstPoint}-{lastPoint} не найдены в РМ."
+      };
+
+    /// <summary>
+    /// Возвращает ошибку конфигурации модуля для одной точки шинной команды.
+    /// </summary>
+    public static ErrorItem BusPointConfiguration(
+      string description,
+      string point,
+      int lineNumber,
+      string command,
+      [CallerMemberName] string callerName = "",
+      [CallerFilePath] string callerFile = "",
+      [CallerLineNumber] int callerLine = 0) => new()
+      {
+        SourceLineNumber = lineNumber,
+        Command = command,
+        Code = ErrorCode.Gen_BusPointConfiguration,
+        SourceFragment = point,
+        DebugInfo = $"{Path.GetFileName(callerFile)} → {callerName} (строка {callerLine})",
+        Description = description
+      };
+
+    /// <summary>
+    /// Возвращает одну ошибку конфигурации модуля для последовательного диапазона
+    /// точек шинной команды.
+    /// </summary>
+    public static ErrorItem BusPointsConfiguration(
+      string description,
+      string firstPoint,
+      string lastPoint,
+      int lineNumber,
+      string command,
+      string sourceFragment,
+      [CallerMemberName] string callerName = "",
+      [CallerFilePath] string callerFile = "",
+      [CallerLineNumber] int callerLine = 0) => new()
+      {
+        SourceLineNumber = lineNumber,
+        Command = command,
+        Code = ErrorCode.Gen_BusPointConfiguration,
+        SourceFragment = sourceFragment,
+        DebugInfo = $"{Path.GetFileName(callerFile)} → {callerName} (строка {callerLine})",
+        Description = $"{description.TrimEnd().TrimEnd('.')}. Затронуты точки {firstPoint}-{lastPoint}."
       };
 
     /// <summary>
@@ -172,9 +239,32 @@ namespace Ask.Core.Services.Errors.Translation
       SourceLineNumber = lineNumber,
       Command = command,
       Code = ErrorCode.Gen_DuplicateDestination,
+      SourceFragment = point,
       DebugInfo = $"{Path.GetFileName(callerFile)} → {callerName} (строка {callerLine})",
-      Description = $"Точка назначения '{point}' используется более одного раза"
+      Description = $"Точка назначения '{point}' используется более одного раза."
     };
+
+    /// <summary>
+    /// Возвращает одну ошибку для последовательного диапазона повторяющихся
+    /// точек назначения команды РМ.
+    /// </summary>
+    public static ErrorItem DuplicateDestinationPoints(
+      string firstPoint,
+      string lastPoint,
+      int lineNumber,
+      string command,
+      string sourceFragment,
+      [CallerMemberName] string callerName = "",
+      [CallerFilePath] string callerFile = "",
+      [CallerLineNumber] int callerLine = 0) => new()
+      {
+        SourceLineNumber = lineNumber,
+        Command = command,
+        Code = ErrorCode.Gen_DuplicateDestination,
+        SourceFragment = sourceFragment,
+        DebugInfo = $"{Path.GetFileName(callerFile)} → {callerName} (строка {callerLine})",
+        Description = $"Точки назначения {firstPoint}-{lastPoint} используются более одного раза."
+      };
 
     /// <summary>
     /// Возвращает ошибку, если совершена попытка добавить схему с дублирующими точками.
@@ -230,9 +320,26 @@ namespace Ask.Core.Services.Errors.Translation
       SourceLineNumber = lineNumber,
       Command = command,
       Description = $"Неизвестная команда {mnemonic}",
+      SourceFragment = mnemonic,
       DebugInfo = $"{Path.GetFileName(callerFile)} → {callerName} (строка {callerLine})",
       Code = ErrorCode.Gen_UnknownCommand
     };
+
+    /// <summary>
+    /// Возвращает ошибку для слитно записанных номера и мнемоники команды.
+    /// </summary>
+    public static ErrorItem InvalidCommandHeader(string token, int lineNumber, string command,
+      [CallerMemberName] string callerName = "",
+      [CallerFilePath] string callerFile = "",
+      [CallerLineNumber] int callerLine = 0) => new()
+      {
+        SourceLineNumber = lineNumber,
+        Command = command,
+        Description = $"Некорректный заголовок команды '{token}'. Между номером команды и мнемоникой должен быть пробел.",
+        SourceFragment = token,
+        DebugInfo = $"{Path.GetFileName(callerFile)} → {callerName} (строка {callerLine})",
+        Code = ErrorCode.Gen_UnknownCommand
+      };
 
     /// <summary>
     /// Возвращает ошибку, если ключ нельзя использовать для указанной команды.
@@ -250,6 +357,7 @@ namespace Ask.Core.Services.Errors.Translation
         SourceLineNumber = lineNumber,
         Command = command,
         Description = $"Для команды {mnemonic} недопустимо использование ключа {key}",
+        SourceFragment = key,
         DebugInfo = $"{Path.GetFileName(callerFile)} → {callerName} (строка {callerLine})",
         Code = ErrorCode.Gen_WrongKey
       };
@@ -269,8 +377,44 @@ namespace Ask.Core.Services.Errors.Translation
       Command = command,
       Code = ErrorCode.Gen_UnrecognizedParameters,
       DebugInfo = $"{Path.GetFileName(callerFile)} → {callerName} (строка {callerLine})",
-      Description = $"Обнаружены нераспознанные параметры: {unparsed}"
+      Description = $"Обнаружены нераспознанные параметры: {unparsed}",
+      SourceFragment = unparsed
     };
+
+    /// <summary>
+    /// Возвращает резервную синтаксическую ошибку, когда транслятор не смог
+    /// отнести фрагмент к более точному виду ошибки.
+    /// </summary>
+    public static ErrorItem CannotParseFragment(string fragment, int lineNumber, string command,
+      [CallerMemberName] string callerName = "",
+      [CallerFilePath] string callerFile = "",
+      [CallerLineNumber] int callerLine = 0) => new()
+      {
+        SourceLineNumber = lineNumber,
+        Command = command,
+        Code = ErrorCode.Gen_UnrecognizedParameters,
+        DebugInfo = $"{Path.GetFileName(callerFile)} → {callerName} (строка {callerLine})",
+        Description = $"Не удалось разобрать фрагмент: {fragment}",
+        SourceFragment = fragment
+      };
+
+    /// <summary>
+    /// Возвращает ошибку для испорченной мнемоники, из которой удалось однозначно
+    /// восстановить мнемонику штатного парсера.
+    /// </summary>
+    public static ErrorItem InvalidCommandMnemonic(string sourceMnemonic, string recoveredMnemonic,
+      int lineNumber, string command,
+      [CallerMemberName] string callerName = "",
+      [CallerFilePath] string callerFile = "",
+      [CallerLineNumber] int callerLine = 0) => new()
+      {
+        SourceLineNumber = lineNumber,
+        Command = command,
+        Code = ErrorCode.Gen_UnknownCommand,
+        DebugInfo = $"{Path.GetFileName(callerFile)} → {callerName} (строка {callerLine})",
+        Description = $"Мнемоника команды '{sourceMnemonic}' записана некорректно. Предположено: {recoveredMnemonic}.",
+        SourceFragment = sourceMnemonic
+      };
 
     public static ErrorItem CommaStarError(int lineNumber, string command, [CallerMemberName] string callerName = "", [CallerFilePath] string callerFile = "", [CallerLineNumber] int callerLine = 0) => new()
     {
@@ -278,7 +422,8 @@ namespace Ask.Core.Services.Errors.Translation
       Command = command,
       Code = ErrorCode.Gen_CommaStar,
       DebugInfo = $"{Path.GetFileName(callerFile)} → {callerName} (строка {callerLine})",
-      Description = $"Обнаружена недопустимая последовательность - \",*\""
+      Description = $"Обнаружена недопустимая последовательность - \",*\"",
+      SourceFragment = ",*"
     };
 
     /// <summary>
@@ -380,7 +525,8 @@ namespace Ask.Core.Services.Errors.Translation
     /// <returns>
     /// Объект <see cref="ErrorItem"/>, описывающий ошибку: команда не распознана.
     /// </returns>
-    public static ErrorItem InvalidParameterOrder(string mnemonic, int lineNumber, string command, string descr,
+    public static ErrorItem InvalidParameterOrder(
+      string mnemonic, int lineNumber, string command, string descr, string? sourceFragment,
       [CallerMemberName] string callerName = "",
       [CallerFilePath] string callerFile = "",
       [CallerLineNumber] int callerLine = 0) => new()
@@ -388,6 +534,7 @@ namespace Ask.Core.Services.Errors.Translation
         SourceLineNumber = lineNumber,
         Command = command,
         Description = $"{descr}",
+        SourceFragment = sourceFragment,
         DebugInfo = $"{Path.GetFileName(callerFile)} → {callerName} (строка {callerLine})",
         Code = ErrorCode.Gen_InvalidParameterOrder
       };

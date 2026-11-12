@@ -211,7 +211,8 @@ namespace Ask.Core.Services.Errors.Translation
         Command = command,
         Code = ErrorCode.Pr_CannotParseParameters,
         DebugInfo = $"{Path.GetFileName(callerFile)} → {callerName} (строка {callerLine})",
-        Description = $"Не удалось распознать параметры: {parameters}"
+        Description = $"Не удалось распознать параметры: {parameters}",
+        SourceFragment = parameters
       };
     /// <summary>
     /// Ошибка: предыдущая коамнда не имеет точек для проверки.

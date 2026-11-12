@@ -189,6 +189,9 @@ public class KcCommandParserTests : IClassFixture<FastMeterDbFixture>, IDisposab
     var model = ParseBody("*X1,X2* 10<Ом<15");
 
     AssertErrorCodes(model, ErrorCode.Ks_InvalidParameterOrder);
+    Assert.Equal(
+      "*X1,X2*",
+      Assert.Single(model.Errors, error => error.Code == ErrorCode.Ks_InvalidParameterOrder).SourceFragment);
     Assert.Equal(10, model.LowerLimitResistance);
     Assert.Equal(15, model.HigherLimitResistance);
     Assert.NotNull(model.Scheme);
@@ -294,8 +297,33 @@ public class KcCommandParserTests : IClassFixture<FastMeterDbFixture>, IDisposab
     var model = ParseBody("10<Ом<15 *X1*");
 
     AssertErrorCodes(model, ErrorCode.Gen_InvalidOnePointUse);
+    Assert.Equal(
+      "X1",
+      Assert.Single(model.Errors, error => error.Code == ErrorCode.Gen_InvalidOnePointUse).SourceFragment);
     Assert.NotNull(model.Scheme);
     Assert.Equal(1, model.Scheme.CountPoints());
+  }
+
+  [Fact(DisplayName = "КС парсер: неверная ссылка ССИРТ сохраняется как точный исходный фрагмент")]
+  public void Parse_WithMissingPointsReference_PreservesReferenceAsSourceFragment()
+  {
+    var model = ParseBody("10<Ом<15 *^999*");
+
+    var error = Assert.Single(
+      model.Errors,
+      item => item.Code == ErrorCode.Gen_InvalidReference);
+    Assert.Equal("^999", error.SourceFragment);
+  }
+
+  [Fact(DisplayName = "КС парсер: недопустимая последовательность запятая-звёздочка подчёркивается точно")]
+  public void Parse_WithCommaStar_PreservesSeparatorAsSourceFragment()
+  {
+    var model = ParseBody("10<Ом<15 *X1,*X2*");
+
+    var error = Assert.Single(
+      model.Errors,
+      item => item.Code == ErrorCode.Gen_CommaStar);
+    Assert.Equal(",*", error.SourceFragment);
   }
 
   /// <summary>

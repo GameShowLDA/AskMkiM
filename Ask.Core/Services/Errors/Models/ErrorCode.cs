@@ -40,7 +40,7 @@ namespace Ask.Core.Services.Errors.Models
     [ErrorCodeTag("GEN005")]
     Gen_MissingPointsMap,
 
-    /// <summary> В команде используется точка, отсутствующая в карте точек RM. </summary>
+    /// <summary> В команде используется точка или диапазон, отсутствующий в карте точек РМ. </summary>
     [ErrorCodeTag("GEN006")]
     Gen_UnknownPoint,
 
@@ -123,6 +123,10 @@ namespace Ask.Core.Services.Errors.Models
     /// <summary> В записи точек присутсвует недопустимая последовательность - ,*. </summary>
     [ErrorCodeTag("GEN026")]
     Gen_CommaStar,
+
+    /// <summary> Точки ОТ/ПТ относятся к отсутствующему модулю или к неподдерживаемой им шине. </summary>
+    [ErrorCodeTag("GEN027")]
+    Gen_BusPointConfiguration,
 
     #endregion
 
