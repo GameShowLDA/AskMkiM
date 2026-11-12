@@ -64,6 +64,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         command.SourceLines);
 
       SetActiveLine(context, command);
+      AddCommandSummaryToProtocol(command, protocolModel);
 
       await DeviceManager.ShowDevicesPreparationMessageIfNeededAsync(context);
 
@@ -174,6 +175,30 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         await siCommandExecutor.ExecuteAsync(commandExecutionContext, protocolModel);
       }
     }
+
+    internal static void AddCommandSummaryToProtocol(PiCommandModel command, ProtocolModel protocolModel)
+    {
+      ArgumentNullException.ThrowIfNull(command);
+      ArgumentNullException.ThrowIfNull(protocolModel);
+
+      if (string.IsNullOrWhiteSpace(command.VoltageSource) ||
+          string.IsNullOrWhiteSpace(command.TimeSource))
+      {
+        return;
+      }
+
+      var commandName = $"{command.CommandNumber} {command.Mnemonic}";
+      if (!protocolModel.Info.TryGetValue(commandName, out var messages))
+      {
+        messages = new List<ShowMessageModel>();
+        protocolModel.Info[commandName] = messages;
+      }
+
+      messages.Add(MeasurementMessages.BuildInsulationStrengthCommandSummary(
+        command.VoltageSource,
+        command.TimeSource));
+    }
+
     private async Task SettingBreakdown(IBreakdownTester breakDown, IUserInteractionService userMessageService, double time, double voltage, VoltageEnum.Type voltageType)
     {
       string name = breakDown.Name;
