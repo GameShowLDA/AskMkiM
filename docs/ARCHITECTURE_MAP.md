@@ -943,7 +943,9 @@ CommandExecutionManager.ExecuteAllCoreAsync loop
 признак вопроса: `40 ЦУ Тест?` → `MessageText = "Тест"`,
 `40 ЦУ Тест??` → `MessageText = "Тест?"`. Остальные знаки сохраняются;
 `SourceLines` содержит исходный текст. `CuCommandExecutor.ShowQuestionDialog`
-передаёт `MessageText` в окно с заголовком `ПОДТВЕРДИТЬ?`.
+передаёт `MessageText` в окно с заголовком `ПОДТВЕРДИТЬ?`. При ключе `Д`
+исполнитель также добавляет `MessageText` в `ProtocolModel.Info`, поэтому итоговый
+протокол содержит строку `DOC <номер> ЦУ: <текст>`.
 
 ```text
 CuCommandExecutor.ExecuteAsync
