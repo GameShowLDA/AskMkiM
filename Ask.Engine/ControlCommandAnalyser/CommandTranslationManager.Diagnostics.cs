@@ -33,6 +33,9 @@ public partial class CommandTranslationManager
     CommandPostAnalyzer.Analyze(models);
     cancellationToken.ThrowIfCancellationRequested();
 
+    VshCommandModel? generatedVsh = null;
+    RmCommandModel? vshInsertionRm = null;
+
     // An automatically inserted VSH has no source span. Attach its warning to RM.
     foreach (var generated in models.Except(sourceModels))
     {
@@ -43,9 +46,92 @@ public partial class CommandTranslationManager
         warning.SourceLineNumber = rm.StartLineNumber;
         rm.Warnings.Add(warning);
       }
+
+      if (generated is VshCommandModel vsh)
+      {
+        generatedVsh = vsh;
+        vshInsertionRm = rm;
+      }
     }
 
-    return MapDiagnostics(text, sourceModels, cancellationToken);
+    var diagnostics = MapDiagnostics(text, sourceModels, cancellationToken);
+    if (generatedVsh == null || vshInsertionRm == null)
+    {
+      return diagnostics;
+    }
+
+    var suggestion = CreateVshSourceSuggestion(text, sourceModels, vshInsertionRm, generatedVsh);
+    var warningCode = WarningCode.Gen_VshCommandAddedAutomatically.ToString();
+    return diagnostics
+      .Select(diagnostic => diagnostic.Code == warningCode
+        ? diagnostic with { Suggestion = suggestion }
+        : diagnostic)
+      .ToArray();
+  }
+
+  internal static SourceTextSuggestion CreateVshSourceSuggestion(
+    string text,
+    IReadOnlyList<BaseCommandModel> sourceModels,
+    RmCommandModel rm,
+    VshCommandModel vsh)
+  {
+    var lines = GetSourceLines(text);
+    int rmIndex = -1;
+    for (int index = 0; index < sourceModels.Count; index++)
+    {
+      if (!ReferenceEquals(sourceModels[index], rm)) continue;
+      rmIndex = index;
+      break;
+    }
+    int nextLineIndex = rmIndex >= 0 && rmIndex + 1 < sourceModels.Count
+      ? Math.Clamp(sourceModels[rmIndex + 1].StartLineNumber - 1, 0, lines.Count)
+      : lines.Count;
+    int insertionLineIndex = nextLineIndex;
+
+    while (insertionLineIndex > rm.StartLineNumber
+      && string.IsNullOrWhiteSpace(lines[insertionLineIndex - 1].Text))
+    {
+      insertionLineIndex--;
+    }
+
+    string command = vsh.SourceLines.FirstOrDefault()
+      ?? $"{vsh.CommandNumber} {vsh.Mnemonic} 2Ш";
+    string newLine = DetectNewLine(text);
+
+    if (insertionLineIndex < lines.Count)
+    {
+      int offset = lines[insertionLineIndex].Offset;
+      return new SourceTextSuggestion(offset, command + newLine, command);
+    }
+
+    bool startsOnNextLine = text.Length > 0 && text[^1] is not ('\r' or '\n');
+    string insertedText = startsOnNextLine ? newLine + command : command;
+    return new SourceTextSuggestion(text.Length, insertedText, command, startsOnNextLine);
+  }
+
+  private static List<(int Offset, string Text)> GetSourceLines(string text)
+  {
+    var lines = new List<(int Offset, string Text)>();
+    for (int start = 0, i = 0; i <= text.Length; i++)
+    {
+      if (i < text.Length && text[i] is not ('\r' or '\n')) continue;
+      lines.Add((start, text[start..i]));
+      if (i < text.Length && text[i] == '\r' && i + 1 < text.Length && text[i + 1] == '\n') i++;
+      start = i + 1;
+    }
+
+    return lines;
+  }
+
+  private static string DetectNewLine(string text)
+  {
+    int lineFeed = text.IndexOf('\n');
+    if (lineFeed >= 0)
+    {
+      return lineFeed > 0 && text[lineFeed - 1] == '\r' ? "\r\n" : "\n";
+    }
+
+    return text.Contains('\r') ? "\r" : Environment.NewLine;
   }
 
   internal static IReadOnlyList<SourceDiagnostic> MapDiagnostics(

@@ -6,12 +6,20 @@
       <StackPanel>
         <TextBlock x:Name="Heading" Text="Ошибка" FontWeight="SemiBold" Margin="0,0,0,4" />
         <TextBlock Text="{Binding Description}" TextWrapping="Wrap" />
+        <TextBlock x:Name="SuggestionHint"
+                   Text="Tab — добавить предложенную команду"
+                   Margin="0,6,0,0"
+                   FontWeight="SemiBold"
+                   Opacity="0.75" />
       </StackPanel>
     </Border>
     <DataTemplate.Triggers>
       <DataTrigger Binding="{Binding IsWarning}" Value="True">
         <Setter TargetName="Entry" Property="BorderBrush" Value="Gold" />
         <Setter TargetName="Heading" Property="Text" Value="Предупреждение" />
+      </DataTrigger>
+      <DataTrigger Binding="{Binding Suggestion}" Value="{x:Null}">
+        <Setter TargetName="SuggestionHint" Property="Visibility" Value="Collapsed" />
       </DataTrigger>
     </DataTemplate.Triggers>
   </DataTemplate>
