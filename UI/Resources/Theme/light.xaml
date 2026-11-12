@@ -82,6 +82,29 @@
     <SolidColorBrush x:Key="PowerButtonOffForegroundBrush" Color="#F8FBFF"/>
     <SolidColorBrush x:Key="ActiveColorBrushes" Color="#90465945"/>
     <SolidColorBrush x:Key="IsCheckedColorSolidColorBrush" Color="#dedddf"/>
+
+    <!-- Диалоги MessageBoxCustom -->
+    <SolidColorBrush x:Key="MessageBoxCardBackgroundBrush" Color="#F2EDF5"/>
+    <SolidColorBrush x:Key="MessageBoxBodyBackgroundBrush" Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="MessageBoxBorderBrush" Color="#B7AFBD"/>
+    <SolidColorBrush x:Key="MessageBoxHeaderBackgroundBrush" Color="#665073"/>
+    <SolidColorBrush x:Key="MessageBoxHeaderForegroundBrush" Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="MessageBoxTextPrimaryBrush" Color="#2C2532"/>
+    <SolidColorBrush x:Key="MessageBoxIconBackgroundBrush" Color="#F5F0F7"/>
+    <SolidColorBrush x:Key="MessageBoxIconBorderBrush" Color="#CBBED4"/>
+    <SolidColorBrush x:Key="MessageBoxNeutralButtonBackgroundBrush" Color="#E1E4E8"/>
+    <SolidColorBrush x:Key="MessageBoxNeutralButtonHoverBackgroundBrush" Color="#D4D9DF"/>
+    <SolidColorBrush x:Key="MessageBoxNeutralButtonForegroundBrush" Color="#2E333A"/>
+    <SolidColorBrush x:Key="MessageBoxActionButtonBackgroundBrush" Color="#704C9B"/>
+    <SolidColorBrush x:Key="MessageBoxActionButtonHoverBackgroundBrush" Color="#805CAD"/>
+    <SolidColorBrush x:Key="MessageBoxActionButtonForegroundBrush" Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="MessageBoxDangerButtonBackgroundBrush" Color="#CF5258"/>
+    <SolidColorBrush x:Key="MessageBoxDangerButtonHoverBackgroundBrush" Color="#DD6268"/>
+    <SolidColorBrush x:Key="MessageBoxDangerButtonForegroundBrush" Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="MessageBoxQuestionAccentBrush" Color="#704C9B"/>
+    <SolidColorBrush x:Key="MessageBoxQuestionForegroundBrush" Color="#FFFFFF"/>
+    <sys:Double x:Key="MessageBoxShadowOpacity">0.18</sys:Double>
+
     <SolidColorBrush x:Key="TopPanelTabsHostBackgroundBrush" Color="#EDE6EE"/>
     <SolidColorBrush x:Key="TopPanelTabBackgroundBrush" Color="#D8CFE0"/>
     <SolidColorBrush x:Key="TopPanelTabForegroundBrush" Color="#66596F"/>

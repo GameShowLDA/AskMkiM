@@ -87,6 +87,29 @@
     <SolidColorBrush x:Key="PowerButtonOffForegroundBrush" Color="#EAF0FA"/>
     <SolidColorBrush x:Key="ActiveColorBrushes" Color="#1ca3e9"/>
     <SolidColorBrush x:Key="IsCheckedColorSolidColorBrush" Color="#1f242b"/>
+
+    <!-- Диалоги MessageBoxCustom -->
+    <SolidColorBrush x:Key="MessageBoxCardBackgroundBrush" Color="#212A36"/>
+    <SolidColorBrush x:Key="MessageBoxBodyBackgroundBrush" Color="#1B2430"/>
+    <SolidColorBrush x:Key="MessageBoxBorderBrush" Color="#4D5B70"/>
+    <SolidColorBrush x:Key="MessageBoxHeaderBackgroundBrush" Color="#4E3D61"/>
+    <SolidColorBrush x:Key="MessageBoxHeaderForegroundBrush" Color="#FAF7FD"/>
+    <SolidColorBrush x:Key="MessageBoxTextPrimaryBrush" Color="#F0EBF5"/>
+    <SolidColorBrush x:Key="MessageBoxIconBackgroundBrush" Color="#2D2537"/>
+    <SolidColorBrush x:Key="MessageBoxIconBorderBrush" Color="#584867"/>
+    <SolidColorBrush x:Key="MessageBoxNeutralButtonBackgroundBrush" Color="#334255"/>
+    <SolidColorBrush x:Key="MessageBoxNeutralButtonHoverBackgroundBrush" Color="#405268"/>
+    <SolidColorBrush x:Key="MessageBoxNeutralButtonForegroundBrush" Color="#E8EEF7"/>
+    <SolidColorBrush x:Key="MessageBoxActionButtonBackgroundBrush" Color="#7453A6"/>
+    <SolidColorBrush x:Key="MessageBoxActionButtonHoverBackgroundBrush" Color="#8664B8"/>
+    <SolidColorBrush x:Key="MessageBoxActionButtonForegroundBrush" Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="MessageBoxDangerButtonBackgroundBrush" Color="#D95757"/>
+    <SolidColorBrush x:Key="MessageBoxDangerButtonHoverBackgroundBrush" Color="#E26868"/>
+    <SolidColorBrush x:Key="MessageBoxDangerButtonForegroundBrush" Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="MessageBoxQuestionAccentBrush" Color="#7453A6"/>
+    <SolidColorBrush x:Key="MessageBoxQuestionForegroundBrush" Color="#FFFFFF"/>
+    <sys:Double x:Key="MessageBoxShadowOpacity">0.45</sys:Double>
+
     <SolidColorBrush x:Key="TopPanelTabsHostBackgroundBrush" Color="#18141F"/>
     <LinearGradientBrush x:Key="TopPanelTabBackgroundBrush" StartPoint="0,0" EndPoint="0,1">
         <GradientStop Color="#3A3146" Offset="0"/>

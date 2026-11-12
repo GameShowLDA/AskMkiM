@@ -1,5 +1,6 @@
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace Message
 {
@@ -52,16 +53,25 @@ namespace Message
           break;
 
         case MessageBoxImage.Question:
-          var question = new Icon.QuestionIcon { Size = 50 };
-          TopPanel.Background = question.CircleColor;
-          BorderWin.BorderBrush = question.CircleColor;
-          Header.Foreground = question.IconStrokeColor;
+          var question = new Icon.QuestionIcon
+          {
+            Size = 50,
+            CircleColor = FindThemeBrush(
+              "MessageBoxQuestionAccentBrush",
+              new SolidColorBrush(Color.FromRgb(0x74, 0x53, 0xA6))),
+            IconStrokeColor = FindThemeBrush(
+              "MessageBoxQuestionForegroundBrush",
+              Brushes.White),
+          };
           IconContainer.Children.Add(question);
           break;
       }
 
       VisibleButton(messageBoxButton);
     }
+
+    private Brush FindThemeBrush(string resourceKey, Brush fallback) =>
+      TryFindResource(resourceKey) as Brush ?? fallback;
 
     private void VisibleButton(MessageBoxButton messageBoxButton)
     {
