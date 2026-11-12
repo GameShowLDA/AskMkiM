@@ -151,7 +151,7 @@ namespace Ask.Core.Services.Errors.Translation
     {
       SourceLineNumber = startLineNumber,
       Command = command,
-      Code = WarningCode.Gen_IgnoreVoltage,
+      Code = WarningCode.Gen_IgnoreAmperage,
       Description = $"Значение силы тока игнорируется",
     };
 
