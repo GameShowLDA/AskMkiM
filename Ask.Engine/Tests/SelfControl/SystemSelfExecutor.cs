@@ -6,6 +6,7 @@ using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.DataBase.Engine.Static.Devices;
 using Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck;
 using static Ask.Device.Runtime.Function.GPT.SelfCheck.SelfTestManager;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Ask.Engine.Tests.SelfControl
 {
@@ -85,6 +86,19 @@ namespace Ask.Engine.Tests.SelfControl
           breakdownTester,
           dbc,
           meter);
+      }
+
+      var powerSupply = (await PowerSupplies.GetDevicesByNumberChassisAsync(managerShassi.Number)).FirstOrDefault();
+      if (powerSupply != null)
+      {
+        await powerSupply.SelfTestManager.StartSelfCheck(
+          _messageService.GetCancellationToken(),
+          Ask.Device.Runtime.Function.B5108.SelftTest.SelfTestManager.TypeConnector.Voltage,
+          settings,
+          _messageService,
+          powerSupply,
+          meter,
+          dbc);
       }
     }
   }

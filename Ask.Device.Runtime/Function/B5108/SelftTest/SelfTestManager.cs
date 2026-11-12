@@ -16,9 +16,9 @@ using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.Device.Runtime.Function.B5108.SelftTest;
 
-internal sealed class SelfTestManager : ISelfTestCheckerPowerSupply
+public sealed class SelfTestManager : ISelfTestCheckerPowerSupply
 {
-  private enum TypeConnector
+  public enum TypeConnector
   {
     [Description("Проверка напряжения")]
     Voltage = 1,
