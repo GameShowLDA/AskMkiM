@@ -4059,7 +4059,9 @@ SettingsViewModel.SettingsCommand
 
 Dialogs:
 
-- `Message.MessageBoxCustom` — generic modal messages;
+- `Message.MessageBoxCustom` — generic modal messages; поверхности, текст, кнопки и тень
+  используют ресурсы `MessageBox*` из текущих `dark.xaml`/`light.xaml`, custom-темы
+  наследуют их, а вопрос и основное действие используют фиолетовый акцент;
 - ProtocolUI drawers/overlays — pause/retry/selection actions;
 - `NotificationHostService` — non-modal notifications;
 - `RoleLoginWindow` — authentication/loading startup UI.

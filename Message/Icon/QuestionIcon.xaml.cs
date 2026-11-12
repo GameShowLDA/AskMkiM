@@ -37,7 +37,7 @@ namespace Message.Icon
 
     public static readonly DependencyProperty CircleColorProperty =
         DependencyProperty.Register(nameof(CircleColor), typeof(Brush), typeof(QuestionIcon),
-            new PropertyMetadata(new SolidColorBrush(Colors.DodgerBlue)));
+            new PropertyMetadata(new SolidColorBrush(Color.FromRgb(0x74, 0x53, 0xA6))));
 
     public Brush CircleColor
     {

@@ -17,20 +17,9 @@
         FontSize="14"
         SizeToContent="Height">
     <Window.Resources>
-        <SolidColorBrush x:Key="WindowCardBackgroundBrush" Color="#212A36"/>
-        <SolidColorBrush x:Key="WindowBodyBackgroundBrush" Color="#1B2430"/>
-        <SolidColorBrush x:Key="TextPrimaryBrush" Color="#E8EEF7"/>
-        <SolidColorBrush x:Key="TextSecondaryBrush" Color="#B7C3D4"/>
-        <SolidColorBrush x:Key="ButtonNeutralBrush" Color="#334255"/>
-        <SolidColorBrush x:Key="ButtonNeutralHoverBrush" Color="#405268"/>
-        <SolidColorBrush x:Key="ButtonActionBrush" Color="#2A9D8F"/>
-        <SolidColorBrush x:Key="ButtonActionHoverBrush" Color="#34B5A5"/>
-        <SolidColorBrush x:Key="ButtonDangerBrush" Color="#D95757"/>
-        <SolidColorBrush x:Key="ButtonDangerHoverBrush" Color="#E26868"/>
-
         <Style x:Key="BaseButtonStyle" TargetType="Button">
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="Background" Value="{StaticResource ButtonNeutralBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource MessageBoxNeutralButtonForegroundBrush}"/>
+            <Setter Property="Background" Value="{DynamicResource MessageBoxNeutralButtonBackgroundBrush}"/>
             <Setter Property="BorderBrush" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Cursor" Value="Hand"/>
@@ -68,37 +57,40 @@
         </Style>
 
         <Style x:Key="OkButtonStyle" TargetType="Button" BasedOn="{StaticResource BaseButtonStyle}">
-            <Setter Property="Background" Value="{StaticResource ButtonActionBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource MessageBoxActionButtonForegroundBrush}"/>
+            <Setter Property="Background" Value="{DynamicResource MessageBoxActionButtonBackgroundBrush}"/>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="{StaticResource ButtonActionHoverBrush}"/>
+                    <Setter Property="Background" Value="{DynamicResource MessageBoxActionButtonHoverBackgroundBrush}"/>
                 </Trigger>
             </Style.Triggers>
         </Style>
 
         <Style x:Key="CancelButtonStyle" TargetType="Button" BasedOn="{StaticResource BaseButtonStyle}">
-            <Setter Property="Background" Value="{StaticResource ButtonNeutralBrush}"/>
+            <Setter Property="Background" Value="{DynamicResource MessageBoxNeutralButtonBackgroundBrush}"/>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="{StaticResource ButtonNeutralHoverBrush}"/>
+                    <Setter Property="Background" Value="{DynamicResource MessageBoxNeutralButtonHoverBackgroundBrush}"/>
                 </Trigger>
             </Style.Triggers>
         </Style>
 
         <Style x:Key="YesButtonStyle" TargetType="Button" BasedOn="{StaticResource BaseButtonStyle}">
-            <Setter Property="Background" Value="{StaticResource ButtonActionBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource MessageBoxActionButtonForegroundBrush}"/>
+            <Setter Property="Background" Value="{DynamicResource MessageBoxActionButtonBackgroundBrush}"/>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="{StaticResource ButtonActionHoverBrush}"/>
+                    <Setter Property="Background" Value="{DynamicResource MessageBoxActionButtonHoverBackgroundBrush}"/>
                 </Trigger>
             </Style.Triggers>
         </Style>
 
         <Style x:Key="NoButtonStyle" TargetType="Button" BasedOn="{StaticResource BaseButtonStyle}">
-            <Setter Property="Background" Value="{StaticResource ButtonDangerBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource MessageBoxDangerButtonForegroundBrush}"/>
+            <Setter Property="Background" Value="{DynamicResource MessageBoxDangerButtonBackgroundBrush}"/>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="{StaticResource ButtonDangerHoverBrush}"/>
+                    <Setter Property="Background" Value="{DynamicResource MessageBoxDangerButtonHoverBackgroundBrush}"/>
                 </Trigger>
             </Style.Triggers>
         </Style>
@@ -106,12 +98,15 @@
 
     <Grid Margin="20">
         <Border x:Name="BorderWin"
-                Background="{StaticResource WindowCardBackgroundBrush}"
-                BorderBrush="#4D5B70"
+                Background="{DynamicResource MessageBoxCardBackgroundBrush}"
+                BorderBrush="{DynamicResource MessageBoxBorderBrush}"
                 BorderThickness="1"
                 CornerRadius="16">
             <Border.Effect>
-                <DropShadowEffect Color="#000000" BlurRadius="28" ShadowDepth="0" Opacity="0.45"/>
+                <DropShadowEffect Color="#000000"
+                                  BlurRadius="28"
+                                  ShadowDepth="0"
+                                  Opacity="{DynamicResource MessageBoxShadowOpacity}"/>
             </Border.Effect>
 
             <Grid>
@@ -123,19 +118,19 @@
 
                 <Border x:Name="TopPanel"
                         Grid.Row="0"
-                        Background="#2B3B50"
+                        Background="{DynamicResource MessageBoxHeaderBackgroundBrush}"
                         CornerRadius="16,16,0,0"
                         Padding="22,14,22,14">
                     <TextBlock x:Name="Header"
                                Text="Заголовок сообщения"
-                               Foreground="{StaticResource TextPrimaryBrush}"
+                               Foreground="{DynamicResource MessageBoxHeaderForegroundBrush}"
                                FontSize="19"
                                FontWeight="SemiBold"
                                TextTrimming="CharacterEllipsis"/>
                 </Border>
 
                 <Border Grid.Row="1"
-                        Background="{StaticResource WindowBodyBackgroundBrush}"
+                        Background="{DynamicResource MessageBoxBodyBackgroundBrush}"
                         Padding="22,18,22,20">
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -146,8 +141,8 @@
                         <Border Width="56"
                                 Height="56"
                                 CornerRadius="28"
-                                Background="#223145"
-                                BorderBrush="#3C4F66"
+                                Background="{DynamicResource MessageBoxIconBackgroundBrush}"
+                                BorderBrush="{DynamicResource MessageBoxIconBorderBrush}"
                                 BorderThickness="1"
                                 VerticalAlignment="Top">
                             <StackPanel x:Name="IconContainer"
@@ -158,7 +153,7 @@
                         <TextBlock x:Name="MessageText"
                                    Grid.Column="1"
                                    Margin="16,2,0,0"
-                                   Foreground="{StaticResource TextPrimaryBrush}"
+                                   Foreground="{DynamicResource MessageBoxTextPrimaryBrush}"
                                    FontFamily="Segoe UI"
                                    FontSize="20"
                                    TextWrapping="Wrap"
@@ -167,7 +162,7 @@
                 </Border>
 
                 <Border Grid.Row="2"
-                        Background="{StaticResource WindowCardBackgroundBrush}"
+                        Background="{DynamicResource MessageBoxCardBackgroundBrush}"
                         CornerRadius="0,0,16,16"
                         Padding="14,14,14,14">
                     <StackPanel Orientation="Horizontal"
