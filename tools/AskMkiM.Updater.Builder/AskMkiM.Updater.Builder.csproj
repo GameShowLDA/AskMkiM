@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AssemblyName>AskMkiM.UpdateBuilder</AssemblyName>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <SelfContained>true</SelfContained>
+    <PublishSingleFile>true</PublishSingleFile>
+    <PublishTrimmed>false</PublishTrimmed>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\AskMkiM.Updater.Core\AskMkiM.Updater.Core.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="..\..\Ask.UI\Resources\Assets\Fonts\Manrope\Manrope-Regular.ttf"
+              Link="Resources\Fonts\Manrope-Regular.ttf" />
+    <Resource Include="..\..\Ask.UI\Resources\Assets\Fonts\Manrope\Manrope-SemiBold.ttf"
+              Link="Resources\Fonts\Manrope-SemiBold.ttf" />
+    <Resource Include="..\..\Ask.UI\Resources\Assets\Fonts\Manrope\OFL.txt"
+              Link="Resources\Fonts\OFL.txt" />
+    <Resource Include="THIRD-PARTY-NOTICES.txt" />
+  </ItemGroup>
+</Project>
