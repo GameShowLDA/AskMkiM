@@ -66,6 +66,14 @@ internal static class CommandMessageBuilder
   }
 
   /// <summary>
+  /// Формирует документируемый текст указания оператору.
+  /// </summary>
+  /// <param name="message">Текст указания из команды ЦУ.</param>
+  /// <returns>Информационное сообщение для итогового протокола.</returns>
+  internal static ShowMessageModel BuildControlInstructionDocumentMessage(string message)
+    => new(message: message);
+
+  /// <summary>
   /// Формирует сообщение о проверке цепи.
   /// </summary>
   /// <param name="chains">Обозначение проверяемых цепей.</param>

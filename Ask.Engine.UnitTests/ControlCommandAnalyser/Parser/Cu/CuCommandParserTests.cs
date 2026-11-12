@@ -33,4 +33,15 @@ public sealed class CuCommandParserTests
     Assert.Equal(CuCommandType.Information, model.CuType);
     Assert.Equal("Тест", model.MessageText);
   }
+
+  [Fact]
+  public void Parse_DocumentationKey_SetsFlagAndRemovesKeyFromMessage()
+  {
+    var parser = new CuCommandParser();
+
+    var model = Assert.IsType<CuCommandModel>(parser.Parse("40", "ЦУ", 1, ["40 ЦУ Д Подключить изделие"]));
+
+    Assert.True(model.IsDocument);
+    Assert.Equal("Подключить изделие", model.MessageText);
+  }
 }
