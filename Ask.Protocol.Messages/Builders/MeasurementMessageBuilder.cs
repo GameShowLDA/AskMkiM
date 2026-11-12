@@ -66,6 +66,20 @@ internal static class MeasurementMessageBuilder
   }
 
   /// <summary>
+  /// Формирует краткое описание запуска проверки прочности изоляции.
+  /// </summary>
+  /// <param name="voltage">Заданное испытательное напряжение с единицей измерения.</param>
+  /// <param name="time">Заданное время проверки с единицей измерения.</param>
+  /// <returns>Информационное сообщение для итогового протокола.</returns>
+  internal static ShowMessageModel BuildInsulationStrengthCommandSummary(string voltage, string time)
+  {
+    ArgumentException.ThrowIfNullOrWhiteSpace(voltage);
+    ArgumentException.ThrowIfNullOrWhiteSpace(time);
+
+    return new ShowMessageModel(message: $"Проверка прочности изоляции: {voltage}, {time}");
+  }
+
+  /// <summary>
   /// Формирует качественный результат проверки прочности изоляции.
   /// </summary>
   /// <param name="points">Обозначение проверяемых точек.</param>

@@ -15,6 +15,14 @@ namespace Ask.Engine.UnitTests.ProtocolMessages;
 
 public sealed class MeasurementMessagesTests
 {
+  [Fact]
+  public void BuildInsulationStrengthCommandSummary_ContainsVoltageAndTime()
+  {
+    var message = MeasurementMessages.BuildInsulationStrengthCommandSummary("438В", "1с");
+
+    Assert.Equal("Проверка прочности изоляции: 438В, 1с", message.Message);
+  }
+
   [Theory]
   [InlineData(true, "Результат")]
   [InlineData(false, "Результат: ПРОБОЙ")]
