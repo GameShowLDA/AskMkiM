@@ -109,6 +109,9 @@
     <GradientStop Color="#4F6480" Offset="0"/>
     <GradientStop Color="#3F5570" Offset="1"/>
   </LinearGradientBrush>
+  <SolidColorBrush x:Key="DocumentTabForegroundBrush" Color="#CDD7E3"/>
+  <SolidColorBrush x:Key="DocumentTabHoverForegroundBrush" Color="#E9EFF7"/>
+  <SolidColorBrush x:Key="DocumentTabActiveForegroundBrush" Color="#FFFFFF"/>
 
   <SolidColorBrush x:Key="ScrollBarThumbBackgroundBrush" Color="#2D3643"/>
   <SolidColorBrush x:Key="ScrollBarThumbHoverBackgroundBrush" Color="#374355"/>

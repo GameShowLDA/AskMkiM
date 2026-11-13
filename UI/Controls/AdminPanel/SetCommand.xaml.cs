@@ -815,13 +815,18 @@ namespace UI.Controls.AdminPanel
       var line = new TextBlock
       {
         Text = text,
-        Foreground = color,
         FontFamily = new FontFamily("Consolas"),
         FontSize = 16,
         Margin = new Thickness(0, 0, 0, 4),
         HorizontalAlignment = HorizontalAlignment.Stretch,
         TextWrapping = TextWrapping.Wrap
       };
+
+      var colorResourceKey = GetConsoleColorResourceKey(color);
+      if (colorResourceKey == null)
+        line.Foreground = color;
+      else
+        line.SetResourceReference(TextBlock.ForegroundProperty, colorResourceKey);
 
       ConsolePanel.Children.Add(line);
       while (ConsolePanel.Children.Count > MaxConsoleLines)
@@ -831,6 +836,34 @@ namespace UI.Controls.AdminPanel
 
       lastStatusLine = line;
       ConsoleScroll.ScrollToEnd();
+    }
+
+    private static string? GetConsoleColorResourceKey(Brush color)
+    {
+      if (ReferenceEquals(color, Brushes.SlateGray))
+        return "SetCommandConsoleDebugBrush";
+      if (ReferenceEquals(color, Brushes.LightGray))
+        return "SetCommandConsoleInformationBrush";
+      if (ReferenceEquals(color, Brushes.Khaki))
+        return "SetCommandConsoleWarningBrush";
+      if (ReferenceEquals(color, Brushes.LightCoral) || ReferenceEquals(color, Brushes.Red))
+        return "SetCommandConsoleErrorBrush";
+      if (ReferenceEquals(color, Brushes.DeepSkyBlue))
+        return "SetCommandConsoleCommandBrush";
+      if (ReferenceEquals(color, Brushes.OrangeRed))
+        return "SetCommandConsoleValidationBrush";
+      if (ReferenceEquals(color, Brushes.Gray))
+        return "SetCommandConsoleDetailBrush";
+      if (ReferenceEquals(color, Brushes.LightGreen))
+        return "SetCommandConsoleSuccessBrush";
+      if (ReferenceEquals(color, Brushes.LightSkyBlue))
+        return "SetCommandConsoleHeadingBrush";
+      if (ReferenceEquals(color, Brushes.DarkGray))
+        return "SetCommandConsoleDividerBrush";
+      if (ReferenceEquals(color, Brushes.LightSteelBlue))
+        return "SetCommandConsoleExampleBrush";
+
+      return null;
     }
 
     private void ClearLastStatusLine()

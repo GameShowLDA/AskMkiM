@@ -89,17 +89,20 @@
   <SolidColorBrush x:Key="ToolTipHotkeyForegroundBrush" Color="#223246"/>
   <SolidColorBrush x:Key="ToolTipShadowBrush" Color="#26081624"/>
   <LinearGradientBrush x:Key="DocumentTabBackgroundBrush" StartPoint="0,0" EndPoint="0,1">
-    <GradientStop Color="#768AA0" Offset="0"/>
-    <GradientStop Color="#677B92" Offset="1"/>
+    <GradientStop Color="#E7EEF7" Offset="0"/>
+    <GradientStop Color="#D9E4F1" Offset="1"/>
   </LinearGradientBrush>
   <LinearGradientBrush x:Key="DocumentTabHoverBackgroundBrush" StartPoint="0,0" EndPoint="0,1">
-    <GradientStop Color="#889DB5" Offset="0"/>
-    <GradientStop Color="#7690A8" Offset="1"/>
+    <GradientStop Color="#D9E7F6" Offset="0"/>
+    <GradientStop Color="#C9D9EC" Offset="1"/>
   </LinearGradientBrush>
   <LinearGradientBrush x:Key="DocumentTabActiveBackgroundBrush" StartPoint="0,0" EndPoint="0,1">
-    <GradientStop Color="#607CA1" Offset="0"/>
-    <GradientStop Color="#4B688C" Offset="1"/>
+    <GradientStop Color="#C6DAF1" Offset="0"/>
+    <GradientStop Color="#B3CAE6" Offset="1"/>
   </LinearGradientBrush>
+  <SolidColorBrush x:Key="DocumentTabForegroundBrush" Color="#435269"/>
+  <SolidColorBrush x:Key="DocumentTabHoverForegroundBrush" Color="#2D4059"/>
+  <SolidColorBrush x:Key="DocumentTabActiveForegroundBrush" Color="#1E334D"/>
 
   <SolidColorBrush x:Key="ScrollBarThumbBackgroundBrush" Color="#D7E0EC"/>
   <SolidColorBrush x:Key="ScrollBarThumbHoverBackgroundBrush" Color="#C8D4E4"/>
