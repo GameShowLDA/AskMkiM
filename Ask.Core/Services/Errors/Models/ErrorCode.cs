@@ -486,6 +486,10 @@ namespace Ask.Core.Services.Errors.Models
     [ErrorCodeTag("PT002")]
     Pt_EmptyCommandBody,
 
+    /// <summary> В команде ПТ время находится вне допустимого диапазона. </summary>
+    [ErrorCodeTag("PT003")]
+    Pt_TimeOutOfRange,
+
     #endregion
 
     #region Режим СК
