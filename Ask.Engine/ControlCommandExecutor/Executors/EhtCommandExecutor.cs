@@ -28,28 +28,14 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         (value >= context.Range.LowerBound && value <= context.Range.UpperBound);
       context.PublishedValue = value;
 
-      if (context.IsIntermediate)
-      {
-        await MeasurementMessages.PublishIntermediateResultAsync(
-          context.CheckType,
-          context.MeasurementType,
-          context.Range,
-          isSuccessful,
-          context.MeasurementTarget,
-          points: context.MeasurementPoints,
-          outputService: context.MessageService);
-      }
-      else
-      {
-        await MeasurementMessages.PublishResultAsync(
-          context.CheckType,
-          context.MeasurementType,
-          context.Range,
-          isSuccessful,
-          context.MeasurementTarget,
-          points: context.MeasurementPoints,
-          outputService: context.MessageService);
-      }
+      await MeasurementMessages.PublishIntermediateResultAsync(
+        context.CheckType,
+        context.MeasurementType,
+        context.Range,
+        isSuccessful,
+        context.MeasurementTarget,
+        points: context.MeasurementPoints,
+        outputService: context.MessageService);
 
       return isSuccessful;
     }

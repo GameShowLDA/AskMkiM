@@ -199,6 +199,7 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
       int maxMeasurementAttempts = measurementCount + 5;
       string lastErrorMessage = string.Empty;
       bool showIntermediateResults = DeviceDisplayConfig.GetIntermediateMeasurementResultsVisibility();
+      string unit = profile.Unit.GetUnit();
 
       for (int attempt = 1; attempt <= maxMeasurementAttempts && measurements.Count < measurementCount; attempt++)
       {
@@ -251,6 +252,21 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
         if (isPositive)
         {
           measurements.Add(measurement);
+
+          if (showIntermediateResults)
+          {
+            await MultimeterMessages.PublishOperationResultAsync(
+              device,
+              "Промежуточное измерение",
+              MeasurementValueFormatter.FormatWithUnit(measurement, unit),
+              IsWithinRange(
+                measurement,
+                measurementRange.LowerBound,
+                measurementRange.UpperBound),
+              2,
+              userMessageService,
+              isStepCheckpoint: true);
+          }
         }
       }
 

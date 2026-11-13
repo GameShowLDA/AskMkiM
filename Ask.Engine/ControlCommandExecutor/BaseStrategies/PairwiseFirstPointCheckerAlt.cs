@@ -310,15 +310,16 @@ namespace Ask.Engine.ControlCommandExecutor.BaseStrategies
                   UpperBound,
                   context.CabelResistance);
                 var range = new MeasurementRange(result, LowerBound, UpperBound);
-                var resultExecutor = context.ResultMessageExecutor
-                  ?? throw new InvalidOperationException(
-                    "Не задан исполнитель сообщений результатов измерения.");
-                bool success = await resultExecutor.PublishMeasurementResultAsync(
+
+                bool success = await GetResultMessageExecutor(context).PublishMeasurementResultAsync(
                   new MeasurementResultMessageContext(
                     context.TypeCommand,
                     range,
                     context.MessageService,
-                    measurementTarget));
+                    measurementTarget)
+                  {
+                    IsIntermediate = true,
+                  });
 
                 return (success, result);
               }, context.MessageService, measurementTask: true);
