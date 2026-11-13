@@ -51,7 +51,7 @@
 
 
 		<!-- Номер команды -->
-		<Rule color="CommandNumber">^\s*\d+\b</Rule>
+		<Rule color="CommandNumber">^\s*\d+(?=\s+[\p{L}_]+(?:\s|$))</Rule>
 
 		<!--Мнемоника-->
 		<Rule color="Mnemonic">\bСИ\b</Rule>
