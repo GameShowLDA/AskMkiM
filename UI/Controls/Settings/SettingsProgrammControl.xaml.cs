@@ -44,6 +44,7 @@ namespace UI.Controls.Settings
       _canEditDeviceConfiguration = CanEditDeviceConfiguration();
       UpdateConfigurationEditingAccess(_canEditDeviceConfiguration);
       UpdateDelaySettingsAccess();
+      UpdateRolePasswordManagementAccess();
 
       if (_isAdminRightsSubscribed)
       {
@@ -81,6 +82,7 @@ namespace UI.Controls.Settings
       {
         UpdateConfigurationEditingAccess(_canEditDeviceConfiguration);
         UpdateDelaySettingsAccess();
+        UpdateRolePasswordManagementAccess();
       }
       else
       {
@@ -88,6 +90,7 @@ namespace UI.Controls.Settings
         {
           UpdateConfigurationEditingAccess(_canEditDeviceConfiguration);
           UpdateDelaySettingsAccess();
+          UpdateRolePasswordManagementAccess();
         });
       }
     }
@@ -285,6 +288,16 @@ namespace UI.Controls.Settings
     }
 
     private static bool CanEditDelaySettings()
+      => RoleAuthorizationConfig.CurrentRole is RoleType.Administrator or RoleType.Root;
+
+    private void UpdateRolePasswordManagementAccess()
+    {
+      RolePasswordManager.Visibility = CanManageRolePasswords()
+        ? Visibility.Visible
+        : Visibility.Collapsed;
+    }
+
+    private static bool CanManageRolePasswords()
       => RoleAuthorizationConfig.CurrentRole is RoleType.Administrator or RoleType.Root;
   }
 }
