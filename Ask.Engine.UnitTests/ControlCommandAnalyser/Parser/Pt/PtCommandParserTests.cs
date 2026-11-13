@@ -33,6 +33,42 @@ namespace Ask.Engine.UnitTests.ControlCommandAnalyser.Parser.Pt
 
       Assert.Equal(5, model.Time);
       Assert.Equal("5с", model.TimeSource);
+      Assert.DoesNotContain(model.Errors, error => error.Code == ErrorCode.Gen_NoPointsBody);
+    }
+
+    [Fact]
+    public void Parse_MillisecondsWithoutPoints_ParsesDelayWithoutPointsError()
+    {
+      var model = Parse("10 ПТ 10мс");
+
+      Assert.Equal(0.01, model.Time);
+      Assert.Empty(model.BusPointsDictionary);
+      Assert.DoesNotContain(model.Errors, error => error.Code == ErrorCode.Gen_NoPointsBody);
+    }
+
+    [Theory]
+    [InlineData("5мс", 0.005)]
+    [InlineData("99990мс", 99.99)]
+    [InlineData("0.005с", 0.005)]
+    [InlineData("99.99с", 99.99)]
+    public void Parse_TimeAtAllowedBoundaries_ParsesWithoutRangeError(string source, double expectedSeconds)
+    {
+      var model = Parse($"10 ПТ {source}");
+
+      Assert.Equal(expectedSeconds, model.Time);
+      Assert.DoesNotContain(model.Errors, error => error.Code == ErrorCode.Pt_TimeOutOfRange);
+    }
+
+    [Theory]
+    [InlineData("4мс")]
+    [InlineData("99991мс")]
+    [InlineData("0.004с")]
+    [InlineData("100с")]
+    public void Parse_TimeOutsideAllowedBoundaries_AddsRangeError(string source)
+    {
+      var model = Parse($"10 ПТ {source}");
+
+      Assert.Contains(model.Errors, error => error.Code == ErrorCode.Pt_TimeOutOfRange);
     }
 
     [Fact]
@@ -51,6 +87,15 @@ namespace Ask.Engine.UnitTests.ControlCommandAnalyser.Parser.Pt
               }));
 
       Assert.Contains("Б", model.AlgorithmKey);
+    }
+
+    [Fact]
+    public void Parse_WithPoints_KeepsBusConnectionParameters()
+    {
+      var model = Parse("10 ПТ *A1:X1*");
+
+      Assert.Equal("*A1:X1*", model.PointsSourse);
+      Assert.DoesNotContain(model.Errors, error => error.Code == ErrorCode.Gen_NoPointsBody);
     }
 
     [Fact]
@@ -145,6 +190,15 @@ namespace Ask.Engine.UnitTests.ControlCommandAnalyser.Parser.Pt
       Assert.Contains(
     model.Errors,
     e => e.Code == ErrorCode.Gen_UnrecognizedParameters);
+    }
+
+    private static PtCommandModel Parse(string source)
+    {
+      return Assert.IsType<PtCommandModel>(new PtCommandParser().Parse(
+        "10",
+        "ПТ",
+        1,
+        new List<string> { source }));
     }
   }
 }
