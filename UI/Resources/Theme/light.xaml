@@ -103,6 +103,40 @@
     <SolidColorBrush x:Key="MessageBoxDangerButtonForegroundBrush" Color="#FFFFFF"/>
     <SolidColorBrush x:Key="MessageBoxQuestionAccentBrush" Color="#704C9B"/>
     <SolidColorBrush x:Key="MessageBoxQuestionForegroundBrush" Color="#FFFFFF"/>
+
+    <!-- Окно выполнения длительной операции -->
+    <SolidColorBrush x:Key="ProgressWindowBackgroundBrush" Color="#F8FAFE"/>
+    <SolidColorBrush x:Key="ProgressWindowBorderBrush" Color="#6FB7DF"/>
+    <SolidColorBrush x:Key="ProgressWindowTitleBrush" Color="#1F2A36"/>
+    <SolidColorBrush x:Key="ProgressWindowTextBrush" Color="#2D3948"/>
+    <SolidColorBrush x:Key="ProgressWindowSecondaryTextBrush" Color="#667386"/>
+    <SolidColorBrush x:Key="ProgressWindowAccentBrush" Color="#1CA3E9"/>
+    <SolidColorBrush x:Key="ProgressWindowTrackBrush" Color="#D9E2EC"/>
+
+    <!-- Командная консоль сервисных утилит -->
+    <SolidColorBrush x:Key="SetCommandConsoleBackgroundBrush" Color="#F8FAFD"/>
+    <SolidColorBrush x:Key="SetCommandConsoleHeaderBackgroundBrush" Color="#EEF3F8"/>
+    <SolidColorBrush x:Key="SetCommandConsoleBorderBrush" Color="#CDD7E3"/>
+    <SolidColorBrush x:Key="SetCommandConsoleTitleBrush" Color="#1F2937"/>
+    <SolidColorBrush x:Key="SetCommandConsoleSecondaryTextBrush" Color="#5F6B7A"/>
+    <SolidColorBrush x:Key="SetCommandConsoleMutedTextBrush" Color="#7A8799"/>
+    <SolidColorBrush x:Key="SetCommandConsoleInputBackgroundBrush" Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="SetCommandConsoleInputBorderBrush" Color="#C7D3E0"/>
+    <SolidColorBrush x:Key="SetCommandConsoleInputTextBrush" Color="#1F2937"/>
+    <SolidColorBrush x:Key="SetCommandConsolePromptBrush" Color="#2D78BC"/>
+    <SolidColorBrush x:Key="SetCommandConsoleKeyBackgroundBrush" Color="#E8EEF5"/>
+    <SolidColorBrush x:Key="SetCommandConsoleAutocompleteBackgroundBrush" Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="SetCommandConsoleDebugBrush" Color="#637083"/>
+    <SolidColorBrush x:Key="SetCommandConsoleInformationBrush" Color="#344054"/>
+    <SolidColorBrush x:Key="SetCommandConsoleWarningBrush" Color="#8A5B00"/>
+    <SolidColorBrush x:Key="SetCommandConsoleErrorBrush" Color="#B42318"/>
+    <SolidColorBrush x:Key="SetCommandConsoleCommandBrush" Color="#1769AA"/>
+    <SolidColorBrush x:Key="SetCommandConsoleValidationBrush" Color="#C2410C"/>
+    <SolidColorBrush x:Key="SetCommandConsoleDetailBrush" Color="#667085"/>
+    <SolidColorBrush x:Key="SetCommandConsoleSuccessBrush" Color="#247A3D"/>
+    <SolidColorBrush x:Key="SetCommandConsoleHeadingBrush" Color="#235D9F"/>
+    <SolidColorBrush x:Key="SetCommandConsoleDividerBrush" Color="#98A2B3"/>
+    <SolidColorBrush x:Key="SetCommandConsoleExampleBrush" Color="#496580"/>
     <sys:Double x:Key="MessageBoxShadowOpacity">0.18</sys:Double>
 
     <SolidColorBrush x:Key="TopPanelTabsHostBackgroundBrush" Color="#EDE6EE"/>
@@ -137,17 +171,20 @@
     <SolidColorBrush x:Key="ToolTipHotkeyForegroundBrush" Color="#253041"/>
     <SolidColorBrush x:Key="ToolTipShadowBrush" Color="#26000000"/>
     <LinearGradientBrush x:Key="DocumentTabBackgroundBrush" StartPoint="0,0" EndPoint="0,1">
-        <GradientStop Color="#73849A" Offset="0"/>
-        <GradientStop Color="#64758A" Offset="1"/>
+        <GradientStop Color="#E8EEF6" Offset="0"/>
+        <GradientStop Color="#DCE5F0" Offset="1"/>
     </LinearGradientBrush>
     <LinearGradientBrush x:Key="DocumentTabHoverBackgroundBrush" StartPoint="0,0" EndPoint="0,1">
-        <GradientStop Color="#8699B1" Offset="0"/>
-        <GradientStop Color="#7389A2" Offset="1"/>
+        <GradientStop Color="#DCE8F6" Offset="0"/>
+        <GradientStop Color="#CCDCEA" Offset="1"/>
     </LinearGradientBrush>
     <LinearGradientBrush x:Key="DocumentTabActiveBackgroundBrush" StartPoint="0,0" EndPoint="0,1">
-        <GradientStop Color="#5D7A9E" Offset="0"/>
-        <GradientStop Color="#496788" Offset="1"/>
+        <GradientStop Color="#C9DCF2" Offset="0"/>
+        <GradientStop Color="#B7CEE8" Offset="1"/>
     </LinearGradientBrush>
+    <SolidColorBrush x:Key="DocumentTabForegroundBrush" Color="#445266"/>
+    <SolidColorBrush x:Key="DocumentTabHoverForegroundBrush" Color="#2E4056"/>
+    <SolidColorBrush x:Key="DocumentTabActiveForegroundBrush" Color="#1F334B"/>
     <SolidColorBrush x:Key="ScrollBarThumbBackgroundBrush" Color="#EBEBEB"/>
     <SolidColorBrush x:Key="ScrollBarThumbHoverBackgroundBrush" Color="#EBEBEB"/>
     <SolidColorBrush x:Key="ScrollBarThumbPressedBackgroundBrush" Color="#EBEBEB"/>

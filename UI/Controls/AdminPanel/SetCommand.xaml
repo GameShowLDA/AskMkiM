@@ -7,8 +7,8 @@
              d:DesignHeight="600"
              d:DesignWidth="920">
     <Grid>
-        <Border Background="#181B20"
-                BorderBrush="#3A3F48"
+        <Border Background="{DynamicResource SetCommandConsoleBackgroundBrush}"
+                BorderBrush="{DynamicResource SetCommandConsoleBorderBrush}"
                 BorderThickness="1"
                 CornerRadius="14"
                 ClipToBounds="True">
@@ -19,8 +19,8 @@
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <Border Background="#242830"
-                        BorderBrush="#3A3F48"
+                <Border Background="{DynamicResource SetCommandConsoleHeaderBackgroundBrush}"
+                        BorderBrush="{DynamicResource SetCommandConsoleBorderBrush}"
                         BorderThickness="0,0,0,1">
                     <Grid Margin="18,0">
                         <Grid.ColumnDefinitions>
@@ -30,7 +30,7 @@
 
                         <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
                             <TextBlock Text="Командная консоль"
-                                       Foreground="#F2F4F8"
+                                       Foreground="{DynamicResource SetCommandConsoleTitleBrush}"
                                        FontSize="17"
                                        FontWeight="SemiBold"
                                        VerticalAlignment="Center"/>
@@ -41,7 +41,7 @@
                                     Orientation="Horizontal">
                             <Ellipse Width="8" Height="8" Margin="0,0,8,0" Fill="#28C840"/>
                             <TextBlock Text="Готово к работе"
-                                       Foreground="#AEB6C3"
+                                       Foreground="{DynamicResource SetCommandConsoleSecondaryTextBrush}"
                                        FontSize="14"/>
                         </StackPanel>
                     </Grid>
@@ -51,7 +51,7 @@
                     <TextBlock x:Name="EmptyConsoleHint"
                                Margin="26,22"
                                Text="История команд появится здесь"
-                               Foreground="#687180"
+                               Foreground="{DynamicResource SetCommandConsoleMutedTextBrush}"
                                FontFamily="Consolas"
                                FontSize="16"
                                IsHitTestVisible="False"
@@ -69,8 +69,8 @@
                 <Border Grid.Row="2"
                         Margin="18"
                         Padding="6"
-                        Background="#22262D"
-                        BorderBrush="#3F4652"
+                        Background="{DynamicResource SetCommandConsoleInputBackgroundBrush}"
+                        BorderBrush="{DynamicResource SetCommandConsoleInputBorderBrush}"
                         BorderThickness="1"
                         CornerRadius="11">
                     <Grid>
@@ -86,7 +86,7 @@
 
                         <TextBlock Margin="12,0,10,0"
                                    Text="›"
-                                   Foreground="#77A8E8"
+                                   Foreground="{DynamicResource SetCommandConsolePromptBrush}"
                                    FontFamily="Consolas"
                                    FontSize="25"
                                    FontWeight="Bold"
@@ -98,8 +98,8 @@
                                  Padding="4,0"
                                  Background="Transparent"
                                  BorderThickness="0"
-                                 CaretBrush="White"
-                                 Foreground="#F4F6FA"
+                                 CaretBrush="{DynamicResource SetCommandConsoleInputTextBrush}"
+                                 Foreground="{DynamicResource SetCommandConsoleInputTextBrush}"
                                  FontFamily="Consolas"
                                  FontSize="16"
                                  VerticalContentAlignment="Center"
@@ -109,10 +109,10 @@
                                 Margin="8,0,3,0"
                                 Padding="10,6"
                                 VerticalAlignment="Center"
-                                Background="#303640"
+                                Background="{DynamicResource SetCommandConsoleKeyBackgroundBrush}"
                                 CornerRadius="7">
                             <TextBlock Text="ENTER"
-                                       Foreground="#AEB6C3"
+                                       Foreground="{DynamicResource SetCommandConsoleSecondaryTextBrush}"
                                        FontSize="10"
                                        FontWeight="SemiBold"/>
                         </Border>
@@ -124,10 +124,10 @@
                                  MaxHeight="180"
                                  Margin="0,6,0,0"
                                  Padding="4"
-                                 Background="#2B3038"
-                                 BorderBrush="#454C57"
+                                 Background="{DynamicResource SetCommandConsoleAutocompleteBackgroundBrush}"
+                                 BorderBrush="{DynamicResource SetCommandConsoleInputBorderBrush}"
                                  BorderThickness="1"
-                                 Foreground="#F4F6FA"
+                                 Foreground="{DynamicResource SetCommandConsoleInputTextBrush}"
                                  FontFamily="Consolas"
                                  FontSize="14"
                                  Visibility="Collapsed"/>

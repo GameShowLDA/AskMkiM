@@ -29,7 +29,7 @@
             SnapsToDevicePixels="True">
         <Border.Style>
             <Style TargetType="Border">
-                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="Background" Value="{DynamicResource TopPanelTabBackgroundBrush}"/>
                 <Style.Triggers>
                     <MultiDataTrigger>
                         <MultiDataTrigger.Conditions>
@@ -37,11 +37,11 @@
                             <Condition Binding="{Binding IsMouseOver, ElementName=Root}" Value="True"/>
                             <Condition Binding="{Binding IsEnabled, ElementName=Root}" Value="True"/>
                         </MultiDataTrigger.Conditions>
-                        <Setter Property="Background" Value="{DynamicResource TopPanelHoverBackgroundBrush}"/>
+                        <Setter Property="Background" Value="{DynamicResource TopPanelTabHoverBackgroundBrush}"/>
                     </MultiDataTrigger>
 
                     <DataTrigger Binding="{Binding IsActive, ElementName=Root}" Value="True">
-                        <Setter Property="Background" Value="{DynamicResource TopPanelPressedBackgroundBrush}"/>
+                        <Setter Property="Background" Value="{DynamicResource TopPanelTabActiveBackgroundBrush}"/>
                     </DataTrigger>
 
                     <MultiDataTrigger>
@@ -49,7 +49,7 @@
                             <Condition Binding="{Binding IsActive, ElementName=Root}" Value="False"/>
                             <Condition Binding="{Binding IsEnabled, ElementName=Root}" Value="False"/>
                         </MultiDataTrigger.Conditions>
-                        <Setter Property="Background" Value="Transparent"/>
+                        <Setter Property="Background" Value="{DynamicResource TopPanelTabDisabledBackgroundBrush}"/>
                     </MultiDataTrigger>
 
                     <MultiDataTrigger>
@@ -57,7 +57,7 @@
                             <Condition Binding="{Binding IsActive, ElementName=Root}" Value="True"/>
                             <Condition Binding="{Binding IsEnabled, ElementName=Root}" Value="False"/>
                         </MultiDataTrigger.Conditions>
-                        <Setter Property="Background" Value="{DynamicResource TopPanelHoverBackgroundBrush}"/>
+                        <Setter Property="Background" Value="{DynamicResource TopPanelTabActiveDisabledBackgroundBrush}"/>
                     </MultiDataTrigger>
                 </Style.Triggers>
             </Style>
