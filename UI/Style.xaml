@@ -744,12 +744,12 @@
 
     <Style x:Key="AppContextMenuStyle" TargetType="{x:Type ContextMenu}">
         <Setter Property="OverridesDefaultStyle" Value="True"/>
-        <Setter Property="Background" Value="{DynamicResource SecondarySolidColorBrush}"/>
-        <Setter Property="BorderBrush" Value="{DynamicResource ActiveBorderSolidColorBrush}"/>
+        <Setter Property="Background" Value="{DynamicResource ModernDataGridSurfaceBrush}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource ModernDataGridBorderBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="Foreground" Value="{DynamicResource ForegroundSolidColorBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource ModernDataGridTextPrimaryBrush}"/>
         <Setter Property="SnapsToDevicePixels" Value="True"/>
-        <Setter Property="Padding" Value="2"/>
+        <Setter Property="Padding" Value="4"/>
         <Setter Property="ItemContainerStyle" Value="{DynamicResource AppMenuItemStyle}"/>
         <Setter Property="Template">
             <Setter.Value>
@@ -757,10 +757,11 @@
                     <Border Background="{TemplateBinding Background}"
                             BorderBrush="{TemplateBinding BorderBrush}"
                             BorderThickness="{TemplateBinding BorderThickness}"
-                            CornerRadius="6"
+                            CornerRadius="10"
+                            Padding="{TemplateBinding Padding}"
                             SnapsToDevicePixels="True">
                         <ScrollViewer CanContentScroll="True">
-                            <StackPanel IsItemsHost="True" Margin="2" Grid.IsSharedSizeScope="True"/>
+                            <StackPanel IsItemsHost="True" Grid.IsSharedSizeScope="True"/>
                         </ScrollViewer>
                     </Border>
                 </ControlTemplate>
@@ -770,39 +771,42 @@
 
     <Style x:Key="AppMenuItemStyle" TargetType="{x:Type MenuItem}">
         <Setter Property="OverridesDefaultStyle" Value="True"/>
-        <Setter Property="Foreground" Value="{DynamicResource ForegroundSolidColorBrush}"/>
-        <Setter Property="Padding" Value="12,6"/>
+        <Setter Property="Foreground" Value="{DynamicResource ModernDataGridTextPrimaryBrush}"/>
+        <Setter Property="Padding" Value="12,8"/>
         <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type MenuItem}">
                     <Grid SnapsToDevicePixels="True">
                         <Border x:Name="Bg"
                                 Background="Transparent"
-                                CornerRadius="4"
-                                Padding="{TemplateBinding Padding}"/>
-                        <Grid Margin="8,2,8,2">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" SharedSizeGroup="IconCol"/>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" SharedSizeGroup="GestureCol"/>
-                            </Grid.ColumnDefinitions>
+                                CornerRadius="6"
+                                Padding="{TemplateBinding Padding}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" SharedSizeGroup="IconCol"/>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" SharedSizeGroup="GestureCol"/>
+                                </Grid.ColumnDefinitions>
 
-                            <ContentPresenter Grid.Column="0"
-                                              ContentSource="Icon"
-                                              Margin="0,0,8,0"
-                                              VerticalAlignment="Center"/>
+                                <ContentPresenter Grid.Column="0"
+                                                  ContentSource="Icon"
+                                                  Margin="0,0,8,0"
+                                                  VerticalAlignment="Center"/>
 
-                            <ContentPresenter Grid.Column="1"
-                                              ContentSource="Header"
-                                              VerticalAlignment="Center"
-                                              RecognizesAccessKey="True"/>
+                                <ContentPresenter Grid.Column="1"
+                                                  ContentSource="Header"
+                                                  VerticalAlignment="Center"
+                                                  RecognizesAccessKey="True"/>
 
-                            <ContentPresenter Grid.Column="2"
-                                              ContentSource="InputGestureText"
-                                              Margin="12,0,0,0"
-                                              VerticalAlignment="Center"/>
-                        </Grid>
+                                <ContentPresenter Grid.Column="2"
+                                                  ContentSource="InputGestureText"
+                                                  Margin="12,0,0,0"
+                                                  VerticalAlignment="Center"/>
+                            </Grid>
+                        </Border>
 
                         <Popup x:Name="SubmenuPopup"
                                Placement="Right"
@@ -810,13 +814,14 @@
                                AllowsTransparency="True"
                                Focusable="False"
                                PopupAnimation="Fade">
-                            <Border Background="{DynamicResource SecondarySolidColorBrush}"
-                                    BorderBrush="{DynamicResource ActiveBorderSolidColorBrush}"
+                            <Border Background="{DynamicResource ModernDataGridSurfaceBrush}"
+                                    BorderBrush="{DynamicResource ModernDataGridBorderBrush}"
                                     BorderThickness="1"
-                                    CornerRadius="6"
+                                    CornerRadius="10"
+                                    Padding="4"
                                     SnapsToDevicePixels="True">
                                 <ScrollViewer CanContentScroll="True">
-                                    <StackPanel IsItemsHost="True" Margin="2" Grid.IsSharedSizeScope="True"/>
+                                    <StackPanel IsItemsHost="True" Grid.IsSharedSizeScope="True"/>
                                 </ScrollViewer>
                             </Border>
                         </Popup>
@@ -824,8 +829,8 @@
 
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsHighlighted" Value="True">
-                            <Setter TargetName="Bg" Property="Background" Value="{DynamicResource IsCheckedColorSolidColorBrush}"/>
-                            <Setter Property="Foreground" Value="{DynamicResource ForegroundSolidColorBrush}"/>
+                            <Setter TargetName="Bg" Property="Background" Value="{DynamicResource ModernDataGridRowHoverBrush}"/>
+                            <Setter Property="Foreground" Value="{DynamicResource ModernDataGridTextPrimaryBrush}"/>
                         </Trigger>
 
                         <Trigger Property="IsEnabled" Value="False">
@@ -834,7 +839,7 @@
                         </Trigger>
 
                         <Trigger Property="IsSubmenuOpen" Value="True">
-                            <Setter TargetName="Bg" Property="Background" Value="{DynamicResource IsCheckedColorSolidColorBrush}"/>
+                            <Setter TargetName="Bg" Property="Background" Value="{DynamicResource ModernDataGridRowSelectedBrush}"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
