@@ -44,7 +44,6 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
     public void SetHeadUnit<T>(T headUnit) where T : class, IHeadUnit
     {
       _headUnit = headUnit;
-      BusTypeLoaded();
     }
 
     /// <summary>
@@ -63,31 +62,7 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
 
       DeviceModelMap = deviceModelMap;
       DeviceModelSelectionBox.ItemsSource = deviceModelMap.Keys;
-    }
-
-    private void BusTypeLoaded()
-    {
-      var values = Enum.GetValues(typeof(SwitchingBusNew)).Cast<SwitchingBusNew>().ToList();
-
-      switch (_headUnit.BusType)
-      {
-        case BusStructureEnum.Type.Bus2:
-          values.Remove(SwitchingBusNew.AB2);
-          values.Remove(SwitchingBusNew.AB3);
-          values.Remove(SwitchingBusNew.AB4);
-          break;
-
-        case BusStructureEnum.Type.Bus4:
-          values.Remove(SwitchingBusNew.AB3);
-          values.Remove(SwitchingBusNew.AB4);
-          break;
-
-        case BusStructureEnum.Type.Bus6:
-          values.Remove(SwitchingBusNew.AB4);
-          break;
-      }
-
-      BusTypeSelectionBox.ItemsSource = values;
+      BusTypeSelectionBox.ItemsSource = Enum.GetValues<SwitchingBusNew>();
       BusTypeSelectionBox.SelectedIndex = 0;
     }
 

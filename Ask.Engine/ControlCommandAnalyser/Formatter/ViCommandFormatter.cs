@@ -18,7 +18,7 @@ internal sealed class ViCommandFormatter : CommandFormatter<ViCommandModel>
       string chassis = model.PowerSupplyChassisNumber.HasValue
         ? $" (тестер {model.PowerSupplyChassisNumber})"
         : string.Empty;
-      yield return $"\tИсточник питания: №{model.PowerSupplyNumber}{chassis}";
+      yield return $"\tПИНТ: №{model.PowerSupplyNumber}{chassis}";
     }
 
     yield return model.Operation switch

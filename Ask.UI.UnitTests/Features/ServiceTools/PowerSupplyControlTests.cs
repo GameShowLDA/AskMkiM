@@ -132,7 +132,10 @@ public sealed class PowerSupplyControlTests(WpfApplicationFixture wpf)
     Assert.Equal(2, form.IpPart3Value);
     Assert.Equal(17, form.IpPart4Value);
     Assert.Equal(80, form.GetPowerSupplyPort());
-    Assert.Single(Descendants(form).OfType<PowerSupplySettingsControl>());
+    var powerSupplySettings = Assert.Single(Descendants(form).OfType<PowerSupplySettingsControl>());
+    var pintNumberBox = (ComboBox)powerSupplySettings.FindName("PintNumberComboBox");
+    Assert.Equal([1, 2, 3, 4], pintNumberBox.Items.Cast<int>());
+    pintNumberBox.SelectedItem = 3;
     SetPowerSupplyField(form, "Минимальное напряжение, В", "2");
     SetPowerSupplyField(form, "Максимальное напряжение, В", "102");
     SetPowerSupplyField(form, "Шаг напряжения, В", "0,5");
@@ -146,6 +149,7 @@ public sealed class PowerSupplyControlTests(WpfApplicationFixture wpf)
     Assert.Equal(2, dto.NumberChassis);
     Assert.Equal("192.168.2.17", dto.ConnectionDetails);
     Assert.Equal(17, dto.Number);
+    Assert.Equal(3, dto.PintNumber);
     Assert.Equal(2m, dto.MinVoltage);
     Assert.Equal(102m, dto.MaxVoltage);
     Assert.Equal(0.5m, dto.VoltageStep);
@@ -161,6 +165,8 @@ public sealed class PowerSupplyControlTests(WpfApplicationFixture wpf)
     Assert.Equal(5080, editingForm.GetPowerSupplyPort());
     Assert.Equal(17, editingForm.IpPart4Value);
     Assert.Equal(17, editingForm.NumberDevice);
+    var editingSettings = Assert.Single(Descendants(editingForm).OfType<PowerSupplySettingsControl>());
+    Assert.Equal(3, ((ComboBox)editingSettings.FindName("PintNumberComboBox")).SelectedItem);
     var roundTripped = new PowerSupplyDto();
     editingForm.ApplyPowerSupplySettings(roundTripped);
     Assert.Equal(dto.MinVoltage, roundTripped.MinVoltage);
@@ -169,12 +175,13 @@ public sealed class PowerSupplyControlTests(WpfApplicationFixture wpf)
     Assert.Equal(dto.MinCurrent, roundTripped.MinCurrent);
     Assert.Equal(dto.MaxCurrent, roundTripped.MaxCurrent);
     Assert.Equal(dto.CurrentStep, roundTripped.CurrentStep);
+    Assert.Equal(dto.PintNumber, roundTripped.PintNumber);
     CaptureConfiguration(editingForm, "power-supply-settings.png", 470, 1000);
     editing.Close();
     var manager = new global::UI.Controls.Settings.DeviceConfig.DeviceManager.DeviceManagerControl();
     manager.AddDevice(dto);
     var list = (global::UI.Controls.Settings.DeviceConfig.Controls.DeviceListControl)manager.FindName("PowerSupplyControl");
-    Assert.Equal("Источник питания", list.DeviceTitle);
+    Assert.Equal("Программируемый источник напряжения и тока", list.DeviceTitle);
     Assert.Single(list.Devices);
     CaptureConfiguration(manager, "power-supply-device-list.png", 1100, 700);
     manager.SetEditingEnabled(false);

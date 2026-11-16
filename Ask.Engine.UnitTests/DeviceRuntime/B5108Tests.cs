@@ -4,6 +4,7 @@ using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Moq;
 using Ask.Device.Application.Composition;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Runtime.Device;
 using Ask.Engine.UnitTests.Services.Config;
 using System.Net;
@@ -87,6 +88,7 @@ public sealed class B5108Tests
       Assert.Equal(0m, await device.MeasurementManager.MeasureVoltageAsync());
       await device.OutputManager.SetOutputStateAsync(true);
       Assert.True(await device.OutputManager.GetOutputStateAsync());
+      Assert.Equal(PowerSupplyRegulationMode.ConstantVoltage, await device.OutputManager.GetRegulationModeAsync());
       Assert.Equal(0.1m, await device.MeasurementManager.MeasureVoltageAsync());
       Assert.Equal(0m, await device.MeasurementManager.MeasureCurrentAsync());
       await device.OutputManager.SetOutputStateAsync(false);

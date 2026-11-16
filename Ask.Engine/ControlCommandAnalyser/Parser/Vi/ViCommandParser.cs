@@ -6,6 +6,7 @@ using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
 using Ask.DataBase.Engine.Static.Devices;
 using Ask.Engine.ControlCommandAnalyser.Model;
+using Ask.Engine.Equipment;
 using System.Globalization;
 using System.Text.RegularExpressions;
 
@@ -154,7 +155,7 @@ internal sealed class ViCommandParser : ICommandParser
     }
 
     ValidateCombination(model, numberLine, command, unrecognizedCount);
-    ValidateBusPair(model, numberLine, command);
+    ValidateBusPair(model, numberLine, command, configuredSupply);
 
     if (configuredSupply.HasValue)
       ValidateElectricalParameters(model, configuredSupply.Value, numberLine, command);
@@ -169,7 +170,7 @@ internal sealed class ViCommandParser : ICommandParser
     int powerSupplyNumber)
   {
     var matches = powerSupplyProvider()
-      .Where(source => source.Number == powerSupplyNumber)
+      .Where(source => source.PintNumber == powerSupplyNumber)
       .ToArray();
 
     if (matches.Length == 0)
@@ -185,6 +186,7 @@ internal sealed class ViCommandParser : ICommandParser
     }
 
     model.PowerSupplyChassisNumber = matches[0].NumberChassis;
+    model.PowerSupplyDeviceNumber = matches[0].DeviceNumber;
     return matches[0];
   }
 
@@ -209,7 +211,11 @@ internal sealed class ViCommandParser : ICommandParser
     model.Errors.Add(ViErrors.InvalidParameterCombination(line, command));
   }
 
-  private static void ValidateBusPair(ViCommandModel model, int line, string command)
+  private static void ValidateBusPair(
+    ViCommandModel model,
+    int line,
+    string command,
+    ViPowerSupplyLimits? configuredSupply)
   {
     if (!model.PositiveBus.HasValue && !model.NegativeBus.HasValue)
       return;
@@ -228,7 +234,20 @@ internal sealed class ViCommandParser : ICommandParser
       model.Errors.Add(ViErrors.InvalidBus(
         line,
         command,
-        "Положительная и отрицательная шины должны образовывать пару +A1,-B1 … +A4,-B4."));
+        "Положительная и отрицательная шины должны образовывать пару +A1,-B1 … +A4,-B4.",
+        model.BusPairSource));
+      return;
+    }
+
+    int pairNumber = positive[^1] - '0';
+    var pair = (SwitchingBusNew)pairNumber;
+    if (configuredSupply.HasValue && !configuredSupply.Value.SupportedBusPairs.Supports(pair))
+    {
+      model.Errors.Add(ViErrors.InvalidBus(
+        line,
+        command,
+        $"Пара шин A{pairNumber}/B{pairNumber} недоступна для настроенного ПИНТ или не представлена модулем МКР.",
+        model.BusPairSource));
     }
   }
 
@@ -295,6 +314,7 @@ internal sealed class ViCommandParser : ICommandParser
         return false;
       }
       model.PositiveBus = bus;
+      model.PositiveBusSource = source;
       return true;
     }
 
@@ -304,6 +324,7 @@ internal sealed class ViCommandParser : ICommandParser
       return false;
     }
     model.NegativeBus = bus;
+    model.NegativeBusSource = source;
     return true;
   }
 
@@ -365,30 +386,43 @@ internal sealed class ViCommandParser : ICommandParser
     => step > 0m && (value - minimum) % step == 0m;
 
   private static IReadOnlyCollection<ViPowerSupplyLimits> LoadPowerSupplyLimits()
-    => PowerSupplies.GetAllAsync()
+  {
+    var relayModules = RelaySwitchModules.GetAllAsync().GetAwaiter().GetResult();
+    return PowerSupplies.GetAllAsync()
       .GetAwaiter()
       .GetResult()
-      .Select(source => new ViPowerSupplyLimits(
-        source.Number,
-        source.NumberChassis,
-        source.VoltageManager.MinVoltage,
-        source.VoltageManager.MaxVoltage,
-        source.VoltageManager.VoltageStep,
-        source.CurrentManager.MinCurrent,
-        source.CurrentManager.MaxCurrent,
-        source.CurrentManager.CurrentStep))
+      .Select(source =>
+      {
+        SupportedBusPairs modulePairs = RelayModuleBusPairResolver.Resolve(
+          relayModules,
+          source.NumberChassis);
+        return new ViPowerSupplyLimits(
+          source.PintNumber,
+          source.Number,
+          source.NumberChassis,
+          source.VoltageManager.MinVoltage,
+          source.VoltageManager.MaxVoltage,
+          source.VoltageManager.VoltageStep,
+          source.CurrentManager.MinCurrent,
+          source.CurrentManager.MaxCurrent,
+          source.CurrentManager.CurrentStep,
+          source.SupportedBusPairs & modulePairs);
+      })
       .ToArray();
+  }
 }
 
 /// <summary>
 /// Содержит рабочие пределы источника, необходимые для трансляции ВИ.
 /// </summary>
 internal readonly record struct ViPowerSupplyLimits(
-  int Number,
+  int PintNumber,
+  int DeviceNumber,
   int NumberChassis,
   decimal MinVoltage,
   decimal MaxVoltage,
   decimal VoltageStep,
   decimal MinCurrent,
   decimal MaxCurrent,
-  decimal CurrentStep);
+  decimal CurrentStep,
+  SupportedBusPairs SupportedBusPairs = SupportedBusPairs.AB2 | SupportedBusPairs.AB3 | SupportedBusPairs.AB4);

@@ -12,98 +12,94 @@ namespace MainWindowProgram.Init
 {
   static internal class DatabaseInitializer
   {
-    static internal async Task<DatabaseInitializationReport?> InitializeAsync()
+    /// <summary>
+    /// Инициализирует схему базы данных, кэши устройств и глобальные модели настроек.
+    /// </summary>
+    /// <returns>Отчёт об инициализации базы данных.</returns>
+    static internal async Task<DatabaseInitializationReport> InitializeAsync()
     {
-      try
+      var newDatabaseReport = await DatabaseEngineInitializer.InitializeAsync();
+      LogInformation(
+        $"New DB initialized. Applied migrations: {newDatabaseReport.AppliedMigrations}, " +
+        $"used EnsureCreated: {newDatabaseReport.UsedEnsureCreated}, " +
+        $"seeded hotkeys: {newDatabaseReport.SeededHotkeys}, " +
+        $"created default settings rows: {newDatabaseReport.CreatedDefaultSettingsRows}.");
+
+      await WarmUpDeviceCachesAsync();
+
+      var protocolTask = ProtocolSettings.GetAsync();
+      var executionTask = ExecutionSettings.GetAsync();
+      var userInterfaceTask = UserInterfaceSettings.GetAsync();
+      var deviceDisplayTask = DeviceDisplaySettings.GetAsync();
+
+      await Task.WhenAll(protocolTask, executionTask, userInterfaceTask, deviceDisplayTask);
+
+      var protocol = protocolTask.Result;
+      var execution = executionTask.Result;
+      var userInterface = userInterfaceTask.Result;
+      var deviceDisplay = deviceDisplayTask.Result;
+
+      if (protocol != null)
       {
-        var newDatabaseReport = await DatabaseEngineInitializer.InitializeAsync();
-        LogInformation(
-          $"New DB initialized. Applied migrations: {newDatabaseReport.AppliedMigrations}, " +
-          $"used EnsureCreated: {newDatabaseReport.UsedEnsureCreated}, " +
-          $"seeded hotkeys: {newDatabaseReport.SeededHotkeys}, " +
-          $"created default settings rows: {newDatabaseReport.CreatedDefaultSettingsRows}.");
-
-        await WarmUpDeviceCachesAsync();
-
-        var protocolTask = ProtocolSettings.GetAsync();
-        var executionTask = ExecutionSettings.GetAsync();
-        var userInterfaceTask = UserInterfaceSettings.GetAsync();
-        var deviceDisplayTask = DeviceDisplaySettings.GetAsync();
-
-        await Task.WhenAll(protocolTask, executionTask, userInterfaceTask, deviceDisplayTask);
-
-        var protocol = protocolTask.Result;
-        var execution = executionTask.Result;
-        var userInterface = userInterfaceTask.Result;
-        var deviceDisplay = deviceDisplayTask.Result;
-
-        if (protocol != null)
+        bool protocolDefaultsAdded = false;
+        if (string.IsNullOrWhiteSpace(protocol.CleanTextProtocol))
         {
-          bool protocolDefaultsAdded = false;
-          if (string.IsNullOrWhiteSpace(protocol.CleanTextProtocol))
-          {
-            protocol.CleanTextProtocol = ProtocolConfig.GetBaseTextProtocol();
-            protocolDefaultsAdded = true;
-          }
-
-          if (string.IsNullOrWhiteSpace(protocol.CleanTextErrorsProtocol))
-          {
-            protocol.CleanTextErrorsProtocol = ProtocolConfig.GetBaseTextErrorsProtocol();
-            protocolDefaultsAdded = true;
-          }
-
-          ProtocolConfig.SetProtocolModel(protocol);
-
-          if (protocolDefaultsAdded)
-          {
-            await ProtocolSettings.SaveAsync(protocol);
-          }
+          protocol.CleanTextProtocol = ProtocolConfig.GetBaseTextProtocol();
+          protocolDefaultsAdded = true;
         }
 
-        if (execution != null)
+        if (string.IsNullOrWhiteSpace(protocol.CleanTextErrorsProtocol))
         {
-          await ExecutionConfig.SetExecutionModel(execution);
+          protocol.CleanTextErrorsProtocol = ProtocolConfig.GetBaseTextErrorsProtocol();
+          protocolDefaultsAdded = true;
         }
 
-        if (userInterface != null)
+        ProtocolConfig.SetProtocolModel(protocol);
+
+        if (protocolDefaultsAdded)
         {
-          await UserInterfaceConfig.SetUserInterfaceModel(userInterface);
+          await ProtocolSettings.SaveAsync(protocol);
         }
-
-        if (deviceDisplay != null)
-        {
-          await DeviceDisplayConfig.SetDeviceDisplaySettingsModel(deviceDisplay);
-        }
-
-        ProtocolConfig.SaveProtocolAsyncEvent += async model =>
-        {
-          await ProtocolSettings.SaveAsync(model);
-          ProtocolModel.SetTemplate(model.CleanTextProtocol);
-          ProtocolModel.SetErrorsTemplate(model.CleanTextErrorsProtocol);
-        };
-
-        ExecutionConfig.SaveExecutionAsyncEvent += async model =>
-        {
-          await ExecutionSettings.SaveAsync(model);
-        };
-
-        UserInterfaceConfig.SaveUserInterfaceAsyncEvent += async model =>
-        {
-          await UserInterfaceSettings.SaveAsync(model);
-        };
-
-        DeviceDisplayConfig.SaveDeviceDisplayAsyncEvent += async model =>
-        {
-          await DeviceDisplaySettings.SaveAsync(model);
-        };
-
-        return newDatabaseReport;
       }
-      catch (Exception ex)
+
+      if (execution != null)
       {
-        LogException(ex);
-        return null;
+        await ExecutionConfig.SetExecutionModel(execution);
       }
+
+      if (userInterface != null)
+      {
+        await UserInterfaceConfig.SetUserInterfaceModel(userInterface);
+      }
+
+      if (deviceDisplay != null)
+      {
+        await DeviceDisplayConfig.SetDeviceDisplaySettingsModel(deviceDisplay);
+      }
+
+      ProtocolConfig.SaveProtocolAsyncEvent += async model =>
+      {
+        await ProtocolSettings.SaveAsync(model);
+        ProtocolModel.SetTemplate(model.CleanTextProtocol);
+        ProtocolModel.SetErrorsTemplate(model.CleanTextErrorsProtocol);
+      };
+
+      ExecutionConfig.SaveExecutionAsyncEvent += async model =>
+      {
+        await ExecutionSettings.SaveAsync(model);
+      };
+
+      UserInterfaceConfig.SaveUserInterfaceAsyncEvent += async model =>
+      {
+        await UserInterfaceSettings.SaveAsync(model);
+      };
+
+      DeviceDisplayConfig.SaveDeviceDisplayAsyncEvent += async model =>
+      {
+        await DeviceDisplaySettings.SaveAsync(model);
+      };
+
+      return newDatabaseReport;
     }
 
     /// <summary>

@@ -4,13 +4,16 @@ using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Parser.Vi;
 using Ask.Engine.ControlCommandAnalyser;
+using Ask.Device.Runtime.Device;
+using Ask.Engine.Equipment;
 
 namespace Ask.Engine.UnitTests.ControlCommandAnalyser.Parser.Vi;
 
 public class ViCommandParserTests
 {
   private static readonly ViPowerSupplyLimits DefaultSupply = new(
-    Number: 3,
+    PintNumber: 3,
+    DeviceNumber: 17,
     NumberChassis: 1,
     MinVoltage: 0m,
     MaxVoltage: 150m,
@@ -35,6 +38,7 @@ public class ViCommandParserTests
 
     Assert.Equal(ViOperation.DisconnectAndRelease, model.Operation);
     Assert.Equal(3, model.PowerSupplyNumber);
+    Assert.Equal(17, model.PowerSupplyDeviceNumber);
     Assert.Equal(1, model.PowerSupplyChassisNumber);
     Assert.Empty(model.Errors);
   }
@@ -127,6 +131,40 @@ public class ViCommandParserTests
     var model = Parse(source);
 
     Assert.NotEmpty(model.Errors);
+  }
+
+  [Theory]
+  [InlineData("310 ВИ *3, 24В, 100мА, +A1, -B1*", "+A1,-B1")]
+  public void Parse_PintUnsupportedBusPair_AddsBusError(string source, string expectedFragment)
+  {
+    var model = Parse(source);
+
+    var error = Assert.Single(model.Errors, error => error.Code == ErrorCode.Vi_InvalidBus);
+    Assert.Equal(expectedFragment, error.SourceFragment);
+  }
+
+  [Fact]
+  public void Parse_FourthBusPair_BuildsConnectOperation()
+  {
+    var model = Parse("310 ВИ *3, 24В, 100мА, +A4, -B4*");
+
+    Assert.Equal(ViOperation.ConfigureAndConnect, model.Operation);
+    Assert.Empty(model.Errors);
+  }
+
+  [Fact]
+  public void ResolveBusPairs_UsesRelayModulesOfSelectedTester()
+  {
+    var modules = new[]
+    {
+      new ModuleRelayControl { NumberChassis = 1, BusType = SwitchingBusNew.AB2 },
+      new ModuleRelayControl { NumberChassis = 1, BusType = SwitchingBusNew.AB4 },
+      new ModuleRelayControl { NumberChassis = 2, BusType = SwitchingBusNew.AB3 },
+    };
+
+    SupportedBusPairs pairs = RelayModuleBusPairResolver.Resolve(modules, 1);
+
+    Assert.Equal(SupportedBusPairs.AB2 | SupportedBusPairs.AB4, pairs);
   }
 
   private static ViCommandModel Parse(string source, params ViPowerSupplyLimits[] supplies)

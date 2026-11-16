@@ -72,13 +72,14 @@
 		<Rule color="Mnemonic">\bСК\b</Rule>
 		<Rule color="Mnemonic">\bНЭ\b</Rule>
 		<Rule color="Mnemonic">\bОС\b</Rule>
+		<Rule color="Mnemonic">\bВИ\b</Rule>
 
 		<!--Комментарии-->
 		<Span color="Comment" begin="{" end="}" multiline="true"/>
 		<Span color="Comment" begin="//" end="\n" />
 		<Span color="Comment" begin="/\*" end="\*/" multiline="true" />
 		<Span begin="^\s*Текст сообщения:\s*$"
-		      end="(?=^\s*Комментарии:|^\s*$|^\s*\d+\s+(?:СИ|ОК|СП|РМ|ЦУ|ПР|ПИ|КЦ|УП|КС|ИЕ|ЭТ|НЭ|ПТ|ОТ|ВШ|СК|ОС)\b)"
+		      end="(?=^\s*Комментарии:|^\s*$|^\s*\d+\s+(?:СИ|ОК|СП|РМ|ЦУ|ПР|ПИ|КЦ|УП|КС|ИЕ|ЭТ|НЭ|ПТ|ОТ|ВШ|СК|ОС|ВИ)\b)"
 		      multiline="true">
 			<RuleSet>
 				<Rule color="OkParam">^\t\t.*$</Rule>

@@ -84,7 +84,6 @@ namespace UI.Controls.Settings.DeviceConfig.ChassisManager
 
           if (deviceDto != null)
           {
-            deviceDto.BusType = (baseDevice as IChassisManager).BusType;
             var chassi = ChassisManagers.Build(deviceDto);
             if (existingDevice == null)
             {

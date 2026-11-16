@@ -763,6 +763,8 @@ public static class DatabaseInitializationService
     await command.ExecuteNonQueryAsync(cancellationToken);
     await EnsureColumnAsync(connection, "PowerSupplies", "NumberChassis", "INTEGER NOT NULL DEFAULT 0",
       new DatabaseInitializationReport(), null, cancellationToken);
+    await EnsureColumnAsync(connection, "PowerSupplies", "PintNumber", "INTEGER NOT NULL DEFAULT 1",
+      new DatabaseInitializationReport(), null, cancellationToken);
     await EnsureColumnAsync(connection, "PowerSupplies", "MinVoltage", "TEXT NOT NULL DEFAULT '0.0'",
       new DatabaseInitializationReport(), null, cancellationToken);
     await EnsureColumnAsync(connection, "PowerSupplies", "MaxVoltage", "TEXT NOT NULL DEFAULT '150.0'",
@@ -926,7 +928,16 @@ public static class DatabaseInitializationService
       || message.Contains("disk i/o error", StringComparison.OrdinalIgnoreCase);
   }
 
-  private static async Task<bool> TryAdoptExistingSchemaAsync(
+  /// <summary>
+  /// Создаёт историю миграций для существующей схемы только при отсутствии таблицы истории.
+  /// </summary>
+  /// <param name="context">Контекст проверяемой базы данных.</param>
+  /// <param name="migrations">Идентификаторы миграций текущей сборки.</param>
+  /// <param name="report">Отчёт об инициализации базы данных.</param>
+  /// <param name="progress">Необязательный обработчик сообщений о ходе инициализации.</param>
+  /// <param name="cancellationToken">Токен отмены операции.</param>
+  /// <returns><see langword="true"/>, если отсутствующая история была создана.</returns>
+  internal static async Task<bool> TryAdoptExistingSchemaAsync(
     AppDbContext context,
     IReadOnlyCollection<string> migrations,
     DatabaseInitializationReport report,
@@ -965,11 +976,7 @@ public static class DatabaseInitializationService
       }
 
       var historyTableExists = await TableExistsAsync(connection, "__EFMigrationsHistory", cancellationToken);
-      var appliedMigrations = historyTableExists
-        ? await GetAppliedMigrationIdsAsync(connection, cancellationToken)
-        : new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-
-      if (historyTableExists && appliedMigrations.Count >= migrations.Count)
+      if (historyTableExists)
       {
         return false;
       }

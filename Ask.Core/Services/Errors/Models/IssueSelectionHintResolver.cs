@@ -298,6 +298,10 @@ namespace Ask.Core.Services.Errors.Models
         int sourceIndex = start;
         int candidateIndex = 0;
 
+        while (sourceIndex < lineText.Length && char.IsWhiteSpace(lineText[sourceIndex]))
+          sourceIndex++;
+        int matchStart = sourceIndex;
+
         while (candidateIndex < compactCandidate.Length)
         {
           while (sourceIndex < lineText.Length && char.IsWhiteSpace(lineText[sourceIndex]))
@@ -313,7 +317,7 @@ namespace Ask.Core.Services.Errors.Models
 
         if (candidateIndex == compactCandidate.Length)
         {
-          hint = new IssueSelectionHint(start, sourceIndex - start);
+          hint = new IssueSelectionHint(matchStart, sourceIndex - matchStart);
           return true;
         }
       }

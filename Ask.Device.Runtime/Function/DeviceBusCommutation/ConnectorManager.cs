@@ -191,15 +191,18 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
     #region ПИНТ
 
     /// <inheritdoc />
-    public async Task<bool> ConnectPINT(SwitchingBusNew bus, IUserInteractionService? userMessageService = null)
+    public async Task<bool> ConnectPINT(
+      SwitchingBusNew bus,
+      IUserInteractionService? userMessageService = null,
+      bool skipSwitchingDelay = false)
     {
       foreach (var connected in connectionState.GetConnected(DeviceBusConnectionType.PINT))
       {
-        await DisconnectPINT(connected.Bus, userMessageService);
+        await DisconnectPINT(connected.Bus, userMessageService, skipSwitchingDelay);
         connectionState.Set(DeviceBusConnectionType.PINT, connected.Bus, false);
       }
 
-      var result = await SetPINTState(true, bus, userMessageService);
+      var result = await SetPINTState(true, bus, userMessageService, skipSwitchingDelay);
       if (result)
       {
         connectionState.Set(DeviceBusConnectionType.PINT, bus, true);
@@ -213,9 +216,12 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
     }
 
     /// <inheritdoc />
-    public async Task<bool> DisconnectPINT(SwitchingBusNew bus, IUserInteractionService? userMessageService = null)
+    public async Task<bool> DisconnectPINT(
+      SwitchingBusNew bus,
+      IUserInteractionService? userMessageService = null,
+      bool skipSwitchingDelay = false)
     {
-      var result = await SetPINTState(false, bus, userMessageService);
+      var result = await SetPINTState(false, bus, userMessageService, skipSwitchingDelay);
       connectionState.Set(DeviceBusConnectionType.PINT, bus, false);
       return result;
     }
@@ -231,14 +237,19 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation
     /// <returns>
     /// <see langword="true"/>, если состояние ПИНТ изменено успешно; иначе — <see langword="false"/>.
     /// </returns>
-    private async Task<bool> SetPINTState(bool connect, SwitchingBusNew bus, IUserInteractionService? userMessageService = null)
+    private async Task<bool> SetPINTState(
+      bool connect,
+      SwitchingBusNew bus,
+      IUserInteractionService? userMessageService = null,
+      bool skipSwitchingDelay = false)
     {
       int numberConnector = (int)SwitchingDeviceTypeConnector.PINT;
-      if (TryGetBusNumber(bus, out int busNumber) && busNumber >= 2 && busNumber <= 3)
+      if (TryGetBusNumber(bus, out int busNumber) && busNumber >= 2 && busNumber <= 4)
       {
         var command = new DeviceCommand(5, numberConnector, busNumber, connect ? 1 : 2);
         var answer = await queryExecutor.QueryAsync(command.ToString());
-        await Task.Delay(10);
+        if (!skipSwitchingDelay)
+          await Task.Delay(10);
         return await DeviceBusCommutationResponseProcessor.CheckEquipmentOperationAsync(
           answer,
           _deviceBusCommutation,

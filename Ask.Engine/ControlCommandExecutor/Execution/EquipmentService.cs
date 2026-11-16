@@ -399,7 +399,7 @@ namespace Ask.Engine.ControlCommandExecutor.Execution
       throw new Exception("Ошибка конфигурации: не найдено устройство быстрого измерителя.");
     }
 
-    private static void RegisterUsedDevices(IEnumerable<IDevice?> devices)
+    internal static void RegisterUsedDevices(IEnumerable<IDevice?> devices)
     {
       foreach (var device in devices.Where(static device => device != null).Cast<IDevice>())
       {

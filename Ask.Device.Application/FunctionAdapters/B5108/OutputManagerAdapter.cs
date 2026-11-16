@@ -2,6 +2,7 @@ using Ask.Core.Services.UI;
 using Ask.Core.Services.Errors.Device;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSupply.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Protocol.Messages.EntryPoints;
 
 namespace Ask.Device.Application.FunctionAdapters.B5108;
@@ -57,6 +58,37 @@ internal sealed class OutputManagerAdapter : IOutputManager
       {
         await EquipmentMessages.PublishPowerSupplyOperationResultAsync(_device, "Чтение состояния выхода", false,
           error.Message, userMessageService);
+        throw;
+      }
+    }, static _ => true, userMessageService, deviceTask: true);
+  }
+
+  /// <inheritdoc />
+  public async Task<PowerSupplyRegulationMode> GetRegulationModeAsync(
+    CancellationToken cancellationToken = default,
+    IUserInteractionService? userMessageService = null)
+  {
+    return await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
+    {
+      try
+      {
+        var result = await _manager.GetRegulationModeAsync(cancellationToken, userMessageService);
+        await EquipmentMessages.PublishPowerSupplyOperationResultAsync(
+          _device,
+          "Чтение режима стабилизации",
+          true,
+          result.ToString(),
+          userMessageService);
+        return result;
+      }
+      catch (DeviceException error)
+      {
+        await EquipmentMessages.PublishPowerSupplyOperationResultAsync(
+          _device,
+          "Чтение режима стабилизации",
+          false,
+          error.Message,
+          userMessageService);
         throw;
       }
     }, static _ => true, userMessageService, deviceTask: true);

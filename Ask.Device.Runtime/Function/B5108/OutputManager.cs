@@ -1,6 +1,7 @@
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSupply.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Communication.Common.Threading;
 using Ask.Device.Emulator;
 using Ask.Device.ResponseProcessor.PowerSupply;
@@ -50,5 +51,22 @@ public sealed class OutputManager : IOutputManager
     using (await protocol.OperationLock.LockAsync(cancellationToken))
       return PowerSupplyResponseProcessor.ParseOutputState(await protocol.QueryAsync("OUTP?",
         timeout: _device.ConnectedProfile.Timeout, port: _device.ConnectedProfile.Port, cancellationToken: cancellationToken));
+  }
+
+  /// <inheritdoc />
+  public async Task<PowerSupplyRegulationMode> GetRegulationModeAsync(
+    CancellationToken cancellationToken = default,
+    IUserInteractionService? userMessageService = null)
+  {
+    using var operationCancellation = CancellationTokenSource.CreateLinkedTokenSource(
+      cancellationToken, userMessageService?.GetCancellationToken() ?? CancellationToken.None,
+      EquipmentExecutionContext.CancellationToken);
+    cancellationToken = operationCancellation.Token;
+    var protocol = DeviceProtocolEmulator.CreatePowerSupply(_device);
+    using (await protocol.OperationLock.LockAsync(cancellationToken))
+      return PowerSupplyResponseProcessor.ParseRegulationMode(await protocol.QueryAsync("STAT:OPER:COND?",
+        timeout: _device.ConnectedProfile.Timeout,
+        port: _device.ConnectedProfile.Port,
+        cancellationToken: cancellationToken));
   }
 }

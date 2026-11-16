@@ -64,7 +64,7 @@ namespace MainWindowProgram.Init
     /// Выполняет проверку единственного экземпляра приложения и инициализацию базы данных.
     /// Этот метод должен вызываться один раз — до загрузки основного окна.
     /// </remarks>
-    static internal async Task<DatabaseInitializationReport?> Initialize()
+    static internal async Task<DatabaseInitializationReport> Initialize()
     {
       LoggerUtility.ConfigureInputLog();
       var buildInfo = ApplicationBuildInfo.Current;

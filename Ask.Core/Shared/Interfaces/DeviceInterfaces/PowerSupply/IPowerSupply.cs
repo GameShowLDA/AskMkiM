@@ -9,6 +9,16 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSupply
   public interface IPowerSupply : IAttachableDevice, IDeviceToDtoConverter<PowerSupplyDto>
   {
     /// <summary>
+    /// Пары шин, поддерживаемые аппаратным выходом источника.
+    /// </summary>
+    Ask.Core.Shared.Metadata.Enums.DeviceEnums.SupportedBusPairs SupportedBusPairs { get; }
+
+    /// <summary>
+    /// Номер ПИНТ, используемый в командах управления источником.
+    /// </summary>
+    int PintNumber { get; set; }
+
+    /// <summary>
     /// Управление уставкой напряжения.
     /// </summary>
     IVoltageManager VoltageManager { get; set; }

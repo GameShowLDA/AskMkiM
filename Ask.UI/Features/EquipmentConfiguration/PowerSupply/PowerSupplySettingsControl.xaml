@@ -7,6 +7,14 @@
              mc:Ignorable="d"
              d:DesignWidth="420">
     <UserControl.Resources>
+        <Style x:Key="PintNumberComboBoxStyle"
+               TargetType="ComboBox"
+               BasedOn="{StaticResource CustomComboBoxStyle}">
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="Margin" Value="14,8,14,8"/>
+            <Setter Property="Height" Value="40"/>
+        </Style>
+
         <Style x:Key="InputBorderStyle" TargetType="Border">
             <Setter Property="Background" Value="{DynamicResource SettingsConfigDataInputTabloBackgroundSolidColorBrush}"/>
             <Setter Property="CornerRadius" Value="10"/>
@@ -58,60 +66,70 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
             <Border Grid.Row="0" Grid.ColumnSpan="2" Style="{StaticResource DeviceInputSectionTitleBarStyle}">
+                <TextBlock Text="Номер ПИНТ" Style="{StaticResource SectionTitleStyle}"/>
+            </Border>
+            <ComboBox Grid.Row="1" Grid.ColumnSpan="2" x:Name="PintNumberComboBox"
+                      Style="{StaticResource PintNumberComboBoxStyle}"
+                      automation:AutomationProperties.Name="Номер ПИНТ"/>
+
+            <Border Grid.Row="2" Grid.ColumnSpan="2" Margin="0,12,0,0"
+                    Style="{StaticResource DeviceInputSectionTitleBarStyle}">
                 <TextBlock Text="Подключение" Style="{StaticResource SectionTitleStyle}"/>
             </Border>
-            <TextBlock Grid.Row="1" Text="TCP-порт" Style="{StaticResource FieldLabelStyle}"/>
-            <Border Grid.Row="1" Grid.Column="1" Style="{StaticResource InputBorderStyle}">
+            <TextBlock Grid.Row="3" Text="TCP-порт" Style="{StaticResource FieldLabelStyle}"/>
+            <Border Grid.Row="3" Grid.Column="1" Style="{StaticResource InputBorderStyle}">
                 <TextBox x:Name="PortTextBox" Text="80" MaxLength="5"
                          Style="{StaticResource InputTextBoxStyle}"
                          PreviewTextInput="Integer_PreviewTextInput"
                          automation:AutomationProperties.Name="TCP-порт источника питания"/>
             </Border>
 
-            <Border Grid.Row="2" Grid.ColumnSpan="2" Margin="0,12,0,0"
+            <Border Grid.Row="4" Grid.ColumnSpan="2" Margin="0,12,0,0"
                     Style="{StaticResource DeviceInputSectionTitleBarStyle}">
                 <TextBlock Text="Напряжение, В" Style="{StaticResource SectionTitleStyle}"/>
             </Border>
-            <TextBlock Grid.Row="3" Text="Минимум" Style="{StaticResource FieldLabelStyle}"/>
-            <Border Grid.Row="3" Grid.Column="1" Style="{StaticResource InputBorderStyle}">
+            <TextBlock Grid.Row="5" Text="Минимум" Style="{StaticResource FieldLabelStyle}"/>
+            <Border Grid.Row="5" Grid.Column="1" Style="{StaticResource InputBorderStyle}">
                 <TextBox x:Name="MinVoltageTextBox" Text="0" Style="{StaticResource InputTextBoxStyle}"
                          PreviewTextInput="Decimal_PreviewTextInput"
                          automation:AutomationProperties.Name="Минимальное напряжение, В"/>
             </Border>
-            <TextBlock Grid.Row="4" Text="Максимум" Style="{StaticResource FieldLabelStyle}"/>
-            <Border Grid.Row="4" Grid.Column="1" Style="{StaticResource InputBorderStyle}">
+            <TextBlock Grid.Row="6" Text="Максимум" Style="{StaticResource FieldLabelStyle}"/>
+            <Border Grid.Row="6" Grid.Column="1" Style="{StaticResource InputBorderStyle}">
                 <TextBox x:Name="MaxVoltageTextBox" Text="150" Style="{StaticResource InputTextBoxStyle}"
                          PreviewTextInput="Decimal_PreviewTextInput"
                          automation:AutomationProperties.Name="Максимальное напряжение, В"/>
             </Border>
-            <TextBlock Grid.Row="5" Text="Шаг" Style="{StaticResource FieldLabelStyle}"/>
-            <Border Grid.Row="5" Grid.Column="1" Style="{StaticResource InputBorderStyle}">
+            <TextBlock Grid.Row="7" Text="Шаг" Style="{StaticResource FieldLabelStyle}"/>
+            <Border Grid.Row="7" Grid.Column="1" Style="{StaticResource InputBorderStyle}">
                 <TextBox x:Name="VoltageStepTextBox" Text="0.1" Style="{StaticResource InputTextBoxStyle}"
                          PreviewTextInput="Decimal_PreviewTextInput"
                          automation:AutomationProperties.Name="Шаг напряжения, В"/>
             </Border>
 
-            <Border Grid.Row="6" Grid.ColumnSpan="2" Margin="0,12,0,0"
+            <Border Grid.Row="8" Grid.ColumnSpan="2" Margin="0,12,0,0"
                     Style="{StaticResource DeviceInputSectionTitleBarStyle}">
                 <TextBlock Text="Ограничение тока, мА" Style="{StaticResource SectionTitleStyle}"/>
             </Border>
-            <TextBlock Grid.Row="7" Text="Минимум" Style="{StaticResource FieldLabelStyle}"/>
-            <Border Grid.Row="7" Grid.Column="1" Style="{StaticResource InputBorderStyle}">
+            <TextBlock Grid.Row="9" Text="Минимум" Style="{StaticResource FieldLabelStyle}"/>
+            <Border Grid.Row="9" Grid.Column="1" Style="{StaticResource InputBorderStyle}">
                 <TextBox x:Name="MinCurrentTextBox" Text="0" Style="{StaticResource InputTextBoxStyle}"
                          PreviewTextInput="Decimal_PreviewTextInput"
                          automation:AutomationProperties.Name="Минимальный ток, мА"/>
             </Border>
-            <TextBlock Grid.Row="8" Text="Максимум" Style="{StaticResource FieldLabelStyle}"/>
-            <Border Grid.Row="8" Grid.Column="1" Style="{StaticResource InputBorderStyle}">
+            <TextBlock Grid.Row="10" Text="Максимум" Style="{StaticResource FieldLabelStyle}"/>
+            <Border Grid.Row="10" Grid.Column="1" Style="{StaticResource InputBorderStyle}">
                 <TextBox x:Name="MaxCurrentTextBox" Text="5000" Style="{StaticResource InputTextBoxStyle}"
                          PreviewTextInput="Decimal_PreviewTextInput"
                          automation:AutomationProperties.Name="Максимальный ток, мА"/>
             </Border>
-            <TextBlock Grid.Row="9" Text="Шаг" Style="{StaticResource FieldLabelStyle}"/>
-            <Border Grid.Row="9" Grid.Column="1" Style="{StaticResource InputBorderStyle}">
+            <TextBlock Grid.Row="11" Text="Шаг" Style="{StaticResource FieldLabelStyle}"/>
+            <Border Grid.Row="11" Grid.Column="1" Style="{StaticResource InputBorderStyle}">
                 <TextBox x:Name="CurrentStepTextBox" Text="1" Style="{StaticResource InputTextBoxStyle}"
                          PreviewTextInput="Decimal_PreviewTextInput"
                          automation:AutomationProperties.Name="Шаг тока, мА"/>

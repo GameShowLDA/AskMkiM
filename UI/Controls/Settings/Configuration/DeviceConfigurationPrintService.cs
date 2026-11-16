@@ -115,10 +115,14 @@ public static class DeviceConfigurationPrintService
 
       devicesPrinted += AppendDeviceSection(
         sb,
-        "Источник питания",
+        "Программируемый источник напряжения и тока",
         configuration.PowerSupplies.Where(x => x.NumberChassis == chassis.Number),
         insertSectionSeparator: devicesPrinted > 0,
-        appendAdditional: (builder, source) => AppendField(builder, "TCP-порт", source.Port, 4));
+        appendAdditional: (builder, source) =>
+        {
+          AppendField(builder, "Номер ПИНТ", source.PintNumber, 4);
+          AppendField(builder, "TCP-порт", source.Port, 4);
+        });
 
       devicesPrinted += AppendDeviceSection(
         sb,

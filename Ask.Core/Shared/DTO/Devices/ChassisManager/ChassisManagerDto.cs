@@ -12,8 +12,4 @@ namespace Ask.Core.Shared.DTO.Devices.ChassisManager;
 [Table("ChassisManagers")]
 public class ChassisManagerDto : DeviceDto
 {
-  /// <summary>
-  /// Тип структурной шины тестера.
-  /// </summary>
-  public BusStructureEnum.Type BusType { get; set; }
 }

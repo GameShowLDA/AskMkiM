@@ -80,9 +80,6 @@ namespace Ask.DataBase.Provider.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("BusType")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("ConnectionDetails")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -619,6 +616,9 @@ namespace Ask.DataBase.Provider.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<int>("Number")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("PintNumber")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("Port")

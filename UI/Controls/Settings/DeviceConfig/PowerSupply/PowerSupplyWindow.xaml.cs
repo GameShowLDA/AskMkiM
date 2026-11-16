@@ -46,7 +46,7 @@ public partial class PowerSupplyWindow : Window
   /// <param name="editingEntity">Изменяемая конфигурация или null при добавлении.</param>
   public void SetSettings(IHeadUnit headUnit, PowerSupplyDto? editingEntity = null)
   {
-    deviceSettingsWindow.NameDevice = "Источник питания";
+    deviceSettingsWindow.NameDevice = "Программируемый источник напряжения и тока";
     deviceSettingsWindow.LoadDeviceModels<IPowerSupply>();
     deviceSettingsWindow.SetHeadUnit(headUnit);
     if (editingEntity != null) deviceSettingsWindow.LoadFromDevice(editingEntity);

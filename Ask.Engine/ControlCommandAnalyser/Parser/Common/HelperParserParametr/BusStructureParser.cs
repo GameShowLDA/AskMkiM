@@ -42,30 +42,25 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.HelperParserParametr
         int? value = match.Groups["value"].Success
             ? int.Parse(match.Groups["value"].Value)
             : null;
-        var shassiBusType = BusStructureEnum.Type.None;
         var managerShassi = ChassisManagers.GetAllAsync().GetAwaiter().GetResult().FirstOrDefault();
-        if (managerShassi != null)
-        {
-          shassiBusType = managerShassi.BusType;
-        }
         if (value == null)
         {
           if (managerShassi != null)
           {
-            busDictionary = ManageBusStructure(model, prefix, managerShassi.Number, busDictionary, shassiBusType);
+            busDictionary = ManageBusStructure(model, prefix, managerShassi.Number, busDictionary);
           }
           var managerRack = Racks.GetAllAsync().GetAwaiter().GetResult();
           if (managerRack != null && managerRack.Count > 0)
           {
             foreach (var rack in managerRack)
             {
-              busDictionary = ManageBusStructure(model, prefix, rack.Number, busDictionary, shassiBusType);
+              busDictionary = ManageBusStructure(model, prefix, rack.Number, busDictionary);
             }
           }
           continue;
         }
 
-        busDictionary = ManageBusStructure(model, prefix, value, busDictionary, shassiBusType);
+        busDictionary = ManageBusStructure(model, prefix, value, busDictionary);
       }
       model.BusStructure = busDictionary;
 
@@ -76,8 +71,11 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.HelperParserParametr
     /// Обрабатывает найденный префикс шины и добавляет номер стойки
     /// в словарь структуры шин с учётом ограничений конфигурации.
     /// </summary>
-    private static Dictionary<BusStructureEnum.Type, List<int?>> ManageBusStructure(VshCommandModel model, string prefix, int? standNumber,
-      Dictionary<BusStructureEnum.Type, List<int?>> busDictionary, BusStructureEnum.Type shassiBusType)
+    private static Dictionary<BusStructureEnum.Type, List<int?>> ManageBusStructure(
+      VshCommandModel model,
+      string prefix,
+      int? standNumber,
+      Dictionary<BusStructureEnum.Type, List<int?>> busDictionary)
     {
       if (string.IsNullOrWhiteSpace(prefix))
         return busDictionary;
@@ -91,88 +89,42 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.HelperParserParametr
         ["К"] = BusStructureEnum.Type.BusCombined
       };
 
-      int.TryParse(shassiBusType.GetDescription(), out int resultShassi);
-
       if (!prefixMap.TryGetValue(prefix, out var busType))
       {
-        int.TryParse(busType.GetDescription(), out int resultBus);
-        string shassiStr = CreateShassiString(resultShassi);
         model.Errors.Add(
             VshErrors.InvalidVshBusStructure(
-              model.StartLineNumber, model.Mnemonic, shassiStr, $"{prefix}Ш"));
+              model.StartLineNumber, model.Mnemonic, "2Ш, 4Ш, 6Ш, 8Ш, КШ", $"{prefix}Ш"));
         return busDictionary;
       }
-      if (shassiBusType == BusStructureEnum.Type.None)
+
+      if (!busDictionary.TryGetValue(busType, out var standList))
       {
-        model.Errors.Add(
-              VshErrors.NoneVshBusStructure(model.StartLineNumber, model.Mnemonic));
-        return busDictionary;
+        standList = [];
+        busDictionary[busType] = standList;
       }
-      else
+
+      if (standNumber.HasValue)
       {
-        int.TryParse(busType.GetDescription(), out int resultBus);
-        if (!busDictionary.TryGetValue(busType, out var standList))
+        var chassisManager = ChassisManagers.GetAllAsync().GetAwaiter().GetResult();
+
+        bool rackExists = chassisManager.Any(c => c.Number == standNumber.Value);
+
+        if (!rackExists)
         {
-          standList = new List<int?>();
-          if (resultBus <= resultShassi)
-          {
-            busDictionary[busType] = standList;
-          }
-          else
-          {
-            string shassiStr = CreateShassiString(resultShassi);
-            model.Errors.Add(
-              VshErrors.InvalidVshBusStructure(
-                model.StartLineNumber, model.Mnemonic, shassiStr, $"{prefix}Ш"));
-            return busDictionary;
-          }
+          model.Errors.Add(
+              VshErrors.InvalidRackNumber(
+                  model.StartLineNumber,
+                  model.Mnemonic,
+                  standNumber.Value,
+                  $"{prefix}Ш:{standNumber.Value}"));
+
+          return busDictionary;
         }
 
-        if (standNumber.HasValue)
-        {
-          var chassisManager = ChassisManagers.GetAllAsync().GetAwaiter().GetResult();
-
-          bool rackExists = chassisManager.Any(c => c.Number == standNumber.Value);
-
-          if (!rackExists)
-          {
-            model.Errors.Add(
-                VshErrors.InvalidRackNumber(
-                    model.StartLineNumber,
-                    model.Mnemonic,
-                    standNumber.Value,
-                    $"{prefix}Ш:{standNumber.Value}"));
-
-            return busDictionary;
-          }
-
-          standList.Add(standNumber.Value);
-        }
+        standList.Add(standNumber.Value);
       }
 
       return busDictionary;
-    }
-
-    /// <summary>
-    /// Формирует строковое представление доступных шин шасси
-    /// для использования в сообщениях об ошибках.
-    /// </summary>
-    private static string CreateShassiString(int resultShassi)
-    {
-      var shassiStr = string.Empty;
-      for (int i = 2; i <= resultShassi; i += 2)
-      {
-        if (i == resultShassi)
-        {
-          shassiStr += i.ToString() + "Ш";
-        }
-        else
-        {
-          shassiStr += i.ToString() + "Ш, ";
-        }
-      }
-
-      return shassiStr;
     }
   }
 }

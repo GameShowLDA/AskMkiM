@@ -756,15 +756,15 @@ namespace Ask.Core.Services.Errors.Models
     [ErrorCodeTag("VI001")]
     Vi_InvalidBody,
 
-    /// <summary> Номер источника питания не указан или записан неверно. </summary>
+    /// <summary> Номер ПИНТ не указан или записан неверно. </summary>
     [ErrorCodeTag("VI002")]
     Vi_InvalidPowerSupplyNumber,
 
-    /// <summary> Источник питания с указанным номером не найден. </summary>
+    /// <summary> Источник питания с указанным номером ПИНТ не найден. </summary>
     [ErrorCodeTag("VI003")]
     Vi_PowerSupplyNotFound,
 
-    /// <summary> Номер источника питания неоднозначен для настроенных тестеров. </summary>
+    /// <summary> Номер ПИНТ неоднозначен для настроенных источников питания. </summary>
     [ErrorCodeTag("VI004")]
     Vi_AmbiguousPowerSupply,
 

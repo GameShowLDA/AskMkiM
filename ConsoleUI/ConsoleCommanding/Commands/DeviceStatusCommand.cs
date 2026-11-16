@@ -186,7 +186,6 @@ namespace ConsoleUI.ConsoleCommanding.Commands
       switch (device)
       {
         case IHeadUnit headUnit:
-          context.Console.WriteLine($"  Структура шин: {headUnit.BusType}");
           break;
       }
 

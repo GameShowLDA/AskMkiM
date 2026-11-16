@@ -78,7 +78,7 @@ public static class DeviceConfigurationService
     return new DeviceConfigurationFileModel
     {
       PowerSupplies = (await externalPowerTask).OrderBy(x => x.NumberChassis).ThenBy(x => x.Number).Select(ToDto).ToList(),
-      Version = 2,
+      Version = 3,
       ExportedAtUtc = DateTime.UtcNow,
       Chassis = chassisTask.Result
         .OrderBy(x => x.Number)
@@ -159,7 +159,10 @@ public static class DeviceConfigurationService
   internal static void ValidateImportedConfiguration(DeviceConfigurationFileModel model)
   {
     EnsureNoDuplicates(model.PowerSupplies, device => $"{device.NumberChassis}:{device.Number}", "источники питания");
+    EnsureNoDuplicates(model.PowerSupplies, device => device.PintNumber.ToString(CultureInfo.InvariantCulture), "номера ПИНТ");
     EnsureDeviceClassSet(model.PowerSupplies, item => item.DeviceClass, "источники питания");
+    if (model.PowerSupplies.Any(source => source.PintNumber is < 1 or > 4))
+      throw new InvalidDataException("Номер ПИНТ должен быть от 1 до 4.");
     if (model.PowerSupplies.Any(source => source.Port is < 1 or > 65535))
       throw new InvalidDataException("TCP-порт источника питания должен быть от 1 до 65535.");
     foreach (PowerSupplyDto source in model.PowerSupplies)
