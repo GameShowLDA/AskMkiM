@@ -846,6 +846,16 @@ error-list controls.
 - `Ask.Engine/ControlCommandAnalyser/Formatter/`
 - `Ask.Engine/ControlCommandAnalyser/RmTranslation/`
 
+Команда `ВИ` пока поддержана только транслятором:
+`ViCommandParser` → `ViCommandModel` → `ViCommandFormatter`. Парсер принимает
+отключение источника, установку U/I без шин и установку U/I с парой
+`+A1,-B1`…`+A4,-B4`, а также условие `Б` перед блоком `*...*`. Напряжение и ток
+распознаются по единицам независимо от порядка. Источник разрешается по
+номеру среди всех записей `PowerSupplies`; отсутствие и дублирование номера между
+тестерами считаются ошибкой. Диапазоны и шаги берутся из `IVoltageManager`/
+`ICurrentManager`; `ViCommandValidator` сверяет номер пары шин с `ВШ` того же тестера.
+Исполнитель `ВИ` и вызовы оборудования ещё не реализованы.
+
 `PointParser.SplitTokens` раскрывает перечисление контактов `х57/[2,11]` внутри
 цепи. `AddressExpansionService` раскрывает диапазон имён разъёмов перед `/`.
 `ControlAddressTranslationEngine` для согласованной записи `К1-К6/1=1.6.1-6`

@@ -749,6 +749,42 @@ namespace Ask.Core.Services.Errors.Models
     #endregion
 
     #endregion
+
+    #region Режим ВИ
+
+    /// <summary> Тело команды ВИ отсутствует или имеет неверный формат. </summary>
+    [ErrorCodeTag("VI001")]
+    Vi_InvalidBody,
+
+    /// <summary> Номер источника питания не указан или записан неверно. </summary>
+    [ErrorCodeTag("VI002")]
+    Vi_InvalidPowerSupplyNumber,
+
+    /// <summary> Источник питания с указанным номером не найден. </summary>
+    [ErrorCodeTag("VI003")]
+    Vi_PowerSupplyNotFound,
+
+    /// <summary> Номер источника питания неоднозначен для настроенных тестеров. </summary>
+    [ErrorCodeTag("VI004")]
+    Vi_AmbiguousPowerSupply,
+
+    /// <summary> Параметры команды ВИ заданы в недопустимом сочетании. </summary>
+    [ErrorCodeTag("VI005")]
+    Vi_InvalidParameterCombination,
+
+    /// <summary> Напряжение не соответствует рабочим пределам или шагу источника. </summary>
+    [ErrorCodeTag("VI006")]
+    Vi_InvalidVoltage,
+
+    /// <summary> Ток не соответствует рабочим пределам или шагу источника. </summary>
+    [ErrorCodeTag("VI007")]
+    Vi_InvalidCurrent,
+
+    /// <summary> Шины команды ВИ заданы неверно или не поддерживаются структурой ВШ. </summary>
+    [ErrorCodeTag("VI008")]
+    Vi_InvalidBus,
+
+    #endregion
   }
 
   /// <summary>
