@@ -141,6 +141,7 @@ namespace Ask.Engine.ControlCommandAnalyser
 
       CheckVshModel(models);
       CkCommandValidator.ValidateVshCompatibility(models);
+      ViCommandValidator.ValidateVshCompatibility(models);
 
       if (HasCriticalStructuralErrors(models))
         return CompleteCriticalTranslation(models, progress);

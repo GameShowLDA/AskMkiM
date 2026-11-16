@@ -68,5 +68,11 @@ namespace Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands
     /// Тип команды ОС.
     /// </summary>
     OC,
+
+    [CommandOrganizationalAttribute("ВИ")]
+    /// <summary>
+    /// Команда управления источником питания.
+    /// </summary>
+    VI,
   }
 }
