@@ -48,7 +48,7 @@ public sealed class B5108 : DeviceWithTcpIp, IPowerSupply, IDisposable
   public int NumberChassis { get; set; }
 
   /// <inheritdoc />
-  public SupportedBusPairs SupportedBusPairs =>
+  public SupportedBusPairs SupportedBusPairs { get; set; } =
     SupportedBusPairs.AB2 | SupportedBusPairs.AB3 | SupportedBusPairs.AB4;
 
   /// <inheritdoc />
@@ -71,6 +71,7 @@ public sealed class B5108 : DeviceWithTcpIp, IPowerSupply, IDisposable
   {
     Id = Id,
     NumberChassis = NumberChassis,
+    SupportedBusPairs = SupportedBusPairs,
     Name = Name,
     Description = Description,
     Number = Number,

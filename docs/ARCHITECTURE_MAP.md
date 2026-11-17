@@ -854,7 +854,7 @@ error-list controls.
 Команда `ВИ` поддержана транслятором и исполнительным контуром:
 `ViCommandParser` → `ViCommandModel` → `ViCommandFormatter`. Парсер принимает
 отключение источника, установку U/I без шин и установку U/I с парой
-`+A2,-B2` или `+A3,-B3`, доступной аппаратному выходу ПИНТ и представленной
+`+A2,-B2`, `+A3,-B3` или `+A4,-B4`, доступной настроенным ПИНТ и УКШ и представленной
 установленным в том же тестере модулем МКР с соответствующим `BusType`, а также условие `Б`
 перед блоком `*...*`. Напряжение и ток
 распознаются по единицам независимо от порядка. Источник разрешается по настроенному
@@ -862,7 +862,7 @@ error-list controls.
 дублирование номера ПИНТ считаются ошибкой. Аппаратный `Number` найденного источника
 сохраняется в модели для последующего разрешения устройства внутри тестера.
 Диапазоны и шаги берутся из `IVoltageManager`/
-`ICurrentManager`; ручная настройка доступных пар в карточках устройств отсутствует,
+`ICurrentManager`; доступные пары берутся из `IAttachableDevice.SupportedBusPairs`,
 а структура `ВШ` не ограничивает выбор пары `ВИ`.
 `CommandExecutorRegistry` обнаруживает `ViCommandExecutor` по reflection. Исполнитель
 разрешает `IPowerSupply` и `ISwitchingDevice` по сохранённому парсером номеру тестера,
@@ -2150,8 +2150,8 @@ Call chains:
 - `ViCommandExecutor` → `PowerSupplies.GetDeviceByNumberChassisAsync` /
   `SwitchingDevices.GetDevicesByNumberChassisAsync` → инициализация обоих устройств
   → безопасное `OUTP OFF` → установка/сброс U/I → `ConnectorManager.ConnectPINT` или
-  отключение зарегистрированной пары ПИНТ → проверка пары по `BusType` модулей МКР
-  выбранного тестера → при включении `OUTP ON` и контроль режима
+  отключение зарегистрированной пары ПИНТ → проверка пересечения настроенных пар ПИНТ и УКШ
+  и пары по `BusType` модулей МКР выбранного тестера → при включении `OUTP ON` и контроль режима
   через `STAT:OPER:COND?`. Устройства входят в `EquipmentService.GetAllDevices()` и
   поэтому сбрасываются общим завершением/`ОС`.
 - `Transport.DisconnectAsync` → `TcpTransport` → блокировка общего протокола
@@ -2180,7 +2180,7 @@ Setters не включают выход, не меняют LIM и не вызы
 Отдельно проверена отмена из UI во время уже выполняющегося запроса измерения.
 
 БД: `Ask.Core/Shared/DTO/Devices/PowerSupply/PowerSupplyDto.cs` → отдельная таблица `PowerSupplies`
-в `AppDbContext.Device.cs`. Поля AttachableDeviceDto (включая NumberChassis),
+в `AppDbContext.Device.cs`. Поля AttachableDeviceDto (включая NumberChassis и `SupportedBusPairs`),
 `PintNumber` (default 1, допустимо 1–4), TCP `Port` (default 80),
 `MinVoltage`/`MaxVoltage`/`VoltageStep` в В (defaults 0/150/0.1) и
 `MinCurrent`/`MaxCurrent`/`CurrentStep` в А (defaults 0/5/0.001).
@@ -2194,17 +2194,21 @@ GetDevicesByNumberChassis/GetDeviceByNumberChassis. Номер источник�
 Маппер переносит общие поля через ReflectionMapper, номер ПИНТ, порт в ConnectedProfile, проверяет
 номер ПИНТ и рабочие пределы и применяет их к runtime-менеджерам до
 `DeviceApplicationComposer`; adapters сохраняют эти значения. Форма настройки показывает номер ПИНТ
-списком 1–4; импорт конфигурации отклоняет значения вне диапазона и дубли номеров ПИНТ.
+списком 1–4; общая форма устройств сохраняет допустимые пары шин. МКР выбирает одну пару,
+ПИНТ — любое непустое подмножество AB2–AB4, ППУ — AB1, УКШ, мультиметр и МиНТ —
+любое непустое подмножество AB1–AB4. Импорт конфигурации отклоняет пары вне аппаратного диапазона,
+значения номера ПИНТ вне диапазона и дубли номеров ПИНТ.
 При удалении/замене записи DeviceCache освобождает `B5108.Dispose` → TCP-протокол.
 
 Схема: миграции `20261029090000_AddExternalPowerSupplies`, `20261029100000_AddPowerSupplyChassis`,
-`20261111090000_AddPowerSupplyOperatingLimits`, `20261116090000_AddPowerSupplyPintNumber` и snapshot,
+`20261111090000_AddPowerSupplyOperatingLimits`, `20261116090000_AddPowerSupplyPintNumber`,
+`20261117120000_AddSupportedBusPairs` и snapshot,
 общий SQL `Ask.DataBase.Provider/Services/Devices/PowerSupplyStorageSql.cs`.
 `DatabaseInitializationService.InitializeAsync` после применения/принятия схемы вызывает
 `EnsurePowerSupplyStorageAsync`: CREATE TABLE IF NOT EXISTS нужен также для legacy-БД,
 миграции которых принимаются как уже применённые. Существующие строки не меняются;
 настроенные устройства автоматически не создаются. NumberChassis, PintNumber и шесть колонок рабочих
-пределов добавляются также в legacy-таблицу; старые записи без принадлежности сохраняют NumberChassis=0,
+пределов и `SupportedBusPairs` добавляются также в legacy-таблицы; старые записи без принадлежности сохраняют NumberChassis=0,
 номер ПИНТ получает значение 1, тестер за пользователя не выбирается, а пределы получают defaults Б5-108.
 В root-редакторе БД таблица видна через reflection DbSet.
 Проверки: `Ask.Engine.UnitTests/DataBase/PowerSupplyStorageTests.cs` — миграции новой базы,

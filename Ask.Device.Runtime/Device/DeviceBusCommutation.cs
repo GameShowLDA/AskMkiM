@@ -55,12 +55,16 @@ namespace Ask.Device.Runtime.Device
     /// </summary>
     public int NumberChassis { get; set; }
 
+    /// <inheritdoc />
+    public SupportedBusPairs SupportedBusPairs { get; set; } = SupportedBusPairs.All;
+
     public SwitchingDeviceDto Convert()
     {
       return new SwitchingDeviceDto
       {
         Id = Id,
         NumberChassis = NumberChassis,
+        SupportedBusPairs = SupportedBusPairs,
         Name = Name ?? string.Empty,
         Description = Description ?? string.Empty,
         Number = Number,

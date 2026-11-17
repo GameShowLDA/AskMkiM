@@ -10,5 +10,10 @@
     /// Получает или задаёт номер менеджера шасси, к которому подключено устройство.
     /// </summary>
     int NumberChassis { get; set; }
+
+    /// <summary>
+    /// Получает или задаёт пары структурных шин, доступные устройству.
+    /// </summary>
+    Ask.Core.Shared.Metadata.Enums.DeviceEnums.SupportedBusPairs SupportedBusPairs { get; set; }
   }
 }

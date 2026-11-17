@@ -35,6 +35,9 @@ namespace Ask.Device.Runtime.Device
     public int NumberChassis { get; set; }
 
     /// <inheritdoc />
+    public SupportedBusPairs SupportedBusPairs { get; set; } = SupportedBusPairs.None;
+
+    /// <inheritdoc />
     public string LastResolvedDevicePath { get; set; } = string.Empty;
 
     /// <summary>
@@ -66,6 +69,7 @@ namespace Ask.Device.Runtime.Device
       {
         Id = Id,
         NumberChassis = NumberChassis,
+        SupportedBusPairs = SupportedBusPairs,
         Name = Name ?? string.Empty,
         Description = Description ?? string.Empty,
         Number = Number,

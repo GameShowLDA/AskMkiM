@@ -2,6 +2,8 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSupply;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Communication.Com;
 using Ask.Device.Communication.Ethernet;
 using Ask.Device.Communication.Usb;
@@ -96,9 +98,9 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
 
         DeviceNumberContainer.Visibility = Visibility.Visible;
         AdditionalSettingsContainer.Visibility = Visibility.Visible;
+        ConfigureBusPairSelection(selectedType);
         if (typeof(IRelaySwitchModule).IsAssignableFrom(selectedType))
         {
-          BusTypeContainer.Visibility = Visibility.Visible;
           ResistanceContainer.Visibility = Visibility.Visible;
           CapacitanceContainer.Visibility = Visibility.Visible;
           var relayModule = (IRelaySwitchModule)(Activator.CreateInstance(selectedType) ??
@@ -108,7 +110,6 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
         }
         else
         {
-          BusTypeContainer.Visibility = Visibility.Collapsed;
           ResistanceContainer.Visibility = Visibility.Collapsed;
           CapacitanceContainer.Visibility = Visibility.Collapsed;
           RelayPointCountContainer.Visibility = Visibility.Collapsed;
@@ -142,6 +143,43 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
       {
         MessageBoxCustom.Show(ex.Message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
       }
+    }
+
+    private void ConfigureBusPairSelection(Type selectedType)
+    {
+      if (Activator.CreateInstance(selectedType) is not IAttachableDevice device ||
+          device.SupportedBusPairs == SupportedBusPairs.None)
+      {
+        BusTypeContainer.Visibility = Visibility.Collapsed;
+        return;
+      }
+
+      BusTypeContainer.Visibility = Visibility.Visible;
+      bool isRelayModule = device is IRelaySwitchModule;
+      BusSelectionTitle.Text = isRelayModule ? "Пара структурных шин" : "Доступные пары шин";
+      BusTypeSelectionBox.Visibility = isRelayModule ? Visibility.Visible : Visibility.Collapsed;
+      BusPairsSelectionPanel.Visibility = isRelayModule ? Visibility.Collapsed : Visibility.Visible;
+
+      if (isRelayModule)
+      {
+        return;
+      }
+
+      SupportedBusPairs allowedPairs = device.SupportedBusPairs;
+      ConfigureBusPairCheckBox(BusPairAB1CheckBox, SupportedBusPairs.AB1, allowedPairs);
+      ConfigureBusPairCheckBox(BusPairAB2CheckBox, SupportedBusPairs.AB2, allowedPairs);
+      ConfigureBusPairCheckBox(BusPairAB3CheckBox, SupportedBusPairs.AB3, allowedPairs);
+      ConfigureBusPairCheckBox(BusPairAB4CheckBox, SupportedBusPairs.AB4, allowedPairs);
+    }
+
+    private static void ConfigureBusPairCheckBox(
+      CheckBox checkBox,
+      SupportedBusPairs pair,
+      SupportedBusPairs allowedPairs)
+    {
+      bool isAllowed = (allowedPairs & pair) != 0;
+      checkBox.IsEnabled = isAllowed;
+      checkBox.IsChecked = isAllowed;
     }
 
     private void ResetSettingsForDeviceModelChange()

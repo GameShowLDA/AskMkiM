@@ -42,6 +42,23 @@ namespace Ask.Device.Runtime.Device
     public int NumberChassis { get; set; }
 
     /// <inheritdoc />
+    public SupportedBusPairs SupportedBusPairs
+    {
+      get => SupportedBusPairsExtensions.FromBus(BusType);
+      set
+      {
+        BusType = value switch
+        {
+          SupportedBusPairs.AB1 => SwitchingBusNew.AB1,
+          SupportedBusPairs.AB2 => SwitchingBusNew.AB2,
+          SupportedBusPairs.AB3 => SwitchingBusNew.AB3,
+          SupportedBusPairs.AB4 => SwitchingBusNew.AB4,
+          _ => BusType
+        };
+      }
+    }
+
+    /// <inheritdoc />
     public int PointCount
     {
       get => _pointCount;
@@ -88,6 +105,7 @@ namespace Ask.Device.Runtime.Device
       {
         Id = Id,
         NumberChassis = NumberChassis,
+        SupportedBusPairs = SupportedBusPairs,
         NumberRack = NumberRack,
         PointCount = PointCount,
         Name = Name ?? string.Empty,

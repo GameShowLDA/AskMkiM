@@ -83,10 +83,11 @@ internal sealed class ViCommandExecutor : CommandExecutorBase, ICommandExecutor
       SwitchingBusNew busPair = GetBusPair(command);
       SupportedBusPairs modulePairs = await busPairProvider(chassisNumber, cancellationToken);
       if (!powerSupply.SupportedBusPairs.Supports(busPair) ||
+          !switchingDevice.SupportedBusPairs.Supports(busPair) ||
           !modulePairs.Supports(busPair))
       {
         throw new InvalidOperationException(
-          $"Пара шин {busPair} недоступна для ПИНТ или не представлена модулем МКР.");
+          $"Пара шин {busPair} недоступна для ПИНТ, УКШ или не представлена модулем МКР.");
       }
     }
 

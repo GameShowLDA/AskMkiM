@@ -74,6 +74,8 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
       DeviceNumberContainer.Visibility = Visibility.Visible;
       RelayPointCountContainer.Visibility = Visibility.Collapsed;
       BusTypeContainer.Visibility = Visibility.Collapsed;
+      BusTypeSelectionBox.Visibility = Visibility.Collapsed;
+      BusPairsSelectionPanel.Visibility = Visibility.Collapsed;
       ResistanceContainer.Visibility = Visibility.Collapsed;
       CapacitanceContainer.Visibility = Visibility.Collapsed;
       ConnectionTypeContainer.Visibility = Visibility.Visible;
@@ -229,6 +231,11 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
         ResistanceTextBox.Text = relayDevice.SwitchResistance.ToString(System.Globalization.CultureInfo.InvariantCulture);
         CapacitanceTextBox.Text = relayDevice.SwitchCapacitance.ToString(System.Globalization.CultureInfo.InvariantCulture);
         BusTypeSelectionBox.SelectedItem = relayDevice.BusType;
+      }
+
+      if (device is AttachableDeviceDto attachableDevice)
+      {
+        SetSupportedBusPairs(attachableDevice.SupportedBusPairs);
       }
 
       if (device is FastMeterDto fastMeterDevice)

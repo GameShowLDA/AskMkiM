@@ -261,6 +261,7 @@ public sealed class ViCommandExecutorTests : IDisposable
     switchingDevice.SetupProperty(device => device.Number, 1);
     switchingDevice.SetupProperty(device => device.NumberChassis, 2);
     switchingDevice.SetupProperty(device => device.ConnectionDetails, "switch");
+    switchingDevice.SetupProperty(device => device.SupportedBusPairs, SupportedBusPairs.All);
     switchingDevice.SetupGet(device => device.ConnectableManager).Returns(switchConnectable.Object);
     switchingDevice.SetupGet(device => device.ConnectorManager).Returns(connector.Object);
 

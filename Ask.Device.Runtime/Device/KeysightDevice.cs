@@ -23,6 +23,9 @@ namespace Ask.Device.Runtime.Device
     public int NumberChassis { get; set; }
 
     /// <inheritdoc />
+    public SupportedBusPairs SupportedBusPairs { get; set; } = SupportedBusPairs.All;
+
+    /// <inheritdoc />
     public ICapacitanceMeasurement CapacitanceManager { get; set; }
 
     /// <inheritdoc />
@@ -160,6 +163,7 @@ namespace Ask.Device.Runtime.Device
       {
         Id = Id,
         NumberChassis = NumberChassis,
+        SupportedBusPairs = SupportedBusPairs,
         Name = Name ?? string.Empty,
         Description = Description ?? string.Empty,
         Number = Number,

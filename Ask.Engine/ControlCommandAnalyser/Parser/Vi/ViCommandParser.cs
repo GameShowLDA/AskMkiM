@@ -388,6 +388,7 @@ internal sealed class ViCommandParser : ICommandParser
   private static IReadOnlyCollection<ViPowerSupplyLimits> LoadPowerSupplyLimits()
   {
     var relayModules = RelaySwitchModules.GetAllAsync().GetAwaiter().GetResult();
+    var switchingDevices = SwitchingDevices.GetAllAsync().GetAwaiter().GetResult();
     return PowerSupplies.GetAllAsync()
       .GetAwaiter()
       .GetResult()
@@ -396,6 +397,9 @@ internal sealed class ViCommandParser : ICommandParser
         SupportedBusPairs modulePairs = RelayModuleBusPairResolver.Resolve(
           relayModules,
           source.NumberChassis);
+        SupportedBusPairs switchingPairs = switchingDevices
+          .FirstOrDefault(device => device.NumberChassis == source.NumberChassis)?
+          .SupportedBusPairs ?? SupportedBusPairs.None;
         return new ViPowerSupplyLimits(
           source.PintNumber,
           source.Number,
@@ -406,7 +410,7 @@ internal sealed class ViCommandParser : ICommandParser
           source.CurrentManager.MinCurrent,
           source.CurrentManager.MaxCurrent,
           source.CurrentManager.CurrentStep,
-          source.SupportedBusPairs & modulePairs);
+          source.SupportedBusPairs & modulePairs & switchingPairs);
       })
       .ToArray();
   }

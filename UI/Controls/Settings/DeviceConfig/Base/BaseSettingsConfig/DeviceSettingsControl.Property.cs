@@ -50,6 +50,39 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
     public int NumberChassis => _headUnit?.Number ?? -1;
 
     /// <summary>
+    /// Получает выбранные для устройства пары структурных шин.
+    /// </summary>
+    public Ask.Core.Shared.Metadata.Enums.DeviceEnums.SupportedBusPairs SelectedSupportedBusPairs
+    {
+      get
+      {
+        if (BusTypeSelectionBox.Visibility == Visibility.Visible &&
+            BusTypeSelectionBox.SelectedItem is Ask.Core.Shared.Metadata.Enums.DeviceEnums.SwitchingBusNew bus)
+        {
+          return Ask.Core.Shared.Metadata.Enums.DeviceEnums.SupportedBusPairsExtensions.FromBus(bus);
+        }
+
+        var result = Ask.Core.Shared.Metadata.Enums.DeviceEnums.SupportedBusPairs.None;
+        if (BusPairAB1CheckBox.IsChecked == true) result |= Ask.Core.Shared.Metadata.Enums.DeviceEnums.SupportedBusPairs.AB1;
+        if (BusPairAB2CheckBox.IsChecked == true) result |= Ask.Core.Shared.Metadata.Enums.DeviceEnums.SupportedBusPairs.AB2;
+        if (BusPairAB3CheckBox.IsChecked == true) result |= Ask.Core.Shared.Metadata.Enums.DeviceEnums.SupportedBusPairs.AB3;
+        if (BusPairAB4CheckBox.IsChecked == true) result |= Ask.Core.Shared.Metadata.Enums.DeviceEnums.SupportedBusPairs.AB4;
+        return result;
+      }
+    }
+
+    /// <summary>
+    /// Устанавливает выбранные пары структурных шин.
+    /// </summary>
+    public void SetSupportedBusPairs(Ask.Core.Shared.Metadata.Enums.DeviceEnums.SupportedBusPairs pairs)
+    {
+      BusPairAB1CheckBox.IsChecked = (pairs & Ask.Core.Shared.Metadata.Enums.DeviceEnums.SupportedBusPairs.AB1) != 0;
+      BusPairAB2CheckBox.IsChecked = (pairs & Ask.Core.Shared.Metadata.Enums.DeviceEnums.SupportedBusPairs.AB2) != 0;
+      BusPairAB3CheckBox.IsChecked = (pairs & Ask.Core.Shared.Metadata.Enums.DeviceEnums.SupportedBusPairs.AB3) != 0;
+      BusPairAB4CheckBox.IsChecked = (pairs & Ask.Core.Shared.Metadata.Enums.DeviceEnums.SupportedBusPairs.AB4) != 0;
+    }
+
+    /// <summary>
     /// Свойство для добавления дополнительных настроек из других элементов управления.
     /// </summary>
     public UIElement AdditionalSettings

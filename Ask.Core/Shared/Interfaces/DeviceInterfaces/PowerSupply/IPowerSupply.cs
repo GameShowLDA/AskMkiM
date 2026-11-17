@@ -11,7 +11,7 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSupply
     /// <summary>
     /// Пары шин, поддерживаемые аппаратным выходом источника.
     /// </summary>
-    Ask.Core.Shared.Metadata.Enums.DeviceEnums.SupportedBusPairs SupportedBusPairs { get; }
+    Ask.Core.Shared.Metadata.Enums.DeviceEnums.SupportedBusPairs SupportedBusPairs { get; set; }
 
     /// <summary>
     /// Номер ПИНТ, используемый в командах управления источником.
