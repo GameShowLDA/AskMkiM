@@ -24,6 +24,7 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       var nameCommand = $"{command.CommandNumber} {command.Mnemonic}";
       var sourceMessage = CommandMessages.FormatSourceLines(command.SourceLines);
       await CommandMessages.PublishCommandExecutionAsync(context.Console, nameCommand, sourceMessage, isBlockStart: false);
+      AddDocumentedMessage(command, protocolModel);
 
       var isQuestion = command.CuType == CuCommandType.Question ||
                        command.MessageText.TrimEnd().EndsWith("?");
@@ -46,6 +47,26 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         hasConditionalJump);
     }
 
+    internal static void AddDocumentedMessage(CuCommandModel command, ProtocolModel protocolModel)
+    {
+      ArgumentNullException.ThrowIfNull(command);
+      ArgumentNullException.ThrowIfNull(protocolModel);
+
+      if (!command.IsDocument || string.IsNullOrWhiteSpace(command.MessageText))
+      {
+        return;
+      }
+
+      var commandName = $"{command.CommandNumber} {command.Mnemonic}";
+      if (!protocolModel.Info.TryGetValue(commandName, out var messages))
+      {
+        messages = new List<ShowMessageModel>();
+        protocolModel.Info[commandName] = messages;
+      }
+
+      messages.Add(CommandMessages.BuildControlInstructionDocumentMessage(command.MessageText));
+    }
+
     private static MessageBoxResult ShowInformation(string message)
     {
       MessageBoxCustom.Show(message, "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -55,8 +76,8 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
     private static MessageBoxResult ShowQuestionDialog(string message)
     {
       return MessageBoxCustom.Show(
-        $"{message}\r\n\r\nКоманда ЦУ: Yes-Да No-Нет Esc-Временный останов ПК",
-        "Запрос оператору",
+        $"{message}",
+        "ПОДТВЕРДИТЬ?",
         MessageBoxButton.YesNoCancel,
         MessageBoxImage.Question);
     }

@@ -99,11 +99,24 @@ namespace UI.Helpers
     {
       toolTip.Dispatcher.BeginInvoke(
         DispatcherPriority.Loaded,
-        new Action(() => UpdateArrow(toolTip)));
+        new Action(() =>
+        {
+          if (toolTip.IsOpen)
+          {
+            UpdateArrow(toolTip);
+          }
+        }));
     }
 
-    private static void UpdateArrow(ToolTip toolTip)
+    internal static void UpdateArrow(ToolTip toolTip)
     {
+      if (!toolTip.IsOpen ||
+          !toolTip.IsLoaded ||
+          PresentationSource.FromVisual(toolTip)?.CompositionTarget == null)
+      {
+        return;
+      }
+
       if (toolTip.PlacementTarget is not FrameworkElement target ||
           toolTip.ActualWidth <= 0 ||
           toolTip.ActualHeight <= 0 ||
@@ -116,8 +129,12 @@ namespace UI.Helpers
         return;
       }
 
-      Rect targetRect = GetScreenRect(target);
-      Rect toolTipRect = GetScreenRect(toolTip);
+      if (!TryGetScreenRect(target, out var targetRect) ||
+          !TryGetScreenRect(toolTip, out var toolTipRect))
+      {
+        return;
+      }
+
       Point targetCenter = new(
         targetRect.Left + targetRect.Width / 2,
         targetRect.Top + targetRect.Height / 2);
@@ -151,19 +168,23 @@ namespace UI.Helpers
       SetArrowAngle(toolTip, 90);
     }
 
-    private static Rect GetScreenRect(FrameworkElement element)
+    private static bool TryGetScreenRect(FrameworkElement element, out Rect rect)
     {
+      rect = Rect.Empty;
+      PresentationSource? source = PresentationSource.FromVisual(element);
+      if (!element.IsLoaded || source?.CompositionTarget == null)
+      {
+        return false;
+      }
+
       Point screenTopLeft = element.PointToScreen(new Point(0, 0));
       Point screenBottomRight = element.PointToScreen(new Point(element.ActualWidth, element.ActualHeight));
 
-      PresentationSource? source = PresentationSource.FromVisual(element);
-      if (source?.CompositionTarget != null)
-      {
-        screenTopLeft = source.CompositionTarget.TransformFromDevice.Transform(screenTopLeft);
-        screenBottomRight = source.CompositionTarget.TransformFromDevice.Transform(screenBottomRight);
-      }
+      screenTopLeft = source.CompositionTarget.TransformFromDevice.Transform(screenTopLeft);
+      screenBottomRight = source.CompositionTarget.TransformFromDevice.Transform(screenBottomRight);
 
-      return new Rect(screenTopLeft, screenBottomRight);
+      rect = new Rect(screenTopLeft, screenBottomRight);
+      return true;
     }
 
     private static double Clamp(double value, double min, double max)

@@ -82,7 +82,7 @@
             <!-- MANU_IR_VOLTAGE -->
             <TextBlock Grid.Row="0" Text="Напряжение IR (50 - 1000 В):" TextAlignment="Left" VerticalAlignment="Center" Margin="10" />
             <shared:NumericComboBox x:Name="VoltageSlider" Grid.Row="0" Grid.Column="1"
-                                    Minimum="50" Maximum="1000" Increment="50" Unit="В"/>
+                                    Unit="В"/>
 
             <!-- MANU_IR_RHISET -->
             <TextBlock Grid.Row="1" Text="Высокий предел сопротивления IR (1G - 50G):" TextAlignment="Left" VerticalAlignment="Center" Margin="10" />

@@ -20,7 +20,7 @@ internal static class ExecutionProtocolEnvironmentSnapshotFactory
       ["Выполнение.Холостой режим"] = State(execution.IdleModeExecution),
       ["Выполнение.Симуляция брака"] = execution.ErroneousMeasurementType.ToString(),
       ["Выполнение.Симуляция аппаратных ошибок"] = State(execution.IsHardwareErrorSimulationMode),
-      ["Выполнение.Пошаговый режим"] = State(execution.StepByStepMode),
+      ["Выполнение.Пошаговый режим"] = State(StepControlManager.StepMode),
       ["Выполнение.Остановка при ошибке"] = State(execution.StopOnError),
       ["Выполнение.Legacy-совместимость"] = State(execution.LegacyCompatibilityMode),
       ["Выполнение.Проверка питания отключена"] = State(execution.DisablePowerCheck),

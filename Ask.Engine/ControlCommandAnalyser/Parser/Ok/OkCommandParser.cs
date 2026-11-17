@@ -91,7 +91,8 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Ok
         if (string.IsNullOrWhiteSpace(objectCode))
           model.Errors.Add(OkErrors.MissingObjectCode(numberLine, $"{commandNumber} {mnemonic}"));
         else if (objectCode.Length > 39)
-          model.Errors.Add(OkErrors.ObjectCodeTooLong(numberLine, $"{commandNumber} {mnemonic}"));
+          model.Errors.Add(OkErrors.ObjectCodeTooLong(
+            numberLine, $"{commandNumber} {mnemonic}", objectCode));
 
         model.ObjectCode = objectCode;
         model.ObjectName = objectName;
@@ -196,7 +197,8 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Ok
           int maxLen = key == "ПРИМ" ? 63 : 39;
           if (value.Length > maxLen)
           {
-            model.Errors.Add(OkErrors.ParameterValueTooLong(numberLine + i, $"{commandNumber} {mnemonic}", key, maxLen));
+            model.Errors.Add(OkErrors.ParameterValueTooLong(
+              numberLine + i, $"{commandNumber} {mnemonic}", key, value, maxLen));
           }
 
           if (!multiKeys.Contains(key))

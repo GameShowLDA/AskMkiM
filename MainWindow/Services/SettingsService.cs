@@ -70,6 +70,9 @@ namespace MainWindowProgram.Services
     /// </summary>
     public void HelpOpenAboutProgram() => HelpText("AboutProgram");
 
+    /// <summary>Открывает историю выпусков приложения.</summary>
+    public void HelpOpenReleaseNotes() => HelpText(Ask.Support.ReleaseNotes.ReleaseNotesHtmlRenderer.HelpPageKey);
+
     /// <summary>
     /// Открывает станицу "Быстрое меню команд"
     /// </summary>

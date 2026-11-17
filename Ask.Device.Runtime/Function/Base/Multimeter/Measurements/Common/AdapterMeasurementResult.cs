@@ -1,4 +1,7 @@
+using Ask.Core.Services.Errors.Device;
+using Ask.Core.Services.UI;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
+using Ask.Core.Shared.Interfaces.UiInterfaces;
 using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
@@ -91,16 +94,30 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
     /// <param name="operation">Операция измерения.</param>
     /// <param name="shouldRetryOnResult">Проверка результата на необходимость повторного измерения.</param>
     /// <param name="maxAttempts">Максимальное количество попыток.</param>
+    /// <param name="messageService">Сервис выбора повтора при отсутствии ответа устройства.</param>
+    /// <param name="retryOnNoResponse">Повторить отсутствие ответа, если запрос ещё не выполнил восстановление связи.</param>
     /// <returns>Результат выполнения измерительной операции.</returns>
     public static async Task<AdapterMeasurementResult<T>> ExecuteAsync<T>(
       IAttachableDevice device,
       string operationName,
       Func<Task<T>> operation,
       Func<T, bool>? shouldRetryOnResult = null,
-      int maxAttempts = 2)
+      int maxAttempts = 2,
+      IUserInteractionService? messageService = null,
+      bool retryOnNoResponse = true)
     {
       ArgumentNullException.ThrowIfNull(device);
       ArgumentNullException.ThrowIfNull(operation);
+
+      if (messageService != null)
+      {
+        return await UserActionHelper.GetRunWithUserRepeatAsync(
+          () => ExecuteAsync(device, operationName, operation, shouldRetryOnResult, maxAttempts,
+            retryOnNoResponse: retryOnNoResponse),
+          static _ => true,
+          messageService,
+          deviceTask: true);
+      }
 
       if (maxAttempts < 1)
       {
@@ -141,6 +158,17 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common
         }
         catch (OperationCanceledException)
         {
+          throw;
+        }
+        catch (DeviceNoResponseException ex)
+        {
+          if (ex.Operation == "Обмен с устройством")
+            ex.Operation = operationName;
+          if (retryOnNoResponse && attempt < maxAttempts)
+          {
+            LogWarning($"[{deviceLabel}] {operationName}: {ex.Message} Повтор {attempt + 1}/{maxAttempts}.", isDeviceLog: true);
+            continue;
+          }
           throw;
         }
         catch (Exception ex)

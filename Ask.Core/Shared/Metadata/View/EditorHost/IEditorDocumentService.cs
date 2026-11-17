@@ -22,7 +22,8 @@ namespace Ask.Core.Shared.Metadata.View.EditorHost
     /// Открывает документ по указанному пути.
     /// </summary>
     /// <param name="filePath">Абсолютный путь к файлу.</param>
-    void OpenFile(string filePath);
+    /// <param name="sourceArchiveName">Название исходного архива, если документ открыт из архива.</param>
+    void OpenFile(string filePath, string? sourceArchiveName = null);
 
     /// <summary>
     /// Сохраняет текущий активный документ.
@@ -33,6 +34,15 @@ namespace Ask.Core.Shared.Metadata.View.EditorHost
     /// Сохраняет текущий документ под новым именем.
     /// </summary>
     void SaveFileAs();
+
+    /// <summary>
+    /// Подтверждает закрытие всех открытых документов и сохраняет выбранные пользователем изменения.
+    /// </summary>
+    /// <returns>
+    /// <see langword="true"/>, если приложение может продолжить закрытие;
+    /// иначе <see langword="false"/>.
+    /// </returns>
+    bool ConfirmCloseAll();
 
     /// <summary>
     /// Выводит текущий документ на печать.

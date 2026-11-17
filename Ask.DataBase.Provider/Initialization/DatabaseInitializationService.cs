@@ -1,4 +1,4 @@
-using Ask.Core.Shared.DTO.Settings;
+﻿using Ask.Core.Shared.DTO.Settings;
 using Ask.Core.Shared.Metadata.Dictonary;
 using Ask.DataBase.Provider.Configuration;
 using Ask.DataBase.Provider.Context;
@@ -76,10 +76,12 @@ public static class DatabaseInitializationService
     await EnsureSettingsProtocolPrintColumnsAsync(databasePath, report, progress, cancellationToken);
     await EnsureDeviceDisplayDelayMessagesColumnAsync(databasePath, report, progress, cancellationToken);
     await EnsureDiagnosticUnderliningColumnsAsync(databasePath, report, progress, cancellationToken);
+    await EnsureUserInterfaceAutoLockColumnAsync(databasePath, report, progress, cancellationToken);
     await EnsureFastMeterPpuDividerCoefficientColumnAsync(databasePath, report, progress, cancellationToken);
     await EnsureBreakdownTesterVoltageColumnsAsync(databasePath, report, progress, cancellationToken);
     await EnsureBreakdownTesterSystemInsulationResistanceColumnAsync(databasePath, report, progress, cancellationToken);
     await EnsureLegacyMkiHardwareProfilesStorageAsync(databasePath, report, progress, cancellationToken);
+    await EnsurePowerSupplyStorageAsync(databasePath, cancellationToken);
     await EnsureDefaultDataAsync(databasePath, report, progress, cancellationToken);
 
     TraceInfo(
@@ -586,7 +588,7 @@ public static class DatabaseInitializationService
   /// <summary>
   /// Проверяет наличие колонок напряжений пробойной установки в старой схеме БД.
   /// </summary>
-  private static async Task EnsureBreakdownTesterVoltageColumnsAsync(
+  internal static async Task EnsureBreakdownTesterVoltageColumnsAsync(
     string databasePath,
     DatabaseInitializationReport report,
     Action<string>? progress,
@@ -600,9 +602,49 @@ public static class DatabaseInitializationService
       return;
     }
 
-    await EnsureColumnAsync(connection, "BreakdownTesters", "PiMaxVoltage", "INTEGER NOT NULL DEFAULT 0", report, progress, cancellationToken);
-    await EnsureColumnAsync(connection, "BreakdownTesters", "SiMaxVoltage", "INTEGER NOT NULL DEFAULT 0", report, progress, cancellationToken);
-    await EnsureColumnAsync(connection, "BreakdownTesters", "IRMinVoltage", "INTEGER NOT NULL DEFAULT 0", report, progress, cancellationToken);
+    foreach (var (name, minimum, maximum, step, exceptions) in new[]
+    {
+      ("AcwVoltageRange", "50", "AcwMaxVoltage", 2, "[]"),
+      ("DcwVoltageRange", "50", "DcwMaxVoltage", 2, "[]"),
+      ("IrVoltageRange", "IRMinVoltage", "SiMaxVoltage", 50, "[125]"),
+    })
+    {
+      if (await ColumnExistsAsync(connection, "BreakdownTesters", name, cancellationToken))
+        continue;
+
+      string minimumSql = minimum == "50" || await ColumnExistsAsync(connection, "BreakdownTesters", minimum, cancellationToken)
+        ? minimum : "50";
+      string maximumSql = await ColumnExistsAsync(connection, "BreakdownTesters", maximum, cancellationToken)
+        ? maximum : name == "AcwVoltageRange" ? "700" : "1000";
+      if (name == "DcwVoltageRange" && maximumSql == "1000"
+          && await ColumnExistsAsync(connection, "BreakdownTesters", "PiMaxVoltage", cancellationToken))
+        maximumSql = "PiMaxVoltage";
+
+      minimumSql = $"CASE WHEN {minimumSql} > 0 THEN {minimumSql} ELSE 50 END";
+      int defaultMaximum = name == "AcwVoltageRange" ? 700 : 1000;
+      maximumSql = $"CASE WHEN {maximumSql} > 0 THEN {maximumSql} ELSE {defaultMaximum} END";
+
+      await using var transaction = connection.BeginTransaction();
+      await using var command = connection.CreateCommand();
+      command.Transaction = transaction;
+      command.CommandText = $$"""
+        ALTER TABLE "BreakdownTesters" ADD COLUMN "{{name}}" TEXT NOT NULL DEFAULT '{}';
+        UPDATE "BreakdownTesters" SET "{{name}}" = json_object(
+          'MinVoltage', {{minimumSql}}, 'MaxVoltage', {{maximumSql}}, 'Step', {{step}}, 'Exceptions', json('{{exceptions}}'));
+        """;
+      await command.ExecuteNonQueryAsync(cancellationToken);
+      await transaction.CommitAsync(cancellationToken);
+      TraceWarning(report, progress, $"[DB] В старой схеме BreakdownTesters добавлен диапазон {name}.");
+    }
+
+    foreach (string obsolete in new[] { "AcwMaxVoltage", "DcwMaxVoltage", "IRMinVoltage", "SiMaxVoltage", "PiMaxVoltage" })
+    {
+      if (!await ColumnExistsAsync(connection, "BreakdownTesters", obsolete, cancellationToken))
+        continue;
+      await using var command = connection.CreateCommand();
+      command.CommandText = $"ALTER TABLE \"BreakdownTesters\" DROP COLUMN \"{obsolete}\";";
+      await command.ExecuteNonQueryAsync(cancellationToken);
+    }
   }
 
   private static async Task EnsureBreakdownTesterSystemInsulationResistanceColumnAsync(
@@ -632,6 +674,27 @@ public static class DatabaseInitializationService
   /// <summary>
   /// Добавляет настройки подчёркиваний в принятую без истории миграций старую схему.
   /// </summary>
+  internal static async Task EnsureUserInterfaceAutoLockColumnAsync(
+    string databasePath,
+    DatabaseInitializationReport report,
+    Action<string>? progress,
+    CancellationToken cancellationToken)
+  {
+    await using var connection = new SqliteConnection($"Data Source={databasePath}");
+    await connection.OpenAsync(cancellationToken);
+    if (!await TableExistsAsync(connection, "UserInterface", cancellationToken)) return;
+    await EnsureColumnAsync(connection, "UserInterface", "AutoLockMinutes", "INTEGER NOT NULL DEFAULT 0",
+      report, progress, cancellationToken);
+    foreach (var column in new[]
+    {
+      nameof(UserInterfaceDto.AdministratorAutoLockMinutes), nameof(UserInterfaceDto.DeveloperAutoLockMinutes),
+      nameof(UserInterfaceDto.AdjusterAutoLockMinutes), nameof(UserInterfaceDto.RootAutoLockMinutes)
+    })
+    {
+      await EnsureColumnAsync(connection, "UserInterface", column, "INTEGER NULL", report, progress, cancellationToken);
+    }
+  }
+
   private static async Task EnsureDiagnosticUnderliningColumnsAsync(
     string databasePath,
     DatabaseInitializationReport report,
@@ -683,6 +746,35 @@ public static class DatabaseInitializationService
     var databasePath = DbPathResolver.Resolve();
     EnsureDirectoryExists(databasePath);
     await EnsureLegacyMkiHardwareProfilesStorageAsync(databasePath, null, null, cancellationToken);
+  }
+
+  /// <summary>
+  /// Создаёт таблицу внешних источников питания, в том числе после принятия legacy-схемы.
+  /// </summary>
+  /// <param name="databasePath">Путь к SQLite-файлу приложения.</param>
+  /// <param name="cancellationToken">Токен отмены операции.</param>
+  /// <returns>Задача проверки таблицы.</returns>
+  internal static async Task EnsurePowerSupplyStorageAsync(string databasePath, CancellationToken cancellationToken = default)
+  {
+    await using var connection = new SqliteConnection($"Data Source={databasePath}");
+    await connection.OpenAsync(cancellationToken);
+    await using var command = connection.CreateCommand();
+    command.CommandText = Ask.DataBase.Provider.Services.Devices.PowerSupplyStorageSql.CreateTableSql;
+    await command.ExecuteNonQueryAsync(cancellationToken);
+    await EnsureColumnAsync(connection, "PowerSupplies", "NumberChassis", "INTEGER NOT NULL DEFAULT 0",
+      new DatabaseInitializationReport(), null, cancellationToken);
+    await EnsureColumnAsync(connection, "PowerSupplies", "MinVoltage", "TEXT NOT NULL DEFAULT '0.0'",
+      new DatabaseInitializationReport(), null, cancellationToken);
+    await EnsureColumnAsync(connection, "PowerSupplies", "MaxVoltage", "TEXT NOT NULL DEFAULT '150.0'",
+      new DatabaseInitializationReport(), null, cancellationToken);
+    await EnsureColumnAsync(connection, "PowerSupplies", "VoltageStep", "TEXT NOT NULL DEFAULT '0.1'",
+      new DatabaseInitializationReport(), null, cancellationToken);
+    await EnsureColumnAsync(connection, "PowerSupplies", "MinCurrent", "TEXT NOT NULL DEFAULT '0.0'",
+      new DatabaseInitializationReport(), null, cancellationToken);
+    await EnsureColumnAsync(connection, "PowerSupplies", "MaxCurrent", "TEXT NOT NULL DEFAULT '5.0'",
+      new DatabaseInitializationReport(), null, cancellationToken);
+    await EnsureColumnAsync(connection, "PowerSupplies", "CurrentStep", "TEXT NOT NULL DEFAULT '0.001'",
+      new DatabaseInitializationReport(), null, cancellationToken);
   }
 
   /// <summary>

@@ -67,6 +67,22 @@ namespace Ask.UI.Shared.Controls
       typeof(NumericComboBox),
       new PropertyMetadata(string.Empty, OnRangeChanged));
 
+    /// <summary>
+    /// Зависимое свойство списка допустимых значений вне сетки шага.
+    /// </summary>
+    public static readonly DependencyProperty ExceptionsProperty = DependencyProperty.Register(
+      nameof(Exceptions), typeof(IReadOnlyList<double>), typeof(NumericComboBox),
+      new PropertyMetadata(null, OnRangeChanged));
+
+    /// <summary>
+    /// Допустимые значения вне сетки шага, находящиеся внутри диапазона.
+    /// </summary>
+    public IReadOnlyList<double>? Exceptions
+    {
+      get => (IReadOnlyList<double>?)GetValue(ExceptionsProperty);
+      set => SetValue(ExceptionsProperty, value);
+    }
+
     private bool isInternalUpdate;
 
     /// <summary>
@@ -247,6 +263,14 @@ namespace Ask.UI.Shared.Controls
         options.Sort((left, right) => left.Value.CompareTo(right.Value));
       }
 
+      foreach (double exception in Exceptions ?? Array.Empty<double>())
+      {
+        if (double.IsFinite(exception) && exception >= Minimum && exception <= Maximum
+            && !options.Any(option => AreEqual(option.Value, exception)))
+          options.Add(new NumericOption(exception, Format(exception)));
+      }
+      options.Sort((left, right) => left.Value.CompareTo(right.Value));
+
       isInternalUpdate = true;
       try
       {
@@ -288,6 +312,8 @@ namespace Ask.UI.Shared.Controls
       double maximum = Math.Max(Minimum, Maximum);
       double increment = Increment > 0 ? Increment : 1;
       double clamped = Math.Clamp(value, minimum, maximum);
+      if (Exceptions?.Any(exception => exception >= minimum && exception <= maximum && AreEqual(exception, value)) == true)
+        return value;
       double steps = Math.Round((clamped - minimum) / increment);
       return Math.Round(
         minimum + (steps * increment),

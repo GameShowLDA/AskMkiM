@@ -9,6 +9,7 @@ using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
 using Ask.Support;
+using Ask.UI.Controls.TextEditorControl.Suggestions;
 using Ask.UI.Shared.Contracts;
 using Ask.UI.Shared.Contracts.Ask.UI.Shared.Contracts;
 using ICSharpCode.AvalonEdit;
@@ -63,6 +64,7 @@ namespace Ask.UI.Controls.TextEditorControl
     /// </summary>
     private TextMarkerService _markerService;
     private Diagnostics.LiveDiagnosticsController? _liveDiagnostics;
+    private readonly InlineCommandSuggestionController _inlineCommandSuggestion;
 
     /// <summary>
     /// Список ожидающих подсветок, которые добавляются до момента
@@ -154,7 +156,7 @@ namespace Ask.UI.Controls.TextEditorControl
       {
         textEditor.Text = value;
 
-        if (FileTypeResolver.SupportsOpkFolding(FileType))
+        if (FileTypeResolver.SupportsBraceCommentColorizer(FileType))
         {
           InitializeFolding();
         }
@@ -171,6 +173,7 @@ namespace Ask.UI.Controls.TextEditorControl
       {
         textEditor.IsReadOnly = value;
         _liveDiagnostics?.Refresh();
+        _inlineCommandSuggestion?.Dismiss();
       }
     }
 
@@ -594,6 +597,14 @@ namespace Ask.UI.Controls.TextEditorControl
       {
         using var reader = new XmlTextReader(stream);
         textEditor.SyntaxHighlighting = HighlightingLoader.Load(reader, HighlightingManager.Instance);
+        if (FileTypeResolver.SupportsOpkFolding(FileType))
+        {
+          // Keep comment coloring after the XSHD highlighter, including after theme changes.
+          var transformers = textEditor.TextArea.TextView.LineTransformers;
+          foreach (var colorizer in transformers.OfType<Ask.UI.Shared.TextEditor.BracesCommentColorizer>().ToList())
+            transformers.Remove(colorizer);
+          transformers.Add(new Ask.UI.Shared.TextEditor.BracesCommentColorizer());
+        }
         ApplyProtocolRuntimeColors();
         LogDebug($"Подсветка включена: {textEditor.SyntaxHighlighting?.Name}");
       }
@@ -683,6 +694,8 @@ namespace Ask.UI.Controls.TextEditorControl
       EnsureLineNumbersForeground();
 
       textEditor.PreviewKeyDown += TextEditor_PreviewKeyDown;
+      textEditor.TextArea.InputBindings.Add(new KeyBinding(ApplicationCommands.Undo, Key.Back, ModifierKeys.Alt));
+      textEditor.TextArea.InputBindings.Add(new KeyBinding(ApplicationCommands.Redo, Key.Back, ModifierKeys.Alt | ModifierKeys.Shift));
       textEditor.PreviewMouseDown += (_, _) => ResetIssueSelectionBrush();
 
       if (_executionMargin == null)
@@ -733,7 +746,9 @@ namespace Ask.UI.Controls.TextEditorControl
         textEditor.Document = new TextDocument();
 
       _documentAdapter = new AvalonTextDocumentAdapter(textEditor.Document);
+      _inlineCommandSuggestion = new InlineCommandSuggestionController(textEditor);
       _liveDiagnostics = new Diagnostics.LiveDiagnosticsController(textEditor);
+      _inlineCommandSuggestion.Attach(_liveDiagnostics);
       _liveDiagnostics.Configure(FileType);
     }
 
@@ -746,6 +761,7 @@ namespace Ask.UI.Controls.TextEditorControl
       FileType = fileType;
       textEditor.IsReadOnly = IsReadOnlyFileType(fileType);
       _liveDiagnostics?.Configure(fileType);
+      _inlineCommandSuggestion?.Dismiss();
 
       if (IsLoaded)
       {

@@ -99,6 +99,13 @@ namespace Ask.Engine.ControlCommandAnalyser
     /// </summary>
     private static int HandleInsideComment(string line, int index, CommentContext context, List<(int, string)> comments)
     {
+      // Delimiters in a line comment must not change the enclosing block stack.
+      if (Match(line, index, "//"))
+      {
+        context.CurrentComment.Append(line.AsSpan(index));
+        return line.Length;
+      }
+
       context.CurrentComment.Append(line[index]);
 
       if (Match(line, index, "/*"))

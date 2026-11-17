@@ -1,0 +1,12 @@
+<UserControl x:Class="Ask.UI.Shared.Components.Icons.ChecklistIcon"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="Root"
+             Width="{Binding Size, ElementName=Root}" Height="{Binding Size, ElementName=Root}" IsHitTestVisible="False">
+  <!-- Semi.Avalonia SemiIconChecklistStroked; лицензия: Semi.Avalonia.LICENSE.txt. -->
+  <Viewbox>
+    <Grid Width="24" Height="24">
+      <Path Fill="{Binding Foreground, ElementName=Root}"
+            Data="M7.7 2.8a1 1 0 0 1 0 1.4l-3 3a1 1 0 0 1-1.4 0L1.8 5.7a1 1 0 0 1 1.4-1.4l.8.79 2.3-2.3a1 1 0 0 1 1.4 0Z M7.7 9.8a1 1 0 0 1 0 1.4l-3 3a1 1 0 0 1-1.4 0l-1.5-1.5a1 1 0 1 1 1.4-1.4l.8.79 2.3-2.3a1 1 0 0 1 1.4 0Z M7.7 16.8a1 1 0 0 1 0 1.4l-3 3a1 1 0 0 1-1.4 0l-1.5-1.5a1 1 0 1 1 1.4-1.4l.8.79 2.3-2.3a1 1 0 0 1 1.4 0Z M9.5 12a1 1 0 0 1 1-1h11a1 1 0 1 1 0 2h-11a1 1 0 0 1-1-1Z M9.5 19a1 1 0 0 1 1-1h11a1 1 0 1 1 0 2h-11a1 1 0 0 1-1-1Z M9.5 5a1 1 0 0 1 1-1h11a1 1 0 1 1 0 2h-11a1 1 0 0 1-1-1Z"/>
+    </Grid>
+  </Viewbox>
+</UserControl>

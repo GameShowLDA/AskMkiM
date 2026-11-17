@@ -23,6 +23,8 @@
 
   <ItemGroup>
     <Using Include="Xunit" />
+    <Compile Include="..\MainWindow\Init\RoleLoginWindowManager.cs" Link="Startup\RoleLoginWindowManager.cs" />
+    <Compile Include="..\MainWindow\Init\WindowOpacityTransition.cs" Link="Startup\WindowOpacityTransition.cs" />
   </ItemGroup>
 
 </Project>

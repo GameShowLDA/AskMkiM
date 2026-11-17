@@ -8,7 +8,6 @@ using Ask.Diagnostics.Abstractions;
 using Ask.Diagnostics.Extensions;
 using Ask.DataBase.Provider.Initialization;
 using Ask.LogLib;
-using Ask.Support;
 using Ask.UI.Features.Archive.Application;
 using Ask.UI.Features.Notifications.Models;
 using Ask.UI.Infrastructure.UI.Overlay.Notifications.Runtime;
@@ -67,6 +66,7 @@ namespace MainWindowProgram.Init
     /// </remarks>
     static internal async Task<DatabaseInitializationReport?> Initialize()
     {
+      LoggerUtility.ConfigureInputLog();
       var buildInfo = ApplicationBuildInfo.Current;
       LogInformation($"Запуск приложения. {buildInfo.ToDiagnosticString()}");
       try
@@ -81,7 +81,6 @@ namespace MainWindowProgram.Init
       // SingleInstanceManager.EnsureSingleInstance();
       var databaseReport = await DatabaseInitializer.InitializeAsync();
       InitializeAppHost();
-      InitializeHelpServer();
       return databaseReport;
     }
 
@@ -270,16 +269,5 @@ namespace MainWindowProgram.Init
         services.AddTransient(c.Type);
     }
 
-    private static void InitializeHelpServer()
-    {
-      try
-      {
-        HelpServer.EnsureStarted();
-      }
-      catch (Exception ex)
-      {
-        LogException(ex: ex, customMessage: $"Не удалось запустить Help-сервер.", file: "Utilities\\Help\\HelpServer.cs");
-      }
-    }
   }
 }

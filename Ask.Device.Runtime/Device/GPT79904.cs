@@ -6,6 +6,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Mode;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.Runtime.Base.Device;
 using Ask.Device.Runtime.Function.Base.Connected;
+using Ask.Device.Runtime.Function.GPT;
 using System.IO.Ports;
 using static Ask.LogLib.LoggerUtility;
 
@@ -24,10 +25,6 @@ namespace Ask.Device.Runtime.Device
       DeviceClass = GetType().FullName;
 
       DeviceType = DeviceType.BreakdownTester;
-      AcwMaxVoltage = 700;
-      DcwMaxVoltage = 1000;
-      IrMaxVoltage = 1000;
-      IrMinVoltage = 50;
       IrMaxResistanceMOhm = 60000;
       SystemInsulationResistanceGOhm = 60;
       ConnectedProfile.CheckMode = "GPT";
@@ -39,14 +36,14 @@ namespace Ask.Device.Runtime.Device
 
       ApplyDefaultComPortSettings();
 
-      AcwManger = new Function.GPT.AcwMode(this);
-      DcwManger = new Function.GPT.DcwMode(this);
-      IrManger = new Function.GPT.IrMode(this);
-      SystemManger = new Function.GPT.SystemSettings(this);
+      AcwManger = new AcwMode(this);
+      DcwManger = new DcwMode(this);
+      IrManger = new IrMode(this);
+      SystemManger = new SystemSettings(this);
       ConnectableManager = new Transport(this);
       SelfTestManager = new Function.GPT.SelfCheck.SelfTestManager();
-      Time = new Function.GPT.TimeManager(this);
-      LimitManager = new Function.GPT.LimitManager(this);
+      Time = new TimeManager(this);
+      LimitManager = new LimitManager(this);
 
       LogWarning($"[{GetType().Name}] ctor вызван. Hash={GetHashCode()}", isDeviceLog: true);
       Mode = BreakdownTypeMode.None;
@@ -83,18 +80,6 @@ namespace Ask.Device.Runtime.Device
 
     /// <inheritdoc />
     public ISystemSettingsBreakdown SystemManger { get; set; }
-
-    /// <inheritdoc />
-    public int AcwMaxVoltage { get; set; }
-
-    /// <inheritdoc />
-    public int DcwMaxVoltage { get; set; }
-
-    /// <inheritdoc />
-    public int IrMaxVoltage { get; set; }
-
-    /// <inheritdoc />
-    public int IrMinVoltage { get; set; }
 
     /// <inheritdoc />
     public int IrMaxResistanceMOhm { get; set; }
@@ -150,10 +135,9 @@ namespace Ask.Device.Runtime.Device
         DeviceType = DeviceType,
         DeviceClass = DeviceClass ?? string.Empty,
         Mode = Mode,
-        AcwMaxVoltage = AcwMaxVoltage,
-        DcwMaxVoltage = DcwMaxVoltage,
-        SiMaxVoltage = IrMaxVoltage,
-        IRMinVoltage = IrMinVoltage,
+        AcwVoltageRange = AcwManger.VoltageRange.Clone(),
+        DcwVoltageRange = DcwManger.VoltageRange.Clone(),
+        IrVoltageRange = IrManger.VoltageRange.Clone(),
         SystemInsulationResistanceGOhm = SystemInsulationResistanceGOhm
       };
     }

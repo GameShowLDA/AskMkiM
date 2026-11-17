@@ -544,7 +544,12 @@ public static class ModuleRelayControlResponseProcessor
     return isValid;
   }
 
-  private static string GetOperationName(string command)
+  /// <summary>
+  /// Возвращает название операции для команды протокола МКР.
+  /// </summary>
+  /// <param name="command">Команда МКР с параметрами, разделёнными точками.</param>
+  /// <returns>Название операции для строки результата.</returns>
+  public static string GetOperationName(string command)
   {
     string[] parts = command.Split('.');
     if (!int.TryParse(parts.ElementAtOrDefault(0), out int commandNumber))

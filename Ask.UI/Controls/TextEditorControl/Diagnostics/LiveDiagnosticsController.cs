@@ -34,6 +34,7 @@ public sealed class LiveDiagnosticsController
     _analyze = analyze;
     _renderer = new DiagnosticUnderlineRenderer(editor.TextArea.TextView);
     _hoverPopup = new DiagnosticHoverPopup(editor.TextArea.TextView);
+    _hoverPopup.Closed += () => HoverDiagnosticsChanged?.Invoke(Array.Empty<SourceDiagnostic>());
     editor.TextArea.TextView.BackgroundRenderers.Add(_renderer);
     editor.TextChanged += OnTextChanged;
     editor.DocumentChanged += OnTextChanged;
@@ -250,6 +251,7 @@ public sealed class LiveDiagnosticsController
   }
 
   internal DiagnosticHoverPopup HoverPopup => _hoverPopup;
+  internal event Action<IReadOnlyList<SourceDiagnostic>>? HoverDiagnosticsChanged;
 
   internal bool UpdateHover(Point point)
   {
@@ -260,6 +262,7 @@ public sealed class LiveDiagnosticsController
       return false;
     }
     _hoverPopup.Show(diagnostics, anchor);
+    HoverDiagnosticsChanged?.Invoke(diagnostics);
     return true;
   }
 }

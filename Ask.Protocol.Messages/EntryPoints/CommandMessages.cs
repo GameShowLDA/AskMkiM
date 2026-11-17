@@ -1,5 +1,6 @@
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
+using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 using Ask.Protocol.Messages.Builders;
@@ -13,6 +14,17 @@ namespace Ask.Protocol.Messages.EntryPoints;
 /// </summary>
 public static class CommandMessages
 {
+  /// <summary>
+  /// Формирует документируемый текст указания оператору для итогового протокола.
+  /// </summary>
+  /// <param name="message">Текст указания из команды ЦУ.</param>
+  /// <returns>Информационное сообщение итогового протокола.</returns>
+  public static ShowMessageModel BuildControlInstructionDocumentMessage(string message)
+  {
+    ArgumentException.ThrowIfNullOrWhiteSpace(message);
+    return CommandMessageBuilder.BuildControlInstructionDocumentMessage(message);
+  }
+
   /// <summary>
   /// Форматирует исходные строки команды для экранного протокола.
   /// </summary>

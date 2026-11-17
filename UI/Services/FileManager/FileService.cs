@@ -54,9 +54,9 @@ namespace UI.Services.FileManager
       Creation.CreateNewFile();
     }
 
-    public void OpenFile(string filePath)
+    public void OpenFile(string filePath, string? sourceArchiveName = null)
     {
-      Opening.OpenFile(filePath);
+      Opening.OpenFile(filePath, sourceArchiveName);
     }
 
     public void SaveFile()
@@ -68,6 +68,8 @@ namespace UI.Services.FileManager
     {
       SaveFileManager.SaveFileAs();
     }
+
+    public bool ConfirmCloseAll() => SaveFileManager.ConfirmCloseAll();
 
     /// <summary>
     /// Выводит файл на печать.

@@ -67,16 +67,17 @@ namespace Ask.Engine.Tests.Metrology
     private async Task ExecuteMeasurementProcess(ActionSettings settings, IUserInteractionService messageService, IInputFieldProvider inputFieldProvider, IInputHighlightService inputHighlightService, CancellationToken cancellationToken)
     {
       var data = await EnsureValidMetrologyInputAsync(inputFieldProvider, _userInteractionService, metrologyMode: metrologicalModeRole, timeCheck: true, timeRampCheck: true);
-      await testMeasurement.ConnectToEquipment(data.FirstPoint, data.SecondPoint, metrologicalModeRole, _userInteractionService);
-      await testMeasurement.SetupCommutation(_userInteractionService, data.FirstPoint, data.SecondPoint, metrologicalModeRole);
-      await testMeasurement.ConfigureMeter(_userInteractionService, metrologicalModeRole, data);
-
       var tolerance = await MeasurementToleranceCalculator.TryCalculateAsync(
         MeasurementTypeCommand.PI_ACW,
         data.Param,
         _userInteractionService);
       if (tolerance == null)
         return;
+
+      await testMeasurement.ConnectToEquipment(data.FirstPoint, data.SecondPoint, metrologicalModeRole, _userInteractionService);
+      await testMeasurement.SetupCommutation(_userInteractionService, data.FirstPoint, data.SecondPoint, metrologicalModeRole);
+      await testMeasurement.ConfigureMeter(_userInteractionService, metrologicalModeRole, data);
+
       await _userInteractionService.AppendEmptyLineAsync();
       await UserActionHelper.RunWithUserRepeatAsync(async () => await testMeasurement.PerformMeasurement(metrologicalModeRole, data.Param, _userInteractionService), _userInteractionService, true);
     }
@@ -86,7 +87,7 @@ namespace Ask.Engine.Tests.Metrology
       return _userInteractionService;
     }
 
-    private class PiMeasurement : BaseMeasurement
+    internal class PiMeasurement : BaseMeasurement
     {
       private IReferenceVoltageRequestService _reference;
 
@@ -105,6 +106,7 @@ namespace Ask.Engine.Tests.Metrology
 
         await breakDown.ConnectableManager.InitializeAsync(messageService);
         await breakDown.AcwManger.Mode.SetModeAsync(messageService);
+        breakDown.Time.SetTargetTime(dataModel.Time);
         await breakDown.AcwManger.Time.SetTestTimeAsync(dataModel.Time, messageService);
         await breakDown.AcwManger.Time.SetRampTimeAsync(dataModel.RampTime, messageService);
         await breakDown.AcwManger.FrequencyConfigurable.SetFrequencyAsync(50, messageService);

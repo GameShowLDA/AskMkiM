@@ -396,6 +396,9 @@
   <data name="protocol.tooltip.commandjump" xml:space="preserve">
     <value>Перейти к другой команде (F4)</value>
   </data>
+  <data name="protocol.tooltip.skipcommand" xml:space="preserve">
+    <value>Завершить текущую команду и перейти к следующей</value>
+  </data>
   <data name="translator.editor.tooltip.back" xml:space="preserve">
     <value>Вернуться к исходному файлу</value>
   </data>
@@ -407,9 +410,6 @@
   </data>
   <data name="menu.test.metrology.eht" xml:space="preserve">
     <value>Режим ЭТ</value>
-  </data>
-  <data name="menu.execution.run.stepByStepMode" xml:space="preserve">
-    <value>Запуск (Пошаговый режим)</value>
   </data>
   <data name="menu.admin" xml:space="preserve">
     <value>Администратор</value>
@@ -500,12 +500,6 @@
   </data>
   <data name="settings.execution.repeatMeasurement.description" xml:space="preserve">
     <value>Разрешает повторять отдельные измерения оборудования. Не влияет на повтор всей команды, теста или программы контроля.</value>
-  </data>
-  <data name="settings.execution.stepByStepMode.title" xml:space="preserve">
-    <value>Пошаговый режим</value>
-  </data>
-  <data name="settings.execution.stepByStepMode.description" xml:space="preserve">
-    <value>Включает отладочное выполнение: F10 — выполнить блок целиком (поверх); F11 — заходить в блок и останавливаться на каждом шаге (вглубь).</value>
   </data>
   <data name="settings.execution.idleMode.title" xml:space="preserve">
     <value>Холостой режим выполнения</value>
@@ -663,6 +657,21 @@
   <data name="settings.userinterface.printFont.description" xml:space="preserve">
     <value>Единый вид печатных форм и PDF-документов.</value>
   </data>
+  <data name="settings.userinterface.runnerLayout.title" xml:space="preserve">
+    <value>Расположение панелей исполнителя</value>
+  </data>
+  <data name="settings.userinterface.runnerLayout.description" xml:space="preserve">
+    <value>Восстанавливает стандартное расположение и размеры панелей для текущего пользователя.</value>
+  </data>
+  <data name="settings.userinterface.runnerLayout.reset" xml:space="preserve">
+    <value>Сбросить расположение</value>
+  </data>
+  <data name="settings.userinterface.runnerLayout.confirmationTitle" xml:space="preserve">
+    <value>Сброс расположения панелей</value>
+  </data>
+  <data name="settings.userinterface.runnerLayout.confirmation" xml:space="preserve">
+    <value>Сбросить расположение и размеры панелей исполнителя для текущего пользователя?</value>
+  </data>
   <data name="settings.protocol.commandHeaders.title" xml:space="preserve">
     <value>Заголовки команд</value>
   </data>
@@ -714,4 +723,12 @@
   <data name="settings.device.breakdownTester.systemInsulationResistance" xml:space="preserve">
     <value>Сопротивление изоляции системы, ГОм</value>
   </data>
+  <data name="Settings_AutoLock_Title" xml:space="preserve"><value>Автоматическая блокировка</value></data>
+  <data name="Settings_AutoLock_Description" xml:space="preserve"><value>Для текущей роли, при отсутствии действий и запущенных процессов</value></data>
+  <data name="Settings_AutoLock_0" xml:space="preserve"><value>Никогда</value></data>
+  <data name="Settings_AutoLock_1" xml:space="preserve"><value>1 минута</value></data>
+  <data name="Settings_AutoLock_2" xml:space="preserve"><value>2 минуты</value></data>
+  <data name="Settings_AutoLock_5" xml:space="preserve"><value>5 минут</value></data>
+  <data name="Settings_AutoLock_10" xml:space="preserve"><value>10 минут</value></data>
+  <data name="menu.help.releaseNotes" xml:space="preserve"><value>Что нового</value></data>
 </root>

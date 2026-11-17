@@ -64,6 +64,10 @@ namespace Ask.Core.Services.Errors.Models
     [WarningCodeTag("WRNGEN011")]
     Gen_EmptyMessage,
 
+    /// <summary> Команда ПЭ была преобразована в команду ПР автоматически. </summary>
+    [WarningCodeTag("WRNGEN012")]
+    Gen_PeToPrCommandAddedAutomatically,
+
     #endregion
 
     #region Режим УМ

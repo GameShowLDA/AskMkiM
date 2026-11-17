@@ -193,6 +193,23 @@ public sealed class DeviceProtocolEmulatorTests
     Assert.Contains("В7-78/3", exception.Message, StringComparison.Ordinal);
   }
 
+  [Fact]
+  public async Task HardwareWatchdogProtocol_DeviceWithDefaultCommandTimeout_ThrowsNoResponseException()
+  {
+    var device = CreateDevice<IMultimeter>(new HangingProtocol(), "АКИП B7-78/3", 1, 17);
+    var protocol = new global::Ask.Device.Communication.Common.HardwareWatchdogProtocol(
+      new HangingProtocol(),
+      "АКИП B7-78/3",
+      TimeSpan.FromMilliseconds(50),
+      device);
+
+    var exception = await Assert.ThrowsAsync<Ask.Core.Services.Errors.Device.DeviceNoResponseException>(
+      () => protocol.QueryAsync("CONF:VOLT:DC 1000,0.001"));
+
+    Assert.Contains("АКИП B7-78/3", exception.Message, StringComparison.Ordinal);
+    Assert.Contains("CONF:VOLT:DC 1000,0.001", exception.Message, StringComparison.Ordinal);
+  }
+
   private static T CreateDevice<T>(IDeviceProtocol protocol, string name, int chassisNumber, int deviceNumber)
     where T : class
   {

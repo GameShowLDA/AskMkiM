@@ -32,6 +32,11 @@ namespace Ask.Core.Shared.DTO.Executor
     public PreActionDelegate? PreActionDelegate { get; init; }
 
     /// <summary>
+    /// Действие после сброса оборудования и до формирования итогового протокола.
+    /// </summary>
+    public Func<Task>? AfterEquipmentResetDelegate { get; set; }
+
+    /// <summary>
     /// Выполнять проверку питания.
     /// </summary>
     public bool CheckPower { get; init; } = true;

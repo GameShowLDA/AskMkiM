@@ -524,14 +524,20 @@ namespace UI.Windows.WpfDocking.Windows
         return licenseErrorElement.DesiredSize;
       }
 
-      if (Child1 != null)
+      bool needsNaturalSize = double.IsPositiveInfinity(availableSize.Width) || double.IsPositiveInfinity(availableSize.Height);
+      Size naturalConstraint = Orientation == Orientation.Horizontal
+        ? new Size(double.PositiveInfinity, availableSize.Height)
+        : new Size(availableSize.Width, double.PositiveInfinity);
+
+      // Неограниченное измерение фиксированных областей отключает виртуализацию их содержимого.
+      if (Child1 != null && (needsNaturalSize || (SplitterDistance.IsAuto && IsSplitterTopLeft)))
       {
-        Child1.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+        Child1.Measure(naturalConstraint);
         _child1AutoSize = Child1.DesiredSize;
       }
-      if (Child2 != null)
+      if (Child2 != null && (needsNaturalSize || (SplitterDistance.IsAuto && !IsSplitterTopLeft)))
       {
-        Child2.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+        Child2.Measure(naturalConstraint);
         _child2AutoSize = Child2.DesiredSize;
       }
 

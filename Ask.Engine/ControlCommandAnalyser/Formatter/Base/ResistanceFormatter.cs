@@ -57,7 +57,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Formatter.Base
       string? resistance,
       string? indent = "\t")
     {
-      return SourceValueFormatter.Format(resistance, "Сопротивление проводов", "Сопротивление проводов не задано.", indent);
+      return SourceValueFormatter.Format(resistance, "Сопротивление технических кабелей", "Сопротивление технических кабелей не задано.", indent);
     }
   }
 }

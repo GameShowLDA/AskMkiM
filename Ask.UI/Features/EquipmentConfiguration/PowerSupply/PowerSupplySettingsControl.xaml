@@ -1,0 +1,121 @@
+<UserControl x:Class="Ask.UI.Features.EquipmentConfiguration.PowerSupply.PowerSupplySettingsControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:automation="clr-namespace:System.Windows.Automation;assembly=PresentationCore"
+             mc:Ignorable="d"
+             d:DesignWidth="420">
+    <UserControl.Resources>
+        <Style x:Key="InputBorderStyle" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource SettingsConfigDataInputTabloBackgroundSolidColorBrush}"/>
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="Margin" Value="3"/>
+        </Style>
+
+        <Style x:Key="InputTextBoxStyle" TargetType="TextBox">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="12,0"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="FontSize" Value="18"/>
+            <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
+            <Setter Property="MaxLength" Value="12"/>
+        </Style>
+
+        <Style x:Key="FieldLabelStyle" TargetType="TextBlock">
+            <Setter Property="Margin" Value="12,8,8,8"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
+            <Setter Property="FontSize" Value="18"/>
+        </Style>
+
+        <Style x:Key="SectionTitleStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="20"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Margin" Value="7,0"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
+        </Style>
+    </UserControl.Resources>
+
+    <Border x:Name="RootCard" Style="{StaticResource DeviceInputSectionCardStyle}">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="200"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <Border Grid.Row="0" Grid.ColumnSpan="2" Style="{StaticResource DeviceInputSectionTitleBarStyle}">
+                <TextBlock Text="Подключение" Style="{StaticResource SectionTitleStyle}"/>
+            </Border>
+            <TextBlock Grid.Row="1" Text="TCP-порт" Style="{StaticResource FieldLabelStyle}"/>
+            <Border Grid.Row="1" Grid.Column="1" Style="{StaticResource InputBorderStyle}">
+                <TextBox x:Name="PortTextBox" Text="80" MaxLength="5"
+                         Style="{StaticResource InputTextBoxStyle}"
+                         PreviewTextInput="Integer_PreviewTextInput"
+                         automation:AutomationProperties.Name="TCP-порт источника питания"/>
+            </Border>
+
+            <Border Grid.Row="2" Grid.ColumnSpan="2" Margin="0,12,0,0"
+                    Style="{StaticResource DeviceInputSectionTitleBarStyle}">
+                <TextBlock Text="Напряжение, В" Style="{StaticResource SectionTitleStyle}"/>
+            </Border>
+            <TextBlock Grid.Row="3" Text="Минимум" Style="{StaticResource FieldLabelStyle}"/>
+            <Border Grid.Row="3" Grid.Column="1" Style="{StaticResource InputBorderStyle}">
+                <TextBox x:Name="MinVoltageTextBox" Text="0" Style="{StaticResource InputTextBoxStyle}"
+                         PreviewTextInput="Decimal_PreviewTextInput"
+                         automation:AutomationProperties.Name="Минимальное напряжение, В"/>
+            </Border>
+            <TextBlock Grid.Row="4" Text="Максимум" Style="{StaticResource FieldLabelStyle}"/>
+            <Border Grid.Row="4" Grid.Column="1" Style="{StaticResource InputBorderStyle}">
+                <TextBox x:Name="MaxVoltageTextBox" Text="150" Style="{StaticResource InputTextBoxStyle}"
+                         PreviewTextInput="Decimal_PreviewTextInput"
+                         automation:AutomationProperties.Name="Максимальное напряжение, В"/>
+            </Border>
+            <TextBlock Grid.Row="5" Text="Шаг" Style="{StaticResource FieldLabelStyle}"/>
+            <Border Grid.Row="5" Grid.Column="1" Style="{StaticResource InputBorderStyle}">
+                <TextBox x:Name="VoltageStepTextBox" Text="0.1" Style="{StaticResource InputTextBoxStyle}"
+                         PreviewTextInput="Decimal_PreviewTextInput"
+                         automation:AutomationProperties.Name="Шаг напряжения, В"/>
+            </Border>
+
+            <Border Grid.Row="6" Grid.ColumnSpan="2" Margin="0,12,0,0"
+                    Style="{StaticResource DeviceInputSectionTitleBarStyle}">
+                <TextBlock Text="Ограничение тока, мА" Style="{StaticResource SectionTitleStyle}"/>
+            </Border>
+            <TextBlock Grid.Row="7" Text="Минимум" Style="{StaticResource FieldLabelStyle}"/>
+            <Border Grid.Row="7" Grid.Column="1" Style="{StaticResource InputBorderStyle}">
+                <TextBox x:Name="MinCurrentTextBox" Text="0" Style="{StaticResource InputTextBoxStyle}"
+                         PreviewTextInput="Decimal_PreviewTextInput"
+                         automation:AutomationProperties.Name="Минимальный ток, мА"/>
+            </Border>
+            <TextBlock Grid.Row="8" Text="Максимум" Style="{StaticResource FieldLabelStyle}"/>
+            <Border Grid.Row="8" Grid.Column="1" Style="{StaticResource InputBorderStyle}">
+                <TextBox x:Name="MaxCurrentTextBox" Text="5000" Style="{StaticResource InputTextBoxStyle}"
+                         PreviewTextInput="Decimal_PreviewTextInput"
+                         automation:AutomationProperties.Name="Максимальный ток, мА"/>
+            </Border>
+            <TextBlock Grid.Row="9" Text="Шаг" Style="{StaticResource FieldLabelStyle}"/>
+            <Border Grid.Row="9" Grid.Column="1" Style="{StaticResource InputBorderStyle}">
+                <TextBox x:Name="CurrentStepTextBox" Text="1" Style="{StaticResource InputTextBoxStyle}"
+                         PreviewTextInput="Decimal_PreviewTextInput"
+                         automation:AutomationProperties.Name="Шаг тока, мА"/>
+            </Border>
+        </Grid>
+    </Border>
+</UserControl>

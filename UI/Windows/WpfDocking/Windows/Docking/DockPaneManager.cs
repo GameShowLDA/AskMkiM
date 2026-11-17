@@ -83,12 +83,15 @@ namespace UI.Windows.WpfDocking.Windows.Docking
     {
       Debug.Assert(dockItem != null);
       _dockControl.UpdateLayout();
-      if (FloatingWindow.CanBeNative)
+      if (RequiresNativeFloatingWindowPump(FloatingWindow.CanBeNative, dockItem.DockPosition))
         DoEvents(); // Wait for native floating window to show
       Keyboard.Focus(dockItem);
       if (!(DesignerProperties.GetIsInDesignMode(_dockControl) || dockItem.IsKeyboardFocusWithin))
         Trace.TraceError(@"Set focus to DockItem ""{0}"" failed. This normally indicates the DockControl is not properly styled.", dockItem.TabText);
     }
+
+    internal static bool RequiresNativeFloatingWindowPump(bool canBeNative, DockPosition dockPosition) =>
+      canBeNative && dockPosition == DockPosition.Floating;
 
     [SuppressMessage("Microsoft.Security", "CA2122:DoNotIndirectlyExposeMethodsWithLinkDemands")]
     private static void DoEvents()

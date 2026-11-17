@@ -6,6 +6,7 @@ using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.DataBase.Engine.Static.Devices;
 using Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck;
 using static Ask.Device.Runtime.Function.GPT.SelfCheck.SelfTestManager;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Ask.Engine.Tests.SelfControl
 {
@@ -47,7 +48,6 @@ namespace Ask.Engine.Tests.SelfControl
 
       var dbc = (await SwitchingDevices.GetDevicesByNumberChassisAsync(managerShassi.Number)).FirstOrDefault();
       var mkr = await RelaySwitchModules.GetDevicesByNumberChassisAsync(managerShassi.Number);
-      var breakdownTester = (await BreakdownTesters.GetDevicesByNumberChassisAsync(managerShassi.Number)).FirstOrDefault();
 
       await dbc.SelfTestManager.StartSelfCheck(
         _messageService.GetCancellationToken(),
@@ -75,14 +75,31 @@ namespace Ask.Engine.Tests.SelfControl
       dbc,
       meter);
 
-      await breakdownTester.SelfTestManager.StartSelfCheck(
-        _messageService.GetCancellationToken(),
-        TypeConnector.FullCheck,
-        settings,
-        _messageService,
-        breakdownTester,
-        dbc,
-        meter);
+      var breakdownTester = (await BreakdownTesters.GetDevicesByNumberChassisAsync(managerShassi.Number)).FirstOrDefault();
+      if (breakdownTester != null)
+      {
+        await breakdownTester.SelfTestManager.StartSelfCheck(
+          _messageService.GetCancellationToken(),
+          TypeConnector.FullCheck,
+          settings,
+          _messageService,
+          breakdownTester,
+          dbc,
+          meter);
+      }
+
+      var powerSupply = (await PowerSupplies.GetDevicesByNumberChassisAsync(managerShassi.Number)).FirstOrDefault();
+      if (powerSupply != null)
+      {
+        await powerSupply.SelfTestManager.StartSelfCheck(
+          _messageService.GetCancellationToken(),
+          Ask.Device.Runtime.Function.B5108.SelftTest.SelfTestManager.TypeConnector.Voltage,
+          settings,
+          _messageService,
+          powerSupply,
+          meter,
+          dbc);
+      }
     }
   }
 }

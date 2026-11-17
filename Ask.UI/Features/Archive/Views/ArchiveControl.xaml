@@ -763,11 +763,6 @@
                                 ElementStyle="{StaticResource ArchiveFilesDataGridTextStyle}"
                                 MinWidth="190"
                                 Width="19*" />
-                            <DataGridTextColumn Header="ОПК"
-                                Binding="{Binding OPK}"
-                                ElementStyle="{StaticResource ArchiveFilesDataGridTextStyle}"
-                                MinWidth="90"
-                                Width="9*" />
                             <DataGridTextColumn Header="Заказ"
                                 Binding="{Binding Order}"
                                 ElementStyle="{StaticResource ArchiveFilesDataGridTextStyle}"

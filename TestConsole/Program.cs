@@ -11,6 +11,17 @@ namespace TestConsole
   {
     private static async Task Main(string[] args)
     {
+      if (args.Length > 0 && string.Equals(args[0], "b5-108", StringComparison.OrdinalIgnoreCase))
+      {
+        Environment.ExitCode = await B5108.B5108Probe.RunAsync(args.Skip(1).ToArray());
+        return;
+      }
+      if (args.Length > 0 && string.Equals(args[0], "release-notes", StringComparison.OrdinalIgnoreCase))
+      {
+        Environment.ExitCode = await ReleaseNotesDebug.RunAsync(args.Length > 1 ? args[1] : null);
+        return;
+      }
+
       if (args.Any(static arg =>
             string.Equals(arg, "encoding-scanner", StringComparison.OrdinalIgnoreCase)
             || string.Equals(arg, "encoding", StringComparison.OrdinalIgnoreCase)))
@@ -44,10 +55,12 @@ namespace TestConsole
         Console.WriteLine("20. ModuleRelayControl");
         Console.WriteLine("21. DeviceBusCommutation ConnectorManager");
         Console.WriteLine("22. Unused code Roslyn analyzer");
+        Console.WriteLine("23. Чтение JSON истории выпусков");
+        Console.WriteLine("24. Б5-108: LAN и команды SCPI");
         Console.WriteLine("0. Exit");
         Console.Write("Введите номер действия: ");
         string? input = Console.ReadLine()?.Trim().Trim('\uFEFF');
-        if (!int.TryParse(input, out int choice) || choice < 0 || choice > 22)
+        if (!int.TryParse(input, out int choice) || choice < 0 || choice > 24)
         {
           Console.Write("Введите номер действия: ");
           continue;
@@ -55,6 +68,9 @@ namespace TestConsole
 
         switch (choice)
         {
+          case 24:
+            await B5108.B5108Probe.RunMenuAsync();
+            break;
           case 1:
             COMTest.Run();
             break;
@@ -141,6 +157,11 @@ namespace TestConsole
 
           case 22:
             await UnusedCodeAnalyzer.RunAsync();
+            break;
+
+          case 23:
+            Console.Write("Каталог JSON (Enter — история выпусков приложения): ");
+            await ReleaseNotesDebug.RunAsync(Console.ReadLine());
             break;
 
           case 0:

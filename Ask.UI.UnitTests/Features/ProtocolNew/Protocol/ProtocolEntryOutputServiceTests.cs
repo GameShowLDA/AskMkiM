@@ -6,6 +6,18 @@ namespace Ask.UI.UnitTests.Features.ProtocolNew.Protocol;
 
 public sealed class ProtocolEntryOutputServiceTests
 {
+  [Fact]
+  public void NoResponseIsKeptInSelfTestConclusionEvenForMeasurementHeader()
+  {
+    var message = new ShowMessageModel
+    {
+      Header = "Результат \"Измерение сопротивления\"",
+      Status = ShowMessageModel.MessageType.NoResponse
+    };
+
+    Assert.False(ProtocolEntryOutputService.ShouldSkipAccumulatedError(message, CheckType.SelfTest));
+  }
+
   [Fact(DisplayName = "Итог самоконтроля не дублирует внутреннюю ошибку измерения мультиметра")]
   public void ShouldSkipAccumulatedError_WhenSelfTestMeasurementResult_ReturnsTrue()
   {

@@ -1,12 +1,16 @@
-﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.UI;
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
-using Ask.Device.Emulator;
-using Ask.Device.ResponseProcessor.Multimeter.ResponseProcessing;
 using Ask.Device.Runtime.Base.Device;
+using Ask.Device.Runtime.Function.Base.Connected;
 using System.Net;
 using System.Net.Sockets;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSupply;
+using Ask.Device.Emulator;
+using Ask.Device.ResponseProcessor.PowerSupply;
+using Ask.Device.Communication.Common.Threading;
 
 namespace Ask.Device.Runtime.Function.Connected
 {
@@ -32,8 +36,13 @@ namespace Ask.Device.Runtime.Function.Connected
     }
 
     /// <inheritdoc />
-    public async Task<(bool Connect, string Answer)> InitializeAsync(IUserInteractionService userMessageService = null)
+    public Task<(bool Connect, string Answer)> InitializeAsync(IUserInteractionService userMessageService = null)
+      => InitializeAsync(userMessageService, null);
+
+    internal async Task<(bool Connect, string Answer)> InitializeAsync(
+      IUserInteractionService userMessageService, Action<int>? onAttempt)
     {
+      if (_device is IPowerSupply) return await ConnectAsync(userMessageService);
       if (_device is IMultimeter multimeter)
       {
         if (!ExecutionConfig.GetIsIdleModeEnabled() && !(await ConnectAsync()).Connect)
@@ -41,16 +50,8 @@ namespace Ask.Device.Runtime.Function.Connected
           return (false, $"Нет связи с {_device.Name}");
         }
 
-        string idleResponse = $"ASK,{_device.Name},0,IDLE";
-        string answer = await DeviceProtocolEmulator.QueryMultimeterAsync(
-          multimeter,
-          _device.ConnectedProfile.Initialize,
-          idleResponse,
-          timeout: _device.ConnectedProfile.Timeout,
-          port: _device.ConnectedProfile.Port);
-        return !MultimeterResponseProcessor.CheckInitialization(answer)
-          ? (false, $"Нет ответа на команду {_device.ConnectedProfile.Initialize} от {_device.Name}")
-          : (true, answer.Trim());
+        return await MultimeterInitialization.InitializeAsync(
+          multimeter, _device.ConnectedProfile.Initialize, _device.ConnectedProfile.Port, userMessageService, onAttempt);
       }
 
       if (ExecutionConfig.GetIsIdleModeEnabled())
@@ -75,6 +76,23 @@ namespace Ask.Device.Runtime.Function.Connected
     /// <inheritdoc />
     public async Task<(bool Connect, string Answer)> ConnectAsync(IUserInteractionService userMessageService = null)
     {
+      if (_device is IPowerSupply powerSupply)
+      {
+        using var operationCancellation = CancellationTokenSource.CreateLinkedTokenSource(
+          EquipmentExecutionContext.CancellationToken,
+          userMessageService?.GetCancellationToken() ?? CancellationToken.None);
+        var sourceToken = operationCancellation.Token;
+        var protocol = DeviceProtocolEmulator.CreatePowerSupply(powerSupply);
+        using (await protocol.OperationLock.LockAsync(sourceToken))
+        {
+          _device.ConnectionInfo.IsConnected = false;
+          string identity = await protocol.QueryAsync(_device.ConnectedProfile.Initialize,
+            timeout: _device.ConnectedProfile.Timeout, port: _device.ConnectedProfile.Port, cancellationToken: sourceToken);
+          bool valid = PowerSupplyResponseProcessor.CheckInitialization(identity, _device.ConnectedProfile.CheckMode);
+          _device.ConnectionInfo.IsConnected = valid;
+          return (valid, valid ? string.Empty : $"Неожиданная идентификация источника: {identity}");
+        }
+      }
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         return IdleHardwareErrorSimulator.ShouldSimulateHardwareError(_device)
@@ -119,6 +137,20 @@ namespace Ask.Device.Runtime.Function.Connected
     /// <inheritdoc />
     public async Task<bool> DisconnectAsync(IUserInteractionService userMessageService = null)
     {
+      if (_device is IPowerSupply powerSupply)
+      {
+        using var operationCancellation = CancellationTokenSource.CreateLinkedTokenSource(
+          EquipmentExecutionContext.CancellationToken,
+          userMessageService?.GetCancellationToken() ?? CancellationToken.None);
+        var sourceToken = operationCancellation.Token;
+        var protocol = DeviceProtocolEmulator.CreatePowerSupply(powerSupply);
+        using (await protocol.OperationLock.LockAsync(sourceToken))
+        {
+          (_device.DeviceProtocol as IDisposable)?.Dispose();
+          _device.ConnectionInfo.IsConnected = false;
+          return true;
+        }
+      }
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         return !IdleHardwareErrorSimulator.ShouldSimulateHardwareError(_device);
@@ -146,9 +178,24 @@ namespace Ask.Device.Runtime.Function.Connected
     }
 
     /// <inheritdoc />
-    public Task<bool> ResetAsync(IUserInteractionService userMessageService = null)
+    public async Task<bool> ResetAsync(IUserInteractionService userMessageService = null)
     {
-      return Task.FromResult(true);
+      if (_device is IPowerSupply powerSupply)
+      {
+        using var operationCancellation = CancellationTokenSource.CreateLinkedTokenSource(
+          EquipmentExecutionContext.CancellationToken,
+          userMessageService?.GetCancellationToken() ?? CancellationToken.None);
+        var sourceToken = operationCancellation.Token;
+        var protocol = DeviceProtocolEmulator.CreatePowerSupply(powerSupply);
+        using (await protocol.OperationLock.LockAsync(sourceToken))
+        {
+          await protocol.QueryAsync(_device.ConnectedProfile.Reset, port: _device.ConnectedProfile.Port, cancellationToken: sourceToken);
+          (_device.DeviceProtocol as IDisposable)?.Dispose();
+          _device.ConnectionInfo.IsConnected = false;
+          IsReset?.Invoke();
+        }
+      }
+      return true;
     }
   }
 }

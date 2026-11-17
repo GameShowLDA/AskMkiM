@@ -1,4 +1,5 @@
-﻿using Ask.Core.Shared.DTO.Devices.Base;
+using Ask.Core.Shared.DTO.Devices.PowerSupply;
+using Ask.Core.Shared.DTO.Devices.Base;
 using Ask.Core.Shared.DTO.Devices.Breakdown;
 using Ask.Core.Shared.DTO.Devices.FastMeter;
 using Ask.Core.Shared.DTO.Devices.PowerSourceModule;
@@ -19,6 +20,10 @@ namespace UI.Controls.Settings.DeviceConfig.DeviceManager
     {
       switch (device)
       {
+        case PowerSupplyDto powerSupply:
+          PowerSupplyControl.AddDevice(powerSupply);
+          break;
+
         case BreakdownTesterDto breakdownTester:
           BreakdownTesterControl.AddDevice(breakdownTester);
           break;
@@ -58,6 +63,10 @@ namespace UI.Controls.Settings.DeviceConfig.DeviceManager
     {
       switch (typeDevices)
       {
+        case PowerSupplyDto powerSupply:
+          PowerSupplyControl.ClearItems();
+          break;
+
         case BreakdownTesterDto breakdownTester:
           BreakdownTesterControl.ClearItems();
           break;

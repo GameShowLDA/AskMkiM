@@ -14,7 +14,8 @@ namespace Ask.Core.Services.Errors.Translation
     /// <summary>
     /// Ошибка: в команде ВШ указана неверная структура стойки коммутации.
     /// </summary>
-    public static ErrorItem InvalidVshBusStructure(int startLineNumber, string command, string numberStructure,
+    public static ErrorItem InvalidVshBusStructure(
+      int startLineNumber, string command, string numberStructure, string sourceFragment,
       [CallerMemberName] string callerName = "",
       [CallerFilePath] string callerFile = "",
       [CallerLineNumber] int callerLine = 0) => new()
@@ -22,6 +23,7 @@ namespace Ask.Core.Services.Errors.Translation
         SourceLineNumber = startLineNumber,
         Command = command,
         Code = ErrorCode.Vsh_InvalidVshBusStructure,
+        SourceFragment = sourceFragment,
         DebugInfo = $"{Path.GetFileName(callerFile)} → {callerName} (строка {callerLine})",
         Description = $"В команде ВШ указана неверная структура стойки коммутации. Допускается только {numberStructure}."
       };
@@ -59,7 +61,8 @@ namespace Ask.Core.Services.Errors.Translation
     /// <summary>
     /// Ошибка: в команде ВШ указан неверный номер стойки коммутации в конфигурации.
     /// </summary>
-    public static ErrorItem InvalidRackNumber(int startLineNumber, string command, int rackNumber,
+    public static ErrorItem InvalidRackNumber(
+      int startLineNumber, string command, int rackNumber, string sourceFragment,
       [CallerMemberName] string callerName = "",
       [CallerFilePath] string callerFile = "",
       [CallerLineNumber] int callerLine = 0) => new()
@@ -67,6 +70,7 @@ namespace Ask.Core.Services.Errors.Translation
         SourceLineNumber = startLineNumber,
         Command = command,
         Code = ErrorCode.Vsh_InvalidRackNumber,
+        SourceFragment = sourceFragment,
         DebugInfo = $"{Path.GetFileName(callerFile)} → {callerName} (строка {callerLine})",
         Description = $"Стойка {rackNumber} отсутствует в конфигурации системы."
       };

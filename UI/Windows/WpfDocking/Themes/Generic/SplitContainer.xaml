@@ -6,7 +6,7 @@
     <Style TargetType="common:SplitContainer">
         <Style.Resources>
             <DataTemplate x:Key="SplitterTemplate">
-                <Rectangle Fill="Transparent" />
+                <Rectangle Fill="{DynamicResource VioletColorSolidColorBrush}" />
             </DataTemplate>
 
             <DataTemplate x:Key="PreviewTemplate">

@@ -32,18 +32,21 @@ namespace MainWindowProgram.ViewModels
     [RelayCommand]
     private async Task RunAsync()
     {
-      ExecutionConfig.SetStepByStepMode(false);
       await _service.RunAsync();
     }
 
     /// <summary>
-    /// Команда запуска исполнителя программы контроля.
+    /// Запускает программу контроля пошагово с выполнением поверх блоков.
     /// </summary>
     [RelayCommand]
-    private async Task RunStepByStepModeAsync()
-    {
-      ExecutionConfig.SetStepByStepMode(true);
-      await _service.RunAsync();
-    }
+    private async Task RunStepByStepModeAsync() =>
+      await _service.RunAsync(startStepByStep: true, isStepInto: false);
+
+    /// <summary>
+    /// Запускает программу контроля пошагово с заходом внутрь блоков.
+    /// </summary>
+    [RelayCommand]
+    private async Task RunStepIntoModeAsync() =>
+      await _service.RunAsync(startStepByStep: true, isStepInto: true);
   }
 }

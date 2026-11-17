@@ -107,7 +107,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Cu
 
     private static string TrimTrailingQuestionMarks(string messageText)
     {
-      return messageText.TrimEnd().TrimEnd('?').TrimEnd();
+      return messageText.TrimEnd()[..^1].TrimEnd();
     }
   }
 }

@@ -45,6 +45,7 @@ namespace Ask.UI.Features.ProtocolNew.Protocol
     /// <param name="callerName">Имя метода, сформировавшего запись.</param>
     /// <param name="callerFile">Путь к файлу, сформировавшему запись.</param>
     /// <param name="callerLine">Номер строки, сформировавшей запись.</param>
+    /// <param name="addClassifiedError">Операция регистрации ошибки с сохранением её типа.</param>
     /// <returns><c>true</c>, если запись была добавлена в редактор.</returns>
     public async Task<bool> WriteAsync(
       ShowMessageModel message,
@@ -55,12 +56,13 @@ namespace Ask.UI.Features.ProtocolNew.Protocol
       Action<string> addError,
       string callerName,
       string callerFile,
-      int callerLine)
+      int callerLine,
+      Action<string, MessageType?>? addClassifiedError = null)
     {
       AddExecutionTime(message);
       AddDebugSource(message, callerName, callerFile, callerLine);
       await ApplyDetailedProtocolModeAsync(message);
-      AccumulateError(message, accumulateErrors, checkType, addError);
+      AccumulateError(message, accumulateErrors, checkType, addError, addClassifiedError);
       ApplyStatusAndHighlighting(message);
 
       if (!CanDisplay(message, ignoreOutputValidation))
@@ -126,10 +128,11 @@ namespace Ask.UI.Features.ProtocolNew.Protocol
       ShowMessageModel message,
       bool accumulateErrors,
       CheckType checkType,
-      Action<string> addError)
+      Action<string> addError,
+      Action<string, MessageType?>? addClassifiedError)
     {
-      if (!accumulateErrors
-        || message.Status != MessageType.Error
+      if ((!accumulateErrors && message.Status != MessageType.NoResponse)
+        || (message.Status != MessageType.Error && message.Status != MessageType.NoResponse)
         || ShouldSkipAccumulatedError(message, checkType))
       {
         return;
@@ -138,7 +141,10 @@ namespace Ask.UI.Features.ProtocolNew.Protocol
       var error = message.ExecutionErrorMessage ?? message.ToString();
       if (!string.IsNullOrWhiteSpace(error))
       {
-        addError(error);
+        if (addClassifiedError != null)
+          addClassifiedError(error, message.Status);
+        else
+          addError(error);
       }
     }
 
@@ -147,7 +153,7 @@ namespace Ask.UI.Features.ProtocolNew.Protocol
     /// </summary>
     internal static bool ShouldSkipAccumulatedError(ShowMessageModel message, CheckType checkType)
     {
-      if (checkType != CheckType.SelfTest)
+      if (message.Status == MessageType.NoResponse || checkType != CheckType.SelfTest)
       {
         return false;
       }

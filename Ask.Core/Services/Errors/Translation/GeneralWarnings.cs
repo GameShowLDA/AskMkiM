@@ -123,6 +123,17 @@ namespace Ask.Core.Services.Errors.Translation
     };
 
     /// <summary>
+    /// Предупреждение: команда ПЭ была преобразована в команду ПР автоматически.
+    /// </summary>
+    public static WarningItem PeToPrCommandAddedAutomatically(int startLineNumber, string command) => new()
+    {
+      SourceLineNumber = startLineNumber,
+      Command = command,
+      Code = WarningCode.Gen_PeToPrCommandAddedAutomatically,
+      Description = $"Команда ПЭ была преобразована в команду ПР автоматически.",
+    };
+
+    /// <summary>
     /// Предупреждение: напряжение игнорируется.
     /// </summary>
     public static WarningItem IgnoreVoltage(int startLineNumber, string command) => new()
@@ -140,7 +151,7 @@ namespace Ask.Core.Services.Errors.Translation
     {
       SourceLineNumber = startLineNumber,
       Command = command,
-      Code = WarningCode.Gen_IgnoreVoltage,
+      Code = WarningCode.Gen_IgnoreAmperage,
       Description = $"Значение силы тока игнорируется",
     };
 

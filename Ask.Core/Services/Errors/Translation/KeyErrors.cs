@@ -18,6 +18,7 @@ namespace Ask.Core.Services.Errors.Translation
       SourceLineNumber = startLineNumber,
       Command = command,
       Code = ErrorCode.Key_NotRecognized,
+      SourceFragment = key,
       Description = $"Ключ '{key}' не распознан."
     };
 
@@ -32,6 +33,7 @@ namespace Ask.Core.Services.Errors.Translation
       SourceLineNumber = startLineNumber,
       Command = command,
       Code = ErrorCode.Key_NotAllowedForCommand,
+      SourceFragment = key,
       Description = $"Ключ '{key}' недопустим для команды {command}."
     };
 
@@ -47,6 +49,7 @@ namespace Ask.Core.Services.Errors.Translation
       SourceLineNumber = startLineNumber,
       Command = command,
       Code = ErrorCode.Key_ConflictPair,
+      SourceFragment = key1,
       Description = $"Ключи '{key1}' и '{key2}' не могут использоваться одновременно."
     };
 

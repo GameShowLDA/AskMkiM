@@ -210,7 +210,9 @@
 
                     <UiSetting:UiSettingsControl Grid.Row="4" x:Name="InterfaceManager"/>
 
-                    <RoleManagement:RolePasswordManagementControl Grid.Row="5" x:Name="RolePasswordManager"/>
+                    <RoleManagement:RolePasswordManagementControl Grid.Row="5"
+                                                                  x:Name="RolePasswordManager"
+                                                                  Visibility="Collapsed"/>
 
 
                 </Grid>

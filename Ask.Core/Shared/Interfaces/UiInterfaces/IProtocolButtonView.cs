@@ -41,4 +41,14 @@ public interface IProtocolButtonView
   /// Видимость кнопки шага внутрь.
   /// </summary>
   Visibility StepIntoVisibility { get; set; }
+
+  /// <summary>
+  /// Признак доступности настроек выполнения для данной панели.
+  /// </summary>
+  bool RuntimeExecutionSettingsEnabled { get; }
+
+  /// <summary>
+  /// Видимость кнопки настроек выполнения.
+  /// </summary>
+  Visibility ExecutionSettingsVisibility { set; }
 }

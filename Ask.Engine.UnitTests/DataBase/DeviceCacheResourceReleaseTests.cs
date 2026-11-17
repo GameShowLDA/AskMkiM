@@ -226,6 +226,9 @@ public sealed class DeviceCacheResourceReleaseTests
     device.SetupGet(x => x.Name).Returns("GPT79904");
     device.SetupGet(x => x.DeviceClass).Returns("Ask.Device.Runtime.Device.GPT79904");
     device.SetupGet(x => x.ConnectionDetails).Returns(string.Empty);
+    device.SetupGet(x => x.AcwManger.VoltageRange).Returns(new Ask.Core.Shared.DTO.Devices.Breakdown.VoltageRange() { MinVoltage = 50, MaxVoltage = 700, Step = 2 });
+    device.SetupGet(x => x.DcwManger.VoltageRange).Returns(new Ask.Core.Shared.DTO.Devices.Breakdown.VoltageRange() { MinVoltage = 50, MaxVoltage = 1000, Step = 2 });
+    device.SetupGet(x => x.IrManger.VoltageRange).Returns(new Ask.Core.Shared.DTO.Devices.Breakdown.VoltageRange() { MinVoltage = 50, MaxVoltage = 1000, Step = 50, Exceptions = [125] });
     device.SetupGet(x => x.IsHardwareFailureSimulationEnabled).Returns(hardwareFailureSimulationEnabled);
     return device.Object;
   }

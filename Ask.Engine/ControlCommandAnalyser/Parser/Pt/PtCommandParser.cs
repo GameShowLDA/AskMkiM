@@ -1,4 +1,5 @@
-﻿using Ask.Core.Services.Extensions;
+﻿using Ask.Core.Services.Errors.Translation;
+using Ask.Core.Services.Extensions;
 using Ask.Core.Services.Translator;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums.Commands;
@@ -65,6 +66,40 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pt
       => PtParameterPipeline.Execute(model, remainder, ctx);
 
     /// <summary>
+    /// Нормализует время команды в секунды и проверяет документированный диапазон.
+    /// </summary>
+    protected override bool AfterParametersParsed(
+      PtCommandModel model,
+      string commandNumber,
+      string mnemonic,
+      int numberLine,
+      List<string> lines,
+      ref string remainder)
+    {
+      if (string.IsNullOrWhiteSpace(model.TimeSource) || !model.Time.HasValue)
+      {
+        return true;
+      }
+
+      bool isMilliseconds = model.TimeSource.EndsWith("ms", StringComparison.OrdinalIgnoreCase)
+        || model.TimeSource.EndsWith("мс", StringComparison.OrdinalIgnoreCase)
+        || model.TimeSource.EndsWith("мc", StringComparison.OrdinalIgnoreCase);
+
+      double milliseconds = isMilliseconds ? model.Time.Value : model.Time.Value * 1000;
+      model.Time = milliseconds / 1000;
+
+      if (milliseconds is < 5 or > 99990)
+      {
+        model.Errors.Add(PtErrors.TimeOutOfRange(
+          numberLine,
+          $"{commandNumber} {mnemonic}",
+          model.TimeSource));
+      }
+
+      return true;
+    }
+
+    /// <summary>
     /// Выполняет разбор структурной части команды — точек подключения.
     /// <para>
     /// В результате формируется словарь:
@@ -88,8 +123,21 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pt
       int numberLine,
       List<string> lines,
       ref string remainder)
-      => model.BusPointsDictionary =
-        SchemeManager.GetBusPointsDictionary(model, rmCommandModel, numberLine, commandNumber, mnemonic, ref remainder);
+    {
+      if (!string.IsNullOrWhiteSpace(model.TimeSource) && string.IsNullOrWhiteSpace(remainder))
+      {
+        model.BusPointsDictionary = new();
+        return;
+      }
+
+      model.BusPointsDictionary = SchemeManager.GetBusPointsDictionary(
+        model,
+        rmCommandModel,
+        numberLine,
+        commandNumber,
+        mnemonic,
+        ref remainder);
+    }
 
     /// <summary>
     /// Обрабатывает нераспознанные параметры команды.

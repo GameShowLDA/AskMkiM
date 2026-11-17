@@ -5,12 +5,23 @@ namespace Ask.Device.Communication.Common;
 /// <summary>
 /// Ограничивает время ожидания операций реального протокола оборудования.
 /// </summary>
-public sealed class HardwareWatchdogProtocol : IDeviceProtocol
+public sealed class HardwareWatchdogProtocol : IDeviceProtocol, IDisposable
 {
   private static readonly TimeSpan DefaultTimeout = TimeSpan.FromSeconds(5);
   private readonly IDeviceProtocol _innerProtocol;
   private readonly string _deviceName;
   private readonly TimeSpan _timeout;
+  private readonly IDevice? _device;
+  private int _disposed;
+
+  /// <summary>
+  /// Освобождает принадлежащий оболочке транспорт.
+  /// </summary>
+  public void Dispose()
+  {
+    if (Interlocked.Exchange(ref _disposed, 1) == 0)
+      (_innerProtocol as IDisposable)?.Dispose();
+  }
 
   /// <summary>
   /// Инициализирует защитный протокол для указанного транспорта.
@@ -18,14 +29,17 @@ public sealed class HardwareWatchdogProtocol : IDeviceProtocol
   /// <param name="innerProtocol">Реальный транспортный протокол.</param>
   /// <param name="deviceName">Наименование оборудования.</param>
   /// <param name="timeout">Максимальное время выполнения одной операции.</param>
+  /// <param name="device">Устройство для классификации отсутствующего ответа.</param>
   public HardwareWatchdogProtocol(
     IDeviceProtocol innerProtocol,
     string deviceName,
-    TimeSpan? timeout = null)
+    TimeSpan? timeout = null,
+    IDevice? device = null)
   {
     _innerProtocol = innerProtocol ?? throw new ArgumentNullException(nameof(innerProtocol));
     _deviceName = string.IsNullOrWhiteSpace(deviceName) ? "Оборудование" : deviceName;
     _timeout = timeout ?? DefaultTimeout;
+    _device = device;
 
     if (_timeout <= TimeSpan.Zero)
     {
@@ -49,6 +63,7 @@ public sealed class HardwareWatchdogProtocol : IDeviceProtocol
     int delayBeforeCall = 0,
     CancellationToken cancellationToken = default)
   {
+    ObjectDisposedException.ThrowIf(Volatile.Read(ref _disposed) != 0, this);
     using var operationCancellation = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
     Task<string> operation = Task.Run(
       () => _innerProtocol.QueryAsync(
@@ -67,9 +82,22 @@ public sealed class HardwareWatchdogProtocol : IDeviceProtocol
     catch (TimeoutException ex)
     {
       await operationCancellation.CancelAsync().ConfigureAwait(false);
+      ObserveFault(operation);
+      if (_device != null)
+        throw new Ask.Core.Services.Errors.Device.DeviceNoResponseException(
+          _device, command, (int)_timeout.TotalMilliseconds, ex);
       throw new TimeoutException(
         $"{_deviceName} не завершило команду \"{command}\" за {_timeout.TotalSeconds:0.###} с.",
         ex);
     }
+  }
+
+  private static void ObserveFault(Task task)
+  {
+    _ = task.ContinueWith(
+      static completedTask => _ = completedTask.Exception,
+      CancellationToken.None,
+      TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously,
+      TaskScheduler.Default);
   }
 }

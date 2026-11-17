@@ -1,5 +1,6 @@
 ﻿using Ask.Core.Services.UI;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
+using Ask.Core.Services.Errors.Device;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
@@ -53,12 +54,25 @@ namespace Ask.Device.Runtime.Function.Base.Connected
     /// <inheritdoc />
     public event Action IsReset;
 
+    private static async Task<T> ExecuteOperationAsync<T>(Func<Task<T>> operation, string operationName)
+    {
+      try
+      {
+        return await operation();
+      }
+      catch (DeviceNoResponseException ex)
+      {
+        ex.Operation = operationName;
+        throw;
+      }
+    }
+
     /// <inheritdoc />
     public async Task<(bool Connect, string Answer)> ConnectAsync(IUserInteractionService userMessageService = null)
     {
       var (connect, answer) = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
-        var result = await _connectionTransport.ConnectAsync(userMessageService);
+        var result = await ExecuteOperationAsync(() => _connectionTransport.ConnectAsync(userMessageService), "Подключение");
         if (result.Connect && _device is IBreakdownTester)
         {
           await _initialSoundConfigurator.ApplyOnceAsync();
@@ -100,7 +114,7 @@ namespace Ask.Device.Runtime.Function.Base.Connected
     {
       var connect = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
-        var result = await _connectionTransport.DisconnectAsync(userMessageService);
+        var result = await ExecuteOperationAsync(() => _connectionTransport.DisconnectAsync(userMessageService), "Отключение");
         if (_device is IRelaySwitchModule module)
         {
           await ModuleRelayControlResponseProcessor.PublishDisconnectionResultAsync(
@@ -137,7 +151,24 @@ namespace Ask.Device.Runtime.Function.Base.Connected
     {
       var (connect, answer) = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
-        var result = await _connectionTransport.InitializeAsync(userMessageService);
+        int initializationAttempt = 1;
+        (bool Connect, string Answer) result;
+        try
+        {
+          result = await ExecuteOperationAsync(() => _connectionTransport switch
+          {
+            TcpTransport tcp when _device is IMultimeter =>
+              tcp.InitializeAsync(userMessageService, attempt => initializationAttempt = attempt),
+            UsbTransport usb when _device is IMultimeter =>
+              usb.InitializeAsync(userMessageService, attempt => initializationAttempt = attempt),
+            _ => _connectionTransport.InitializeAsync(userMessageService),
+          }, "Инициализация");
+        }
+        catch (DeviceNoResponseException ex) when (_device is IMultimeter && initializationAttempt > 1)
+        {
+          ex.Operation += $" (Попытка {initializationAttempt}/3)";
+          throw;
+        }
         if (result.Connect)
         {
           await _initialSoundConfigurator.ApplyOnceAsync();
@@ -157,7 +188,7 @@ namespace Ask.Device.Runtime.Function.Base.Connected
         else if (_device is IMultimeter multimeter)
         {
           await MultimeterResponseProcessor.PublishInitializationResultAsync(
-            multimeter, result.Connect, error, userMessageService);
+            multimeter, result.Connect, error, userMessageService, initializationAttempt);
         }
         else if (_device is IBreakdownTester breakdownTester)
         {
@@ -181,7 +212,7 @@ namespace Ask.Device.Runtime.Function.Base.Connected
     {
       var connect = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
-        var result = await _connectionTransport.ResetAsync(userMessageService);
+        var result = await ExecuteOperationAsync(() => _connectionTransport.ResetAsync(userMessageService), "Сброс устройства");
         if (_device is IRelaySwitchModule module)
         {
           await ModuleRelayControlResponseProcessor.PublishResetResultAsync(

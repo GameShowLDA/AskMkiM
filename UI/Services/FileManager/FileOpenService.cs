@@ -25,7 +25,7 @@ namespace UI.Services.FileManager
   /// Основные функции:
   /// <list type="bullet">
   ///   <item>Открывает указанный файл и загружает его содержимое в редактор.</item>
-  ///   <item>Определяет кодировку и тип содержимого по расширению.</item>
+  ///   <item>Определяет кодировку по содержимому и типу файла.</item>
   ///   <item>Создаёт новый редактор для файла или активирует уже открытый экземпляр.</item>
   ///   <item>Обрабатывает ошибки и уведомляет пользователя при сбоях.</item>
   /// </list>
@@ -43,7 +43,7 @@ namespace UI.Services.FileManager
     /// Открывает файл по указанному пути и отображает его содержимое в текстовом редакторе.
     /// </summary>
     /// <param name="path">Полный путь к файлу.</param>
-    public void OpenFile(string path)
+    public void OpenFile(string path, string? sourceArchiveName = null)
     {
       Application.Current.Dispatcher.BeginInvoke(async () =>
       {
@@ -88,12 +88,13 @@ namespace UI.Services.FileManager
             });
             new UI.Components.MultiEditorMethods.ControlManager(_fileManager.EditorWorkspaceModel).AddControl(
               fileName,
-              new SavedExecutionProtocolUI(messages),
+              new SavedExecutionProtocolUI(messages) { FilePath = path },
               TypeWindow.Files,
               path);
             await Application.Current.Dispatcher.InvokeAsync(
               () => { },
               System.Windows.Threading.DispatcherPriority.ContextIdle);
+            LastDirectoryService.RememberFile(path);
             return;
           }
 
@@ -101,9 +102,13 @@ namespace UI.Services.FileManager
           var container = EnsureTextEditorContainer();
 
           if (TryActivateAlreadyOpenedFile(container, fileName, path, fileType))
+          {
+            LastDirectoryService.RememberFile(path);
             return;
+          }
 
-          OpenNewFile(path, fileName, fileContent, encoding, fileType, container);
+          OpenNewFile(path, fileName, fileContent, encoding, fileType, container, sourceArchiveName);
+          LastDirectoryService.RememberFile(path);
         }
         catch (Exception ex)
         {
@@ -167,7 +172,7 @@ namespace UI.Services.FileManager
     /// <summary>
     /// Открывает новый файл в редакторе.
     /// </summary>
-    private void OpenNewFile(string path, string fileName, string fileContent, Encoding encoding, FileType fileType, TextEditorContainer container)
+    private void OpenNewFile(string path, string fileName, string fileContent, Encoding encoding, FileType fileType, TextEditorContainer container, string? sourceArchiveName = null)
     {
       var uniqueName = _fileManager.FileService.Name.EnsureUniqueFileName(path, fileName);
       var uniqueNameWithoutExtention = Path.GetFileNameWithoutExtension(uniqueName);
@@ -178,6 +183,7 @@ namespace UI.Services.FileManager
       }
       var originalName = uniqueNameWithoutExtention + Path.GetExtension(uniqueName);
       var textEditorModel = new TextEditorModel(path, uniqueName, originalName, encoding);
+      textEditorModel.SourceArchiveName = sourceArchiveName;
       var textEditor = _fileManager.TextEditorService.CreateTextEditor(textEditorModel, fileContent, fileType);
       textEditor.ConfigureBreakpoints(interactive: false, visible: false);
       textEditor.TextArea.TextView.LineTransformers.Add(new BracesCommentColorizer());
@@ -264,21 +270,13 @@ namespace UI.Services.FileManager
         encoding = Encoding.GetEncoding(866);
       }
 
-      var content = ReadTextFile(path, encoding, extention)
+      bool encrypted = IsProtocolFileExtension(extention) && FileEncryptionManager.IsFileEncrypted(path);
+      var (text, detectedEncoding) = EncodingService.ReadFile(path, encoding, encrypted);
+      var content = text
         .Replace("\r\n", "\n")
         .Replace('\r', '\n');
 
-      return (content, encoding);
-    }
-
-    private static string ReadTextFile(string path, Encoding encoding, string extension)
-    {
-      if (IsProtocolFileExtension(extension) && FileEncryptionManager.IsFileEncrypted(path))
-      {
-        return FileEncryptionManager.ReadEncryptedFileText(path, encoding);
-      }
-
-      return File.ReadAllText(path, encoding);
+      return (content, detectedEncoding);
     }
 
     private static bool IsProtocolFileExtension(string extension)

@@ -50,7 +50,7 @@
 
 
 		<!-- Номер команды -->
-		<Rule color="CommandNumber">^\s*\d+\b</Rule>
+		<Rule color="CommandNumber">^\s*\d+(?=\s+[\p{L}_]+(?:\s|$))</Rule>
 
 		<!--Мнемоника-->
 		<Rule color="Mnemonic">\bСИ\b</Rule>
@@ -59,6 +59,7 @@
 		<Rule color="Mnemonic">\bРМ\b</Rule>
 		<Rule color="Mnemonic">\bЦУ\b</Rule>
 		<Rule color="Mnemonic">\bПР\b</Rule>
+		<Rule color="Mnemonic">\bПЭ\b</Rule>
 		<Rule color="Mnemonic">\bПИ\b</Rule>
 		<Rule color="Mnemonic">\bКЦ\b</Rule>
 		<Rule color="Mnemonic">\bУП\b</Rule>

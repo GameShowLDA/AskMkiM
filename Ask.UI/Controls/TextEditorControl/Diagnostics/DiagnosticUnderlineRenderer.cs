@@ -106,7 +106,8 @@ internal sealed class DiagnosticUnderlineRenderer : IBackgroundRenderer
       _errorGeometry = _showErrors ? BuildGeometry(start, end, false) : null;
       _geometryValid = true;
     }
-    // Two frozen batches; errors cover warnings at intersections.
+    // When errors are visible, warning geometry already excludes their spans.
+    // Draw errors last as an additional guarantee at shared boundaries.
     if (_warningGeometry != null) drawingContext.DrawGeometry(null, WarningPen, _warningGeometry);
     if (_errorGeometry != null) drawingContext.DrawGeometry(null, ErrorPen, _errorGeometry);
   }
@@ -116,7 +117,8 @@ internal sealed class DiagnosticUnderlineRenderer : IBackgroundRenderer
     var geometry = new StreamGeometry();
     using (var context = geometry.Open())
     {
-      foreach (var segment in _snapshot.GetUnderlines(start, end - start, warnings))
+      foreach (var segment in _snapshot.GetUnderlines(start, end - start, warnings,
+        suppressWarningsUnderErrors: _showErrors))
       {
         foreach (var rect in BackgroundGeometryBuilder.GetRectsForSegment(_view, segment))
         {

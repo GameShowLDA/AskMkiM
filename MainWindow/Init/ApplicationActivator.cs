@@ -77,7 +77,7 @@ namespace MainWindowProgram.Init
       dispatcher.BeginInvoke(() =>
       {
         var window = Application.Current?.MainWindow;
-        if (window == null)
+        if (window == null || RoleLoginWindowManager.IsAuthenticationActive)
         {
           return;
         }
@@ -177,7 +177,8 @@ namespace MainWindowProgram.Init
 
       dispatcher.Invoke(() =>
       {
-        if (Application.Current?.MainWindow is MainWindowProgram.MainWindow mainWindow)
+        if (!RoleLoginWindowManager.IsAuthenticationActive &&
+            Application.Current?.MainWindow is MainWindowProgram.MainWindow mainWindow)
         {
           mainWindow.OpenFileFromExternalRequest(filePath);
           opened = true;

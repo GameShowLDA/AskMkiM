@@ -9,6 +9,7 @@ using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Ask.Core.Shared.Metadata.View.EditorHost.TextEditor;
 using Ask.Support;
+using Ask.UI.Controls.TextEditorControl.Suggestions;
 using Ask.UI.Shared.Contracts.Ask.UI.Shared.Contracts;
 using ICSharpCode.AvalonEdit.Document;
 using ICSharpCode.AvalonEdit.Editing;
@@ -61,6 +62,7 @@ namespace UI.Controls.TextEditorControl
     /// </summary>
     private TextMarkerService _markerService;
     private Ask.UI.Controls.TextEditorControl.Diagnostics.LiveDiagnosticsController? _liveDiagnostics;
+    private readonly InlineCommandSuggestionController _inlineCommandSuggestion;
 
     /// <summary>
     /// Список ожидающих подсветок, которые добавляются до момента
@@ -169,6 +171,7 @@ namespace UI.Controls.TextEditorControl
       {
         textEditor.IsReadOnly = value;
         _liveDiagnostics?.Refresh();
+        _inlineCommandSuggestion?.Dismiss();
       }
     }
 
@@ -583,6 +586,14 @@ namespace UI.Controls.TextEditorControl
       {
         using var reader = new XmlTextReader(stream);
         textEditor.SyntaxHighlighting = HighlightingLoader.Load(reader, HighlightingManager.Instance);
+        if (FileTypeResolver.SupportsBraceCommentColorizer(FileType))
+        {
+          // Keep comment coloring after the XSHD highlighter, including after theme changes.
+          var transformers = textEditor.TextArea.TextView.LineTransformers;
+          foreach (var colorizer in transformers.OfType<UI.Components.SearchControls.BracesCommentColorizer>().ToList())
+            transformers.Remove(colorizer);
+          transformers.Add(new UI.Components.SearchControls.BracesCommentColorizer());
+        }
         ApplyProtocolRuntimeColors();
         LogDebug($"Подсветка включена: {textEditor.SyntaxHighlighting?.Name}");
       }
@@ -673,6 +684,8 @@ namespace UI.Controls.TextEditorControl
       EnsureLineNumbersForeground();
 
       textEditor.PreviewKeyDown += TextEditor_PreviewKeyDown;
+      textEditor.TextArea.InputBindings.Add(new KeyBinding(ApplicationCommands.Undo, Key.Back, ModifierKeys.Alt));
+      textEditor.TextArea.InputBindings.Add(new KeyBinding(ApplicationCommands.Redo, Key.Back, ModifierKeys.Alt | ModifierKeys.Shift));
       textEditor.PreviewMouseDown += (_, _) => ResetIssueSelectionBrush();
 
       if (_executionMargin == null)
@@ -723,7 +736,9 @@ namespace UI.Controls.TextEditorControl
         textEditor.Document = new TextDocument();
 
       _documentAdapter = new AvalonTextDocumentAdapter(textEditor.Document);
+      _inlineCommandSuggestion = new InlineCommandSuggestionController(textEditor);
       _liveDiagnostics = new Ask.UI.Controls.TextEditorControl.Diagnostics.LiveDiagnosticsController(textEditor);
+      _inlineCommandSuggestion.Attach(_liveDiagnostics);
       _liveDiagnostics.Configure(FileType);
     }
 

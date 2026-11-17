@@ -10,14 +10,41 @@
         <Style.Resources>
             <ControlTemplate x:Key="ControlTemplate" TargetType="{x:Type primitives:DockPaneControlOverlay}">
                 <ControlTemplate.Resources>
-                    <Style TargetType="{x:Type Border}">
+                    <Style x:Key="GuideHitArea" TargetType="Border">
                         <Setter Property="Padding" Value="4" />
-                        <Setter Property="Background" Value="#FFF0F0F0" />
-                        <Setter Property="BorderBrush" Value="#FFA0A0A0" />
+                        <Setter Property="Background" Value="Transparent" />
                     </Style>
+                    <Style x:Key="GuideTile" TargetType="Border">
+                        <Setter Property="Margin" Value="2" />
+                        <Setter Property="CornerRadius" Value="3" />
+                        <Setter Property="BorderThickness" Value="1" />
+                        <Setter Property="Background" Value="{DynamicResource DockGuideTileBrush}" />
+                        <Setter Property="BorderBrush" Value="{DynamicResource DockGuideOutlineBrush}" />
+                        <Setter Property="IsHitTestVisible" Value="False" />
+                        <Setter Property="SnapsToDevicePixels" Value="True" />
+                        <Setter Property="Effect">
+                            <Setter.Value>
+                                <DropShadowEffect BlurRadius="3" ShadowDepth="1" Opacity="0.24" />
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                    <ControlTemplate x:Key="DirectionGlyph" TargetType="Control">
+                        <Canvas Width="16" Height="16" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <Canvas Canvas.Left="-2" Canvas.Top="-2">
+                                <Path Data="M 2,13 V 4 H 18 V 13" Opacity="0.48"
+                                      Stroke="{DynamicResource DockGuideGlyphBrush}" StrokeThickness="0.8" />
+                                <Path Data="M 2,13 H 18" Stroke="{DynamicResource DockGuideGlyphBrush}"
+                                      StrokeThickness="0.8" StrokeDashArray="2 1.5" />
+                                <Rectangle Canvas.Left="2" Canvas.Top="2.5" Width="16" Height="4.5"
+                                           RadiusX="0.8" RadiusY="0.8" StrokeThickness="0.8"
+                                           Stroke="{DynamicResource DockGuideGlyphBrush}"
+                                           Fill="{DynamicResource ModernDataGridAccentBrush}" />
+                            </Canvas>
+                        </Canvas>
+                    </ControlTemplate>
                 </ControlTemplate.Resources>
                 <Grid>
-                    <Grid Margin="-100" Opacity="0.8">
+                    <Grid x:Name="guide" Margin="-100">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="1*" />
                             <RowDefinition Height="Auto" />
@@ -39,24 +66,76 @@
                                 <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
-                            <Border x:Name="fillBorder" BorderThickness="1" Grid.Column="1" Grid.Row="1" Margin="-15" Opacity="1" RenderTransformOrigin="0.5,0.5">
+                            <Canvas x:Name="guideShell" Grid.RowSpan="3" Grid.ColumnSpan="3" Margin="-3"
+                                    IsHitTestVisible="False">
+                                <Path Width="{Binding ActualWidth, ElementName=guideShell}"
+                                      Height="{Binding ActualHeight, ElementName=guideShell}" Stretch="Fill"
+                                      Fill="{DynamicResource DockGuideShellBrush}"
+                                      Stroke="{DynamicResource DockGuideShellRimBrush}" StrokeThickness="1.2"
+                                      Data="M 34,0 H 62 Q 68,0 68,6 V 22 Q 68,24 70,26 L 74,30 Q 76,32 78,32 H 90 Q 96,32 96,38
+                                            V 58 Q 96,64 90,64 H 78 Q 76,64 74,66 L 70,70 Q 68,72 68,74 V 90 Q 68,96 62,96
+                                            H 34 Q 28,96 28,90 V 74 Q 28,72 26,70 L 22,66 Q 20,64 18,64 H 6 Q 0,64 0,58
+                                            V 38 Q 0,32 6,32 H 18 Q 20,32 22,30 L 26,26 Q 28,24 28,22 V 6 Q 28,0 34,0 Z">
+                                    <Path.Effect>
+                                        <DropShadowEffect BlurRadius="13" ShadowDepth="3" Opacity="0.32" />
+                                    </Path.Effect>
+                                </Path>
+                            </Canvas>
+                            <Border x:Name="topTile" Grid.Row="0" Grid.Column="1" Style="{StaticResource GuideTile}">
+                                <Control Focusable="False" Template="{StaticResource DirectionGlyph}" />
+                            </Border>
+                            <Border x:Name="leftTile" Grid.Row="1" Grid.Column="0" Style="{StaticResource GuideTile}">
+                                <Control Focusable="False" Template="{StaticResource DirectionGlyph}" RenderTransformOrigin="0.5,0.5">
+                                    <Control.RenderTransform>
+                                        <RotateTransform Angle="-90" />
+                                    </Control.RenderTransform>
+                                </Control>
+                            </Border>
+                            <Border x:Name="rightTile" Grid.Row="1" Grid.Column="2" Style="{StaticResource GuideTile}">
+                                <Control Focusable="False" Template="{StaticResource DirectionGlyph}" RenderTransformOrigin="0.5,0.5">
+                                    <Control.RenderTransform>
+                                        <RotateTransform Angle="90" />
+                                    </Control.RenderTransform>
+                                </Control>
+                            </Border>
+                            <Border x:Name="bottomTile" Grid.Row="2" Grid.Column="1" Style="{StaticResource GuideTile}">
+                                <Control Focusable="False" Template="{StaticResource DirectionGlyph}" RenderTransformOrigin="0.5,0.5">
+                                    <Control.RenderTransform>
+                                        <RotateTransform Angle="180" />
+                                    </Control.RenderTransform>
+                                </Control>
+                            </Border>
+                            <Border x:Name="fillTile" Grid.Row="1" Grid.Column="1" Style="{StaticResource GuideTile}">
+                                <Canvas Width="18" Height="16" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <Rectangle Canvas.Left="1" Canvas.Top="1" Width="16" Height="3.5"
+                                               Fill="{DynamicResource DockGuideGlyphBrush}" Opacity="0.58" />
+                                    <Rectangle Canvas.Left="1" Canvas.Top="1" Width="16" Height="14"
+                                               RadiusX="0.8" RadiusY="0.8" StrokeThickness="0.9"
+                                               Stroke="{DynamicResource DockGuideGlyphBrush}" />
+                                    <Path Data="M 1,4.5 H 17" Stroke="{DynamicResource DockGuideGlyphBrush}"
+                                          StrokeThickness="0.8" />
+                                </Canvas>
+                            </Border>
+
+                            <!-- DockManager reads the original image bounds and target metadata during drag hit testing. -->
+                            <Border Style="{StaticResource GuideHitArea}" BorderThickness="1" Grid.Column="1" Grid.Row="1" Margin="-15" RenderTransformOrigin="0.5,0.5">
                                 <Border.RenderTransform>
                                     <RotateTransform Angle="45" />
                                 </Border.RenderTransform>
                             </Border>
-                            <Border x:Name="leftBorder" Margin="0,0,12,0" BorderThickness="1,1,0,1" Grid.Column="0" Grid.Row="1">
-                                <Image primitives:DockManager.TargetItem="{Binding SelectedItem}" primitives:DockManager.TargetPosition="Left" Margin="0,0,-12,0" Stretch="None" Source="{StaticResource LeftGuideImage}" />
+                            <Border Style="{StaticResource GuideHitArea}" Margin="0,0,12,0" BorderThickness="1,1,0,1" Grid.Column="0" Grid.Row="1">
+                                <Image Opacity="0" primitives:DockManager.TargetItem="{Binding SelectedItem}" primitives:DockManager.TargetPosition="Left" Margin="0,0,-12,0" Stretch="None" Source="{StaticResource LeftGuideImage}" />
                             </Border>
-                            <Border x:Name="rightBorder" Margin="12,0,0,0" BorderThickness="0,1,1,1" Grid.Column="2" Grid.Row="1">
-                                <Image primitives:DockManager.TargetItem="{Binding SelectedItem}" primitives:DockManager.TargetPosition="Right" Margin="-12,0,0,0" Stretch="None" Source="{StaticResource RightGuideImage}" />
+                            <Border Style="{StaticResource GuideHitArea}" Margin="12,0,0,0" BorderThickness="0,1,1,1" Grid.Column="2" Grid.Row="1">
+                                <Image Opacity="0" primitives:DockManager.TargetItem="{Binding SelectedItem}" primitives:DockManager.TargetPosition="Right" Margin="-12,0,0,0" Stretch="None" Source="{StaticResource RightGuideImage}" />
                             </Border>
-                            <Border x:Name="topBorder" Margin="0,0,0,12"  BorderThickness="1,1,1,0" Grid.Column="1" Grid.Row="0">
-                                <Image primitives:DockManager.TargetItem="{Binding SelectedItem}" primitives:DockManager.TargetPosition="Top" Margin="0,0,0,-12" Stretch="None" Source="{StaticResource TopGuideImage}" />
+                            <Border Style="{StaticResource GuideHitArea}" Margin="0,0,0,12"  BorderThickness="1,1,1,0" Grid.Column="1" Grid.Row="0">
+                                <Image Opacity="0" primitives:DockManager.TargetItem="{Binding SelectedItem}" primitives:DockManager.TargetPosition="Top" Margin="0,0,0,-12" Stretch="None" Source="{StaticResource TopGuideImage}" />
                             </Border>
-                            <Border x:Name="bottomBorder" Margin="0,12,0,0" BorderThickness="1,0,1,1" Grid.Column="1" Grid.Row="2">
-                                <Image primitives:DockManager.TargetItem="{Binding SelectedItem}" primitives:DockManager.TargetPosition="Bottom" Margin="0,-12,0,0" Stretch="None" Source="{StaticResource BottomGuideImage}" />
+                            <Border Style="{StaticResource GuideHitArea}" Margin="0,12,0,0" BorderThickness="1,0,1,1" Grid.Column="1" Grid.Row="2">
+                                <Image Opacity="0" primitives:DockManager.TargetItem="{Binding SelectedItem}" primitives:DockManager.TargetPosition="Bottom" Margin="0,-12,0,0" Stretch="None" Source="{StaticResource BottomGuideImage}" />
                             </Border>
-                            <Image primitives:DockManager.TargetItem="{Binding SelectedItem}" primitives:DockManager.TargetPosition="Fill" Grid.Column="1" Grid.Row="1" Stretch="None" Source="{StaticResource FillGuideImage}" />
+                            <Image Opacity="0" primitives:DockManager.TargetItem="{Binding SelectedItem}" primitives:DockManager.TargetPosition="Fill" Grid.Column="1" Grid.Row="1" Stretch="None" Source="{StaticResource FillGuideImage}" />
                         </Grid>
                     </Grid>
                     <Grid>
@@ -73,33 +152,41 @@
                 </Grid>
                 <ControlTemplate.Triggers>
                     <DataTrigger Binding="{Binding Path=(primitives:DockManager.Preview)}" Value="Left">
-                        <Setter TargetName="leftBorder" Property="BorderBrush" Value="#FF3399FF" />
+                        <Setter TargetName="leftTile" Property="Background" Value="{DynamicResource DockGuideActiveBrush}" />
+                        <Setter TargetName="leftTile" Property="BorderBrush" Value="{DynamicResource ModernDataGridAccentBrush}" />
                         <Setter TargetName="preview" Property="Grid.RowSpan" Value="2" />
                         <Setter TargetName="preview" Property="Visibility" Value="Visible" />
                     </DataTrigger>
                     <DataTrigger Binding="{Binding Path=(primitives:DockManager.Preview)}" Value="Right">
-                        <Setter TargetName="rightBorder" Property="BorderBrush" Value="#FF3399FF" />
+                        <Setter TargetName="rightTile" Property="Background" Value="{DynamicResource DockGuideActiveBrush}" />
+                        <Setter TargetName="rightTile" Property="BorderBrush" Value="{DynamicResource ModernDataGridAccentBrush}" />
                         <Setter TargetName="preview" Property="Grid.Column" Value="1" />
                         <Setter TargetName="preview" Property="Grid.RowSpan" Value="2" />
                         <Setter TargetName="preview" Property="Visibility" Value="Visible" />
                     </DataTrigger>
                     <DataTrigger Binding="{Binding Path=(primitives:DockManager.Preview)}" Value="Top">
-                        <Setter TargetName="topBorder" Property="BorderBrush" Value="#FF3399FF" />
+                        <Setter TargetName="topTile" Property="Background" Value="{DynamicResource DockGuideActiveBrush}" />
+                        <Setter TargetName="topTile" Property="BorderBrush" Value="{DynamicResource ModernDataGridAccentBrush}" />
                         <Setter TargetName="preview" Property="Grid.ColumnSpan" Value="2" />
                         <Setter TargetName="preview" Property="Visibility" Value="Visible" />
                     </DataTrigger>
                     <DataTrigger Binding="{Binding Path=(primitives:DockManager.Preview)}" Value="Bottom">
-                        <Setter TargetName="bottomBorder" Property="BorderBrush" Value="#FF3399FF" />
+                        <Setter TargetName="bottomTile" Property="Background" Value="{DynamicResource DockGuideActiveBrush}" />
+                        <Setter TargetName="bottomTile" Property="BorderBrush" Value="{DynamicResource ModernDataGridAccentBrush}" />
                         <Setter TargetName="preview" Property="Grid.Row" Value="1" />
                         <Setter TargetName="preview" Property="Grid.ColumnSpan" Value="2" />
                         <Setter TargetName="preview" Property="Visibility" Value="Visible" />
                     </DataTrigger>
                     <DataTrigger Binding="{Binding Path=(primitives:DockManager.Preview)}" Value="Fill">
-                        <Setter TargetName="fillBorder" Property="BorderBrush" Value="#FF3399FF" />
+                        <Setter TargetName="fillTile" Property="Background" Value="{DynamicResource DockGuideActiveBrush}" />
+                        <Setter TargetName="fillTile" Property="BorderBrush" Value="{DynamicResource ModernDataGridAccentBrush}" />
                         <Setter TargetName="preview" Property="Grid.RowSpan" Value="2" />
                         <Setter TargetName="preview" Property="Grid.ColumnSpan" Value="2" />
                         <Setter TargetName="preview" Property="Visibility" Value="Visible" />
                     </DataTrigger>
+                    <Trigger Property="IsEnabled" Value="False">
+                        <Setter TargetName="guide" Property="Opacity" Value="0.5" />
+                    </Trigger>
                 </ControlTemplate.Triggers>
             </ControlTemplate>
         </Style.Resources>

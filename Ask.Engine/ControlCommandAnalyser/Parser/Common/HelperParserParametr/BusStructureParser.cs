@@ -98,7 +98,8 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.HelperParserParametr
         int.TryParse(busType.GetDescription(), out int resultBus);
         string shassiStr = CreateShassiString(resultShassi);
         model.Errors.Add(
-            VshErrors.InvalidVshBusStructure(model.StartLineNumber, model.Mnemonic, shassiStr));
+            VshErrors.InvalidVshBusStructure(
+              model.StartLineNumber, model.Mnemonic, shassiStr, $"{prefix}Ш"));
         return busDictionary;
       }
       if (shassiBusType == BusStructureEnum.Type.None)
@@ -121,7 +122,8 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.HelperParserParametr
           {
             string shassiStr = CreateShassiString(resultShassi);
             model.Errors.Add(
-              VshErrors.InvalidVshBusStructure(model.StartLineNumber, model.Mnemonic, shassiStr));
+              VshErrors.InvalidVshBusStructure(
+                model.StartLineNumber, model.Mnemonic, shassiStr, $"{prefix}Ш"));
             return busDictionary;
           }
         }
@@ -138,7 +140,8 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.HelperParserParametr
                 VshErrors.InvalidRackNumber(
                     model.StartLineNumber,
                     model.Mnemonic,
-                    standNumber.Value));
+                    standNumber.Value,
+                    $"{prefix}Ш:{standNumber.Value}"));
 
             return busDictionary;
           }

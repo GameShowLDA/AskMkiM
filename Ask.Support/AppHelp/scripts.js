@@ -1,8 +1,12 @@
 document.addEventListener('DOMContentLoaded', () => {
     const $ = (selector, root = document) => root.querySelector(selector);
     const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
-    const textOf = el => el?.innerText.trim() || '';
-    const normalize = text => text.replace(/\s+/g, ' ').trim().toLowerCase();
+    const textOf = el => el?.lastElementChild?.textContent.trim() || '';
+    const normalizeWhitespace = text => String(text ?? '').replace(/\s+/g, ' ').trim();
+    const normalize = (text, caseSensitive = false) => {
+        const normalized = normalizeWhitespace(text);
+        return caseSensitive ? normalized : normalized.toLocaleLowerCase('ru-RU');
+    };
 
     const tabs = $$('.tab');
     const panes = $$('.tab-content');
@@ -16,16 +20,24 @@ document.addEventListener('DOMContentLoaded', () => {
     const searchResults = $('#search-results');
     const clearBtn = $('#clear-btn');
     const searchModes = $$('input[name="search-mode"]');
+    const searchOptions = $$('input[name="search-option"]');
+    const caseSensitiveOption = $('#search-case-sensitive');
+    const wholeWordsOption = $('#search-whole-words');
     const resizer = $('#resizer');
     const primaryArea = $('.primary-area');
     const secondaryArea = $('.secondary-area');
     const contentFrame = $('#content-frame');
     const mainContent = $('.main-content');
     const themeToggle = $('#theme-toggle');
+    const sidebarToggle = $('#sidebar-toggle');
+    const imageLightbox = $('#image-lightbox');
+    const imageLightboxImage = $('#image-lightbox-image');
+    const imageLightboxClose = $('#image-lightbox-close');
 
     const FALLBACK_ID = 'GeneralInformation';
     const THEME_STORAGE_KEY = 'mki-help-theme';
     const THEME_COOKIE = 'mki_help_theme';
+    const SIDEBAR_STORAGE_KEY = 'mki-help-sidebar-collapsed';
     const BOOKMARKS_STORAGE_KEY = 'mki-help-bookmarks-v1';
     const LEGACY_BOOKMARKS_STORAGE_KEY = 'mki-bookmarks';
     const BOOKMARKS_COOKIE = 'mki_help_bookmarks';
@@ -40,26 +52,51 @@ document.addEventListener('DOMContentLoaded', () => {
         el,
         src: el.dataset.src,
         title: textOf(el),
-        titleSearch: normalize(`${el.id} ${textOf(el)}`),
+        titleSearch: normalizeWhitespace(`${el.id} ${textOf(el)} ${el.dataset.aliases || ''}`),
         isPage: el.classList.contains('page')
     }));
     const pageMap = new Map(pages.map(page => [page.id, page]));
     const pageOrder = pages.map(page => page.id);
 
+    function resolvePageId(id) {
+        const key = String(id ?? '').trim().toLowerCase();
+        if (!key) return undefined;
+        return pages.find(page => page.id.toLowerCase() === key)?.id
+            || pages.find(page => (page.el.dataset.aliases || '').split(/\s+/)
+                .some(alias => alias.toLowerCase() === key))?.id;
+    }
+
+    window.mkiHelp = { ...(window.mkiHelp || {}), resolvePageId };
+
     let currentPage = null;
     let activeItem = null;
-    let isResizing = false;
+    let resizePointerId = null;
+    let resizeStartX = 0;
+    let resizeStartWidth = 0;
     let searchToken = 0;
+    let searchTimer = null;
     const bookmarks = new Set(readBookmarks());
     const contentIndex = new Map();
     let contentIndexPromise = null;
     let searchFrame = null;
     let pendingSelectionQuery = '';
+    let pendingSelectionOptions = null;
     let currentTheme = 'light';
+    let activeImage = null;
+    let frameObserver = null;
+    let themeAnimation = null;
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
     const getSearchMode = () => $('input[name="search-mode"]:checked')?.value || 'title';
+    const getSearchOptions = () => ({
+        caseSensitive: Boolean(caseSensitiveOption?.checked),
+        wholeWords: Boolean(wholeWordsOption?.checked)
+    });
     const getTheme = () => currentTheme;
-    const setClearVisible = visible => { clearBtn.style.display = visible ? 'block' : 'none'; };
+    const setClearVisible = visible => {
+        clearBtn.style.display = visible ? 'block' : 'none';
+        $('.search-shortcut').hidden = visible;
+    };
     const setBookmarkVisible = visible => { bookmarkBtn.style.visibility = visible ? 'visible' : 'hidden'; };
     const bookmarkIds = () => [...bookmarks].filter(id => pageMap.get(id)?.isPage);
     const getBranch = folder => folder?.nextElementSibling?.tagName === 'UL' ? folder.nextElementSibling : null;
@@ -112,27 +149,124 @@ document.addEventListener('DOMContentLoaded', () => {
         doc.body.classList.toggle('dark-theme', getTheme() === 'dark');
     }
 
-    function updateThemeButton(theme) {
+    function updateThemeButton(theme, animate = false) {
         if (!themeToggle) return;
 
         const isDark = theme === 'dark';
-        $('.theme-toggle-icon', themeToggle).textContent = isDark ? '☀️' : '🌙';
-        $('.theme-toggle-text', themeToggle).textContent = isDark ? 'Светлая тема' : 'Темная тема';
+        if (themeAnimation) {
+            const currentFrame = themeAnimation.firstFrame + themeAnimation.currentRawFrame;
+            const targetFrame = isDark ? (currentFrame < 22 ? 0 : 43) : 22;
+            if (animate && !reducedMotion.matches && currentFrame !== targetFrame) {
+                themeAnimation.playSegments([currentFrame, targetFrame], true);
+            } else {
+                themeAnimation.resetSegments(true);
+                themeAnimation.goToAndStop(isDark ? 0 : 22, true);
+            }
+        } else {
+            $('.theme-toggle-icon', themeToggle).textContent = isDark ? '☾' : '☀';
+        }
         themeToggle.setAttribute('aria-label', isDark ? 'Включить светлую тему' : 'Включить темную тему');
         themeToggle.setAttribute('aria-pressed', String(isDark));
+        themeToggle.title = themeToggle.getAttribute('aria-label');
     }
 
-    function applyTheme(theme = getTheme()) {
+    function applyTheme(theme = getTheme(), animate = false) {
         currentTheme = theme;
         document.body.classList.toggle('dark-theme', theme === 'dark');
-        updateThemeButton(theme);
+        window.chrome?.webview?.postMessage({ type: 'mki:theme', theme });
+        updateThemeButton(theme, animate);
         applyThemeToFrame();
     }
 
     function toggleTheme() {
         const theme = getTheme() === 'dark' ? 'light' : 'dark';
         writeStoredTheme(theme);
-        applyTheme(theme);
+        applyTheme(theme, true);
+    }
+
+    function openImageViewer(image) {
+        const rawSource = image?.getAttribute('src') || image?.src || image?.currentSrc;
+        let source = rawSource;
+
+        try {
+            source = rawSource
+                ? new URL(rawSource, image?.ownerDocument?.baseURI || location.href).href
+                : '';
+        } catch {
+            // Если URL нестандартный (например, data:), используем его как есть.
+        }
+
+        if (!source || !imageLightbox || !imageLightboxImage || !imageLightboxClose) return;
+
+        activeImage = image;
+        imageLightboxImage.src = source;
+        imageLightboxImage.alt = image.alt || 'Изображение из справки';
+        imageLightbox.scrollTop = 0;
+        imageLightbox.scrollLeft = 0;
+        imageLightbox.hidden = false;
+        document.body.classList.add('image-lightbox-open');
+        imageLightboxClose.focus();
+    }
+
+    function closeImageViewer() {
+        if (!imageLightbox || imageLightbox.hidden) return;
+
+        const imageToFocus = activeImage;
+        activeImage = null;
+        imageLightbox.hidden = true;
+        imageLightboxImage?.removeAttribute('src');
+        if (imageLightboxImage) imageLightboxImage.alt = '';
+        document.body.classList.remove('image-lightbox-open');
+
+        if (imageToFocus?.isConnected) imageToFocus.focus();
+    }
+
+    function handleContentImageDoubleClick(event) {
+        const image = event.target?.closest?.('img');
+        if (!image) return;
+
+        event.preventDefault();
+        openImageViewer(image);
+    }
+
+    function readSidebarCollapsed() {
+        try {
+            return localStorage.getItem(SIDEBAR_STORAGE_KEY) === 'true';
+        } catch {
+            return false;
+        }
+    }
+
+    function writeSidebarCollapsed(collapsed) {
+        try {
+            localStorage.setItem(SIDEBAR_STORAGE_KEY, String(collapsed));
+        } catch {
+            // При недоступном localStorage состояние всё равно работает до закрытия страницы.
+        }
+    }
+
+    function updateSidebarToggle(collapsed) {
+        if (!sidebarToggle) return;
+
+        sidebarToggle.setAttribute('aria-expanded', String(!collapsed));
+        sidebarToggle.setAttribute(
+            'aria-label',
+            collapsed ? 'Показать панель навигации' : 'Свернуть панель навигации'
+        );
+        sidebarToggle.title = collapsed ? 'Показать меню' : 'Свернуть меню';
+        sidebarToggle.dataset.collapsed = String(collapsed);
+    }
+
+    function applySidebarState(collapsed) {
+        mainContent.classList.toggle('sidebar-collapsed', collapsed);
+        updateSidebarToggle(collapsed);
+        requestAnimationFrame(fitFrame);
+    }
+
+    function toggleSidebar() {
+        const collapsed = !mainContent.classList.contains('sidebar-collapsed');
+        writeSidebarCollapsed(collapsed);
+        applySidebarState(collapsed);
     }
 
     function encodeBookmarks(ids) {
@@ -219,6 +353,7 @@ document.addEventListener('DOMContentLoaded', () => {
         panes.forEach(pane => pane.classList.toggle('active', pane.id === `${name}-content`));
 
         if (name !== 'search') {
+            clearTimeout(searchTimer);
             searchToken++;
             searchBox.value = '';
             searchResults.innerHTML = '';
@@ -230,12 +365,16 @@ document.addEventListener('DOMContentLoaded', () => {
         activeItem?.classList.remove('active');
         activeItem = item || null;
         activeItem?.classList.add('active');
+        activeItem?.scrollIntoView({ block: 'nearest' });
     }
 
     function updateNavButtons() {
         const index = pageOrder.indexOf(currentPage);
         prevBtn.disabled = index <= 0;
         nextBtn.disabled = index < 0 || index >= pageOrder.length - 1;
+        prevBtn.title = index > 0 ? `Предыдущий раздел: ${pageMap.get(pageOrder[index - 1]).title}` : 'Первый раздел';
+        nextBtn.title = index >= 0 && index < pageOrder.length - 1
+            ? `Следующий раздел: ${pageMap.get(pageOrder[index + 1]).title}` : 'Последний раздел';
     }
 
     function updateBookmarkIcon() {
@@ -247,7 +386,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         setBookmarkVisible(true);
-        bookmarkBtn.classList.toggle('active', bookmarks.has(currentPage));
+        const bookmarked = bookmarks.has(currentPage);
+        bookmarkBtn.classList.toggle('active', bookmarked);
+        bookmarkBtn.setAttribute('aria-pressed', String(bookmarked));
+        bookmarkBtn.title = bookmarked ? 'Удалить из закладок' : 'Добавить в закладки';
+        bookmarkBtn.setAttribute('aria-label', bookmarkBtn.title);
     }
 
     function renderBookmarksTab() {
@@ -281,12 +424,41 @@ document.addEventListener('DOMContentLoaded', () => {
         const parts = [];
 
         for (let node = item; node; ) {
-            if (node.classList?.contains('tree-item')) parts.unshift(textOf(node));
+            if (node.classList?.contains('tree-item')) parts.unshift(node);
             const branch = node.parentElement?.parentElement;
             node = branch ? branch.previousElementSibling : null;
         }
 
-        breadcrumb.innerHTML = parts.map(part => `<span>${part}</span>`).join(' → ');
+        const list = document.createElement('ol');
+        parts.forEach((part, index) => {
+            const entry = document.createElement('li');
+            if (index > 0) {
+                const separator = document.createElement('span');
+                separator.className = 'breadcrumb-separator';
+                separator.textContent = '›';
+                separator.setAttribute('aria-hidden', 'true');
+                entry.append(separator);
+            }
+            const current = index === parts.length - 1;
+            const label = document.createElement(!current && pageMap.has(part.id) ? 'a' : 'span');
+            label.textContent = textOf(part);
+            if (current) label.setAttribute('aria-current', 'page');
+            else if (pageMap.has(part.id)) {
+                const address = new URL(location.href);
+                address.searchParams.delete('cmd');
+                address.searchParams.set('section', part.id);
+                label.href = address.href;
+                label.addEventListener('click', event => {
+                    if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+                    event.preventDefault();
+                    showTab('menu');
+                    loadPage(part.id);
+                });
+            }
+            entry.append(label);
+            list.append(entry);
+        });
+        breadcrumb.replaceChildren(list);
     }
 
     function expandPathTo(item) {
@@ -295,11 +467,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function loadPage(id, pushHistory = true, selectionQuery = '') {
+    function loadPage(id, pushHistory = true, selectionQuery = '', selectionOptions = null) {
         const page = pageMap.get(id);
         if (!page) return;
 
         pendingSelectionQuery = selectionQuery.trim();
+        pendingSelectionOptions = pendingSelectionQuery ? { ...selectionOptions } : null;
 
         currentPage = id;
         expandPathTo(page.el);
@@ -327,13 +500,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateSearchPlaceholder() {
-        searchBox.placeholder = SEARCH_PLACEHOLDERS[getSearchMode()];
+        searchBox.title = SEARCH_PLACEHOLDERS[getSearchMode()];
     }
 
     function stripDocToText(doc) {
         if (!doc) return '';
         doc.querySelectorAll('script,style,noscript').forEach(node => node.remove());
-        return (doc.body?.innerText || doc.body?.textContent || doc.documentElement?.textContent || '')
+        return (doc.body?.textContent || doc.documentElement?.textContent || '')
             .replace(/\s+/g, ' ')
             .trim();
     }
@@ -351,6 +524,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         searchFrame = document.createElement('iframe');
         searchFrame.setAttribute('aria-hidden', 'true');
+        searchFrame.setAttribute('sandbox', 'allow-same-origin');
         searchFrame.tabIndex = -1;
         searchFrame.style.cssText = 'position:absolute;width:0;height:0;border:0;opacity:0;pointer-events:none;';
         document.body.append(searchFrame);
@@ -361,18 +535,21 @@ document.addEventListener('DOMContentLoaded', () => {
         const frame = getSearchFrame();
 
         return new Promise(resolve => {
-            const finish = () => {
+            const finish = text => {
+                clearTimeout(timeout);
                 frame.onload = null;
                 frame.onerror = null;
-                resolve(stripDocToText(frame.contentDocument));
+                resolve(text);
             };
-
-            frame.onload = finish;
-            frame.onerror = () => {
-                frame.onload = null;
-                frame.onerror = null;
-                resolve('');
+            const timeout = setTimeout(() => finish(null), 5000);
+            frame.onload = () => {
+                try {
+                    finish(frame.contentDocument ? stripDocToText(frame.contentDocument) : null);
+                } catch {
+                    finish(null);
+                }
             };
+            frame.onerror = () => finish(null);
             frame.src = src;
         });
     }
@@ -385,22 +562,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
         contentIndexPromise = (async () => {
             try {
-                await loadContentTextByFetch(missingPages[0].src);
-
-                const loaded = await Promise.all(missingPages.map(async page => ([
-                    page.id,
-                    await loadContentTextByFetch(page.src)
-                ])));
-
-                loaded.forEach(([id, text]) => {
-                    contentIndex.set(id, { text, search: normalize(text) });
-                });
-                return;
-            } catch {
-                for (const page of missingPages) {
-                    const text = await loadContentTextByFrame(page.src);
-                    contentIndex.set(page.id, { text, search: normalize(text) });
+                // file:// не везде разрешает fetch; только для него нужен запасной iframe.
+                if (location.protocol === 'file:') {
+                    for (const page of missingPages) {
+                        const text = await loadContentTextByFrame(page.src);
+                        if (text !== null) contentIndex.set(page.id, text);
+                    }
+                    return;
                 }
+
+                let next = 0;
+                const worker = async () => {
+                    while (next < missingPages.length) {
+                        const page = missingPages[next++];
+                        try {
+                            // Сразу сохраняем текст и освобождаем DOM каждой статьи.
+                            contentIndex.set(page.id, await loadContentTextByFetch(page.src));
+                        } catch {
+                            // Повторим только эту статью при следующем поиске.
+                        }
+                    }
+                };
+                await Promise.all(Array.from({ length: Math.min(4, missingPages.length) }, worker));
+            } finally {
+                searchFrame?.remove();
+                searchFrame = null;
             }
         })().finally(() => {
             contentIndexPromise = null;
@@ -409,11 +595,48 @@ document.addEventListener('DOMContentLoaded', () => {
         return contentIndexPromise;
     }
 
-    function buildSnippet(text, query) {
+    function isWordCharacter(character) {
+        return Boolean(character && /[\p{L}\p{N}_]/u.test(character));
+    }
+
+    function findMatchIndex(text, query, options = {}) {
+        const source = normalizeWhitespace(text);
+        const pattern = normalizeWhitespace(query);
+        if (!source || !pattern) return -1;
+
+        const searchableSource = options.caseSensitive
+            ? source
+            : source.toLocaleLowerCase('ru-RU');
+        const searchablePattern = options.caseSensitive
+            ? pattern
+            : pattern.toLocaleLowerCase('ru-RU');
+        const requireLeadingBoundary = options.wholeWords && isWordCharacter(pattern[0]);
+        const requireTrailingBoundary = options.wholeWords && isWordCharacter(pattern.at(-1));
+
+        for (let fromIndex = 0; fromIndex <= searchableSource.length - searchablePattern.length;) {
+            const index = searchableSource.indexOf(searchablePattern, fromIndex);
+            if (index < 0) return -1;
+
+            const before = index > 0 ? source[index - 1] : '';
+            const after = source[index + pattern.length] || '';
+            const leadingBoundaryMatches = !requireLeadingBoundary || !isWordCharacter(before);
+            const trailingBoundaryMatches = !requireTrailingBoundary || !isWordCharacter(after);
+
+            if (leadingBoundaryMatches && trailingBoundaryMatches) return index;
+            fromIndex = index + 1;
+        }
+
+        return -1;
+    }
+
+    function matchesSearch(text, query, options) {
+        return findMatchIndex(text, query, options) >= 0;
+    }
+
+    function buildSnippet(text, query, options) {
         if (!text) return '';
 
-        const searchText = text.toLowerCase();
-        const index = searchText.indexOf(query);
+        const index = findMatchIndex(text, query, options);
         if (index < 0) return '';
 
         const start = Math.max(0, index - 55);
@@ -421,7 +644,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return `${start ? '…' : ''}${text.slice(start, end).trim()}${end < text.length ? '…' : ''}`;
     }
 
-    function renderSearchResults(items, mode, query) {
+    function renderSearchResults(items, mode, query, options) {
         if (!query) {
             searchResults.innerHTML = '';
             return;
@@ -432,8 +655,11 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        searchResults.innerHTML = items.map(page => {
-            const snippet = mode === 'content' ? buildSnippet(contentIndex.get(page.id)?.text, query) : '';
+        const summary = `<div class="search-summary">Найдено: ${items.length}</div>`;
+        searchResults.innerHTML = summary + items.map(page => {
+            const snippet = mode === 'content'
+                ? buildSnippet(contentIndex.get(page.id), query, options)
+                : '';
             return `
                 <div class="result-item" data-id="${page.id}">
                     <div class="result-title">${page.title}</div>
@@ -445,8 +671,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function runSearch() {
         const token = ++searchToken;
-        const query = normalize(searchBox.value);
+        const query = normalizeWhitespace(searchBox.value);
         const mode = getSearchMode();
+        const options = getSearchOptions();
 
         setClearVisible(Boolean(query));
         if (!query) {
@@ -455,7 +682,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (mode === 'title') {
-            renderSearchResults(pages.filter(page => page.titleSearch.includes(query)), mode, query);
+            renderSearchResults(
+                pages.filter(page => matchesSearch(page.titleSearch, query, options)),
+                mode,
+                query,
+                options
+            );
             return;
         }
 
@@ -464,81 +696,88 @@ document.addEventListener('DOMContentLoaded', () => {
         if (token !== searchToken) return;
 
         renderSearchResults(
-            pages.filter(page => contentIndex.get(page.id)?.search.includes(query)),
+            pages.filter(page => matchesSearch(contentIndex.get(page.id), query, options)),
             mode,
-            query
+            query,
+            options
         );
     }
 
-    function createNormalizedTextMap(root) {
-        const walker = document.createTreeWalker(
-            root,
-            NodeFilter.SHOW_TEXT,
-            {
-                acceptNode(node) {
-                    const parent = node.parentElement;
-                    if (!parent) return NodeFilter.FILTER_REJECT;
+    function findTextRange(doc, query, options = {}) {
+        if (!doc?.body) return null;
+        const pattern = normalize(query || '', options.caseSensitive);
+        if (!pattern) return null;
 
-                    const tag = parent.tagName?.toLowerCase();
-                    if (tag === 'script' || tag === 'style' || tag === 'noscript') {
-                        return NodeFilter.FILTER_REJECT;
-                    }
-
-                    if (!node.nodeValue.trim()) {
-                        return NodeFilter.FILTER_REJECT;
-                    }
-
-                    return NodeFilter.FILTER_ACCEPT;
-                }
-            }
-        );
-
-        let normalized = '';
-        const map = [];
+        // KMP walks text nodes until the first match. Only query-sized buffers are
+        // retained, instead of allocating a mapping object for every page character.
+        const prefix = new Uint32Array(pattern.length);
+        for (let i = 1, j = 0; i < pattern.length; i++) {
+            while (j && pattern[i] !== pattern[j]) j = prefix[j - 1];
+            if (pattern[i] === pattern[j]) j++;
+            prefix[i] = j;
+        }
+        const capacity = pattern.length + 1;
+        const nodes = new Array(capacity);
+        const offsets = new Uint32Array(capacity);
+        const characters = new Array(capacity);
+        const walker = doc.createTreeWalker(doc.body, NodeFilter.SHOW_TEXT, {
+            acceptNode: node => node.parentElement?.closest('script,style,noscript')
+                ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT
+        });
+        let count = 0;
+        let matched = 0;
+        let whitespace = true;
+        let pendingRange = null;
         let node;
-
         while ((node = walker.nextNode())) {
             const text = node.nodeValue;
+            for (let offset = 0; offset < text.length; offset++) {
+                const isSpace = /\s/.test(text[offset]);
+                if (isSpace && whitespace) continue;
+                whitespace = isSpace;
+                const chars = isSpace
+                    ? ' '
+                    : options.caseSensitive
+                        ? text[offset]
+                        : text[offset].toLocaleLowerCase('ru-RU');
+                for (let i = 0; i < chars.length; i++) {
+                    const ch = chars[i];
 
-            for (let i = 0; i < text.length; i++) {
-                const ch = text[i];
-
-                if (/\s/.test(ch)) {
-                    if (normalized && !normalized.endsWith(' ')) {
-                        normalized += ' ';
-                        map.push({ node, offset: i });
+                    if (pendingRange) {
+                        if (!isWordCharacter(ch)) return pendingRange;
+                        pendingRange = null;
                     }
-                } else {
-                    normalized += ch.toLowerCase();
-                    map.push({ node, offset: i });
+
+                    const slot = count++ % capacity;
+                    nodes[slot] = node;
+                    offsets[slot] = offset;
+                    characters[slot] = ch;
+                    while (matched && ch !== pattern[matched]) matched = prefix[matched - 1];
+                    if (ch === pattern[matched]) matched++;
+                    if (matched === pattern.length) {
+                        const startIndex = count - pattern.length;
+                        const start = startIndex % capacity;
+                        const before = startIndex > 0
+                            ? characters[(startIndex - 1) % capacity]
+                            : '';
+                        const leadingBoundaryMatches = !options.wholeWords ||
+                            !isWordCharacter(pattern[0]) ||
+                            !isWordCharacter(before);
+                        const range = doc.createRange();
+                        range.setStart(nodes[start], offsets[start]);
+                        range.setEnd(node, offset + 1);
+
+                        if (leadingBoundaryMatches) {
+                            if (!options.wholeWords || !isWordCharacter(pattern.at(-1))) return range;
+                            pendingRange = range;
+                        }
+
+                        matched = prefix[matched - 1];
+                    }
                 }
             }
         }
-
-        return { normalized: normalized.trim(), map };
-    }
-
-    function findTextRange(doc, query) {
-        if (!doc?.body || !query) return null;
-
-        const normalizedQuery = normalize(query);
-        if (!normalizedQuery) return null;
-
-        const { normalized, map } = createNormalizedTextMap(doc.body);
-        const index = normalized.indexOf(normalizedQuery);
-
-        if (index < 0) return null;
-
-        const start = map[index];
-        const end = map[index + normalizedQuery.length - 1];
-
-        if (!start || !end) return null;
-
-        const range = doc.createRange();
-        range.setStart(start.node, start.offset);
-        range.setEnd(end.node, end.offset + 1);
-
-        return range;
+        return pendingRange;
     }
 
     function scrollFrameSelectionIntoView(range) {
@@ -588,7 +827,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return document.scrollingElement || document.documentElement;
     }
 
-    function selectTextInContentFrame(query) {
+    function selectTextInContentFrame(query, options) {
         const doc = contentFrame.contentDocument;
         const win = contentFrame.contentWindow;
 
@@ -599,7 +838,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (!query) return;
 
-        const range = findTextRange(doc, query);
+        const range = findTextRange(doc, query, options);
         if (!range) return;
 
         selection.addRange(range);
@@ -607,29 +846,40 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     contentFrame.addEventListener('load', () => {
+        frameObserver?.disconnect();
         applyThemeToFrame();
         fitFrame();
 
         const doc = contentFrame.contentDocument;
         if (!doc) return;
 
+        doc.addEventListener('dblclick', handleContentImageDoubleClick);
+        doc.addEventListener('keydown', focusSearchShortcut);
+        frameObserver = new ResizeObserver(() => fitFrame());
+        if (doc.body) frameObserver.observe(doc.body);
+
+        doc.addEventListener('toggle', () => fitFrame(), true);
+
         requestAnimationFrame(() => {
             fitFrame();
-            selectTextInContentFrame(pendingSelectionQuery);
+            selectTextInContentFrame(pendingSelectionQuery, pendingSelectionOptions);
         });
 
         $$('img', doc).forEach(img => {
+            img.style.cursor = 'zoom-in';
+            if (!img.title) img.title = 'Двойной щелчок для просмотра изображения в оригинальном размере';
+
             if (!img.complete) {
                 img.addEventListener('load', () => {
                     fitFrame();
-                    selectTextInContentFrame(pendingSelectionQuery);
+                    selectTextInContentFrame(pendingSelectionQuery, pendingSelectionOptions);
                 });
             }
         });
 
         doc.fonts?.ready.then(() => {
             fitFrame();
-            selectTextInContentFrame(pendingSelectionQuery);
+            selectTextInContentFrame(pendingSelectionQuery, pendingSelectionOptions);
         });
     });
 
@@ -655,13 +905,33 @@ document.addEventListener('DOMContentLoaded', () => {
         if (hasPage) loadPage(item.id);
     });
 
-    searchBox.addEventListener('input', runSearch);
+    function focusSearchShortcut(event) {
+        if (!event.ctrlKey || event.altKey || event.key.toLowerCase() !== 'k') return;
+        event.preventDefault();
+        searchBox.focus();
+        searchBox.select();
+    }
+    document.addEventListener('keydown', focusSearchShortcut);
+    searchBox.addEventListener('focus', () => showTab('search'));
+    searchBox.addEventListener('input', () => {
+        showTab('search');
+        clearTimeout(searchTimer);
+        searchToken++;
+        setClearVisible(Boolean(searchBox.value));
+        searchTimer = setTimeout(runSearch, 150);
+    });
     searchModes.forEach(mode => mode.addEventListener('change', () => {
+        clearTimeout(searchTimer);
         updateSearchPlaceholder();
+        runSearch();
+    }));
+    searchOptions.forEach(option => option.addEventListener('change', () => {
+        clearTimeout(searchTimer);
         runSearch();
     }));
 
     clearBtn.addEventListener('click', () => {
+        clearTimeout(searchTimer);
         searchToken++;
         searchBox.value = '';
         searchResults.innerHTML = '';
@@ -673,12 +943,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const item = event.target.closest('.result-item');
         if (!item) return;
 
-        const queryForSelection = getSearchMode() === 'content'
+        const isContentSearch = getSearchMode() === 'content';
+        const queryForSelection = isContentSearch
             ? searchBox.value.trim()
             : '';
+        const optionsForSelection = isContentSearch ? getSearchOptions() : null;
 
         showTab('menu');
-        loadPage(item.dataset.id, true, queryForSelection);
+        loadPage(item.dataset.id, true, queryForSelection, optionsForSelection);
     });
 
     bookmarkBtn.addEventListener('click', () => {
@@ -710,28 +982,72 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     themeToggle?.addEventListener('click', toggleTheme);
+    sidebarToggle?.addEventListener('click', toggleSidebar);
+    imageLightboxClose?.addEventListener('click', event => {
+        event.preventDefault();
+        closeImageViewer();
+    });
+    document.addEventListener('keydown', event => {
+        if (event.key === 'Escape' && imageLightbox && !imageLightbox.hidden) {
+            event.preventDefault();
+            closeImageViewer();
+        }
+    });
+    document.addEventListener('copy', event => {
+        if (imageLightbox && !imageLightbox.hidden) event.preventDefault();
+    });
+    imageLightbox?.addEventListener('selectstart', event => event.preventDefault());
+    imageLightbox?.addEventListener('dragstart', event => event.preventDefault());
+    imageLightboxImage?.addEventListener('contextmenu', event => event.preventDefault());
 
-    resizer.addEventListener('mousedown', event => {
-        isResizing = true;
-        document.body.style.cursor = 'col-resize';
+    function setNavigationWidth(width) {
+        const minimum = parseFloat(getComputedStyle(primaryArea).minWidth);
+        primaryArea.style.flexBasis = `${Math.min(Math.max(width, minimum), mainContent.clientWidth / 2)}px`;
+    }
+
+    function finishResize() {
+        if (resizePointerId === null) return;
+        const pointerId = resizePointerId;
+        resizePointerId = null;
+        document.body.classList.remove('resizing-navigation');
+        if (resizer.hasPointerCapture(pointerId)) resizer.releasePointerCapture(pointerId);
+        fitFrame();
+    }
+
+    resizer.addEventListener('pointerdown', event => {
+        if (event.button !== 0 || resizePointerId !== null) return;
+        resizer.setPointerCapture(event.pointerId);
+        resizePointerId = event.pointerId;
+        resizeStartX = event.clientX;
+        resizeStartWidth = primaryArea.getBoundingClientRect().width;
+        document.body.classList.add('resizing-navigation');
         event.preventDefault();
     });
 
-    document.addEventListener('mousemove', event => {
-        if (!isResizing) return;
-
-        const totalWidth = mainContent.offsetWidth;
-        const leftWidth = Math.min(Math.max(event.clientX, totalWidth / 3), totalWidth / 2);
-
-        primaryArea.style.width = `${leftWidth}px`;
-        secondaryArea.style.flex = 'none';
-        secondaryArea.style.width = `${totalWidth - leftWidth - resizer.offsetWidth}px`;
+    resizer.addEventListener('pointermove', event => {
+        if (event.pointerId !== resizePointerId) return;
+        if (event.buttons === 0) {
+            finishResize();
+            return;
+        }
+        setNavigationWidth(resizeStartWidth + event.clientX - resizeStartX);
     });
 
-    document.addEventListener('mouseup', () => {
-        isResizing = false;
-        document.body.style.cursor = 'default';
+    for (const eventName of ['pointerup', 'pointercancel', 'lostpointercapture']) {
+        resizer.addEventListener(eventName, event => {
+            if (event.pointerId === resizePointerId) finishResize();
+        });
+    }
+    window.addEventListener('blur', finishResize);
+
+    resizer.addEventListener('keydown', event => {
+        if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+        event.preventDefault();
+        const delta = event.key === 'ArrowRight' ? 16 : -16;
+        setNavigationWidth(primaryArea.offsetWidth + delta);
+        fitFrame();
     });
+    window.addEventListener('resize', fitFrame);
 
     window.addEventListener('popstate', event => {
         readBookmarks().forEach(id => bookmarks.add(id));
@@ -744,6 +1060,22 @@ document.addEventListener('DOMContentLoaded', () => {
     renderBookmarksTab();
     updateSearchPlaceholder();
     applyTheme(readStoredTheme());
+    applySidebarState(readSidebarCollapsed());
+    if (window.lottie && window.mkiHelpThemeAnimation) {
+        const icon = $('.theme-toggle-icon', themeToggle);
+        icon.textContent = '';
+        themeAnimation = window.lottie.loadAnimation({
+            container: icon,
+            renderer: 'svg',
+            loop: false,
+            autoplay: false,
+            animationData: window.mkiHelpThemeAnimation
+        });
+        themeAnimation.setSpeed(2);
+        updateThemeButton(getTheme());
+        themeAnimation.addEventListener('complete', () => updateThemeButton(getTheme()));
+    }
+    reducedMotion.addEventListener('change', () => updateThemeButton(getTheme()));
 
     const params = new URLSearchParams(location.search);
     const cmd = params.get('cmd');
@@ -752,7 +1084,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (cmd) {
         const decoded = decodeURIComponent(cmd).toLowerCase();
-        startId = pages.find(page => page.id.toLowerCase() === decoded)?.id || FALLBACK_ID;
+        startId = resolvePageId(decoded) || FALLBACK_ID;
     } else if (section && pageMap.has(section)) {
         startId = section;
     }

@@ -14,6 +14,7 @@ namespace Ask.Core.Services.EventCore.Events
   /// </remarks>
   public static class FileInteractionEvents
   {
+    public sealed record ExportProtocolPdf(string FilePath, string Text) : IEvent;
     /// <summary>
     /// Событие, генерируемое при необходимости открыть новый OPK-файл.
     /// </summary>
@@ -35,10 +36,12 @@ namespace Ask.Core.Services.EventCore.Events
     public class OpenFileInEditorAgain : IEvent
     {
       public string FilePath { get; }
+      public string? SourceArchiveName { get; }
 
-      public OpenFileInEditorAgain(string filePath)
+      public OpenFileInEditorAgain(string filePath, string? sourceArchiveName = null)
       {
         FilePath = filePath;
+        SourceArchiveName = sourceArchiveName;
       }
     }
 

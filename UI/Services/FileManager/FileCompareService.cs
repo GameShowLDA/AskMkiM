@@ -56,10 +56,7 @@ namespace UI.Services.FileManager
 
       if (editor.TextEditorModel.SavedTextSnapshot != null)
       {
-        return !string.Equals(
-          NormalizeText(editor.TextEditorModel.SavedTextSnapshot),
-          NormalizeText(editor.Text),
-          StringComparison.Ordinal);
+        return DocumentTextState.IsModified(editor.TextEditorModel.SavedTextSnapshot, editor.Text);
       }
 
       return CompareWithSavedFile(editor, editor.TextEditorModel.FilePath, notifyMissingFile);
@@ -119,10 +116,7 @@ namespace UI.Services.FileManager
       Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
       var encoding = editor.TextEditorModel?.Encoding ?? Encoding.UTF8;
       var diskContent = File.ReadAllText(filePath, encoding);
-      return !string.Equals(
-        NormalizeText(diskContent),
-        NormalizeText(editor.Text),
-        StringComparison.Ordinal);
+      return DocumentTextState.IsModified(diskContent, editor.Text);
     }
 
     /// <summary>
@@ -138,15 +132,5 @@ namespace UI.Services.FileManager
       return true;
     }
 
-    /// <summary>
-    /// Нормализует переводы строк, чтобы они не считались изменением содержимого.
-    /// </summary>
-    private static string NormalizeText(string? text)
-    {
-      return (text ?? string.Empty)
-        .TrimStart('\uFEFF')
-        .Replace("\r\n", "\n")
-        .Replace('\r', '\n');
-    }
   }
 }

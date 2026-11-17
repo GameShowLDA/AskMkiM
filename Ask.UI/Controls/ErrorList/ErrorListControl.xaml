@@ -35,7 +35,7 @@
                                      WarningTemplate="{StaticResource WarningIconTemplate}" />
 
             <Style x:Key="PaginationBaseButtonStyle" TargetType="Button">
-                <Setter Property="Foreground" Value="{DynamicResource ForegroundSolidColorBrush}"/>
+                <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes85}"/>
                 <Setter Property="Background" Value="{DynamicResource IsCheckedColorSolidColorBrush}"/>
                 <Setter Property="BorderBrush" Value="{DynamicResource IsCheckedColorSolidColorBrush}"/>
                 <Setter Property="BorderThickness" Value="0"/>
@@ -64,15 +64,15 @@
                                 <Trigger Property="IsMouseOver" Value="True">
                                     <Setter Property="Background" Value="{DynamicResource VioletColorSolidColorBrush}"/>
                                     <Setter Property="BorderBrush" Value="{DynamicResource VioletColorSolidColorBrush}"/>
+                                    <Setter Property="Foreground" Value="{DynamicResource MessageBoxActionButtonForegroundBrush}"/>
                                 </Trigger>
                                 <Trigger Property="IsPressed" Value="True">
                                     <Setter TargetName="RootBorder" Property="Opacity" Value="0.82"/>
                                 </Trigger>
                                 <Trigger Property="IsEnabled" Value="False">
-                                    <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes35}"/>
+                                    <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes85}"/>
                                     <Setter Property="Background" Value="Transparent"/>
                                     <Setter Property="BorderBrush" Value="Transparent"/>
-                                    <Setter TargetName="RootBorder" Property="Opacity" Value="0.55"/>
                                 </Trigger>
                             </ControlTemplate.Triggers>
                         </ControlTemplate>
@@ -90,13 +90,13 @@
                     <DataTrigger Binding="{Binding IsCurrent}" Value="True">
                         <Setter Property="Background" Value="{DynamicResource VioletColorSolidColorBrush}"/>
                         <Setter Property="BorderBrush" Value="{DynamicResource VioletColorSolidColorBrush}"/>
-                        <Setter Property="Foreground" Value="{DynamicResource ForegroundSolidColorBrush}"/>
+                        <Setter Property="Foreground" Value="{DynamicResource MessageBoxActionButtonForegroundBrush}"/>
                         <Setter Property="FontWeight" Value="SemiBold"/>
                     </DataTrigger>
                     <DataTrigger Binding="{Binding IsClickable}" Value="False">
                         <Setter Property="Background" Value="Transparent"/>
                         <Setter Property="BorderBrush" Value="Transparent"/>
-                        <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes35}"/>
+                        <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes85}"/>
                         <Setter Property="Cursor" Value="Arrow"/>
                         <Setter Property="Focusable" Value="False"/>
                     </DataTrigger>

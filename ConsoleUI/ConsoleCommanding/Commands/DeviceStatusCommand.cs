@@ -205,7 +205,7 @@ namespace ConsoleUI.ConsoleCommanding.Commands
 
         case IBreakdownTester breakdownTester:
           context.Console.WriteLine($"  Режим: {breakdownTester.Mode}");
-          context.Console.WriteLine($"  Пределы: PI(ACW)={breakdownTester.AcwMaxVoltage} В, PI(DCW)={breakdownTester.DcwMaxVoltage} В, IrMax={breakdownTester.IrMaxVoltage} В, IrMin={breakdownTester.IrMinVoltage} В");
+          context.Console.WriteLine($"  Пределы: PI(ACW)={breakdownTester.AcwManger.VoltageRange.MaxVoltage} В, PI(DCW)={breakdownTester.DcwManger.VoltageRange.MaxVoltage} В, IrMax={breakdownTester.IrManger.VoltageRange.MaxVoltage} В, IrMin={breakdownTester.IrManger.VoltageRange.MinVoltage} В");
           break;
 
         case IMultimeter fastMeter:

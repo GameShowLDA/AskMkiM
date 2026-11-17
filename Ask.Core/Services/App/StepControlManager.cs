@@ -1,4 +1,3 @@
-using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 
@@ -148,24 +147,6 @@ namespace Ask.Core.Services.App
     }
 
     /// <summary>
-    /// Инициализирует состояние пошагового режима.
-    /// Загружает настройки из <c>ExecutionConfig</c>
-    /// и уведомляет подписчиков о текущем состоянии.
-    /// </summary>
-    public static async Task InitializeAsync()
-    {
-      _stepMode = ExecutionConfig.GetIsStepByStepModeEnabled();
-      if (_stepMode)
-      {
-        EnableStepMode(true);
-      }
-      else
-      {
-        DisableStepMode();
-      }
-    }
-
-    /// <summary>
     /// Включает пошаговый режим через пользовательский или конфигурационный источник.
     /// </summary>
     /// <param name="isStepInto">
@@ -250,13 +231,5 @@ namespace Ask.Core.Services.App
       ExecutionEventAdapter.RaiseStepByStepModeChanged(false);
     }
 
-    /// <summary>
-    /// Выполняет начальную инициализацию,
-    /// загружая настройки пошагового режима при старте.
-    /// </summary>
-    static StepControlManager()
-    {
-      InitializeAsync().ConfigureAwait(true);
-    }
   }
 }

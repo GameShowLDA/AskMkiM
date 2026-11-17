@@ -19,7 +19,24 @@ namespace Ask.Core.Services.Errors.Translation
       SourceLineNumber = startLineNumber,
       Command = command,
       Code = ErrorCode.Rm_CannotParseExpression,
-      Description = $"Не удалось распознать выражение: {expr}"
+      Description = $"Не удалось распознать выражение: {expr}",
+      SourceFragment = expr
+    };
+
+    /// <summary>
+    /// Ошибка, уже сформулированная транслятором РМ для пользователя.
+    /// </summary>
+    public static ErrorItem TranslationDiagnostic(
+      string description,
+      string? sourceFragment,
+      int startLineNumber,
+      string command) => new()
+    {
+      SourceLineNumber = startLineNumber,
+      Command = command,
+      Code = ErrorCode.Rm_CannotParseExpression,
+      Description = description,
+      SourceFragment = sourceFragment
     };
 
     /// <summary>
@@ -33,7 +50,8 @@ namespace Ask.Core.Services.Errors.Translation
       SourceLineNumber = startLineNumber,
       Command = command,
       Code = ErrorCode.Rm_ExtraSpace,
-      Description = $"Не удалось распознать выражение: {expr}. Возможно присутствует лишний пробел."
+      Description = $"Не удалось распознать выражение: {expr}. Возможно присутствует лишний пробел.",
+      SourceFragment = expr
     };
 
     /// <summary>
@@ -47,7 +65,8 @@ namespace Ask.Core.Services.Errors.Translation
       SourceLineNumber = startLineNumber,
       Command = command,
       Code = ErrorCode.Rm_UnacceptableSymbol,
-      Description = $"Обнаружены недопустимые символы в выражении: {expr}."
+      Description = $"Обнаружены недопустимые символы в выражении: {expr}.",
+      SourceFragment = expr
     };
 
     /// <summary>

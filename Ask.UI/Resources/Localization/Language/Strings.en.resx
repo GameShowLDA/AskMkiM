@@ -393,6 +393,9 @@
   <data name="protocol.tooltip.commandjump" xml:space="preserve">
     <value>Go to another command (F4)</value>
   </data>
+  <data name="protocol.tooltip.skipcommand" xml:space="preserve">
+    <value>Finish the current command and go to the next one</value>
+  </data>
   <data name="translator.editor.tooltip.back" xml:space="preserve">
     <value>Return to the source file</value>
   </data>
@@ -404,9 +407,6 @@
   </data>
   <data name="menu.test.metrology.eht" xml:space="preserve">
     <value>ЭТ Mode</value>
-  </data>
-  <data name="menu.execution.run.stepByStepMode" xml:space="preserve">
-    <value>Run (Step by step mode)</value>
   </data>
   <data name="menu.admin" xml:space="preserve">
     <value>Admin</value>
@@ -497,12 +497,6 @@
   </data>
   <data name="settings.execution.repeatMeasurement.description" xml:space="preserve">
     <value>Allows individual equipment measurements to be repeated. Does not repeat the entire command, test, or control program.</value>
-  </data>
-  <data name="settings.execution.stepByStepMode.title" xml:space="preserve">
-    <value>Step-by-step mode</value>
-  </data>
-  <data name="settings.execution.stepByStepMode.description" xml:space="preserve">
-    <value>Enables debug execution: F10 executes the whole block (Step Over); F11 enters the block and stops at each step (Step Into).</value>
   </data>
   <data name="settings.execution.idleMode.title" xml:space="preserve">
     <value>Idle execution mode</value>
@@ -660,6 +654,21 @@
   <data name="settings.userinterface.printFont.description" xml:space="preserve">
     <value>Unified appearance for printed forms and PDF documents.</value>
   </data>
+  <data name="settings.userinterface.runnerLayout.title" xml:space="preserve">
+    <value>Runner panel layout</value>
+  </data>
+  <data name="settings.userinterface.runnerLayout.description" xml:space="preserve">
+    <value>Restores the default panel positions and sizes for the current user.</value>
+  </data>
+  <data name="settings.userinterface.runnerLayout.reset" xml:space="preserve">
+    <value>Reset layout</value>
+  </data>
+  <data name="settings.userinterface.runnerLayout.confirmationTitle" xml:space="preserve">
+    <value>Reset panel layout</value>
+  </data>
+  <data name="settings.userinterface.runnerLayout.confirmation" xml:space="preserve">
+    <value>Reset the runner panel positions and sizes for the current user?</value>
+  </data>
   <data name="settings.protocol.commandHeaders.title" xml:space="preserve">
     <value>Command headers</value>
   </data>
@@ -711,4 +720,12 @@
   <data name="settings.device.breakdownTester.systemInsulationResistance" xml:space="preserve">
     <value>System insulation resistance, GOhm</value>
   </data>
+  <data name="Settings_AutoLock_Title" xml:space="preserve"><value>Automatic lock</value></data>
+  <data name="Settings_AutoLock_Description" xml:space="preserve"><value>For the current role, when there is no input and no running process</value></data>
+  <data name="Settings_AutoLock_0" xml:space="preserve"><value>Never</value></data>
+  <data name="Settings_AutoLock_1" xml:space="preserve"><value>1 minute</value></data>
+  <data name="Settings_AutoLock_2" xml:space="preserve"><value>2 minutes</value></data>
+  <data name="Settings_AutoLock_5" xml:space="preserve"><value>5 minutes</value></data>
+  <data name="Settings_AutoLock_10" xml:space="preserve"><value>10 minutes</value></data>
+  <data name="menu.help.releaseNotes" xml:space="preserve"><value>What's New</value></data>
 </root>

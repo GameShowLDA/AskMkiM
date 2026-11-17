@@ -15,12 +15,19 @@
     /// <returns>
     /// <c>true</c>, если обнаружено нарушение порядка; иначе <c>false</c>.
     /// </returns>
-    public static bool HasInvalidParameterOrder(string firstLine, List<string> algorithmKeys, string? capacityStart, out string errorDescription)
+    public static bool HasInvalidParameterOrder(
+      string firstLine,
+      List<string> algorithmKeys,
+      string? capacityStart,
+      out string errorDescription,
+      out string? sourceFragment)
     {
       errorDescription = string.Empty;
+      sourceFragment = null;
 
       int idxKey = -1;
       int idxCapacity = -1;
+      string? firstKey = null;
 
       int idxPointStart = firstLine.IndexOf('*');
       int idxPointEnd = firstLine.LastIndexOf('*');
@@ -29,7 +36,10 @@
       {
         int idx = firstLine.IndexOf(key, StringComparison.OrdinalIgnoreCase);
         if (idx >= 0 && (idxKey == -1 || idx < idxKey))
+        {
           idxKey = idx;
+          firstKey = key;
+        }
       }
 
       if (!string.IsNullOrWhiteSpace(capacityStart))
@@ -40,6 +50,7 @@
       if (idxKey != -1 && idxCapacity != -1 && idxKey > idxCapacity)
       {
         errorDescription = "Ключ алгоритма указан после электрической емкости.";
+        sourceFragment = firstKey;
         return true;
       }
 
@@ -49,6 +60,7 @@
          || (idxCapacity != -1 && idxCapacity > idxPointEnd))
         {
           errorDescription = "Один из параметров указан после точек.";
+          sourceFragment = idxKey > idxPointEnd ? firstKey : capacityStart;
           return true;
         }
       }

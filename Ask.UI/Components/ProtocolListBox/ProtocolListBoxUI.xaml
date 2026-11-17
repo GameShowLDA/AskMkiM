@@ -118,6 +118,16 @@
                           BorderThickness="0"
                           Padding="0"
                           HorizontalContentAlignment="Stretch">
+                    <ToggleButton.Style>
+                        <Style TargetType="ToggleButton">
+                            <Setter Property="ToolTip" Value="Показать служебные сообщения операции"/>
+                            <Style.Triggers>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter Property="ToolTip" Value="Скрыть служебные сообщения операции"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ToggleButton.Style>
                     <ToggleButton.Template>
                         <ControlTemplate TargetType="ToggleButton">
                             <Grid Background="Transparent"
@@ -182,10 +192,11 @@
                     </local:ProtocolServiceLogsBox.Style>
                 </local:ProtocolServiceLogsBox>
 
-                <TextBox x:Name="PART_SelectableText"
+                <local:ProtocolSelectableTextBox x:Name="PART_SelectableText"
                      Grid.RowSpan="2"
                      Text="{Binding SelectableText, Mode=OneWay}"
                      IsReadOnly="True"
+                     IsUndoEnabled="False"
                      IsReadOnlyCaretVisible="False"
                      AcceptsReturn="True"
                      TextWrapping="Wrap"
@@ -242,9 +253,9 @@
                         BorderThickness="0"
                         Padding="0"
                         HorizontalAlignment="Stretch">
-                    <ContentControl Content="{Binding}"
-                                    HorizontalAlignment="Stretch"
-                                    ContentTemplate="{StaticResource ProtocolLineContentTemplate}"/>
+                    <ContentPresenter Content="{Binding}"
+                                      HorizontalAlignment="Stretch"
+                                      ContentTemplate="{StaticResource ProtocolLineContentTemplate}"/>
                 </Border>
             </Grid>
 
@@ -260,6 +271,7 @@
         </DataTemplate>
 
         <Style x:Key="ProtocolCommandHeaderToggleStyle" TargetType="ToggleButton">
+            <Setter Property="ToolTip" Value="Развернуть сообщения команды"/>
             <Setter Property="Focusable" Value="False"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Background" Value="Transparent"/>
@@ -334,12 +346,26 @@
 
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsChecked" Value="True">
-                                <Setter TargetName="Chevron"
-                                        Property="RenderTransform">
-                                    <Setter.Value>
-                                        <RotateTransform Angle="0"/>
-                                    </Setter.Value>
-                                </Setter>
+                                <Trigger.EnterActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="Chevron"
+                                                             Storyboard.TargetProperty="(UIElement.RenderTransform).(RotateTransform.Angle)"
+                                                             To="0"
+                                                             Duration="0:0:0.16"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.EnterActions>
+                                <Trigger.ExitActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="Chevron"
+                                                             Storyboard.TargetProperty="(UIElement.RenderTransform).(RotateTransform.Angle)"
+                                                             To="-90"
+                                                             Duration="0:0:0.16"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.ExitActions>
                                 <Setter TargetName="TreeLine" Property="Visibility" Value="Visible"/>
                             </Trigger>
 
@@ -359,6 +385,11 @@
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsChecked" Value="True">
+                    <Setter Property="ToolTip" Value="Свернуть сообщения команды"/>
+                </Trigger>
+            </Style.Triggers>
         </Style>
 
         <DataTemplate x:Key="ProtocolCommandHeaderTemplate">
@@ -370,7 +401,10 @@
         </DataTemplate>
     </UserControl.Resources>
 
-    <Border CornerRadius="20,20,0,0" Background="{DynamicResource TestsProtocolBackgroundBrush}">
+    <Border CornerRadius="14"
+            Background="{DynamicResource TestsProtocolBackgroundBrush}"
+            BorderBrush="{DynamicResource TopPanelHoverBackgroundBrush}"
+            BorderThickness="1">
 
         <Grid>
             <Grid.RowDefinitions>
@@ -408,32 +442,6 @@
                      VirtualizingPanel.CacheLength="1"
                      VirtualizingPanel.CacheLengthUnit="Page">
 
-                    <ListBox.ItemTemplate>
-                        <DataTemplate>
-                            <ContentControl Content="{Binding}"
-                                        Margin="0"
-                                        HorizontalAlignment="Stretch">
-                                <ContentControl.Style>
-                                    <Style TargetType="ContentControl">
-                                        <Setter Property="ContentTemplate"
-                                            Value="{StaticResource ProtocolLineTemplate}"/>
-
-                                        <Style.Triggers>
-                                            <MultiDataTrigger>
-                                                <MultiDataTrigger.Conditions>
-                                                    <Condition Binding="{Binding IsCommandHeader}" Value="True"/>
-                                                    <Condition Binding="{Binding HasChildItems}" Value="True"/>
-                                                </MultiDataTrigger.Conditions>
-                                                <Setter Property="ContentTemplate"
-                                                    Value="{StaticResource ProtocolCommandHeaderTemplate}"/>
-                                            </MultiDataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </ContentControl.Style>
-                            </ContentControl>
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-
                     <ListBox.ItemContainerStyle>
                         <Style TargetType="ListBoxItem">
                             <Setter Property="OverridesDefaultStyle" Value="True"/>
@@ -441,8 +449,9 @@
                             <Setter Property="BorderThickness" Value="0"/>
                             <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
                             <Setter Property="Background" Value="Transparent"/>
-                            <Setter Property="Padding" Value="0"/>
+                            <Setter Property="Padding" Value="5,0,0,0"/>
                             <Setter Property="Margin" Value="0"/>
+                            <Setter Property="ContentTemplate" Value="{StaticResource ProtocolLineTemplate}"/>
                             <Setter Property="Template">
                                 <Setter.Value>
                                     <ControlTemplate TargetType="ListBoxItem">
@@ -459,6 +468,14 @@
                                 </Setter.Value>
                             </Setter>
                             <Style.Triggers>
+                                <MultiDataTrigger>
+                                    <MultiDataTrigger.Conditions>
+                                        <Condition Binding="{Binding IsCommandHeader}" Value="True"/>
+                                        <Condition Binding="{Binding HasChildItems}" Value="True"/>
+                                    </MultiDataTrigger.Conditions>
+                                    <Setter Property="ContentTemplate"
+                                            Value="{StaticResource ProtocolCommandHeaderTemplate}"/>
+                                </MultiDataTrigger>
                                 <Trigger Property="IsSelected" Value="True">
                                     <Setter Property="Background" Value="#663A78A1"/>
                                 </Trigger>

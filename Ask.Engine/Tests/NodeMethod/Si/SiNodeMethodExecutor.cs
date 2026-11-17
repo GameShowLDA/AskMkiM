@@ -75,8 +75,8 @@ namespace Ask.Engine.Tests.NodeMethod.Si
         await breakDown.ConnectableManager.InitializeAsync(messageService);
         await breakDown.IrManger.Mode.SetModeAsync(messageService);
         await breakDown.IrManger.Voltage.SetVoltageAsync(dataModel.Voltage, messageService);
-        await breakDown.IrManger.Time.SetTestTimeAsync(dataModel.Time, messageService);
         breakDown.Time.SetTargetTime(dataModel.Time);
+        await breakDown.IrManger.Time.SetTestTimeAsync(dataModel.Time, messageService);
       }
 
       /// <inheritdoc />

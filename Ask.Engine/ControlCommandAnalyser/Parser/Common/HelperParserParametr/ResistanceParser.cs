@@ -161,10 +161,21 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.HelperParserParametr
     /// </returns>
     public (string? Min, string? Max, string? Unit, string Remainder) ParseResistanceRangeWithR(string input)
     {
-      if (string.IsNullOrWhiteSpace(input))
-        return (null, null, null, input);
+      var parsed = ParseResistanceRangeWithRDetails(input);
+      return (parsed.Min, parsed.Max, parsed.Unit, parsed.Remainder);
+    }
 
-      const string Number = @"\d+(?:[.,](?!\d+\.\d)\d+)?";
+    /// <summary>
+    /// Парсит диапазон сопротивления и дополнительно возвращает его исходную
+    /// запись для точной привязки диагностик редактора.
+    /// </summary>
+    public (string? Min, string? Max, string? Unit, string? SourceFragment, string Remainder)
+      ParseResistanceRangeWithRDetails(string input)
+    {
+      if (string.IsNullOrWhiteSpace(input))
+        return (null, null, null, null, input);
+
+      const string Number = @"[-+]?\d+(?:[.,](?!\d+\.\d)\d+)?";
 
       // 1) "10 Ом < R < 20 Ом"
       var m = Regex.Match(input,
@@ -175,7 +186,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.HelperParserParametr
           RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace);
 
       if (m.Success)
-        return ParseBothLimitsR(input, m);
+        return WithSourceFragment(m, ParseBothLimitsR(input, m));
 
       // 2) "R < 10 Ом" / "10 Ом > R"
       m = Regex.Match(input,
@@ -187,7 +198,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.HelperParserParametr
           RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace);
 
       if (m.Success)
-        return ParseLimitRUnified(input, m);
+        return WithSourceFragment(m, ParseLimitRUnified(input, m));
 
       // 4) "10<МОм<20"
       m = Regex.Match(input,
@@ -200,7 +211,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.HelperParserParametr
           RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace);
 
       if (m.Success)
-        return ParseRange(input, m);
+        return WithSourceFragment(m, ParseRange(input, m));
 
       // 5) "Ом < 10"
       m = Regex.Match(input,
@@ -211,7 +222,7 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.HelperParserParametr
           RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace);
 
       if (m.Success)
-        return ParseLowerLimit(input, m);
+        return WithSourceFragment(m, ParseLowerLimit(input, m));
 
       // 6) "10 < Ом"
       m = Regex.Match(input,
@@ -222,10 +233,16 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.HelperParserParametr
           RegexOptions.IgnoreCase | RegexOptions.IgnorePatternWhitespace);
 
       if (m.Success)
-        return ParseHigherLimit(input, m);
+        return WithSourceFragment(m, ParseHigherLimit(input, m));
 
-      return (null, null, null, input);
+      return (null, null, null, null, input);
     }
+
+    private static (string? Min, string? Max, string? Unit, string? SourceFragment, string Remainder)
+      WithSourceFragment(
+        Match match,
+        (string? Min, string? Max, string? Unit, string Remainder) parsed)
+      => (parsed.Min, parsed.Max, parsed.Unit, match.Value.Trim(), parsed.Remainder);
 
     private (string? Min, string? Max, string? Unit, string Remainder) ParseLimitRUnified(string input, Match m)
     {

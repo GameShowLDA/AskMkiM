@@ -1,5 +1,6 @@
 using Ask.Core.Services.App;
 using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.UI;
 using Ask.Core.Services.Errors.Models;
 using Ask.Core.Services.Protocols;
 using Ask.Core.Shared.DTO.Executor;
@@ -13,12 +14,10 @@ using Ask.UI.Features.ProtocolNew.Controls;
 using Ask.UI.Features.ProtocolNew.Execution;
 using Ask.UI.Features.ProtocolNew.Protocol;
 using Message;
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.UI.Controls.ProtocolNew
 {
@@ -61,6 +60,7 @@ namespace Ask.UI.Controls.ProtocolNew
 
     private TaskCompletionSource<UserAction> _userActionTcs;
     private bool _isRetryOrContinueInteraction;
+    private bool _isStartPending;
 
     public ErrorManager Errors;
 
@@ -150,43 +150,66 @@ namespace Ask.UI.Controls.ProtocolNew
     /// Начинает запуск измерения.
     /// </summary>
     /// <returns>Задача, представляющая асинхронную операцию измерения.</returns>
-    public async Task StartAsync()
+    public Task StartAsync() => StartAsync(startStepByStep: false, isStepInto: true);
+
+    /// <summary>Проверка возможности запуска до подготовки протокола и обращения к оборудованию.</summary>
+    public Func<Task<bool>>? BeforeStartAsync { get; set; }
+
+    /// <summary>
+    /// Начинает выполнение с выбранным режимом пошагового запуска.
+    /// </summary>
+    /// <param name="startStepByStep">Включает пошаговый режим перед началом выполнения.</param>
+    /// <param name="isStepInto">Определяет выполнение с заходом внутрь блоков.</param>
+    /// <returns>Задача, представляющая асинхронную операцию запуска.</returns>
+    public async Task StartAsync(bool startStepByStep, bool isStepInto)
     {
-      if (ActionExecutor.IsActive) return;
-      var actionSettings = _modeSettings.Current;
-      bool simulatedPowerFailure = ExecutionConfig.GetIsIdleModeEnabled()
-        && actionSettings.CheckType != CheckType.SelfTest
-        && (await ChassisManagers.GetAllAsync()).Any(IdleHardwareErrorSimulator.ShouldSimulateHardwareError);
-
-      if (simulatedPowerFailure || ShouldBlockStartForMissingPower(
-        ExecutionConfig.GetIsIdleModeEnabled(),
-        SystemStateManager.GetIsActivePower(),
-        actionSettings.CheckPower,
-        ExecutionConfig.GetIsPowerCheckDisabled()))
+      if (_isStartPending || ActionExecutor.IsActive) return;
+      _isStartPending = true;
+      try
       {
-        await ShowMessageAsync(
-          new ShowMessageModel(
-            simulatedPowerFailure
-              ? "Не удалось выполнить включение питания системы. Проверьте подключение системы к компьютеру и повторите попытку."
-              : "Нет связи с системой. Пожалуйста, подключитесь к системе и повторите попытку.",
-            type: ShowMessageModel.MessageType.Error),
-          skipPause: true);
-        ShowOnlyStartButton();
-        return;
-      }
+        if (BeforeStartAsync != null && !await BeforeStartAsync())
+          return;
 
-      _modeSettings.Current.Mode = ExecutionConfig.GetIsIdleModeEnabled() ? "Холостой режим" : "Рабочий режим";
-      _modeSettings.Current.StartTime = TimeOnly.FromDateTime(DateTime.Now);
-      _modeSettings.Current.ExecutionDuration = TimeSpan.Zero;
-      _modeSettings.Current.DeviceResults.Clear();
-      var executionName = actionSettings.NameProvider?.Invoke();
-      if (!string.IsNullOrWhiteSpace(executionName))
+        var actionSettings = _modeSettings.Current;
+        bool simulatedPowerFailure = ExecutionConfig.GetIsIdleModeEnabled()
+          && actionSettings.CheckType != CheckType.SelfTest
+          && (await ChassisManagers.GetAllAsync()).Any(IdleHardwareErrorSimulator.ShouldSimulateHardwareError);
+
+        if (simulatedPowerFailure || ShouldBlockStartForMissingPower(
+          ExecutionConfig.GetIsIdleModeEnabled(),
+          SystemStateManager.GetIsActivePower(),
+          actionSettings.CheckPower,
+          ExecutionConfig.GetIsPowerCheckDisabled()))
+        {
+          await ShowMessageAsync(
+            new ShowMessageModel(
+              simulatedPowerFailure
+                ? "Не удалось выполнить включение питания системы. Проверьте подключение системы к компьютеру и повторите попытку."
+                : "Нет связи с системой. Пожалуйста, подключитесь к системе и повторите попытку.",
+              type: ShowMessageModel.MessageType.Error),
+            skipPause: true,
+            SkipStepModeCheck: true);
+          ShowOnlyStartButton();
+          return;
+        }
+
+        _modeSettings.Current.Mode = ExecutionConfig.GetIsIdleModeEnabled() ? "Холостой режим" : "Рабочий режим";
+        _modeSettings.Current.StartTime = TimeOnly.FromDateTime(DateTime.Now);
+        _modeSettings.Current.ExecutionDuration = TimeSpan.Zero;
+        _modeSettings.Current.DeviceResults.Clear();
+        var executionName = actionSettings.NameProvider?.Invoke();
+        if (!string.IsNullOrWhiteSpace(executionName))
+        {
+          Header = executionName;
+          actionSettings.Name = executionName;
+        }
+
+        await ActionExecutor.StartAsync(actionSettings, startStepByStep, isStepInto);
+      }
+      finally
       {
-        Header = executionName;
-        actionSettings.Name = executionName;
+        _isStartPending = false;
       }
-
-      await ActionExecutor.StartAsync(actionSettings);
     }
 
     /// <summary>
@@ -282,9 +305,6 @@ namespace Ask.UI.Controls.ProtocolNew
       [CallerFilePath] string callerFile = "",
       [CallerLineNumber] int callerLine = 0)
     {
-      var outputStarted = Stopwatch.GetTimestamp();
-      var messageId = RuntimeHelpers.GetHashCode(showMessageModel);
-
       await CheckBlockStart(IsBlockStart);
       var wasDisplayed = await _entryOutputService.WriteAsync(
         showMessageModel,
@@ -295,28 +315,20 @@ namespace Ask.UI.Controls.ProtocolNew
         AddError,
         callerName,
         callerFile,
-        callerLine);
+        callerLine,
+        (error, status) => ActionExecutor.AddError(error, status));
 
       if (!wasDisplayed)
       {
         return;
       }
 
-      var displayedAt = Stopwatch.GetTimestamp();
       LastMessage = false;
       await _postOutputController.ProcessAsync(
         showMessageModel,
         IsBlockStart,
         SkipStepModeCheck,
         skipPause);
-
-      var completedAt = Stopwatch.GetTimestamp();
-      LogDebug(
-        $"[ProtocolOutputTiming] Output completed: message={messageId}, " +
-        $"dispatcherAndWriteMs={Stopwatch.GetElapsedTime(outputStarted, displayedAt).TotalMilliseconds:F1}, " +
-        $"postOutputMs={Stopwatch.GetElapsedTime(displayedAt, completedAt).TotalMilliseconds:F1}, " +
-        $"totalMs={Stopwatch.GetElapsedTime(outputStarted, completedAt).TotalMilliseconds:F1}, " +
-        $"thread={Environment.CurrentManagedThreadId}");
     }
 
     /// <summary>
@@ -530,7 +542,7 @@ namespace Ask.UI.Controls.ProtocolNew
     {
       var cancellationToken = GetCancellationToken();
       cancellationToken.ThrowIfCancellationRequested();
-      bool stopOnError = await ExecutionConfig.GetIsStopOnErrorEnabled();
+      bool stopOnError = ExecutionConfig.GetStopOnErrorEnabled();
       cancellationToken.ThrowIfCancellationRequested();
       if (ShouldWaitForUserAction(stopOnError, loop, deviceTask))
       {
@@ -546,21 +558,23 @@ namespace Ask.UI.Controls.ProtocolNew
     }
 
     /// <inheritdoc />
-    public async Task<UserAction> ConfirmControlProgramCommandRetryAsync(int errorCount)
+    public async Task<UserAction> ConfirmControlProgramCommandRetryAsync(int errorCount, string commandNumber, string mnemonic)
     {
-      if (!await ExecutionConfig.GetIsStopOnErrorEnabled())
+      bool stopOnError = ExecutionConfig.GetStopOnErrorEnabled();
+      if (!stopOnError)
       {
         return UserAction.None;
       }
 
       MessageBoxResult ShowDialog() => MessageBoxCustom.Show(
-        $"Найдено ошибок: {errorCount}.\r\n\r\n" +
+        $"В команде {commandNumber} {mnemonic} обнаружены ошибки.\r\n\r\n" +
         "Да — повторить всю команду.\r\n" +
         "Нет — принять результат с ошибками и продолжить выполнение.\r\n" +
         "Отмена — закрыть окно, изучить протокол и выбрать действие позже.",
-        "Ошибки выполнения команды",
+        "ПОВТОРИТЬ?",
         MessageBoxButton.YesNoCancel,
-        MessageBoxImage.Question);
+        MessageBoxImage.Question,
+        titleFontSize: 24);
 
       var result = Dispatcher.CheckAccess()
         ? ShowDialog()

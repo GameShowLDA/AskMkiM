@@ -3,11 +3,10 @@ using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Devices;
 using Ask.Core.Services.UI;
 using Ask.Core.Services.Errors.Models;
-using Ask.Core.Services.EventCore.Events;
-using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.DTO.Executor;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Exceptions;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSupply;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.ExecutionEnums;
@@ -43,7 +42,6 @@ namespace Ask.UI.Features.ProtocolNew.Execution
       _systemResetService = new ExecutionSystemResetService();
       var protocolCompletionService = new ProtocolCompletionService(new InspectionProtocolBuilder());
       _finalizer = new ExecutionFinalizer(_systemResetService, protocolCompletionService);
-      EventAggregator.Subscribe<ExecutionEvents.StepByStepModeChanged>(e => StepMode = e.IsEnabled);
     }
 
     /// <summary>
@@ -191,7 +189,10 @@ namespace Ask.UI.Features.ProtocolNew.Execution
     /// Запуск самоконтроля/режима.
     /// </summary>
     /// <returns>Задача, представляющая асинхронную операцию запуска процесса.</returns>
-    internal async Task StartAsync(ActionSettings actionSettings)
+    internal async Task StartAsync(
+      ActionSettings actionSettings,
+      bool startStepByStep = false,
+      bool isStepInto = true)
     {
       if (IsActive)
       {
@@ -201,7 +202,7 @@ namespace Ask.UI.Features.ProtocolNew.Execution
       if (!_runGuard.TryAcquire(actionSettings.Name, this, out var activeProcessName))
       {
         LogWarning($"Попытка запустить \"{actionSettings.Name}\", пока выполняется \"{activeProcessName}\".");
-        await ProtocolSelfCheck.ShowMessageAsync(new ShowMessageModel($"Уже выполняется \"{activeProcessName}\". Дождитесь завершения текущей задачи.", type: MessageType.Error), skipPause: true);
+        await ProtocolSelfCheck.ShowMessageAsync(new ShowMessageModel($"Уже выполняется \"{activeProcessName}\". Дождитесь завершения текущей задачи.", type: MessageType.Error), skipPause: true, SkipStepModeCheck: true);
         return;
       }
 
@@ -221,18 +222,14 @@ namespace Ask.UI.Features.ProtocolNew.Execution
       {
         _actionSettings = actionSettings;
         ClearErrors();
+        ProtocolSelfCheck.ShowOnlyStopAndFinishButtons();
         ProtocolSelfCheck.HideProtocolManager();
         ProtocolSelfCheck.ClearInspectionProtocol();
 
         // Новый запуск не должен наследовать "залипшее" состояние
         // брейкпоинта/пошагового режима от предыдущего выполнения.
-        StepControlManager.Reset();
-        if (StepControlManager.StepMode)
-        {
-          StepControlManager.DisableStepMode();
-        }
         StepMode = false;
-
+        StepControlManager.Reset();
         await ProtocolSelfCheck.ClearAllMessagesAsync();
         ProtocolSelfCheck.StartLogCapture();
         if (actionSettings.PreActionDelegate != null)
@@ -249,14 +246,14 @@ namespace Ask.UI.Features.ProtocolNew.Execution
           return;
         }
 
+        StepControlManager.DisableStepMode();
+        if (startStepByStep)
+        {
+          StepControlManager.EnableStepMode(isStepInto);
+        }
+
         ProtocolSelfCheck.ShowOnlyStopAndFinishButtons();
         StartProcessing?.Invoke(true);
-
-        if (ExecutionConfig.GetIsStepByStepModeEnabled())
-        {
-          StepControlManager.EnableStepMode(true);
-          StepMode = true;
-        }
 
         PrepareForStartAsync(actionSettings.Name);
 
@@ -278,7 +275,12 @@ namespace Ask.UI.Features.ProtocolNew.Execution
       {
         _executionFinished?.TrySetResult();
         LogException($"Ошибка при запуске \"{actionSettings.Name}\"", ex);
-        await ProtocolSelfCheck.ShowMessageAsync(new ShowMessageModel("Системная ошибка запуска. Проверьте журнал и повторите попытку.", type: MessageType.Error), skipPause: true, SkipStepModeCheck: true);
+        var message = ex is Ask.Core.Services.Errors.Device.DeviceNoResponseException noResponse
+          ? noResponse.ToMessage()
+          : new ShowMessageModel("Системная ошибка запуска. Проверьте журнал и повторите попытку.", type: MessageType.Error);
+        if (ex is Ask.Core.Services.Errors.Device.DeviceNoResponseException)
+          _completionStatus = ExecutionCompletionStatus.Interrupted;
+        await ProtocolSelfCheck.ShowMessageAsync(message, skipPause: true, SkipStepModeCheck: true);
         try
         {
           await FinalizeAsync(actionSettings);
@@ -353,15 +355,19 @@ namespace Ask.UI.Features.ProtocolNew.Execution
         () => CancelProcessTaskAsync(actionSettings.StopDelegate, actionSettings.Name),
         () => ResetUsedEquipmentAsync(
           equipmentUsage,
-          ShouldShowTestCompletionHeader(actionSettings.CheckType)),
+          actionSettings.CheckType),
         ResetState,
         value => StartProcessing?.Invoke(value));
       }
       finally
       {
-        _executionFinished = null;
-        _runGuard.Release(this);
-        finalizationFinished?.TrySetResult();
+        ProtocolSelfCheck.Dispatcher.Invoke(() =>
+        {
+          _executionFinished = null;
+          _runGuard.Release(this);
+          finalizationFinished?.TrySetResult();
+          ProtocolSelfCheck.ShowOnlyStartButton();
+        });
       }
     }
 
@@ -380,17 +386,21 @@ namespace Ask.UI.Features.ProtocolNew.Execution
     /// Сбрасывает оборудование, использованное текущим запуском.
     /// </summary>
     /// <param name="equipmentUsage">Сеанс учёта использованного оборудования.</param>
-    /// <param name="showTestCompletionHeader">Признак вывода заголовка завершения теста.</param>
+    /// <param name="checkType">Тип завершённой проверки.</param>
     private async Task ResetUsedEquipmentAsync(
       EquipmentUsageSession? equipmentUsage,
-      bool showTestCompletionHeader)
+      CheckType checkType)
     {
-      var devices = equipmentUsage?.GetUsedDevices() ?? [];
+      var usedDevices = equipmentUsage?.GetUsedDevices() ?? [];
+      // Самоконтроль источника отключает выход сам. Команда *RST может изменить уставку тока.
+      var devices = checkType == CheckType.SelfTest
+        ? usedDevices.Where(device => device is not IPowerSupply)
+        : usedDevices;
       await DeviceResetService.ResetDevicesAsync(
         devices,
         ProtocolSelfCheck,
         CancellationToken.None,
-        showTestCompletionHeader);
+        ShouldShowTestCompletionHeader(checkType));
     }
 
     /// <summary>
@@ -446,6 +456,22 @@ namespace Ask.UI.Features.ProtocolNew.Execution
 
       Interlocked.Exchange(ref _commandJumpRequested, 1);
       _pauseController.InterruptWait();
+    }
+
+    /// <summary>
+    /// Запрашивает прерывание команды в ближайшей контрольной точке и снимает паузу.
+    /// </summary>
+    internal void InterruptCurrentCommand()
+    {
+      if (!IsActive || IsStopping)
+      {
+        return;
+      }
+
+      Interlocked.Exchange(ref _commandJumpRequested, 1);
+      StepControlManager.DisableStepMode();
+      _pauseController.Resume();
+      KeyboardManager.TriggerStep();
     }
 
     /// <summary>
@@ -739,7 +765,8 @@ namespace Ask.UI.Features.ProtocolNew.Execution
     /// Добавляет текст ошибки в результаты текущего запуска.
     /// </summary>
     /// <param name="error">Текст ошибки без итогового маркера качества.</param>
-    internal void AddError(string error)
+    /// <param name="status">Тип записи, сформировавшей ошибку.</param>
+    internal void AddError(string error, MessageType? status = null)
     {
       if (string.IsNullOrWhiteSpace(error))
       {
@@ -749,7 +776,11 @@ namespace Ask.UI.Features.ProtocolNew.Execution
       lock (_errorSync)
       {
         _actionSettings?.ExecutionErrors.Add(error);
-        _actionSettings?.DeviceResults.LastOrDefault()?.Tests.LastOrDefault()?.Errors.Add(new TestError { Message = error });
+        _actionSettings?.DeviceResults.LastOrDefault()?.Tests.LastOrDefault()?.Errors.Add(new TestError
+        {
+          Message = error,
+          IsNoResponse = status == MessageType.NoResponse
+        });
       }
     }
 
@@ -809,6 +840,11 @@ namespace Ask.UI.Features.ProtocolNew.Execution
         {
           _completionStatus = ExecutionCompletionStatus.Interrupted;
           // Отмена ожидаема при остановке выполнения.
+        }
+        catch (Ask.Core.Services.Errors.Device.DeviceNoResponseException ex)
+        {
+          _completionStatus = ExecutionCompletionStatus.Interrupted;
+          await ProtocolSelfCheck.ShowMessageAsync(ex.ToMessage(), SkipStepModeCheck: true, skipPause: true);
         }
         catch (InputValidationException)
         {
@@ -949,7 +985,7 @@ namespace Ask.UI.Features.ProtocolNew.Execution
       actionExecutor.ProtocolSelfCheck = parentClass;
       actionExecutor.ShouldShowPauseMessage = true;
       actionExecutor.ShouldShowResumeMessage = false;
-      actionExecutor.StepMode = ExecutionConfig.GetIsStepByStepModeEnabled();
+      actionExecutor.StepMode = false;
       actionExecutor._pauseController.Reset();
       return actionExecutor;
     }

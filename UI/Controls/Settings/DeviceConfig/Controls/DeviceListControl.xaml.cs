@@ -1,4 +1,5 @@
-﻿using Ask.Core.Shared.DTO.Devices.Base;
+using Ask.Core.Shared.DTO.Devices.PowerSupply;
+using Ask.Core.Shared.DTO.Devices.Base;
 using Ask.Core.Shared.DTO.Devices.Breakdown;
 using Ask.Core.Shared.DTO.Devices.ChassisManager;
 using Ask.Core.Shared.DTO.Devices.FastMeter;
@@ -161,6 +162,10 @@ namespace UI.Controls.Settings.DeviceConfig.Controls
     {
       switch (device)
       {
+        case PowerSupplyDto:
+          await PowerSupplies.DeleteAsync(PowerSupplies.Build(device));
+          break;
+
         case SwitchingDeviceDto:
           var switchingDevice = SwitchingDevices.Build(device);
           await SwitchingDevices.DeleteAsync(switchingDevice);

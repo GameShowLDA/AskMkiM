@@ -1,7 +1,9 @@
 using System.Globalization;
 using System.Runtime.InteropServices;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Threading;
 
 namespace UI.Components
 {
@@ -10,16 +12,20 @@ namespace UI.Components
   /// </summary>
   public partial class KeyboardLayoutComponent : UserControl
   {
+    private readonly DispatcherTimer _keyboardStateTimer;
+
     public KeyboardLayoutComponent()
     {
       InitializeComponent();
       UpdateLayoutDisplay();
 
-      InputLanguageManager.Current.InputLanguageChanged += (s, e) =>
+      _keyboardStateTimer = new DispatcherTimer
       {
-        UpdateLayoutDisplay();
+        Interval = TimeSpan.FromMilliseconds(250),
       };
-      this.MouseLeftButtonUp += (s, e) => SwitchToNextInputLanguage();
+      _keyboardStateTimer.Tick += (_, _) => UpdateCapsLockIndicator();
+      Loaded += KeyboardLayoutComponent_Loaded;
+      Unloaded += KeyboardLayoutComponent_Unloaded;
     }
 
     public new System.Windows.Media.Brush Foreground
@@ -32,6 +38,37 @@ namespace UI.Components
       {
         LayoutText.Foreground = value;
       }
+    }
+
+    private void KeyboardLayoutComponent_Loaded(object sender, RoutedEventArgs e)
+    {
+      UpdateLayoutDisplay();
+      UpdateCapsLockIndicator();
+      InputLanguageManager.Current.InputLanguageChanged += InputLanguageChanged;
+      _keyboardStateTimer.Start();
+    }
+
+    private void KeyboardLayoutComponent_Unloaded(object sender, RoutedEventArgs e)
+    {
+      _keyboardStateTimer.Stop();
+      InputLanguageManager.Current.InputLanguageChanged -= InputLanguageChanged;
+    }
+
+    private void InputLanguageChanged(object sender, InputLanguageEventArgs e)
+    {
+      UpdateLayoutDisplay();
+    }
+
+    private void UpdateCapsLockIndicator()
+    {
+      CapsLockBadge.Visibility = Keyboard.IsKeyToggled(Key.CapsLock)
+        ? Visibility.Visible
+        : Visibility.Collapsed;
+    }
+
+    private void LayoutButton_Click(object sender, System.Windows.RoutedEventArgs e)
+    {
+      SwitchToNextInputLanguage();
     }
 
     private void UpdateLayoutDisplay()

@@ -27,6 +27,21 @@ public class UserInterfaceDto
   /// </summary>
   public ThemeMode Theme { get; set; }
 
+  /// <summary>Время до автоматической блокировки в минутах; 0 отключает блокировку.</summary>
+  public int AutoLockMinutes { get; set; }
+
+  /// <summary>Время автоблокировки администратора; null задаёт значение по умолчанию 5 минут.</summary>
+  public int? AdministratorAutoLockMinutes { get; set; }
+
+  /// <summary>Время автоблокировки разработчика ПК; null задаёт значение по умолчанию 5 минут.</summary>
+  public int? DeveloperAutoLockMinutes { get; set; }
+
+  /// <summary>Время автоблокировки регулировщика; null отключает блокировку.</summary>
+  public int? AdjusterAutoLockMinutes { get; set; }
+
+  /// <summary>Время автоблокировки Root; null отключает блокировку.</summary>
+  public int? RootAutoLockMinutes { get; set; }
+
   /// <summary>
   /// Включает подсветку синтаксиса в редакторе.
   /// </summary>

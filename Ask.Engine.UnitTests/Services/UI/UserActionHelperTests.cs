@@ -1,17 +1,34 @@
-using Ask.Core.Services.Errors.Device.ModuleRelayControl;
 using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Errors.Device;
+using Ask.Core.Services.Errors.Device.ModuleRelayControl;
 using Ask.Core.Services.UI;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Ask.Engine.UnitTests.TestInfrastructure;
 using Moq;
+using System.Net.Sockets;
 
 namespace Ask.Engine.UnitTests.Services.UI;
 
 [Collection("ExecutionConfigCollection")]
 public sealed class UserActionHelperTests
 {
+  [Fact]
+  public async Task CommandInterruptionPropagatesWithoutHardwareErrorHandling()
+  {
+    var interruption = new Ask.Core.Shared.Exceptions.CommandJumpRequestedException();
+    var interaction = new Mock<IUserInteractionService>(MockBehavior.Strict);
+    interaction.Setup(x => x.GetCancellationToken()).Returns(CancellationToken.None);
+    interaction.Setup(x => x.GetLastLineNumber()).Returns(0);
+
+    var thrown = await Assert.ThrowsAsync<Ask.Core.Shared.Exceptions.CommandJumpRequestedException>(
+      () => UserActionHelper.RunWithUserRepeatAsync(
+        () => Task.FromException<bool>(interruption), interaction.Object, deviceTask: true));
+
+    Assert.Same(interruption, thrown);
+  }
+
   [Fact]
   public async Task EnabledMeasurementRepeatRetriesMeasurementInsideControlCommand()
   {
@@ -35,12 +52,24 @@ public sealed class UserActionHelperTests
           () =>
           {
             calls++;
+            if (calls == 1)
+            {
+              ExecutionConfig.SetRepeatMeasurement(false);
+            }
+
             return Task.FromResult(results.Dequeue());
           },
           interaction.Object,
           measurementTask: true);
 
         Assert.True(result);
+
+        bool nextMeasurementResult = await UserActionHelper.GetRunWithUserRepeatAsync(
+          () => Task.FromResult(false),
+          interaction.Object,
+          measurementTask: true);
+
+        Assert.False(nextMeasurementResult);
       }
 
       Assert.Equal(2, calls);
@@ -443,6 +472,139 @@ public sealed class UserActionHelperTests
     Assert.Equal(ShowMessageModel.MessageType.Error, message.Status);
     Assert.Equal("МКР 1.6: Подключение точки", message.Header);
     Assert.Equal("Системная ошибка. Неизвестная команда программы.", message.Message);
+  }
+
+  [Fact]
+  public async Task DeviceTransportErrorIsAlwaysWrittenToProtocol()
+  {
+    await WpfTestHost.RunAsync(() => Task.CompletedTask);
+    var messages = new List<ShowMessageModel>();
+    var interaction = CreateInteractionService(requests: null, UserAction.None);
+    interaction
+      .Setup(service => service.ShowMessageAsync(
+        It.IsAny<ShowMessageModel>(),
+        It.IsAny<bool>(),
+        It.IsAny<bool>(),
+        It.IsAny<bool>(),
+        It.IsAny<bool>(),
+        It.IsAny<string>(),
+        It.IsAny<string>(),
+        It.IsAny<int>()))
+      .Callback<ShowMessageModel, bool, bool, bool, bool, string, string, int>(
+        (message, _, _, _, _, _, _, _) => messages.Add(message))
+      .Returns(Task.CompletedTask);
+
+    await Assert.ThrowsAsync<DeviceTransportException>(
+      () => UserActionHelper.GetRunWithUserRepeatAsync(
+        () => Task.FromException<bool>(
+          new DeviceTransportException(
+            "[МКР 1.9] Ошибка UDP-транспорта: Недостаточно места в буфере.",
+            new SocketException(10055))),
+        interaction.Object,
+        deviceTask: true));
+
+    ShowMessageModel message = Assert.Single(messages);
+    Assert.Equal(ShowMessageModel.MessageType.Error, message.Status);
+    Assert.Contains("Ошибка UDP-транспорта", message.Message);
+  }
+
+  [Fact]
+  public async Task TimeoutErrorIsWrittenToProtocolBeforeUserAction()
+  {
+    await WpfTestHost.RunAsync(() => Task.CompletedTask);
+    var events = new List<string>();
+    var interaction = CreateInteractionService(requests: null, UserAction.None);
+    interaction
+      .Setup(service => service.ShowMessageAsync(
+        It.IsAny<ShowMessageModel>(),
+        It.IsAny<bool>(),
+        It.IsAny<bool>(),
+        It.IsAny<bool>(),
+        It.IsAny<bool>(),
+        It.IsAny<string>(),
+        It.IsAny<string>(),
+        It.IsAny<int>()))
+      .Callback<ShowMessageModel, bool, bool, bool, bool, string, string, int>(
+        (message, _, _, _, _, _, _, _) => events.Add($"message:{message.Message}"))
+      .Returns(Task.CompletedTask);
+    interaction
+      .Setup(service => service.WaitUserActionAsync(
+        It.IsAny<bool>(),
+        It.IsAny<bool>(),
+        It.IsAny<bool>()))
+      .Callback(() => events.Add("interaction"))
+      .ReturnsAsync(UserAction.None);
+
+    var error = await Assert.ThrowsAsync<TimeoutException>(
+      () => UserActionHelper.GetRunWithUserRepeatAsync(
+        () => Task.FromException<bool>(new TimeoutException("Прибор не ответил за 5 с.")),
+        interaction.Object,
+        deviceTask: true));
+
+    Assert.Equal("Прибор не ответил за 5 с.", error.Message);
+    Assert.Equal(new[] { "message:Прибор не ответил за 5 с.", "interaction" }, events);
+  }
+
+  [Fact]
+  public async Task NoResponseInsideControlCommand_RequestsRetryWithoutContinueAndPreservesMessageKind()
+  {
+    await WpfTestHost.RunAsync(() => Task.CompletedTask);
+    var requests = new List<(bool Force, bool Hardware, bool CanContinue)>();
+    var interaction = CreateInteractionService(requests, UserAction.Retry);
+    var messages = new List<ShowMessageModel>();
+    interaction.Setup(service => service.ShowMessageAsync(It.IsAny<ShowMessageModel>(),
+      It.IsAny<bool>(), It.IsAny<bool>(), It.IsAny<bool>(), It.IsAny<bool>(),
+      It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>()))
+      .Callback<ShowMessageModel, bool, bool, bool, bool, string, string, int>(
+        (message, _, _, _, _, _, _, _) => messages.Add(message))
+      .Returns(Task.CompletedTask);
+    var device = new Mock<Ask.Core.Shared.Interfaces.DeviceInterfaces.IDevice>();
+    device.SetupGet(d => d.Name).Returns("МКР");
+    int attempts = 0;
+
+    using (ControlProgramCommandExecutionContext.Enter())
+    {
+      bool result = await UserActionHelper.GetRunWithUserRepeatAsync(() => ++attempts == 1
+        ? Task.FromException<bool>(new DeviceNoResponseException(device.Object, "6.1.0.0.", 1000))
+        : Task.FromResult(true), interaction.Object, deviceTask: true);
+      Assert.True(result);
+    }
+
+    Assert.Equal(2, attempts);
+    var request = Assert.Single(requests);
+    Assert.True(request.Hardware);
+    Assert.False(request.CanContinue);
+    var message = Assert.Single(messages);
+    Assert.Equal(ShowMessageModel.MessageType.NoResponse, message.Status);
+    Assert.Contains("МКР", message.Header);
+    Assert.Equal("Обмен с устройством", message.Message);
+    Assert.DoesNotContain("1000", message.ToString());
+    Assert.Equal("[СБОЙ ОБМЕНА]", message.GetQualityPrefix());
+  }
+
+  [Theory]
+  [InlineData(false)]
+  [InlineData(true)]
+  public async Task MeasurementExecutors_DoNotConvertMissingReplyToFailedMeasurement(bool applicationLayer)
+  {
+    var device = new Mock<Ask.Core.Shared.Interfaces.DeviceInterfaces.IAttachableDevice>();
+    device.SetupGet(d => d.Name).Returns("Измеритель");
+    int attempts = 0;
+    Func<Task<int>> operation = () =>
+    {
+      attempts++;
+      throw new DeviceNoResponseException(device.Object, "READ?", 1000);
+    };
+
+    if (applicationLayer)
+      await Assert.ThrowsAsync<DeviceNoResponseException>(() =>
+        Ask.Device.Application.Execution.AdapterMeasurementExecutor.ExecuteAsync(device.Object, "Измерение", operation));
+    else
+      await Assert.ThrowsAsync<DeviceNoResponseException>(() =>
+        Ask.Device.Runtime.Function.Base.Multimeter.Measurements.Common.AdapterMeasurementExecutor.ExecuteAsync(
+          device.Object, "Измерение", operation));
+
+    Assert.Equal(2, attempts);
   }
 
   private static Mock<IUserInteractionService> CreateInteractionService(

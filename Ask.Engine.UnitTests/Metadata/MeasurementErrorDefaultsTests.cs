@@ -39,16 +39,9 @@ public class MeasurementErrorDefaultsTests
       range =>
       {
         Assert.Equal(0.1, range.MinValue);
-        Assert.Equal(1, range.MaxValue);
-        Assert.Equal(0.05, range.NumericError);
-        Assert.Equal(0, range.PercentageError);
-      },
-      range =>
-      {
-        Assert.Equal(1, range.MinValue);
         Assert.Equal(100, range.MaxValue);
-        Assert.Equal(0, range.NumericError);
-        Assert.Equal(5, range.PercentageError);
+        Assert.Equal(0.05, range.NumericError);
+        Assert.Equal(1, range.PercentageError);
       });
   }
 
@@ -61,8 +54,11 @@ public class MeasurementErrorDefaultsTests
   /// <param name="expectedUpperBound">Ожидаемая верхняя граница допуска.</param>
   /// <param name="expectedDelta">Ожидаемая абсолютная погрешность.</param>
   [Theory(DisplayName = "ЭТ: диапазон допуска рассчитывается по погрешностям из инструкции")]
-  [InlineData(0.5, 0.45, 0.55, 0.05)]
-  [InlineData(10, 9.5, 10.5, 0.5)]
+  [InlineData(0.1, 0.049, 0.151, 0.051)]
+  [InlineData(0.5, 0.445, 0.555, 0.055)]
+  [InlineData(1, 0.94, 1.06, 0.06)]
+  [InlineData(10, 9.85, 10.15, 0.15)]
+  [InlineData(100, 98.95, 101.05, 1.05)]
   public void CalculateToleranceRange_ForEht_UsesInstructionErrors(
     double measuredValue,
     double expectedLowerBound,

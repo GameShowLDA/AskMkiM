@@ -1,0 +1,10 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <FontFamily x:Key="Manrope">pack://application:,,,/Ask.UI;component/Resources/Assets/Fonts/Manrope/#Manrope</FontFamily>
+    <FontFamily x:Key="WinstonBold">pack://application:,,,/Ask.UI;component/Resources/Assets/Fonts/#Winston Bold</FontFamily>
+    <FontFamily x:Key="WinstonLight">pack://application:,,,/Ask.UI;component/Resources/Assets/Fonts/#Winston Light</FontFamily>
+    <FontFamily x:Key="WinstonMedium">pack://application:,,,/Ask.UI;component/Resources/Assets/Fonts/#Winston Medium</FontFamily>
+    <FontFamily x:Key="WinstonRegular">pack://application:,,,/Ask.UI;component/Resources/Assets/Fonts/#Winston Regular</FontFamily>
+
+</ResourceDictionary>

@@ -1,0 +1,23 @@
+<UserControl x:Class="Ask.UI.Features.ReleaseNotes.Views.ReleaseNotesPrompt"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Visibility="Collapsed">
+    <Button x:Name="OpenButton" Click="OpenButton_Click" Padding="20,10" MinHeight="44" Margin="0"
+            Style="{DynamicResource WindowActionButtonStyle}" Focusable="True"
+            FontFamily="{DynamicResource Manrope}" FontSize="15"
+            ToolTip="Открыть историю изменений в справке">
+        <Button.FocusVisualStyle>
+            <Style TargetType="Control">
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate>
+                            <Border CornerRadius="10" BorderThickness="1" Margin="-3"
+                                    BorderBrush="{DynamicResource ForegrounfBrushes85}"/>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+        </Button.FocusVisualStyle>
+        <TextBlock x:Name="Caption" TextWrapping="Wrap" TextAlignment="Center"/>
+    </Button>
+</UserControl>

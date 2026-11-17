@@ -84,7 +84,7 @@
             <!-- MANU_DCW_VOLTAGE -->
             <TextBlock Grid.Row="0" Text="Напряжение DCW (100 - 1000 В):" TextAlignment="Left" VerticalAlignment="Center" Margin="10" />
             <shared:NumericComboBox x:Name="VoltageSlider" Grid.Row="0" Grid.Column="1"
-                                    Minimum="100" Maximum="1000" Increment="100" Unit="В"/>
+                                    Unit="В"/>
 
             <!-- MANU_DCW_CHISET -->
             <TextBlock Grid.Row="1" Text="Высокий предел тока DCW (1 - 20 мА):" TextAlignment="Left" VerticalAlignment="Center" Margin="10" />

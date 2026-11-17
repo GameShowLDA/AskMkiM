@@ -123,7 +123,7 @@ namespace Ask.Device.Runtime.Device
       SelfTestManager = new SelfTestManager();
       DeviceProtocol = new HardwareWatchdogProtocol(
         new TcpProtocol(this, ConnectedProfile.Port),
-        Name);
+        Name, device: this);
 
       ResistanceCommands = new ResistanceMeasurementProfile()
       {

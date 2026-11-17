@@ -29,9 +29,9 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
         await ConnectPointsAsync(item, command.BusPointsDictionary[item], context.Console);
       }
 
-      if (command.Time > 0)
+      if (command.Time is > 0)
       {
-        await DelayAsync(command.Time, context.Console);
+        await DelayAsync(command.Time.Value, context.Console);
 
         foreach (var item in command.BusPointsDictionary.Keys)
         {
@@ -86,11 +86,10 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
           "Проверьте выполнение РМ и валидацию точек.");
     }
 
-    private async Task DelayAsync(double? time, IUserInteractionService interactionService)
+    private async Task DelayAsync(double time, IUserInteractionService interactionService)
     {
       await ExecutionMessages.PublishDelayBeforeDisablingAsync(time, interactionService);
-      var delay = Convert.ToInt32(time * 1000);
-      await interactionService.DelayWithPauseAsync(TimeSpan.FromMilliseconds(delay));
+      await interactionService.DelayWithPauseAsync(TimeSpan.FromSeconds(time));
     }
   }
 }

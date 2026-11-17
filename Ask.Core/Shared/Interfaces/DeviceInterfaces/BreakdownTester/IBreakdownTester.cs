@@ -16,26 +16,6 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester
     BreakdownTypeMode Mode { get; set; }
 
     /// <summary>
-    /// Макссимально выдаваемое напряжение ПИ(ACW).
-    /// </summary>
-    int AcwMaxVoltage { get; set; }
-
-    /// <summary>
-    /// Макссимально выдаваемое напряжение ПИ(DCW).
-    /// </summary>
-    int DcwMaxVoltage { get; set; }
-
-    /// <summary>
-    /// Макссимально выдаваемое напряжение СИ.
-    /// </summary>
-    int IrMaxVoltage { get; set; }
-
-    /// <summary>
-    /// Минимально выдаваемое напряжение при измерении сопротивления.
-    /// </summary>
-    int IrMinVoltage { get; set; }
-
-    /// <summary>
     /// Максимально измеряемое сопротивление изоляции, МОм.
     /// </summary>
     int IrMaxResistanceMOhm { get; set; }

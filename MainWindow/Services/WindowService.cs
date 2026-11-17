@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using System.Windows;
+using Ask.Core.Shared.Metadata.View.EditorHost;
 
 namespace MainWindowProgram.Services
 {
@@ -14,16 +15,22 @@ namespace MainWindowProgram.Services
     /// Делегат, предоставляющий актуальное значение состояния блокировки приложения.
     /// </summary>
     private readonly Func<bool> _isLockedProvider;
+    private readonly IEditorDocumentService _editorDocumentService;
 
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="WindowService"/>.
     /// </summary>
     /// <param name="mainWindow">Главное окно.</param>
     /// <param name="isLockedProvider">Функция, возвращающая признак блокировки интерфейса.</param>
-    public WindowService(MainWindow mainWindow, Func<bool> isLockedProvider)
+    /// <param name="editorDocumentService">Сервис управления открытыми документами.</param>
+    public WindowService(
+      MainWindow mainWindow,
+      Func<bool> isLockedProvider,
+      IEditorDocumentService editorDocumentService)
     {
       _mainWindow = mainWindow;
       _isLockedProvider = isLockedProvider;
+      _editorDocumentService = editorDocumentService;
     }
 
     /// <summary>
@@ -33,7 +40,7 @@ namespace MainWindowProgram.Services
     {
       Application.Current.Dispatcher.Invoke(() =>
       {
-        Application.Current.Shutdown();
+        _mainWindow.Close();
       });
 
       return Task.CompletedTask;
@@ -90,7 +97,7 @@ namespace MainWindowProgram.Services
     /// Обрабатывает событие закрытия окна.
     /// </summary>
     /// <param name="e">Аргументы события Closing.</param>
-    public async Task HandleWindowClosingAsync(CancelEventArgs e)
+    public Task HandleWindowClosingAsync(CancelEventArgs e)
     {
       if (_isLockedProvider())
       {
@@ -102,10 +109,12 @@ namespace MainWindowProgram.Services
             MessageBoxImage.Warning);
 
       }
-      else
+      else if (!_editorDocumentService.ConfirmCloseAll())
       {
-        Application.Current.Shutdown();
+        e.Cancel = true;
       }
+
+      return Task.CompletedTask;
     }
   }
 }

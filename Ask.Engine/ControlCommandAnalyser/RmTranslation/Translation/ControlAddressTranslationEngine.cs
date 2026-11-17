@@ -51,12 +51,30 @@ public sealed class ControlAddressTranslationEngine
     var diagnostics = new List<RmDiagnostic>(existingDiagnostics);
     var entries = new List<AddressMapping>();
     var failedAddresses = new List<MachineAddress>();
+    TextSpan failedAddressSpan = default;
 
     foreach (var mapping in ast.Mappings)
     {
       var binding = BindExpressions(mapping);
       var objectResult = expansionService.ExpandObjectExpression(binding.ObjectExpression);
-      var machineResult = expansionService.ExpandMachineExpression(mapping.Machine);
+      var machineExpression = mapping.Machine;
+      var connectorRange = System.Text.RegularExpressions.Regex.Match(
+        binding.ObjectExpression.Text, @"^(?<prefix>[\p{L}]+)1-\k<prefix>(?<count>\d+)/(?<contact>\d+)$");
+      var blockRange = System.Text.RegularExpressions.Regex.Match(
+        mapping.Machine.Text, @"^(?<rack>\d+)\.(?<count>\d+)\.(?<contact>\d+)-\k<count>$");
+      if (connectorRange.Success && blockRange.Success
+        && connectorRange.Groups["count"].Value == blockRange.Groups["count"].Value
+        && connectorRange.Groups["contact"].Value == blockRange.Groups["contact"].Value)
+      {
+        var rack = blockRange.Groups["rack"].Value;
+        var contact = blockRange.Groups["contact"].Value;
+        machineExpression = mapping.Machine with
+        {
+          Text = string.Join(",", Enumerable.Range(1, int.Parse(blockRange.Groups["count"].Value))
+            .Select(block => $"{rack}.{block}.{contact}"))
+        };
+      }
+      var machineResult = expansionService.ExpandMachineExpression(machineExpression);
       diagnostics.AddRange(objectResult.Diagnostics);
       diagnostics.AddRange(machineResult.Diagnostics);
 
@@ -79,7 +97,7 @@ public sealed class ControlAddressTranslationEngine
         diagnostics.Add(RmDiagnostic.Error(
           RmDiagnosticCode.RangeLengthMismatch,
           $"Диапазоны имеют разную длину: ОК={objectAddresses.Count}, машинные адреса={machineAddresses.Count}.",
-          mapping.Span));
+          binding.ObjectExpression.Span));
         continue;
       }
 
@@ -88,7 +106,7 @@ public sealed class ControlAddressTranslationEngine
         diagnostics.Add(RmDiagnostic.Error(
           RmDiagnosticCode.RangeLengthMismatch,
           $"Диапазоны имеют разную длину: синонимы={synonyms.Count}, ОК={objectAddresses.Count}.",
-          mapping.Span));
+          binding.SynonymExpression!.Span));
         continue;
       }
 
@@ -98,11 +116,13 @@ public sealed class ControlAddressTranslationEngine
 
         if (!mappedMachineAddress.IsSuccess || mappedMachineAddress.Address is null)
         {
+          if (failedAddresses.Count == 0)
+            failedAddressSpan = mapping.Machine.Span;
           failedAddresses.Add(machineAddresses[i]);
           continue;
         }
 
-        AddAddressRangeDiagnostic(failedAddresses, diagnostics, mapping.Span);
+        AddAddressRangeDiagnostic(failedAddresses, diagnostics, failedAddressSpan);
 
         entries.Add(new AddressMapping(
           objectAddresses[i],
@@ -115,7 +135,7 @@ public sealed class ControlAddressTranslationEngine
       }
     }
 
-    AddAddressRangeDiagnostic(failedAddresses, diagnostics, ast.Mappings.LastOrDefault()?.Span ?? default);
+    AddAddressRangeDiagnostic(failedAddresses, diagnostics, failedAddressSpan);
 
     diagnostics.AddRange(validator.Validate(entries));
     return new TranslationResult(entries, diagnostics);
@@ -148,8 +168,10 @@ public sealed class ControlAddressTranslationEngine
     var first = failedAddresses[0];
     var last = failedAddresses[^1];
     var message = failedAddresses.Count == 1
-      ? $"Адрес {first} не задан в конфигурации. Проверьте RelaySwitchModules и PointCount."
-      : $"Адреса с {first} по {last} не заданы в конфигурации. Проверьте RelaySwitchModules и PointCount.";
+      ? $"Адрес {first} не задан в конфигурации модулей релейного коммутатора. " +
+        "Проверьте номер модуля и количество его точек."
+      : $"Адреса с {first} по {last} не заданы в конфигурации модулей релейного коммутатора. " +
+        "Проверьте номера модулей и количество их точек.";
 
     diagnostics.Add(RmDiagnostic.Error(
       RmDiagnosticCode.MachineAddressNotConfigured,

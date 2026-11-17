@@ -1,4 +1,5 @@
 using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Errors.Device;
 using Ask.Core.Services.Errors.Device.ModuleRelayControl;
 using Ask.Core.Shared.DTO.Protocol;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
@@ -161,6 +162,7 @@ namespace Ask.Core.Services.UI
       ArgumentNullException.ThrowIfNull(isSuccessful);
 
       bool interactiveMode = loop;
+      bool repeatMeasurement = measurementTask && ExecutionConfig.GetIsRepeatMeasurementEnabled();
       int attempt = 0;
 
       while (true)
@@ -193,10 +195,20 @@ namespace Ask.Core.Services.UI
         {
           throw;
         }
+        catch (Ask.Core.Shared.Exceptions.CommandJumpRequestedException)
+        {
+          throw;
+        }
         catch (Exception ex)
         {
           hardwareException = ex;
           LogException($"Аппаратная операция завершилась ошибкой на попытке {attempt}.", ex, isDeviceLog: true);
+        }
+
+        if (hardwareException is DeviceNoResponseException noResponse && messageService != null)
+        {
+          await messageService.ShowMessageAsync(noResponse.ToMessage(),
+            SkipStepModeCheck: true, skipPause: true);
         }
 
         if (EquipmentExecutionContext.IsMandatoryFinalization)
@@ -204,21 +216,18 @@ namespace Ask.Core.Services.UI
           return ResolveWithoutInteraction(result, hardwareException, exceptionFallback);
         }
 
-        bool repeatMeasurement = measurementTask
-          && ExecutionConfig.GetIsRepeatMeasurementEnabled();
-
-        if (ControlProgramCommandExecutionContext.IsActive && !repeatMeasurement)
+        if (ControlProgramCommandExecutionContext.IsActive && !repeatMeasurement
+          && hardwareException is not DeviceNoResponseException)
         {
           return ResolveWithoutInteraction(result, hardwareException, exceptionFallback);
         }
 
         bool hardwareSucceeded = hardwareException == null && (!deviceTask || operationSucceeded);
         bool attemptProducedOutput = messageService != null &&
-          messageService.GetLastLineNumber() != outputLineBeforeAttempt;
+          (hardwareException is DeviceNoResponseException ||
+           messageService.GetLastLineNumber() != outputLineBeforeAttempt);
 
-        if (hardwareException is ModuleRelayControlProtocolException &&
-            messageService != null &&
-            !attemptProducedOutput)
+        if (hardwareException != null && messageService != null && !attemptProducedOutput)
         {
           await ShowAttemptResultAsync(messageService, success: false, hardwareException);
           attemptProducedOutput = true;
@@ -246,7 +255,7 @@ namespace Ask.Core.Services.UI
 
         bool forceInteraction = interactiveMode;
         interactiveMode = true;
-        UserAction action = repeatMeasurement && !operationSucceeded
+        UserAction action = repeatMeasurement && !operationSucceeded && hardwareException is not DeviceNoResponseException
           ? await messageService.WaitRetryOrContinueAsync()
           : await messageService.WaitUserActionAsync(
             loop: loop || forceInteraction,

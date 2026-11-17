@@ -34,8 +34,8 @@ namespace Ask.Core.Services.EventCore.Adapters
     /// FileInteractionEventAdapter.RaiseOpenFileInEditorAgain("report.txt");
     /// </code>
     /// </example>
-    public static void RaiseOpenFileInEditorAgain(string filePath)
-      => EventAggregator.Publish(new FileInteractionEvents.OpenFileInEditorAgain(filePath));
+    public static void RaiseOpenFileInEditorAgain(string filePath, string? sourceArchiveName = null)
+      => EventAggregator.Publish(new FileInteractionEvents.OpenFileInEditorAgain(filePath, sourceArchiveName));
 
     /// <summary>
     /// Генерирует событие просмотра протокола испытаний в новом редакторе.

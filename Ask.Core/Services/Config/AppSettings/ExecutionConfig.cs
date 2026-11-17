@@ -13,6 +13,11 @@ namespace Ask.Core.Services.Config.AppSettings
   {
     static public Func<SettingsExecutionDto, Task>? SaveExecutionAsyncEvent;
 
+    /// <summary>
+    /// Возникает после сохранения общей модели настроек выполнения.
+    /// </summary>
+    public static event Action<SettingsExecutionDto>? ExecutionModelSaved;
+
     private static SettingsExecutionDto SettingsExecutionModel = new SettingsExecutionDto();
 
     /// <summary>
@@ -33,20 +38,22 @@ namespace Ask.Core.Services.Config.AppSettings
     }
 
     /// <summary>
-    /// Устанавливает режим по шагам.
-    /// </summary>
-    /// <param name="enable">true для включения, false для выключения.</param>
-    public static void SetStepByStepMode(bool enable)
-    {
-      SettingsExecutionModel.StepByStepMode = enable;
-      ExecutionEventAdapter.RaiseStepByStepModeChanged(enable);
-    }
-
-    /// <summary>
     /// Устанавливает флаг остановки выполнения при ошибке.
     /// </summary>
     /// <param name="enable">true для включения, false для выключения.</param>
     public static void SetStopOnError(bool enable) => SettingsExecutionModel.StopOnError = enable;
+
+    /// <summary>
+    /// Включает или выключает повтор измерения.
+    /// </summary>
+    /// <param name="enable">Признак включения повтора.</param>
+    public static void SetRepeatMeasurement(bool enable) => SettingsExecutionModel.RepeatMeasurement = enable;
+
+    /// <summary>
+    /// Возвращает текущую настройку остановки при ошибке.
+    /// </summary>
+    /// <returns><see langword="true"/>, если выполнение останавливается при ошибке.</returns>
+    public static bool GetStopOnErrorEnabled() => SettingsExecutionModel?.StopOnError ?? false;
     public static void SetLegacyCompatibilityMode(bool enable) => SettingsExecutionModel.LegacyCompatibilityMode = enable;
 
     /// <summary>
@@ -85,7 +92,7 @@ namespace Ask.Core.Services.Config.AppSettings
       SetIdleMode(protocolModel.IdleModeExecution);
       SetErroneousMeasurementType(protocolModel.ErroneousMeasurementType);
       SetIsHardwareErrorSimulationMode(protocolModel.IsHardwareErrorSimulationMode);
-      SetStepByStepMode(protocolModel.StepByStepMode);
+      SettingsExecutionModel.StepByStepMode = false;
       SetStopOnError(protocolModel.StopOnError);
       SettingsExecutionModel.RepeatMeasurement = protocolModel.RepeatMeasurement;
       SetLegacyCompatibilityMode(protocolModel.LegacyCompatibilityMode);
@@ -145,11 +152,6 @@ namespace Ask.Core.Services.Config.AppSettings
     public static bool GetIsHardwareErrorSimulationEnabled() =>
       SettingsExecutionModel?.IsHardwareErrorSimulationMode ?? false;
 
-    /// <summary>
-    /// Возвращает, включен ли пошаговый режим.
-    /// </summary>
-    /// <returns>true, если включен; false, если выключена.</returns>
-    public static bool GetIsStepByStepModeEnabled() => SettingsExecutionModel?.StepByStepMode ?? false;
     public static bool GetIsLegacyCompatibilityModeEnabled() => SettingsExecutionModel?.LegacyCompatibilityMode ?? false;
 
     /// <summary>
@@ -171,7 +173,7 @@ namespace Ask.Core.Services.Config.AppSettings
         IdleModeExecution = SettingsExecutionModel.IdleModeExecution,
         ErroneousMeasurementType = SettingsExecutionModel.ErroneousMeasurementType,
         IsHardwareErrorSimulationMode = SettingsExecutionModel.IsHardwareErrorSimulationMode,
-        StepByStepMode = SettingsExecutionModel.StepByStepMode,
+        StepByStepMode = false,
         StopOnError = SettingsExecutionModel.StopOnError,
         RepeatMeasurement = SettingsExecutionModel.RepeatMeasurement,
         LegacyCompatibilityMode = SettingsExecutionModel.LegacyCompatibilityMode,
@@ -186,13 +188,15 @@ namespace Ask.Core.Services.Config.AppSettings
       SetIdleMode(execution.IdleModeExecution);
       SetErroneousMeasurementType(execution.ErroneousMeasurementType);
       SetIsHardwareErrorSimulationMode(execution.IsHardwareErrorSimulationMode);
-      SetStepByStepMode(execution.StepByStepMode);
+      execution.StepByStepMode = false;
+      SettingsExecutionModel.StepByStepMode = false;
       SetStopOnError(execution.StopOnError);
       SettingsExecutionModel.RepeatMeasurement = execution.RepeatMeasurement;
       SetLegacyCompatibilityMode(execution.LegacyCompatibilityMode);
       SetDisablePowerCheck(execution.DisablePowerCheck);
 
       await InvokeSaveExecutionAsync(execution);
+      ExecutionModelSaved?.Invoke(GetExecutionModelSnapshot());
     }
 
     private static async Task InvokeSaveExecutionAsync(SettingsExecutionDto execution)

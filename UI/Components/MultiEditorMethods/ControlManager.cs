@@ -66,7 +66,8 @@ namespace UI.Components.MultiEditorMethods
         else if (control is RunControl)
         {
           editorType = SetEditorType(tabButton);
-          CloseControl(tabButton, control, editorType);
+          if (!CloseControl(tabButton, control, editorType))
+            return;
           var container = fileManager.EditorWorkspaceModel.OpenPages.FirstOrDefault(textEditorContainer
                     => textEditorContainer.Text == editorType.ToString()); // находим вкладку контейнера, содержащую нужный контрол
           var containerIndex = fileManager.EditorWorkspaceModel.OpenPages.IndexOf(container);
@@ -112,7 +113,7 @@ namespace UI.Components.MultiEditorMethods
       }
     }
 
-    private void CloseControl(OpenFileButton tabButton, UserControl control, EditorType editorType)
+    private bool CloseControl(OpenFileButton tabButton, UserControl control, EditorType editorType)
     {
       var container = fileManager.EditorWorkspaceModel.OpenPages.FirstOrDefault(textEditorContainer
                     => textEditorContainer.Text == editorType.ToString()); // находим вкладку контейнера, содержащую нужный контрол
@@ -122,9 +123,10 @@ namespace UI.Components.MultiEditorMethods
         var foundDockItem = foundContainer.DockManager.DockItems.FirstOrDefault(dockItem => dockItem.Content == control);
         if (foundDockItem != null)
         {
-          CloseDockItem(tabButton, foundContainer, foundDockItem);
+          return CloseDockItem(tabButton, foundContainer, foundDockItem);
         }
       }
+      return false;
     }
 
     private bool CloseContainer(OpenFileButton tabButton, UserControl control, ref int index, ref EditorType editorType, TextEditorContainer foundContainer)
@@ -162,27 +164,24 @@ namespace UI.Components.MultiEditorMethods
       {
         foreach (var item in foundContainer.DockManager.DockItems.ToList())
         {
-          if (!ShowSaveDialogForControl(item))
+          if (item.Content is RunControl)
           {
-            return false;
+            if (!item.Close())
+              return false;
+            continue;
           }
 
-          fileManager.EditorWorkspaceModel.FilePaths.Remove(item.Title);
-          EditorEventAdapter.RaiseTextEditorContainerClosing(true, item.Title);
+          if (!item.PerformClose())
+            return false;
         }
       }
 
       return true;
     }
 
-    private void CloseDockItem(OpenFileButton tabButton, TextEditorContainer foundContainer, DockItem foundDockItem)
+    private bool CloseDockItem(OpenFileButton tabButton, TextEditorContainer foundContainer, DockItem foundDockItem)
     {
-      if (!ShowSaveDialogForControl(foundDockItem))
-      {
-        return;
-      }
-
-      foundDockItem.PerformClose();
+      return foundDockItem.PerformClose();
     }
 
     private static EditorType SetEditorType(OpenFileButton tabButton)
@@ -218,17 +217,6 @@ namespace UI.Components.MultiEditorMethods
         content = leftEditor.Text;
         foundDockItemType = EditorType.Translator;
       }
-    }
-
-    /// <summary>
-    /// Отображает диалоговое окно для сохранения файла, если это требуется.
-    /// </summary>
-    /// <param name="control">Элемент управления для проверки.</param>
-    /// <returns>Возвращает <c>true</c>, если файл был сохранен, <c>false</c> в противном случае.</returns>
-    private bool ShowSaveDialogForControl(DockItem control)
-    {
-      var saveFileManager = new SaveFileManager(fileManager);
-      return saveFileManager.ConfirmClose(control);
     }
 
     /// <summary>

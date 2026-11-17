@@ -17,20 +17,19 @@ public class BreakdownTesterDto : AttachableDeviceDto
   public BreakdownTypeMode Mode { get; set; }
 
   /// <summary>
-  /// Максимально допустимое напряжение для режима ПИ.
+  /// Диапазон установки напряжения ACW.
   /// </summary>
-  public int AcwMaxVoltage { get; set; }
-  public int DcwMaxVoltage { get; set; }
+  public VoltageRange AcwVoltageRange { get; set; } = new();
 
   /// <summary>
-  /// Максимально допустимое напряжение для режима СИ.
+  /// Диапазон установки напряжения DCW.
   /// </summary>
-  public int SiMaxVoltage { get; set; }
+  public VoltageRange DcwVoltageRange { get; set; } = new();
 
   /// <summary>
-  /// Минимальное напряжение для измерения сопротивления изоляции.
+  /// Диапазон установки напряжения IR.
   /// </summary>
-  public int IRMinVoltage { get; set; }
+  public VoltageRange IrVoltageRange { get; set; } = new();
 
   /// <summary>
   /// Сопротивление изоляции системы, ГОм.

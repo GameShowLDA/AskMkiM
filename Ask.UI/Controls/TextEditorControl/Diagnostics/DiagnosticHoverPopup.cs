@@ -85,6 +85,7 @@ internal sealed class DiagnosticHoverPopup
 
   internal bool IsOpen => _popup.IsOpen;
   internal FrameworkElement Content => _border;
+  internal event Action? Closed;
 
   internal void Show(IReadOnlyList<SourceDiagnostic> diagnostics, Rect anchor)
   {
@@ -111,10 +112,12 @@ internal sealed class DiagnosticHoverPopup
 
   internal void Close()
   {
+    bool wasOpen = _popup.IsOpen;
     _closeTimer.Stop();
     _popup.IsOpen = false;
     _diagnostics = Array.Empty<SourceDiagnostic>();
     _messages.ItemsSource = null;
+    if (wasOpen) Closed?.Invoke();
   }
 
   private Brush GetBrush(string key, Brush fallback) => _owner.TryFindResource(key) as Brush ?? fallback;

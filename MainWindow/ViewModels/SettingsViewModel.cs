@@ -47,6 +47,10 @@ namespace MainWindowProgram.ViewModels
     [RelayCommand]
     private void HelpOpenAboutProgram() => _service.HelpOpenAboutProgram();
 
+    /// <summary>Открывает историю выпусков приложения.</summary>
+    [RelayCommand]
+    private void HelpOpenReleaseNotes() => _service.HelpOpenReleaseNotes();
+
     /// <summary>Открыть быстрое меню команд.</summary>
     [RelayCommand]
     private void HelpOpenFastMenu() => _service.HelpOpenFastMenuCommand();

@@ -21,7 +21,7 @@
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="/MainWindowProgram;component/Windows/ConversionDialogStyles.xaml" />
+                <ResourceDictionary Source="/AskMkiM;component/Windows/ConversionDialogStyles.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Window.Resources>

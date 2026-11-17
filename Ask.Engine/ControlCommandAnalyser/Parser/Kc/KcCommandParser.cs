@@ -73,7 +73,10 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Kc
 
       if (HasPointsBeforeResistance(remainder))
       {
-        model.Errors.Add(KsErrors.InvalidParameterOrder(numberLine, $"{commandNumber} {mnemonic}"));
+        model.Errors.Add(KsErrors.InvalidParameterOrder(
+          numberLine,
+          $"{commandNumber} {mnemonic}",
+          GetPointsFragment(remainder)));
       }
 
       var ctx = ParameterContext.Create(commandNumber, mnemonic, numberLine);
@@ -117,6 +120,16 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Kc
 
       var afterRange = CommonParameterParser.ResistanceParser.ParseResistanceRange(afterPoints);
       return !string.IsNullOrWhiteSpace(afterRange.Min) || !string.IsNullOrWhiteSpace(afterRange.Max);
+    }
+
+    private static string GetPointsFragment(string remainder)
+    {
+      int firstStar = remainder.IndexOf('*');
+      int lastStar = remainder.LastIndexOf('*');
+
+      return firstStar >= 0 && lastStar > firstStar
+        ? remainder[firstStar..(lastStar + 1)]
+        : remainder;
     }
 
     private static void NormalizeKsSpecificErrors(KsCommandModel model, int numberLine, string commandId)

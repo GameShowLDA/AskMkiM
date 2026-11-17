@@ -36,6 +36,10 @@ namespace MainWindowProgram.ViewModels
     [RelayCommand]
     private void Database() => _service.OpenDatabase();
 
+    /// <summary>Сбрасывает просмотр текущего выпуска для роли root.</summary>
+    [RelayCommand]
+    private async Task ResetReleaseNotesView() => await _service.ResetReleaseNotesViewAsync();
+
     [RelayCommand]
     private void Protocol() => _service.ProtocolTest();
 

@@ -1,0 +1,389 @@
+<Window x:Class="AskMkiM.Updater.Stub.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Обновление AskMkiM"
+        Width="1180" Height="760" MinWidth="900" MinHeight="650"
+        WindowStyle="None" AllowsTransparency="True" ResizeMode="CanResize"
+        WindowStartupLocation="CenterScreen"
+        Background="Transparent" Foreground="#211D38"
+        Loaded="Window_Loaded" StateChanged="Window_StateChanged">
+  <Window.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="Resources/SemiIcons.xaml" />
+      </ResourceDictionary.MergedDictionaries>
+      <FontFamily x:Key="Manrope">pack://application:,,,/Resources/Fonts/#Manrope</FontFamily>
+      <SolidColorBrush x:Key="SurfaceBrush" Color="#F7F3EC" />
+      <SolidColorBrush x:Key="TextBrush" Color="#211D38" />
+      <SolidColorBrush x:Key="SecondaryTextBrush" Color="#6E687B" />
+      <SolidColorBrush x:Key="OutlineBrush" Color="#BDB4AE" />
+      <LinearGradientBrush x:Key="TitleBarBrush" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="#2B233F" Offset="0" />
+        <GradientStop Color="#171526" Offset="1" />
+      </LinearGradientBrush>
+      <LinearGradientBrush x:Key="InsetVerticalBrush" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#48BDB4A7" Offset="0" />
+        <GradientStop Color="#00BDB4A7" Offset="0.32" />
+        <GradientStop Color="#00FFFFFF" Offset="0.68" />
+        <GradientStop Color="#9AFFFFFF" Offset="1" />
+      </LinearGradientBrush>
+      <LinearGradientBrush x:Key="InsetHorizontalBrush" StartPoint="0,0" EndPoint="1,0">
+        <GradientStop Color="#34BDB4A7" Offset="0" />
+        <GradientStop Color="#00BDB4A7" Offset="0.07" />
+        <GradientStop Color="#00FFFFFF" Offset="0.93" />
+        <GradientStop Color="#70FFFFFF" Offset="1" />
+      </LinearGradientBrush>
+
+      <Style x:Key="WindowCommandButtonStyle" TargetType="Button">
+        <Setter Property="Width" Value="48" />
+        <Setter Property="Height" Value="48" />
+        <Setter Property="Margin" Value="2,0" />
+        <Setter Property="Foreground" Value="White" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="Template">
+          <Setter.Value>
+            <ControlTemplate TargetType="Button">
+              <Border x:Name="Surface" Background="Transparent" CornerRadius="10">
+                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+              </Border>
+              <ControlTemplate.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                  <Setter TargetName="Surface" Property="Background" Value="#24FFFFFF" />
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                  <Setter TargetName="Surface" Property="Background" Value="#38FFFFFF" />
+                </Trigger>
+              </ControlTemplate.Triggers>
+            </ControlTemplate>
+          </Setter.Value>
+        </Setter>
+      </Style>
+
+      <Style x:Key="NeumorphicButtonStyle" TargetType="Button">
+        <Setter Property="Height" Value="46" />
+        <Setter Property="Padding" Value="18,0" />
+        <Setter Property="FontFamily" Value="{StaticResource Manrope}" />
+        <Setter Property="FontSize" Value="15" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="Template">
+          <Setter.Value>
+            <ControlTemplate TargetType="Button">
+              <Grid x:Name="ButtonRoot" RenderTransformOrigin="0.5,0.5">
+                <Grid.RenderTransform><ScaleTransform /></Grid.RenderTransform>
+                <Grid x:Name="RaisedShadows" IsHitTestVisible="False">
+                  <Border CornerRadius="12" Background="{StaticResource SurfaceBrush}">
+                    <Border.Effect>
+                      <DropShadowEffect Color="White" Direction="135" BlurRadius="15" ShadowDepth="4" Opacity="0.9" />
+                    </Border.Effect>
+                  </Border>
+                  <Border CornerRadius="12" Background="{StaticResource SurfaceBrush}">
+                    <Border.Effect>
+                      <DropShadowEffect Color="#C9C2B6" Direction="315" BlurRadius="15" ShadowDepth="4" Opacity="0.55" />
+                    </Border.Effect>
+                  </Border>
+                </Grid>
+                <Border CornerRadius="12" Background="{StaticResource SurfaceBrush}" />
+                <Grid x:Name="InsetShading" Opacity="0" IsHitTestVisible="False">
+                  <Border CornerRadius="12" Background="{StaticResource InsetVerticalBrush}" />
+                  <Border CornerRadius="12" Background="{StaticResource InsetHorizontalBrush}" />
+                </Grid>
+                <ContentPresenter Margin="{TemplateBinding Padding}"
+                                  HorizontalAlignment="Center" VerticalAlignment="Center" />
+              </Grid>
+              <ControlTemplate.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                  <Setter TargetName="ButtonRoot" Property="RenderTransform">
+                    <Setter.Value><ScaleTransform ScaleX="1.02" ScaleY="1.02" /></Setter.Value>
+                  </Setter>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                  <Setter TargetName="RaisedShadows" Property="Opacity" Value="0" />
+                  <Setter TargetName="InsetShading" Property="Opacity" Value="1" />
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="False">
+                  <Setter Property="Foreground" Value="#8E8792" />
+                  <Setter TargetName="RaisedShadows" Property="Opacity" Value="0.2" />
+                  <Setter Property="Cursor" Value="Arrow" />
+                </Trigger>
+              </ControlTemplate.Triggers>
+            </ControlTemplate>
+          </Setter.Value>
+        </Setter>
+      </Style>
+
+      <Style x:Key="InsetTextBoxStyle" TargetType="TextBox">
+        <Setter Property="Height" Value="44" />
+        <Setter Property="Padding" Value="15,0" />
+        <Setter Property="FontFamily" Value="{StaticResource Manrope}" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+        <Setter Property="CaretBrush" Value="{StaticResource TextBrush}" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Template">
+          <Setter.Value>
+            <ControlTemplate TargetType="TextBox">
+              <Grid>
+                <Border CornerRadius="12" Background="{StaticResource SurfaceBrush}" />
+                <Border CornerRadius="12" Background="{StaticResource InsetVerticalBrush}" />
+                <Border CornerRadius="12" Background="{StaticResource InsetHorizontalBrush}" />
+                <Border x:Name="Outline" CornerRadius="12" BorderBrush="{StaticResource OutlineBrush}"
+                        BorderThickness="1" />
+                <ScrollViewer x:Name="PART_ContentHost" Margin="{TemplateBinding Padding}"
+                              VerticalAlignment="Center" HorizontalScrollBarVisibility="Hidden" />
+              </Grid>
+              <ControlTemplate.Triggers>
+                <Trigger Property="IsKeyboardFocused" Value="True">
+                  <Setter TargetName="Outline" Property="BorderBrush" Value="#6E5AD3" />
+                  <Setter TargetName="Outline" Property="BorderThickness" Value="1.5" />
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="False">
+                  <Setter Property="Opacity" Value="0.55" />
+                </Trigger>
+              </ControlTemplate.Triggers>
+            </ControlTemplate>
+          </Setter.Value>
+        </Setter>
+      </Style>
+
+      <Style x:Key="PrimaryButtonStyle" TargetType="Button">
+        <Setter Property="Height" Value="58" />
+        <Setter Property="FontFamily" Value="{StaticResource Manrope}" />
+        <Setter Property="FontSize" Value="18" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="White" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="Template">
+          <Setter.Value>
+            <ControlTemplate TargetType="Button">
+              <Grid x:Name="Root" RenderTransformOrigin="0.5,0.5">
+                <Grid.RenderTransform><ScaleTransform /></Grid.RenderTransform>
+                <Border x:Name="ButtonSurface" CornerRadius="15">
+                  <Border.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                      <GradientStop Color="#322747" Offset="0" />
+                      <GradientStop Color="#211D38" Offset="1" />
+                    </LinearGradientBrush>
+                  </Border.Background>
+                  <Border.Effect>
+                    <DropShadowEffect Color="#918596" BlurRadius="18" ShadowDepth="8" Opacity="0.42" />
+                  </Border.Effect>
+                </Border>
+                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+              </Grid>
+              <ControlTemplate.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                  <Setter TargetName="Root" Property="RenderTransform">
+                    <Setter.Value><ScaleTransform ScaleX="1.008" ScaleY="1.008" /></Setter.Value>
+                  </Setter>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                  <Setter TargetName="Root" Property="Opacity" Value="0.88" />
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="False">
+                  <Setter TargetName="ButtonSurface" Property="Background" Value="#DDD8DF" />
+                  <Setter TargetName="Root" Property="Opacity" Value="0.8" />
+                  <Setter Property="Foreground" Value="#8E8798" />
+                  <Setter Property="Cursor" Value="Arrow" />
+                </Trigger>
+              </ControlTemplate.Triggers>
+            </ControlTemplate>
+          </Setter.Value>
+        </Setter>
+      </Style>
+    </ResourceDictionary>
+  </Window.Resources>
+
+  <Border x:Name="OuterBorder" CornerRadius="18" Background="{StaticResource TitleBarBrush}"
+          BorderBrush="#605C73" BorderThickness="1" ClipToBounds="True">
+    <Grid>
+      <Grid.RowDefinitions>
+        <RowDefinition Height="62" />
+        <RowDefinition Height="*" />
+      </Grid.RowDefinitions>
+
+      <Grid Grid.Row="0" Background="Transparent" MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+        <StackPanel Orientation="Horizontal" Margin="28,0,0,0" VerticalAlignment="Center">
+          <Grid Width="32" Height="32" Margin="0,0,14,0">
+            <Path Fill="White" Data="M2,8 L16,1 L30,8 L16,15 Z M2,14 L16,21 L30,14 L30,19 L16,26 L2,19 Z M2,21 L16,28 L30,21 L30,26 L16,33 L2,26 Z"
+                  Stretch="Uniform" />
+          </Grid>
+          <TextBlock FontFamily="{StaticResource Manrope}" FontSize="17" FontWeight="SemiBold"
+                     Foreground="White" VerticalAlignment="Center" Text="Обновление AskMkiM" />
+        </StackPanel>
+        <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="0,0,12,0" VerticalAlignment="Center">
+          <Button Style="{StaticResource WindowCommandButtonStyle}" Click="Minimize_Click"
+                  AutomationProperties.Name="Свернуть">
+            <Path Width="16" Height="2" Fill="White" Data="M0,0 L16,0 L16,2 L0,2 Z" />
+          </Button>
+          <Button Style="{StaticResource WindowCommandButtonStyle}" Click="Maximize_Click"
+                  AutomationProperties.Name="Развернуть">
+            <Rectangle Width="15" Height="15" Stroke="White" StrokeThickness="1.7" RadiusX="1.5" RadiusY="1.5" />
+          </Button>
+          <Button Style="{StaticResource WindowCommandButtonStyle}" Click="Close_Click"
+                  AutomationProperties.Name="Закрыть">
+            <Path Width="17" Height="17" Stroke="White" StrokeThickness="1.8"
+                  StrokeStartLineCap="Round" StrokeEndLineCap="Round" Data="M1,1 L16,16 M16,1 L1,16" />
+          </Button>
+        </StackPanel>
+      </Grid>
+
+      <Grid Grid.Row="1">
+        <Path Fill="{StaticResource SurfaceBrush}" Stretch="Fill"
+              Data="M0,0 L735,0 C810,0 810,88 885,112 C920,124 962,124 1000,124 L1000,700 L0,700 Z" />
+
+        <Grid Margin="42,34,42,30">
+          <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+          </Grid.RowDefinitions>
+
+          <Grid Grid.Row="0" Margin="0,0,0,26">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="84" />
+              <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Border Width="66" Height="66" CornerRadius="18" Background="{StaticResource SurfaceBrush}"
+                    HorizontalAlignment="Left" VerticalAlignment="Center">
+              <Border.Effect>
+                <DropShadowEffect Color="#C9C2B6" Direction="315" BlurRadius="16" ShadowDepth="5" Opacity="0.5" />
+              </Border.Effect>
+              <Path Width="34" Height="34" Fill="{StaticResource TextBrush}"
+                    Data="{StaticResource SemiIconRefresh}" Stretch="Uniform" />
+            </Border>
+            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+              <TextBlock FontFamily="{StaticResource Manrope}" FontSize="31" FontWeight="SemiBold"
+                         Foreground="{StaticResource TextBrush}" Text="Обновление AskMkiM" />
+              <TextBlock x:Name="PackageVersionTextBlock" Margin="0,5,0,0"
+                         FontFamily="{StaticResource Manrope}" FontSize="14.5"
+                         Foreground="{StaticResource SecondaryTextBrush}"
+                         Text="Чтение пакета обновления..." />
+            </StackPanel>
+          </Grid>
+
+          <Grid Grid.Row="1" Margin="0,0,0,20">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="54" />
+              <ColumnDefinition Width="*" />
+              <ColumnDefinition Width="184" />
+            </Grid.ColumnDefinitions>
+            <Path Width="25" Height="25" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="7,0,0,9"
+                  Fill="{StaticResource TextBrush}" Data="{StaticResource SemiIconFolderOpen}" Stretch="Uniform" />
+            <StackPanel Grid.Column="1" Margin="0,0,20,0">
+              <TextBlock Margin="0,0,0,8" FontFamily="{StaticResource Manrope}" FontSize="16"
+                         FontWeight="SemiBold" Text="Расположение AskMkiM" />
+              <TextBox x:Name="TargetPathTextBox" Style="{StaticResource InsetTextBoxStyle}"
+                       TextChanged="TargetPath_Changed" />
+            </StackPanel>
+            <Button Grid.Column="2" Margin="0,28,0,0" Style="{StaticResource NeumorphicButtonStyle}"
+                    Click="BrowseTarget_Click">
+              <StackPanel Orientation="Horizontal">
+                <Path Width="21" Height="21" Margin="0,0,10,0"
+                      Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                      Data="{StaticResource SemiIconFolderOpen}" Stretch="Uniform" />
+                <TextBlock VerticalAlignment="Center" Text="Выбрать..." />
+              </StackPanel>
+            </Button>
+          </Grid>
+
+          <Border Grid.Row="2" Margin="0,0,0,18" Padding="30,20"
+                  Background="#48E5E0EA" CornerRadius="16">
+            <Grid>
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="1" />
+                <ColumnDefinition Width="*" />
+              </Grid.ColumnDefinitions>
+              <Grid>
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="58" />
+                  <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Path Width="30" Height="30" Fill="#4C405F" HorizontalAlignment="Left" VerticalAlignment="Center"
+                      Data="{StaticResource SemiIconDesktop}" Stretch="Uniform" />
+                <StackPanel Grid.Column="1">
+                  <TextBlock FontFamily="{StaticResource Manrope}" FontSize="14.5"
+                             Foreground="{StaticResource SecondaryTextBrush}" Text="Установленная версия" />
+                  <TextBlock x:Name="CurrentVersionTextBlock" Margin="0,5,0,0"
+                             FontFamily="{StaticResource Manrope}" FontSize="19" FontWeight="SemiBold" Text="—" />
+                </StackPanel>
+              </Grid>
+              <Border Grid.Column="1" Background="#35A59DAB" />
+              <Grid Grid.Column="2" Margin="50,0,0,0">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="58" />
+                  <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Path Width="30" Height="30" Fill="#4C405F" HorizontalAlignment="Left" VerticalAlignment="Center"
+                      Data="{StaticResource SemiIconDownload}" Stretch="Uniform" />
+                <StackPanel Grid.Column="1">
+                  <TextBlock FontFamily="{StaticResource Manrope}" FontSize="14.5"
+                             Foreground="{StaticResource SecondaryTextBrush}" Text="Новая версия" />
+                  <TextBlock x:Name="NewVersionTextBlock" Margin="0,5,0,0"
+                             FontFamily="{StaticResource Manrope}" FontSize="19" FontWeight="SemiBold" Text="—" />
+                </StackPanel>
+              </Grid>
+            </Grid>
+          </Border>
+
+          <Grid Grid.Row="3" Margin="7,0,7,18">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="46" />
+              <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Path Width="26" Height="26" Fill="{StaticResource TextBrush}" HorizontalAlignment="Left" VerticalAlignment="Top"
+                  Data="{StaticResource SemiIconInfoCircle}" Stretch="Uniform" />
+            <TextBlock Grid.Column="1" FontFamily="{StaticResource Manrope}" FontSize="14.5"
+                       LineHeight="22" TextWrapping="Wrap"
+                       Text="Перед заменой файлов будет создана резервная копия программы, базы данных и настроек. Архивы, история и пользовательские данные не изменяются." />
+          </Grid>
+
+          <Border Grid.Row="4" Margin="0,0,0,18" Padding="24,20" MinHeight="128"
+                  Background="#28FFFFFF" BorderBrush="{StaticResource OutlineBrush}"
+                  BorderThickness="1" CornerRadius="16">
+            <Grid>
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="45" />
+                <ColumnDefinition Width="*" />
+              </Grid.ColumnDefinitions>
+              <Path Width="25" Height="25" Fill="#756E82" HorizontalAlignment="Left" VerticalAlignment="Top"
+                    Data="{StaticResource SemiIconArticle}" Stretch="Uniform" />
+              <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto">
+                <TextBlock x:Name="StatusTextBlock" FontFamily="{StaticResource Manrope}" FontSize="14"
+                           LineHeight="21" TextWrapping="Wrap" Foreground="{StaticResource SecondaryTextBrush}"
+                           Text="Файл не является обновлением AskMkiM." />
+              </ScrollViewer>
+            </Grid>
+          </Border>
+
+          <Grid Grid.Row="5">
+            <Button x:Name="UpdateButton" Style="{StaticResource PrimaryButtonStyle}"
+                    IsEnabled="False" IsDefault="True" Click="Update_Click">
+              <StackPanel Orientation="Horizontal">
+                <Path Width="25" Height="25" Margin="0,0,12,0"
+                      Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                      Data="{StaticResource SemiIconRefresh}" Stretch="Uniform" />
+                <TextBlock VerticalAlignment="Center" Text="Обновить" />
+              </StackPanel>
+            </Button>
+            <ProgressBar x:Name="ProgressBar" Height="4" Margin="20,0" VerticalAlignment="Bottom"
+                         IsIndeterminate="True" Visibility="Collapsed" Foreground="#6E5AD3" />
+          </Grid>
+        </Grid>
+      </Grid>
+    </Grid>
+  </Border>
+</Window>

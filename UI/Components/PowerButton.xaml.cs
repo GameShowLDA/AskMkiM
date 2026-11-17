@@ -1,5 +1,6 @@
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.Devices;
+using Ask.Core.Services.Errors.Device;
 using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
@@ -139,6 +140,10 @@ namespace UI.Components
           await StopPowerSequenceAsync();
         }
       }
+      catch (DeviceException exception) when (exception is DeviceTransportException or DeviceNoResponseException)
+      {
+        HandleTransportError(exception);
+      }
       finally
       {
         taskInProgress = false;
@@ -172,6 +177,10 @@ namespace UI.Components
         {
           SetConnectedState("Отключить систему");
         }
+      }
+      catch (DeviceException exception) when (exception is DeviceTransportException or DeviceNoResponseException)
+      {
+        HandleTransportError(exception);
       }
       finally
       {
@@ -208,6 +217,10 @@ namespace UI.Components
           SetDisconnectedState("Подключить систему");
         }
       }
+      catch (DeviceException exception) when (exception is DeviceTransportException or DeviceNoResponseException)
+      {
+        HandleTransportError(exception);
+      }
       finally
       {
         taskInProgress = false;
@@ -222,18 +235,47 @@ namespace UI.Components
     {
       await EnsureConfiguredUpsPowerAsync();
 
-      if (!await model.PowerManager.VerifyPowerAsync(null))
+      if (!await TryInitializeChassisAsync())
+      {
+        return;
+      }
+
+      if (await model.PowerManager.VerifyPowerAsync(null))
+      {
+        SetConnectedState("Отключить систему");
+      }
+      else
       {
         await model.PowerManager.StartPowerAsync();
         await ShowCountdownMessageAsync(5, "Питание включено. Ожидание загрузки системы перед инициализацией и сбросом устройств");
+
+        if (!await TryConnectAsync() && !await HandleConnectionErrorAsync())
+        {
+          return;
+        }
       }
 
       await ResetConfiguredDevicesAfterPowerStartAsync();
+    }
 
-      if (!await TryConnectAsync())
+    /// <summary>
+    /// Инициализирует шасси до обращения к подключённым модулям.
+    /// </summary>
+    /// <returns>
+    /// <see langword="true"/>, если шасси подтвердило инициализацию.
+    /// В противном случае — <see langword="false"/>.
+    /// </returns>
+    private async Task<bool> TryInitializeChassisAsync()
+    {
+      var initialization = await model.ConnectableManager.InitializeAsync();
+      if (initialization.Connect)
       {
-        await HandleConnectionErrorAsync();
+        return true;
       }
+
+      SetDisconnectedState("Подключить систему");
+      ShowChassisConnectionError(initialization.Answer);
+      return false;
     }
 
     private async Task ResetConfiguredDevicesAfterPowerStartAsync()
@@ -320,6 +362,48 @@ namespace UI.Components
     }
 
     /// <summary>
+    /// Восстанавливает состояние кнопки и показывает ошибку связи с шасси.
+    /// </summary>
+    /// <param name="exception">Ошибка транспорта оборудования.</param>
+    private void HandleTransportError(DeviceException exception)
+    {
+      if (active)
+      {
+        SetConnectedState("Отключить систему");
+      }
+      else
+      {
+        SetDisconnectedState("Подключить систему");
+      }
+
+      if (exception is DeviceNoResponseException)
+        MessageBoxCustom.Show(exception.Message, "Нет ответа устройства", MessageBoxButton.OK, MessageBoxImage.Warning);
+      else
+        ShowChassisConnectionError(exception.Message);
+    }
+
+    /// <summary>
+    /// Показывает ошибку связи с шасси.
+    /// </summary>
+    /// <param name="details">Дополнительные сведения об ошибке.</param>
+    private void ShowChassisConnectionError(string? details)
+    {
+      string deviceName = string.IsNullOrWhiteSpace(model.Name)
+        ? "оборудованием"
+        : $"устройством «{model.Name}»";
+      string message = $"Нет соединения с {deviceName}.{Environment.NewLine}{Environment.NewLine}" +
+        "Проверьте сетевое подключение компьютера и кабельное подключение устройства, " +
+        "затем повторите попытку.";
+
+      if (!string.IsNullOrWhiteSpace(details))
+      {
+        message += $"{Environment.NewLine}{Environment.NewLine}{details}";
+      }
+
+      MessageBoxCustom.Show(message, "Ошибка подключения", MessageBoxButton.OK, MessageBoxImage.Error);
+    }
+
+    /// <summary>
     /// Процесс отключения системы, включая сброс и остановку питания.
     /// </summary>
     private async Task StopPowerSequenceAsync()
@@ -396,41 +480,35 @@ namespace UI.Components
     /// <summary>
     /// Обработка ошибки подключения с повторными попытками и возможностью отмены.
     /// </summary>
-    private async Task HandleConnectionErrorAsync()
+    /// <returns>
+    /// <see langword="true"/>, если шасси подтвердило питание после повторной попытки.
+    /// В противном случае — <see langword="false"/>.
+    /// </returns>
+    private async Task<bool> HandleConnectionErrorAsync()
     {
       hasError = true;
       SetLoadingState("Отменить подключение", (Color)FindResource("YellowColor"));
 
-      bool exitLoop = false;
-      int i = 0;
-      do
+      for (int attempt = 0; attempt < 3; attempt++)
       {
         if (cancellationToken.Token.IsCancellationRequested)
         {
-          exitLoop = true;
+          SetDisconnectedState("Подключить систему");
+          return false;
         }
-        else
+
+        await model.PowerManager.StartPowerAsync();
+        await ShowCountdownMessageAsync(3, "Повторная попытка через");
+
+        if (await TryConnectAsync())
         {
-          await model.PowerManager.StartPowerAsync();
-          await ShowCountdownMessageAsync(3, "Повторная попытка через");
+          return true;
         }
-
-        if (exitLoop)
-        {
-          break;
-        }
-
-        i++;
       }
-      while (!await TryConnectAsync() && i < 3);
 
-      if (!exitLoop)
-      {
-        NotificationHostService.Instance.Show(
-               "Включение системы",
-               "Не удалось выполнить включение питания системы. Проверьте подключение системы к компьютеру и повторите попытку.",
-               type: NotificationType.Error);
-      }
+      SetDisconnectedState("Подключить систему");
+      ShowChassisConnectionError("Шасси не подтвердило включение питания.");
+      return false;
     }
 
     /// <summary>
@@ -456,8 +534,7 @@ namespace UI.Components
       {
         _ = color;
         SetButtonToolTip(text);
-        SetIconForegroundResource("PowerButtonOnForegroundBrush");
-        SetIconsState(true);
+        PowerActionButton.Tag = hasError ? "Cancel" : "Loading";
         PowerActionButton.Opacity = 1;
       });
     }
@@ -470,9 +547,8 @@ namespace UI.Components
       Application.Current.Dispatcher.Invoke(() =>
       {
         SetButtonToolTip(text);
-        SetIconForegroundResource("PowerButtonOnForegroundBrush");
-        SetIconsState(true);
-        PowerActionButton.Opacity = 0.92;
+        PowerActionButton.Tag = "Connected";
+        PowerActionButton.Opacity = 1;
         active = true;
       });
     }
@@ -485,43 +561,10 @@ namespace UI.Components
       Application.Current.Dispatcher.Invoke(() =>
       {
         SetButtonToolTip(text);
-        SetIconForegroundResource("PowerButtonOffForegroundBrush");
-        SetIconsState(false);
-        PowerActionButton.Opacity = 0.86;
+        PowerActionButton.Tag = "Disconnected";
+        PowerActionButton.Opacity = 1;
         active = false;
       });
-    }
-
-    /// <summary>
-    /// Переключает видимость иконок питания в зависимости от состояния.
-    /// </summary>
-    private void SetIconsState(bool isPowerOn)
-    {
-      if (FindButtonTemplateElement("PowerOnStateIcon") is UIElement powerOnIcon)
-      {
-        powerOnIcon.Visibility = isPowerOn ? Visibility.Visible : Visibility.Collapsed;
-      }
-
-      if (FindButtonTemplateElement("PowerOffStateIcon") is UIElement powerOffIcon)
-      {
-        powerOffIcon.Visibility = isPowerOn ? Visibility.Collapsed : Visibility.Visible;
-      }
-    }
-
-    /// <summary>
-    /// Устанавливает цвет иконки через ресурс темы.
-    /// </summary>
-    private void SetIconForegroundResource(string resourceKey)
-    {
-      if (FindButtonTemplateElement("PowerOnStateIcon") is FrameworkElement powerOnIcon)
-      {
-        powerOnIcon.SetResourceReference(ForegroundProperty, resourceKey);
-      }
-
-      if (FindButtonTemplateElement("PowerOffStateIcon") is FrameworkElement powerOffIcon)
-      {
-        powerOffIcon.SetResourceReference(ForegroundProperty, resourceKey);
-      }
     }
 
     /// <summary>
@@ -559,15 +602,6 @@ namespace UI.Components
 
       MessageBoxCustom.Show("Отключите холостой режим для включения питания!", "Ошибка!", MessageBoxButton.OK, image: MessageBoxImage.Error);
       return false;
-    }
-
-    /// <summary>
-    /// Возвращает элемент шаблона кнопки по имени.
-    /// </summary>
-    private FrameworkElement FindButtonTemplateElement(string elementName)
-    {
-      PowerActionButton.ApplyTemplate();
-      return PowerActionButton.Template?.FindName(elementName, PowerActionButton) as FrameworkElement;
     }
   }
 }

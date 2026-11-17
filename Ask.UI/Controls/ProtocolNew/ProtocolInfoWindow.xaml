@@ -61,7 +61,7 @@
                  Name="ExecutorInput"
                  />
             </Border>
-            <TextBlock Grid.Row="5" Text="Представитель ОК" Style="{DynamicResource SettingsHeaderStyle}" 
+            <TextBlock Grid.Row="5" Text="Представитель ОТК" Style="{DynamicResource SettingsHeaderStyle}" 
                        FontSize="20" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="20,0, 0, 0"/>
             <Border Grid.Row="6" Style="{DynamicResource DeviceInputSectionCardStyle}"  Margin="20,10" Padding="5,0">
                 <TextBox 
@@ -75,7 +75,7 @@
                  />
             </Border>
 
-            <TextBlock Grid.Row="7" Text="Представитель заказчика (ОК)" Style="{DynamicResource SettingsHeaderStyle}" 
+            <TextBlock Grid.Row="7" Text="Представитель заказчика (ВП)" Style="{DynamicResource SettingsHeaderStyle}" 
                        FontSize="20" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="20,0, 0, 0"/>
             <Border Grid.Row="8" Style="{DynamicResource DeviceInputSectionCardStyle}"  Margin="20,10" Padding="5,0">
                 <TextBox 

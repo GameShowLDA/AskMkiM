@@ -1,0 +1,16 @@
+<UserControl x:Class="Ask.UI.Shared.Components.Icons.NextCommandIcon"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:icons="clr-namespace:Ask.UI.Shared.Components.Icons"
+             x:Name="root"
+             Width="{Binding Size, ElementName=root}"
+             Height="{Binding Size, ElementName=root}"
+             Cursor="Hand">
+    <Viewbox Stretch="Uniform">
+        <icons:StepIntoIcon Size="24" IsHitTestVisible="False" RenderTransformOrigin="0.5,0.5">
+            <icons:StepIntoIcon.RenderTransform>
+                <RotateTransform Angle="-90" />
+            </icons:StepIntoIcon.RenderTransform>
+        </icons:StepIntoIcon>
+    </Viewbox>
+</UserControl>

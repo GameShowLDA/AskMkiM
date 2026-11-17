@@ -1,3 +1,5 @@
+using Ask.Core.Shared.DTO.Devices.PowerSupply;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSupply;
 using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Shared.DTO.Devices.Base;
 using Ask.Core.Shared.DTO.Devices.Breakdown;
@@ -38,6 +40,7 @@ public class DeviceEngine : IDeviceEngine
   private readonly record struct ChassisQueryCacheKey(Type DeviceType, int NumberChassis);
 
   private readonly DeviceCache _cache;
+  private readonly PowerSupplyDtoService _powerSupplyService;
   private readonly BreakdownTesterDtoService _breakdownTesterService;
   private readonly ChassisManagerDtoService _chassisManagerService;
   private readonly FastMeterDtoService _fastMeterService;
@@ -61,8 +64,10 @@ public class DeviceEngine : IDeviceEngine
     RackDtoService? rackService = null,
     RelaySwitchModuleDtoService? relaySwitchModuleService = null,
     SwitchingDeviceDtoService? switchingDeviceService = null,
-    UninterruptiblePowerSupplyDtoService? uninterruptiblePowerSupplyService = null)
+    UninterruptiblePowerSupplyDtoService? uninterruptiblePowerSupplyService = null,
+    PowerSupplyDtoService? powerSupplyService = null)
   {
+    _powerSupplyService = powerSupplyService ?? new PowerSupplyDtoService();
     _cache = cache ?? new DeviceCache();
     _breakdownTesterService = breakdownTesterService ?? new BreakdownTesterDtoService();
     _chassisManagerService = chassisManagerService ?? new ChassisManagerDtoService();
@@ -82,6 +87,8 @@ public class DeviceEngine : IDeviceEngine
 
     if (requestedType == typeof(IBreakdownTester))
       return GetByIdInternalAsync<TDevice, BreakdownTesterDto>(_breakdownTesterService, id, cancellationToken);
+    if (requestedType == typeof(IPowerSupply))
+      return GetByIdInternalAsync<TDevice, PowerSupplyDto>(_powerSupplyService, id, cancellationToken);
     if (requestedType == typeof(IChassisManager))
       return GetByIdInternalAsync<TDevice, ChassisManagerDto>(_chassisManagerService, id, cancellationToken);
     if (requestedType == typeof(IMultimeter))
@@ -108,6 +115,8 @@ public class DeviceEngine : IDeviceEngine
 
     if (requestedType == typeof(IBreakdownTester))
       return GetAllInternalAsync<TDevice, BreakdownTesterDto>(_breakdownTesterService, cancellationToken);
+    if (requestedType == typeof(IPowerSupply))
+      return GetAllInternalAsync<TDevice, PowerSupplyDto>(_powerSupplyService, cancellationToken);
     if (requestedType == typeof(IChassisManager))
       return GetAllInternalAsync<TDevice, ChassisManagerDto>(_chassisManagerService, cancellationToken);
     if (requestedType == typeof(IMultimeter))
@@ -134,6 +143,8 @@ public class DeviceEngine : IDeviceEngine
 
     if (requestedType == typeof(IBreakdownTester))
       return GetByNumberInternalAsync<TDevice, BreakdownTesterDto>(_breakdownTesterService, number, cancellationToken);
+    if (requestedType == typeof(IPowerSupply))
+      return GetByNumberInternalAsync<TDevice, PowerSupplyDto>(_powerSupplyService, number, cancellationToken);
     if (requestedType == typeof(IChassisManager))
       return GetByNumberInternalAsync<TDevice, ChassisManagerDto>(_chassisManagerService, number, cancellationToken);
     if (requestedType == typeof(IMultimeter))
@@ -162,6 +173,8 @@ public class DeviceEngine : IDeviceEngine
 
     if (requestedType == typeof(IBreakdownTester))
       return GetByChassisInternalAsync<TDevice, BreakdownTesterDto>(_breakdownTesterService, numberChassis, cancellationToken);
+    if (requestedType == typeof(IPowerSupply))
+      return GetByChassisInternalAsync<TDevice, PowerSupplyDto>(_powerSupplyService, numberChassis, cancellationToken);
     if (requestedType == typeof(IMultimeter))
       return GetByChassisInternalAsync<TDevice, FastMeterDto>(_fastMeterService, numberChassis, cancellationToken);
     if (requestedType == typeof(IPowerSourceModule))
@@ -188,6 +201,8 @@ public class DeviceEngine : IDeviceEngine
 
     if (requestedType == typeof(IBreakdownTester))
       return GetByChassisAndNumberInternalAsync<TDevice, BreakdownTesterDto>(_breakdownTesterService, numberChassis, number, cancellationToken);
+    if (requestedType == typeof(IPowerSupply))
+      return GetByChassisAndNumberInternalAsync<TDevice, PowerSupplyDto>(_powerSupplyService, numberChassis, number, cancellationToken);
     if (requestedType == typeof(IMultimeter))
       return GetByChassisAndNumberInternalAsync<TDevice, FastMeterDto>(_fastMeterService, numberChassis, number, cancellationToken);
     if (requestedType == typeof(IPowerSourceModule))
@@ -221,6 +236,8 @@ public class DeviceEngine : IDeviceEngine
 
     if (requestedType == typeof(IBreakdownTester))
       return CreateInternalAsync(device, x => BreakdownTesterMapper.ToDto((IBreakdownTester)(object)x), _breakdownTesterService, cancellationToken);
+    if (requestedType == typeof(IPowerSupply))
+      return CreateInternalAsync(device, x => PowerSupplyMapper.ToDto((IPowerSupply)(object)x), _powerSupplyService, cancellationToken);
     if (requestedType == typeof(IChassisManager))
       return CreateInternalAsync(device, x => ChassisManagerMapper.ToDto((IChassisManager)(object)x), _chassisManagerService, cancellationToken);
     if (requestedType == typeof(IMultimeter))
@@ -251,6 +268,8 @@ public class DeviceEngine : IDeviceEngine
 
     if (requestedType == typeof(IBreakdownTester))
       return CreateRangeInternalAsync(devices, x => BreakdownTesterMapper.ToDto((IBreakdownTester)(object)x), _breakdownTesterService, cancellationToken);
+    if (requestedType == typeof(IPowerSupply))
+      return CreateRangeInternalAsync(devices, x => PowerSupplyMapper.ToDto((IPowerSupply)(object)x), _powerSupplyService, cancellationToken);
     if (requestedType == typeof(IChassisManager))
       return CreateRangeInternalAsync(devices, x => ChassisManagerMapper.ToDto((IChassisManager)(object)x), _chassisManagerService, cancellationToken);
     if (requestedType == typeof(IMultimeter))
@@ -279,6 +298,8 @@ public class DeviceEngine : IDeviceEngine
 
     if (requestedType == typeof(IBreakdownTester))
       return UpdateInternalAsync(device, x => BreakdownTesterMapper.ToDto((IBreakdownTester)(object)x), _breakdownTesterService, cancellationToken);
+    if (requestedType == typeof(IPowerSupply))
+      return UpdateInternalAsync(device, x => PowerSupplyMapper.ToDto((IPowerSupply)(object)x), _powerSupplyService, cancellationToken);
     if (requestedType == typeof(IChassisManager))
       return UpdateInternalAsync(device, x => ChassisManagerMapper.ToDto((IChassisManager)(object)x), _chassisManagerService, cancellationToken);
     if (requestedType == typeof(IMultimeter))
@@ -313,6 +334,8 @@ public class DeviceEngine : IDeviceEngine
 
     if (requestedType == typeof(IBreakdownTester))
       return DeleteByIdInternalAsync<TDevice, BreakdownTesterDto>(id, _breakdownTesterService, cancellationToken);
+    if (requestedType == typeof(IPowerSupply))
+      return DeleteByIdInternalAsync<TDevice, PowerSupplyDto>(id, _powerSupplyService, cancellationToken);
     if (requestedType == typeof(IChassisManager))
       return DeleteByIdInternalAsync<TDevice, ChassisManagerDto>(id, _chassisManagerService, cancellationToken);
     if (requestedType == typeof(IMultimeter))
@@ -338,6 +361,8 @@ public class DeviceEngine : IDeviceEngine
 
     if (requestedType == typeof(IBreakdownTester))
       return DeleteAllInternalAsync<TDevice, BreakdownTesterDto>(_breakdownTesterService, cancellationToken);
+    if (requestedType == typeof(IPowerSupply))
+      return DeleteAllInternalAsync<TDevice, PowerSupplyDto>(_powerSupplyService, cancellationToken);
     if (requestedType == typeof(IChassisManager))
       return DeleteAllInternalAsync<TDevice, ChassisManagerDto>(_chassisManagerService, cancellationToken);
     if (requestedType == typeof(IMultimeter))

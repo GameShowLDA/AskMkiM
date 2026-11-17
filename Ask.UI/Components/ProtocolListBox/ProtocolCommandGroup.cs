@@ -121,6 +121,15 @@ namespace Ask.UI.Components.ProtocolListBox
 
     public void SetExecutionResult(bool hasErrors)
     {
+      if (hasErrors
+        && BodyItems.Exists(item => item.Message.Status == ShowMessageModel.MessageType.NoResponse)
+        && !BodyItems.Exists(item => item.Message.Status == ShowMessageModel.MessageType.Error))
+      {
+        HeaderItem.Message.CommandExecutionHasErrors = null;
+        _executionState = CommandExecutionVisualState.Pending;
+        UpdateHeaderBackground();
+        return;
+      }
       HeaderItem.Message.CommandExecutionHasErrors = hasErrors;
       _executionState = hasErrors
         ? CommandExecutionVisualState.Error

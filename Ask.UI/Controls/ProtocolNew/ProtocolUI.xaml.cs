@@ -1,4 +1,5 @@
 using Ask.Core.Services.App;
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
@@ -131,6 +132,8 @@ namespace Ask.UI.Controls.ProtocolNew
     private Action<ExecutionEvents.ControlButtonPressed> _controlButtonHandler;
     private Action<ExecutionEvents.StepByStepModeChanged> _stepByStepModeChangedHandler;
     private bool _eventSubscriptionsAttached;
+    private bool _runtimeExecutionSettingsEnabled;
+    private bool _isUpdatingRuntimeExecutionSettings;
 
     /// <summary>
     /// Конструктор по умолчанию для элемента ProtocolSelfCheck.
@@ -154,6 +157,8 @@ namespace Ask.UI.Controls.ProtocolNew
 
     private void EventAggregator_StepByStepModeChanged(bool obj)
     {
+      LogInput($"Событие пошагового режима: enabled={obj}.");
+      ActionExecutor.StepMode = obj;
       UpdateStepButtonsForCurrentState(obj);
     }
 
@@ -164,7 +169,9 @@ namespace Ask.UI.Controls.ProtocolNew
 
       loaded = true;
       InitializeComponent();
-      LayoutUpdated += ProtocolUI_LayoutUpdated;
+      ProtocolManager.SizeChanged += ProtocolManager_SizeChanged;
+      InspectionProtocolPanel.SizeChanged += ProtocolManager_SizeChanged;
+      InspectionProtocolSplitter.IsVisibleChanged += ProtocolManager_IsVisibleChanged;
       _protocolStorage = new ProtocolStorageService();
       _inspectionProtocolAreaController = new InspectionProtocolAreaController(_protocolStorage, this);
       inspectionProtocolTextBox.SetFileType(FileType.InspectionProtocol);
@@ -191,7 +198,6 @@ namespace Ask.UI.Controls.ProtocolNew
           _attachedWindow.AddHandler(Keyboard.PreviewKeyDownEvent, new KeyEventHandler(OnGlobalKeyDown), true);
         }
 
-        RegisterHotkeys();
       };
 
       this.Unloaded += (s, e) =>
@@ -212,7 +218,12 @@ namespace Ask.UI.Controls.ProtocolNew
       UpdateProtocolManagerLayout();
     }
 
-    private void ProtocolUI_LayoutUpdated(object? sender, EventArgs e)
+    private void ProtocolManager_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+      UpdateProtocolManagerLayout();
+    }
+
+    private void ProtocolManager_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
     {
       UpdateProtocolManagerLayout();
     }
@@ -270,6 +281,7 @@ namespace Ask.UI.Controls.ProtocolNew
 
       EventAggregator.Subscribe(_controlButtonHandler);
       EventAggregator.Subscribe(_stepByStepModeChangedHandler);
+      ActionExecutor.StepMode = StepControlManager.StepMode;
       _eventSubscriptionsAttached = true;
     }
 
@@ -277,7 +289,6 @@ namespace Ask.UI.Controls.ProtocolNew
     {
       if (e.Handled || !IsVisible || !IsEnabled || ActionExecutor.IsStopping
         || !Ask.UI.Features.ProtocolNew.Execution.ExecutionRunGuard.CanHandleInput(ActionExecutor)) return;
-      RegisterHotkeys();
       _hotkeyController.HandleKeyDown(sender, e);
     }
 
@@ -339,6 +350,23 @@ namespace Ask.UI.Controls.ProtocolNew
       ActionExecutor.InterruptPauseForCommandJump();
 
     /// <inheritdoc />
+    void IExecutionCommandJumpGate.InterruptCurrentCommand()
+    {
+      bool wasAtBreakpoint = StepControlManager.IsBreakpointStepModeActive;
+      ActionExecutor.InterruptCurrentCommand();
+      if (wasAtBreakpoint)
+      {
+        ExecutionEventAdapter.ExecutionControlEventAdapter.Raise(ExecutionControlButton.Run);
+      }
+
+      _userActionTcs?.TrySetResult(Ask.Core.Shared.Metadata.Enums.UiEnums.UserAction.Continue);
+      ShowOnlyStopAndFinishButtons(false);
+    }
+
+    /// <inheritdoc />
+    Task IExecutionCommandJumpGate.PauseBeforeNextCommandAsync() => PauseAsync();
+
+    /// <inheritdoc />
     void IProtocolHotkeyContext.NotifyOtherKey(object sender, KeyEventArgs e) =>
       AnotherKeyPressed?.Invoke(sender, e);
 
@@ -350,6 +378,47 @@ namespace Ask.UI.Controls.ProtocolNew
     public void MenuButtonVisibility(bool visibility)
     {
       MenuButton.Visibility = visibility ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    /// <summary>
+    /// Показывает или скрывает настройки выполнения программы контроля.
+    /// </summary>
+    /// <param name="isEnabled">Признак включения runtime-настроек выполнения.</param>
+    public void SetRuntimeExecutionSettingsEnabled(bool isEnabled)
+    {
+      _runtimeExecutionSettingsEnabled = isEnabled;
+      _buttonController.UpdateRuntimeExecutionSettingsVisibility();
+    }
+
+    private void ExecutionSettingsButtonTop_Click(object sender, RoutedEventArgs e)
+    {
+      _isUpdatingRuntimeExecutionSettings = true;
+      try
+      {
+        RepeatMeasurementToggle.IsChecked = ExecutionConfig.GetIsRepeatMeasurementEnabled();
+        StopOnErrorToggle.IsChecked = ExecutionConfig.GetStopOnErrorEnabled();
+      }
+      finally
+      {
+        _isUpdatingRuntimeExecutionSettings = false;
+      }
+
+      ExecutionSettingsPopup.IsOpen = !ExecutionSettingsPopup.IsOpen;
+    }
+
+    private async void ExecutionSetting_Changed(object sender, RoutedEventArgs e)
+    {
+      if (_isUpdatingRuntimeExecutionSettings
+        || !IsInitialized
+        || RepeatMeasurementToggle == null
+        || StopOnErrorToggle == null)
+      {
+        return;
+      }
+
+      ExecutionConfig.SetRepeatMeasurement(RepeatMeasurementToggle.IsChecked == true);
+      ExecutionConfig.SetStopOnError(StopOnErrorToggle.IsChecked == true);
+      await ExecutionConfig.SaveExecutionModel(ExecutionConfig.GetExecutionModelSnapshot());
     }
 
     public IReadOnlyList<ShowMessageModel> GetShowMessageModels()
@@ -367,6 +436,8 @@ namespace Ask.UI.Controls.ProtocolNew
     }
 
     private void CommandJumpButtonTop_Click(object sender, RoutedEventArgs e) => RequestCommandJump();
+
+    private void SkipCommandButtonTop_Click(object sender, RoutedEventArgs e) => RequestNextCommand();
 
     private async void RequestCommandJump()
     {
@@ -386,8 +457,22 @@ namespace Ask.UI.Controls.ProtocolNew
       }
     }
 
+    private async void RequestNextCommand()
+    {
+      try
+      {
+        await CommandExecutionManager.RequestNextCommandAsync();
+      }
+      catch (Exception exception)
+      {
+        LogException("Ошибка перехода к следующей команде", exception);
+      }
+    }
+
     private void OnControlButtonPressed(ExecutionEvents.ControlButtonPressed e)
     {
+      LogInput($"Событие управления точкой останова: button={e.Button}, " +
+        $"stepMode={StepControlManager.StepMode}, breakpointStep={StepControlManager.IsBreakpointStepModeActive}.");
       // Эти события публикуются только в breakpoint-flow.
       // Здесь нельзя повторно звать обычные обработчики F5/F10/F11,
       // потому что они снова публикуют те же ControlButtonPressed
@@ -453,7 +538,6 @@ namespace Ask.UI.Controls.ProtocolNew
     {
       if (StartButtonElement.Visibility == Visibility.Visible)
       {
-        KeyboardManager.OnStartPressedByStepMode?.Invoke();
         return;
       }
 
@@ -490,6 +574,24 @@ namespace Ask.UI.Controls.ProtocolNew
       }
 
       OpenLatestProtocolFolder();
+    }
+
+    public string? InspectionProtocolFilePath => _protocolStorage.ResolveLatestInspectionProtocolPath();
+
+    private void ExportExecutionPdfButton_Click(object sender, RoutedEventArgs e)
+    {
+      var path = _protocolStorage.ResolveLatestExecutionProtocolPath();
+      var text = string.Join(Environment.NewLine,
+        GetShowMessageModels().Select(Ask.Core.Services.Protocols.ExecutionProtocolLineFormatter.Format));
+      if (!string.IsNullOrWhiteSpace(text))
+        EventAggregator.Publish(new FileInteractionEvents.ExportProtocolPdf(path ?? "Протокол.asktrace", text));
+    }
+
+    private void ExportInspectionPdfButton_Click(object sender, RoutedEventArgs e)
+    {
+      if (!string.IsNullOrWhiteSpace(_protocolStorage.InspectionProtocolText))
+        EventAggregator.Publish(new FileInteractionEvents.ExportProtocolPdf(
+          InspectionProtocolFilePath ?? "Протокол.askresult", _protocolStorage.InspectionProtocolText));
     }
 
     private void OpenInspectionFileButton_Click(object sender, RoutedEventArgs e)

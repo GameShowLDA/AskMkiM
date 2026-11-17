@@ -43,7 +43,9 @@ namespace UI.Services
       var activeDockItem = container.DockManager.DockItems.FirstOrDefault(item => item.IsSelected);
       if (activeDockItem?.Content is not TextEditorUI) return false;
 
-      return activeDockItem.PerformClose();
+      return isTranslation
+        ? _fileManager.DockItemService.CloseForTransfer(activeDockItem)
+        : activeDockItem.PerformClose();
     }
 
     /// <summary>
@@ -62,7 +64,7 @@ namespace UI.Services
 
       if (textEditorModel != null)
       {
-        textEditorModel.SavedTextSnapshot = fileContent;
+        UI.Services.FileManager.DocumentTextState.MarkSaved(textEditorModel, fileContent);
       }
 
       return editor;

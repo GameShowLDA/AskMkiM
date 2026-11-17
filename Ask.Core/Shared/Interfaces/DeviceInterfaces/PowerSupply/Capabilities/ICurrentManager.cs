@@ -1,0 +1,42 @@
+using Ask.Core.Shared.Interfaces.UiInterfaces;
+
+namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSupply.Capabilities
+{
+  /// <summary>
+  /// Предоставляет управление уставкой ограничения тока источника питания.
+  /// </summary>
+  public interface ICurrentManager
+  {
+    /// <summary>
+    /// Минимальная допустимая уставка ограничения тока в амперах.
+    /// </summary>
+    decimal MinCurrent { get; set; }
+
+    /// <summary>
+    /// Максимальная допустимая уставка ограничения тока в амперах.
+    /// </summary>
+    decimal MaxCurrent { get; set; }
+
+    /// <summary>
+    /// Программный шаг уставки тока в амперах, отсчитываемый от <see cref="MinCurrent"/>.
+    /// </summary>
+    decimal CurrentStep { get; set; }
+
+    /// <summary>
+    /// Устанавливает ограничение тока в допустимом диапазоне с программным шагом.
+    /// </summary>
+    /// <param name="current">Уставка ограничения тока в амперах, кратная шагу относительно минимальной уставки.</param>
+    /// <param name="cancellationToken">Токен отмены операции.</param>
+    /// <param name="userMessageService">Сервис взаимодействия с пользователем.</param>
+    /// <returns>Задача установки ограничения тока.</returns>
+    Task SetCurrentAsync(decimal current, CancellationToken cancellationToken = default, IUserInteractionService? userMessageService = null);
+
+    /// <summary>
+    /// Читает уставку ограничения тока источника питания.
+    /// </summary>
+    /// <param name="cancellationToken">Токен отмены операции.</param>
+    /// <param name="userMessageService">Сервис взаимодействия с пользователем.</param>
+    /// <returns>Уставка ограничения тока в амперах.</returns>
+    Task<decimal> GetCurrentAsync(CancellationToken cancellationToken = default, IUserInteractionService? userMessageService = null);
+  }
+}

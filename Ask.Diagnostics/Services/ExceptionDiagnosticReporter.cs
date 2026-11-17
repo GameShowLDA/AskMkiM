@@ -28,6 +28,11 @@ namespace Ask.Diagnostics.Services
     {
       ArgumentNullException.ThrowIfNull(exception);
 
+      if (!CrashReportPolicy.ShouldReport(exception))
+      {
+        return;
+      }
+
       var options = _options.Value;
       if (!options.CreatePackageForLoggedExceptions)
       {
@@ -68,6 +73,11 @@ namespace Ask.Diagnostics.Services
       CancellationToken cancellationToken = default)
     {
       ArgumentNullException.ThrowIfNull(exception);
+      if (!CrashReportPolicy.ShouldReport(exception))
+      {
+        return null;
+      }
+
       SetSource(exception, source);
 
       try

@@ -14,4 +14,15 @@ public interface IExecutionCommandJumpGate
   /// Прерывает ожидание паузы для обработки перехода к другой команде.
   /// </summary>
   void InterruptPauseForCommandJump();
+
+  /// <summary>
+  /// Прерывает текущую команду и возобновляет выполнение для перехода к следующей.
+  /// </summary>
+  void InterruptCurrentCommand();
+
+  /// <summary>
+  /// Ставит выполнение на паузу перед следующей командой и ожидает действия пользователя.
+  /// </summary>
+  /// <returns>Задача ожидания продолжения выполнения.</returns>
+  Task PauseBeforeNextCommandAsync();
 }

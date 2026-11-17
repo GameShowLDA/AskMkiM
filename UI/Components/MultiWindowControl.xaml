@@ -26,7 +26,7 @@
         </Grid.RowDefinitions>
 
         <!-- Верхняя панель -->
-        <StackPanel x:Name="TopPanel" Grid.Row="0" Background="{DynamicResource TopPanelTabsHostBackgroundBrush}" Orientation="Horizontal"/>
+        <StackPanel x:Name="TopPanel" Grid.Row="0" Background="Transparent" Orientation="Horizontal"/>
 
         <Grid Grid.Row="1">
             <!-- Редактор -->

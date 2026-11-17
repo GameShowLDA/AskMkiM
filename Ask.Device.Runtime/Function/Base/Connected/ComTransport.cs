@@ -1,4 +1,5 @@
-﻿using Ask.Core.Services.Config.AppSettings;
+using Ask.Core.Services.Errors.Device;
+using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
@@ -159,7 +160,7 @@ namespace Ask.Device.Runtime.Function.Connected
 
           return isReset;
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not DeviceNoResponseException)
         {
           LogException($"Ошибка сброса устройства {_device?.Name}", ex, isDeviceLog: true);
           return false;
@@ -194,7 +195,7 @@ namespace Ask.Device.Runtime.Function.Connected
           ? (false, "Устройство не ответило на команду инициализации.")
           : (false, $"Неожиданный ответ от устройства: {answer}");
       }
-      catch (Exception ex)
+      catch (Exception ex) when (ex is not DeviceNoResponseException)
       {
         _device.ConnectionInfo.IsConnected = false;
         LogWarning($"[{_device.Name}] Ошибка при опросе команды инициализации: {ex.Message}", isDeviceLog: true);
@@ -299,7 +300,7 @@ namespace Ask.Device.Runtime.Function.Connected
         LogInformation($"[{_device.Name}] Отправлены команды сброса и очистки.", isDeviceLog: true);
         return true;
       }
-      catch (Exception ex)
+      catch (Exception ex) when (ex is not DeviceNoResponseException)
       {
         LogWarning($"[{_device.Name}] Ошибка при {operationName}: {ex.Message}", isDeviceLog: true);
         return false;

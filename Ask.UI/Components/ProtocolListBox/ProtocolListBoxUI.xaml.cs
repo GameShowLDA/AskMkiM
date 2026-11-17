@@ -8,7 +8,7 @@ using Ask.Core.Shared.Metadata.Enums.UiEnums;
 using Ask.UI.Controls.TextEditorControl;
 using Ask.UI.Services.Notifications;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
+using System.Collections.Specialized;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
@@ -42,7 +42,7 @@ namespace Ask.UI.Components.ProtocolListBox
     private int _errorOverviewIndex = -1;
     private ShowMessageModel? _activeErrorMessage;
     private readonly Dictionary<ShowMessageModel, int> _messageIndices = new();
-    private bool _overviewUpdatePending;
+    private readonly DispatcherTimer _overviewUpdateTimer;
     private bool _overviewDiagnosticsDirty;
     private bool _visibleIndicesDirty = true;
     private readonly Dictionary<ProtocolDisplayItem, int> _visibleIndices = new();
@@ -50,27 +50,10 @@ namespace Ask.UI.Components.ProtocolListBox
     private readonly Dictionary<ProtocolDisplayItem, ProtocolCommandGroup> _itemGroups = new();
     private ProtocolDisplayItem? _lastMessageItem;
     private bool _scrollToEndRequested;
+    private bool _scrollMetricsUpdateRequested;
+    private bool _followTail = true;
     private bool _settingsSubscribed;
     private bool _themeSubscribed;
-    /// <summary>
-    /// Признак запланированного замера задержки отрисовки.
-    /// </summary>
-    private bool _renderProbePending;
-
-    /// <summary>
-    /// Количество записей, ожидающих ближайшего цикла отрисовки.
-    /// </summary>
-    private int _pendingRenderEntries;
-
-    /// <summary>
-    /// Метка времени добавления последней записи протокола.
-    /// </summary>
-    private long _lastAppendTimestamp;
-
-    /// <summary>
-    /// Идентификатор последней записи протокола, ожидающей отрисовки.
-    /// </summary>
-    private int _lastRenderedMessageId;
 
     public static readonly DependencyProperty ProtocolFontSizeProperty =
       DependencyProperty.Register(
@@ -112,15 +95,32 @@ namespace Ask.UI.Components.ProtocolListBox
     public ProtocolListBoxUI()
     {
       InitializeComponent();
-      errorOverviewBar.SetPositionPreviewFactory(GetOverviewPreview);
-      DisplayItems.CollectionChanged += (_, _) =>
+      _overviewUpdateTimer = new DispatcherTimer(DispatcherPriority.Background, Dispatcher)
       {
-        _visibleIndicesDirty = true;
-        RequestOverviewUpdate(diagnosticsChanged: true);
+        Interval = TimeSpan.FromMilliseconds(100)
       };
+      _overviewUpdateTimer.Tick += (_, _) => FlushOverviewUpdate();
+      errorOverviewBar.SetPositionPreviewFactory(GetOverviewPreview);
+      DisplayItems.CollectionChanged += DisplayItems_CollectionChanged;
       PreviewKeyDown += ProtocolListBoxUI_PreviewKeyDown;
       Loaded += ProtocolListBoxUI_Loaded;
       Unloaded += ProtocolListBoxUI_Unloaded;
+    }
+
+    private void DisplayItems_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+      if (!_visibleIndicesDirty && e.Action == NotifyCollectionChangedAction.Add &&
+          e.NewItems != null && e.NewStartingIndex == DisplayItems.Count - e.NewItems.Count)
+      {
+        for (int i = 0; i < e.NewItems.Count; i++)
+          _visibleIndices[(ProtocolDisplayItem)e.NewItems[i]!] = e.NewStartingIndex + i;
+      }
+      else
+      {
+        _visibleIndicesDirty = true;
+      }
+
+      RequestOverviewUpdate(diagnosticsChanged: true);
     }
 
     private void ProtocolListBoxUI_Loaded(object sender, RoutedEventArgs e)
@@ -315,8 +315,28 @@ namespace Ask.UI.Components.ProtocolListBox
 
     private void ProtocolScrollViewer_ScrollChanged(object sender, ScrollChangedEventArgs e)
     {
-      RefreshVerticalScrollBar();
-      RequestOverviewUpdate(diagnosticsChanged: false);
+      if (e.VerticalChange != 0 && e.ExtentHeightChange == 0)
+      {
+        _followTail = IsScrolledToEnd();
+      }
+
+      RequestScrollMetricsUpdate();
+    }
+
+    private void RequestScrollMetricsUpdate()
+    {
+      if (_scrollMetricsUpdateRequested)
+      {
+        return;
+      }
+
+      _scrollMetricsUpdateRequested = true;
+      Dispatcher.BeginInvoke(() =>
+      {
+        _scrollMetricsUpdateRequested = false;
+        RefreshVerticalScrollBar();
+        RefreshErrorOverviewViewport();
+      }, DispatcherPriority.Render);
     }
 
     private void RefreshVerticalScrollBar()
@@ -333,6 +353,7 @@ namespace Ask.UI.Components.ProtocolListBox
 
     private void ProtocolVerticalScrollBar_Scroll(object sender, ScrollEventArgs e)
     {
+      _followTail = false;
       _protocolScrollViewer?.ScrollToVerticalOffset(e.NewValue);
     }
 
@@ -385,8 +406,11 @@ namespace Ask.UI.Components.ProtocolListBox
           positions[diagnostic.LineNumber] = ProjectOverviewOffset(index, anchors) / extent;
       }
       errorOverviewBar.SetLinePositions(positions, fraction =>
+      {
+        _followTail = false;
         _protocolScrollViewer!.ScrollToVerticalOffset(Math.Max(0,
-          fraction * _protocolScrollViewer.ExtentHeight - _protocolScrollViewer.ViewportHeight / 2)));
+          fraction * _protocolScrollViewer.ExtentHeight - _protocolScrollViewer.ViewportHeight / 2));
+      });
     }
 
     // Нереализованные строки виртуализированного списка оцениваются между измеренными границами.
@@ -608,6 +632,7 @@ namespace Ask.UI.Components.ProtocolListBox
         _pendingGroup = null;
         _lastMessageItem = null;
         _activeErrorMessage = null;
+        _followTail = true;
         _messageItems.Clear();
         _itemGroups.Clear();
         RefreshErrorOverview();
@@ -644,19 +669,10 @@ namespace Ask.UI.Components.ProtocolListBox
       });
     }
 
-    public async Task AppendLineAsync(ShowMessageModel showMessageModel, bool lastMessage = false)
+    public Task AppendLineAsync(ShowMessageModel showMessageModel, bool lastMessage = false)
     {
-      var queuedAt = Stopwatch.GetTimestamp();
-      var messageId = RuntimeHelpers.GetHashCode(showMessageModel);
-      var dispatcherQueueMs = 0d;
-      var uiWorkMs = 0d;
-
-      await Application.Current.Dispatcher.InvokeAsync(() =>
+      return InvokeOnUiAsync(() =>
       {
-        var uiWorkStarted = Stopwatch.GetTimestamp();
-        dispatcherQueueMs = Stopwatch.GetElapsedTime(queuedAt, uiWorkStarted).TotalMilliseconds;
-        var shouldScrollToEnd = IsScrolledToEnd();
-
         _historyMessages.Add(showMessageModel);
         AppendVisibleMessage(showMessageModel);
         _messageIndices[showMessageModel] = _historyMessages.Count - 1;
@@ -668,52 +684,22 @@ namespace Ask.UI.Components.ProtocolListBox
           FinalizeLatestCommandGroup();
         }
 
-        if (shouldScrollToEnd)
+        if (_followTail)
         {
           RequestScrollToEnd();
         }
-        RequestRenderTimingProbe(messageId);
-
-        uiWorkMs = Stopwatch.GetElapsedTime(uiWorkStarted).TotalMilliseconds;
-      }, DispatcherPriority.Background);
-
-      LogDebug(
-        $"[ProtocolOutputTiming] UI append completed: message={messageId}, " +
-        $"dispatcherQueueMs={dispatcherQueueMs:F1}, uiWorkMs={uiWorkMs:F1}, " +
-        $"totalMs={Stopwatch.GetElapsedTime(queuedAt).TotalMilliseconds:F1}, " +
-        $"thread={Environment.CurrentManagedThreadId}");
+      }, DispatcherPriority.DataBind);
     }
 
-    /// <summary>
-    /// Регистрирует задержку до ближайшего цикла отрисовки протокола.
-    /// </summary>
-    /// <param name="messageId">Идентификатор записи протокола.</param>
-    private void RequestRenderTimingProbe(int messageId)
+    private Task InvokeOnUiAsync(Action action, DispatcherPriority priority = DispatcherPriority.Normal)
     {
-      _pendingRenderEntries++;
-      _lastAppendTimestamp = Stopwatch.GetTimestamp();
-      _lastRenderedMessageId = messageId;
-
-      if (_renderProbePending)
+      if (Dispatcher.CheckAccess())
       {
-        return;
+        action();
+        return Task.CompletedTask;
       }
 
-      _renderProbePending = true;
-      Dispatcher.BeginInvoke(() =>
-      {
-        var entries = _pendingRenderEntries;
-        var lastMessageId = _lastRenderedMessageId;
-        var renderLatencyMs = Stopwatch.GetElapsedTime(_lastAppendTimestamp).TotalMilliseconds;
-
-        _pendingRenderEntries = 0;
-        _renderProbePending = false;
-
-        LogDebug(
-          $"[ProtocolOutputTiming] UI render turn reached: message={lastMessageId}, " +
-          $"batchedEntries={entries}, renderLatencyMs={renderLatencyMs:F1}, " +
-          $"thread={Environment.CurrentManagedThreadId}");
-      }, DispatcherPriority.Render);
+      return Dispatcher.InvokeAsync(action, priority).Task;
     }
 
     private void AppendVisibleMessage(ShowMessageModel model)
@@ -926,7 +912,7 @@ namespace Ask.UI.Components.ProtocolListBox
         _messageIndices[_historyMessages[i]] = i;
         AddOverviewDiagnostic(_historyMessages[i], i + 1);
       }
-      RequestOverviewUpdate();
+      RequestOverviewUpdate(immediate: true);
     }
 
     private void AddOverviewDiagnostic(ShowMessageModel message, int lineNumber)
@@ -944,7 +930,7 @@ namespace Ask.UI.Components.ProtocolListBox
           ? ErrorOverviewSeverity.Information : null;
 
     internal static bool IsOverviewError(ShowMessageModel message)
-      => message.Status == ShowMessageModel.MessageType.Error || message.ExecutionError ||
+      => message.Status is ShowMessageModel.MessageType.Error or ShowMessageModel.MessageType.NoResponse || message.ExecutionError ||
         ((message.Status == null || message.Status == ShowMessageModel.MessageType.Info) &&
          (ContainsErrorMarker(message.Header) || ContainsErrorMarker(message.Message)));
 
@@ -952,24 +938,31 @@ namespace Ask.UI.Components.ProtocolListBox
       => text?.Contains("[ERR]", StringComparison.OrdinalIgnoreCase) == true ||
          text?.Contains("[БРАК]", StringComparison.OrdinalIgnoreCase) == true;
 
-    private void RequestOverviewUpdate(bool diagnosticsChanged = true)
+    private void RequestOverviewUpdate(bool diagnosticsChanged = true, bool immediate = false)
     {
       _overviewDiagnosticsDirty |= diagnosticsChanged;
-      if (_overviewUpdatePending) return;
-      _overviewUpdatePending = true;
-      Dispatcher.BeginInvoke(() =>
+      if (immediate)
       {
-        _overviewUpdatePending = false;
-        if (_overviewDiagnosticsDirty)
-        {
-          _overviewDiagnosticsDirty = false;
-          errorOverviewBar.SetLineDiagnostics(_historyMessages.Count,
-            _overviewDiagnostics, NavigateToErrorOverviewLine);
-          RefreshOverviewPositions(_protocolScrollViewer?.ExtentHeight ?? 0);
-        }
-        UpdateOverviewSelection();
-        RefreshErrorOverviewViewport();
-      }, DispatcherPriority.Loaded);
+        FlushOverviewUpdate();
+      }
+      else if (!_overviewUpdateTimer.IsEnabled)
+      {
+        _overviewUpdateTimer.Start();
+      }
+    }
+
+    private void FlushOverviewUpdate()
+    {
+      _overviewUpdateTimer.Stop();
+      if (_overviewDiagnosticsDirty)
+      {
+        _overviewDiagnosticsDirty = false;
+        errorOverviewBar.SetLineDiagnostics(_historyMessages.Count,
+          _overviewDiagnostics, NavigateToErrorOverviewLine);
+        RefreshOverviewPositions(_protocolScrollViewer?.ExtentHeight ?? 0);
+      }
+      UpdateOverviewSelection();
+      RefreshErrorOverviewViewport();
     }
 
     private void UpdateOverviewSelection()
@@ -1027,6 +1020,8 @@ namespace Ask.UI.Components.ProtocolListBox
       }
 
       var targetMessage = _historyMessages[messageIndex];
+      // Пересчёт высоты виртуализированных строк при переходе не должен возвращать список в конец.
+      _followTail = false;
       _activeErrorMessage = targetMessage;
       _errorOverviewIndex = _errorOverviewDiagnostics.FindIndex(diagnostic =>
         diagnostic.LineNumber == lineNumber);
@@ -1093,6 +1088,7 @@ namespace Ask.UI.Components.ProtocolListBox
     private void RefreshVisibleState()
     {
       RestoreVisibleItems();
+      _followTail = true;
       RequestScrollToEnd();
     }
 
@@ -1198,6 +1194,11 @@ namespace Ask.UI.Components.ProtocolListBox
         ProtocolListBox.LayoutUpdated -= HandleLayoutUpdated;
         _scrollToEndRequested = false;
 
+        if (!_followTail)
+        {
+          return;
+        }
+
         _protocolScrollViewer ??= FindVisualChild<ScrollViewer>(ProtocolListBox);
         if (_protocolScrollViewer == null)
         {
@@ -1208,12 +1209,6 @@ namespace Ask.UI.Components.ProtocolListBox
       }
 
       ProtocolListBox.LayoutUpdated += HandleLayoutUpdated;
-
-      Dispatcher.BeginInvoke(() =>
-      {
-        ProtocolListBox.InvalidateMeasure();
-        ProtocolListBox.InvalidateArrange();
-      }, DispatcherPriority.Loaded);
     }
 
     /// <summary>
@@ -1305,6 +1300,7 @@ namespace Ask.UI.Components.ProtocolListBox
       {
         int index = Math.Max(0, Math.Min(lineNumber, DisplayItems.Count - 1));
         var item = DisplayItems[index];
+        _followTail = false;
         ProtocolListBox.SelectedItem = item;
         ProtocolListBox.ScrollIntoView(item);
       });

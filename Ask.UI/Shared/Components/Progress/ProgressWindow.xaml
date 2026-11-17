@@ -14,7 +14,7 @@
         Topmost="True">
     <Border CornerRadius="18"
             BorderThickness="1"
-            BorderBrush="{DynamicResource ActiveBorderSolidColorBrush}">
+            BorderBrush="{DynamicResource ProgressWindowBorderBrush}">
         <Border.Background>
             <SolidColorBrush Color="#01000000" />
         </Border.Background>
@@ -26,7 +26,7 @@
         </Border.Effect>
         <Grid ClipToBounds="True">
             <Border CornerRadius="17"
-                    Background="{DynamicResource SecondarySolidColorBrush}" />
+                    Background="{DynamicResource ProgressWindowBackgroundBrush}" />
             <Border CornerRadius="17"
                     Opacity="0.8">
                 <Border.Background>
@@ -48,11 +48,11 @@
 
                 <StackPanel Orientation="Horizontal">
                     <Grid Width="44" Height="44">
-                        <Ellipse Fill="{DynamicResource ActiveBorderSolidColorBrush}"
+                        <Ellipse Fill="{DynamicResource ProgressWindowAccentBrush}"
                                  Opacity="0.18" />
                         <Ellipse Width="22"
                                  Height="22"
-                                 Fill="{DynamicResource ActiveBorderSolidColorBrush}"
+                                 Fill="{DynamicResource ProgressWindowAccentBrush}"
                                  HorizontalAlignment="Center"
                                  VerticalAlignment="Center" />
                     </Grid>
@@ -63,11 +63,11 @@
                                    Text="Трансляция программы контроля"
                                    FontSize="19"
                                    FontWeight="SemiBold"
-                                   Foreground="{DynamicResource MainTitleSolidColorBrush}" />
+                                   Foreground="{DynamicResource ProgressWindowTitleBrush}" />
                         <TextBlock Text="Подготавливаем результат трансляции"
                                    Margin="0,4,0,0"
                                    FontSize="12"
-                                   Foreground="{DynamicResource ForegroundSolidColorBrush60}" />
+                                   Foreground="{DynamicResource ProgressWindowSecondaryTextBrush}" />
                     </StackPanel>
                 </StackPanel>
 
@@ -76,7 +76,7 @@
                            Margin="0,22,0,0"
                            FontSize="16"
                            FontWeight="SemiBold"
-                           Foreground="{DynamicResource ForegroundSolidColorBrush}"
+                           Foreground="{DynamicResource ProgressWindowTextBrush}"
                            Text="Подготовка..." />
 
                 <TextBlock x:Name="HintTextBlock"
@@ -84,14 +84,15 @@
                            Margin="0,10,0,0"
                            FontSize="13"
                            TextWrapping="Wrap"
-                           Foreground="{DynamicResource ForegroundSolidColorBrush60}"
+                           Foreground="{DynamicResource ProgressWindowSecondaryTextBrush}"
                            Text="Собираем данные для трансляции." />
 
                 <ProgressBar x:Name="progressBar"
                              Grid.Row="3"
                              Height="8"
                              Margin="0,18,0,0"
-                             Foreground="{DynamicResource ActiveBorderSolidColorBrush}"
+                             Background="{DynamicResource ProgressWindowTrackBrush}"
+                             Foreground="{DynamicResource ProgressWindowAccentBrush}"
                              IsIndeterminate="True" />
             </Grid>
         </Grid>

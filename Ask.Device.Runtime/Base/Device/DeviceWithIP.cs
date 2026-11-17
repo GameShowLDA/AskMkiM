@@ -102,6 +102,14 @@ namespace Ask.Device.Runtime.Base.Device
     /// <param name="ipString">Строковое представление IP-адреса.</param>
     internal void SetIPAddress(string ipString)
     {
+      // Повторное применение того же DTO сохраняет открытый канал UDP.
+      if (this is DeviceWithUdpIp &&
+          (!IPAddress.TryParse(ipString, out var nextAddress) || !IPAddress.Equals(nextAddress)))
+      {
+        (DeviceProtocol as IDisposable)?.Dispose();
+        DeviceProtocol = null!;
+      }
+
       if (IPAddress.TryParse(ipString, out IPAddress? ipAddress))
       {
         IPAddress = ipAddress;

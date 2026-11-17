@@ -120,6 +120,26 @@ public sealed class EhtResistanceManagerTests
     Assert.Equal("Ом", model.CabelResistanceUnit);
   }
 
+  [Fact(DisplayName = "ЭТ транслятор: отрицательная нижняя граница подчёркивается исходным диапазоном")]
+  public void ParameterPipeline_NegativeLowerBoundPreservesSourceFragment()
+  {
+    var model = CreateModel();
+    var context = ParameterContext.Create("10", "ЭТ", 10);
+    const string sourceLine = "10 ЭТ -1<Ом<1.11, 0.13Ом *К1/15,К1/20*";
+
+    var remainder = EhtParameterPipeline.Execute(
+      model,
+      "-1<Ом<1.11, 0.13Ом",
+      context);
+    UnparsedParametersManager.HandleUnparsedParameters(model, 10, remainder);
+
+    var error = Assert.Single(model.Errors);
+    Assert.Equal(ErrorCode.Eht_ResistanceLimitsConflict, error.Code);
+    Assert.Equal("-1<Ом<1.11", error.SourceFragment);
+    Assert.True(IssueSelectionHintResolver.TryResolve(error, sourceLine, out var hint));
+    Assert.Equal("-1<Ом<1.11", sourceLine.Substring(hint.StartIndex, hint.Length));
+  }
+
   private static EhtCommandModel CreateModel() => new()
   {
     CommandNumber = "10",

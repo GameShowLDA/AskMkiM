@@ -3,6 +3,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSupply;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
 using Ask.Core.Shared.Interfaces.ExecutionInterfaces;
@@ -130,6 +131,19 @@ namespace Ask.Engine.Tests.SelfControl
               _messageService,
               switcher3,
               multimeter);
+            break;
+
+          case DeviceType.PowerSupply when device is IPowerSupply powerSupply:
+            var numberPowerSupply = powerSupply.NumberChassis;
+            var switcher4 = (await SwitchingDevices.GetDevicesByNumberChassisAsync(numberPowerSupply)).FirstOrDefault();
+            await powerSupply.SelfTestManager.StartSelfCheck(
+              cancellationToken,
+              part,
+              settings,
+              _messageService,
+              powerSupply,
+              meter,
+              switcher4);
             break;
         }
       }

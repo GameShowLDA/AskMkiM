@@ -42,7 +42,7 @@
 
                      <Icons:SuccessIconControlV2 
                          Grid.Column="1"
-                         x:Name="Success" 
+                         x:Name="Success" ToolTip="Сохранить изменения настроек протокола"
                          Visibility="Collapsed"
                          Width="30"
                         Margin="10,0,0,0"
@@ -53,7 +53,7 @@
                         />
 
                      <Icons:ErrorIconControlV2 
-                       x:Name="Error"
+                       x:Name="Error" ToolTip="Отменить изменения и восстановить сохранённые настройки протокола"
                          Grid.Column="2"
                        Visibility="Collapsed"
                        Width="30"
@@ -222,6 +222,7 @@
                                                    VerticalAlignment="Center"/>
 
                                 <Icons:RepeatIcon x:Name="RestartClearProtocol"
+                                                  ToolTip="Восстановить сохранённый текст протокола"
                                                   Margin="8,0,0,0"
                                                   Size="20"
                                                   PreviewMouseDown="RepeatIcon_PreviewMouseDown"/>
@@ -263,6 +264,7 @@
                                                    VerticalAlignment="Center"/>
 
                                 <Icons:RepeatIcon x:Name="RestartClearProtocolErrors"
+                                                  ToolTip="Восстановить сохранённый текст протокола ошибок"
                                                   Margin="8,0,0,0"
                                                   Size="20"
                                                   PreviewMouseDown="RepeatErrorIcon_PreviewMouseDown"/>

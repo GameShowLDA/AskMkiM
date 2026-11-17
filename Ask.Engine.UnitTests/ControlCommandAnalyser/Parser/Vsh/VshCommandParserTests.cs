@@ -75,7 +75,10 @@ namespace Ask.Engine.UnitTests.ControlCommandAnalyser.Parser.Vsh
                 "30 ВШ *2Ш:999*"
               }));
 
-      Assert.NotEmpty(model.Errors);
+      Assert.Equal(
+        "2Ш:999",
+        Assert.Single(model.Errors, error => error.Code == Ask.Core.Services.Errors.Models.ErrorCode.Vsh_InvalidRackNumber)
+          .SourceFragment);
     }
 
     [Fact]

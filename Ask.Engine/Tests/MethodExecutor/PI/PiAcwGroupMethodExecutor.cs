@@ -78,6 +78,7 @@ namespace Ask.Engine.Tests.MethodExecutor.PI
 
         await breakDown.AcwManger.Mode.SetModeAsync(messageService);
         await breakDown.AcwManger.Voltage.SetVoltageAsync(dataModel.Voltage, messageService);
+        breakDown.Time.SetTargetTime(dataModel.Time);
         await breakDown.AcwManger.Time.SetTestTimeAsync(dataModel.Time, messageService);
         await breakDown.AcwManger.Time.SetRampTimeAsync(dataModel.RampTime, messageService);
         await breakDown.AcwManger.CurrentLimits.SetHighCurrentLimitAsync(dataModel.Param, messageService);

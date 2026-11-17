@@ -66,16 +66,17 @@ namespace Ask.Engine.Tests.Metrology
     private async Task ExecuteMeasurementProcess(ActionSettings settings, IUserInteractionService _messageService, IInputFieldProvider inputFieldProvider, IInputHighlightService inputHighlightService, CancellationToken cancellationToken)
     {
       var data = await EnsureValidMetrologyInputAsync(inputFieldProvider, _messageService, metrologyMode: metrologicalModeRole, timeCheck: true, timeRampCheck: true);
-      await testMeasurement.ConnectToEquipment(data.FirstPoint, data.SecondPoint, metrologicalModeRole, _messageService);
-      await testMeasurement.SetupCommutation(_messageService, data.FirstPoint, data.SecondPoint, metrologicalModeRole);
-      await testMeasurement.ConfigureMeter(_messageService, metrologicalModeRole, data);
-
       var tolerance = await MeasurementToleranceCalculator.TryCalculateAsync(
         MeasurementTypeCommand.PI_DCW,
         data.Param,
         _messageService);
       if (tolerance == null)
         return;
+
+      await testMeasurement.ConnectToEquipment(data.FirstPoint, data.SecondPoint, metrologicalModeRole, _messageService);
+      await testMeasurement.SetupCommutation(_messageService, data.FirstPoint, data.SecondPoint, metrologicalModeRole);
+      await testMeasurement.ConfigureMeter(_messageService, metrologicalModeRole, data);
+
 
       await _messageService.AppendEmptyLineAsync();
       await UserActionHelper.RunWithUserRepeatAsync(async () => await testMeasurement.PerformMeasurement(metrologicalModeRole, data.Param, _messageService), _messageService, true);
@@ -86,7 +87,7 @@ namespace Ask.Engine.Tests.Metrology
       return _userInteractionService;
     }
 
-    private class PiMeasurement : BaseMeasurement
+    internal class PiMeasurement : BaseMeasurement
     {
       private IReferenceVoltageRequestService _reference;
 
@@ -105,6 +106,7 @@ namespace Ask.Engine.Tests.Metrology
 
         await breakDown.ConnectableManager.InitializeAsync(messageService);
         await breakDown.DcwManger.Mode.SetModeAsync(messageService);
+        breakDown.Time.SetTargetTime(dataModel.Time);
         await breakDown.DcwManger.Time.SetTestTimeAsync(dataModel.Time, messageService);
         await breakDown.DcwManger.Time.SetRampTimeAsync(dataModel.RampTime, messageService);
         await breakDown.DcwManger.CurrentLimits.SetLowCurrentLimitAsync(0, messageService);

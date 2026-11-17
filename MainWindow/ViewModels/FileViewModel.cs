@@ -23,6 +23,10 @@ namespace MainWindowProgram.ViewModels
     [RelayCommand]
     private void OpenFile() => _fileService.OpenFileAsync();
 
+    /// <summary>Команда открытия файла из истории.</summary>
+    [RelayCommand]
+    private void OpenRecentFile(string filePath) => _fileService.OpenFileAsync(filePath);
+
     /// <summary>Команда сохранения файла.</summary>
     [RelayCommand]
     private void SaveFile() => _fileService.SaveFileAsync();
@@ -43,13 +47,11 @@ namespace MainWindowProgram.ViewModels
     [RelayCommand]
     private void ExitApplication() => _fileService.ExitApplicationAsync();
 
-    /// <summary>Команда поиска по файлу.</summary>
-    [RelayCommand]
-    private async Task SearchFile() => await _fileService.SearchFileAsync();
 
-    /// <summary>Команда открытия окна поиска в режиме замены.</summary>
+
+    /// <summary>Открывает панель поиска.</summary>
     [RelayCommand]
-    private async Task SearchReplaceFile() => await _fileService.SearchReplaceFileAsync();
+    private void SearchFile() => _fileService.ShowSearchPanel();
 
     /// <summary>Команда открытия выбора файлов для сравнения.</summary>
     [RelayCommand]

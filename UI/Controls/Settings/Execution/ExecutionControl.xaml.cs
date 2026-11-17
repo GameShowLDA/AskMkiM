@@ -32,6 +32,7 @@ namespace UI.Controls.Settings.Execution
   public partial class ExecutionControl : UserControl
   {
     private bool _isInitialized;
+    private bool _isExecutionModelSavedSubscribed;
     private bool _isHardwareErrorSimulationRefreshRunning;
     private int _hardwareErrorSimulationRefreshVersion;
     private sealed record ErroneousMeasurementOption(TypeErroneousMeasurement Value, string Title);
@@ -62,6 +63,7 @@ namespace UI.Controls.Settings.Execution
     {
       InitializeComponent();
       Loaded += ExecutionControl_Loaded;
+      Unloaded += ExecutionControl_Unloaded;
       EventAggregator.Subscribe<SystemStateEvents.PowerChanged>(e => ChangeVisible(e.IsPowered));
       EventAggregator.Subscribe<SystemStateEvents.DeviceConfigurationChanged>(OnDeviceConfigurationChanged);
       ChangeVisible(SystemStateManager.GetIsActivePower());
@@ -134,7 +136,6 @@ namespace UI.Controls.Settings.Execution
       {
         StopInError.CheckedChanged += CheckedChanged;
         RepeatMeasurement.CheckedChanged += CheckedChanged;
-        StepByStepMode.CheckedChanged += CheckedChanged;
         ErroneousMeasurementTypeSelect.ValueChanged += ErroneousMeasurementTypeChanged;
         IdleMode.CheckedChanged += IdleMode_CheckedChanged;
 
@@ -145,9 +146,39 @@ namespace UI.Controls.Settings.Execution
         _isInitialized = true;
       }
 
+      if (!_isExecutionModelSavedSubscribed)
+      {
+        ExecutionConfig.ExecutionModelSaved += OnExecutionModelSaved;
+        _isExecutionModelSavedSubscribed = true;
+      }
+
       Error.Visibility = Visibility.Collapsed;
       Success.Visibility = Visibility.Collapsed;
       HasUnsavedChanges = false;
+    }
+
+    private void ExecutionControl_Unloaded(object sender, RoutedEventArgs e)
+    {
+      if (_isExecutionModelSavedSubscribed)
+      {
+        ExecutionConfig.ExecutionModelSaved -= OnExecutionModelSaved;
+        _isExecutionModelSavedSubscribed = false;
+      }
+    }
+
+    private void OnExecutionModelSaved(SettingsExecutionDto model)
+    {
+      if (!Dispatcher.CheckAccess())
+      {
+        Dispatcher.BeginInvoke(() => OnExecutionModelSaved(model));
+        return;
+      }
+
+      _baseExecutionModel.StopOnError = model.StopOnError;
+      _baseExecutionModel.RepeatMeasurement = model.RepeatMeasurement;
+      StopInError.IsChecked = model.StopOnError;
+      RepeatMeasurement.IsChecked = model.RepeatMeasurement;
+      CheckedChanged(null, false);
     }
     /// <summary>
     /// Клик по галочке «сохранить»: сохраняет текущую модель,
@@ -225,7 +256,6 @@ namespace UI.Controls.Settings.Execution
       {
         StopOnError = StopInError.IsChecked,
         RepeatMeasurement = RepeatMeasurement.IsChecked,
-        StepByStepMode = StepByStepMode.IsChecked,
         ErroneousMeasurementType = ErroneousMeasurementTypeSelect.SelectedValue is TypeErroneousMeasurement selectedType
           ? selectedType
           : _baseExecutionModel.ErroneousMeasurementType,
@@ -246,7 +276,6 @@ namespace UI.Controls.Settings.Execution
       a.IdleModeExecution == b.IdleModeExecution &&
       a.ErroneousMeasurementType == b.ErroneousMeasurementType &&
       a.IsHardwareErrorSimulationMode == b.IsHardwareErrorSimulationMode &&
-      a.StepByStepMode == b.StepByStepMode &&
       a.StopOnError == b.StopOnError &&
       a.RepeatMeasurement == b.RepeatMeasurement &&
       a.LegacyCompatibilityMode == b.LegacyCompatibilityMode &&
@@ -265,7 +294,6 @@ namespace UI.Controls.Settings.Execution
         item.Card.IsChecked = item.SavedValue;
       }
 
-      StepByStepMode.IsChecked = _baseExecutionModel.StepByStepMode;
       StopInError.IsChecked = _baseExecutionModel.StopOnError;
       RepeatMeasurement.IsChecked = _baseExecutionModel.RepeatMeasurement;
       CompatibilityModeCheckBox.IsChecked = _baseExecutionModel.LegacyCompatibilityMode;

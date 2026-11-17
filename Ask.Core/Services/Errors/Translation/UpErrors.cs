@@ -20,12 +20,13 @@ namespace Ask.Core.Services.Errors.Translation
     /// <summary>
     /// Ошибка: в команде УП указана ссылка на саму себя.
     /// </summary>
-    public static ErrorItem SelfReferenceJump(int lineNumber, string command) => new()
+    public static ErrorItem SelfReferenceJump(string label, int lineNumber, string command) => new()
     {
       SourceLineNumber = lineNumber,
       Command = command,
       Code = ErrorCode.Up_SelfReferenceJump,
-      Description = "В команде УП указана ссылка на саму себя."
+      Description = "В команде УП указана ссылка на саму себя.",
+      SourceFragment = label
     };
 
     /// <summary>
@@ -36,7 +37,8 @@ namespace Ask.Core.Services.Errors.Translation
       SourceLineNumber = lineNumber,
       Command = command,
       Code = ErrorCode.Up_UpLabelNotFound,
-      Description = $"Метка перехода '{label}' не найдена среди команд."
+      Description = $"Метка перехода '{label}' не найдена среди команд.",
+      SourceFragment = label
     };
 
     /// <summary>
@@ -47,7 +49,8 @@ namespace Ask.Core.Services.Errors.Translation
       SourceLineNumber = lineNumber,
       Command = command,
       Code = ErrorCode.Up_UpLabelNotFound, // Можно добавить отдельный ErrorCode, если требуется
-      Description = $"Метка перехода '{label}' должна быть больше номера текущей команды ({current})."
+      Description = $"Метка перехода '{label}' должна быть больше номера текущей команды ({current}).",
+      SourceFragment = label
     };
 
     /// <summary>
@@ -58,7 +61,8 @@ namespace Ask.Core.Services.Errors.Translation
       SourceLineNumber = lineNumber,
       Command = command,
       Code = ErrorCode.Up_MissingOrInvalidUpLabel,
-      Description = $"Метка перехода '{label}' должна быть целым числом."
+      Description = $"Метка перехода '{label}' должна быть целым числом.",
+      SourceFragment = label
     };
   }
 }

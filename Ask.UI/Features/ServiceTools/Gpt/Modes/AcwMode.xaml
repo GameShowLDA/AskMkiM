@@ -116,7 +116,7 @@
                                 <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
                                 <TextBlock Text="Напряжение ACW" Style="{StaticResource ParameterLabelStyle}"/>
                                 <shared:NumericComboBox x:Name="VoltageSlider" Grid.Column="1"
-                                                        Minimum="100" Maximum="1000" Increment="100" Unit="В"/>
+                                                        Unit="В"/>
                             </Grid>
                         </Border>
                         <Border Grid.Row="2" Style="{StaticResource ParameterRowStyle}">

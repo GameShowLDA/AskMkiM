@@ -1,3 +1,4 @@
+using Ask.Core.Shared.DTO.Devices.PowerSupply;
 using Ask.Core.Shared.DTO.Devices.Breakdown;
 using Ask.Core.Shared.DTO.Devices.ChassisManager;
 using Ask.Core.Shared.DTO.Devices.FastMeter;
@@ -13,6 +14,8 @@ namespace UI.Controls.Settings.Configuration;
 /// </summary>
 public sealed class DeviceConfigurationFileModel
 {
+  public List<PowerSupplyDto> PowerSupplies { get; set; } = new();
+
   public int Version { get; set; }
 
   public DateTime ExportedAtUtc { get; set; }

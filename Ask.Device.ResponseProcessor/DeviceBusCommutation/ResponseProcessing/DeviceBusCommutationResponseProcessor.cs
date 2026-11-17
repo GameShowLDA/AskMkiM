@@ -360,8 +360,10 @@ public static class DeviceBusCommutationResponseProcessor
     bool result,
     IUserInteractionService? outputService)
     => detail == null
-      ? DeviceMessages.PublishOperationResultAsync(device, operation, result, 1, outputService)
-      : DeviceMessages.PublishOperationResultAsync(device, operation, detail, result, 1, outputService);
+      ? DeviceMessages.PublishOperationResultAsync(
+        device, operation, result, 1, outputService, forceDisplay: true)
+      : DeviceMessages.PublishOperationResultAsync(
+        device, operation, detail, result, 1, outputService, forceDisplay: true);
 
   /// <summary>
   /// Публикует результат с учётом настройки отображения информации о подключениях.

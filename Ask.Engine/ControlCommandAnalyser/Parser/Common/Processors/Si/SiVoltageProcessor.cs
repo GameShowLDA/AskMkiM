@@ -40,10 +40,15 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Processors.Si
           model,
           value,
           unit,
-          breakdown.IrMinVoltage,
-          breakdown.IrMaxVoltage,
+          breakdown.IrManger.VoltageRange.MinVoltage,
+          breakdown.IrManger.VoltageRange.MaxVoltage,
           ctx.LineNumber,
           $"{ctx.CommandNumber} {ctx.Mnemonic}");
+
+      if (value >= breakdown.IrManger.VoltageRange.MinVoltage && value <= breakdown.IrManger.VoltageRange.MaxVoltage
+          && !breakdown.IrManger.VoltageRange.IsAllowed(value))
+        model.Errors.Add(GeneralErrors.VoltageConflict(ctx.LineNumber, $"{ctx.CommandNumber} {ctx.Mnemonic}",
+          $"Напряжение {value} В не соответствует шагу {breakdown.IrManger.VoltageRange.Step} В и отсутствует в списке исключений."));
 
       return rest;
     }

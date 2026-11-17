@@ -25,8 +25,7 @@ namespace Ask.Core.Shared.Metadata.Static
       {
         Ranges = new List<MeasurementErrorRangeEntity>
         {
-          new MeasurementErrorRangeEntity { MinValue = 0.001, MaxValue = 1000000, NumericError = 0.8, PercentageError = 1 },
-          new MeasurementErrorRangeEntity { MinValue = 1000001, PercentageError = 5 },
+          new MeasurementErrorRangeEntity { MinValue = 1, MaxValue = 10000000, NumericError = 0.8, PercentageError = 1 },
         }
       },
 
@@ -34,7 +33,7 @@ namespace Ask.Core.Shared.Metadata.Static
       {
         Ranges = new List<MeasurementErrorRangeEntity>
         {
-          new MeasurementErrorRangeEntity { MinValue = 0.2, MaxValue = 100000, NumericError = 0.5, PercentageError = 5  },
+          new MeasurementErrorRangeEntity { MinValue = 100, MaxValue = 100000, NumericError = 0.5, PercentageError = 5  },
         }
       },
 
@@ -82,7 +81,7 @@ namespace Ask.Core.Shared.Metadata.Static
       {
         Ranges = new List<MeasurementErrorRangeEntity>
         {
-          new MeasurementErrorRangeEntity { MinValue = 50,  MaxValue = 650, NumericError = 3,  PercentageError = 2 },
+          new MeasurementErrorRangeEntity { MinValue = 50,  MaxValue = 650, NumericError = 0,  PercentageError = 5 },
         }
       },
 
@@ -90,8 +89,7 @@ namespace Ask.Core.Shared.Metadata.Static
       {
         Ranges = new List<MeasurementErrorRangeEntity>
         {
-          new MeasurementErrorRangeEntity { MinValue = 0.1, MaxValue = 1, NumericError = 0.05 },
-          new MeasurementErrorRangeEntity { MinValue = 1, MaxValue = 100, PercentageError = 5 },
+          new MeasurementErrorRangeEntity { MinValue = 0.1, MaxValue = 100, NumericError = 0.05,  PercentageError = 1 },
         }
       },
     };

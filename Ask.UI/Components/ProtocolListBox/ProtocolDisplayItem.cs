@@ -58,6 +58,9 @@ namespace Ask.UI.Components.ProtocolListBox
           return;
 
         _areServiceLogsExpanded = value;
+        // Текст обновляется до показа блока; свёрнутые записи не требуют повторной склейки.
+        if (value)
+          OnPropertyChanged(nameof(ServiceLogText));
         OnPropertyChanged();
       }
     }
@@ -65,8 +68,10 @@ namespace Ask.UI.Components.ProtocolListBox
     public void AddServiceLog(string log)
     {
       ServiceLogs.Add(log);
-      OnPropertyChanged(nameof(HasServiceLogs));
-      OnPropertyChanged(nameof(ServiceLogText));
+      if (ServiceLogs.Count == 1)
+        OnPropertyChanged(nameof(HasServiceLogs));
+      if (AreServiceLogsExpanded)
+        OnPropertyChanged(nameof(ServiceLogText));
     }
 
     /// <summary>

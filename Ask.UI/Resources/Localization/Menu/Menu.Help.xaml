@@ -3,6 +3,7 @@
                     xmlns:LocalizeStrings="clr-namespace:Ask.UI.Infrastructure.Localization">
 
     <LocalizeStrings:LocalizedString x:Key="LS_Menu_Help" Key="menu.help" />
+    <LocalizeStrings:LocalizedString x:Key="LS_Menu_Help_ReleaseNotes" Key="menu.help.releaseNotes" />
     <LocalizeStrings:LocalizedString x:Key="LS_Menu_Help_GeneralInformation" Key="menu.help.generalInformation"/>
     <LocalizeStrings:LocalizedString x:Key="LS_Menu_Help_MainMenu" Key="menu.help.mainMenu"/>
     <LocalizeStrings:LocalizedString x:Key="LS_Menu_Help_LanguageControlPrograms" Key="menu.help.languageControlPrograms"/>

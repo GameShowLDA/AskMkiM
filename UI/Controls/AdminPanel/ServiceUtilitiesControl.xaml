@@ -59,7 +59,7 @@
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="2*"/>
                 </Grid.ColumnDefinitions>
 
                 <StackPanel VerticalAlignment="Center">
@@ -82,6 +82,7 @@
                         BorderBrush="{DynamicResource SettingCardBorderBrush}"
                         BorderThickness="1"
                         CornerRadius="12">
+                    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
                     <StackPanel Orientation="Horizontal">
                         <RadioButton x:Name="SetCommandTab"
                                      GroupName="UtilityNavigation"
@@ -108,7 +109,12 @@
                                      Content="Мультиметры"
                                      Style="{StaticResource MacSegmentStyle}"
                                      Checked="MultimeterTab_Checked"/>
+                        <RadioButton GroupName="UtilityNavigation"
+                                     Content="Источники питания"
+                                     Style="{StaticResource MacSegmentStyle}"
+                                     Checked="PowerSupplyTab_Checked"/>
                     </StackPanel>
+                    </ScrollViewer>
                 </Border>
             </Grid>
         </Border>

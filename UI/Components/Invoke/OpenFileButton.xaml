@@ -23,9 +23,9 @@
     </UserControl.Style>
 
     <Border x:Name="ButtonPage"
-            Margin="10,3,4,1"
+            Margin="6,3,2,1"
             Padding="10,1,8,1"
-            CornerRadius="8,8,0,0"
+            CornerRadius="6"
             SnapsToDevicePixels="True">
         <Border.Style>
             <Style TargetType="Border">

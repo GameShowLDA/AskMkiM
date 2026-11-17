@@ -51,12 +51,44 @@ public sealed class ProtocolHotkeyControllerTests
   [InlineData(Key.F11, true)]
   public Task StepKey_WhenPressed_InvokesExpectedStep(Key key, bool isStepInto) => RunOnStaAsync(() =>
   {
-    var context = new RecordingHotkeyContext();
+    var context = new RecordingHotkeyContext { CanContinue = true };
     var args = CreateKeyEventArgs(key);
 
     new ProtocolHotkeyController(context).HandleKeyDown(this, args);
 
     Assert.Equal([isStepInto], context.StepModes);
+    Assert.True(args.Handled);
+  });
+
+  [Theory(DisplayName = "F10/F11 во время выполнения не меняют состояние кнопок")]
+  [InlineData(Key.F10)]
+  [InlineData(Key.F11)]
+  public Task StepKey_WhenRunIsActive_DoesNotChangePauseOrExit(Key key) => RunOnStaAsync(() =>
+  {
+    var context = new RecordingHotkeyContext { CanPause = true, CanExit = true };
+    var args = CreateKeyEventArgs(key);
+
+    new ProtocolHotkeyController(context).HandleKeyDown(this, args, ModifierKeys.None);
+
+    Assert.Empty(context.StepModes);
+    Assert.Equal(0, context.StartCount);
+    Assert.Equal(0, context.PauseCount);
+    Assert.Equal(0, context.ExitCount);
+    Assert.True(args.Handled);
+  });
+
+  [Theory(DisplayName = "F10/F11 в состоянии готовности не запускают выполнение")]
+  [InlineData(Key.F10)]
+  [InlineData(Key.F11)]
+  public Task StepKey_WhenOnlyStartIsAvailable_DoesNotStart(Key key) => RunOnStaAsync(() =>
+  {
+    var context = new RecordingHotkeyContext { CanStart = true };
+    var args = CreateKeyEventArgs(key);
+
+    new ProtocolHotkeyController(context).HandleKeyDown(this, args, ModifierKeys.None);
+
+    Assert.Empty(context.StepModes);
+    Assert.Equal(0, context.StartCount);
     Assert.True(args.Handled);
   });
 
@@ -168,6 +200,8 @@ public sealed class ProtocolHotkeyControllerTests
 
     public int RunOrPauseCount { get; private set; }
 
+    public int StartCount { get; private set; }
+
     public int PauseCount { get; private set; }
 
     public int ContinueCount { get; private set; }
@@ -182,6 +216,7 @@ public sealed class ProtocolHotkeyControllerTests
 
     public void Start()
     {
+      StartCount++;
     }
 
     public void RunOrPause() => RunOrPauseCount++;

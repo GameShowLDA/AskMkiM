@@ -1,3 +1,4 @@
+using Ask.Core.Services.Errors.Device;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
@@ -115,7 +116,7 @@ namespace Ask.Device.Runtime.Function.GPT.Managment
 
         return 0;
       }
-      catch
+      catch (Exception ex) when (ex is not DeviceNoResponseException)
       {
         return 0;
       }

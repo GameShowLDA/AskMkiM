@@ -40,18 +40,43 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border x:Name="ButtonChrome"
-                                Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="4"
-                                SnapsToDevicePixels="True">
+                        <Grid SnapsToDevicePixels="True">
+                            <Border x:Name="ButtonChrome"
+                                    Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="6"/>
+                            <Border x:Name="HoverOverlay"
+                                    Background="{DynamicResource TestsInteractivePressedSolidColorBrush}"
+                                    CornerRadius="6"
+                                    Opacity="0"
+                                    IsHitTestVisible="False"/>
                             <ContentPresenter Margin="{TemplateBinding Padding}"
                                               HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
                                               VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
-                        </Border>
+                        </Grid>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
+                                <Trigger.EnterActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="HoverOverlay"
+                                                             Storyboard.TargetProperty="Opacity"
+                                                             To="0.12"
+                                                             Duration="0:0:0.12"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.EnterActions>
+                                <Trigger.ExitActions>
+                                    <BeginStoryboard>
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="HoverOverlay"
+                                                             Storyboard.TargetProperty="Opacity"
+                                                             To="0"
+                                                             Duration="0:0:0.18"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </Trigger.ExitActions>
                                 <Setter TargetName="ButtonChrome" Property="Background" Value="{DynamicResource TestsInteractiveBackgroundSolidColorBrush}"/>
                                 <Setter TargetName="ButtonChrome" Property="BorderBrush" Value="{DynamicResource TestsInteractiveBorderSolidColorBrush}"/>
                             </Trigger>
@@ -85,7 +110,7 @@
 
     </UserControl.Resources>
 
-    <Grid>
+    <Grid Background="Transparent">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -95,7 +120,7 @@
         <Grid Grid.Row="0"
               Height="40"
               MaxHeight="40"
-              Margin="5"
+              Margin="8,4,8,6"
               Name="ProtocolManager"
               Visibility="Collapsed">
             <Grid.ColumnDefinitions>
@@ -110,6 +135,7 @@
                     Style="{DynamicResource SettingCardStyle}">
                 <Grid>
                     <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="Auto"/>
@@ -137,8 +163,13 @@
                                               Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" />
                     </Button>
 
+                    <Button Grid.Column="2" Margin="8,0,0,0" VerticalAlignment="Center"
+                            Click="ExportExecutionPdfButton_Click" ToolTip="Экспортировать протокол в PDF"
+                            Style="{StaticResource ActionButtonStyle}">
+                        <Icons:ExportConfigIcon Size="16" Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}"/>
+                    </Button>
                     <Button x:Name="PrintButton"
-                            Grid.Column="2"
+                            Grid.Column="3"
                             Margin="8,0,0,0"
                             VerticalAlignment="Center"
                             Click="PrintButton_Click"
@@ -150,7 +181,7 @@
                     </Button>
 
                     <TextBlock x:Name="FileName"
-                               Grid.Column="3"
+                               Grid.Column="4"
                                FontSize="16"
                                Margin="12,0"
                                FontFamily="{DynamicResource WinstonBold}"
@@ -170,6 +201,7 @@
                     Style="{DynamicResource SettingCardStyle}">
                 <Grid>
                     <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="Auto"/>
@@ -195,7 +227,12 @@
                                               Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" />
                     </Button>
 
-                    <Button Grid.Column="2"
+                    <Button Grid.Column="2" Margin="8,0,0,0" VerticalAlignment="Center"
+                            Click="ExportInspectionPdfButton_Click" ToolTip="Экспортировать протокол в PDF"
+                            Style="{StaticResource ActionButtonStyle}">
+                        <Icons:ExportConfigIcon Size="16" Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}"/>
+                    </Button>
+                    <Button Grid.Column="3"
                             Margin="8,0,0,0"
                             VerticalAlignment="Center"
                             Click="PrintInspectionButton_Click"
@@ -207,7 +244,7 @@
                     </Button>
 
                     <TextBlock x:Name="InspectionFileName"
-                               Grid.Column="3"
+                               Grid.Column="4"
                                FontSize="16"
                                Margin="12,0"
                                FontFamily="{DynamicResource WinstonBold}"
@@ -220,7 +257,7 @@
             </Border>
         </Grid>
 
-        <Grid Grid.Row="1" Background="{DynamicResource IsCheckedColorSolidColorBrush}" Name="TopMenuButton" MinHeight="40" Visibility="{Binding IsTopMenuVisible, Converter={StaticResource BoolToVis}}">
+        <Grid Grid.Row="1" Background="Transparent" Name="TopMenuButton" MinHeight="40" Margin="8,4,8,6" Visibility="{Binding IsTopMenuVisible, Converter={StaticResource BoolToVis}}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
@@ -230,7 +267,17 @@
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
+
+            <Border Grid.ColumnSpan="10"
+                    Background="{DynamicResource SettingsNestedGroupBackgroundSolidColorBrush}"
+                    BorderBrush="{DynamicResource TopPanelHoverBackgroundBrush}"
+                    BorderThickness="1"
+                    CornerRadius="12"
+                    Opacity="0.85"
+                    IsHitTestVisible="False"/>
 
             <Button x:Name="ContinueButtonTop" Grid.Column="0" Style="{StaticResource TopMenuButtonStyle}" ToolTip="{Binding Source={StaticResource LS_Protocol_Tooltip_Continue}, Path=Value}">
                 <Icons:ContinueIcon Size="18" IsHitTestVisible="False"/>
@@ -258,20 +305,29 @@
                 <Icons:StopIcon Size="18" IsHitTestVisible="False"/>
             </Button>
 
-            <Button x:Name="RepeatButtonTop" Grid.Column="4" Style="{StaticResource TopMenuButtonStyle}" ToolTip="{Binding Source={StaticResource LS_Protocol_Tooltip_Repeat}, Path=Value}">
+            <Button x:Name="SkipCommandButtonTop"
+                    Grid.Column="4"
+                    Style="{StaticResource TopMenuButtonStyle}"
+                    ToolTip="{Binding Source={StaticResource LS_Protocol_Tooltip_SkipCommand}, Path=Value}"
+                    Click="SkipCommandButtonTop_Click"
+                    Visibility="{Binding ElementName=ContinueButtonTop, Path=Visibility}">
+                <Icons:NextCommandIcon Size="17" IsHitTestVisible="False"/>
+            </Button>
+
+            <Button x:Name="RepeatButtonTop" Grid.Column="5" Style="{StaticResource TopMenuButtonStyle}" ToolTip="{Binding Source={StaticResource LS_Protocol_Tooltip_Repeat}, Path=Value}">
                 <Icons:RepeatIcon Size="18" IsHitTestVisible="False"/>
             </Button>
 
-            <Button x:Name="StepOverTop" Grid.Column="5" Style="{StaticResource TopMenuButtonStyle}" ToolTip="{Binding Source={StaticResource LS_Protocol_Tooltip_StepOver}, Path=Value}">
+            <Button x:Name="StepOverTop" Grid.Column="6" Style="{StaticResource TopMenuButtonStyle}" ToolTip="{Binding Source={StaticResource LS_Protocol_Tooltip_StepOver}, Path=Value}">
                 <Icons:StepOverIcon Size="17" IsHitTestVisible="False"/>
             </Button>
 
-            <Button x:Name="StepIntoTop" Grid.Column="6" Style="{StaticResource TopMenuButtonStyle}" ToolTip="{Binding Source={StaticResource LS_Protocol_Tooltip_StepInto}, Path=Value}">
+            <Button x:Name="StepIntoTop" Grid.Column="7" Style="{StaticResource TopMenuButtonStyle}" ToolTip="{Binding Source={StaticResource LS_Protocol_Tooltip_StepInto}, Path=Value}">
                 <Icons:StepIntoIcon Size="17" IsHitTestVisible="False"/>
             </Button>
 
             <Button x:Name="CommandJumpButtonTop"
-                    Grid.Column="7"
+                    Grid.Column="8"
                     Style="{StaticResource TopMenuButtonStyle}"
                     ToolTip="{Binding Source={StaticResource LS_Protocol_Tooltip_CommandJump}, Path=Value}"
                     Click="CommandJumpButtonTop_Click"
@@ -279,17 +335,71 @@
                 <Icons:FastForwardIcon Size="17" IsHitTestVisible="False"/>
             </Button>
 
+            <Button x:Name="ExecutionSettingsButtonTop"
+                    Grid.Column="9"
+                    Style="{StaticResource TopMenuButtonStyle}"
+                    Foreground="{DynamicResource ForegroundSolidColorBrush}"
+                    ToolTip="Настройки выполнения"
+                    Visibility="Collapsed"
+                    Click="ExecutionSettingsButtonTop_Click">
+                <Icons:SettingsGearIcon Size="17"
+                                        Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}"
+                                        IsHovering="False"/>
+            </Button>
+
+            <Popup x:Name="ExecutionSettingsPopup"
+                   PlacementTarget="{Binding ElementName=ExecutionSettingsButtonTop}"
+                   Placement="Bottom"
+                   StaysOpen="False"
+                   AllowsTransparency="True"
+                   PopupAnimation="None">
+                <Border Padding="10"
+                        Background="{DynamicResource SettingsPanelBackgroundSolidColorBrush}"
+                        BorderBrush="{DynamicResource SettingsPanelBorderSolidColorBrush}"
+                        BorderThickness="1"
+                        CornerRadius="8">
+                    <StackPanel MinWidth="260">
+                        <TextBlock Text="Поведение при ошибке"
+                                   Margin="6,2,6,8"
+                                   Style="{DynamicResource SettingsHeaderStyle}"/>
+                        <CheckBox x:Name="RepeatMeasurementToggle"
+                                  Content="Повтор измерения"
+                                  Style="{DynamicResource SettingsCheckBox2}"
+                                  Margin="6,5"
+                                  Foreground="{DynamicResource ForegrounfBrushes}"
+                                  FontFamily="{DynamicResource WinstonLight}"
+                                  FontSize="13"
+                                  Checked="ExecutionSetting_Changed"
+                                  Unchecked="ExecutionSetting_Changed"/>
+                        <CheckBox x:Name="StopOnErrorToggle"
+                                  Content="Остановка при ошибке"
+                                  Style="{DynamicResource SettingsCheckBox2}"
+                                  Margin="6,5"
+                                  Foreground="{DynamicResource ForegrounfBrushes}"
+                                  FontFamily="{DynamicResource WinstonLight}"
+                                  FontSize="13"
+                                  Checked="ExecutionSetting_Changed"
+                                  Unchecked="ExecutionSetting_Changed"/>
+                        <TextBlock Text="Изменения применятся к следующим проверкам"
+                                   Margin="6,8,6,2"
+                                   Style="{DynamicResource SettingsDescriptionStyle}"/>
+                    </StackPanel>
+                </Border>
+            </Popup>
+
         </Grid>
 
-        <Border  Name="ButtonPanels" CornerRadius="0,0,0,0" Grid.Row="2" Background="{DynamicResource TestsProtocolBackgroundBrush}">
+        <Border Name="ButtonPanels" Grid.Row="2" Background="Transparent">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition x:Name="MenuButtonColumn" Width="Auto" MaxWidth="400"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <Border  Padding="0,0" Margin="5" CornerRadius="20" Name="MenuButton" Height="Auto" Width="Auto" Visibility="{Binding IsTopMenuVisible, Converter={StaticResource InverseBoolToVis}}" 
-                         Background="{DynamicResource TestsMainPanelBackgroundBrush}">
+                <Border Padding="0" Margin="8,2,6,8" CornerRadius="14" Name="MenuButton" Height="Auto" Width="Auto" Visibility="{Binding IsTopMenuVisible, Converter={StaticResource InverseBoolToVis}}"
+                        Background="{DynamicResource TestsMainPanelBackgroundBrush}"
+                        BorderBrush="{DynamicResource TopPanelHoverBackgroundBrush}"
+                        BorderThickness="1">
 
                     <Grid Height="Auto">
                         <Grid.RowDefinitions>
@@ -297,7 +407,7 @@
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
 
-                        <Border Background="{DynamicResource TestsInputBackgroundHeaderPanelBrush}" CornerRadius="20,20,0,0">
+                        <Border Background="{DynamicResource TestsInputBackgroundHeaderPanelBrush}" CornerRadius="13,13,0,0">
                             <Grid >
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto"/>
@@ -346,16 +456,19 @@
                                 <StackPanel x:Name="BigButtonsPanel" Margin="20,0,20,20">
 
                                     <Button x:Name="StartButton" 
+                                    ToolTip="Начать выполнение проверки (F5)"
                                     Content="{Binding Source={StaticResource LS_Protocol_Btn_Start}, Path=Value}" 
                                     Style="{DynamicResource ShadowButtonStyle}"/>
 
                                     <Button x:Name="RepeatButton" 
+                                    ToolTip="Запустить повторное выполнение проверки (R)"
                                     Content="{Binding Source={StaticResource LS_Protocol_Btn_Repeat}, Path=Value}" 
                                     Margin="0,10,0,0" 
                                     Style="{DynamicResource ShadowButtonStyle}" 
                                     />
 
                                     <Button x:Name="PauseButton" 
+                                    ToolTip="Приостановить выполнение проверки (P/F5)"
                                     Content="{Binding Source={StaticResource LS_Protocol_Btn_Stop}, Path=Value}" 
                                     Margin="0,10,0,0"
                                     Style="{DynamicResource ButtonStyleV5}"
@@ -368,6 +481,7 @@
                                         </Grid.ColumnDefinitions>
 
                                         <Button x:Name="StepOver" 
+                                        ToolTip="Выполнить следующий шаг без углубления в проверку (F10)"
                                         Content="{Binding Source={StaticResource LS_Protocol_Btn_StepOver}, Path=Value}" 
                                         FontSize="18" 
                                         Grid.Column="0" 
@@ -375,6 +489,7 @@
                                         Style="{StaticResource ShadowButtonStyle}" />
 
                                         <Button x:Name="StepInto" 
+                                        ToolTip="Выполнить следующий шаг с входом в проверку (F11)"
                                         Content="{Binding Source={StaticResource LS_Protocol_Btn_StepInto}, Path=Value}" 
                                         FontSize="18" 
                                         Grid.Column="1" 
@@ -385,6 +500,7 @@
                                     </Grid>
 
                                     <Button x:Name="ContinueButton"  
+                                    ToolTip="Возобновить выполнение проверки (P/F5)"
                                     Content="{Binding Source={StaticResource LS_Protocol_Btn_Continue}, Path=Value}" 
                                     FontSize="18" 
                                     Grid.Column="0" 
@@ -393,6 +509,7 @@
                                     />
 
                                     <Button x:Name="StopButton" 
+                                    ToolTip="Остановить выполнение и завершить проверку (Esc)"
                                     Content="{Binding Source={StaticResource LS_Protocol_Btn_Exit}, Path=Value}" 
                                     FontSize="18" 
                                     Grid.Column="1" 
@@ -406,7 +523,7 @@
                     </Grid>
                 </Border>
 
-                <Grid Grid.Column="1" Margin="5">
+                <Grid Grid.Column="1" Margin="6,2,8,8">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition x:Name="ExecutionProtocolColumn" Width="*" MinWidth="100"/>
                         <ColumnDefinition x:Name="InspectionProtocolSplitterColumn" Width="Auto"/>

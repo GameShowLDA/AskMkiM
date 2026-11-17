@@ -1,3 +1,5 @@
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSupply;
+using Ask.UI.Features.ServiceTools.PowerSupply;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Chassis;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
@@ -23,6 +25,8 @@ namespace UI.Controls.AdminPanel
     private readonly Func<Task<IReadOnlyList<IRelaySwitchModule>>> relaySwitchModulesProvider;
     private readonly Func<Task<IReadOnlyList<IMultimeter>>> multimetersProvider;
     private readonly Func<Task<IChassisManager?>> chassisProvider;
+    private readonly Func<CancellationToken, Task<IReadOnlyList<IPowerSupply>>> powerSuppliesProvider;
+    private PowerSupplyControl? powerSupplyControl;
     private SetCommand? setCommandControl;
     private GPTPunchControl? gptControl;
     private SwitchingDeviceControl? switchingDeviceControl;
@@ -38,12 +42,14 @@ namespace UI.Controls.AdminPanel
     /// <param name="relaySwitchModulesProvider">Функция получения модулей коммутации реле.</param>
     /// <param name="multimetersProvider">Функция получения мультиметров.</param>
     /// <param name="chassisProvider">Функция получения контроллера шасси.</param>
+    /// <param name="powerSuppliesProvider">Загрузка внешних источников питания.</param>
     public ServiceUtilitiesControl(
       Func<Task<IBreakdownTester?>> gptProvider,
       Func<Task<ISwitchingDevice?>> switchingDeviceProvider,
       Func<Task<IReadOnlyList<IRelaySwitchModule>>> relaySwitchModulesProvider,
       Func<Task<IReadOnlyList<IMultimeter>>> multimetersProvider,
-      Func<Task<IChassisManager?>> chassisProvider)
+      Func<Task<IChassisManager?>> chassisProvider,
+      Func<CancellationToken, Task<IReadOnlyList<IPowerSupply>>> powerSuppliesProvider)
     {
       this.gptProvider = gptProvider
         ?? throw new ArgumentNullException(nameof(gptProvider));
@@ -55,8 +61,23 @@ namespace UI.Controls.AdminPanel
         ?? throw new ArgumentNullException(nameof(multimetersProvider));
       this.chassisProvider = chassisProvider
         ?? throw new ArgumentNullException(nameof(chassisProvider));
+      this.powerSuppliesProvider = powerSuppliesProvider ?? throw new ArgumentNullException(nameof(powerSuppliesProvider));
       InitializeComponent();
       SetCommandTab.IsChecked = true;
+    }
+
+    private void PowerSupplyTab_Checked(object sender, RoutedEventArgs e)
+    {
+      var setCommand = setCommandControl ??= new SetCommand();
+      UtilityContentPresenter.Content = null;
+      SideConsolePresenter.Content = null;
+      UtilityContentPresenter.Content = powerSupplyControl ??= new PowerSupplyControl(powerSuppliesProvider);
+      SideConsolePresenter.Content = setCommand;
+      UtilityContentPresenter.HorizontalAlignment = HorizontalAlignment.Left;
+      UtilityColumn.Width = GridLength.Auto;
+      UtilitySplitterColumn.Width = new GridLength(18);
+      ConsoleColumn.Width = new GridLength(1, GridUnitType.Star);
+      UtilitySplitter.Visibility = Visibility.Visible;
     }
 
     private void ChassisTab_Checked(object sender, RoutedEventArgs e)

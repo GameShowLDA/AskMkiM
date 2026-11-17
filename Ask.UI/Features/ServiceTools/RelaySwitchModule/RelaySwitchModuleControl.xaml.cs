@@ -66,12 +66,18 @@ namespace Ask.UI.Features.ServiceTools.RelaySwitchModule
       {
         StatusText.Text = "МКР не найдены в конфигурации первого шасси.";
         StatusIndicator.Background = Brushes.IndianRed;
+        SelfTestPointComboBox.ItemsSource = null;
         RefreshConnections();
         return;
       }
 
       StatusText.Text = $"{module.Name}, устройство №{module.Number}, точек: {module.PointCount}";
       StatusIndicator.Background = Brushes.MediumSeaGreen;
+      int? selectedPoint = SelfTestPointComboBox.SelectedItem as int?;
+      SelfTestPointComboBox.ItemsSource = Enumerable.Range(1, module.PointCount);
+      SelfTestPointComboBox.SelectedItem = selectedPoint is >= 1 && selectedPoint <= module.PointCount
+        ? selectedPoint
+        : 1;
       RefreshConnections();
     }
 
@@ -138,6 +144,10 @@ namespace Ask.UI.Features.ServiceTools.RelaySwitchModule
       ? bus
       : throw new InvalidOperationException("Выберите шину точки.");
 
+    private int SelfTestPoint() => SelfTestPointComboBox.SelectedItem is int point
+      ? point
+      : throw new InvalidOperationException("Выберите точку для самоконтроля.");
+
     private static void ReportError(string operation, Exception exception) =>
       LoggerUtility.LogError($"МКР — {operation}: {exception.Message}", isDeviceLog: true);
 
@@ -153,6 +163,10 @@ namespace Ask.UI.Features.ServiceTools.RelaySwitchModule
       await ExecuteAsync("отключение точки с проверкой", m => m.PointManager.DisconnectRelayVerifiedAsync(PointBus(PointBusComboBox), Number(PointNumberTextBox, "номер точки")));
     private async void MovePointButton_Click(object sender, RoutedEventArgs e) =>
       await ExecuteAsync("переподключение точки", m => m.PointManager.ConnectingPointToNewBus(PointBus(PointBusComboBox), Number(PointNumberTextBox, "номер точки")));
+    private async void CheckPointButton_Click(object sender, RoutedEventArgs e) =>
+      await ExecuteAsync(
+        "самоконтроль выбранной точки",
+        module => module.SelfTestManager.CheckPointAsync(SelfTestPoint()));
     private async void ConnectGroupButton_Click(object sender, RoutedEventArgs e) =>
       await ExecuteAsync("подключение диапазона", m => m.PointManager.ConnectRelayGroupAsync(PointBus(GroupBusComboBox), Number(FirstPointTextBox, "начальную точку"), Number(LastPointTextBox, "конечную точку")));
     private async void DisconnectGroupButton_Click(object sender, RoutedEventArgs e) =>

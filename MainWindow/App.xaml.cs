@@ -2,6 +2,7 @@ using Ask.Core.Services.App;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.DataBase.Engine.Static.Devices;
 using Ask.Diagnostics.Abstractions;
+using Ask.Diagnostics.Services;
 using Ask.Support;
 using ConsoleUI.ConsoleLogic;
 using MainWindowProgram.Init;
@@ -74,7 +75,7 @@ namespace MainWindowProgram
 
       try
       {
-        loginWindowManager.Show();
+        await loginWindowManager.ShowAsync();
 
         var authenticatedRole = await loginWindowManager.WaitForAuthenticationAsync();
         if (authenticatedRole == null)
@@ -98,7 +99,6 @@ namespace MainWindowProgram
           Visibility = Visibility.Hidden
         };
         Application.Current.MainWindow = mainWindow;
-        mainWindow.Show();
         ShutdownMode = ShutdownMode.OnMainWindowClose;
 
         await loginWindowManager.UpdateLoadingStatusAsync("Инициализация главного окна...");
@@ -108,9 +108,14 @@ namespace MainWindowProgram
         await SplashScreenManager.CloseSplashAsync();
 
         SetThreadExecutionState(EXECUTION_STATE.ES_CONTINUOUS | EXECUTION_STATE.ES_DISPLAY_REQUIRED);
-        mainWindow.Visibility = Visibility.Visible;
         await loginWindowManager.CloseAsync();
-        mainWindow.Show();
+        if (loginWindowManager.IsClosedByUser)
+        {
+          Application.Current.Shutdown();
+          return;
+        }
+        if (!await WindowOpacityTransition.ShowAsync(mainWindow)) return;
+        ApplicationActivator.FlushPendingFileRequests();
 
         if (databaseInitializationReport?.DatabaseAlreadyExisted == false)
         {
@@ -201,6 +206,11 @@ namespace MainWindowProgram
 
     private static void CreateCrashPackage(Exception ex, string source)
     {
+      if (!CrashReportPolicy.ShouldReport(ex))
+      {
+        return;
+      }
+
       try
       {
         ex.Data["CrashSource"] = source;

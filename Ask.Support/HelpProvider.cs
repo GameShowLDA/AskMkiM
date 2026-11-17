@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using Ask.Core.Services.Config.AppSettings;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -76,27 +77,23 @@ namespace Ask.Support
         => (string?)element.GetValue(HelpKeyProperty);
 
     /// <summary>
-    /// Последний визуальный элемент, над которым находилась мышь.
-    /// Используется как приоритетная точка поиска ключа справки при нажатии <c>F1</c>.
-    /// </summary>
-    private static DependencyObject? _lastHoverElement;
-
-    /// <summary>
     /// Вызывается один раз в конструкторе окна: устанавливает обработчики MouseMove и F1.
     /// </summary>
     /// <param name="window">Окно WPF, в котором включается поддержка F1-справки.</param>
     public static void RegisterHelp(Window window)
     {
+      // Ссылка принадлежит окну: статическое поле удерживало закрытое окно и всё его дерево.
+      DependencyObject? lastHoverElement = null;
       window.PreviewMouseMove += (s, e) =>
       {
-        _lastHoverElement = e.OriginalSource as DependencyObject;
+        lastHoverElement = e.OriginalSource as DependencyObject;
       };
 
       window.PreviewKeyDown += (s, e) =>
       {
         if (e.Key != Key.F1) return;
 
-        DependencyObject? el = _lastHoverElement
+        DependencyObject? el = lastHoverElement
                               ?? Keyboard.FocusedElement as DependencyObject
                               ?? Mouse.DirectlyOver as DependencyObject;
 
@@ -127,7 +124,7 @@ namespace Ask.Support
 
         if (string.IsNullOrWhiteSpace(command))
         {
-          var tagEl = FindElementWithTag(_lastHoverElement);
+          var tagEl = FindElementWithTag(lastHoverElement);
           if (tagEl is FrameworkElement fe && fe.Tag is string tag)
             command = tag.Trim();
         }
@@ -169,9 +166,12 @@ namespace Ask.Support
         return;
       }
 
+      string language = LanguageSettings.NormalizeLanguageCode(LanguageSettings.CurrentLanguage);
+      if (pageName == ReleaseNotes.ReleaseNotesHtmlRenderer.HelpPageKey) language = "ru";
+      string indexUrl = $"/{language}/index.html";
       string url = string.IsNullOrWhiteSpace(pageName)
-          ? "/index.html"
-          : $"/index.html?cmd={Uri.EscapeDataString(pageName)}";
+          ? indexUrl
+          : $"{indexUrl}?cmd={Uri.EscapeDataString(pageName)}";
 
       LogInformation($"Путь до старницы: {url}");
 
@@ -184,9 +184,10 @@ namespace Ask.Support
     /// </summary>
     public static void OpenFastMenuCommand() 
     {
-      LogInformation($"Путь до старницы: /FastMenuCommand.html");
-      if (HelpViewerWindow._IsClose) HelpViewerWindow.LoadAndShow("/FastMenuCommand.html");
-      else HelpViewerWindow.Load("/FastMenuCommand.html");
+      const string url = "/ru/FastMenuCommand.html";
+      LogInformation($"Путь до старницы: {url}");
+      if (HelpViewerWindow._IsClose) HelpViewerWindow.LoadAndShow(url);
+      else HelpViewerWindow.Load(url);
     }
   }
 }

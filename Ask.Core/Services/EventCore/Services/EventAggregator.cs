@@ -29,7 +29,9 @@ namespace Ask.Core.Services.EventCore.Services
     {
       if (_subscribers.TryGetValue(typeof(TEvent), out var list))
       {
-        foreach (var subscriber in list.ToArray())
+        Delegate[] snapshot;
+        lock (list) snapshot = list.ToArray();
+        foreach (var subscriber in snapshot)
         {
           try
           {

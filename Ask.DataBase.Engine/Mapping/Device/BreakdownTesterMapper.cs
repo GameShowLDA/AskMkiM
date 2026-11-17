@@ -5,14 +5,14 @@ namespace Ask.DataBase.Engine.Mapping.Device;
 
 /// <summary>
 /// Маппер для преобразования между <see cref="IBreakdownTester"/> и <see cref="BreakdownTesterDto"/>.
-/// Использует <see cref="ReflectionMapper"/> для автоматического копирования всех совпадающих свойств,
-/// включая параметры режимов и ограничения напряжений.
+/// Копирует совпадающие свойства через <see cref="ReflectionMapper"/>
+/// и отдельно переносит диапазоны напряжений между режимами устройства и DTO.
 /// </summary>
 public static class BreakdownTesterMapper
 {
   /// <summary>
   /// Преобразует реализацию <see cref="IBreakdownTester"/> в DTO <see cref="BreakdownTesterDto"/>.
-  /// Копирует все совпадающие свойства, включая режим работы и параметры напряжения.
+  /// Копирует совпадающие свойства и создаёт независимые копии диапазонов напряжений режимов.
   /// </summary>
   /// <param name="device">Экземпляр пробойной установки.</param>
   /// <returns>DTO с данными устройства.</returns>
@@ -22,6 +22,9 @@ public static class BreakdownTesterMapper
     ArgumentNullException.ThrowIfNull(device);
     var dto = ReflectionMapper.Map<IBreakdownTester, BreakdownTesterDto>(device);
 
+    dto.AcwVoltageRange = device.AcwManger.VoltageRange.Clone();
+    dto.DcwVoltageRange = device.DcwManger.VoltageRange.Clone();
+    dto.IrVoltageRange = device.IrManger.VoltageRange.Clone();
     return dto;
   }
 
@@ -38,5 +41,8 @@ public static class BreakdownTesterMapper
     ArgumentNullException.ThrowIfNull(dto);
 
     ReflectionMapper.Apply(dto, device);
+    device.AcwManger.VoltageRange = dto.AcwVoltageRange.Clone();
+    device.DcwManger.VoltageRange = dto.DcwVoltageRange.Clone();
+    device.IrManger.VoltageRange = dto.IrVoltageRange.Clone();
   }
 }

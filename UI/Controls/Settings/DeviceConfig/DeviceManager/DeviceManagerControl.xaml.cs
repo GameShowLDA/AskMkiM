@@ -1,3 +1,4 @@
+using Ask.Core.Shared.DTO.Devices.PowerSupply;
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Shared.DTO.Devices.Breakdown;
@@ -48,6 +49,16 @@ namespace UI.Controls.Settings.DeviceConfig.DeviceManager
     /// </summary>
     public event EventHandler<IHeadUnit> UninterruptiblePowerSupplyEvent;
 
+    /// <summary>
+    /// Возникает при добавлении источника питания выбранного тестера.
+    /// </summary>
+    public event EventHandler<IHeadUnit>? PowerSupplyEvent;
+
+    /// <summary>
+    /// Возникает при редактировании источника питания.
+    /// </summary>
+    public event EventHandler<PowerSupplyDto>? EditPowerSupplyEvent;
+
     public event EventHandler<BreakdownTesterDto> EditBreakdownEvent;
     public event EventHandler<FastMeterDto> EditFastMeterEvent;
     public event EventHandler<PowerSourceModuleDto> EditPowerModuleEvent;
@@ -76,6 +87,12 @@ namespace UI.Controls.Settings.DeviceConfig.DeviceManager
       BreakdownTesterControl.IsSingleDeviceOnly = true;
       SwitchingDeviceControl.IsSingleDeviceOnly = true;
       UninterruptiblePowerSupplyControl.IsSingleDeviceOnly = true;
+
+      PowerSupplyControl.PlusEvent += (s, a) => PowerSupplyEvent?.Invoke(this, _headUnit);
+      PowerSupplyControl.EditEvent += (s, device) =>
+      {
+        if (device is PowerSupplyDto source) EditPowerSupplyEvent?.Invoke(this, source);
+      };
 
       BreakdownTesterControl.PlusEvent += (s, a) => AddBreakdownEvent?.Invoke(this, _headUnit);
       SwitchingDeviceControl.PlusEvent += (s, a) => DeviceBusCommutationSelected?.Invoke(this, _headUnit);
@@ -141,6 +158,7 @@ namespace UI.Controls.Settings.DeviceConfig.DeviceManager
     public void SetEditingEnabled(bool isEnabled)
     {
       _isEditingEnabled = isEnabled;
+      PowerSupplyControl.IsEditingEnabled = isEnabled;
       BreakdownTesterControl.IsEditingEnabled = isEnabled;
       SwitchingDeviceControl.IsEditingEnabled = isEnabled;
       FastMeterControl.IsEditingEnabled = isEnabled;

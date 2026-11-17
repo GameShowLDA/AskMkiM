@@ -7,6 +7,16 @@
              mc:Ignorable="d"
              d:DesignHeight="32" d:DesignWidth="32"
              Width="32" Height="32">
+    <UserControl.Style>
+        <Style TargetType="{x:Type local:ArrowButton}">
+            <Setter Property="ToolTip" Value="Скрыть содержимое раздела"/>
+            <Style.Triggers>
+                <Trigger Property="IsArrowUp" Value="True">
+                    <Setter Property="ToolTip" Value="Показать содержимое раздела"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Style>
 
     <Button x:Name="PART_Button"
           Cursor="Hand"

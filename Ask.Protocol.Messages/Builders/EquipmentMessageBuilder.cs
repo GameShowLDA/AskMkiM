@@ -12,6 +12,19 @@ namespace Ask.Protocol.Messages.Builders;
 internal static class EquipmentMessageBuilder
 {
   /// <summary>
+  /// Формирует результат операции внешнего источника питания без адреса шасси.
+  /// </summary>
+  /// <param name="device">Внешний источник питания.</param>
+  /// <param name="operation">Название операции.</param>
+  /// <param name="isSuccessful">Признак успешного выполнения.</param>
+  /// <param name="details">Параметры или описание результата.</param>
+  /// <returns>Модель сообщения о результате операции.</returns>
+  internal static ShowMessageModel BuildPowerSupplyOperationResult(IDevice device, string operation,
+    bool isSuccessful, string? details)
+    => new(header: $"{device.Name}: {operation}", message: details,
+      type: isSuccessful ? ShowMessageModel.MessageType.Success : ShowMessageModel.MessageType.Error);
+
+  /// <summary>
   /// Формирует заголовок проверки работоспособности устройства.
   /// </summary>
   /// <param name="device">Проверяемое устройство.</param>

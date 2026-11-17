@@ -18,6 +18,11 @@ namespace Ask.Core.Shared.Entity.Settings
     public string DisplayName { get; set; } = string.Empty;
 
     /// <summary>
+    /// Логин роли.
+    /// </summary>
+    public string Login { get; set; } = string.Empty;
+
+    /// <summary>
     /// Хэш пароля роли.
     /// </summary>
     public string PasswordHash { get; set; } = string.Empty;

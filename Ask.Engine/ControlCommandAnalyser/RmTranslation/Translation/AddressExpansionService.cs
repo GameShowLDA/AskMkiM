@@ -63,6 +63,14 @@ public sealed class AddressExpansionService
     if (expression.Length == 0)
       return Array.Empty<string>();
 
+    var slash = expression.LastIndexOf('/');
+    if (slash > 0 && FindTopLevelRangeSeparator(expression[..slash]) >= 0)
+    {
+      var contact = expression[(slash + 1)..];
+      return ExpandSingleObjectExpression(expression[..slash], span, diagnostics)
+        .Select(value => $"{value}/{contact}").ToArray();
+    }
+
     var separator = FindTopLevelRangeSeparator(expression);
     if (separator < 0)
       return new[] { expression };

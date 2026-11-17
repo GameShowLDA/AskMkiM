@@ -18,6 +18,15 @@ namespace Ask.Protocol.Messages.EntryPoints;
 public static class MeasurementMessages
 {
   /// <summary>
+  /// Формирует краткое описание запуска проверки прочности изоляции.
+  /// </summary>
+  /// <param name="voltage">Заданное испытательное напряжение с единицей измерения.</param>
+  /// <param name="time">Заданное время проверки с единицей измерения.</param>
+  /// <returns>Информационное сообщение для итогового протокола.</returns>
+  public static ShowMessageModel BuildInsulationStrengthCommandSummary(string voltage, string time)
+    => MeasurementMessageBuilder.BuildInsulationStrengthCommandSummary(voltage, time);
+
+  /// <summary>
   /// Формирует описание брака для разряда группового метода.
   /// </summary>
   /// <param name="dischargeIndex">Индекс проверяемого разряда.</param>

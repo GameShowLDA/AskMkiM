@@ -73,7 +73,7 @@ namespace Ask.Device.Runtime.Base.Device
           COMPort = port;
           var realProtocol = new HardwareWatchdogProtocol(
             new ComProtocol(this, port),
-            Name);
+            Name, device: this is IBreakdownTester ? this : null);
           DeviceProtocol = this is IBreakdownTester breakdownTester
             ? DeviceProtocolEmulator.CreateBreakdownTester(breakdownTester, realProtocol)
             : realProtocol;

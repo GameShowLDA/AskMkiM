@@ -24,12 +24,24 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Processors.Eht
     {
       string lower, higher, unit;
       string cabel, cabelUnit;
+      string? sourceFragment;
 
-      (lower, higher, unit, remainder) = CommonParameterParser.ResistanceParser.ParseResistanceRangeWithR(remainder);
+      (lower, higher, unit, sourceFragment, remainder) =
+        CommonParameterParser.ResistanceParser.ParseResistanceRangeWithRDetails(remainder);
 
       (cabel, cabelUnit, remainder) = CommonParameterParser.ResistanceParser.ParseCabelResistance(remainder);
 
-      ResistanceManager.ProcessResistance(model, lower, higher, cabel, unit, cabelUnit, ctx.CommandNumber, ctx.Mnemonic, ctx.LineNumber);
+      ResistanceManager.ProcessResistance(
+        model,
+        lower,
+        higher,
+        cabel,
+        unit,
+        cabelUnit,
+        ctx.CommandNumber,
+        ctx.Mnemonic,
+        ctx.LineNumber,
+        sourceFragment);
 
       return remainder;
     }

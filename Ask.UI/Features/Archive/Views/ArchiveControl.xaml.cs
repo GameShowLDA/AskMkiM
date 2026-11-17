@@ -13,6 +13,7 @@ using Ask.UI.Infrastructure.UI.Overlay.Notifications.Runtime;
 using Ask.UI.Shared.Components.Progress;
 using Ask.UI.Shared.Formatting;
 using Message;
+using System.Collections.Concurrent;
 using System.Globalization;
 using System.IO;
 using System.IO.Compression;
@@ -45,7 +46,7 @@ namespace Ask.UI.Features.Archive.Views
     /// Кэш архивных записей по строковому ключу (без учёта регистра).
     /// Используется для ускорения доступа и избежания повторной загрузки данных.
     /// </summary>
-    private readonly Dictionary<string, IReadOnlyList<ArchiveEntryInfo>> _archiveEntriesCache = new Dictionary<string, IReadOnlyList<ArchiveEntryInfo>>(StringComparer.OrdinalIgnoreCase);
+    private readonly ConcurrentDictionary<string, IReadOnlyList<ArchiveEntryInfo>> _archiveEntriesCache = new(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>
     /// Настройки сериализации JSON для манифеста (имена свойств без учёта регистра).
@@ -134,7 +135,7 @@ namespace Ask.UI.Features.Archive.Views
     /// <summary>
     /// Кэш манифестов архивов (имя файла → дата создания).
     /// </summary>
-    private readonly Dictionary<string, Dictionary<string, DateTime>> _manifestCache = new();
+    private readonly ConcurrentDictionary<string, Dictionary<string, DateTime>> _manifestCache = new(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>
     /// Инициализирует контрол: подписка на события, настройка путей, таймера автообновления и начального состояния UI.
@@ -746,14 +747,14 @@ namespace Ask.UI.Features.Archive.Views
         return;
       }
 
-      _archiveEntriesCache.Remove(archivePath);
-      _manifestCache.Remove(archivePath);
+      _archiveEntriesCache.TryRemove(archivePath, out _);
+      _manifestCache.TryRemove(archivePath, out _);
 
       var normalizedArchivePath = Path.GetFullPath(archivePath);
       if (!string.Equals(normalizedArchivePath, archivePath, StringComparison.OrdinalIgnoreCase))
       {
-        _archiveEntriesCache.Remove(normalizedArchivePath);
-        _manifestCache.Remove(normalizedArchivePath);
+        _archiveEntriesCache.TryRemove(normalizedArchivePath, out _);
+        _manifestCache.TryRemove(normalizedArchivePath, out _);
       }
     }
 
@@ -3059,6 +3060,8 @@ namespace Ask.UI.Features.Archive.Views
           _lastSelectedEntryName,
           Path.GetFileName(_lastSelectedEntryName),
           ArchiveClipboardOperation.Cut);
+
+        UpdateRightPanels(isFilesVisible: true, isEditorVisible: false);
       }
     }
 
@@ -3573,7 +3576,8 @@ namespace Ask.UI.Features.Archive.Views
       try
       {
         var entryName = NormalizeEntryName(_lastSelectedEntryName);
-        var text = await Task.Run(() => ReadArchiveEntryTextWithManager(_lastSelectedArchivePath, entryName));
+        var sourceArchivePath = _lastSelectedArchivePath;
+        var text = await Task.Run(() => ReadArchiveEntryTextWithManager(sourceArchivePath, entryName));
         if (string.IsNullOrWhiteSpace(text))
         {
           ShowArchiveNotification("Запуск в исполнителе", "Выбранный файл пустой.", NotificationType.Warning);
@@ -3588,7 +3592,7 @@ namespace Ask.UI.Features.Archive.Views
           : Encoding.GetEncoding(866);
 
         await File.WriteAllTextAsync(tempFilePath, text, encoding);
-        FileInteractionEventAdapter.RaiseOpenFileInEditorAgain(tempFilePath);
+        FileInteractionEventAdapter.RaiseOpenFileInEditorAgain(tempFilePath, Path.GetFileName(sourceArchivePath));
 
         await Task.Delay(120);
         if (!TryExecuteRunCommand())

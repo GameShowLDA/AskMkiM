@@ -40,7 +40,7 @@ namespace Ask.Core.Services.Errors.Models
     [ErrorCodeTag("GEN005")]
     Gen_MissingPointsMap,
 
-    /// <summary> В команде используется точка, отсутствующая в карте точек RM. </summary>
+    /// <summary> В команде используется точка или диапазон, отсутствующий в карте точек РМ. </summary>
     [ErrorCodeTag("GEN006")]
     Gen_UnknownPoint,
 
@@ -123,6 +123,10 @@ namespace Ask.Core.Services.Errors.Models
     /// <summary> В записи точек присутсвует недопустимая последовательность - ,*. </summary>
     [ErrorCodeTag("GEN026")]
     Gen_CommaStar,
+
+    /// <summary> Точки ОТ/ПТ относятся к отсутствующему модулю или к неподдерживаемой им шине. </summary>
+    [ErrorCodeTag("GEN027")]
+    Gen_BusPointConfiguration,
 
     #endregion
 
@@ -482,6 +486,10 @@ namespace Ask.Core.Services.Errors.Models
     [ErrorCodeTag("PT002")]
     Pt_EmptyCommandBody,
 
+    /// <summary> В команде ПТ время находится вне допустимого диапазона. </summary>
+    [ErrorCodeTag("PT003")]
+    Pt_TimeOutOfRange,
+
     #endregion
 
     #region Режим СК
@@ -739,6 +747,42 @@ namespace Ask.Core.Services.Errors.Models
     [ErrorCodeTag("METROLOGY016")]
     Metrology_MeasurementError_ToleranceRangeNotFound,
     #endregion
+
+    #endregion
+
+    #region Режим ВИ
+
+    /// <summary> Тело команды ВИ отсутствует или имеет неверный формат. </summary>
+    [ErrorCodeTag("VI001")]
+    Vi_InvalidBody,
+
+    /// <summary> Номер источника питания не указан или записан неверно. </summary>
+    [ErrorCodeTag("VI002")]
+    Vi_InvalidPowerSupplyNumber,
+
+    /// <summary> Источник питания с указанным номером не найден. </summary>
+    [ErrorCodeTag("VI003")]
+    Vi_PowerSupplyNotFound,
+
+    /// <summary> Номер источника питания неоднозначен для настроенных тестеров. </summary>
+    [ErrorCodeTag("VI004")]
+    Vi_AmbiguousPowerSupply,
+
+    /// <summary> Параметры команды ВИ заданы в недопустимом сочетании. </summary>
+    [ErrorCodeTag("VI005")]
+    Vi_InvalidParameterCombination,
+
+    /// <summary> Напряжение не соответствует рабочим пределам или шагу источника. </summary>
+    [ErrorCodeTag("VI006")]
+    Vi_InvalidVoltage,
+
+    /// <summary> Ток не соответствует рабочим пределам или шагу источника. </summary>
+    [ErrorCodeTag("VI007")]
+    Vi_InvalidCurrent,
+
+    /// <summary> Шины команды ВИ заданы неверно или не поддерживаются структурой ВШ. </summary>
+    [ErrorCodeTag("VI008")]
+    Vi_InvalidBus,
 
     #endregion
   }

@@ -1,10 +1,11 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<TargetFramework>net8.0-windows</TargetFramework>
 		<UseWPF>true</UseWPF>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
+		<DefaultItemExcludes>$(DefaultItemExcludes);ThirdParty\AvalonDock\source\**</DefaultItemExcludes>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -12,7 +13,6 @@
 		<Folder Include="Infrastructure\State\" />
 		<Folder Include="Infrastructure\Messaging\" />
 		<Folder Include="Resources\Assets\Image\" />
-		<Folder Include="Resources\Assets\Fonts\" />
 		<Folder Include="Resources\Assets\SyntaxHighlighting\Light\" />
 		<Folder Include="Resources\Theme\" />
 		<Folder Include="Shared\Validation\" />
@@ -25,10 +25,14 @@
 	  <ProjectReference Include="..\Ask.Support\Ask.Support.csproj" />
 	  <ProjectReference Include="..\Message\Message.csproj" />
 	  <ProjectReference Include="..\Ask.Device.Runtime\Ask.Device.Runtime.csproj" />
+	  <ProjectReference Include="ThirdParty\AvalonDock\source\Components\AvalonDock\AvalonDock.csproj" />
+	  <ProjectReference Include="ThirdParty\AvalonDock\source\Components\AvalonDock.Serializer.Json\AvalonDock.Serializer.Json.csproj" />
+	  <ProjectReference Include="ThirdParty\AvalonDock\source\Components\AvalonDock.Themes.Arc\AvalonDock.Themes.Arc.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
 	  <PackageReference Include="AvalonEdit" Version="6.3.0.90" />
+	  <PackageReference Include="DiffPlex" Version="1.9.0" />
 	  <PackageReference Include="InputSimulator" Version="1.0.4" />
 	</ItemGroup>
 
@@ -48,6 +52,16 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <None Update="Shared\Components\Icons\Semi.Avalonia.LICENSE.txt">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	    <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+	  </None>
+	  <None Remove="Resources\Assets\Fonts\**\*.ttf" />
+	  <Resource Include="Resources\Assets\Fonts\**\*.ttf" />
+	  <None Update="Resources\Assets\Fonts\Manrope\OFL.txt">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	    <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+	  </None>
 	  <Resource Include="Resources\Assets\Image\Authorization\*.*" />
 	  <Resource Include="Resources\Assets\SyntaxHighlighting\Dark\*.xshd" />
 	  <Resource Include="Resources\Assets\SyntaxHighlighting\Light\*.xshd" />

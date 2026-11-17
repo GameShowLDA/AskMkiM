@@ -7,6 +7,8 @@ namespace Ask.Core.Shared.DTO.TextEditor
     public string FilePath { get; set; }
     public string FileName { get; set; }
     public string OriginalFileName { get; set; }
+    /// <summary>Название архива, из которого открыта программа контроля.</summary>
+    public string? SourceArchiveName { get; set; }
     public Encoding Encoding { get; set; }
     public string? SavedTextSnapshot { get; set; }
     public List<string>? SourceLines { get; set; } = new();

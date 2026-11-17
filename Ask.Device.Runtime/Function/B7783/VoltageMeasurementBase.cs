@@ -1,9 +1,9 @@
 using Ask.Core.Services.Config.AppSettings;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
-using Ask.Device.Runtime.Device;
-using Ask.Device.ResponseProcessor.Multimeter.ResponseProcessing;
 using Ask.Core.Shared.Metadata.Static.Messages;
+using Ask.Device.ResponseProcessor.Multimeter.ResponseProcessing;
+using Ask.Device.Runtime.Device;
 using System.Globalization;
 
 namespace Ask.Device.Runtime.Function.B7783

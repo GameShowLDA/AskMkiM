@@ -33,6 +33,12 @@
     public string MeasureResult { get; set; } = string.Empty;
 
     /// <summary>
+    /// Исходный фрагмент программы, к которому относится ошибка.
+    /// Используется редактором для точного подчёркивания и не выводится пользователю.
+    /// </summary>
+    public string? SourceFragment { get; set; }
+
+    /// <summary>
     /// Отладочная информация.
     /// </summary>
     public string DebugInfo { get; set; } = string.Empty;

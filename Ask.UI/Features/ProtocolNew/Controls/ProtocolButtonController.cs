@@ -1,5 +1,6 @@
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 using System.Windows;
+using static Ask.LogLib.LoggerUtility;
 
 namespace Ask.UI.Features.ProtocolNew.Controls;
 
@@ -12,6 +13,8 @@ internal sealed class ProtocolButtonController
   /// Представление, содержащее реальные WPF-кнопки.
   /// </summary>
   private readonly IProtocolButtonView _view;
+
+  private ProtocolButtonState _currentState = ProtocolButtonState.Hidden;
 
   /// <summary>
   /// Инициализирует контроллер указанным представлением кнопок.
@@ -81,6 +84,14 @@ internal sealed class ProtocolButtonController
         default:
           throw new ArgumentOutOfRangeException(nameof(state), state, "Неизвестное состояние панели кнопок.");
       }
+
+      _currentState = state;
+      UpdateRuntimeExecutionSettingsVisibility();
+
+      LogInput($"Состояние панели управления применено: state={state}, stepMode={stepMode}, " +
+        $"start={_view.StartVisibility}, pause={_view.PauseVisibility}, continue={_view.ContinueVisibility}, " +
+        $"exit={_view.ExitVisibility}, repeat={_view.RepeatVisibility}, " +
+        $"stepOver={_view.StepOverVisibility}, stepInto={_view.StepIntoVisibility}.");
     });
   }
 
@@ -115,6 +126,8 @@ internal sealed class ProtocolButtonController
       }
 
       SetStepButtons(visible: false);
+      LogInput($"Обновление пошаговых кнопок без активной панели: stepMode={stepModeEnabled}, " +
+        $"breakpointStep={breakpointPauseActive}, stepOver={_view.StepOverVisibility}, stepInto={_view.StepIntoVisibility}.");
     });
   }
 
@@ -137,7 +150,30 @@ internal sealed class ProtocolButtonController
       _view.ContinueVisibility = Visibility.Collapsed;
       _view.ExitVisibility = Visibility.Collapsed;
       SetStepButtons(visible: false);
+      _currentState = _view.StartVisibility == Visibility.Visible
+        ? ProtocolButtonState.Ready
+        : ProtocolButtonState.Hidden;
+      UpdateRuntimeExecutionSettingsVisibility();
     });
+  }
+
+  /// <summary>
+  /// Обновляет видимость настроек выполнения с учётом текущего состояния панели.
+  /// </summary>
+  public void UpdateRuntimeExecutionSettingsVisibility()
+  {
+    Application.Current.Dispatcher.Invoke(() =>
+    {
+      _view.ExecutionSettingsVisibility =
+        ShouldShowRuntimeExecutionSettings(_view.RuntimeExecutionSettingsEnabled, _currentState)
+          ? Visibility.Visible
+          : Visibility.Collapsed;
+    });
+  }
+
+  public static bool ShouldShowRuntimeExecutionSettings(bool enabled, ProtocolButtonState state)
+  {
+    return enabled && (state is ProtocolButtonState.Ready or ProtocolButtonState.Paused);
   }
 
   /// <summary>

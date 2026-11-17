@@ -1,4 +1,5 @@
 using Ask.Core.Shared.Metadata.Enums.ExecutionEnums;
+using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -46,6 +47,17 @@ namespace Ask.Core.Shared.DTO.Protocol
     /// Название программы контроля.
     /// </summary>
     public string ProgramName { get; set; }
+
+    /// <summary>Название архива, содержащего программу контроля.</summary>
+    public string? SourceArchiveName { get; set; }
+
+    private static string GetProgramDescription(ProtocolModel model)
+    {
+      var source = !string.IsNullOrWhiteSpace(model.SourceArchiveName)
+        ? model.SourceArchiveName
+        : string.IsNullOrWhiteSpace(model.ProgramPath) ? null : Path.GetFullPath(model.ProgramPath);
+      return string.IsNullOrWhiteSpace(source) ? model.ProgramName : $"{model.ProgramName} ({source})";
+    }
 
     /// <summary>
     /// Представитель ОК.
@@ -156,7 +168,7 @@ namespace Ask.Core.Shared.DTO.Protocol
           .Replace("$ОБОЗНАЧЕНИЕ", protocolModel.Designation)
           .Replace("$РЕЖИМ", protocolModel.Mode)
           .Replace("$НОМЕР", protocolModel.Number.ToString())
-          .Replace("$ПРОГРАММА", protocolModel.ProgramName)
+          .Replace("$ПРОГРАММА", GetProgramDescription(protocolModel))
           .Replace("$НАЧАЛО", protocolModel.StartTime.ToString("HH:mm:ss:ff"))
           .Replace("$КОНЕЦ", protocolModel.EndTime.ToString("HH:mm:ss:ff"))
           .Replace("$ВРЕМЯ", timeText + messagesText)
@@ -194,7 +206,7 @@ namespace Ask.Core.Shared.DTO.Protocol
           .Replace("$ОБОЗНАЧЕНИЕ", protocolModel.Designation)
           .Replace("$РЕЖИМ", protocolModel.Mode)
           .Replace("$НОМЕР", protocolModel.Number.ToString())
-          .Replace("$ПРОГРАММА", protocolModel.ProgramName);
+          .Replace("$ПРОГРАММА", GetProgramDescription(protocolModel));
 
       after = after
           .Replace("$ОБОЗНАЧЕНИЕ", protocolModel.Designation)
@@ -225,6 +237,7 @@ namespace Ask.Core.Shared.DTO.Protocol
       sb.AppendLine().AppendLine().AppendLine();
 
       int sequenceIndex = 1;
+      ProtocolMessageKind? previousKind = null;
 
       foreach (var (command, entries) in protocolModel.Messages)
       {
@@ -240,13 +253,18 @@ namespace Ask.Core.Shared.DTO.Protocol
           {
             continue;
           }
+          if (previousKind.HasValue && previousKind.Value != kind)
+          {
+            sb.AppendLine();
+          }
           var messageText = BuildProtocolMessage(message);
 
           var prefix = kind == ProtocolMessageKind.Error
             ? $"ERR{sequenceIndex++}"
-            : $"DOC{sequenceIndex++}";
+            : $"DOC";
 
           sb.AppendLine($"{prefix} {command}: {messageText}");
+          previousKind = kind;
         }
       }
 

@@ -1,4 +1,5 @@
-﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
+﻿using VoltageRange = Ask.Core.Shared.DTO.Devices.Breakdown.VoltageRange;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Capabilities;
 using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using System;
 using System.Collections.Generic;
@@ -18,6 +19,11 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Mode
     /// Тип режима работы устройства (ACW, DCW, IR и т.д.).
     /// </summary>
     BreakdownTypeMode ModeType { get; }
+
+    /// <summary>
+    /// Допустимые напряжения режима: границы, шаг и исключения.
+    /// </summary>
+    VoltageRange VoltageRange { get; set; }
 
     /// <summary>
     /// Управление режимом работы устройства.

@@ -19,6 +19,12 @@ namespace UI.Components.SearchControls
     /// <value>Описание элемента стрелки.</value>
     public string Description { get; set; }
 
+    /// <summary>Подпись действия в выпадающем списке.</summary>
+    public string Caption { get; set; } = string.Empty;
+
+    /// <summary>Сочетание клавиш действия.</summary>
+    public string Gesture { get; set; } = string.Empty;
+
     /// <summary>
     /// Получает или задает геометрические данные, которые представляют форму стрелки.
     /// </summary>

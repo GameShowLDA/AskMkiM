@@ -34,8 +34,10 @@ namespace Ask.Core.Shared.Interfaces.UiInterfaces
     /// Запрашивает повтор команды программы контроля после обнаружения ошибок.
     /// </summary>
     /// <param name="errorCount">Количество ошибок текущей попытки команды.</param>
+    /// <param name="commandNumber">Номер выполненной команды программы контроля.</param>
+    /// <param name="mnemonic">Мнемоника выполненной команды.</param>
     /// <returns>Действие, выбранное оператором.</returns>
-    Task<UserAction> ConfirmControlProgramCommandRetryAsync(int errorCount) =>
+    Task<UserAction> ConfirmControlProgramCommandRetryAsync(int errorCount, string commandNumber, string mnemonic) =>
       WaitUserActionAsync();
 
     CancellationToken GetCancellationToken();

@@ -21,9 +21,9 @@ using System.Windows.Documents;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Effects;
 using System.Windows.Threading;
 using UI.Components;
-using UI.Controls.Search;
 using static Ask.LogLib.LoggerUtility;
 using System.Windows.Media.Media3D;
 
@@ -74,7 +74,6 @@ namespace MainWindowProgram
     /// <summary>
     /// Сервис управления многооконным интерфейсом.
     /// </summary>
-    public SearchWindow SearchWindow;
 
     private readonly TextEditorStatusViewModel _statusBarViewModel = new();
 
@@ -92,10 +91,10 @@ namespace MainWindowProgram
     public MainWindow()
     {
       InitializeComponent();
-      AddHandler(Keyboard.PreviewKeyDownEvent, new KeyEventHandler(MainWindow_PreviewKeyDown), true);
+      InitializeTodayTasks();
+      InitializeAutoLock();
 
       this.Visibility = Visibility.Hidden;
-      this.PreviewKeyDown += MainWindow_PreviewKeyDown;
       InputManager.Current.PreProcessInput += InputManager_PreProcessInput;
 
       var vm = AppServices.Build(this);
@@ -524,7 +523,7 @@ namespace MainWindowProgram
 
     }
 
-    private void TerminalButton_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+    private void TerminalButton_Click(object sender, RoutedEventArgs e)
     {
       if (DrawerHostService.Instance.ShouldBlockGlobalInput)
       {
@@ -609,20 +608,25 @@ namespace MainWindowProgram
       }
 
       var loginWindowManager = new RoleLoginWindowManager();
+      loginWindowManager.ClosedByUser += () => Application.Current.Shutdown();
+      var previousEffect = Effect;
+      bool wasEnabled = IsEnabled;
+      bool loginWindowShown = false;
+      bool authenticated = false;
 
       try
       {
         _isUserSwitchInProgress = true;
         CurrentUserButton.IsEnabled = false;
+        _searchPanel?.Close();
 
-        if (SearchWindow != null && SearchWindow.IsVisible)
-        {
-          SearchWindow.CloseDialog();
-        }
 
         SaveCurrentWorkspaceSession();
+        Effect = new BlurEffect { Radius = 8 };
 
-        loginWindowManager.Show(GetRolesWithSavedWorkspaceSessions());
+        await loginWindowManager.ShowAsync(GetRolesWithSavedWorkspaceSessions(), owner: this);
+        loginWindowShown = true;
+        IsEnabled = false;
 
         var authenticatedRole = await loginWindowManager.WaitForAuthenticationAsync();
         if (authenticatedRole == null)
@@ -638,15 +642,35 @@ namespace MainWindowProgram
         RestoreWorkspaceSession(authenticatedRole.Role);
         UpdateCurrentUserBadge();
         await loginWindowManager.CloseAsync();
+        authenticated = !loginWindowManager.IsClosedByUser;
       }
       catch (Exception exception)
       {
+        if (loginWindowShown)
+        {
+          await loginWindowManager.CloseAsync();
+        }
+
         LogException("Ошибка смены пользователя.", exception);
-        MessageBoxCustom.Show($"Ошибка смены пользователя: {exception.Message}", image: MessageBoxImage.Error);
+        Application.Current.Shutdown();
       }
       finally
       {
+        Effect = previousEffect;
+        IsEnabled = wasEnabled;
+        if (authenticated && wasEnabled)
+        {
+          if (await WindowOpacityTransition.ShowAsync(this))
+          {
+            Activate();
+            ApplicationActivator.FlushPendingFileRequests();
+          }
+        }
         _isUserSwitchInProgress = false;
+        if (authenticated)
+        {
+          _inactivityLock.Reset(System.Diagnostics.Stopwatch.GetTimestamp());
+        }
         if (CurrentUserButton != null)
         {
           CurrentUserButton.IsEnabled = true;
@@ -708,7 +732,7 @@ namespace MainWindowProgram
         : Visibility.Collapsed;
     }
 
-    private async void ThemeToggleButton_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+    private async void ThemeToggleButton_Click(object sender, RoutedEventArgs e)
     {
       e.Handled = true;
 
@@ -754,75 +778,22 @@ namespace MainWindowProgram
         _ => ThemeMode.Dark,
       };
 
-    /// <summary>
-    /// Глобальные хоткеи для навигации по результатам поиска (F3/Shift+F3), даже когда окно SearchWindow не в фокусе.
-    /// </summary>
-    private async void MainWindow_PreviewKeyDown(object sender, KeyEventArgs e)
-    {
-      if (DrawerHostService.Instance.ShouldBlockGlobalInput)
-      {
-        return;
-      }
 
-      if (e.Key == Key.Escape && SearchWindow != null && SearchWindow.IsVisible)
-      {
-        SearchWindow.CloseDialog();
-        e.Handled = true;
-        return;
-      }
 
-      if (e.Key != Key.F3 || Keyboard.Modifiers == ModifierKeys.Control || Keyboard.Modifiers == ModifierKeys.Alt)
-      {
-        return;
-      }
 
-      if (SearchWindow == null)
-      {
-        return;
-      }
-
-      if (SearchWindow.IsVisible)
-      {
-        return;
-      }
-
-      var direction = Keyboard.Modifiers == ModifierKeys.Shift ? "FindPrevious" : "FindNext";
-      var selectedText = MultiWindow?.GetActiveTextEditor()?.TextArea?.Selection?.GetText();
-
-      if (!string.IsNullOrEmpty(selectedText))
-      {
-        e.Handled = true;
-        await ShowSearchWindowAndRunSearchAsync(selectedText, direction);
-        return;
-      }
-
-      SearchEventAdapter.RaiseSearchButtonPressed(direction);
-      e.Handled = true;
-    }
-
-    private async Task ShowSearchWindowAndRunSearchAsync(string selectedText, string direction)
-    {
-      if (SearchWindow == null)
-      {
-        return;
-      }
-
-      if (SearchWindow.Owner == null)
-      {
-        SearchWindow.Owner = this;
-      }
-
-      await SearchWindow.ShowWindow(expandReplaceRow: false, focusReplaceField: false);
-      SearchEventAdapter.RaiseSearchTextRequested(selectedText);
-      SearchEventAdapter.RaiseSearchButtonPressed(direction);
-    }
 
     /// <summary>
-    /// Глобальный перехват Esc/F3 вне зависимости от того, где фокус (включая окно поиска).
+    /// Глобальная обработка ввода и навигации по ошибкам.
     /// Работает через InputManager, поэтому охватывает все окна приложения.
     /// </summary>
     private void InputManager_PreProcessInput(object? sender, PreProcessInputEventArgs e)
     {
+      if (_isUserSwitchInProgress)
+      {
+        e.Cancel();
+        return;
+      }
+
       if (TryHandleSwitchUserHotkey(e))
       {
         return;
@@ -849,107 +820,49 @@ namespace MainWindowProgram
         return;
       }
 
-      if (SearchWindow == null || !SearchWindow.IsVisible)
+      if (e.StagingItem.Input is KeyEventArgs searchKeyArgs
+          && searchKeyArgs.RoutedEvent == Keyboard.KeyDownEvent
+          && searchKeyArgs.Key == Key.F && Keyboard.Modifiers == ModifierKeys.Control)
       {
-        if (e.StagingItem.Input is not KeyEventArgs globalKeyArgs || globalKeyArgs.RoutedEvent != Keyboard.KeyDownEvent)
-        {
-          return;
-        }
+        ShowSearchPanel();
+        searchKeyArgs.Handled = true;
+        return;
+      }
 
-        var globalModifiers = Keyboard.Modifiers;
-        var globalPressedKey = globalKeyArgs.SystemKey == Key.None ? globalKeyArgs.Key : globalKeyArgs.SystemKey;
+      if (e.StagingItem.Input is not KeyEventArgs globalKeyArgs || globalKeyArgs.RoutedEvent != Keyboard.KeyDownEvent)
+      {
+        return;
+      }
 
-        if (globalPressedKey == Key.F8
-            && (globalModifiers == ModifierKeys.None || globalModifiers == ModifierKeys.Shift)
-            && ErrorListControl.TryNavigatePreferredIssue(globalModifiers == ModifierKeys.Shift ? -1 : 1))
+      if (_searchPanel?.IsVisible == true)
+      {
+        if (globalKeyArgs.Key == Key.Escape && Keyboard.FocusedElement is not (MenuItem or System.Windows.Controls.ContextMenu))
         {
+          _searchPanel.CloseAnimated();
           globalKeyArgs.Handled = true;
-        }
-
-        return;
-      }
-
-      if (e.StagingItem.Input is not KeyEventArgs ke || ke.RoutedEvent != Keyboard.KeyDownEvent)
-      {
-        return;
-      }
-
-      var mods = Keyboard.Modifiers;
-      bool ctrl = (mods & ModifierKeys.Control) != 0;
-      bool alt = (mods & ModifierKeys.Alt) != 0;
-      var pressedKey = ke.SystemKey == Key.None ? ke.Key : ke.SystemKey;
-
-      if (pressedKey == Key.F8
-          && (mods == ModifierKeys.None || mods == ModifierKeys.Shift)
-          && ErrorListControl.TryNavigatePreferredIssue(mods == ModifierKeys.Shift ? -1 : 1))
-      {
-        ke.Handled = true;
-        return;
-      }
-
-      if (ctrl && !alt && pressedKey == Key.F)
-      {
-        SearchWindow.CloseDialog();
-        ke.Handled = true;
-        return;
-      }
-
-      if (ctrl && !alt && pressedKey == Key.H)
-      {
-        _ = SearchWindow.ToggleReplaceRowAsync();
-        ke.Handled = true;
-        return;
-      }
-
-      // Пропускаем только «чистый» Ctrl (без Alt) — им заведуют другие биндинги.
-      if (ctrl && !alt)
-      {
-        return;
-      }
-
-      if (SearchWindow.IsVisible && ke.Key == Key.Escape)
-      {
-        SearchWindow.CloseDialog();
-        ke.Handled = true;
-        return;
-      }
-
-      if (SearchWindow.IsVisible && ke.Key == Key.F3)
-      {
-        var selectedText = MultiWindow?.GetActiveTextEditor()?.TextArea?.Selection?.GetText();
-        var direction = Keyboard.Modifiers == ModifierKeys.Shift ? "FindPrevious" : "FindNext";
-
-        if (!string.IsNullOrEmpty(selectedText))
-        {
-          SearchEventAdapter.RaiseSearchTextRequested(selectedText);
-        }
-
-        SearchEventAdapter.RaiseSearchButtonPressed(direction);
-        ke.Handled = true;
-        return;
-      }
-
-      // Alt+R / Alt+A — локально в SearchWindow
-      if (SearchWindow != null && SearchWindow.IsVisible && alt)
-      {
-        var key = ke.SystemKey == Key.None ? ke.Key : ke.SystemKey;
-
-        if (key == Key.R)
-        {
-          _ = SearchWindow.ShowWindow(expandReplaceRow: true, focusReplaceField: true);
-          SearchEventAdapter.RaiseReplaceWordButtonPressed();
-          ke.Handled = true;
           return;
         }
-
-        if (key == Key.A)
+        if (globalKeyArgs.Key == Key.F3
+            && (Keyboard.Modifiers == ModifierKeys.None || Keyboard.Modifiers == ModifierKeys.Shift))
         {
-          _ = SearchWindow.ShowWindow(expandReplaceRow: true, focusReplaceField: false);
-          SearchEventAdapter.RaiseReplaceAllWordsButtonPressed();
-          ke.Handled = true;
+          _ = _searchPanel.RunSearchAsync(Keyboard.Modifiers == ModifierKeys.Shift
+            ? Ask.Core.Shared.Interfaces.UiInterfaces.TextSearchAction.Previous
+            : Ask.Core.Shared.Interfaces.UiInterfaces.TextSearchAction.Next);
+          globalKeyArgs.Handled = true;
           return;
         }
       }
+
+      var globalModifiers = Keyboard.Modifiers;
+      var globalPressedKey = globalKeyArgs.SystemKey == Key.None ? globalKeyArgs.Key : globalKeyArgs.SystemKey;
+
+      if (globalPressedKey == Key.F8
+          && (globalModifiers == ModifierKeys.None || globalModifiers == ModifierKeys.Shift)
+          && ErrorListControl.TryNavigatePreferredIssue(globalModifiers == ModifierKeys.Shift ? -1 : 1))
+      {
+        globalKeyArgs.Handled = true;
+      }
+
     }
 
     private bool TryHandleSwitchUserHotkey(PreProcessInputEventArgs e)

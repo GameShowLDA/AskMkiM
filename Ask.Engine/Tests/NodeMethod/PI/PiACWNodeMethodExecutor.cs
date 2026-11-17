@@ -72,6 +72,7 @@ namespace Ask.Engine.Tests.NodeMethod.PI
 
         await breakDown.ConnectableManager.InitializeAsync(messageService);
         await breakDown.AcwManger.Mode.SetModeAsync(messageService);
+        breakDown.Time.SetTargetTime(dataModel.Time);
         await breakDown.AcwManger.Time.SetTestTimeAsync(dataModel.Time, messageService);
         await breakDown.AcwManger.Time.SetRampTimeAsync(dataModel.RampTime, messageService);
         await breakDown.AcwManger.CurrentLimits.SetHighCurrentLimitAsync(dataModel.Param, messageService);

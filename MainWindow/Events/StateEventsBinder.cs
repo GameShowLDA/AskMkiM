@@ -132,6 +132,10 @@ namespace MainWindowProgram.Events
         ? "NotificationSuccessIconBrush"
         : "NotificationErrorIconBrush";
 
+      _mainWindow.UploadErrorIndicator.ToolTip = isIdleMode
+        ? "Выполнение в холостом режиме. Оборудование не используется."
+        : "Выполнение с оборудованием. Идёт проверка.";
+
       _mainWindow.UploadErrorIndicator.SetResourceReference(
         System.Windows.Controls.Control.ForegroundProperty,
         brushKey);
@@ -226,8 +230,6 @@ namespace MainWindowProgram.Events
         _mainWindow.Build.IsEnabled = true;
         _mainWindow.Run.Visibility = Visibility.Visible;
         _mainWindow.Run.IsEnabled = true;
-        _mainWindow.RunStepByStepMode.Visibility = Visibility.Visible;
-        _mainWindow.RunStepByStepMode.IsEnabled = true;
       });
     }
 

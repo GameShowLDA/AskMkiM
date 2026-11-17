@@ -1,0 +1,10 @@
+<Application x:Class="ExecutionWorkspacePrototype.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             StartupUri="MainWindow.xaml">
+    <Application.Resources>
+        <SolidColorBrush x:Key="SettingsNestedGroupBackgroundSolidColorBrush" Color="#171E28" />
+        <SolidColorBrush x:Key="VioletColorSolidColorBrush" Color="#8C7CFF" />
+        <SolidColorBrush x:Key="ForegrounfBrushes" Color="#EEF2F8" />
+    </Application.Resources>
+</Application>
