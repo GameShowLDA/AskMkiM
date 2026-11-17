@@ -48,6 +48,13 @@ public sealed class B5108 : DeviceWithTcpIp, IPowerSupply, IDisposable
   public int NumberChassis { get; set; }
 
   /// <inheritdoc />
+  public SupportedBusPairs SupportedBusPairs { get; set; } =
+    SupportedBusPairs.AB2 | SupportedBusPairs.AB3 | SupportedBusPairs.AB4;
+
+  /// <inheritdoc />
+  public int PintNumber { get; set; } = 1;
+
+  /// <inheritdoc />
   public IVoltageManager VoltageManager { get; set; }
   /// <inheritdoc />
   public ICurrentManager CurrentManager { get; set; }
@@ -64,9 +71,11 @@ public sealed class B5108 : DeviceWithTcpIp, IPowerSupply, IDisposable
   {
     Id = Id,
     NumberChassis = NumberChassis,
+    SupportedBusPairs = SupportedBusPairs,
     Name = Name,
     Description = Description,
     Number = Number,
+    PintNumber = PintNumber,
     ConnectionDetails = ConnectionDetails,
     DeviceClass = DeviceClass,
     DeviceType = DeviceType,

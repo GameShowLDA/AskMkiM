@@ -35,6 +35,7 @@
 		<Rule color="Mnemonic">\bСК\b</Rule>
 		<Rule color="Mnemonic">\bНЭ\b</Rule>
 		<Rule color="Mnemonic">\bОС\b</Rule>
+		<Rule color="Mnemonic">\bВИ\b</Rule>
 
 		<!--Ключи-->
 		

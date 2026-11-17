@@ -27,7 +27,6 @@ public sealed class VshParserDbFixture : IDisposable
       ConnectionDetails = "UNIT-TEST",
       DeviceType = DeviceType.ChassisManager,
       DeviceClass = "Ask.Device.Runtime.Device.ManagerChassis",
-      BusType = BusStructureEnum.Type.Bus2
     };
 
     var chassis = ChassisManagers.Build(chassisDto);

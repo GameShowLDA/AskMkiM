@@ -146,7 +146,7 @@ namespace UI.Controls.Settings.DeviceConfig
       FastMeterWindow fastMeterWindow = new FastMeterWindow();
       fastMeterWindow.SetSettings(sender, e);
       fastMeterWindow.RequestSave += async (s, a) => await RefreshDeviceAsync(devices, system.Number, a);
-      await OpenWindowInDrawerAsync(fastMeterWindow, "Добавление устройства", "F4 - закрыть");
+      await OpenWindowInDrawerAsync(fastMeterWindow, "Добавление устройства", "F4 / Esc — закрыть");
     }
 
     /// <summary>
@@ -162,7 +162,7 @@ namespace UI.Controls.Settings.DeviceConfig
       ModuleVoltageCurrentSourceWindow fastMeterWindow = new ModuleVoltageCurrentSourceWindow();
       fastMeterWindow.SetSettings(sender, e);
       fastMeterWindow.RequestSave += async (s, a) => await RefreshDeviceAsync(devices, system.Number, a);
-      await OpenWindowInDrawerAsync(fastMeterWindow, "Добавление устройства", "F4 - закрыть");
+      await OpenWindowInDrawerAsync(fastMeterWindow, "Добавление устройства", "F4 / Esc — закрыть");
     }
 
     /// <summary>
@@ -178,7 +178,7 @@ namespace UI.Controls.Settings.DeviceConfig
       ModuleRelayControlWindow fastMeterWindow = ServiceLocator.GetRequired<ModuleRelayControlWindow>();
       fastMeterWindow.SetSettings(sender, e);
       fastMeterWindow.RequestSave += async (s, a) => await RefreshDeviceAsync(devices, system.Number, a);
-      await OpenWindowInDrawerAsync(fastMeterWindow, "Добавление устройства", "F4 - закрыть");
+      await OpenWindowInDrawerAsync(fastMeterWindow, "Добавление устройства", "F4 / Esc — закрыть");
     }
 
     /// <summary>
@@ -194,7 +194,7 @@ namespace UI.Controls.Settings.DeviceConfig
       DeviceBusCommutationWindow deviceSettingsWindow = new DeviceBusCommutationWindow();
       deviceSettingsWindow.SetSettings(sender, e);
       deviceSettingsWindow.RequestSave += async (s, a) => await RefreshDeviceAsync(devices, system.Number, a);
-      await OpenWindowInDrawerAsync(deviceSettingsWindow, "Добавление устройства", "F4 - закрыть");
+      await OpenWindowInDrawerAsync(deviceSettingsWindow, "Добавление устройства", "F4 / Esc — закрыть");
     }
 
     /// <summary>
@@ -218,7 +218,7 @@ namespace UI.Controls.Settings.DeviceConfig
       BreakDownWindow fastMeterWindow = new BreakDownWindow();
       fastMeterWindow.SetSettings(sender, e);
       fastMeterWindow.RequestSave += async (s, a) => await RefreshDeviceAsync(devices, system.Number, a);
-      await OpenWindowInDrawerAsync(fastMeterWindow, "Добавление устройства", "F4 - закрыть");
+      await OpenWindowInDrawerAsync(fastMeterWindow, "Добавление устройства", "F4 / Esc — закрыть");
     }
 
     private async void Devices_EditBreakdownEvent(IChassisManager system, DeviceManagerControl devices, BreakdownTesterDto entity)
@@ -231,7 +231,7 @@ namespace UI.Controls.Settings.DeviceConfig
       BreakDownWindow window = new BreakDownWindow();
       window.SetSettings(this, system, entity);
       window.RequestSave += async (s, a) => await RefreshDeviceAsync(devices, system.Number, a);
-      await OpenWindowInDrawerAsync(window, "Редактирование устройства", "F4 - закрыть");
+      await OpenWindowInDrawerAsync(window, "Редактирование устройства", "F4 / Esc — закрыть");
     }
 
     private async void Devices_EditSwitchingEvent(IChassisManager system, DeviceManagerControl devices, SwitchingDeviceDto entity)
@@ -244,7 +244,7 @@ namespace UI.Controls.Settings.DeviceConfig
       DeviceBusCommutationWindow window = new DeviceBusCommutationWindow();
       window.SetSettings(this, system, entity);
       window.RequestSave += async (s, a) => await RefreshDeviceAsync(devices, system.Number, a);
-      await OpenWindowInDrawerAsync(window, "Редактирование устройства", "F4 - закрыть");
+      await OpenWindowInDrawerAsync(window, "Редактирование устройства", "F4 / Esc — закрыть");
     }
 
     private async void Devices_EditPowerModuleEvent(IChassisManager system, DeviceManagerControl devices, PowerSourceModuleDto entity)
@@ -257,7 +257,7 @@ namespace UI.Controls.Settings.DeviceConfig
       ModuleVoltageCurrentSourceWindow window = new ModuleVoltageCurrentSourceWindow();
       window.SetSettings(this, system, entity);
       window.RequestSave += async (s, a) => await RefreshDeviceAsync(devices, system.Number, a);
-      await OpenWindowInDrawerAsync(window, "Редактирование устройства", "F4 - закрыть");
+      await OpenWindowInDrawerAsync(window, "Редактирование устройства", "F4 / Esc — закрыть");
     }
 
     private async void Devices_EditRelayEvent(IChassisManager system, DeviceManagerControl devices, RelaySwitchModuleDto entity)
@@ -270,7 +270,7 @@ namespace UI.Controls.Settings.DeviceConfig
       ModuleRelayControlWindow window = ServiceLocator.GetRequired<ModuleRelayControlWindow>();
       window.SetSettings(this, system, entity);
       window.RequestSave += async (s, a) => await RefreshDeviceAsync(devices, system.Number, a);
-      await OpenWindowInDrawerAsync(window, "Редактирование устройства", "F4 - закрыть");
+      await OpenWindowInDrawerAsync(window, "Редактирование устройства", "F4 / Esc — закрыть");
     }
 
     private async void Devices_EditFastMeterEvent(IChassisManager system, DeviceManagerControl devices, FastMeterDto entity)
@@ -283,7 +283,7 @@ namespace UI.Controls.Settings.DeviceConfig
       FastMeterWindow window = new FastMeterWindow();
       window.SetSettings(this, system, entity);
       window.RequestSave += async (s, a) => await RefreshDeviceAsync(devices, system.Number, a);
-      await OpenWindowInDrawerAsync(window, "Редактирование устройства", "F4 - закрыть");
+      await OpenWindowInDrawerAsync(window, "Редактирование устройства", "F4 / Esc — закрыть");
     }
 
     private async void Devices_PowerSupplyEvent(IHeadUnit headUnit, IChassisManager system,
@@ -295,7 +295,8 @@ namespace UI.Controls.Settings.DeviceConfig
       window.RequestSave += async (_, dto) => await RefreshDeviceAsync(devices, system.Number, dto);
       window.CloseActionOverride = () => DrawerHostService.Instance.Close();
       var content = window.DetachSettingsControl();
-      await DrawerHostService.Instance.OpenContentAsync(content, "Источник питания", "F4 - закрыть",
+      await DrawerHostService.Instance.OpenContentAsync(
+        content, "Программируемый источник напряжения и тока", "F4 / Esc — закрыть",
         panelWidth: DeviceConfigDrawerPanelWidth);
     }
 
@@ -309,7 +310,7 @@ namespace UI.Controls.Settings.DeviceConfig
       UninterruptiblePowerSupplyWindow window = new UninterruptiblePowerSupplyWindow();
       window.SetSettings(sender, e);
       window.RequestSave += async (s, a) => await RefreshDeviceAsync(devices, system.Number, a);
-      await OpenWindowInDrawerAsync(window, "Добавление устройства", "F4 - закрыть");
+      await OpenWindowInDrawerAsync(window, "Добавление устройства", "F4 / Esc — закрыть");
     }
 
     private async void Devices_EditUninterruptiblePowerSupplyEvent(IChassisManager system, DeviceManagerControl devices, UninterruptiblePowerSupplyDto entity)
@@ -322,7 +323,7 @@ namespace UI.Controls.Settings.DeviceConfig
       UninterruptiblePowerSupplyWindow window = new UninterruptiblePowerSupplyWindow();
       window.SetSettings(this, system, entity);
       window.RequestSave += async (s, a) => await RefreshDeviceAsync(devices, system.Number, a);
-      await OpenWindowInDrawerAsync(window, "Редактирование устройства", "F4 - закрыть");
+      await OpenWindowInDrawerAsync(window, "Редактирование устройства", "F4 / Esc — закрыть");
     }
 
     /// <summary>
@@ -463,7 +464,7 @@ namespace UI.Controls.Settings.DeviceConfig
       chassisManagerWindow.SetSettings();
       chassisManagerWindow.RequestSave += ChassisManagerSettings_DeviceSaved;
 
-      await OpenWindowInDrawerAsync(chassisManagerWindow, "Добавление системы", "F4 - закрыть", () => Setting_RequestClose(null, EventArgs.Empty));
+      await OpenWindowInDrawerAsync(chassisManagerWindow, "Добавление системы", "F4 / Esc — закрыть", () => Setting_RequestClose(null, EventArgs.Empty));
     }
 
     /// <summary>
@@ -480,7 +481,7 @@ namespace UI.Controls.Settings.DeviceConfig
       ChassisManagerWindow window = new ChassisManagerWindow();
       window.SetSettings(device);
       window.RequestSave += ChassisManagerSettings_DeviceSaved;
-      await OpenWindowInDrawerAsync(window, "Редактирование системы", "F4 - закрыть", () => Setting_RequestClose(null, EventArgs.Empty));
+      await OpenWindowInDrawerAsync(window, "Редактирование системы", "F4 / Esc — закрыть", () => Setting_RequestClose(null, EventArgs.Empty));
     }
 
     /// <summary>

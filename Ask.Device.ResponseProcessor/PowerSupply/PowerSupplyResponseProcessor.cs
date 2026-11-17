@@ -1,4 +1,5 @@
 using Ask.Core.Services.Errors.Device;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Device.ResponseProcessor.Multimeter.ResponseProcessing;
 using System.Globalization;
 
@@ -63,4 +64,24 @@ public static class PowerSupplyResponseProcessor
     1 => true,
     _ => throw new DeviceException($"Некорректное состояние выхода источника питания: {response}"),
   };
+
+  /// <summary>
+  /// Читает режим регулирования из операционного регистра источника.
+  /// </summary>
+  /// <param name="response">Десятичное значение регистра <c>STAT:OPER:COND?</c>.</param>
+  /// <returns>Текущий режим регулирования выхода.</returns>
+  public static PowerSupplyRegulationMode ParseRegulationMode(string response)
+  {
+    decimal value = ParseNumber(response);
+    if (value != decimal.Truncate(value) || value < 0 || value > int.MaxValue)
+      throw new DeviceException($"Некорректный операционный регистр источника питания: {response}");
+
+    int status = (int)value;
+    if ((status & 1) == 0)
+      return PowerSupplyRegulationMode.OutputDisabled;
+
+    return (status & 2) == 0
+      ? PowerSupplyRegulationMode.ConstantVoltage
+      : PowerSupplyRegulationMode.ConstantCurrent;
+  }
 }

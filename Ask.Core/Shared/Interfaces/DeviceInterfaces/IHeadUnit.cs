@@ -7,9 +7,5 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces
   /// </summary>
   public interface IHeadUnit : IDevice 
   {
-    /// <summary>
-    /// Тип структурной шины тестера АСК.
-    /// </summary>
-    BusStructureEnum.Type BusType { get; set; }
   }
 }

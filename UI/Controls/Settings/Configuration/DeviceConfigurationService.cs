@@ -17,6 +17,7 @@ using Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSourceModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Rack;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.RelaySwitchModule;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.DataBase.Engine.Static;
 using Ask.DataBase.Engine.Static.Devices;
 using Ask.DataBase.Engine.Mapping.Device;
@@ -78,7 +79,7 @@ public static class DeviceConfigurationService
     return new DeviceConfigurationFileModel
     {
       PowerSupplies = (await externalPowerTask).OrderBy(x => x.NumberChassis).ThenBy(x => x.Number).Select(ToDto).ToList(),
-      Version = 2,
+      Version = 4,
       ExportedAtUtc = DateTime.UtcNow,
       Chassis = chassisTask.Result
         .OrderBy(x => x.Number)
@@ -153,13 +154,18 @@ public static class DeviceConfigurationService
     model.FastMeters ??= [];
     model.BreakdownTesters ??= [];
 
+    NormalizeSupportedBusPairs(model);
+
     return model;
   }
 
   internal static void ValidateImportedConfiguration(DeviceConfigurationFileModel model)
   {
     EnsureNoDuplicates(model.PowerSupplies, device => $"{device.NumberChassis}:{device.Number}", "источники питания");
+    EnsureNoDuplicates(model.PowerSupplies, device => device.PintNumber.ToString(CultureInfo.InvariantCulture), "номера ПИНТ");
     EnsureDeviceClassSet(model.PowerSupplies, item => item.DeviceClass, "источники питания");
+    if (model.PowerSupplies.Any(source => source.PintNumber is < 1 or > 4))
+      throw new InvalidDataException("Номер ПИНТ должен быть от 1 до 4.");
     if (model.PowerSupplies.Any(source => source.Port is < 1 or > 65535))
       throw new InvalidDataException("TCP-порт источника питания должен быть от 1 до 65535.");
     foreach (PowerSupplyDto source in model.PowerSupplies)
@@ -189,6 +195,17 @@ public static class DeviceConfigurationService
     EnsureDeviceClassSet(model.PowerSourceModules, item => item.DeviceClass, "модули источника питания");
     EnsureDeviceClassSet(model.FastMeters, item => item.DeviceClass, "быстрые измерители");
     EnsureDeviceClassSet(model.BreakdownTesters, item => item.DeviceClass, "пробойные установки");
+
+    ValidateSupportedBusPairs(model.PowerSupplies, SupportedBusPairs.AB2 | SupportedBusPairs.AB3 | SupportedBusPairs.AB4, "источники питания");
+    ValidateSupportedBusPairs(model.SwitchingDevices, SupportedBusPairs.All, "устройства коммутации шин");
+    ValidateSupportedBusPairs(model.PowerSourceModules, SupportedBusPairs.All, "модули источника питания");
+    ValidateSupportedBusPairs(model.FastMeters, SupportedBusPairs.All, "быстрые измерители");
+    ValidateSupportedBusPairs(model.BreakdownTesters, SupportedBusPairs.AB1, "пробойные установки");
+    if (model.RelaySwitchModules.Any(device =>
+          device.SupportedBusPairs != SupportedBusPairsExtensions.FromBus(device.BusType)))
+    {
+      throw new InvalidDataException("Пара шин модуля МКР не соответствует его типу структурной шины.");
+    }
 
     var chassisNumbers = model.Chassis
       .Select(chassis => chassis.Number)
@@ -307,6 +324,36 @@ public static class DeviceConfigurationService
 
     throw new InvalidDataException(
       $"В разделе \"{sectionName}\" есть привязка к несуществующим шасси: {string.Join(", ", unknownChassis)}.");
+  }
+
+  private static void NormalizeSupportedBusPairs(DeviceConfigurationFileModel model)
+  {
+    foreach (PowerSupplyDto device in model.PowerSupplies.Where(x => x.SupportedBusPairs == SupportedBusPairs.None))
+      device.SupportedBusPairs = SupportedBusPairs.AB2 | SupportedBusPairs.AB3 | SupportedBusPairs.AB4;
+    foreach (SwitchingDeviceDto device in model.SwitchingDevices.Where(x => x.SupportedBusPairs == SupportedBusPairs.None))
+      device.SupportedBusPairs = SupportedBusPairs.All;
+    foreach (PowerSourceModuleDto device in model.PowerSourceModules.Where(x => x.SupportedBusPairs == SupportedBusPairs.None))
+      device.SupportedBusPairs = SupportedBusPairs.All;
+    foreach (FastMeterDto device in model.FastMeters.Where(x => x.SupportedBusPairs == SupportedBusPairs.None))
+      device.SupportedBusPairs = SupportedBusPairs.All;
+    foreach (BreakdownTesterDto device in model.BreakdownTesters.Where(x => x.SupportedBusPairs == SupportedBusPairs.None))
+      device.SupportedBusPairs = SupportedBusPairs.AB1;
+    foreach (RelaySwitchModuleDto device in model.RelaySwitchModules)
+      device.SupportedBusPairs = SupportedBusPairsExtensions.FromBus(device.BusType);
+  }
+
+  private static void ValidateSupportedBusPairs<TDevice>(
+    IEnumerable<TDevice> devices,
+    SupportedBusPairs allowedPairs,
+    string sectionName)
+    where TDevice : AttachableDeviceDto
+  {
+    if (devices.Any(device =>
+          device.SupportedBusPairs == SupportedBusPairs.None ||
+          (device.SupportedBusPairs & ~allowedPairs) != 0))
+    {
+      throw new InvalidDataException($"В разделе \"{sectionName}\" указаны недопустимые пары структурных шин.");
+    }
   }
 
   private static PowerSupplyDto ToDto(IPowerSupply item) => PreserveHardwareSimulation(item, item.Convert());

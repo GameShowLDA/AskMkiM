@@ -40,6 +40,10 @@ namespace Ask.DataBase.Provider.Context
         property.HasConversion(converter).IsRequired();
         property.Metadata.SetValueComparer(comparer);
       }
+
+      // Legacy-схема содержит обязательную колонку BusType у шасси. Теневое свойство
+      // сохраняет совместимость, не возвращая выбор структурной шины в модель шасси и UI.
+      modelBuilder.Entity<ChassisManagerDto>().Property<int>("BusType");
     }
 
     /// <summary>

@@ -118,12 +118,14 @@ public sealed class B5108SelfTestTests
       var connector = new Mock<IConnectorDeviceBusCommutation>();
       connector.Setup(x => x.ConnectMultimeter(SwitchingBusNew.AB2, It.IsAny<IUserInteractionService>()))
         .ReturnsAsync(true);
-      connector.Setup(x => x.ConnectPINT(SwitchingBusNew.AB2, It.IsAny<IUserInteractionService>()))
+      connector.Setup(x => x.ConnectPINT(
+          SwitchingBusNew.AB2, It.IsAny<IUserInteractionService>(), It.IsAny<bool>()))
         .ReturnsAsync(true);
       connector.Setup(x => x.DisconnectMultimeter(SwitchingBusNew.AB2, It.IsAny<IUserInteractionService>()))
         .Callback(() => DisconnectOperations.Add("DisconnectMultimeter"))
         .ReturnsAsync(true);
-      connector.Setup(x => x.DisconnectPINT(SwitchingBusNew.AB2, It.IsAny<IUserInteractionService>()))
+      connector.Setup(x => x.DisconnectPINT(
+          SwitchingBusNew.AB2, It.IsAny<IUserInteractionService>(), It.IsAny<bool>()))
         .Callback(() => DisconnectOperations.Add("DisconnectPINT"))
         .ReturnsAsync(true);
       var switchingDevice = new Mock<ISwitchingDevice>();

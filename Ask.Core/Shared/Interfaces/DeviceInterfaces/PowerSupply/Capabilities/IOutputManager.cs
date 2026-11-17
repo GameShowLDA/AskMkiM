@@ -1,4 +1,5 @@
 using Ask.Core.Shared.Interfaces.UiInterfaces;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 
 namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSupply.Capabilities
 {
@@ -23,5 +24,15 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSupply.Capabilities
     /// <param name="userMessageService">Сервис взаимодействия с пользователем.</param>
     /// <returns><see langword="true"/>, если выход включён; иначе — <see langword="false"/>.</returns>
     Task<bool> GetOutputStateAsync(CancellationToken cancellationToken = default, IUserInteractionService? userMessageService = null);
+
+    /// <summary>
+    /// Читает текущий режим регулирования выхода источника питания.
+    /// </summary>
+    /// <param name="cancellationToken">Токен отмены операции.</param>
+    /// <param name="userMessageService">Сервис взаимодействия с пользователем.</param>
+    /// <returns>Текущий режим регулирования выхода.</returns>
+    Task<PowerSupplyRegulationMode> GetRegulationModeAsync(
+      CancellationToken cancellationToken = default,
+      IUserInteractionService? userMessageService = null);
   }
 }

@@ -10,4 +10,9 @@ public class AttachableDeviceDto : DeviceDto
   /// Номер шасси, к которому подключено устройство.
   /// </summary>
   public int NumberChassis { get; set; }
+
+  /// <summary>
+  /// Получает или задаёт пары структурных шин, доступные устройству.
+  /// </summary>
+  public Ask.Core.Shared.Metadata.Enums.DeviceEnums.SupportedBusPairs SupportedBusPairs { get; set; }
 }

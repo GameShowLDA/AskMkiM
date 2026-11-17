@@ -141,7 +141,6 @@ namespace Ask.Engine.ControlCommandAnalyser
 
       CheckVshModel(models);
       CkCommandValidator.ValidateVshCompatibility(models);
-      ViCommandValidator.ValidateVshCompatibility(models);
 
       if (HasCriticalStructuralErrors(models))
         return CompleteCriticalTranslation(models, progress);
@@ -419,8 +418,8 @@ namespace Ask.Engine.ControlCommandAnalyser
               comments.Remove(c); // удаляем из общего списка
             }
 
-            if (commands.Any(c => c.Mnemonic == mnemonic && c.CommandNumber == commandNumber))
-              model.Errors.Add(GeneralErrors.CommandAlreadyExists(mnemonic, currentStartLine + 1, $"{commandNumber} {mnemonic}"));
+            if (commands.Any(c => c.CommandNumber == commandNumber))
+              model.Errors.Add(GeneralErrors.CommandAlreadyExists(commandNumber, currentStartLine + 1, $"{commandNumber} {mnemonic}"));
 
             commands.Add(model);
             CommandsModel.CommandModels.Add(model);
@@ -519,8 +518,8 @@ namespace Ask.Engine.ControlCommandAnalyser
         var model = ParseSourceCommand(commandNumber, mnemonic, currentStartLine + 1, commandLines, sourceLineNumbers);
         model.StartLineNumber = currentStartLine + 1;
 
-        if (commands.Any(c => c.Mnemonic == mnemonic && c.CommandNumber == commandNumber))
-          model.Errors.Add(GeneralErrors.CommandAlreadyExists(mnemonic, currentStartLine + 1, $"{commandNumber} {mnemonic}"));
+        if (commands.Any(c => c.CommandNumber == commandNumber))
+          model.Errors.Add(GeneralErrors.CommandAlreadyExists(commandNumber, currentStartLine + 1, $"{commandNumber} {mnemonic}"));
 
         // Все оставшиеся комментарии → последней команде
         foreach (var c in comments.ToList())

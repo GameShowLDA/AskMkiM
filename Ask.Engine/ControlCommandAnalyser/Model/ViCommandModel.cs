@@ -17,9 +17,14 @@ public sealed class ViCommandModel : BaseCommandModel
   public override string Mnemonic => EnumExtensions.GetCommandOrganizationalInfo(OrganizationalComands.VI).DisplayName;
 
   /// <summary>
-  /// Номер источника питания.
+  /// Номер ПИНТ, указанный в команде.
   /// </summary>
   public int? PowerSupplyNumber { get; set; }
+
+  /// <summary>
+  /// Аппаратный номер настроенного источника питания.
+  /// </summary>
+  public int? PowerSupplyDeviceNumber { get; set; }
 
   /// <summary>
   /// Номер тестера, к которому относится найденный источник.
@@ -52,9 +57,32 @@ public sealed class ViCommandModel : BaseCommandModel
   public SwitchingBus? PositiveBus { get; set; }
 
   /// <summary>
+  /// Исходная запись положительной шины.
+  /// </summary>
+  public string? PositiveBusSource { get; set; }
+
+  /// <summary>
   /// Шина, подключаемая к отрицательному выводу.
   /// </summary>
   public SwitchingBus? NegativeBus { get; set; }
+
+  /// <summary>
+  /// Исходная запись отрицательной шины.
+  /// </summary>
+  public string? NegativeBusSource { get; set; }
+
+  /// <summary>
+  /// Возвращает исходную запись выбранной пары шин.
+  /// </summary>
+  internal string? BusPairSource
+  {
+    get
+    {
+      if (string.IsNullOrWhiteSpace(PositiveBusSource)) return NegativeBusSource;
+      if (string.IsNullOrWhiteSpace(NegativeBusSource)) return PositiveBusSource;
+      return $"{PositiveBusSource},{NegativeBusSource}";
+    }
+  }
 
   /// <summary>
   /// Действие, определённое сочетанием параметров команды.

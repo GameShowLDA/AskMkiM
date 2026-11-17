@@ -34,20 +34,28 @@ namespace Ask.Core.Shared.Interfaces.DeviceInterfaces.SwitchingDevice.Capabiliti
     /// </summary>
     /// <param name="bus">Шина, к которой подключается ПИНТ.</param>
     /// <param name="userMessageService">Сервис для вывода сообщений.</param>
+    /// <param name="skipSwitchingDelay">Признак пропуска задержки после коммутации.</param>
     /// <returns>
     /// <see langword="true"/>, если операция выполнена успешно; иначе — <see langword="false"/>.
     /// </returns>
-    Task<bool> ConnectPINT(SwitchingBusNew bus, IUserInteractionService? userMessageService = null);
+    Task<bool> ConnectPINT(
+      SwitchingBusNew bus,
+      IUserInteractionService? userMessageService = null,
+      bool skipSwitchingDelay = false);
 
     /// <summary>
     /// Отключает прецизионный источник напряжения и тока (ПИНТ) от указанной шины.
     /// </summary>
     /// <param name="bus">Шина, от которой отключается ПИНТ.</param>
     /// <param name="userMessageService">Сервис для вывода сообщений.</param>
+    /// <param name="skipSwitchingDelay">Признак пропуска задержки после коммутации.</param>
     /// <returns>
     /// <see langword="true"/>, если операция выполнена успешно; иначе — <see langword="false"/>.
     /// </returns>
-    Task<bool> DisconnectPINT(SwitchingBusNew bus, IUserInteractionService? userMessageService = null);
+    Task<bool> DisconnectPINT(
+      SwitchingBusNew bus,
+      IUserInteractionService? userMessageService = null,
+      bool skipSwitchingDelay = false);
 
     /// <summary>
     /// Подключает пробойную установку к системе.

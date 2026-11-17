@@ -117,7 +117,7 @@ namespace MainWindowProgram
         if (!await WindowOpacityTransition.ShowAsync(mainWindow)) return;
         ApplicationActivator.FlushPendingFileRequests();
 
-        if (databaseInitializationReport?.DatabaseAlreadyExisted == false)
+        if (!databaseInitializationReport.DatabaseAlreadyExisted)
         {
           var result = Message.MessageBoxCustom.Show(
             "Настройки приложения не заданы. Заполнить их автоматически?\n\n" +

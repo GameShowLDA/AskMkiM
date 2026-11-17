@@ -43,6 +43,9 @@ namespace Ask.Device.Runtime.Device
     /// </summary>
     public int NumberChassis { get; set; }
 
+    /// <inheritdoc />
+    public SupportedBusPairs SupportedBusPairs { get; set; } = SupportedBusPairs.All;
+
     /// <summary>
     /// Менеджер управления шинами модуля.
     /// </summary>
@@ -72,6 +75,7 @@ namespace Ask.Device.Runtime.Device
       {
         Id = Id,
         NumberChassis = NumberChassis,
+        SupportedBusPairs = SupportedBusPairs,
         Name = Name ?? string.Empty,
         Description = Description ?? string.Empty,
         Number = Number,

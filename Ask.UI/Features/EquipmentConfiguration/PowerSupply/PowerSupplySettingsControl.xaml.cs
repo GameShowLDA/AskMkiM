@@ -14,13 +14,19 @@ public partial class PowerSupplySettingsControl : UserControl
   /// <summary>
   /// Создаёт форму параметров внешнего источника питания.
   /// </summary>
-  public PowerSupplySettingsControl() => InitializeComponent();
+  public PowerSupplySettingsControl()
+  {
+    InitializeComponent();
+    PintNumberComboBox.ItemsSource = Enumerable.Range(1, 4);
+    PintNumberComboBox.SelectedItem = 1;
+  }
 
   /// <summary>
   /// Поля, изменение которых снимает подсветку ошибки секции.
   /// </summary>
   public IReadOnlyList<FrameworkElement> ValidationSources =>
   [
+    PintNumberComboBox,
     PortTextBox,
     MinVoltageTextBox,
     MaxVoltageTextBox,
@@ -52,12 +58,18 @@ public partial class PowerSupplySettingsControl : UserControl
     => int.TryParse(PortTextBox.Text, out int port) && port is >= 1 and <= 65535 ? port : 0;
 
   /// <summary>
+  /// Выбранный номер ПИНТ или ноль, если значение не выбрано.
+  /// </summary>
+  public int PintNumber => PintNumberComboBox.SelectedItem is int number ? number : 0;
+
+  /// <summary>
   /// Загружает параметры источника питания в форму.
   /// </summary>
   /// <param name="dto">Конфигурация внешнего источника питания.</param>
   public void LoadFrom(PowerSupplyDto dto)
   {
     ArgumentNullException.ThrowIfNull(dto);
+    PintNumberComboBox.SelectedItem = dto.PintNumber;
     SetText(PortTextBox, dto.Port);
     SetText(MinVoltageTextBox, dto.MinVoltage);
     SetText(MaxVoltageTextBox, dto.MaxVoltage);
@@ -74,11 +86,14 @@ public partial class PowerSupplySettingsControl : UserControl
   public void ApplyTo(PowerSupplyDto dto)
   {
     ArgumentNullException.ThrowIfNull(dto);
+    if (PintNumber is < 1 or > 4)
+      throw new InvalidOperationException("Выберите номер ПИНТ от 1 до 4.");
     if (Port == 0)
       throw new InvalidOperationException("Проверьте TCP-порт источника питания.");
     if (!TryGetOperatingLimits(out OperatingLimits limits))
       throw new InvalidOperationException("Проверьте диапазоны и шаги напряжения и тока.");
 
+    dto.PintNumber = PintNumber;
     dto.Port = Port;
     dto.MinVoltage = limits.MinVoltage;
     dto.MaxVoltage = limits.MaxVoltage;

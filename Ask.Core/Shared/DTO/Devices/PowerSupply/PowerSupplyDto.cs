@@ -10,6 +10,11 @@ namespace Ask.Core.Shared.DTO.Devices.PowerSupply;
 public class PowerSupplyDto : AttachableDeviceDto
 {
   /// <summary>
+  /// Номер ПИНТ, используемый в командах управления источником.
+  /// </summary>
+  public int PintNumber { get; set; } = 1;
+
+  /// <summary>
   /// TCP-порт управления источником питания.
   /// </summary>
   public int Port { get; set; } = 80;

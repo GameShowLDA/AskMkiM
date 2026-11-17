@@ -44,7 +44,6 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
     public void SetHeadUnit<T>(T headUnit) where T : class, IHeadUnit
     {
       _headUnit = headUnit;
-      BusTypeLoaded();
     }
 
     /// <summary>
@@ -63,31 +62,7 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
 
       DeviceModelMap = deviceModelMap;
       DeviceModelSelectionBox.ItemsSource = deviceModelMap.Keys;
-    }
-
-    private void BusTypeLoaded()
-    {
-      var values = Enum.GetValues(typeof(SwitchingBusNew)).Cast<SwitchingBusNew>().ToList();
-
-      switch (_headUnit.BusType)
-      {
-        case BusStructureEnum.Type.Bus2:
-          values.Remove(SwitchingBusNew.AB2);
-          values.Remove(SwitchingBusNew.AB3);
-          values.Remove(SwitchingBusNew.AB4);
-          break;
-
-        case BusStructureEnum.Type.Bus4:
-          values.Remove(SwitchingBusNew.AB3);
-          values.Remove(SwitchingBusNew.AB4);
-          break;
-
-        case BusStructureEnum.Type.Bus6:
-          values.Remove(SwitchingBusNew.AB4);
-          break;
-      }
-
-      BusTypeSelectionBox.ItemsSource = values;
+      BusTypeSelectionBox.ItemsSource = Enum.GetValues<SwitchingBusNew>();
       BusTypeSelectionBox.SelectedIndex = 0;
     }
 
@@ -99,6 +74,8 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
       DeviceNumberContainer.Visibility = Visibility.Visible;
       RelayPointCountContainer.Visibility = Visibility.Collapsed;
       BusTypeContainer.Visibility = Visibility.Collapsed;
+      BusTypeSelectionBox.Visibility = Visibility.Collapsed;
+      BusPairsSelectionPanel.Visibility = Visibility.Collapsed;
       ResistanceContainer.Visibility = Visibility.Collapsed;
       CapacitanceContainer.Visibility = Visibility.Collapsed;
       ConnectionTypeContainer.Visibility = Visibility.Visible;
@@ -254,6 +231,11 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
         ResistanceTextBox.Text = relayDevice.SwitchResistance.ToString(System.Globalization.CultureInfo.InvariantCulture);
         CapacitanceTextBox.Text = relayDevice.SwitchCapacitance.ToString(System.Globalization.CultureInfo.InvariantCulture);
         BusTypeSelectionBox.SelectedItem = relayDevice.BusType;
+      }
+
+      if (device is AttachableDeviceDto attachableDevice)
+      {
+        SetSupportedBusPairs(attachableDevice.SupportedBusPairs);
       }
 
       if (device is FastMeterDto fastMeterDevice)

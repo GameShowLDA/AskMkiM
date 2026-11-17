@@ -98,15 +98,15 @@ namespace Ask.Core.Services.Errors.Translation
       };
 
     /// <summary>
-    /// Возвращает ошибку, если команда с указанным номером и мнемоникой встречается в программе более одного раза.
+    /// Возвращает ошибку, если номер команды уже использован в программе.
     /// </summary>
-    /// <param name="mnemonic">Мнемоника команды, которая продублирована.</param>
+    /// <param name="commandNumber">Повторно использованный номер команды.</param>
     /// <param name="lineNumber">Номер строки, где обнаружен дубликат.</param>
     /// <param name="command">Текст дублирующей команды.</param>
     /// <returns>
     /// Объект <see cref="ErrorItem"/>, описывающий ошибку дублирования команды.
     /// </returns>
-    public static ErrorItem CommandAlreadyExists(string mnemonic, int lineNumber, string command,
+    public static ErrorItem CommandAlreadyExists(string commandNumber, int lineNumber, string command,
       [CallerMemberName] string callerName = "",
       [CallerFilePath] string callerFile = "",
       [CallerLineNumber] int callerLine = 0) => new()
@@ -114,6 +114,7 @@ namespace Ask.Core.Services.Errors.Translation
         SourceLineNumber = lineNumber,
         Command = command,
         Code = ErrorCode.Gen_CommandAlreadyExists,
+        SourceFragment = commandNumber,
         DebugInfo = $"{Path.GetFileName(callerFile)} → {callerName} (строка {callerLine})",
         Description = $"Команда {command} уже существует. Измените номер команды и повторите попытку."
       };

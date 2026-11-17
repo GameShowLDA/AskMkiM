@@ -18,6 +18,8 @@ namespace Ask.DataBase.Provider.Initialization;
 /// </summary>
 public static class DatabaseInitializationService
 {
+  private const string SupportedBusPairsMigrationId = "20261117120000_AddSupportedBusPairs";
+
   /// <summary>
   /// Инициализирует базу данных и возвращает подробный отчёт.
   /// </summary>
@@ -82,6 +84,7 @@ public static class DatabaseInitializationService
     await EnsureBreakdownTesterSystemInsulationResistanceColumnAsync(databasePath, report, progress, cancellationToken);
     await EnsureLegacyMkiHardwareProfilesStorageAsync(databasePath, report, progress, cancellationToken);
     await EnsurePowerSupplyStorageAsync(databasePath, cancellationToken);
+    await EnsureSupportedBusPairsColumnsAsync(databasePath, report, progress, cancellationToken);
     await EnsureDefaultDataAsync(databasePath, report, progress, cancellationToken);
 
     TraceInfo(
@@ -159,6 +162,20 @@ public static class DatabaseInitializationService
         .Where(migration => !appliedMigrations.Contains(migration))
         .ToList();
 
+      if (pendingMigrations.Count == 1 &&
+          string.Equals(pendingMigrations[0], SupportedBusPairsMigrationId, StringComparison.OrdinalIgnoreCase))
+      {
+        pendingMigrations.Clear();
+        await EnsureSupportedBusPairsColumnsAsync(databasePath, report, progress, cancellationToken);
+        await MarkMigrationAppliedAsync(
+          context.Database.GetDbConnection(), SupportedBusPairsMigrationId, cancellationToken);
+        report.AppliedMigrations++;
+        TraceWarning(
+          report,
+          progress,
+          "[DB] Схема доступных пар шин синхронизирована с совместимой базой.");
+      }
+
       if (pendingMigrations.Count == 0)
       {
         TraceInfo(report, progress, "[DB] Ожидающих миграций нет.");
@@ -170,7 +187,7 @@ public static class DatabaseInitializationService
         try
         {
           await context.Database.MigrateAsync(cancellationToken);
-          report.AppliedMigrations = pendingMigrations.Count;
+          report.AppliedMigrations += pendingMigrations.Count;
           TraceInfo(report, progress, $"[DB] Применены миграции: {string.Join(", ", pendingMigrations)}");
         }
         catch (SqliteException ex) when (IsExistingTablesException(ex))
@@ -763,6 +780,8 @@ public static class DatabaseInitializationService
     await command.ExecuteNonQueryAsync(cancellationToken);
     await EnsureColumnAsync(connection, "PowerSupplies", "NumberChassis", "INTEGER NOT NULL DEFAULT 0",
       new DatabaseInitializationReport(), null, cancellationToken);
+    await EnsureColumnAsync(connection, "PowerSupplies", "PintNumber", "INTEGER NOT NULL DEFAULT 1",
+      new DatabaseInitializationReport(), null, cancellationToken);
     await EnsureColumnAsync(connection, "PowerSupplies", "MinVoltage", "TEXT NOT NULL DEFAULT '0.0'",
       new DatabaseInitializationReport(), null, cancellationToken);
     await EnsureColumnAsync(connection, "PowerSupplies", "MaxVoltage", "TEXT NOT NULL DEFAULT '150.0'",
@@ -775,6 +794,61 @@ public static class DatabaseInitializationService
       new DatabaseInitializationReport(), null, cancellationToken);
     await EnsureColumnAsync(connection, "PowerSupplies", "CurrentStep", "TEXT NOT NULL DEFAULT '0.001'",
       new DatabaseInitializationReport(), null, cancellationToken);
+    await EnsureColumnAsync(connection, "PowerSupplies", "SupportedBusPairs", "INTEGER NOT NULL DEFAULT 14",
+      new DatabaseInitializationReport(), null, cancellationToken);
+  }
+
+  private static async Task EnsureSupportedBusPairsColumnsAsync(
+    string databasePath,
+    DatabaseInitializationReport report,
+    Action<string>? progress,
+    CancellationToken cancellationToken)
+  {
+    await using var connection = new SqliteConnection($"Data Source={databasePath}");
+    await connection.OpenAsync(cancellationToken);
+
+    var defaults = new Dictionary<string, int>
+    {
+      ["BreakdownTesters"] = 1,
+      ["FastMeters"] = 15,
+      ["PowerSourceModules"] = 15,
+      ["PowerSupplies"] = 14,
+      ["Rack"] = 0,
+      ["RelaySwitchModules"] = 1,
+      ["SwitchingDevices"] = 15,
+      ["UninterruptiblePowerSupplies"] = 0,
+    };
+
+    foreach ((string table, int defaultValue) in defaults)
+    {
+      if (await TableExistsAsync(connection, table, cancellationToken))
+      {
+        await EnsureColumnAsync(
+          connection,
+          table,
+          "SupportedBusPairs",
+          $"INTEGER NOT NULL DEFAULT {defaultValue}",
+          report,
+          progress,
+          cancellationToken);
+      }
+    }
+
+    if (await TableExistsAsync(connection, "RelaySwitchModules", cancellationToken))
+    {
+      await using var command = connection.CreateCommand();
+      command.CommandText =
+        """
+        UPDATE "RelaySwitchModules"
+        SET "SupportedBusPairs" = CASE "BusType"
+          WHEN 1 THEN 2
+          WHEN 2 THEN 4
+          WHEN 3 THEN 8
+          ELSE 1
+        END;
+        """;
+      await command.ExecuteNonQueryAsync(cancellationToken);
+    }
   }
 
   /// <summary>
@@ -926,7 +1000,16 @@ public static class DatabaseInitializationService
       || message.Contains("disk i/o error", StringComparison.OrdinalIgnoreCase);
   }
 
-  private static async Task<bool> TryAdoptExistingSchemaAsync(
+  /// <summary>
+  /// Создаёт историю миграций для существующей схемы только при отсутствии таблицы истории.
+  /// </summary>
+  /// <param name="context">Контекст проверяемой базы данных.</param>
+  /// <param name="migrations">Идентификаторы миграций текущей сборки.</param>
+  /// <param name="report">Отчёт об инициализации базы данных.</param>
+  /// <param name="progress">Необязательный обработчик сообщений о ходе инициализации.</param>
+  /// <param name="cancellationToken">Токен отмены операции.</param>
+  /// <returns><see langword="true"/>, если отсутствующая история была создана.</returns>
+  internal static async Task<bool> TryAdoptExistingSchemaAsync(
     AppDbContext context,
     IReadOnlyCollection<string> migrations,
     DatabaseInitializationReport report,
@@ -965,11 +1048,7 @@ public static class DatabaseInitializationService
       }
 
       var historyTableExists = await TableExistsAsync(connection, "__EFMigrationsHistory", cancellationToken);
-      var appliedMigrations = historyTableExists
-        ? await GetAppliedMigrationIdsAsync(connection, cancellationToken)
-        : new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-
-      if (historyTableExists && appliedMigrations.Count >= migrations.Count)
+      if (historyTableExists)
       {
         return false;
       }
@@ -1099,6 +1178,40 @@ public static class DatabaseInitializationService
       }
 
       return await GetAppliedMigrationIdsAsync(connection, cancellationToken);
+    }
+    finally
+    {
+      if (closeConnection)
+      {
+        await connection.CloseAsync();
+      }
+    }
+  }
+
+  private static async Task MarkMigrationAppliedAsync(
+    System.Data.Common.DbConnection connection,
+    string migrationId,
+    CancellationToken cancellationToken)
+  {
+    bool closeConnection = connection.State != System.Data.ConnectionState.Open;
+    if (closeConnection)
+    {
+      await connection.OpenAsync(cancellationToken);
+    }
+
+    try
+    {
+      await using var command = connection.CreateCommand();
+      command.CommandText =
+        """
+        INSERT OR IGNORE INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
+        VALUES ($migrationId, '9.0.4');
+        """;
+      var parameter = command.CreateParameter();
+      parameter.ParameterName = "$migrationId";
+      parameter.Value = migrationId;
+      command.Parameters.Add(parameter);
+      await command.ExecuteNonQueryAsync(cancellationToken);
     }
     finally
     {

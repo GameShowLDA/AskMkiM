@@ -596,7 +596,7 @@ PreStartupInitializer.Initialize()
 → DatabaseInitializationService.InitializeAsync()
   → DbPathResolver.Resolve()
   → SQLite integrity_check
-  → migrate / adopt existing schema / EnsureCreated fallback
+  → migrate / adopt schema only when migration history is absent / EnsureCreated fallback
   → compatibility columns and legacy profile storage
   → default settings rows + hotkeys
 → WarmUpDeviceCachesAsync()
@@ -608,9 +608,8 @@ PreStartupInitializer.Initialize()
 ```
 
 Затем `PreStartupInitializer` вызывает `InitializeAppHost()` и
-`HelpServer.EnsureStarted()`. Startup БД намеренно ловит ошибку на уровне
-`MainWindow.Init.DatabaseInitializer`, пишет лог и возвращает `null`; приложение
-может продолжить запуск.
+`HelpServer.EnsureStarted()`. Ошибка инициализации БД распространяется в startup flow:
+DI host, кэши устройств, настройки и главное окно не загружаются с неполной схемой.
 
 ## Dependency Injection
 
@@ -776,6 +775,8 @@ TranslationViewModel command
 к результату трансляции; `OpkwFoldingStrategy` маскирует эти диапазоны с
 сохранением offsets перед поиском заголовков, поэтому команды внутри
 комментария не создают маркеры сворачивания.
+Мнемоника `ВИ` включена в светлые и тёмные схемы `MKI_PK`, `MKI_OPKW` и
+`MKI_PROTOCOL`; в `MKI_OPKW` она также завершает многострочный блок текста сообщения.
 
 Диагностика исходника при вводе использует те же `ICommandParser`,
 `CkCommandValidator` и `CommandPostAnalyzer` через `CommandTranslationManager.AnalyzeSource`:
@@ -791,6 +792,10 @@ TextEditorUI (UI / Ask.UI), новый документ или PK/PKW
 → DiagnosticSnapshot.Create на worker: индекс сообщений + объединённые диапазоны ошибок/предупреждений
 → актуальность документа/запроса → DiagnosticUnderlineRenderer + DiagnosticHoverPopup
 ```
+
+Ошибки шин `ВИ` сохраняют исходные токены положительной и отрицательной шин.
+Проверка совместимости с `ВШ` передаёт их объединённый `SourceFragment`, поэтому
+редактор подчёркивает точную пару вида `+A2,-B2`, а не всю команду или мнемонику.
 
 Фоновый анализ не форматирует текст и не заменяет модели обычной трансляции.
 `CommandsModel` перенаправляет обращения старых парсеров в локальную коллекцию
@@ -846,15 +851,30 @@ error-list controls.
 - `Ask.Engine/ControlCommandAnalyser/Formatter/`
 - `Ask.Engine/ControlCommandAnalyser/RmTranslation/`
 
-Команда `ВИ` пока поддержана только транслятором:
+Команда `ВИ` поддержана транслятором и исполнительным контуром:
 `ViCommandParser` → `ViCommandModel` → `ViCommandFormatter`. Парсер принимает
 отключение источника, установку U/I без шин и установку U/I с парой
-`+A1,-B1`…`+A4,-B4`, а также условие `Б` перед блоком `*...*`. Напряжение и ток
-распознаются по единицам независимо от порядка. Источник разрешается по
-номеру среди всех записей `PowerSupplies`; отсутствие и дублирование номера между
-тестерами считаются ошибкой. Диапазоны и шаги берутся из `IVoltageManager`/
-`ICurrentManager`; `ViCommandValidator` сверяет номер пары шин с `ВШ` того же тестера.
-Исполнитель `ВИ` и вызовы оборудования ещё не реализованы.
+`+A2,-B2`, `+A3,-B3` или `+A4,-B4`, доступной настроенным ПИНТ и УКШ и представленной
+установленным в том же тестере модулем МКР с соответствующим `BusType`, а также условие `Б`
+перед блоком `*...*`. Напряжение и ток
+распознаются по единицам независимо от порядка. Источник разрешается по настроенному
+`IPowerSupply.PintNumber` (1–4) среди всех записей `PowerSupplies`; отсутствие и
+дублирование номера ПИНТ считаются ошибкой. Аппаратный `Number` найденного источника
+сохраняется в модели для последующего разрешения устройства внутри тестера.
+Диапазоны и шаги берутся из `IVoltageManager`/
+`ICurrentManager`; доступные пары берутся из `IAttachableDevice.SupportedBusPairs`,
+а структура `ВШ` не ограничивает выбор пары `ВИ`.
+`CommandExecutorRegistry` обнаруживает `ViCommandExecutor` по reflection. Исполнитель
+разрешает `IPowerSupply` и `ISwitchingDevice` по сохранённому парсером номеру тестера,
+регистрирует оба устройства в `EquipmentService` и инициализирует их. Перекоммутация
+выполняется при выключенном выходе источника: для включения задаются ток и напряжение,
+затем ПИНТ подключается к паре шин либо отключается от ранее занятой пары, после чего
+выход включается. Для варианта с шинами исполнитель читает операционный регистр источника
+и требует стабилизацию напряжения; при стабилизации тока выход выключается, а ПИНТ
+отключается. ВИ только с номером выключает выход, отключает ПИНТ и сбрасывает U/I к
+настроенным минимальным значениям. Ошибка коммутации не позволяет включить выход.
+Условие `Б` передаётся в `ConnectorManager` и отменяет штатную задержку 10 мс после
+подключения/отключения ПИНТ; остальные вызовы capability сохраняют задержку по умолчанию.
 
 `PointParser.SplitTokens` раскрывает перечисление контактов `х57/[2,11]` внутри
 цепи. `AddressExpansionService` раскрывает диапазон имён разъёмов перед `/`.
@@ -2060,7 +2080,9 @@ Namespace: `Ask.Core.Shared.Interfaces.DeviceInterfaces.PowerSupply`.
 
 Уставки и измерения представлены `decimal`; все операции принимают `CancellationToken`.
 Шаг — программное ограничение уставок относительно минимума, не физическое разрешение выхода.
-Чтение уставки отделено от измерения фактического выхода. `IPowerSupply.NumberChassis` задаёт логическую принадлежность выбранному тестеру;
+Чтение уставки отделено от измерения фактического выхода. `IPowerSupply.PintNumber`
+задаёт номер ПИНТ 1–4, используемый командой `ВИ`; аппаратный `Number` остаётся
+идентификатором устройства внутри тестера. `IPowerSupply.NumberChassis` задаёт логическую принадлежность выбранному тестеру;
 источник остаётся внешним устройством, не модулем МиНТ. Также наследует `IDeviceToDtoConverter<PowerSupplyDto>`.
 `B5108.Convert()` сохраняет подключение и пользовательские диапазоны/шаги U/I; текущие уставки не сохраняются.
 Внешние источники не объединяются с модулем МиНТ и его `IPowerSourceModule`.
@@ -2106,7 +2128,9 @@ Call chains:
   → `VOLT?` / `CURR?` → `EnsureSetpoint` → публикация результата adapter.
 - `OutputManagerAdapter` → `UserActionHelper` → runtime `OutputManager`
   → общая блокировка → `OUTP ON/OFF` → `SYST:ERR?` → `OUTP?` → проверка readback.
-  Getter возвращает `false` для выключенного выхода как успешный результат операции.
+  Getter возвращает `false` для выключенного выхода как успешный результат операции;
+  `GetRegulationModeAsync` → `STAT:OPER:COND?` → разбор битов включённого выхода и
+  стабилизации тока в `PowerSupplyResponseProcessor`.
 - Getters уставок → `VOLT?/CURR?`; `MeasurementManager` → `MEAS:VOLT?/MEAS:CURR?`
   → `PowerSupplyResponseProcessor.ParseNumber` / `ParseOutputState`.
 - Общая Real/Idle-подцепочка: `Ask.Device.Emulator/DeviceProtocolEmulator.cs`
@@ -2123,6 +2147,13 @@ Call chains:
   включённом выходе, иначе 0; ток равен 0 (нагрузка не моделируется).
   `IdleHardwareErrorSimulator` создаёт `DeviceException`; переключение режима не переносит
   Idle-уставки в физический источник.
+- `ViCommandExecutor` → `PowerSupplies.GetDeviceByNumberChassisAsync` /
+  `SwitchingDevices.GetDevicesByNumberChassisAsync` → инициализация обоих устройств
+  → безопасное `OUTP OFF` → установка/сброс U/I → `ConnectorManager.ConnectPINT` или
+  отключение зарегистрированной пары ПИНТ → проверка пересечения настроенных пар ПИНТ и УКШ
+  и пары по `BusType` модулей МКР выбранного тестера → при включении `OUTP ON` и контроль режима
+  через `STAT:OPER:COND?`. Устройства входят в `EquipmentService.GetAllDevices()` и
+  поэтому сбрасываются общим завершением/`ОС`.
 - `Transport.DisconnectAsync` → `TcpTransport` → блокировка общего протокола
   → dispose реального протокола → закрытие сокета → IsConnected=false.
   `ResetAsync` → `*RST` через Real/Idle → закрытие канала → IsConnected=false → `IsReset`.
@@ -2149,7 +2180,8 @@ Setters не включают выход, не меняют LIM и не вызы
 Отдельно проверена отмена из UI во время уже выполняющегося запроса измерения.
 
 БД: `Ask.Core/Shared/DTO/Devices/PowerSupply/PowerSupplyDto.cs` → отдельная таблица `PowerSupplies`
-в `AppDbContext.Device.cs`. Поля AttachableDeviceDto (включая NumberChassis), TCP `Port` (default 80),
+в `AppDbContext.Device.cs`. Поля AttachableDeviceDto (включая NumberChassis и `SupportedBusPairs`),
+`PintNumber` (default 1, допустимо 1–4), TCP `Port` (default 80),
 `MinVoltage`/`MaxVoltage`/`VoltageStep` в В (defaults 0/150/0.1) и
 `MinCurrent`/`MaxCurrent`/`CurrentStep` в А (defaults 0/5/0.001).
 Текущие U/I и включение выхода в БД не сохраняются.
@@ -2159,25 +2191,33 @@ Setters не включают выход, не меняют LIM и не вызы
 → `DeviceApplicationComposer` → runtime с отдельными прикладными adapters.
 Поддержаны Create/CreateRange/GetById/GetAll/GetByNumber/Update/Delete/DeleteAll, а также
 GetDevicesByNumberChassis/GetDeviceByNumberChassis. Номер источника уникален внутри выбранного тестера.
-Маппер переносит общие поля через ReflectionMapper, порт в ConnectedProfile, проверяет рабочие пределы
-и применяет их к runtime-менеджерам до `DeviceApplicationComposer`; adapters сохраняют эти значения.
+Маппер переносит общие поля через ReflectionMapper, номер ПИНТ, порт в ConnectedProfile, проверяет
+номер ПИНТ и рабочие пределы и применяет их к runtime-менеджерам до
+`DeviceApplicationComposer`; adapters сохраняют эти значения. Форма настройки показывает номер ПИНТ
+списком 1–4; общая форма устройств сохраняет допустимые пары шин. МКР выбирает одну пару,
+ПИНТ — любое непустое подмножество AB2–AB4, ППУ — AB1, УКШ, мультиметр и МиНТ —
+любое непустое подмножество AB1–AB4. Импорт конфигурации отклоняет пары вне аппаратного диапазона,
+значения номера ПИНТ вне диапазона и дубли номеров ПИНТ.
 При удалении/замене записи DeviceCache освобождает `B5108.Dispose` → TCP-протокол.
 
 Схема: миграции `20261029090000_AddExternalPowerSupplies`, `20261029100000_AddPowerSupplyChassis`,
-`20261111090000_AddPowerSupplyOperatingLimits` и snapshot,
+`20261111090000_AddPowerSupplyOperatingLimits`, `20261116090000_AddPowerSupplyPintNumber`,
+`20261117120000_AddSupportedBusPairs` и snapshot,
 общий SQL `Ask.DataBase.Provider/Services/Devices/PowerSupplyStorageSql.cs`.
 `DatabaseInitializationService.InitializeAsync` после применения/принятия схемы вызывает
 `EnsurePowerSupplyStorageAsync`: CREATE TABLE IF NOT EXISTS нужен также для legacy-БД,
 миграции которых принимаются как уже применённые. Существующие строки не меняются;
-настроенные устройства автоматически не создаются. NumberChassis и шесть колонок рабочих пределов добавляются
-также в legacy-таблицу; старые записи без принадлежности сохраняют NumberChassis=0,
-тестер за пользователя не выбирается, а пределы получают defaults Б5-108. В root-редакторе БД таблица видна через reflection DbSet.
+настроенные устройства автоматически не создаются. NumberChassis, PintNumber и шесть колонок рабочих
+пределов и `SupportedBusPairs` добавляются также в legacy-таблицы; старые записи без принадлежности сохраняют NumberChassis=0,
+номер ПИНТ получает значение 1, тестер за пользователя не выбирается, а пределы получают defaults Б5-108.
+В root-редакторе БД таблица видна через reflection DbSet.
 Проверки: `Ask.Engine.UnitTests/DataBase/PowerSupplyStorageTests.cs` — миграции новой базы,
 идемпотентное добавление таблицы и сохранение старых данных, CRUD и восстановление LAN-конфигурации.
 
 Конфигурация UI (общий список устройств выбранного тестера):
 `UI/Controls/Settings/DeviceConfig/DeviceManager/DeviceManagerControl.xaml(.cs)`
-содержит отдельный `DeviceListControl` с заголовком «Источник питания».
+содержит отдельный `DeviceListControl` с заголовком
+«Программируемый источник напряжения и тока».
 `PopulateDevicesAsync` в `DeviceConfigControl.xaml.cs` загружает DTO только по NumberChassis
 выбранного тестера; события PowerSupplyEvent/EditPowerSupplyEvent открывают
 `UI/Controls/Settings/DeviceConfig/PowerSupply/PowerSupplyWindow.xaml(.cs)` в существующем DrawerHost.
@@ -2188,12 +2228,14 @@ GetDevicesByNumberChassis/GetDeviceByNumberChassis. Номер источник�
 → определение DeviceWithIP → общий блок IP, общая валидация и синхронизация номера с последним октетом.
 Разметка дополнительных параметров вынесена в
 `Ask.UI/Features/EquipmentConfiguration/PowerSupply/PowerSupplySettingsControl.xaml`:
-TCP-порт (default 80, допустимы 1–65535), минимум/максимум/шаг напряжения в В и тока в мА.
+номер ПИНТ (список 1–4), TCP-порт (default 80, допустимы 1–65535),
+минимум/максимум/шаг напряжения в В и тока в мА.
 Code-behind этого контрола проверяет значения и преобразует ток в амперы перед записью DTO.
 Валидация требует неотрицательный минимум, максимум больше минимума и положительный шаг
 не больше диапазона. `UI/.../DeviceSettingsControl.PowerSupply.cs` только создаёт XAML-контрол,
 помещает его в `AdditionalSettingsContainer` и подключает поля к общей подсветке ошибок.
-`LoadFromDevice` восстанавливает порт, IP и пределы; ток из DTO переводится из А в мА для отображения.
+`LoadFromDevice` восстанавливает номер ПИНТ, порт, IP и пределы; ток из DTO переводится
+из А в мА для отображения.
 `SaveEvent` → `DeviceSettingsProcessorBase.ProcessDevice<PowerSupplyDto>`
 (общий номер, IP и NumberChassis) → `ApplyPowerSupplySettings` → DeviceBuilder
 → `PowerSupplyMapper.ValidateOperatingLimits` → PowerSupplies.Create/Update
@@ -2205,10 +2247,13 @@ Code-behind этого контрола проверяет значения и �
 
 Экспорт/импорт/печать:
 `UI/Controls/Settings/Configuration/DeviceConfigurationFileModel.cs` содержит PowerSupplies;
-DeviceConfigurationService экспортирует NumberChassis/IP/Port и рабочие пределы U/I, проверяет принадлежность тестеру,
-дубликаты в пределах тестера, TCP-порт и диапазоны/шаги; импорт включает источники в существующую транзакционную
+DeviceConfigurationService экспортирует PintNumber/NumberChassis/IP/Port и рабочие пределы U/I,
+проверяет принадлежность тестеру, уникальность номера ПИНТ во всей конфигурации,
+дубликаты аппаратных номеров в пределах тестера, TCP-порт и диапазоны/шаги;
+импорт включает источники в существующую транзакционную
 полную замену конфигурации. Старые JSON без раздела читаются с пустым списком, как остальные секции.
-DeviceConfigurationPrintService выводит раздел «Источник питания» у соответствующего тестера и TCP-порт.
+DeviceConfigurationPrintService выводит раздел «Программируемый источник напряжения и тока»
+у соответствующего тестера, номер ПИНТ и TCP-порт.
 
 Сервисное управление UI:
 root → Администрирование → Сервисные утилиты → «Источники питания».

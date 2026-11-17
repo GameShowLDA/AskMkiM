@@ -1,6 +1,7 @@
 using Ask.Core.Shared.DTO.Devices.Base;
 using Ask.Core.Shared.DTO.Devices.ChassisManager;
 using Ask.Core.Shared.DTO.Devices.RelaySwitchModule;
+using Ask.Core.Shared.Metadata.Enums.DeviceEnums;
 using Ask.Core.Services.FilesUtility;
 using Ask.Device.Communication.Com.Configuration;
 using System.Globalization;
@@ -115,10 +116,14 @@ public static class DeviceConfigurationPrintService
 
       devicesPrinted += AppendDeviceSection(
         sb,
-        "Источник питания",
+        "Программируемый источник напряжения и тока",
         configuration.PowerSupplies.Where(x => x.NumberChassis == chassis.Number),
         insertSectionSeparator: devicesPrinted > 0,
-        appendAdditional: (builder, source) => AppendField(builder, "TCP-порт", source.Port, 4));
+        appendAdditional: (builder, source) =>
+        {
+          AppendField(builder, "Номер ПИНТ", source.PintNumber, 4);
+          AppendField(builder, "TCP-порт", source.Port, 4);
+        });
 
       devicesPrinted += AppendDeviceSection(
         sb,
@@ -174,6 +179,11 @@ public static class DeviceConfigurationPrintService
       AppendField(sb, "Модель устройства", device.Name, 4);
       AppendField(sb, "Номер устройства", device.Number, 4);
       AppendConnectionDetails(sb, device.ConnectionDetails, 4);
+      if (device is AttachableDeviceDto attachableDevice &&
+          attachableDevice.SupportedBusPairs != SupportedBusPairs.None)
+      {
+        AppendField(sb, "Доступные пары шин", FormatBusPairs(attachableDevice.SupportedBusPairs), 4);
+      }
 
       appendAdditional?.Invoke(sb, device);
 
@@ -185,6 +195,19 @@ public static class DeviceConfigurationPrintService
     }
 
     return deviceList.Count;
+  }
+
+  private static string FormatBusPairs(SupportedBusPairs pairs)
+  {
+    return string.Join(
+      ", ",
+      new[]
+      {
+        (SupportedBusPairs.AB1, "A1/B1"),
+        (SupportedBusPairs.AB2, "A2/B2"),
+        (SupportedBusPairs.AB3, "A3/B3"),
+        (SupportedBusPairs.AB4, "A4/B4")
+      }.Where(item => (pairs & item.Item1) != 0).Select(item => item.Item2));
   }
 
   private static void AppendConnectionDetails(StringBuilder sb, string? connectionDetails, int indent)

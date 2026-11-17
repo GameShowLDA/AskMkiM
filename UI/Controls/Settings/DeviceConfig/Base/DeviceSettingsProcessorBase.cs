@@ -35,6 +35,10 @@ namespace UI.Controls.Settings.DeviceConfig.Base
       deviceModel.ConnectionDetails = connectString;
       deviceModel.IsHardwareFailureSimulationEnabled = selectedDevice.IsHardwareFailureSimulationEnabled;
       SetChassisNumber(deviceModel, control);
+      if (deviceModel is AttachableDeviceDto attachableDevice)
+      {
+        attachableDevice.SupportedBusPairs = control.SelectedSupportedBusPairs;
+      }
       return deviceModel;
     }
 

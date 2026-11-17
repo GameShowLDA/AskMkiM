@@ -46,7 +46,7 @@ namespace Ask.UI.Features.ExecutionSelection.Views
 
         e.Handled = true;
       }
-      else if (e.Key == Key.F4)
+      else if (e.Key is Key.F4 or Key.Escape)
       {
         ViewModel.Cancel();
         e.Handled = true;

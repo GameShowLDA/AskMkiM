@@ -179,7 +179,6 @@ internal static class DatabaseDeviceCreate
     if (interfaceType == typeof(IChassisManager))
     {
       var chassis = (IChassisManager)device;
-      chassis.BusType = ReadEnum("Тип структурной шины", chassis.BusType);
       return;
     }
 

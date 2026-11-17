@@ -13,15 +13,15 @@ public static class ViErrors
 
   public static ErrorItem InvalidPowerSupplyNumber(int line, string command, string? fragment) => Create(
     ErrorCode.Vi_InvalidPowerSupplyNumber, line, command,
-    "Первым параметром должен быть указан положительный номер источника питания.", fragment);
+    "Первым параметром должен быть указан номер ПИНТ от 1 до 4.", fragment);
 
   public static ErrorItem PowerSupplyNotFound(int line, string command, int number) => Create(
     ErrorCode.Vi_PowerSupplyNotFound, line, command,
-    $"Источник питания №{number} не найден в конфигурации.", number.ToString());
+    $"ПИНТ №{number} не найден в конфигурации.", number.ToString());
 
   public static ErrorItem AmbiguousPowerSupply(int line, string command, int number) => Create(
     ErrorCode.Vi_AmbiguousPowerSupply, line, command,
-    $"Источник питания №{number} найден у нескольких тестеров. Номер источника должен быть однозначным.", number.ToString());
+    $"Номер ПИНТ №{number} назначен нескольким источникам. Номер ПИНТ должен быть однозначным.", number.ToString());
 
   public static ErrorItem InvalidParameterCombination(int line, string command) => Create(
     ErrorCode.Vi_InvalidParameterCombination, line, command,

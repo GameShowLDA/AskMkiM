@@ -66,6 +66,9 @@ namespace Ask.DataBase.Provider.Migrations
                     b.Property<int>("NumberChassis")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("SupportedBusPairs")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("SystemInsulationResistanceGOhm")
                         .HasColumnType("INTEGER");
 
@@ -76,11 +79,11 @@ namespace Ask.DataBase.Provider.Migrations
 
             modelBuilder.Entity("Ask.Core.Shared.DTO.Devices.ChassisManager.ChassisManagerDto", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
+                    b.Property<int>("BusType")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("BusType")
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("ConnectionDetails")
@@ -525,6 +528,9 @@ namespace Ask.DataBase.Provider.Migrations
                     b.Property<int>("NumberChassis")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("SupportedBusPairs")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("TypeMode")
                         .HasColumnType("INTEGER");
 
@@ -565,6 +571,9 @@ namespace Ask.DataBase.Provider.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("NumberChassis")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("SupportedBusPairs")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("ResistanceCalibrationJson")
@@ -621,6 +630,9 @@ namespace Ask.DataBase.Provider.Migrations
                     b.Property<int>("Number")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("PintNumber")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("Port")
                         .HasColumnType("INTEGER");
 
@@ -628,6 +640,9 @@ namespace Ask.DataBase.Provider.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<int>("NumberChassis")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("SupportedBusPairs")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
@@ -667,6 +682,9 @@ namespace Ask.DataBase.Provider.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("NumberChassis")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("SupportedBusPairs")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
@@ -709,6 +727,9 @@ namespace Ask.DataBase.Provider.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("NumberChassis")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("SupportedBusPairs")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("NumberRack")
@@ -762,6 +783,9 @@ namespace Ask.DataBase.Provider.Migrations
                     b.Property<int>("NumberChassis")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("SupportedBusPairs")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("Id");
 
                     b.ToTable("SwitchingDevices");
@@ -803,6 +827,9 @@ namespace Ask.DataBase.Provider.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("NumberChassis")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("SupportedBusPairs")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");

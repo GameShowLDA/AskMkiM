@@ -29,13 +29,10 @@ namespace Ask.Device.Runtime.Device
       Name = "Тестер АСКМ";
       Description = "Добавить описание сюда";
       DeviceClass = GetType().FullName;
-      BusType = BusStructureEnum.Type.Bus2;
     }
 
     /// <inheritdoc />
     public IPower PowerManager { get; set; }
-    public BusStructureEnum.Type BusType { get; set; }
-
     public ChassisManagerDto Convert()
     {
       return new ChassisManagerDto
@@ -46,8 +43,7 @@ namespace Ask.Device.Runtime.Device
         Number = Number,
         ConnectionDetails = ConnectionDetails ?? string.Empty,
         DeviceType = DeviceType,
-        DeviceClass = DeviceClass ?? string.Empty,
-        BusType = BusType
+        DeviceClass = DeviceClass ?? string.Empty
       };
     }
   }

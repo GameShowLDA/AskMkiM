@@ -19,6 +19,7 @@ public static class PowerSupplyMapper
     ArgumentNullException.ThrowIfNull(device);
     var dto = ReflectionMapper.Map<IPowerSupply, PowerSupplyDto>(device);
     if (device is DeviceWithTcpIp tcp) dto.Port = tcp.ConnectedProfile.Port;
+    dto.PintNumber = device.PintNumber;
     dto.MinVoltage = device.VoltageManager.MinVoltage;
     dto.MaxVoltage = device.VoltageManager.MaxVoltage;
     dto.VoltageStep = device.VoltageManager.VoltageStep;
@@ -41,6 +42,7 @@ public static class PowerSupplyMapper
     ValidateOperatingLimits(dto);
     ReflectionMapper.Apply(dto, device);
     if (device is DeviceWithTcpIp tcp) tcp.ConnectedProfile.Port = dto.Port;
+    device.PintNumber = dto.PintNumber;
     device.VoltageManager.MinVoltage = dto.MinVoltage;
     device.VoltageManager.MaxVoltage = dto.MaxVoltage;
     device.VoltageManager.VoltageStep = dto.VoltageStep;
@@ -50,15 +52,17 @@ public static class PowerSupplyMapper
   }
 
   /// <summary>
-  /// Проверяет диапазоны и шаги уставок источника питания.
+  /// Проверяет номер ПИНТ, диапазоны и шаги уставок источника питания.
   /// </summary>
   /// <param name="dto">Конфигурация источника питания.</param>
   /// <exception cref="ArgumentOutOfRangeException">
-  /// Выбрасывается, если диапазон или шаг уставки некорректен.
+  /// Выбрасывается, если номер ПИНТ, диапазон или шаг уставки некорректен.
   /// </exception>
   public static void ValidateOperatingLimits(PowerSupplyDto dto)
   {
     ArgumentNullException.ThrowIfNull(dto);
+    if (dto.PintNumber is < 1 or > 4)
+      throw new ArgumentOutOfRangeException(nameof(dto.PintNumber), "Номер ПИНТ должен быть от 1 до 4.");
     ValidateRange(dto.MinVoltage, dto.MaxVoltage, dto.VoltageStep, nameof(dto.VoltageStep));
     ValidateRange(dto.MinCurrent, dto.MaxCurrent, dto.CurrentStep, nameof(dto.CurrentStep));
   }

@@ -20,6 +20,10 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
       RegisterValidationSource(DeviceModelSelectionBox, DeviceModelContainer);
       RegisterValidationSource(DeviceNumberTextBox, DeviceNumberContainer);
       RegisterValidationSource(BusTypeSelectionBox, BusTypeContainer);
+      RegisterValidationSource(BusPairAB1CheckBox, BusTypeContainer);
+      RegisterValidationSource(BusPairAB2CheckBox, BusTypeContainer);
+      RegisterValidationSource(BusPairAB3CheckBox, BusTypeContainer);
+      RegisterValidationSource(BusPairAB4CheckBox, BusTypeContainer);
       RegisterValidationSource(RelayPointCountTextBox, RelayPointCountContainer);
       RegisterValidationSource(ResistanceTextBox, ResistanceContainer);
       RegisterValidationSource(CapacitanceTextBox, CapacitanceContainer);
@@ -50,6 +54,14 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
       {
         comboBox.SelectionChanged -= OnValidationSourceChanged;
         comboBox.SelectionChanged += OnValidationSourceChanged;
+      }
+
+      if (source is CheckBox checkBox)
+      {
+        checkBox.Checked -= OnValidationSourceChanged;
+        checkBox.Checked += OnValidationSourceChanged;
+        checkBox.Unchecked -= OnValidationSourceChanged;
+        checkBox.Unchecked += OnValidationSourceChanged;
       }
     }
 
@@ -112,10 +124,21 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
 
       AddIssueIf(
         issues,
-        BusTypeContainer.Visibility == Visibility.Visible && BusTypeSelectionBox.SelectedItem is not SwitchingBusNew,
-        "Тип структурной шины",
+        BusTypeContainer.Visibility == Visibility.Visible &&
+          BusTypeSelectionBox.Visibility == Visibility.Visible &&
+          BusTypeSelectionBox.SelectedItem is not SwitchingBusNew,
+        "Пара структурных шин",
         BusTypeContainer,
         BusTypeSelectionBox);
+
+      AddIssueIf(
+        issues,
+        BusTypeContainer.Visibility == Visibility.Visible &&
+          BusPairsSelectionPanel.Visibility == Visibility.Visible &&
+          SelectedSupportedBusPairs == SupportedBusPairs.None,
+        "Доступные пары шин",
+        BusTypeContainer,
+        BusPairAB1CheckBox);
 
       AddIssueIf(
         issues,

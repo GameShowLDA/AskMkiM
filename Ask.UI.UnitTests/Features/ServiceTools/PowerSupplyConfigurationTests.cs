@@ -15,7 +15,7 @@ public sealed class PowerSupplyConfigurationTests
     var configuration = new DeviceConfigurationFileModel
     {
       Chassis = [new ChassisManagerDto { Number = 2, Name = "Тестер", DeviceClass = typeof(ManagerChassis).FullName! }],
-      PowerSupplies = [new PowerSupplyDto { NumberChassis = 2, Number = 17, Name = "Б5-108",
+      PowerSupplies = [new PowerSupplyDto { NumberChassis = 2, Number = 17, PintNumber = 3, Name = "Б5-108",
         ConnectionDetails = "192.168.2.17", Port = 5080, DeviceClass = typeof(B5108).FullName!,
         MinVoltage = 1m, MaxVoltage = 120m, VoltageStep = 0.5m,
         MinCurrent = 0.01m, MaxCurrent = 2.01m, CurrentStep = 0.01m }],
@@ -25,6 +25,7 @@ public sealed class PowerSupplyConfigurationTests
     var source = Assert.Single(parsed.PowerSupplies);
     Assert.Equal(2, source.NumberChassis);
     Assert.Equal(5080, source.Port);
+    Assert.Equal(3, source.PintNumber);
     Assert.Equal("192.168.2.17", source.ConnectionDetails);
     Assert.Equal(1m, source.MinVoltage);
     Assert.Equal(120m, source.MaxVoltage);
@@ -77,5 +78,26 @@ public sealed class PowerSupplyConfigurationTests
     Assert.Equal(0m, source.MinCurrent);
     Assert.Equal(5m, source.MaxCurrent);
     Assert.Equal(0.001m, source.CurrentStep);
+    Assert.Equal(1, source.PintNumber);
+  }
+
+  [Theory]
+  [InlineData(0)]
+  [InlineData(5)]
+  public void Configuration_RejectsInvalidPintNumber(int pintNumber)
+  {
+    var configuration = new DeviceConfigurationFileModel
+    {
+      Chassis = [new ChassisManagerDto { Number = 2, DeviceClass = typeof(ManagerChassis).FullName! }],
+      PowerSupplies = [new PowerSupplyDto
+      {
+        NumberChassis = 2,
+        Number = 17,
+        PintNumber = pintNumber,
+        DeviceClass = typeof(B5108).FullName!
+      }]
+    };
+
+    Assert.Throws<InvalidDataException>(() => DeviceConfigurationService.ValidateImportedConfiguration(configuration));
   }
 }

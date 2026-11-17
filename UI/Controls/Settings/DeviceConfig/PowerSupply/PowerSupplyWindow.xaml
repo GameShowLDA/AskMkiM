@@ -7,7 +7,7 @@
         xmlns:Data ="clr-namespace:UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig"
     
     mc:Ignorable="d"
-    Title="Источник питания" 
+    Title="Программируемый источник напряжения и тока"
     
     Height="600" 
     Width="400"

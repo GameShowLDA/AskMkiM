@@ -35,6 +35,17 @@
             <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
         </Style>
 
+        <Style x:Key="DeviceBusPairCheckBoxStyle"
+               TargetType="CheckBox"
+               BasedOn="{StaticResource SettingsCheckBox2}">
+            <Setter Property="Foreground" Value="{DynamicResource ForegrounfBrushes}"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="8,4"/>
+        </Style>
+
         <Style TargetType="ScrollBar" BasedOn="{StaticResource ConfigurationScrollBarStyle}" />
 
         <DropShadowEffect x:Key="ShadowEffect" 
@@ -123,17 +134,26 @@
                             </Grid.RowDefinitions>
 
                             <Border Style="{StaticResource DeviceInputSectionTitleBarStyle}">
-                                <TextBlock Text="Тип структурной шины" Foreground="{DynamicResource ForegrounfBrushes}" 
+                                <TextBlock Name="BusSelectionTitle" Text="Доступные пары шин" Foreground="{DynamicResource ForegrounfBrushes}"
                            FontSize="20" FontWeight="Bold" Margin="7,0"
                            />
                             </Border>
 
-                            <ComboBox Grid.Row="1" 
-                                Name="BusTypeSelectionBox" 
-                                Style="{StaticResource DeviceSettingsUnifiedComboBoxStyle}"
-                                SelectionChanged="BusTypeSelectionBox_SelectionChanged"
-                                >
-                            </ComboBox>
+                            <Grid Grid.Row="1">
+                                <ComboBox Name="BusTypeSelectionBox"
+                                    Style="{StaticResource DeviceSettingsUnifiedComboBoxStyle}"
+                                    SelectionChanged="BusTypeSelectionBox_SelectionChanged"/>
+                                <UniformGrid Name="BusPairsSelectionPanel" Columns="2" Margin="18,8" MinHeight="58">
+                                    <CheckBox Name="BusPairAB1CheckBox" Content="A1/B1"
+                                              Style="{StaticResource DeviceBusPairCheckBoxStyle}"/>
+                                    <CheckBox Name="BusPairAB2CheckBox" Content="A2/B2"
+                                              Style="{StaticResource DeviceBusPairCheckBoxStyle}"/>
+                                    <CheckBox Name="BusPairAB3CheckBox" Content="A3/B3"
+                                              Style="{StaticResource DeviceBusPairCheckBoxStyle}"/>
+                                    <CheckBox Name="BusPairAB4CheckBox" Content="A4/B4"
+                                              Style="{StaticResource DeviceBusPairCheckBoxStyle}"/>
+                                </UniformGrid>
+                            </Grid>
                         </Grid>
                     </Border>
 

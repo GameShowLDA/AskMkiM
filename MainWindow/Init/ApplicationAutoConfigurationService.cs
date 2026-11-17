@@ -54,7 +54,6 @@ internal sealed class ApplicationAutoConfigurationService
         new ChassisManagerDto
         {
           Id = 1,
-          BusType = BusStructureEnum.Type.Bus2,
           Name = "Тестер АСКМ",
           Description = "Добавить описание сюда",
           Number = 1,

@@ -116,6 +116,7 @@ namespace Ask.Device.Runtime.Device
     public ISelfTestCheckerMultimeter SelfTestManager { get; set; }
 
     public int NumberChassis { get; set; }
+    public SupportedBusPairs SupportedBusPairs { get; set; } = SupportedBusPairs.All;
     public string LastResolvedDevicePath { get; set; } = string.Empty;
     public ResistanceMeasurementProfile ResistanceCommands { get; set; }
     public ACVMeasurementProfile ACVCommands { get; set; }
@@ -133,6 +134,7 @@ namespace Ask.Device.Runtime.Device
       {
         Id = Id,
         NumberChassis = NumberChassis,
+        SupportedBusPairs = SupportedBusPairs,
         Name = Name ?? string.Empty,
         Description = Description ?? string.Empty,
         Number = Number,

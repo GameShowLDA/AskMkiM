@@ -28,6 +28,7 @@ public sealed class PowerSupplyStorageTests
       {
         Name = "Лабораторный источник",
         Number = 7,
+        PintNumber = 3,
         NumberChassis = 1,
         ConnectionDetails = "192.0.2.17",
         IsHardwareFailureSimulationEnabled = true,
@@ -47,6 +48,7 @@ public sealed class PowerSupplyStorageTests
       var source = Assert.IsType<B5108>(loaded);
       Assert.Equal("Лабораторный источник", source.Name);
       Assert.Equal(7, source.Number);
+      Assert.Equal(3, source.PintNumber);
       Assert.Equal(1, source.NumberChassis);
       Assert.Equal("192.0.2.17", source.ConnectionDetails);
       Assert.Equal(5080, source.ConnectedProfile.Port);
@@ -100,6 +102,7 @@ public sealed class PowerSupplyStorageTests
       await context.SaveChangesAsync();
       var source = await context.PowerSupplies.SingleAsync();
       Assert.Equal(80, source.Port);
+      Assert.Equal(1, source.PintNumber);
       Assert.Equal(0m, source.MinVoltage);
       Assert.Equal(150m, source.MaxVoltage);
       Assert.Equal(0.1m, source.VoltageStep);
@@ -125,6 +128,7 @@ public sealed class PowerSupplyStorageTests
     await context.Database.MigrateAsync();
     Assert.Contains("20261029090000_AddExternalPowerSupplies", await context.Database.GetAppliedMigrationsAsync());
     Assert.Contains("20261111090000_AddPowerSupplyOperatingLimits", await context.Database.GetAppliedMigrationsAsync());
+    Assert.Contains("20261116090000_AddPowerSupplyPintNumber", await context.Database.GetAppliedMigrationsAsync());
     Assert.Empty(await context.PowerSupplies.ToListAsync());
   }
 

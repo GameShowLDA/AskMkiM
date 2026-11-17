@@ -506,7 +506,7 @@ public partial class AskMkiConfigControl : UserControl
     await DrawerHostService.Instance.OpenContentAsync(
       editor,
       "Редактирование параметров",
-      "F4 - закрыть",
+      "F4 / Esc — закрыть",
       onClose: null,
       panelWidth: AskMkiConfigDrawerPanelWidth);
   }

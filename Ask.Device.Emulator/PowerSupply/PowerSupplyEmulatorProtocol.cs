@@ -50,6 +50,7 @@ internal sealed class PowerSupplyEmulatorProtocol(IPowerSupply device) : IDevice
         "VOLT:LIM?" => device.VoltageManager.MaxVoltage.ToString(CultureInfo.InvariantCulture),
         "CURR:LIM?" => device.CurrentManager.MaxCurrent.ToString(CultureInfo.InvariantCulture),
         "OUTP?" => _output ? "1" : "0",
+        "STAT:OPER:COND?" => _output ? "1" : "0",
         "MEAS:VOLT?" => (_output ? _voltage : 0).ToString(CultureInfo.InvariantCulture),
         "MEAS:CURR?" => "0",
         "SYST:ERR?" => "0",

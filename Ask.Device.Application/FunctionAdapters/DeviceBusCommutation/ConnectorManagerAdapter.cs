@@ -141,11 +141,14 @@ namespace Ask.Device.Application.FunctionAdapters.DeviceBusCommutation
     }
 
     /// <inheritdoc />
-    public async Task<bool> ConnectPINT(SwitchingBusNew bus, IUserInteractionService? userMessageService = null)
+    public async Task<bool> ConnectPINT(
+      SwitchingBusNew bus,
+      IUserInteractionService? userMessageService = null,
+      bool skipSwitchingDelay = false)
     {
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
-        var succes = await _connectorManager.ConnectPINT(bus, userMessageService);
+        var succes = await _connectorManager.ConnectPINT(bus, userMessageService, skipSwitchingDelay);
 
         return succes;
       }, userMessageService, deviceTask: true);
@@ -157,11 +160,14 @@ namespace Ask.Device.Application.FunctionAdapters.DeviceBusCommutation
     }
 
     /// <inheritdoc />
-    public async Task<bool> DisconnectPINT(SwitchingBusNew bus, IUserInteractionService? userMessageService = null)
+    public async Task<bool> DisconnectPINT(
+      SwitchingBusNew bus,
+      IUserInteractionService? userMessageService = null,
+      bool skipSwitchingDelay = false)
     {
       var result = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
       {
-        var succes = await _connectorManager.DisconnectPINT(bus, userMessageService);
+        var succes = await _connectorManager.DisconnectPINT(bus, userMessageService, skipSwitchingDelay);
 
         return succes;
       }, userMessageService, deviceTask: true);
