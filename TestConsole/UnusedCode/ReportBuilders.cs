@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Security.Cryptography;
@@ -405,4 +405,3 @@ internal sealed class JsonReportBuilder : IReportBuilder
     await JsonSerializer.SerializeAsync(stream, payload, options, cancellationToken).ConfigureAwait(false);
   }
 }
-

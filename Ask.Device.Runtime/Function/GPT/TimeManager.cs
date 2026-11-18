@@ -1,4 +1,4 @@
-﻿using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
+using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.BreakdownTester.Mode;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
 
@@ -99,7 +99,6 @@ namespace Ask.Device.Runtime.Function.GPT
         default: return (false, string.Empty);
       }
     }
-
 
     /// <summary>
     /// Устанавливает целевое время.

@@ -218,7 +218,6 @@ public static class ModuleRelayControlResponseProcessor
       }
     }
 
-
     if (DeviceDisplayConfig.GetConnectionInfoVisibility())
     {
       await DeviceMessages.PublishOperationResultAsync(

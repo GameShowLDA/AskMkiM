@@ -28,7 +28,7 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
     /// <param name="selectedType">Тип выполняемой проверки.</param>
     /// <param name="device">Проверяемое устройство коммутации шин.</param>
     /// <param name="meter">Мультиметр для проверки целостности цепей.</param>
-    static public async Task StartSelfCheck(CancellationToken cancellationToken, IUserInteractionService messageService, ActionSettings settings, System.Enum selectedType, ISwitchingDevice device = null, IMultimeter meter = null)
+    public static async Task StartSelfCheck(CancellationToken cancellationToken, IUserInteractionService messageService, ActionSettings settings, System.Enum selectedType, ISwitchingDevice device = null, IMultimeter meter = null)
     {
       SelfTestManager.MeterConnect = false;
       SelfTestManager.DbcConnect = false;
@@ -40,6 +40,7 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
           messageService);
         return;
       }
+
       settings.DeviceResults.Add(new DeviceExecutionResult(device.Name, device.NumberChassis, device.Number));
       await DeviceBusCommutationMessages.PublishSelfTestTitleAsync(device, messageService);
       await DeviceBusCommutationMessages.PublishInformationAsync("Настройка оборудования", messageService);
@@ -223,7 +224,6 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
       string testName = GetTestName(testType);
       string busName = SelfTestMetadataProvider.GetBusContactName(busContact);
 
-
       if (!await UserActionHelper.GetRunWithUserRepeatAsync(
         () => ExecuteCircuitOperationAsync(
           () => selfTestChecker.ExecuteSelfTestAsync(cancellationToken, testType, busContact, 1),
@@ -254,8 +254,6 @@ namespace Ask.Device.Runtime.Function.DeviceBusCommutation.SelfCheck
               continuityResult = relayResult;
             }
           }
-
-
 
           if (DeviceDisplayConfig.GetConnectionInfoVisibility())
           {

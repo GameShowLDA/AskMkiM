@@ -32,7 +32,6 @@ namespace MainWindowProgram.Events
 
     private TextEditor? _lastEditorControl;
 
-
     /// <summary>
     /// Инициализирует новый экземпляр класса <see cref="UiEventsBinder"/>.
     /// </summary>
@@ -53,9 +52,6 @@ namespace MainWindowProgram.Events
       EventAggregator.Subscribe<EditorEvents.TextEditorActivated>(e => OnTextEditorActivated(e.ActiveEditor));
       EventAggregator.Subscribe<EditorEvents.TextEditorContainerClosing>(e => OnTextEditorClosing(e.IsClosing, e.EditorName));
       EventAggregator.Subscribe<EditorEvents.ActiveEditorChanged>(e => RefreshActiveEditorUiState());
-
-
-
 
       EventAggregator.Subscribe<EditorEvents.TranslatorActive>(e => EventAggregator_TranslatorActive(e.IsActive));
 
@@ -129,14 +125,6 @@ namespace MainWindowProgram.Events
     {
       RefreshActiveEditorUiState();
     }
-
-
-
-
-
-
-
-
 
     private void RefreshActiveEditorUiState()
     {

@@ -332,7 +332,6 @@ namespace Ask.UI.Controls.TextEditorControl
       transformers.Add(_colorizer);
     }
 
-
     /// <summary>
     /// Реализация текстового маркера.
     /// </summary>

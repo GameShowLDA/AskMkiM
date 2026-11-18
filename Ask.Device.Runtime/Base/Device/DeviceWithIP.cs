@@ -66,7 +66,6 @@ namespace Ask.Device.Runtime.Base.Device
 
     public IpConnectedProfile ConnectedProfile { get; } = new IpConnectedProfile();
 
-
     /// <summary>
     /// Инициализирует новый экземпляр <see cref="DeviceWithIP"/> с заданным IP-адресом.
     /// </summary>

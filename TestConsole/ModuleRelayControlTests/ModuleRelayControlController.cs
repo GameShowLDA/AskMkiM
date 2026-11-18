@@ -45,7 +45,6 @@ namespace TestConsole.ModuleRelayControlTests
 
     public IConnectionInfo ConnectionInfo => _device.ConnectionInfo;
 
-
     public async Task<ModuleRelayControlCommandResult> ConnectAsync(int timeoutMs = DefaultTimeoutMs, CancellationToken cancellationToken = default)
     {
       EnsureProtocolConfigured();

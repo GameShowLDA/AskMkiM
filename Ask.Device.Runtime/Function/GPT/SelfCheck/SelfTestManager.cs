@@ -374,7 +374,6 @@ namespace Ask.Device.Runtime.Function.GPT.SelfCheck
             indentLevel: 1,
             executionErrorMessage);
 
-
           await MeasurementMessages.PublishMeasurementErrorAsync(CheckType.SelfTest,
             VoltageUnit.Volt,
             new MeasurementRange(err, lowerBound, upperBound),

@@ -218,7 +218,6 @@ namespace Ask.Core.Shared.DTO.Protocol
           .Replace("$ЗАКАЗЧИК", protocolModel.Customer)
           .Replace("$ЗАКЛЮЧЕНИЕ", conclusionText);
       
-
       if (string.IsNullOrEmpty(messagesText))
       {
         return before + "\r\n" + after;

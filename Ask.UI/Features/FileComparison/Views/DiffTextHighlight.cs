@@ -1,4 +1,4 @@
-﻿using System.Windows;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
@@ -158,7 +158,6 @@ public static class DiffTextHighlight
   /// <summary>Рисует рамки совпадений поверх текста без изменения его метрик.</summary>
   private sealed class SearchOutline : Adorner
   {
-
 
     /// <summary>Создаёт слой рамок строки.</summary>
     /// <param name="block">Текст строки сравнения.</param>

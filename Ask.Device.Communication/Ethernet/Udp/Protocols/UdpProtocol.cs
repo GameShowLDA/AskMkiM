@@ -113,6 +113,7 @@ namespace Ask.Device.Communication.Ethernet.Udp.Protocols
             udpClient = GetClient(deviceEndpoint, inputPort);
             await _send(udpClient, buffer, deviceEndpoint, cancellationToken).ConfigureAwait(false);
           }
+
           DiagnosticCommandHistory.RecordCommand(_device.Name, command);
           LogInformation($"[{_device.Name}] Отправка команды: \"{command}\" на {deviceEndpoint}", isDeviceLog: true);
 
@@ -142,6 +143,7 @@ namespace Ask.Device.Communication.Ethernet.Udp.Protocols
           {
             throw new DeviceNoResponseException(_device, command, timeout);
           }
+
           DiagnosticCommandHistory.RecordResponse(_device.Name, response);
           LogInformation($"[{_device.Name}] Ответ от устройства: {response}", isDeviceLog: true);
           return response;
@@ -153,6 +155,7 @@ namespace Ask.Device.Communication.Ethernet.Udp.Protocols
           {
             throw new DeviceNoResponseException(_device, command, timeout);
           }
+
           return LogWarning($"[{_device.Name}] Устройство не ответило в течение {timeout / 1000.0} секунд(ы).", isDeviceLog: true);
         }
         catch (DeviceNoResponseException)

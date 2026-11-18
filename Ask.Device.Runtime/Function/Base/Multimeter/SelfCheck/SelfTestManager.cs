@@ -592,8 +592,11 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.SelfCheck
         IdealResult = idealResult;
         PercentageError = percentageError;
       }
+
       public int Number { get; }
+
       public double IdealResult { get; }
+
       public int PercentageError { get; }
     }
   }

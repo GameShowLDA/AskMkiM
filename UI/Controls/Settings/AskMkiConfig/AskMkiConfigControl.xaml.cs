@@ -56,7 +56,6 @@ public partial class AskMkiConfigControl : UserControl
     _selectedProfileKind = LegacyMkiConfig.GetSelectedProfile();
     LoadProfileFromDatabaseIntoEditor();
 
-    
   }
 
   /// <summary>
@@ -163,8 +162,6 @@ public partial class AskMkiConfigControl : UserControl
       UpdateProfileGroupsScrollHeight();
     }
   }
-
-
 
   /// <summary>
   /// Отмечает наличие несохраненных изменений и показывает кнопки подтверждения.

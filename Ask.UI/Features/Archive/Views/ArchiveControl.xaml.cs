@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.EventCore.Adapters;
+using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.EventCore.Events;
 using Ask.Core.Services.EventCore.Services;
 using Ask.Core.Services.FileFormats;
@@ -156,7 +156,6 @@ namespace Ask.UI.Features.Archive.Views
       };
 
       _autoRefreshTimer.Tick += AutoRefreshTimer_Tick;
-
 
       UpdateRightPanels(isFilesVisible: false, isEditorVisible: false);
       ResetTree();
@@ -637,7 +636,6 @@ namespace Ask.UI.Features.Archive.Views
       return ViewModel.TreeNodes.ToList();
     }
 
-
     /// <summary>
     /// Возвращает корневой узел дерева по указанному типу.
     /// </summary>
@@ -802,7 +800,6 @@ namespace Ask.UI.Features.Archive.Views
       UpdateActionButtons();
       UpdateRightPanels(isFilesVisible: false, isEditorVisible: false);
     }
-
 
     /// <summary>
     /// Загружает список архивов в корневой узел дерева с учётом состояния раскрытия.
@@ -2101,7 +2098,6 @@ namespace Ask.UI.Features.Archive.Views
         await SelectGridRow(selectedEntry);
       }
     }
-
 
     /// <summary>
     /// Выбирает строку в таблице архивов.
@@ -4096,7 +4092,6 @@ namespace Ask.UI.Features.Archive.Views
     /// </summary>
     /// <param name="title">Заголовок окна.</param>
     /// <returns>Экземпляр окна.</returns>
-
 
     /// <summary>
     /// Отображает уведомление об архиве.

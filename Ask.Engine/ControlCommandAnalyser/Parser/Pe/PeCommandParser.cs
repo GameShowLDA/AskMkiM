@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.Errors.Translation;
+using Ask.Core.Services.Errors.Translation;
 using Ask.Core.Services.Extensions;
 using Ask.Core.Services.Translator;
 using Ask.Core.Shared.DTO.Executor;
@@ -23,7 +23,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pe
   {
     public bool CanParse(MnemonicIdentifier mnemonic) => mnemonic.Mnemonic.MatchesEnum(MeasurementTypeCommand.PE);
 
-
     public BaseCommandModel Parse(string commandNumber, string mnemonic, int numberLine, List<string> lines)
     {
       LogInformation($"Начало парсинга команды: {commandNumber} {mnemonic}, строк: {lines?.Count ?? 0}");
@@ -47,7 +46,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Pe
       model.Scheme = SchemeManager.GetScheme(model, rmCommandModel, numberLine, ref remainder);
       UnparsedParametersManager.HandleUnparsedParameters(model, numberLine, remainder);
       AllowedKeysAttribute.ValidateKeysAndAttachErrors(model);
-
 
       var prModel = new PrCommandModel
       {

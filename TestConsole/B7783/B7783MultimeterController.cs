@@ -146,7 +146,6 @@ namespace TestConsole.B7783
       return QueryAsync("*IDN?", timeoutMs: timeoutMs, cancellationToken: cancellationToken);
     }
 
-
     /// <summary>
     /// Выполняет сброс мультиметра к заводским настройкам.
     /// </summary>

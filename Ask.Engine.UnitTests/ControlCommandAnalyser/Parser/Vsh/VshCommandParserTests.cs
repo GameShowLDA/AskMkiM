@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.Translator;
+using Ask.Core.Services.Translator;
 using Ask.Core.Shared.Metadata.Enums.TranslationEnums;
 using Ask.Engine.ControlCommandAnalyser.Model;
 using Ask.Engine.ControlCommandAnalyser.Parser.Vsh;
@@ -35,7 +35,6 @@ namespace Ask.Engine.UnitTests.ControlCommandAnalyser.Parser.Vsh
               {
                 "30 ВШ *2Ш:1*"
               }));
-
 
       Assert.NotNull(model.BusStructure);
       Assert.True(model.BusStructure.ContainsKey(BusStructureEnum.Type.Bus2));

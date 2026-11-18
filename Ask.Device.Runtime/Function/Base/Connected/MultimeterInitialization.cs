@@ -45,6 +45,7 @@ internal static class MultimeterInitialization
           LogInformation($"[{device.Name}] Инициализация: попытка {attempt}/{attempts} успешна.", isDeviceLog: true);
           return (true, answer.Trim());
         }
+
         LogWarning($"[{device.Name}] Инициализация: пустой ответ на попытке {attempt}/{attempts}.", isDeviceLog: true);
       }
       catch (DeviceNoResponseException ex)

@@ -73,6 +73,7 @@ internal static class MultimeterMeasurementQuery
           probeError.Operation = ex.Operation;
           throw;
         }
+
         if (!MultimeterResponseProcessor.CheckInitialization(identification))
           throw;
 
@@ -82,6 +83,7 @@ internal static class MultimeterMeasurementQuery
         LogInformation($"[{device.Name}] {operation}: связь подтверждена, разрешены ещё два запроса результата.", isDeviceLog: true);
       }
     }
+
     throw new InvalidOperationException("Не удалось получить результат мультиметра.");
   }
 }

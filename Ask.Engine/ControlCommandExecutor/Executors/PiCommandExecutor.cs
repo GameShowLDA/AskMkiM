@@ -289,7 +289,6 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
           return (isSuccessful, resultContext.PublishedValue);
         }
 
-
       }, messageService, measurementTask: true);
 
       await ExecutionMessages.PublishDelayAsync(AppDelays.BreakdownTesterDelays.PostTestDelay, messageService);

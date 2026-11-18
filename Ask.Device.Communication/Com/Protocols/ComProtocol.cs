@@ -82,6 +82,7 @@ namespace Ask.Device.Communication.Com.Protocols
             {
               throw new DeviceNoResponseException(_device, command, timeout);
             }
+
             return response;
           }
           catch (DeviceNoResponseException)
@@ -101,6 +102,7 @@ namespace Ask.Device.Communication.Com.Protocols
             {
               throw new DeviceNoResponseException(_device, command, timeout, ex);
             }
+
             return string.Empty;
           }
         }
@@ -196,6 +198,7 @@ namespace Ask.Device.Communication.Com.Protocols
 
       return response;
     }
+
     private void RecoverPortAfterFailure(Exception exception)
     {
       if (exception is not IOException

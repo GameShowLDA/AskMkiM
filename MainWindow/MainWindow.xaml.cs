@@ -620,7 +620,6 @@ namespace MainWindowProgram
         CurrentUserButton.IsEnabled = false;
         _searchPanel?.Close();
 
-
         SaveCurrentWorkspaceSession();
         Effect = new BlurEffect { Radius = 8 };
 
@@ -777,10 +776,6 @@ namespace MainWindowProgram
         ThemeMode.LightCustom => ThemeMode.DarkCustom,
         _ => ThemeMode.Dark,
       };
-
-
-
-
 
     /// <summary>
     /// Глобальная обработка ввода и навигации по ошибкам.

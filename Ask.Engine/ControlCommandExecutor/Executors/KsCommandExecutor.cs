@@ -62,7 +62,6 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       return isSuccessful;
     }
 
-
     public async Task ExecuteAsync(CommandExecutionContext context, ProtocolModel protocolModel)
     {
       firstValue = 0;

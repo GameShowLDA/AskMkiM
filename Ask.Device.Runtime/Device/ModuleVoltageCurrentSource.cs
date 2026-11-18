@@ -10,7 +10,6 @@ using Ask.Device.Runtime.Function.ModuleVoltageCurrentSource.SelfCheck;
 
 using System.ComponentModel.DataAnnotations.Schema;
 
-
 namespace Ask.Device.Runtime.Device
 {
   /// <summary>

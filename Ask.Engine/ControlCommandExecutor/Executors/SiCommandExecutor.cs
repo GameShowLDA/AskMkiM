@@ -72,7 +72,6 @@ namespace Ask.Engine.ControlCommandExecutor.Executors
       return isSuccessful;
     }
 
-
     /// <summary>
     /// Выполняет команду СИ и сохраняет обнаруженные ошибки в модели протокола.
     /// </summary>

@@ -245,7 +245,6 @@ namespace UI.Controls.Settings.DeviceConfig.Base.BaseSettingsConfig
           fastMeterDevice.DcwPpuDividerCoefficientPercent);
       }
 
-
       if (device is BreakdownTesterDto breakdownTesterDevice)
       {
         SetSystemInsulationResistanceGOhm(breakdownTesterDevice.SystemInsulationResistanceGOhm);

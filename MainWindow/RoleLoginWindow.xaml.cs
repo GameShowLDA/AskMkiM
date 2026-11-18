@@ -202,7 +202,6 @@ namespace MainWindowProgram
         return;
       }
 
-
     }
 
     private void InstallKeyboardHook()

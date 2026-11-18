@@ -35,14 +35,16 @@ namespace UI.Controls.Settings.Execution
     private bool _isExecutionModelSavedSubscribed;
     private bool _isHardwareErrorSimulationRefreshRunning;
     private int _hardwareErrorSimulationRefreshVersion;
+
     private sealed record ErroneousMeasurementOption(TypeErroneousMeasurement Value, string Title);
+
     private readonly List<HardwareErrorSimulationItem> _hardwareErrorSimulationItems = [];
 
     private sealed class HardwareErrorSimulationItem
     {
-      public required DeviceDto Device { get; init; }
+      required public DeviceDto Device { get; init; }
 
-      public required SettingsCard Card { get; init; }
+      required public SettingsCard Card { get; init; }
 
       public bool SavedValue { get; set; }
     }
@@ -180,6 +182,7 @@ namespace UI.Controls.Settings.Execution
       RepeatMeasurement.IsChecked = model.RepeatMeasurement;
       CheckedChanged(null, false);
     }
+
     /// <summary>
     /// Клик по галочке «сохранить»: сохраняет текущую модель,
     /// перечитывает базу и скрывает индикаторы изменений.

@@ -55,7 +55,6 @@ namespace Ask.Device.Runtime.Device
         Timeout = 2000,
       };
 
-
       DCVCommands = new DCVMeasurementProfile()
       {
         Measure = "READ?",
@@ -84,7 +83,6 @@ namespace Ask.Device.Runtime.Device
       {
         Measure = "READ?",
       };
-
 
       MaxContinuityResistance = 100000;
       AcwPpuDividerCoefficientPercent = 48d;
@@ -126,7 +124,6 @@ namespace Ask.Device.Runtime.Device
     public ContinuityMeasurementProfile ContinuityCommands { get; set; }
 
     public DiodeMeasurementProfile DiodeCommands { get; set; }
-
 
     public FastMeterDto Convert()
     {

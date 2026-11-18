@@ -1,4 +1,4 @@
-﻿using Ask.Core.Services.Errors.Models;
+using Ask.Core.Services.Errors.Models;
 using Ask.Core.Services.Errors.Translation;
 using Ask.Core.Services.EventCore.Adapters;
 using Ask.Core.Services.Extensions;
@@ -917,7 +917,6 @@ namespace Ask.Engine.ControlCommandAnalyser
 
       return "\t" + formatted.Replace(Environment.NewLine, Environment.NewLine + "\t");
     }
-
 
     private static IEnumerable<string> NormalizeUnknownSourceLines(IEnumerable<string>? sourceLines)
     {

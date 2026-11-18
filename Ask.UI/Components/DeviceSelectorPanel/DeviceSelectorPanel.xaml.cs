@@ -231,7 +231,6 @@ namespace Ask.UI.Components.DeviceSelectorPanel
         SetSelfControlEnum(enumType);
       }
 
-
       _isHasDevice = true;
 
       if (Ask.Core.Services.Config.AppSettings.AdminConfig.GetAdminRights())

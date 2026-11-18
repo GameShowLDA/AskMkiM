@@ -93,7 +93,6 @@ namespace Ask.Device.Runtime.Device
     /// </summary>
     public DiodeMeasurementProfile DiodeCommands { get; set; }
 
-
     /// <summary>
     /// Устройство Keysight 3466, предназначенное для измерения различных электрических параметров.
     /// Работает через сетевое подключение (TCP/IP).
@@ -146,7 +145,6 @@ namespace Ask.Device.Runtime.Device
       };
       ContinuityCommands = new ContinuityMeasurementProfile();
       DiodeCommands = new DiodeMeasurementProfile();
-
 
       MaxContinuityResistance = 100000;
       AcwPpuDividerCoefficientPercent = 100d;

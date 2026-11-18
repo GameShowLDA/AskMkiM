@@ -14,7 +14,6 @@ namespace TestConsole.Keysight
     private readonly KeysightDevice _device;
     private readonly Action<string> _log;
 
-
     public KeysightMultimeterController(KeysightDevice? device = null, Action<string>? log = null)
     {
       _device = device ?? new KeysightDevice();

@@ -56,7 +56,6 @@ namespace Ask.Core.Shared.DTO.Executor
 
     public virtual IDislpayInfo BuildDislpayInfo => null;
 
-
     public string PointsSourse { get; set; }
 
     /// <summary>

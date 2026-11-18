@@ -1,4 +1,4 @@
-﻿using Ask.Core.Shared.DTO.Devices.Measurements;
+using Ask.Core.Shared.DTO.Devices.Measurements;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter;
 using Ask.Core.Shared.Interfaces.DeviceInterfaces.Multimeter.Capabilities;
 using Ask.Core.Shared.Interfaces.UiInterfaces;
@@ -29,7 +29,6 @@ namespace Ask.Device.Runtime.Function.Base.Multimeter.Measurements
         _device.DiodeCommands,
         userMessageService,
         cancellationToken);
-
 
     /// <inheritdoc />
     public async Task<double> CheckDiodeAsync(

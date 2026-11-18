@@ -744,7 +744,6 @@ namespace Ask.Device.Application.FunctionAdapters.GPT
           2,
           userMessageService);
 
-
         if (answer.Value > _device.IrMaxResistanceMOhm)
           answer.Value = _device.IrMaxResistanceMOhm;
 

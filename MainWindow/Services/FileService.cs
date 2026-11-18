@@ -99,7 +99,6 @@ namespace MainWindowProgram.Services
         ArchiveDirectoryService.ResolveReviewArchivesRootPath);
       _apkwToApkExporter = new ApkwToApkLegacyExportService();
 
-
       EventAggregator.Unsubscribe<FileInteractionEvents.ViewProtocol>(e => ViewProtocol(e.Protocol));
       EventAggregator.Subscribe<FileInteractionEvents.ViewProtocol>(e => ViewProtocol(e.Protocol));
       EventAggregator.Subscribe<FileInteractionEvents.ExportProtocolPdf>(e =>
@@ -113,7 +112,6 @@ namespace MainWindowProgram.Services
       EventAggregator.Subscribe<ExecutionEvents.ExecutionInterrupted>(OnExecutionInterrupted);
 
     }
-
 
     private void OnGetProtocolInfo(ProtocolModel protocolModel)
     {
@@ -131,9 +129,6 @@ namespace MainWindowProgram.Services
     {
       _executionInterrupted = true;
     }
-
-
-
 
     /// <summary>
     /// Открывает диалог выбора файлов и загружает их в редактор.
@@ -657,8 +652,6 @@ namespace MainWindowProgram.Services
       _mainWindow.Close();
     }
 
-
-
     /// <summary>
     /// Открывает единый контрол выбора уже открытых файлов для сравнения.
     /// </summary>
@@ -1019,10 +1012,6 @@ namespace MainWindowProgram.Services
       }
     }
     internal void OpenFolder() => _multiWindow.EditorDocumentService.OpenFolder();
-
-
-
-
 
     /// <summary>
     /// Запускает выполнение программы контроля через внешнюю старую программу АСК-МКИ.

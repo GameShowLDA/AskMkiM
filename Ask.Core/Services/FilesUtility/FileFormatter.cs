@@ -1,4 +1,4 @@
-﻿using Ask.Core.Shared.DTO.TextEditor;
+using Ask.Core.Shared.DTO.TextEditor;
 using Ask.Core.Shared.Metadata.Enums.FileEnums;
 using System.Text.RegularExpressions;
 
@@ -215,8 +215,6 @@ namespace Ask.Core.Services.FilesUtility
       var match = Regex.Match(trimmedLine, @"^(\d+)\s+(\S+)(.*)$");
       return match.Success && string.Equals(match.Groups[2].Value, "КЦ", StringComparison.OrdinalIgnoreCase);
     }
-
-    
 
     public static string GetLeadingWhitespace(string text)
     {

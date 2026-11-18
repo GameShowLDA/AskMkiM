@@ -93,6 +93,7 @@ namespace Ask.Device.Runtime.Function.Connected
           return (valid, valid ? string.Empty : $"Неожиданная идентификация источника: {identity}");
         }
       }
+
       if (ExecutionConfig.GetIsIdleModeEnabled())
       {
         return IdleHardwareErrorSimulator.ShouldSimulateHardwareError(_device)
@@ -195,6 +196,7 @@ namespace Ask.Device.Runtime.Function.Connected
           IsReset?.Invoke();
         }
       }
+
       return true;
     }
   }

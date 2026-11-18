@@ -77,7 +77,6 @@ namespace Ask.Engine.Tests.Metrology
       await testMeasurement.SetupCommutation(_messageService, data.FirstPoint, data.SecondPoint, metrologicalModeRole);
       await testMeasurement.ConfigureMeter(_messageService, metrologicalModeRole, data);
 
-
       await _messageService.AppendEmptyLineAsync();
       await UserActionHelper.RunWithUserRepeatAsync(async () => await testMeasurement.PerformMeasurement(metrologicalModeRole, data.Param, _messageService), _messageService, true);
     }

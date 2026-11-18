@@ -30,7 +30,6 @@ namespace Ask.Engine.ControlCommandAnalyser.Parser.Common.Processors.Pi
       var (voltage, unit, rest) =
           CommonParameterParser.VoltageParser.ParseVoltage(remainder);
 
-
       if (string.IsNullOrWhiteSpace(voltage))
       {
         model.Errors.Add(SiErrors.EmptyVoltage(ctx.LineNumber, $"{ctx.CommandNumber} {ctx.Mnemonic}"));

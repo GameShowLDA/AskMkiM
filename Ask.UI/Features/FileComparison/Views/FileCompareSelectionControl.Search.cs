@@ -30,8 +30,6 @@ public partial class FileCompareSelectionControl : ITextSearchTarget, ITextSearc
   public void HighlightSearchResults(IReadOnlyList<TextSearchMatch> matches, TextSearchMatch? current)
     => _searchIndex.Update(ActiveComparison, matches, current);
 
-
-
   /// <inheritdoc />
   public void NavigateToSearchResult(TextSearchMatch match)
   {
@@ -78,7 +76,6 @@ public partial class FileCompareSelectionControl : ITextSearchTarget, ITextSearc
     }
     return null;
   }
-
 
 }
 

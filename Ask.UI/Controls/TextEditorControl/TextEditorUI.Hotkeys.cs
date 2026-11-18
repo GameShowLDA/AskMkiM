@@ -467,10 +467,6 @@ namespace Ask.UI.Controls.TextEditorControl
       textEditor.CaretOffset = caretOffset;
     }
 
-    
-
-    
-
     /// <summary>
     /// Обрабатывает масштабирование редактора:
     /// Ctrl + '+' — увеличение масштаба;

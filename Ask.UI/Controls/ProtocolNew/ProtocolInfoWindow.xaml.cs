@@ -50,7 +50,6 @@ namespace Ask.UI.Controls.ProtocolNew
       this.Loaded += Window_Loaded;
     }
 
-
     private void Window_Loaded(object sender, RoutedEventArgs e)
     {
       NumberInput.Text = string.Empty;

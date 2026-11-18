@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Input;
 using MainWindowProgram.Services;
 
 namespace MainWindowProgram.ViewModels
@@ -46,8 +46,6 @@ namespace MainWindowProgram.ViewModels
     /// <summary>Команда завершения работы приложения.</summary>
     [RelayCommand]
     private void ExitApplication() => _fileService.ExitApplicationAsync();
-
-
 
     /// <summary>Открывает панель поиска.</summary>
     [RelayCommand]

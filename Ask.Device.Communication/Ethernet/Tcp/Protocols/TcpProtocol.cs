@@ -139,6 +139,7 @@ namespace Ask.Device.Communication.Ethernet.Tcp.Protocols
               if (line.Length >= 8192) throw new IOException("Ответ TCP превышает 8192 символа.");
               line.Append((char)character[0]);
             }
+
             answer = line.ToString().Trim();
           }
           else
@@ -146,10 +147,12 @@ namespace Ask.Device.Communication.Ethernet.Tcp.Protocols
             int bytesRead = await _stream.ReadAsync(buffer, timeoutCts.Token).ConfigureAwait(false);
             answer = Encoding.ASCII.GetString(buffer, 0, bytesRead).Trim();
           }
+
           if (string.IsNullOrWhiteSpace(answer))
           {
             throw new DeviceNoResponseException(_device, command, timeout);
           }
+
           DiagnosticCommandHistory.RecordResponse(_device.Name, answer);
           LogInformation($"[{_device.Name}] Получен ответ ({command}) - {answer}", isDeviceLog: true);
           return answer;

@@ -70,7 +70,8 @@ namespace Ask.Device.Runtime.Function.Base.Connected
     /// <inheritdoc />
     public async Task<(bool Connect, string Answer)> ConnectAsync(IUserInteractionService userMessageService = null)
     {
-      var (connect, answer) = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
+      var (connect, answer) = await UserActionHelper.GetRunWithUserRepeatAsync(
+          async () =>
       {
         var result = await ExecuteOperationAsync(() => _connectionTransport.ConnectAsync(userMessageService), "Подключение");
         if (result.Connect && _device is IBreakdownTester)
@@ -103,6 +104,7 @@ namespace Ask.Device.Runtime.Function.Base.Connected
         {
           await EquipmentMessages.PublishConnectionResultAsync(_device, result.Connect, error, userMessageService);
         }
+
         return result;
       }, userMessageService, deviceTask: true);
 
@@ -112,7 +114,8 @@ namespace Ask.Device.Runtime.Function.Base.Connected
     /// <inheritdoc />
     public async Task<bool> DisconnectAsync(IUserInteractionService userMessageService = null)
     {
-      var connect = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
+      var connect = await UserActionHelper.GetRunWithUserRepeatAsync(
+          async () =>
       {
         var result = await ExecuteOperationAsync(() => _connectionTransport.DisconnectAsync(userMessageService), "Отключение");
         if (_device is IRelaySwitchModule module)
@@ -140,6 +143,7 @@ namespace Ask.Device.Runtime.Function.Base.Connected
           await EquipmentMessages.PublishDisconnectionResultAsync(
             _device, result, outputService: userMessageService);
         }
+
         return result;
       }, userMessageService, deviceTask: true);
 
@@ -149,13 +153,15 @@ namespace Ask.Device.Runtime.Function.Base.Connected
     /// <inheritdoc />
     public async Task<(bool Connect, string Answer)> InitializeAsync(IUserInteractionService userMessageService = null)
     {
-      var (connect, answer) = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
+      var (connect, answer) = await UserActionHelper.GetRunWithUserRepeatAsync(
+          async () =>
       {
         int initializationAttempt = 1;
         (bool Connect, string Answer) result;
         try
         {
-          result = await ExecuteOperationAsync(() => _connectionTransport switch
+          result = await ExecuteOperationAsync(
+              () => _connectionTransport switch
           {
             TcpTransport tcp when _device is IMultimeter =>
               tcp.InitializeAsync(userMessageService, attempt => initializationAttempt = attempt),
@@ -169,6 +175,7 @@ namespace Ask.Device.Runtime.Function.Base.Connected
           ex.Operation += $" (Попытка {initializationAttempt}/3)";
           throw;
         }
+
         if (result.Connect)
         {
           await _initialSoundConfigurator.ApplyOnceAsync();
@@ -200,6 +207,7 @@ namespace Ask.Device.Runtime.Function.Base.Connected
           await EquipmentMessages.PublishInitializationResultAsync(
             _device, result.Connect, error, userMessageService);
         }
+
         return result;
       }, userMessageService,
       deviceTask: true);
@@ -210,7 +218,8 @@ namespace Ask.Device.Runtime.Function.Base.Connected
     /// <inheritdoc />
     public async Task<bool> ResetAsync(IUserInteractionService userMessageService = null)
     {
-      var connect = await UserActionHelper.GetRunWithUserRepeatAsync(async () =>
+      var connect = await UserActionHelper.GetRunWithUserRepeatAsync(
+          async () =>
       {
         var result = await ExecuteOperationAsync(() => _connectionTransport.ResetAsync(userMessageService), "Сброс устройства");
         if (_device is IRelaySwitchModule module)
