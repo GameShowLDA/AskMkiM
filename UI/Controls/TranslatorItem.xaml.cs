@@ -298,10 +298,8 @@ namespace UI.Controls
 
     private bool SaveTranslatedFileToDisk()
     {
-      var rightBox = GetRightBox();
       var leftTextEditor = GetLeftBox()?.GetTextEditor();
-      var rightTextEditor = rightBox?.GetTextEditor();
-      if (rightTextEditor?.TextEditorModel == null)
+      if (leftTextEditor?.TextEditorModel == null)
       {
         NotificationHostService.Instance.Show(
           "Сохранение на диск",
@@ -312,8 +310,8 @@ namespace UI.Controls
 
       return _translatedFileSaveService.SaveToDisk(
         this,
-        rightTextEditor.TextEditorModel.SourceLines,
-        rightTextEditor.TextEditorModel.FilePath);
+        leftTextEditor.Text,
+        leftTextEditor.TextEditorModel.FilePath);
     }
 
     private void RightEditor_BackRequestedAsync(object? sender, EventArgs e)

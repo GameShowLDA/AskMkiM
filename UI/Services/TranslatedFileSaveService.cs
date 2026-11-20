@@ -38,14 +38,14 @@ namespace UI.Services
     /// Файл сохраняется в кодировке UTF-8 с расширением .opkw.
     /// В случае ошибки пользователю отображается уведомление.
     /// </remarks>
-    public bool SaveToDisk(FrameworkElement ownerElement, List<string> translatedText, string? sourceFilePath)
+    public bool SaveToDisk(FrameworkElement ownerElement, string translatedText, string? sourceFilePath)
     {
       if (ownerElement == null)
       {
         throw new ArgumentNullException(nameof(ownerElement));
       }
 
-      if (translatedText.Count == 0 || translatedText == null)
+      if (string.IsNullOrWhiteSpace(translatedText))
       {
         ShowNotification(
           "Сохранение на диск",
@@ -69,7 +69,7 @@ namespace UI.Services
       var filePath = EnsureOpkwExtension(saveFileDialog.FileName);
       try
       {
-        var text = FileFormatter.NormalizeProgramWhitespace(string.Join(Environment.NewLine, translatedText));
+        var text = FileFormatter.NormalizeProgramWhitespace(translatedText);
 
         File.WriteAllText(filePath, text, Encoding.UTF8);
         LogInformation($"Файл {filePath} сохранен на диск.");
